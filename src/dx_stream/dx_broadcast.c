@@ -87,7 +87,7 @@
 #define MATCH_VAL_MAIN (1 << 31)
 #define MATCH_VAL_THREAD 1
 
-#define MY_DCU_OFFSET	0x400000
+#define MY_DCU_OFFSET	0x1a00000
 #define MY_IPC_OFFSET	(MY_DCU_OFFSET + 0x8000)
 #define MY_GDS_OFFSET	(MY_DCU_OFFSET + 0x9000)
 #define MY_DAT_OFFSET	(MY_DCU_OFFSET + 0xa000)
@@ -107,8 +107,7 @@ volatile char *drDataPtr;
 volatile char *drGdsPtr;
 volatile char *drDataBlk;
 int *drIntData;
-static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
-
+static const int buf_size = DAQ_DCU_BLOCK_SIZE;
 /*
  * Remote nodeId:
  *
@@ -135,6 +134,7 @@ unsigned int            *localbufferPtr;
 unsigned int            loops          = 5000;
 int                     rank           = 0;
 int                     nodes          = 0;
+unsigned int 		memcpyFlag     = NO_FLAGS;
 
 /*********************************************************************************/
 /*                                U S A G E                                      */
@@ -175,6 +175,57 @@ void PrintParameters(void)
     printf("----------------------------\n\n");
 }
 
+int waitServers(int nodes,sci_sequence_t sequence,volatile unsigned int *readAddr,volatile unsigned int *writeAddr)
+{
+int node_offset;
+int value;
+
+        /* Lets wait for the servers to write CMD_READY  */
+        printf("Wait for %d servers ...\n", nodes);
+        
+        for (node_offset=1; node_offset <= nodes;node_offset++){
+            int wait_loops = 0;
+            
+            do {
+                value = (*(readAddr+SYNC_OFFSET+node_offset));
+                wait_loops++;
+            } while (value != CMD_READY); 
+        }
+        printf("Client received CMD_READY from all nodes \n\n",value); 
+            
+        /* Lets write CMD_READY to offset 0 to signal all servers to go on. */
+        *(writeAddr+SYNC_OFFSET) = CMD_READY;  
+        SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
+}
+
+int waitClients(int rank,sci_sequence_t sequence,volatile unsigned int *readAddr,volatile unsigned int *writeAddr)
+{
+
+        int wait_loops = 0;
+	int value;
+        
+        /* Lets write CMD_READY the to client, offset "myrank" */
+        *(writeAddr+SYNC_OFFSET+rank) = CMD_READY;
+        SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
+        
+        printf("Wait for CMD_READY from master ...\n");
+
+        /* Lets wait for the client to send me CMD_READY in offset 0 */
+        do {
+            
+            value = (*(readAddr+SYNC_OFFSET));  
+            wait_loops++;
+
+            if ((wait_loops % 100000000)==0) {
+                /* Lets again write CMD_READY to the client, offset "myrank" */
+                *(writeAddr+SYNC_OFFSET+rank) = CMD_READY;
+                SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
+            }
+
+        } while (value != CMD_READY);
+        printf("Server received CMD_READY\n");
+}
+
 
 sci_error_t create_and_test_reflective_memory(int client)
 {
@@ -190,6 +241,20 @@ sci_error_t create_and_test_reflective_memory(int client)
     volatile unsigned char *myreadAddr;
     volatile unsigned char *mywriteAddr;
 
+#if 0
+    volatile void *base;
+    DAQ_INFO_BLOCK *dinfo;
+    struct rmIpcStr *dipc;
+    char *dataPtr;
+    int *dataIntType;
+
+	base = (volatile void *)findSharedMemory(mydaq);
+        if(base == NULL) {
+                printf("Memory ptr not found for %s\n",mydaq);
+        } else {
+                printf("My mem points are:\n");
+        }
+#endif
     /* 
      * The segmentId paramter is used to set the reflective memory group id 
      * when the flag SCI_FLAG_BROADCAST is specified. 
@@ -285,56 +350,9 @@ sci_error_t create_and_test_reflective_memory(int client)
 
     /* Perform a barrier operation. The client acts as master. */
     if (client){
-        
-        /* Lets wait for the servers to write CMD_READY  */
-        printf("Wait for %d servers ...\n", nodes);
-        
-        for (node_offset=1; node_offset <= nodes;node_offset++){
-            int wait_loops = 0;
-            
-            do {
-                value = (*(readAddr+SYNC_OFFSET+node_offset));
-                wait_loops++;
-                if (verbose) {
-                    if ((wait_loops % 100000000)==0){
-                        printf("Value = %d (expected = %d) delayed from rank %d - after %u reads\n", value, CMD_READY, node_offset, wait_loops);
-                    }
-                }
-            } while (value != CMD_READY); 
-        }
-        printf("Client received CMD_READY from all nodes \n\n",value); 
-            
-        /* Lets write CMD_READY to offset 0 to signal all servers to go on. */
-        *(writeAddr+SYNC_OFFSET) = CMD_READY;  
-        SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
-        
+	waitServers(nodes,sequence,readAddr,writeAddr);
     } else {
-
-        int wait_loops = 0;
-        
-        /* Lets write CMD_READY the to client, offset "myrank" */
-        *(writeAddr+SYNC_OFFSET+rank) = CMD_READY;
-        SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
-        
-        printf("Wait for CMD_READY from master ...\n");
-
-        /* Lets wait for the client to send me CMD_READY in offset 0 */
-        do {
-            
-            value = (*(readAddr+SYNC_OFFSET));  
-            wait_loops++;
-
-            if ((wait_loops % 100000000)==0) {
-                if (verbose) {
-                    printf("Value = %d delayed from Client\n", value);
-                }
-                /* Lets again write CMD_READY to the client, offset "myrank" */
-                *(writeAddr+SYNC_OFFSET+rank) = CMD_READY;
-                SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
-            }
-
-        } while (value != CMD_READY);
-        printf("Server received CMD_READY\n");
+	waitClients(rank,sequence,readAddr,writeAddr);
     }
     
     printf("\n***********************************************************\n\n");
@@ -348,7 +366,7 @@ sci_error_t create_and_test_reflective_memory(int client)
     written_value=1;
     int ii;
 	int new_cycle = 0;
-        	int lastCycle = 0;
+        int lastCycle = 0;
 unsigned char *dataBuff;
 	dxIpcPtr = (unsigned char *) (mywriteAddr + MY_IPC_OFFSET);
 	dxGdsPtr = (unsigned char *) (mywriteAddr + MY_GDS_OFFSET);
@@ -382,10 +400,34 @@ printf("My drintdata is at 0x%lx \n",(unsigned long)drIpcPtr);
 
 		lastCycle = new_cycle;
 
+SCIMemCpy(sequence,shmTpTable[0], remoteMap,MY_GDS_OFFSET,sizeof(struct cdsDaqNetGdsTpNum),memcpyFlag,&error);
+    if (error != SCI_ERR_OK) {
+        fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
+        return error;
+    }
+dataBuff = (unsigned char *)shmDataPtr[0] + (lastCycle * buf_size);
+// dataBuff = (unsigned char *)shmDataPtr[0]; // + (lastCycle * buf_size);
+	drIntData = (int *)drDataPtr;
+	drIntData += 2;
+    // SCIMemCpy(sequence,shmDataPtr[0], remoteMap,MY_DAT_OFFSET,shmIpcPtr[0]->dataBlockSize,memcpyFlag,&error);
+SCIMemCpy(sequence,dataBuff, remoteMap,MY_DAT_OFFSET,shmIpcPtr[0]->dataBlockSize,memcpyFlag,&error);
+    if (error != SCI_ERR_OK) {
+        fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
+        return error;
+    }
+SCIMemCpy(sequence,shmIpcPtr[0], remoteMap,MY_IPC_OFFSET,sizeof(struct rmIpcStr),memcpyFlag,&error);
+    if (error == SCI_ERR_OK) {
+        printf("Sending CPU value of %d on cycle %d\n",*drIntData,lastCycle);
+    } else {
+        fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
+        return error;
+    }
+#if 0
 	    memcpy((unsigned char *)dxIpcPtr,(unsigned char *)shmIpcPtr[0],sizeof(struct rmIpcStr)); 
 	    memcpy((unsigned char *)dxGdsPtr,(unsigned char *)shmTpTable[0],sizeof(struct cdsDaqNetGdsTpNum)); 
 	    dataBuff = (unsigned char *)shmDataPtr[0]; // + (lastCycle * buf_size);
 	    memcpy((unsigned char *)dxDataPtr,(unsigned char *)dataBuff,shmIpcPtr[0]->dataBlockSize); 
+#endif
             *writeAddr = written_value; 
             SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
             
@@ -422,16 +464,15 @@ printf("My drintdata is at 0x%lx \n",(unsigned long)drIpcPtr);
                 
                 value = (*(readAddr));  
                 wait_loops++;
-                if ((wait_loops % 10000000)==0) {
-                    printf("Value = %d delayed from Client - written_value=%d\n", value,written_value);
-                }
+                // if ((wait_loops % 10000000)==0) {
+                   //  printf("Value = %d delayed from Client - written_value=%d\n", value,written_value);
+                // }
             } while (value != written_value); 
             
             if (verbose) {
                 printf("Server received broadcast value %d \n",value); 
             }
             
-	    printf("Server received CPU M = %d \n",*drIntData);
             written_value++;
             /* Lets write a value back received value +1 to the client, offset "myrank" */
             *(writeAddr+rank) = written_value;
@@ -592,17 +633,18 @@ main(int argc,char *argv[])
 
 	if(client) {
 		char sname[128];
-		sprintf(sname,"%s_daq","x1lscaux");
-		void *dcu_addr = findSharedMemory(sname);
+		sprintf(sname,"%s_daq","x1ioplsc0");
+		volatile void *dcu_addr = findSharedMemory(sname);
 		if (dcu_addr <= 0) {
 			fprintf(stderr, "Can't map shmem\n");
 			exit(1);
 		} else {
 			printf("mapped at 0x%lx\n",(unsigned long)dcu_addr);
 		}
-		shmIpcPtr[0] = (struct rmIpcStr *)((char *)dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
-		shmDataPtr[0] = (char *)((char *)dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
-		shmTpTable[0] = (struct cdsDaqNetGdsTpNum *)((char *)dcu_addr + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
+		// shmIpcPtr[0] = (struct rmIpcStr *)((char *)dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
+		shmIpcPtr[0] = (struct rmIpcStr *)dcu_addr;
+		shmDataPtr[0] = (char *)(dcu_addr + DAQ_NIB_DATA_OFFSET);
+		shmTpTable[0] = (struct cdsDaqNetGdsTpNum *)((char *)dcu_addr + DAQ_NIB_GDS_TABLE_OFFSET);
 
 		for (;shmIpcPtr[0]->cycle;) usleep(1000);
         	int lastCycle = 0;
@@ -616,6 +658,9 @@ main(int argc,char *argv[])
                 printf("New cycle = %d\n", shmIpcPtr[0]->cycle);
                 printf("Size of rmIpcStr = %ld\n", sizeof(struct rmIpcStr));
                 printf("Size of GDStp = %ld\n", sizeof(struct cdsDaqNetGdsTpNum));
+		drIntData = (int *)shmDataPtr[0];
+		drIntData += 2;
+		printf("CPU = %d\n",*drIntData);
 	}
 
 
