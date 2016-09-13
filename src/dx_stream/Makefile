@@ -18,6 +18,7 @@ CFLAGS = -I/opt/Dolphin/4.4.3/IX/DIS/src/include -I/opt/Dolphin/4.4.3/IX/DIS/src
 
 CFLAGS+= -g
 FLAGS= -g
+CFLAGS+= -I../include
 
 LBITS := $(shell getconf LONG_BIT)
 ifeq ($(LBITS),64)
@@ -38,12 +39,38 @@ dx_stream: dx_stream.c
 rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+dx_utils.o: ./dx_utils.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+param.o: ../drv/param.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+crc.o: ../drv/crc.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+dx_bcLib: dx_bcLib.c 
+	$(CC) $(CFLAGS) dx_bcLib.c -c -o dx_bcLib.o 
+	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
+	$(CC) $(FLAGS) -o dx_bcLib  dx_bcLib.o  rfm.o -L $(API_LIB_PATH) -lsisci
+	sync
+
 dx_broadcast: dx_broadcast.c 
 	$(CC) $(CFLAGS) dx_broadcast.c -c -o dx_broadcast.o 
 	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
 	$(CC) $(FLAGS) -o dx_broadcast  dx_broadcast.o  rfm.o -L $(API_LIB_PATH) -lsisci
 	sync
 
+daq_master_config: daq_master_config.c
+	$(CC) $(CFLAGS) daq_master_config.c -c -o daq_master_config.o
+	$(CC) $(FLAGS) -o daq_master_config  daq_master_config.o  rfm.o  param.o crc.o dx_utils.o dx_bcLib.o -L $(API_LIB_PATH) -lsisci
+
+datarate: datarate.c
+	$(CC) $(CFLAGS) datarate.c -c -o datarate.o
+	$(CC) $(FLAGS) -o datarate  datarate.o  rfm.o  param.o crc.o
+
+test_bcLib: test_bcLib.c
+	$(CC) $(CFLAGS) test_bcLib.c -c -o test_bcLib.o
+	$(CC) $(FLAGS) -o test_bcLib  test_bcLib.o  dx_bcLib.o -L $(API_LIB_PATH) -lsisci
 
 clean: 
 	rm -f  *.o $(APP)
