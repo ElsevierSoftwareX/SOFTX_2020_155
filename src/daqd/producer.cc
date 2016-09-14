@@ -779,7 +779,7 @@ int cycle_delay = daqd.cycle_delay;
 	//memcpy(read_dest, (char *)(daqd.edcu1.channel_value + daqd.edcu1.fidx), daqd.dcuSize[ifo][j]);
 			
 			  unsigned int bytes = daqd.dcuSize[0][DCU_ID_EDCU];
-			  unsigned char *cp = daqd.move_buf; // The EDCU data is in front
+              unsigned char *cp = move_buf; // The EDCU data is in front
 			  unsigned long crc = 0;
       			  while (bytes--) {
         		    crc = (crc << 8) ^ crctab[((crc >> 24) ^ *(cp++)) & 0xFF];
@@ -819,13 +819,13 @@ int cycle_delay = daqd.cycle_delay;
 
 #ifdef GDS_TESTPOINTS
      // Update testpoints data in the main buffer
-     daqd.gds.update_tp_data((unsigned int *)tpbufptr, (char *)daqd.move_buf);
+     daqd.gds.update_tp_data((unsigned int *)tpbufptr, (char *)move_buf);
 #endif
      stat_crc.sample();
      // Parse received broadcast transmission header and
      // check config file CRCs and data CRCs, check DCU size and number
      // Assign DCU status and cycle.
-     unsigned int *header = (unsigned int *)(((char *)daqd.move_buf) - BROADCAST_HEADER_SIZE);
+     unsigned int *header = (unsigned int *)(((char *)move_buf) - BROADCAST_HEADER_SIZE);
      int ndcu = ntohl(*header++);
      //printf("ndcu = %d\n", ndcu);
      if (ndcu > 0 && ndcu <= MAX_BROADCAST_DCU_NUM) {
@@ -860,7 +860,7 @@ int cycle_delay = daqd.cycle_delay;
 				// Detected local configuration mismach
 				daqd.dcuStatus[ifo][dcu_number] |= 0x2000;
 			}
-			unsigned char *cp = daqd.move_buf + data_offs; // Start of data
+            unsigned char *cp = move_buf + data_offs; // Start of data
 			unsigned int bytes = dcu_size; // DCU data size
       			unsigned int crc = 0;
 			// Calculate DCU data CRC

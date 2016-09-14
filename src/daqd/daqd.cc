@@ -814,7 +814,7 @@ daqd_c::framer_io(int science)
                assert(nw->broadcast);
 
                PV::set_pv(epics_state_var, STATE_BROADCAST);
-               if (nw->send_to_client ((char *) addr, sb.st_size, gps, b1 -> block_period ())) {
+               if (nw->send_to_client ((char *) addr, sb.st_size, cur_buf->gps, b1 -> block_period ())) {
                    system_log(1, "failed to broadcast data frame");
                    exit(1);
                }

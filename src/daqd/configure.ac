@@ -299,7 +299,7 @@ BUILD_MODE=""
 BUILD_MODE_FLAGS=""
 PRODUCER_CC="producer.cc"
 PRODUCER_O="producer.o"
-AS_IF([test "x$enable_fw" != "xno" ], [
+AS_IF([test "x$enable_fw" != "x" ], [
     dnl Enable all framewriter build flags
     dnl --disable-broadcast
     dnl --enable-debug
