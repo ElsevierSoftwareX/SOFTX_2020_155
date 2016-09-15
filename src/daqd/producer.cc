@@ -56,6 +56,7 @@ using namespace std;
 #endif
 
 #include "raii.hh"
+#include "conv.hh"
 
 extern daqd_c daqd;
 extern int shutdown_server ();
@@ -922,13 +923,22 @@ int cycle_delay = daqd.cycle_delay;
 
      ++stat_cycles;
     if (stat_cycles >= 16) {
-        DEBUG(5, {
-            cout << "producer thread timings" << endl;
-            cout << " full min:"<< stat_full.getMin() << " mean:" << stat_full.getMean() << " max:" << stat_full.getMax() << endl;
-            cout << " recv min:"<< stat_recv.getMin() << " mean:" << stat_recv.getMean() << " max:" << stat_recv.getMax() << endl;
-            cout << " crc  min:"<< stat_crc.getMin() <<  " mean:" << stat_crc.getMean() <<  " max:" << stat_crc.getMax() << endl;
-            cout << " xfer min:"<< stat_transfer.getMin() <<  " mean:" << stat_transfer.getMean() <<  " max:" << stat_transfer.getMax() << endl;
-        });
+        PV::set_pv(PV::PV_PRDCR_TIME_FULL_MIN_MS, conv::s_to_ms_int(stat_recv.getMin()));
+        PV::set_pv(PV::PV_PRDCR_TIME_FULL_MAX_MS, conv::s_to_ms_int(stat_recv.getMax()));
+        PV::set_pv(PV::PV_PRDCR_TIME_FULL_MEAN_MS, conv::s_to_ms_int(stat_recv.getMean()));
+
+        PV::set_pv(PV::PV_PRDCR_TIME_RECV_MIN_MS, conv::s_to_ms_int(stat_recv.getMin()));
+        PV::set_pv(PV::PV_PRDCR_TIME_RECV_MAX_MS, conv::s_to_ms_int(stat_recv.getMax()));
+        PV::set_pv(PV::PV_PRDCR_TIME_RECV_MEAN_MS, conv::s_to_ms_int(stat_recv.getMean()));
+
+        PV::set_pv(PV::PV_PRDCR_CRC_TIME_CRC_MEAN_MS, conv::s_to_ms_int(stat_crc.getMin()));
+        PV::set_pv(PV::PV_PRDCR_CRC_TIME_CRC_MEAN_MS, conv::s_to_ms_int(stat_crc.getMax()));
+        PV::set_pv(PV::PV_PRDCR_CRC_TIME_CRC_MEAN_MS, conv::s_to_ms_int(stat_crc.getMean()));
+
+        PV::set_pv(PV::PV_PRDCR_CRC_TIME_XFER_MIN_MS, conv::s_to_ms_int(stat_transfer.getMin()));
+        PV::set_pv(PV::PV_PRDCR_CRC_TIME_XFER_MAX_MS, conv::s_to_ms_int(stat_transfer.getMax()));
+        PV::set_pv(PV::PV_PRDCR_CRC_TIME_XFER_MEAN_MS, conv::s_to_ms_int(stat_transfer.getMean()));
+
         stat_full.clearStats();
         stat_crc.clearStats();
         stat_recv.clearStats();
