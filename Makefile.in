@@ -256,3 +256,9 @@ standiop:
 	/bin/mkdir -p build/standiop
 	(mysrc=$(srcdir); cd build/standiop; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics' --enable-iop && make)
 
+
+standiop-localtime:
+	(cd $(srcdir)/src/daqd; autoconf)
+	/bin/rm -rf build/standiop-localtime
+	/bin/mkdir -p build/standiop-localtime
+	(mysrc=$(srcdir); cd build/standiop-localtime; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics' --enable-local-timing --enable-iop' && make)
