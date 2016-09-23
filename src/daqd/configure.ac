@@ -264,7 +264,7 @@ AC_ARG_WITH(epics,
       AC_CHECK_FILE(${EPICS_TRY}/lib/${host_arch}/libca.a, found_epics="yes", found_epics="no")
       if test $found_epics = "yes"; then
         have_epics = "yes"
-        EPICSLIBS="L$EPICS_TRY/lib/$host_arch"
+        EPICSLIBS="-L$EPICS_TRY/lib/$host_arch"
         EPICSFLAGS="-I$EPICS_TRY/include -I$EPICS_TRY/include/os/$osarch"
       else
         AC_MSG_ERROR([could not find EPICS base libraries])
