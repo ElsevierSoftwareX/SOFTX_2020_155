@@ -10,6 +10,7 @@ Changes for X.X
 - Bug Fix (1010): Prevent divide-by-zero error in daqd filesys.hh
 - Bug Fix (513): Cleanup debug schemes.  Also created separate udp_rcvr files, fixed mx_rcvr header
 - Bug Fix (1015): Update daqd,nds build for ldas-tools 2.5
+- Add leap second to dataviewer for Dec. 31, 2016
 ==================================================================================================
 Changes for 3.1.1
 ==================================================================================================
