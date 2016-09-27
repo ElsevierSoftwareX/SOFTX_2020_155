@@ -395,8 +395,13 @@ static const int digits_in_dir = 5;
       dnum = cur_update_dir;
 
       // Switch to the next directory if current directory is full
-      if (dir [cur_update_dir].nfiles >= files_per_dir)
-        ++dnum %= num_dirs;
+      if (dir [cur_update_dir].nfiles >= files_per_dir) {
+        if ( num_dirs > 0 ) {
+          ++dnum %= num_dirs;
+        } else {
+	  ++dnum;
+        }
+      }
     }
 
 if (gps_time_dirs) {
@@ -445,8 +450,13 @@ if (gps_time_dirs) {
       dnum = cur_update_dir;
 
       // Switch to the next directory if current directory is full
-      if (dir [cur_update_dir].nfiles >= files_per_dir)
-	++dnum %= num_dirs;
+      if (dir [cur_update_dir].nfiles >= files_per_dir) {
+        if ( num_dirs > 0 ) {
+          ++dnum %= num_dirs;
+        } else {
+	  ++dnum;
+        }
+      }
     }
     
     _filename_dir (t, fname, dnum, framedt);

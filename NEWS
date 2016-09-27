@@ -8,6 +8,7 @@ Changes for 3.x.x
   Cleaned up some of the EPICS code.
   Added more EPICS channels to give metrics on daqd.
 - Add leap second to dataviewer leapsecs.txt file for 12-31-16
+- Bug Fix (1010): Prevent divide-by-zero error in daqd filesys.hh
 ==================================================================================================
 Changes for 3.1.1
 ==================================================================================================
