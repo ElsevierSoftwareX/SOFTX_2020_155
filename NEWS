@@ -9,6 +9,8 @@ Changes for 3.x.x
   Added more EPICS channels to give metrics on daqd.
 - Add leap second to dataviewer leapsecs.txt file for 12-31-16
 - Bug Fix (1010): Prevent divide-by-zero error in daqd filesys.hh
+- Bug Fix (1047): EDCU code that supports dual data concentrators was modified to work 
+  with new mx_stream introduced in 3.1
 ==================================================================================================
 Changes for 3.1.1
 ==================================================================================================

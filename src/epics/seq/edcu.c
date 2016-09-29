@@ -434,7 +434,6 @@ char *newname;
 void edcuWriteData(int daqBlockNum, unsigned long cycle_gps_time)
 // **************************************************************************
 {
-unsigned int crcSend;
 float *daqData;
 int buf_size;
 int ii;
@@ -447,18 +446,16 @@ int ii;
 		daqData ++;
 	}
 	daqData = (float *)(shmDataPtr + (buf_size * daqBlockNum));
-	crcSend = crc_ptr((char *)daqData, xferInfo.crcLength, 0);
-	crcSend = crc_len(xferInfo.crcLength, crcSend);
 	dipc->dcuId = 119;
 	dipc->crc = daqFileCrc;
 	dipc->dataBlockSize = xferInfo.crcLength;
 	dipc->bp[daqBlockNum].cycle = daqBlockNum;
-	dipc->bp[daqBlockNum].crc = crcSend;
+	dipc->bp[daqBlockNum].crc = xferInfo.crcLength;
 	dipc->bp[daqBlockNum].timeSec = (unsigned int) cycle_gps_time;
 	dipc->bp[daqBlockNum].timeNSec = (unsigned int)daqBlockNum;
 	// DAQ expects data xmission 2 cycles later, so trigger sending of 
 	// data already buffered and ready to go to keep sample time correct.
-	daqBlockNum -= 2;
+	daqBlockNum -= 1;
 	if(daqBlockNum < 0) {
 		daqBlockNum += 16;
 	}
