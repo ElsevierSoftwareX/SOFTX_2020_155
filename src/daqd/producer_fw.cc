@@ -122,9 +122,6 @@ void *producer::frame_writer() {
     stats stat_recv;
 
     DEBUG(5, cerr << "producer::frame_writer()" << endl);
-    // Set thread parameters
-    daqd_c::set_thread_priority("Producer", "dqprod", PROD_THREAD_PRIORITY,
-                                PROD_CPUAFFINITY);
 
     // can probably get rid of this too
     if (!daqd.no_myrinet) {
@@ -224,6 +221,10 @@ void *producer::frame_writer() {
         pthread_cond_wait(&prod_crc_cond, &prod_crc_mutex);
         DEBUG(5, cerr << "producer threads synced" << endl);
     }
+
+    // Set thread parameters
+    daqd_c::set_thread_priority("Producer", "dqprod", PROD_THREAD_PRIORITY,
+                                PROD_CPUAFFINITY);
 
     // TODO make IP addresses configurable from daqdrc
     stat_recv.sample();

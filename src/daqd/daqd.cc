@@ -538,7 +538,15 @@ daqd_c::full_frame(int frame_length_seconds, int science,
   FrameCPP::Version::FrameH::rawData_type rawData
         =  FrameCPP::Version::FrameH::rawData_type(new FrameCPP::Version::FrRawData);
   ldas_frame_h_type frame;
+#if USE_LDAS_VERSION
   FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-" + string(LDAS_VERSION));
+#else
+#if USE_FRAMECPP_VERSION
+  FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-" + string(FRAMECPP_VERSION));
+#else
+  FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-unkown");
+#endif
+#endif
   FrameCPP::Version::FrDetector detector = daqd.getDetector1();
 
   // Create frame
@@ -854,15 +862,13 @@ daqd_c::framer (int science)
   enum PV::PV_NAME epics_sec_var = (science ? PV::PV_SCIENCE_FW_DATA_SEC : PV::PV_RAW_FW_DATA_SEC);
 
   framer_work_queue *_work_queue = 0;
-// Set thread parameters
+  // create work queues
   if (science) {
-      daqd_c::set_thread_priority("Science frame saver","dqscifr",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_CPUAFFINITY); 
       daqd_c::locker _l(this);
       if (!_science_framer_work_queue)
           _science_framer_work_queue = reinterpret_cast<void *>(new framer_work_queue(2));
       _work_queue = reinterpret_cast<framer_work_queue *>(_science_framer_work_queue);
   } else {
-      daqd_c::set_thread_priority("Full frame saver","dqfulfr",SAVER_THREAD_PRIORITY,FULL_SAVER_CPUAFFINITY); 
       daqd_c::locker _l(this);
       if (!_framer_work_queue)
           _framer_work_queue = reinterpret_cast<void *>(new framer_work_queue(2));
@@ -922,6 +928,13 @@ daqd_c::framer (int science)
           exit(1);
       }
       pthread_attr_destroy(&attr);
+  }
+
+  // Set thread parameters. Make sure this is done after starting the io threads.
+  if (science) {
+      daqd_c::set_thread_priority("Science frame saver","dqscifr",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_CPUAFFINITY);
+  } else {
+      daqd_c::set_thread_priority("Full frame saver","dqfulfr",SAVER_THREAD_PRIORITY,FULL_SAVER_CPUAFFINITY);
   }
 
   // done creating a frame
@@ -1511,33 +1524,47 @@ void daqd_c::set_thread_priority (char *thread_name, char *thread_abbrev, int rt
 
     system_log(1, "%s thread - label %s pid=%d", thread_name, my_thr_label, (int) my_tid);
     // If priority is non-zero, add to the real-time scheduler at that priority
-    if (rt_priority > 0) {
+
+    {
+        int policy = SCHED_FIFO;
+        if (rt_priority <= 0) {
+            rt_priority = 0;
+            policy = SCHED_OTHER;
+        }
+
         struct sched_param my_sched_param = { rt_priority };
         int set_stat;
-        set_stat = pthread_setschedparam(pthread_self(), SCHED_FIFO, &my_sched_param);
+        set_stat = pthread_setschedparam(pthread_self(), policy, &my_sched_param);
         if(set_stat != 0){
             system_log(1, "%s thread priority error %s",thread_name, strerror(set_stat));
         } else {
             system_log(1, "%s thread set to priority %d",thread_name, rt_priority);
         }
     }
-    // If cpu affinity is non-zero, set the affinity (if enough CPUs)
+
+    // set the affinity (if enough CPUs)
+    // If set to 0, set allow thread on all CPUs
     //  If positive, count from 0, if negative, count from max
     // count CPUs
-    if (cpu_affinity != 0 ) {
+    {
         int numCPU, cpuId;
         numCPU = sysconf(_SC_NPROCESSORS_ONLN);
         if (cpu_affinity < 0) {
             cpuId = numCPU + cpu_affinity;
         } else {
-        cpuId = cpu_affinity;
+            cpuId = cpu_affinity;
         }
-        if( numCPU > 1 && (cpuId > 0  && cpuId < numCPU)){
+        if( numCPU > 1 && (cpuId >= 0  && cpuId < numCPU)){
             cpu_set_t my_cpu_set;
             CPU_ZERO(&my_cpu_set);
-            CPU_SET(cpuId,&my_cpu_set);
+            if (cpuId > 0) {
+                CPU_SET(cpuId,&my_cpu_set);
+            } else {
+                for (int cur_cpu = 0; cur_cpu < numCPU; ++cur_cpu)
+                    CPU_SET(cur_cpu, &my_cpu_set);
+            }
             int set_stat;
-        set_stat = pthread_setaffinity_np(pthread_self(),sizeof(cpu_set_t),&my_cpu_set);
+            set_stat = pthread_setaffinity_np(pthread_self(),sizeof(cpu_set_t),&my_cpu_set);
             if(set_stat != 0){
                system_log(1, "%s thread setaffinity error %s",thread_name, strerror(set_stat));
             } else {

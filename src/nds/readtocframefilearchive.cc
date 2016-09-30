@@ -97,20 +97,20 @@ Nds::readTocFrameFileArchive()
   daqd_net daqd_net(mDataFd, mSpec);
 
   // Iterate over gps ranges, ie. over data directories
-  for (int i = 0; i < gps.size(); i++) {
-    // get directory number for the range `i'
+  for (int cur_range = 0; cur_range < gps.size(); cur_range++) {
+    // get directory number for the range `cur_range'
 
     unsigned int dir_num = 0;
 
     if (archiveDirScanned) {
       // directory number is based on GPS timestamp: all digits but the last 6
-      dir_num = gps[i].first / 100000;
+      dir_num = gps[cur_range].first / 100000;
     } else {
       dir_num =  distance(archive_gps.begin(),
 			  find_first_of(archive_gps.begin(),
 					archive_gps.end(),
-					gps.begin() + i,
-					gps.begin() + i + 1)
+                    gps.begin() + cur_range,
+                    gps.begin() + cur_range + 1)
 			  );
     }
 

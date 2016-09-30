@@ -14,7 +14,10 @@
 #include <sys/syscall.h>
 #include <sys/prctl.h>
 
+#ifdef USE_LDAS_VERSION
 #include "ldas/ldasconfig.hh"
+#endif
+
 #include "framecpp/Common/FrameSpec.hh"
 #include "framecpp/Common/CheckSum.hh"
 #include "framecpp/Common/IOStream.hh"
@@ -109,12 +112,24 @@ using namespace std;
 #define MX_MAX_BOARDS 4
 #define MX_MAX_ENDPOINTS 32
 
+// as of ldas_tools 2.5, the LDAS_VERSION is no longer provided. Instead use FRAMECPP_VERSION_NUMBER
+#if USE_LDAS_VERSION
 #if LDAS_VERSION_NUMBER >= 200000
 typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
 #else
 typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
 #endif
-
+#else
+#if USE_FRAMECPP_VERSION
+#if FRAMECPP_VERSION_NUMBER >= 200000
+typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+#else
+typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+#endif
+#else
+typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+#endif
+#endif
 
 /// Daqd server main class. This is a top-level class, which encloses various objects
 /// representing threads of execution.

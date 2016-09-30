@@ -68,6 +68,8 @@ have_framecpp2=
 PKG_CHECK_MODULES([FRAMECPP2],[framecpp >= 2],[have_framecpp2="yes"],[have_framecpp2="no"])
 have_framecpp2to233=
 PKG_CHECK_MODULES([FRAMECPP2TO233],[framecpp <= 2.3.3 framecpp >= 2],[have_framecpp2to233="yes"],[have_framecpp2to233="no"])
+have_framecpp25=
+PKG_CHECK_MODULES([FRAMECPP25],[framecpp >= 2.5],[have_framecpp25="yes"],[have_framecpp25="no"])
 
 
 dnl======================================================
@@ -90,6 +92,16 @@ fi
 
 if test "$have_framecpp2" = "yes"; then
   CPPFLAGS="$CPPFLAGS -DDAQD_CPP11"
+fi
+
+dnl======================================================
+dnl FrameCPP 2.5 and above do not have LDAS_VERSION, use FRAMECPP_VERSION
+dnl======================================================
+
+if test "$have_framecpp25" = "yes"; then
+  CPPFLAGS="$CPPFLAGS -DUSE_FRAMECPP_VERSION"
+else
+  CPPFLAGS="$CPPFLAGS -DUSE_LDAS_VERSION"
 fi
 
 dnl======================================================================

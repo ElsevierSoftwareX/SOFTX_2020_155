@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <iostream>
 #include "nds.hh"
+
+#include <unistd.h>
+
 //#include "framecpp/dictionary.hh"
 
 using namespace CDS_NDS;
