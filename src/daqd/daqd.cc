@@ -495,9 +495,9 @@ daqd_c::full_frame(int frame_length_seconds, int science,
   FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-" + string(LDAS_VERSION));
 #else
 #if USE_FRAMECPP_VERSION
-  FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-2.5.1");
+  FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-" + string(FRAMECPP_VERSION));
 #else
-  FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-" + string(LDAS_VERSION));
+  FrameCPP::Version::FrHistory history ("", 0, "framebuilder, framecpp-unknown");
 #endif
 #endif
   FrameCPP::Version::FrDetector detector = daqd.getDetector1();

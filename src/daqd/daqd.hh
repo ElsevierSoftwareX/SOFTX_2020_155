@@ -118,6 +118,10 @@ typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
 #endif
 #else
 #if USE_FRAMECPP_VERSION
+// create ASCII FRAMECPP_VERSION if missing
+#if !defined(FRAMECPP_VERSION)
+#define FRAMECPP_VERSION "2.5.1"
+#endif
 #if FRAMECPP_VERSION_NUMBER >= 200000
 typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
 #else
