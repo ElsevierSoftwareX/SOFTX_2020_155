@@ -13,6 +13,7 @@ Changes for X.X
 - Add leap second to dataviewer for Dec. 31, 2016
 - Bug Fix (1047): EDCU code that supports dual data concentrators was modified to work 
   with new mx_stream introduced in 3.1
+- Bug Fix: Corrected initialization for fixed and set phase oscillators at model start.
 ==================================================================================================
 Changes for 3.1.1
 ==================================================================================================
