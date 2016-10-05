@@ -115,8 +115,8 @@ sub frontEndInitCode {
 	$calcExp .= "FE_RATE);\n";
 	$calcExp .= "RampParamInit(&\L$::xpartName[$i]\_cosgain_state,0, ";
 	$calcExp .= "FE_RATE);\n";
-	$calcExp .= "\L$::xpartName[$i]_freq_request = \L$::xpartName[$i]_freq;\n";
-	$calcExp .= "\L$::xpartName[$i]_freq_request_limited = ((int) (\L$::xpartName[$i]_freq_request * 1000)) / 1000.0;\n";
+	$calcExp .= "\L$::xpartName[$i]_freq_request = 0.0;\n";
+	$calcExp .= "\L$::xpartName[$i]_freq_request_limited = 0;\n";
 	$calcExp .= "\L$::xpartName[$i]\_freq_cycle_count = 0;\n";
 	$calcExp .= "\L$::xpartName[$i]\_delta_freq = 0;\n";
 	$calcExp .= "\L$::xpartName[$i]\_extra_phase_shift_per_cycle = 0;\n";
