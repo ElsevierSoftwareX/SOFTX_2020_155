@@ -47,6 +47,7 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
 #if __GNUC__ >= 4
 #ifdef DAQD_CPP11
 #include <unordered_map>
@@ -59,6 +60,8 @@
 #include <fstream>
 #include <vector>
 #include <memory>
+
+#include "framecpp/Common/MD5SumFilter.hh"
 
 using namespace std;
 
@@ -729,9 +732,11 @@ daqd_c::framer_io(int science)
                PV::set_pv(epics_state_var, STATE_WRITING);
                time_t t = 0;
                {
+                   FrameCPP::Common::MD5SumFilter md5filter;
                    FrameCPP::Common::FrameBuffer<filebuf>* obuf
                             = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
                    obuf -> open(cur_buf->_tmpf, std::ios::out | std::ios::binary);
+                   obuf -> FilterAdd( &md5filter );
                    FrameCPP::Common::OFrameStream  ofs(obuf);
                    ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
                    DEBUG(1, cerr << "Begin WriteFrame()" << endl);
@@ -746,6 +751,18 @@ daqd_c::framer_io(int science)
 
                    ofs.Close();
                    obuf->close();
+                   md5filter.Finalize();
+
+                   std::string chksumFilename (cur_buf->tmpf);
+                   chksumFilename += ".md5";
+                   DEBUG1(cout << "Writing md5sum out to '" << chksumFilename << "' of '" << md5filter << "'" << std::endl);
+                   std::ofstream chksumFile(chksumFilename.c_str(), std::ios::binary | std::ios::out);
+                   chksumFile << md5filter << std::endl;
+                   chksumFile.close();
+
+
+                   PV::set_pv( (science ? PV::PV_SCIENCE_FRAME_CHECK_SUM_TRUNC : PV::PV_FRAME_CHECK_SUM_TRUNC),
+                              *reinterpret_cast<const unsigned int*>(md5filter.Value()));
                }
                t = time(0) - t;
                PV::set_pv(epics_state_var, STATE_NORMAL);

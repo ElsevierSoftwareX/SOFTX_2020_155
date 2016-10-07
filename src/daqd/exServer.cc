@@ -88,7 +88,11 @@ pvInfo exServer::pvList[] = {
     pvInfo (1, "SCIENCE_FW_DATA_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_FW_DATA_STATE),
     pvInfo (1, "SCIENCE_FW_DATA_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_FW_DATA_SEC),
     pvInfo (1, "STREND_FW_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_STREND_FW_STATE),
-    pvInfo (1, "MTREND_FW_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_MTREND_FW_STATE)
+    pvInfo (1, "MTREND_FW_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_MTREND_FW_STATE),
+    pvInfo (1, "FRAME_CHECK_SUM_TRUNC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_FRAME_CHECK_SUM_TRUNC),
+    pvInfo (1, "SCIENCE_FRAME_CHECK_SUM_TRUNC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_FRAME_CHECK_SUM_TRUNC),
+    pvInfo (1, "SECOND_FRAME_CHECK_SUM_TRUNC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SECOND_FRAME_CHECK_SUM_TRUNC),
+    pvInfo (1, "MINUTE_FRAME_CHECK_SUM_TRUNC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_MINUTE_FRAME_CHECK_SUM_TRUNC)
 };
 
 const unsigned exServer::pvListNElem = NELEMENTS (exServer::pvList);

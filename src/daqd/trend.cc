@@ -21,6 +21,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "framecpp/Common/MD5SumFilter.hh"
+
 using namespace std;
 
 #include "circ.hh"
@@ -38,6 +40,20 @@ extern daqd_c daqd;
 #define SECPERMIN 60 // # of seconds per minute
 #define SECPERHOUR 3600 // # of seconds per hour
 #define MINPERHOUR 60 // # of minutes per hour
+
+namespace {
+
+void write_checksum_file(const char *frame_filename, FrameCPP::Common::MD5SumFilter& md5filter) {
+    if (!frame_filename) return;
+    std::string chksumFilename (frame_filename);
+    chksumFilename += ".md5";
+    DEBUG1(cout << "Writing md5sum out to '" << chksumFilename << "' of '" << md5filter << "'" << std::endl);
+    std::ofstream chksumFile(chksumFilename.c_str(), std::ios::binary | std::ios::out);
+    chksumFile << md5filter << std::endl;
+    chksumFile.close();
+}
+
+}
 
 // saves striped data 
 void *
@@ -387,9 +403,11 @@ trender_c::minute_framer ()
         pthread_mutex_lock (&frame_write_lock);
         DEBUG(3, cerr << "Get trend frame write mutex for minute frame" << endl);
  
+        FrameCPP::Common::MD5SumFilter md5filter;
         FrameCPP::Common::FrameBuffer<filebuf>* obuf
             = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
         obuf -> open(_tmpf, std::ios::out | std::ios::binary);
+        obuf -> FilterAdd( &md5filter );
         FrameCPP::Common::OFrameStream  ofs(obuf);
         ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
         DEBUG(1, cerr << "Begin minute trend WriteFrame()" << endl);
@@ -404,10 +422,16 @@ trender_c::minute_framer ()
 
         ofs.Close();
         obuf->close();
+        md5filter.Finalize();
         pthread_mutex_unlock (&frame_write_lock);
 
         t = time(0) - t;
         PV::set_pv(PV::PV_MTREND_FW_STATE, STATE_NORMAL);
+
+        write_checksum_file(tmpf, md5filter);
+
+        PV::set_pv(PV::PV_MINUTE_FRAME_CHECK_SUM_TRUNC, *reinterpret_cast<const unsigned int*>(md5filter.Value()));
+
         DEBUG(1, cerr << "Done in " << t << " seconds" << endl);
 	if (1)
 	{
@@ -844,8 +868,10 @@ trender_c::framer ()
           pthread_mutex_lock (&frame_write_lock);
           DEBUG(3, cerr << "Get trend frame write mutex for second frame" << endl);
 
+          FrameCPP::Common::MD5SumFilter md5filter;
           FrameCPP::Common::FrameBuffer<filebuf>* obuf
             = new FrameCPP::Common::FrameBuffer<std::filebuf>(std::ios::out);
+          obuf -> FilterAdd( &md5filter );
           obuf -> open(_tmpf, std::ios::out | std::ios::binary);
           FrameCPP::Common::OFrameStream  ofs(obuf);
           ofs.SetCheckSumFile(FrameCPP::Common::CheckSum::CRC);
@@ -860,10 +886,17 @@ trender_c::framer ()
 
           ofs.Close();
           obuf->close();
+          md5filter.Finalize();
+
           pthread_mutex_unlock (&frame_write_lock);
 
           t = time(0) - t;
           PV::set_pv(PV::PV_STREND_FW_STATE, STATE_NORMAL);
+
+          write_checksum_file(tmpf, md5filter);
+
+          PV::set_pv(PV::PV_SECOND_FRAME_CHECK_SUM_TRUNC, *reinterpret_cast<const unsigned int*>(md5filter.Value()));
+
           DEBUG(1, cerr << "Second trend frame write done in " << t << " seconds" << endl);
 	  if (rename(_tmpf, tmpf)) {
 		system_log(1, "framer(): failed to rename file; errno %d", errno);
