@@ -683,6 +683,11 @@ daqd_c::framer_io(int science)
    const int STATE_WRITING = 1;
    const int STATE_BROADCAST = 2;
 
+   bool write_frame_checksums = true;
+   {
+       std::string checksum_flag = parameters().get<std::string>("write_frame_checksums", "1");
+       write_frame_checksums = (checksum_flag == std::string("1") ? true : false);
+   }
    framer_work_queue *_work_queue = 0;
    if (science) {
        daqd_c::set_thread_priority("Science frame saver IO","dqscifrio",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_IO_CPUAFFINITY);
@@ -753,13 +758,14 @@ daqd_c::framer_io(int science)
                    obuf->close();
                    md5filter.Finalize();
 
-                   std::string chksumFilename (cur_buf->tmpf);
-                   chksumFilename += ".md5";
-                   DEBUG1(cout << "Writing md5sum out to '" << chksumFilename << "' of '" << md5filter << "'" << std::endl);
-                   std::ofstream chksumFile(chksumFilename.c_str(), std::ios::binary | std::ios::out);
-                   chksumFile << md5filter << std::endl;
-                   chksumFile.close();
-
+                   if (write_frame_checksums) {
+                       std::string chksumFilename (cur_buf->tmpf);
+                       chksumFilename += ".md5";
+                       DEBUG1(cout << "Writing md5sum out to '" << chksumFilename << "' of '" << md5filter << "'" << std::endl);
+                       std::ofstream chksumFile(chksumFilename.c_str(), std::ios::binary | std::ios::out);
+                       chksumFile << md5filter << std::endl;
+                       chksumFile.close();
+                   }
 
                    PV::set_pv( (science ? PV::PV_SCIENCE_FRAME_CHECK_SUM_TRUNC : PV::PV_FRAME_CHECK_SUM_TRUNC),
                               *reinterpret_cast<const unsigned int*>(md5filter.Value()));

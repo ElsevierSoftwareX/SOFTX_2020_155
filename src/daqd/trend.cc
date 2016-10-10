@@ -186,6 +186,13 @@ trender_c::minute_framer ()
 {
   const int STATE_NORMAL = 0;
   const int STATE_WRITTING = 1;
+
+  bool write_frame_checksums = true;
+  {
+      std::string checksum_flag = daqd.parameters().get<std::string>("write_frame_checksums", "1");
+      write_frame_checksums = (checksum_flag == std::string("1") ? true : false);
+  }
+
   // Set thread parameters
   daqd_c::set_thread_priority("Minute trend framer","dqmtrfr",SAVER_THREAD_PRIORITY,MINUTE_SAVER_CPUAFFINITY); 
 
@@ -428,7 +435,8 @@ trender_c::minute_framer ()
         t = time(0) - t;
         PV::set_pv(PV::PV_MTREND_FW_STATE, STATE_NORMAL);
 
-        write_checksum_file(tmpf, md5filter);
+        if (write_frame_checksums)
+            write_checksum_file(tmpf, md5filter);
 
         PV::set_pv(PV::PV_MINUTE_FRAME_CHECK_SUM_TRUNC, *reinterpret_cast<const unsigned int*>(md5filter.Value()));
 
@@ -647,6 +655,13 @@ trender_c::framer ()
 {
   const int STATE_NORMAL = 0;
   const int STATE_WRITTING = 1;
+
+  bool write_frame_checksums = true;
+  {
+      std::string checksum_flag = daqd.parameters().get<std::string>("write_frame_checksums", "1");
+      write_frame_checksums = (checksum_flag == std::string("1") ? true : false);
+  }
+
   // Set thread parameters
   daqd_c::set_thread_priority("Second trend framer","dqstrfr",SAVER_THREAD_PRIORITY,SECOND_SAVER_CPUAFFINITY); 
 
@@ -893,7 +908,8 @@ trender_c::framer ()
           t = time(0) - t;
           PV::set_pv(PV::PV_STREND_FW_STATE, STATE_NORMAL);
 
-          write_checksum_file(tmpf, md5filter);
+          if (write_frame_checksums)
+            write_checksum_file(tmpf, md5filter);
 
           PV::set_pv(PV::PV_SECOND_FRAME_CHECK_SUM_TRUNC, *reinterpret_cast<const unsigned int*>(md5filter.Value()));
 
