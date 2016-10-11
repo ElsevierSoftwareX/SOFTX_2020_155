@@ -759,8 +759,22 @@ daqd_c::framer_io(int science)
                    md5filter.Finalize();
 
                    if (write_frame_checksums) {
+                       const static std::string md5(".md5");
+
                        std::string chksumFilename (cur_buf->tmpf);
-                       chksumFilename += ".md5";
+                       std::string::size_type dot = chksumFilename.rfind('.');
+                       std::string::size_type slash = chksumFilename.rfind('/');
+
+                       // if there is an extension, don't count a leading '.' for the extension
+                       if (dot != std::string::npos &&
+                           dot != 0 &&
+                           (slash == std::string::npos || slash < dot-1))
+                       {
+                           // erase the extension
+                           chksumFilename.erase(dot);
+                       }
+                       // add .md5
+                       chksumFilename += md5;
                        DEBUG1(cout << "Writing md5sum out to '" << chksumFilename << "' of '" << md5filter << "'" << std::endl);
                        std::ofstream chksumFile(chksumFilename.c_str(), std::ios::binary | std::ios::out);
                        chksumFile << md5filter << std::endl;
