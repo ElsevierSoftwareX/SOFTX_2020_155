@@ -1,5 +1,5 @@
 ==================================================================================================
-Changes for 3.x.x
+Changes for 3.2
 ==================================================================================================
 - Bug Fix (1033): Daqd frame writer changes:
   Split the producer thread into multiple parts to free up a thread to only receive data.
