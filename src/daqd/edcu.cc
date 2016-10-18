@@ -41,9 +41,6 @@ extern long int altzone;
 void connectCallback(struct connection_handler_args args) {
     unsigned int *channel_status = (unsigned int *)ca_puser(args.chid);
     *channel_status = (args.op == CA_OP_CONN_UP? 0: 0xbad);
-	unsigned long chnum = (unsigned long)ca_puser(args.chid);
-//	system_log(1, "Epics Connect callback for channel %d", chnum);
-	daqd.edcu1.channel_status[chnum] = (args.op == CA_OP_CONN_UP? 0: 0xbad);
 	if (args.op == CA_OP_CONN_UP) daqd.edcu1.con_chans++; else daqd.edcu1.con_chans--;
 	daqd.edcu1.con_events++;
     PV::set_pv(PV::PV_EDCU_CHANS, daqd.edcu1.num_chans);
