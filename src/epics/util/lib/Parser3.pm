@@ -62,8 +62,10 @@ sub sortDacs {
                 my $w = 0;
                 if ($::dacType[$_] eq "GSC_18AO8") {
                         $w = 1;
-                } elsif ($::dacType[$_] eq "GSC_16AO16") {
+                } elsif ($::dacType[$_] eq "GSC_20AO8") {
                         $w = 100;
+                } elsif ($::dacType[$_] eq "GSC_16AO16") {
+                        $w = 200;
                 } else {
                         die "Unsupported DAC board type " . $::dacType[$_] ;
                 }
@@ -95,11 +97,12 @@ sub sortDacs {
                         }
                 }}
 
-		#print "DAC: moving " . $_ . " to " . $i . "\n";
+		print "DAC: moving " . $_ . " to " . $i . "\n";
                 $::dacPartNum[$i] = $dacPartNumSave[$_];
                 $::dacType[$i] = $dacTypeSave[$_];
                 $::dacNum[$i] = $dacNumSave[$_];
                 $::card2array[$::dacPartNum[$i]] = $i;
+		print "\t" .$::dacPartNum[$i] . "\t" . $::dacType[$i] . "\n";
         }
 	return 1;
 }

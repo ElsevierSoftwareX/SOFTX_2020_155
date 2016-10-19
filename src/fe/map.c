@@ -17,6 +17,7 @@
 #include <drv/gsc16ai64.c>
 #include <drv/gsc16ao16.c>
 #include <drv/gsc18ao8.c>
+#include <drv/gsc20ao8.c>
 #include <drv/accesIIRO8.c>
 #include <drv/accesIIRO16.c>
 #include <drv/accesDio24.c>
@@ -71,12 +72,16 @@ int mapPciModules(CDS_HARDWARE *pCds)
 #endif
   int dac_cnt = 0;
   int dac_18bit_cnt = 0;
+  int dac_20bit_cnt = 0;
   int bo_cnt = 0;
   int use_it;
 
   dacdev = NULL;
   status = 0;
 
+for (i = 0; i < pCds->cards; i++) {
+printk("%d is type %d with instance %d\n",i,pCds->cards_used[i].type,pCds->cards_used[i].instance);
+}
   // Search system for any module with PLX-9056 and PLX id
   while((dacdev = pci_get_device(PLX_VID, PLX_TID, dacdev))) {
 	// Check if this is an 18bit DAC from General Standards
@@ -103,7 +108,31 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		}
 		dac_18bit_cnt++;
 	}
-	// if found, check if it is a DAC module
+	// Check if this is an 20bit DAC from General Standards
+	if ((dacdev->subsystem_device == DAC_20BIT_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
+	{
+		use_it = 0;
+		if (pCds->cards) {
+			use_it = 0;
+			/* See if ought to use this one or not */
+			for (i = 0; i < pCds->cards; i++) {
+				if (pCds->cards_used[i].type == GSC_20AO8
+				    && pCds->cards_used[i].instance == dac_20bit_cnt) {
+					use_it = 1;
+					break;
+				}
+			}
+		}
+		if (use_it) {
+                  printk("20-bit dac card on bus %x; device %x\n",
+                        dacdev->bus->number,
+			PCI_SLOT(dacdev->devfn));
+                  status = gsc20ao8Init(pCds,dacdev);
+		  modCount ++;
+		}
+		dac_20bit_cnt++;
+	}
+	// if found, check if it is a 16 bit DAC module
         if((dacdev->subsystem_device == DAC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
         {
 		use_it = 0;

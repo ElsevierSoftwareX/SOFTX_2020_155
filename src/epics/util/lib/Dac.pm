@@ -13,7 +13,8 @@ require "lib/medmGen.pm";
 # DAC cards we support
 %board_types = (
 	GSC_16AO16 => 1, # General Standards board
-        GSC_18AO8 => 1 # 18-bit General Standards DAC board
+        GSC_18AO8 => 1, # 18-bit General Standards DAC board
+        GSC_20AO8 => 1 # 18-bit General Standards DAC board
 );
 $default_board_type = "GSC_16AO16";
 

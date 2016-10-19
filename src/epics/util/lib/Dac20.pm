@@ -1,11 +1,11 @@
-package CDS::Dac18;
+package CDS::Dac20;
 use Exporter;
 @ISA = ('Exporter');
 
 require "lib/medmGen.pm";
 
-#//     \page Dac18 Dac18.pm
-#//     Dac18.pm - provides RCG support for General Standards 18 bit, 8 channel DAC modules.
+#//     \page Dac20 Dac20.pm
+#//     Dac20.pm - provides RCG support for General Standards 20 bit, 8 channel DAC modules.
 #//
 #// \n
 #// \n
@@ -14,7 +14,7 @@ require "lib/medmGen.pm";
 %board_types = (
 	GSC_16AO16 => 1, # General Standards board
         GSC_18AO8 => 1, # 18-bit General Standards DAC board
-        GSC_20AO8 => 1 # 18-bit General Standards DAC board
+        GSC_20AO8 => 1 # 20-bit General Standards DAC board
 );
 $default_board_type = "GSC_16AO16";
 
@@ -63,9 +63,9 @@ sub initDac {
 
 #// \b sub \b partType \n 
 #// Required subroutine for RCG \n
-#// Returns Dac18 \n\n
+#// Returns Dac20 \n\n
 sub partType {
-	return Dac18;
+	return Dac20;
 }
 
 #// \b sub \b printHeaderStruct \n 
@@ -165,10 +165,10 @@ sub frontEndCode {
 }
 
 
-#// \b sub \b createDac18Medm \n 
-#// Called by feCodeGen.pl to auto gen DAC18 channel MEDM screens \n
+#// \b sub \b createDac20Medm \n 
+#// Called by feCodeGen.pl to auto gen DAC20 channel MEDM screens \n
 #// This code requires /lib/medmGen.pm \n\n
-sub createDac18Medm
+sub createDac20Medm
 {
         my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$dacNum) = @_;
  # Define colors to be sent to screen gen.
@@ -211,7 +211,7 @@ sub createDac18Medm
         # ************* Add Text  **********************************************************************************
         # Add DAC top label
         $xpos = 46; $ypos = 32; $width = 140; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DAC $::dacCardNum[$dacNum] - 18bit",$ecolors{black});
+        $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DAC $::dacCardNum[$dacNum] - 20bit",$ecolors{black});
         # Add DAC OUT label
         $xpos = 49; $ypos = 52; $width = 45; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"OUT",$ecolors{black});
