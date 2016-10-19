@@ -1,10 +1,9 @@
 Library {
   Name			  "CDS_PARTS"
-  Version		  8.0
+  Version		  8.6
   MdlSubVersion		  0
-  SavedCharacterEncoding  "US-ASCII"
+  SavedCharacterEncoding  "ISO-8859-1"
   LibraryType		  "BlockLibrary"
-  SaveDefaultBlockParams  on
   ScopeRefreshTime	  0.035000
   OverrideScopeRefreshTime on
   DisableAllScopes	  off
@@ -19,7 +18,7 @@ Library {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [694.0, 249.0, 1036.0, 1047.0]
+      Location		      [694.0, 33.0, 1036.0, 1047.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -41,11 +40,11 @@ Library {
 	$ObjectID		5
 	$ClassName		"Simulink.EditorInfo"
 	IsActive		[1]
-	ViewObjType		"SimulinkSubsys"
-	LoadSaveID		"150"
-	Extents			[992.0, 874.0]
-	ZoomFactor		[1.25]
-	Offset			[0.0, -2.3249999999999886]
+	ViewObjType		"SimulinkTopLevel"
+	LoadSaveID		"0"
+	Extents			[1002.0, 885.0]
+	ZoomFactor		[1.4799999999999998]
+	Offset			[-5.6843418860808015e-14, -5.6843418860808015e-14]
       }
     }
   }
@@ -53,12 +52,12 @@ Library {
   Creator		  "aivanov"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "controls"
+  LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Apr 22 12:20:09 2016"
-  RTWModifiedTimeStamp	  383227721
-  ModelVersionFormat	  "1.%<AutoIncrement:390>"
-  ConfigurationManager	  "None"
+  LastModifiedDate	  "Wed Oct 19 14:38:02 2016"
+  RTWModifiedTimeStamp	  398788668
+  ModelVersionFormat	  "1.%<AutoIncrement:392>"
+  ConfigurationManager	  "none"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
   LibraryLinkDisplay	  "all"
@@ -75,29 +74,24 @@ Library {
   SortedOrder		  off
   ExecutionContextIcon	  off
   ShowLinearizationAnnotations on
+  ShowVisualizeInsertedRTB on
+  ShowMarkup		  on
   BlockNameDataTip	  off
   BlockParametersDataTip  off
   BlockDescriptionStringDataTip	off
   ToolBar		  on
   StatusBar		  on
-  BrowserShowLibraryLinks on
-  BrowserLookUnderMasks	  on
+  BrowserShowLibraryLinks off
+  BrowserLookUnderMasks	  off
   SimulationMode	  "normal"
+  PauseTimes		  "5"
+  NumberOfSteps		  1
+  SnapshotBufferSize	  10
+  SnapshotInterval	  10
+  NumberOfLastSnapshots	  0
   LinearizationMsg	  "none"
   Profile		  off
   ParamWorkspaceSource	  "MATLABWorkspace"
-  RecordCoverage	  off
-  CovSaveName		  "covdata"
-  CovMetricSettings	  "dw"
-  CovNameIncrementing	  off
-  CovHtmlReporting	  on
-  CovForceBlockReductionOff on
-  covSaveCumulativeToWorkspaceVar on
-  CovSaveSingleToWorkspaceVar on
-  CovCumulativeReport	  off
-  CovReportOnPause	  on
-  CovModelRefEnable	  "Off"
-  CovExternalEMLEnable	  off
   ExtModeBatchMode	  off
   ExtModeEnableFloating	  on
   ExtModeTrigType	  "manual"
@@ -126,13 +120,13 @@ Library {
     Dimension		    1
     Simulink.ConfigSet {
       $ObjectID		      6
-      Version		      "1.12.1"
+      Version		      "1.15.1"
       Array {
 	Type			"Handle"
-	Dimension		8
+	Dimension		9
 	Simulink.SolverCC {
 	  $ObjectID		  7
-	  Version		  "1.12.1"
+	  Version		  "1.15.1"
 	  StartTime		  "0.0"
 	  StopTime		  "10.0"
 	  AbsTol		  "auto"
@@ -159,6 +153,8 @@ Library {
 	  ZeroCrossControl	  "UseLocalSettings"
 	  ZeroCrossAlgorithm	  "Nonadaptive"
 	  AlgebraicLoopSolver	  "TrustRegion"
+	  SolverInfoToggleStatus  off
+	  IsAutoAppliedInSIP	  off
 	  SolverResetMethod	  "Fast"
 	  PositivePriorityOrder	  off
 	  AutoInsertRateTranBlk	  off
@@ -167,7 +163,7 @@ Library {
 	}
 	Simulink.DataIOCC {
 	  $ObjectID		  8
-	  Version		  "1.12.1"
+	  Version		  "1.15.1"
 	  Decimation		  "1"
 	  ExternalInput		  "[t, u]"
 	  FinalStateName	  "xFinal"
@@ -185,6 +181,9 @@ Library {
 	  SignalLogging		  on
 	  DSMLogging		  on
 	  InspectSignalLogs	  off
+	  VisualizeSimOutput	  on
+	  StreamToWorkspace	  off
+	  StreamVariableName	  "streamout"
 	  SaveTime		  on
 	  ReturnWorkspaceOutputs  off
 	  StateSaveName		  "xout"
@@ -196,10 +195,11 @@ Library {
 	  OutputTimes		  "[]"
 	  ReturnWorkspaceOutputsName "out"
 	  Refine		  "1"
+	  LoggingIntervals	  "[-inf, inf]"
 	}
 	Simulink.OptimizationCC {
 	  $ObjectID		  9
-	  Version		  "1.12.1"
+	  Version		  "1.15.1"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    4
@@ -212,14 +212,17 @@ Library {
 	  BlockReduction	  off
 	  BooleanDataType	  off
 	  ConditionallyExecuteInputs on
-	  InlineParams		  off
-	  UseIntDivNetSlope	  off
+	  DefaultParameterBehavior "Tunable"
+	  UseDivisionForNetSlopeComputation "off"
 	  UseFloatMulNetSlope	  off
+	  DefaultUnderspecifiedDataType	"double"
 	  UseSpecifiedMinMax	  off
 	  InlineInvariantSignals  off
 	  OptimizeBlockIOStorage  on
 	  BufferReuse		  on
 	  EnhancedBackFolding	  off
+	  CachingGlobalReferences off
+	  GlobalBufferReuse	  on
 	  StrengthReduction	  off
 	  ExpressionFolding	  on
 	  BooleansAsBitfields	  off
@@ -227,14 +230,13 @@ Library {
 	  EnableMemcpy		  on
 	  MemcpyThreshold	  64
 	  PassReuseOutputArgsAs	  "Structure reference"
+	  PassReuseOutputArgsThreshold 12
 	  ExpressionDepthLimit	  2147483647
-	  FoldNonRolledExpr	  on
 	  LocalBlockOutputs	  on
 	  RollThreshold		  5
-	  SystemCodeInlineAuto	  off
 	  StateBitsets		  off
 	  DataBitsets		  off
-	  UseTempVars		  off
+	  ActiveStateOutputEnumStorageType "Native Integer"
 	  ZeroExternalMemoryAtStartup on
 	  ZeroInternalMemoryAtStartup on
 	  InitFltsAndDblsToZero	  off
@@ -245,13 +247,12 @@ Library {
 	  LifeSpan		  "inf"
 	  MaxStackSize		  "Inherit from target"
 	  BufferReusableBoundary  on
-	  SimCompilerOptimization "Off"
+	  SimCompilerOptimization "off"
 	  AccelVerboseBuild	  off
-	  ParallelExecutionInRapidAccelerator on
 	}
 	Simulink.DebuggingCC {
 	  $ObjectID		  10
-	  Version		  "1.12.1"
+	  Version		  "1.15.1"
 	  RTPrefix		  "error"
 	  ConsistencyChecking	  "none"
 	  ArrayBoundsChecking	  "none"
@@ -278,7 +279,6 @@ Library {
 	  IgnoredZcDiagnostic	  "warning"
 	  SolverPrmCheckMsg	  "none"
 	  InheritedTsInSrcMsg	  "warning"
-	  DiscreteInheritContinuousMsg "warning"
 	  MultiTaskDSMMsg	  "error"
 	  MultiTaskCondExecSysMsg "error"
 	  MultiTaskRateTransMsg	  "error"
@@ -306,17 +306,16 @@ Library {
 	  UnconnectedOutputMsg	  "warning"
 	  UnconnectedLineMsg	  "warning"
 	  SFcnCompatibilityMsg	  "none"
-	  FrameProcessingCompatibilityMsg "warning"
+	  FrameProcessingCompatibilityMsg "error"
 	  UniqueDataStoreMsg	  "none"
 	  BusObjectLabelMismatch  "warning"
 	  RootOutportRequireBusObject "warning"
 	  AssertControl		  "UseLocalSettings"
-	  EnableOverflowDetection off
+	  AllowSymbolicDim	  off
 	  ModelReferenceIOMsg	  "none"
 	  ModelReferenceMultiInstanceNormalModeStructChecksumCheck "error"
 	  ModelReferenceVersionMismatchMessage "none"
 	  ModelReferenceIOMismatchMessage "none"
-	  ModelReferenceCSMismatchMessage "none"
 	  UnknownTsInhSupMsg	  "warning"
 	  ModelReferenceDataLoggingMessage "warning"
 	  ModelReferenceSymbolNameMessage "warning"
@@ -328,7 +327,7 @@ Library {
 	  StrictBusMsg		  "Warning"
 	  BusNameAdapt		  "WarnAndRepair"
 	  NonBusSignalsTreatedAsBus "none"
-	  LoggingUnavailableSignals "error"
+	  SymbolicDimMinMaxWarning "warning"
 	  BlockIODiagnostic	  "none"
 	  SFUnusedDataAndEventsDiag "warning"
 	  SFUnexpectedBacktrackingDiag "warning"
@@ -338,14 +337,17 @@ Library {
 	  SFUnconditionalTransitionShadowingDiag "warning"
 	  SFUndirectedBroadcastEventsDiag "warning"
 	  SFTransitionActionBeforeConditionDiag	"warning"
+	  SFOutputUsedAsStateInMooreChartDiag "error"
+	  IntegerSaturationMsg	  "warning"
 	}
 	Simulink.HardwareCC {
 	  $ObjectID		  11
-	  Version		  "1.12.1"
+	  Version		  "1.15.1"
 	  ProdBitPerChar	  8
 	  ProdBitPerShort	  16
 	  ProdBitPerInt		  32
 	  ProdBitPerLong	  32
+	  ProdBitPerLongLong	  64
 	  ProdBitPerFloat	  32
 	  ProdBitPerDouble	  64
 	  ProdBitPerPointer	  32
@@ -355,21 +357,23 @@ Library {
 	  ProdEndianess		  "Unspecified"
 	  ProdWordSize		  32
 	  ProdShiftRightIntArith  on
+	  ProdLongLongMode	  off
 	  ProdHWDeviceType	  "32-bit Generic"
 	  TargetBitPerChar	  8
 	  TargetBitPerShort	  16
 	  TargetBitPerInt	  32
 	  TargetBitPerLong	  32
+	  TargetBitPerLongLong	  64
 	  TargetBitPerFloat	  32
 	  TargetBitPerDouble	  64
 	  TargetBitPerPointer	  32
 	  TargetLargestAtomicInteger "Char"
 	  TargetLargestAtomicFloat "None"
 	  TargetShiftRightIntArith on
+	  TargetLongLongMode	  off
 	  TargetIntDivRoundTo	  "Undefined"
 	  TargetEndianess	  "Unspecified"
 	  TargetWordSize	  32
-	  TargetTypeEmulationWarnSuppressLevel 0
 	  TargetPreprocMaxBitsSint 32
 	  TargetPreprocMaxBitsUint 32
 	  TargetHWDeviceType	  "Specified"
@@ -378,8 +382,9 @@ Library {
 	}
 	Simulink.ModelReferenceCC {
 	  $ObjectID		  12
-	  Version		  "1.12.1"
+	  Version		  "1.15.1"
 	  UpdateModelReferenceTargets "IfOutOfDateOrStructuralChange"
+	  EnableRefExpFcnMdlSchedulingChecks on
 	  CheckModelReferenceTargetMessage "error"
 	  EnableParallelModelReferenceBuilds off
 	  ParallelModelReferenceErrorOnInvalidPool on
@@ -393,22 +398,19 @@ Library {
 	}
 	Simulink.SFSimCC {
 	  $ObjectID		  13
-	  Version		  "1.12.1"
-	  SFSimEnableDebug	  on
-	  SFSimOverflowDetection  on
+	  Version		  "1.15.1"
 	  SFSimEcho		  on
-	  SimBlas		  on
 	  SimCtrlC		  on
-	  SimExtrinsic		  on
 	  SimIntegrity		  on
 	  SimUseLocalCustomCode	  off
 	  SimParseCustomCode	  on
 	  SimBuildMode		  "sf_incremental_build"
+	  SimGenImportedTypeDefs  off
 	}
 	Simulink.RTWCC {
 	  $BackupClass		  "Simulink.RTWCC"
 	  $ObjectID		  14
-	  Version		  "1.12.1"
+	  Version		  "1.15.1"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    6
@@ -421,11 +423,14 @@ Library {
 	    PropName		    "DisabledProps"
 	  }
 	  SystemTargetFile	  "grt.tlc"
+	  TLCOptions		  ""
 	  GenCodeOnly		  off
 	  MakeCommand		  "make_rtw"
 	  GenerateMakefile	  on
 	  PackageGeneratedCodeAndArtifacts off
 	  TemplateMakefile	  "grt_default_tmf"
+	  PostCodeGenCommand	  ""
+	  Description		  ""
 	  GenerateReport	  off
 	  SaveLog		  off
 	  RTWVerbose		  on
@@ -434,41 +439,40 @@ Library {
 	  TLCDebug		  off
 	  TLCCoverage		  off
 	  TLCAssert		  off
-	  ProcessScriptMode	  "Default"
-	  ConfigurationMode	  "Optimized"
-	  ConfigAtBuild		  off
 	  RTWUseLocalCustomCode	  off
 	  RTWUseSimCustomCode	  off
+	  Toolchain		  "Automatically locate an installed toolchain"
+	  BuildConfiguration	  "Faster Builds"
 	  IncludeHyperlinkInReport off
 	  LaunchReport		  off
 	  PortableWordSizes	  off
-	  GenerateErtSFunction	  off
 	  CreateSILPILBlock	  "None"
 	  CodeExecutionProfiling  off
 	  CodeExecutionProfileVariable "executionProfile"
 	  CodeProfilingSaveOptions "SummaryOnly"
 	  CodeProfilingInstrumentation off
+	  SILDebugging		  off
 	  TargetLang		  "C"
 	  IncludeBusHierarchyInRTWFileBlockHierarchyMap	off
-	  IncludeERTFirstTime	  off
 	  GenerateTraceInfo	  off
 	  GenerateTraceReport	  off
 	  GenerateTraceReportSl	  off
 	  GenerateTraceReportSf	  off
 	  GenerateTraceReportEml  off
-	  GenerateCodeInfo	  off
 	  GenerateWebview	  off
 	  GenerateCodeMetricsReport off
 	  GenerateCodeReplacementReport	off
-	  RTWCompilerOptimization "Off"
+	  GenerateMissedCodeReplacementReport off
+	  RTWCompilerOptimization "off"
+	  RTWCustomCompilerOptimizations ""
 	  CheckMdlBeforeBuild	  "Off"
-	  CustomRebuildMode	  "OnUpdate"
+	  SharedConstantsCachingThreshold 1024
 	  Array {
 	    Type		    "Handle"
 	    Dimension		    2
 	    Simulink.CodeAppCC {
 	      $ObjectID		      15
-	      Version		      "1.12.1"
+	      Version		      "1.15.1"
 	      Array {
 		Type			"Cell"
 		Dimension		17
@@ -493,6 +497,7 @@ Library {
 	      }
 	      ForceParamTrailComments off
 	      GenerateComments	      on
+	      CommentStyle	      "Auto"
 	      IgnoreCustomStorageClasses on
 	      IgnoreTestpoints	      off
 	      IncHierarchyInIds	      off
@@ -515,6 +520,7 @@ Library {
 	      CustomSymbolStrBlkIO    "rtb_$N$M"
 	      CustomSymbolStrTmpVar   "$N$M"
 	      CustomSymbolStrMacro    "$R$N$M"
+	      CustomSymbolStrUtil     "$N$C"
 	      DefineNamingRule	      "None"
 	      ParamNamingRule	      "None"
 	      SignalNamingRule	      "None"
@@ -531,12 +537,12 @@ Library {
 	    Simulink.GRTTargetCC {
 	      $BackupClass	      "Simulink.TargetCC"
 	      $ObjectID		      16
-	      Version		      "1.12.1"
+	      Version		      "1.15.1"
 	      Array {
 		Type			"Cell"
-		Dimension		15
+		Dimension		14
 		Cell			"IncludeMdlTerminateFcn"
-		Cell			"CombineOutputUpdateFcns"
+		Cell			"GenerateAllocFcn"
 		Cell			"SuppressErrorStatus"
 		Cell			"ERTCustomFileBanners"
 		Cell			"GenerateSampleERTMain"
@@ -549,21 +555,22 @@ Library {
 		Cell			"SupportComplex"
 		Cell			"SupportAbsoluteTime"
 		Cell			"SupportContinuousTime"
-		Cell			"GenerateAllocFcn"
 		PropName		"DisabledProps"
 	      }
 	      TargetFcnLib	      "ansi_tfl_table_tmw.mat"
 	      TargetLibSuffix	      ""
 	      TargetPreCompLibLocation ""
-	      CodeReplacementLibrary  "ANSI_C"
+	      GenFloatMathFcnCalls    "NOT IN USE"
+	      TargetLangStandard      "C89/C90 (ANSI)"
+	      CodeReplacementLibrary  "None"
 	      UtilityFuncGeneration   "Auto"
 	      ERTMultiwordTypeDef     "System defined"
 	      ERTMultiwordLength      256
 	      MultiwordLength	      2048
 	      GenerateFullHeader      on
+	      InferredTypesCompatibility off
 	      GenerateSampleERTMain   off
 	      GenerateTestInterfaces  off
-	      IsPILTarget	      off
 	      ModelReferenceCompliant on
 	      ParMdlRefBuildCompliant on
 	      CompOptLevelCompliant   on
@@ -580,18 +587,23 @@ Library {
 	      LogVarNameModifier      "rt_"
 	      MatFileLogging	      on
 	      MultiInstanceERTCode    off
+	      CodeInterfacePackaging  "Nonreusable function"
 	      SupportNonFinite	      on
 	      SupportComplex	      on
 	      PurelyIntegerCode	      off
 	      SupportContinuousTime   on
 	      SupportNonInlinedSFcns  on
 	      SupportVariableSizeSignals off
-	      EnableShiftOperators    on
 	      ParenthesesLevel	      "Nominal"
+	      CastingMode	      "Nominal"
+	      MATLABClassNameForMDSCustomization "Simulink.SoftwareTarget.GRTCustomization"
 	      ModelStepFunctionPrototypeControlCompliant off
-	      CPPClassGenCompliant    off
+	      CPPClassGenCompliant    on
 	      AutosarCompliant	      off
 	      GRTInterface	      on
+	      GenerateAllocFcn	      off
+	      UseToolchainInfoCompliant	on
+	      GenerateSharedConstants on
 	      UseMalloc		      off
 	      ExtMode		      off
 	      ExtModeStaticAlloc      off
@@ -605,9 +617,37 @@ Library {
 	      RTWCAPIStates	      off
 	      RTWCAPIRootIO	      off
 	      GenerateASAP2	      off
+	      MultiInstanceErrorCode  "Error"
 	    }
 	    PropName		    "Components"
 	  }
+	}
+	SlCovCC.ConfigComp {
+	  $ObjectID		  17
+	  Version		  "1.15.1"
+	  Description		  "Simulink Coverage Configuration Component"
+	  Name			  "Simulink Coverage"
+	  RecordCoverage	  off
+	  CovPath		  "/"
+	  CovSaveName		  "covdata"
+	  CovMetricSettings	  "dw"
+	  CovNameIncrementing	  off
+	  CovHtmlReporting	  on
+	  CovForceBlockReductionOff on
+	  CovEnableCumulative	  on
+	  CovSaveCumulativeToWorkspaceVar on
+	  CovSaveSingleToWorkspaceVar on
+	  CovCumulativeVarName	  "covCumulativeData"
+	  CovCumulativeReport	  off
+	  CovReportOnPause	  on
+	  CovModelRefEnable	  "Off"
+	  CovExternalEMLEnable	  off
+	  CovSFcnEnable		  on
+	  CovBoundaryAbsTol	  1e-05
+	  CovBoundaryRelTol	  0.01
+	  CovUseTimeInterval	  off
+	  CovStartTime		  0
+	  CovStopTime		  0
 	}
 	PropName		"Components"
       }
@@ -682,7 +722,6 @@ Library {
     }
     Block {
       BlockType		      BusCreator
-      Inputs		      "4"
       DisplayOption	      "none"
       OutDataTypeStr	      "Inherit: auto"
       NonVirtualBus	      off
@@ -739,6 +778,7 @@ Library {
     }
     Block {
       BlockType		      Goto
+      GotoTag		      "A"
       IconDisplay	      "Tag"
       TagVisibility	      "local"
     }
@@ -821,10 +861,15 @@ Library {
       Permissions	      "ReadWrite"
       PermitHierarchicalResolution "All"
       TreatAsAtomicUnit	      off
+      MinAlgLoopOccurrences   off
+      PropExecContextOutsideSubsystem off
       CheckFcnCallInpInsideContextMsg off
       SystemSampleTime	      "-1"
+      RTWSystemCode	      "Auto"
       RTWFcnNameOpts	      "Auto"
       RTWFileNameOpts	      "Auto"
+      FunctionInterfaceSpec   "void_void"
+      FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"
@@ -834,9 +879,12 @@ Library {
       DataTypeOverride	      "UseLocalSettings"
       DataTypeOverrideAppliesTo	"AllNumericTypes"
       MinMaxOverflowLogging   "UseLocalSettings"
+      Opaque		      off
+      MaskHideContents	      off
       SFBlockType	      "NONE"
-      Variant		      off
       GeneratePreprocessorConditionals off
+      ContentPreviewEnabled   off
+      IsWebBlock	      off
     }
     Block {
       BlockType		      Sum
@@ -884,8 +932,8 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [694, 249, 1730, 1296]
-    Open		    off
+    Location		    [694, 33, 1730, 1080]
+    Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
     ScreenColor		    "white"
@@ -898,7 +946,7 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "148"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    "374"
+    SIDHighWatermark	    "379"
     Block {
       BlockType		      SubSystem
       Name		      " I/O "
@@ -907,16 +955,11 @@ Library {
       Position		      [271, 113, 317, 182]
       ZOrder		      -6
       DropShadow	      on
-      MinAlgLoopOccurrences   off
-      PropExecContextOutsideSubsystem off
-      RTWSystemCode	      "Auto"
-      FunctionWithSeparateData off
-      Opaque		      off
       RequestExecContextInheritance off
-      MaskHideContents	      off
+      Variant		      off
       System {
 	Name			" I/O "
-	Location		[1319, 176, 2347, 1191]
+	Location		[694, 33, 1730, 1080]
 	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -928,7 +971,7 @@ Library {
 	TiledPaperMargins	[0.500000, 0.500000, 0.500000, 0.500000]
 	TiledPageScale		1
 	ShowPageBoundaries	off
-	ZoomFactor		"78"
+	ZoomFactor		"86"
 	Block {
 	  BlockType		  SubSystem
 	  Name			  "16x16-bit DACs"
@@ -938,13 +981,8 @@ Library {
 	  ZOrder		  -1
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
-	  MinAlgLoopOccurrences	  off
-	  PropExecContextOutsideSubsystem off
-	  RTWSystemCode		  "Auto"
-	  FunctionWithSeparateData off
-	  Opaque		  off
 	  RequestExecContextInheritance	off
-	  MaskHideContents	  off
+	  Variant		  off
 	  System {
 	    Name		    "16x16-bit DACs"
 	    Location		    [386, 80, 1303, 1110]
@@ -1240,6 +1278,64 @@ Library {
 	}
 	Block {
 	  BlockType		  SubSystem
+	  Name			  "2x20-bit DACs"
+	  SID			  "375"
+	  Ports			  []
+	  Position		  [590, 371, 750, 499]
+	  ZOrder		  1
+	  RequestExecContextInheritance	off
+	  Variant		  off
+	  System {
+	    Name		    "2x20-bit DACs"
+	    Location		    [694, 33, 1730, 1080]
+	    Open		    off
+	    ModelBrowserVisibility  off
+	    ModelBrowserWidth	    200
+	    ScreenColor		    "white"
+	    PaperOrientation	    "landscape"
+	    PaperPositionMode	    "auto"
+	    PaperType		    "usletter"
+	    PaperUnits		    "inches"
+	    TiledPaperMargins	    [0.500000, 0.500000, 0.500000, 0.500000]
+	    TiledPageScale	    1
+	    ShowPageBoundaries	    off
+	    ZoomFactor		    "100"
+	    Block {
+	      BlockType		      Reference
+	      Name		      "DAC_0"
+	      SID		      "378"
+	      Description	      "type=GSC_20AO8,\ncard_num=0     "
+	      Ports		      [8]
+	      Position		      [165, 102, 200, 268]
+	      ZOrder		      1
+	      BackgroundColor	      "cyan"
+	      DropShadow	      on
+	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.6"
+	      SourceBlock	      "dac18/Subsystem"
+	      SourceType	      "SubSystem"
+	      ContentPreviewEnabled   off
+	    }
+	    Block {
+	      BlockType		      Reference
+	      Name		      "DAC_1"
+	      SID		      "379"
+	      Description	      "type=GSC_20AO8,\ncard_num=1     "
+	      Ports		      [8]
+	      Position		      [265, 102, 300, 268]
+	      ZOrder		      2
+	      BackgroundColor	      "cyan"
+	      DropShadow	      on
+	      AttributesFormatString  "%<Description>"
+	      LibraryVersion	      "1.6"
+	      SourceBlock	      "dac18/Subsystem"
+	      SourceType	      "SubSystem"
+	      ContentPreviewEnabled   off
+	    }
+	  }
+	}
+	Block {
+	  BlockType		  SubSystem
 	  Name			  "8x18-bit DACs"
 	  SID			  "72"
 	  Ports			  []
@@ -1247,16 +1343,11 @@ Library {
 	  ZOrder		  -2
 	  BackgroundColor	  "cyan"
 	  DropShadow		  on
-	  MinAlgLoopOccurrences	  off
-	  PropExecContextOutsideSubsystem off
-	  RTWSystemCode		  "Auto"
-	  FunctionWithSeparateData off
-	  Opaque		  off
 	  RequestExecContextInheritance	off
-	  MaskHideContents	  off
+	  Variant		  off
 	  System {
 	    Name		    "8x18-bit DACs"
-	    Location		    [8, 44, 862, 924]
+	    Location		    [694, 33, 1730, 1080]
 	    Open		    off
 	    ModelBrowserVisibility  off
 	    ModelBrowserWidth	    200
@@ -1283,14 +1374,7 @@ Library {
 	      LibraryVersion	      "1.6"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
+	      ContentPreviewEnabled   off
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -1306,14 +1390,7 @@ Library {
 	      LibraryVersion	      "1.6"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
+	      ContentPreviewEnabled   off
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -1329,14 +1406,7 @@ Library {
 	      LibraryVersion	      "1.6"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
+	      ContentPreviewEnabled   off
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -1352,14 +1422,7 @@ Library {
 	      LibraryVersion	      "1.6"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
+	      ContentPreviewEnabled   off
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -1375,14 +1438,7 @@ Library {
 	      LibraryVersion	      "1.6"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
+	      ContentPreviewEnabled   off
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -1398,14 +1454,7 @@ Library {
 	      LibraryVersion	      "1.6"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
+	      ContentPreviewEnabled   off
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -1421,14 +1470,7 @@ Library {
 	      LibraryVersion	      "1.6"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
+	      ContentPreviewEnabled   off
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -1444,14 +1486,7 @@ Library {
 	      LibraryVersion	      "1.6"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
+	      ContentPreviewEnabled   off
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -1467,14 +1502,7 @@ Library {
 	      LibraryVersion	      "1.6"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
+	      ContentPreviewEnabled   off
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -1490,14 +1518,7 @@ Library {
 	      LibraryVersion	      "1.6"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
+	      ContentPreviewEnabled   off
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -1513,14 +1534,7 @@ Library {
 	      LibraryVersion	      "1.6"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
+	      ContentPreviewEnabled   off
 	    }
 	    Block {
 	      BlockType		      Reference
@@ -1536,14 +1550,7 @@ Library {
 	      LibraryVersion	      "1.6"
 	      SourceBlock	      "dac18/Subsystem"
 	      SourceType	      "SubSystem"
-	      ShowPortLabels	      "FromPortIcon"
-	      SystemSampleTime	      "-1"
-	      FunctionWithSeparateData "off"
-	      RTWMemSecFuncInitTerm   "Inherit from model"
-	      RTWMemSecFuncExecute    "Inherit from model"
-	      RTWMemSecDataConstants  "Inherit from model"
-	      RTWMemSecDataInternal   "Inherit from model"
-	      RTWMemSecDataParameters "Inherit from model"
+	      ContentPreviewEnabled   off
 	    }
 	  }
 	}
@@ -1563,6 +1570,7 @@ Library {
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx0/ADC0"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1580,6 +1588,7 @@ Library {
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx1/ADC1"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1597,6 +1606,7 @@ Library {
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx2/ADC2"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1614,6 +1624,7 @@ Library {
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx3/ADC3"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1631,6 +1642,7 @@ Library {
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx4/ADC4"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1648,6 +1660,7 @@ Library {
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx5/ADC5"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1665,6 +1678,7 @@ Library {
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx6/ADC6"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1682,6 +1696,7 @@ Library {
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx7/ADC7"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1699,6 +1714,7 @@ Library {
 	  FontSize		  14
 	  SourceBlock		  "cdsAdcx8/ADC8"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1715,6 +1731,7 @@ Library {
 	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsAdcx9/ADC9"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  BusSelector
@@ -1753,6 +1770,7 @@ Library {
 	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsContec1616DIO/Subsystem"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -1769,6 +1787,7 @@ Library {
 	  LibraryVersion	  "1.3"
 	  SourceBlock		  "cdsCDO32/Subsystem"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  SubSystem
@@ -1780,13 +1799,8 @@ Library {
 	  BackgroundColor	  "lightBlue"
 	  AncestorBlock		  "CDS_PARTS2/IO_PARTS/Contec6464\nModules"
 	  LibraryVersion	  "*"
-	  MinAlgLoopOccurrences	  off
-	  PropExecContextOutsideSubsystem off
-	  RTWSystemCode		  "Auto"
-	  FunctionWithSeparateData off
-	  Opaque		  off
 	  RequestExecContextInheritance	off
-	  MaskHideContents	  off
+	  Variant		  off
 	  System {
 	    Name		    "Contec6464\nModules"
 	    Location		    [208, 44, 1083, 924]
@@ -2330,49 +2344,77 @@ Library {
 	    Annotation {
 	      SID		      "98:321"
 	      Name		      "CONTEC6464 Binary I/O Modules "
-	      Position		      [157, 21]
+	      Position		      [157, 21, 420, 41]
+	      InternalMargins	      [0, 0, 0, 0]
+	      FixedHeight	      off
+	      FixedWidth	      off
+	      ZOrder		      -1
 	      FontName		      "times"
 	      FontSize		      18
 	    }
 	    Annotation {
 	      SID		      "98:322"
 	      Name		      "Card 0 "
-	      Position		      [152, 111]
+	      Position		      [152, 111, 206, 131]
+	      InternalMargins	      [0, 0, 0, 0]
+	      FixedHeight	      off
+	      FixedWidth	      off
+	      ZOrder		      -2
 	      FontName		      "times"
 	      FontSize		      18
 	    }
 	    Annotation {
 	      SID		      "98:323"
 	      Name		      "Card 1 "
-	      Position		      [327, 111]
+	      Position		      [327, 111, 381, 131]
+	      InternalMargins	      [0, 0, 0, 0]
+	      FixedHeight	      off
+	      FixedWidth	      off
+	      ZOrder		      -3
 	      FontName		      "times"
 	      FontSize		      18
 	    }
 	    Annotation {
 	      SID		      "98:324"
 	      Name		      "Card 2 "
-	      Position		      [507, 111]
+	      Position		      [507, 111, 561, 131]
+	      InternalMargins	      [0, 0, 0, 0]
+	      FixedHeight	      off
+	      FixedWidth	      off
+	      ZOrder		      -4
 	      FontName		      "times"
 	      FontSize		      18
 	    }
 	    Annotation {
 	      SID		      "98:325"
 	      Name		      "User Application Parts *********************************"
-	      Position		      [262, 86]
+	      Position		      [262, 86, 728, 106]
+	      InternalMargins	      [0, 0, 0, 0]
+	      FixedHeight	      off
+	      FixedWidth	      off
+	      ZOrder		      -5
 	      FontName		      "times"
 	      FontSize		      18
 	    }
 	    Annotation {
 	      SID		      "98:326"
 	      Name		      "IOP Parts *********************************"
-	      Position		      [222, 361]
+	      Position		      [222, 361, 594, 381]
+	      InternalMargins	      [0, 0, 0, 0]
+	      FixedHeight	      off
+	      FixedWidth	      off
+	      ZOrder		      -6
 	      FontName		      "times"
 	      FontSize		      18
 	    }
 	    Annotation {
 	      SID		      "98:327"
 	      Name		      "Card 3 "
-	      Position		      [697, 111]
+	      Position		      [697, 111, 751, 131]
+	      InternalMargins	      [0, 0, 0, 0]
+	      FixedHeight	      off
+	      FixedWidth	      off
+	      ZOrder		      -7
 	      FontName		      "times"
 	      FontSize		      18
 	    }
@@ -2383,8 +2425,7 @@ Library {
 	  Name			  "DigitalIO"
 	  SID			  "99"
 	  Tag			  "cdsDio"
-	  Description		  "support for 8 bit input 8 bit output DIO PCI card\nACCESS I/O Products model DIO-24D               "
-	  " "
+	  Description		  "support for 8 bit input 8 bit output DIO PCI card\nACCESS I/O Products model DIO-24D                "
 	  Ports			  [1, 1]
 	  Position		  [50, 912, 115, 978]
 	  ZOrder		  -20
@@ -2394,6 +2435,7 @@ Library {
 	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsDio/Subsystem"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -2406,11 +2448,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag2"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -2424,11 +2467,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag3"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -2442,11 +2486,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag4"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -2460,11 +2505,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag5"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -2478,11 +2524,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag6"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -2496,11 +2543,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag7"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -2514,11 +2562,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag8"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -2532,11 +2581,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag9"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -2554,6 +2604,7 @@ Library {
 	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsIPCx/SignalName"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -2570,6 +2621,7 @@ Library {
 	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsIPCx/SignalName"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -2587,6 +2639,7 @@ Library {
 	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsRio/Subsystem"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -2604,6 +2657,7 @@ Library {
 	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsRio1/Subsystem"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -2620,39 +2674,60 @@ Library {
 	  LibraryVersion	  "1.1"
 	  SourceBlock		  "cdsIPCx/SignalName"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Annotation {
 	  SID			  "335"
 	  Name			  "Binary I/O Modules *******************************************************************"
-	  Position		  [397, 831]
+	  Position		  [397, 831, 1151, 851]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -1
 	  FontName		  "times"
 	  FontSize		  18
 	}
 	Annotation {
 	  SID			  "336"
 	  Name			  "Digital to Analog (DAC) Modules ********"
-	  Position		  [187, 316]
+	  Position		  [187, 316, 512, 336]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -2
 	  FontName		  "times"
 	  FontSize		  18
 	}
 	Annotation {
 	  SID			  "337"
 	  Name			  "Real-time Communications ********"
-	  Position		  [162, 566]
+	  Position		  [162, 566, 438, 586]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -3
 	  FontName		  "times"
 	  FontSize		  18
 	}
 	Annotation {
 	  SID			  "338"
 	  Name			  " aLIGO Real-time Code Generator - I/O Parts Library"
-	  Position		  [385, 20]
+	  Position		  [385, 20, 903, 46]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -4
 	  FontName		  "times"
 	  FontSize		  24
 	}
 	Annotation {
 	  SID			  "339"
 	  Name			  "Analog to Digial (ADC) Modules ***************************************************"
-	  Position		  [387, 66]
+	  Position		  [387, 66, 1095, 86]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -5
 	  FontName		  "times"
 	  FontSize		  18
 	}
@@ -2666,13 +2741,8 @@ Library {
       Position		      [366, 336, 411, 404]
       ZOrder		      -1
       DropShadow	      on
-      MinAlgLoopOccurrences   off
-      PropExecContextOutsideSubsystem off
-      RTWSystemCode	      "Auto"
-      FunctionWithSeparateData off
-      Opaque		      off
       RequestExecContextInheritance off
-      MaskHideContents	      off
+      Variant		      off
       System {
 	Name			"C Code"
 	Location		[857, 306, 1877, 1289]
@@ -2744,12 +2814,14 @@ Library {
 	  DisplayOption		  "bar"
 	}
 	Line {
+	  ZOrder		  1
 	  SrcBlock		  "Function Name"
 	  SrcPort		  1
 	  DstBlock		  "Demux"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  2
 	  SrcBlock		  "Mux"
 	  SrcPort		  1
 	  DstBlock		  "Function Name"
@@ -2767,13 +2839,8 @@ Library {
       DropShadow	      on
       AncestorBlock	      "CDS_PARTS/C Code"
       LibraryVersion	      "*"
-      MinAlgLoopOccurrences   off
-      PropExecContextOutsideSubsystem off
-      RTWSystemCode	      "Auto"
-      FunctionWithSeparateData off
-      Opaque		      off
       RequestExecContextInheritance off
-      MaskHideContents	      off
+      Variant		      off
       System {
 	Name			"DAQ Channels"
 	Location		[857, 306, 1877, 1289]
@@ -2812,9 +2879,13 @@ Library {
 	  SID			  "6:7"
 	  Name			  "#DAQ Channels\n\nONE_DAQ_CHANNEL 2048\nANOTHER_DAQ_CHANNEL 1024\nSCIENCE_FRAME_CHAN* 1024\nUINT32_CHAN ui"
 	  "nt32 2048\nDAQ_CHANNEL_AT_DEFAULT_RATE"
-	  Position		  [66, 131]
+	  Position		  [66, 131, 294, 231]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
 	  HorizontalAlignment	  "left"
 	  DropShadow		  on
+	  ZOrder		  -1
 	  FontSize		  14
 	}
       }
@@ -2830,11 +2901,12 @@ Library {
       BackgroundColor	      "yellow"
       ShowName		      off
       AttributesFormatString  "%<Description>"
-      LibraryVersion	      "1.281"
+      LibraryVersion	      "1.358"
       UserDataPersistent      on
       UserData		      "DataTag12"
       SourceBlock	      "simulink/Model-Wide\nUtilities/DocBlock"
       SourceType	      "DocBlock"
+      ContentPreviewEnabled   off
       DocumentType	      "Text"
     }
     Block {
@@ -2845,13 +2917,8 @@ Library {
       Position		      [462, 113, 508, 182]
       ZOrder		      -4
       DropShadow	      on
-      MinAlgLoopOccurrences   off
-      PropExecContextOutsideSubsystem off
-      RTWSystemCode	      "Auto"
-      FunctionWithSeparateData off
-      Opaque		      off
       RequestExecContextInheritance off
-      MaskHideContents	      off
+      Variant		      off
       System {
 	Name			"EpicsParts"
 	Location		[1419, 271, 2439, 1254]
@@ -3330,12 +3397,14 @@ Library {
 	  SourceType		  "SubSystem"
 	}
 	Line {
+	  ZOrder		  1
 	  SrcBlock		  "Ground"
 	  SrcPort		  1
 	  DstBlock		  "EpicsMomentary"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  2
 	  SrcBlock		  "Ground1"
 	  SrcPort		  1
 	  DstBlock		  "EpicsBinIn"
@@ -3344,14 +3413,22 @@ Library {
 	Annotation {
 	  SID			  "332"
 	  Name			  "RCG EPICS Parts Library ******************************"
-	  Position		  [287, 31]
+	  Position		  [287, 31, 752, 51]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -1
 	  FontName		  "times"
 	  FontSize		  18
 	}
 	Annotation {
 	  SID			  "333"
 	  Name			  "Custom For Guardian Scripts ***************************"
-	  Position		  [272, 481]
+	  Position		  [272, 481, 732, 501]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -2
 	  FontName		  "times"
 	  FontSize		  18
 	}
@@ -3367,13 +3444,8 @@ Library {
       DropShadow	      on
       FontSize		      12
       FontWeight	      "bold"
-      MinAlgLoopOccurrences   off
-      PropExecContextOutsideSubsystem off
-      RTWSystemCode	      "Auto"
-      FunctionWithSeparateData off
-      Opaque		      off
       RequestExecContextInheritance off
-      MaskHideContents	      off
+      Variant		      off
       System {
 	Name			"Filters/\nGDS"
 	Location		[1419, 271, 2439, 1254]
@@ -3762,7 +3834,11 @@ Library {
 	Annotation {
 	  SID			  "334"
 	  Name			  "aLIGO RCG - Filter Modules and GDS Parts"
-	  Position		  [197, 25]
+	  Position		  [197, 25, 524, 48]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -1
 	  FontName		  "Times New Roman"
 	  FontSize		  18
 	}
@@ -3776,13 +3852,8 @@ Library {
       Position		      [368, 220, 414, 289]
       ZOrder		      -7
       DropShadow	      on
-      MinAlgLoopOccurrences   off
-      PropExecContextOutsideSubsystem off
-      RTWSystemCode	      "Auto"
-      FunctionWithSeparateData off
-      Opaque		      off
       RequestExecContextInheritance off
-      MaskHideContents	      off
+      Variant		      off
       System {
 	Name			"MatrixParts"
 	Location		[857, 306, 1877, 1289]
@@ -4196,36 +4267,42 @@ Library {
 	  SourceType		  "SubSystem"
 	}
 	Line {
+	  ZOrder		  1
 	  SrcBlock		  "Mux"
 	  SrcPort		  1
 	  DstBlock		  "cdsMuxMatrix"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  2
 	  SrcBlock		  "cdsMuxMatrix"
 	  SrcPort		  1
 	  DstBlock		  "Demux"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  3
 	  SrcBlock		  "Mux1"
 	  SrcPort		  1
 	  DstBlock		  "cdsFiltMuxMatrix"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  4
 	  SrcBlock		  "cdsFiltMuxMatrix"
 	  SrcPort		  1
 	  DstBlock		  "Demux1"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  5
 	  SrcBlock		  "Mux2"
 	  SrcPort		  1
 	  DstBlock		  "RampMuxMatrix"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  6
 	  SrcBlock		  "RampMuxMatrix"
 	  SrcPort		  1
 	  DstBlock		  "Demux2"
@@ -4234,14 +4311,22 @@ Library {
 	Annotation {
 	  SID			  "340"
 	  Name			  " aLIGO Real-time Code Generator - Matrix Parts Library ***************"
-	  Position		  [310, 30]
+	  Position		  [310, 30, 864, 53]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -1
 	  FontName		  "Times New Roman"
 	  FontSize		  18
 	}
 	Annotation {
 	  SID			  "341"
 	  Name			  " Legacy Parts Built to Support HEPI Controls **************************"
-	  Position		  [325, 440]
+	  Position		  [325, 440, 894, 463]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -2
 	  FontName		  "Times New Roman"
 	  FontSize		  18
 	}
@@ -4255,17 +4340,12 @@ Library {
       Position		      [461, 221, 507, 290]
       ZOrder		      -8
       DropShadow	      on
-      MinAlgLoopOccurrences   off
-      PropExecContextOutsideSubsystem off
-      RTWSystemCode	      "Auto"
-      FunctionWithSeparateData off
-      Opaque		      off
       RequestExecContextInheritance off
-      MaskHideContents	      off
+      Variant		      off
       System {
 	Name			"Osc/Phase"
-	Location		[694, 249, 1730, 1296]
-	Open			on
+	Location		[694, 33, 1730, 1080]
+	Open			off
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
 	ScreenColor		"white"
@@ -4288,11 +4368,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag40"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -4306,11 +4387,12 @@ Library {
 	  BackgroundColor	  "magenta"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag41"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -4324,11 +4406,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag42"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -4342,11 +4425,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag43"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -4360,11 +4444,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag44"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -4378,11 +4463,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag45"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -4396,11 +4482,12 @@ Library {
 	  BackgroundColor	  "yellow"
 	  ShowName		  off
 	  AttributesFormatString  "%<Description>"
-	  LibraryVersion	  "1.281"
+	  LibraryVersion	  "1.358"
 	  UserDataPersistent	  on
 	  UserData		  "DataTag46"
 	  SourceBlock		  "simulink/Model-Wide\nUtilities/DocBlock"
 	  SourceType		  "DocBlock"
+	  ContentPreviewEnabled	  off
 	  DocumentType		  "Text"
 	}
 	Block {
@@ -4438,6 +4525,7 @@ Library {
 	  LibraryVersion	  "1.5"
 	  SourceBlock		  "cdsNoise/Subsystem"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -4453,6 +4541,7 @@ Library {
 	  LibraryVersion	  "1.10"
 	  SourceBlock		  "cdsOscFixedPhase/Subsystem"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -4469,6 +4558,7 @@ Library {
 	  LibraryVersion	  "1.6"
 	  SourceBlock		  "cdsOsc/Subsystem"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -4484,6 +4574,7 @@ Library {
 	  LibraryVersion	  "1.10"
 	  SourceBlock		  "cdsOscSetPhase/Subsystem"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -4500,6 +4591,7 @@ Library {
 	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsPhase/Subsystem"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -4516,6 +4608,7 @@ Library {
 	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsWfsPhase/Subsystem"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
@@ -4532,20 +4625,24 @@ Library {
 	  LibraryVersion	  "1.6"
 	  SourceBlock		  "cdsSatCount/Saturation Count Name"
 	  SourceType		  "SubSystem"
+	  ContentPreviewEnabled	  off
 	}
 	Line {
+	  ZOrder		  1
 	  SrcBlock		  "Ground"
 	  SrcPort		  1
 	  DstBlock		  "Oscillator Name"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  2
 	  SrcBlock		  "Ground1"
 	  SrcPort		  1
 	  DstBlock		  "Noise Generator"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  3
 	  SrcBlock		  "Ground2"
 	  SrcPort		  1
 	  DstBlock		  "Oscillator Fixed Phase Name"
@@ -4554,7 +4651,11 @@ Library {
 	Annotation {
 	  SID			  "342"
 	  Name			  "RCG OSC/Phase Parts Library"
-	  Position		  [182, 21]
+	  Position		  [182, 21, 406, 41]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -1
 	  FontName		  "times"
 	  FontSize		  18
 	}
@@ -4569,13 +4670,8 @@ Library {
       ZOrder		      -9
       DropShadow	      on
       LibraryVersion	      "1.216"
-      MinAlgLoopOccurrences   off
-      PropExecContextOutsideSubsystem off
-      RTWSystemCode	      "Auto"
-      FunctionWithSeparateData off
-      Opaque		      off
       RequestExecContextInheritance off
-      MaskHideContents	      off
+      Variant		      off
       System {
 	Name			"RT Links"
 	Location		[857, 306, 1877, 1289]
@@ -4695,13 +4791,8 @@ Library {
       Position		      [270, 336, 315, 404]
       ZOrder		      -10
       DropShadow	      on
-      MinAlgLoopOccurrences   off
-      PropExecContextOutsideSubsystem off
-      RTWSystemCode	      "Auto"
-      FunctionWithSeparateData off
-      Opaque		      off
       RequestExecContextInheritance off
-      MaskHideContents	      off
+      Variant		      off
       System {
 	Name			"WatchDogs"
 	Location		[1319, 176, 2347, 1191]
@@ -4974,13 +5065,8 @@ Library {
       Position		      [366, 112, 413, 182]
       ZOrder		      -11
       DropShadow	      on
-      MinAlgLoopOccurrences   off
-      PropExecContextOutsideSubsystem off
-      RTWSystemCode	      "Auto"
-      FunctionWithSeparateData off
-      Opaque		      off
       RequestExecContextInheritance off
-      MaskHideContents	      off
+      Variant		      off
       System {
 	Name			"simLinkParts"
 	Location		[694, 249, 1730, 1296]
@@ -5014,6 +5100,7 @@ Library {
 	  ShowName		  off
 	  Inputs		  "'signal1','signal2'"
 	  DisplayOption		  "bar"
+	  InheritFromInputs	  on
 	}
 	Block {
 	  BlockType		  BusSelector
@@ -5163,7 +5250,6 @@ Library {
 	  SID			  "187"
 	  Position		  [40, 540, 80, 570]
 	  ZOrder		  -14
-	  GotoTag		  "A"
 	}
 	Block {
 	  BlockType		  Ground
@@ -5289,13 +5375,21 @@ Library {
 	Annotation {
 	  SID			  "343"
 	  Name			  "MUXs"
-	  Position		  [185, 561]
+	  Position		  [185, 561, 244, 587]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -1
 	  FontSize		  24
 	}
 	Annotation {
 	  SID			  "344"
 	  Name			  "BUS CREATOR"
-	  Position		  [306, 563]
+	  Position		  [306, 563, 426, 583]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -2
 	  FontSize		  18
 	}
       }
@@ -5346,24 +5440,37 @@ Library {
       LibraryVersion	      "1.6"
       SourceBlock	      "cdsParameters/Subsystem"
       SourceType	      "SubSystem"
+      ContentPreviewEnabled   off
     }
     Annotation {
       SID		      "364"
       Name		      "Note: \nIn V2.8 and later:\nBIQUAD IIR filter algorithm set \nas default.\nshmem_daq=1 set as defau"
       "lt, so no\nlonger a required setting.\n"
-      Position		      [122, 333]
+      Position		      [122, 333, 322, 405]
+      InternalMargins	      [0, 0, 0, 0]
+      FixedHeight	      off
+      FixedWidth	      off
+      ZOrder		      -1
       FontWeight	      "bold"
     }
     Annotation {
       SID		      "345"
       Name		      "One cdsParameters block is\nrequired per User Model.\nPart is shown with the 6\nrequired fields. Ad"
       "ditional\noptions described in DOC block. "
-      Position		      [122, 121]
+      Position		      [122, 121, 316, 173]
+      InternalMargins	      [0, 0, 0, 0]
+      FixedHeight	      off
+      FixedWidth	      off
+      ZOrder		      -2
     }
     Annotation {
       SID		      "346"
-      Name		      "Matlab Parts Library for Use with aLIGO Real-time Code Generator - V3.0"
-      Position		      [330, 30]
+      Name		      "Matlab Parts Library for Use with aLIGO Real-time Code Generator - V3.3"
+      Position		      [330, 30, 876, 50]
+      InternalMargins	      [0, 0, 0, 0]
+      FixedHeight	      off
+      FixedWidth	      off
+      ZOrder		      -3
       FontName		      "times"
       FontSize		      18
     }
