@@ -53,11 +53,14 @@ int gsc20ao8Init(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
 
           dac20bitPtr->BCR |= GSAO_20BIT_RESET;
 
+	  timer = 6000;
           do{
-		// If I uncomment next line, then Autocal wait works, but 
-		// output limited to 9.75V.
-		// udelay(5000);
-          }while((dac20bitPtr->BCR & GSAO_20BIT_RESET) != 0);
+		udelay(1000);
+		timer -= 1;
+          }while(dac20bitPtr->BCR & GSAO_20BIT_RESET != 0 &&
+	  	 timer > 0 &&
+		 dac20bitPtr->PRIMARY_STATUS == 1);
+	  printk("DAC PSR after init = 0x%x and timer = %d\n",dac20bitPtr->PRIMARY_STATUS,timer);
 
           /// Enable 2s complement by clearing offset binary bit
           dac20bitPtr->BCR &= ~GSAO_20BIT_OFFSET_BINARY;
@@ -68,39 +71,37 @@ int gsc20ao8Init(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
           printk("DAC OUTPUT CONFIG = 0x%x\n",dac20bitPtr->OUTPUT_CONFIG);
 
           /// Enable 10 volt output range
-	  if(dacdev->subsystem_device == DAC_20BIT_SS_ID)
-		  dac20bitPtr->OUTPUT_CONFIG |= GSAO_20BIT_10VOLT_RANGE;
+	  dac20bitPtr->OUTPUT_CONFIG |= GSAO_20BIT_10VOLT_RANGE;
           // Set differential outputs
           dac20bitPtr->OUTPUT_CONFIG |= GSAO_20BIT_DIFF_OUTS;
-	  // If 20bit DAC, need to enable outputs.
-	  if(dacdev->subsystem_device == DAC_20BIT_SS_ID)
-          	dac20bitPtr->BCR |= GSAO_20BIT_OUTPUT_ENABLE;
+	  // Enable outputs.
+          dac20bitPtr->BCR |= GSAO_20BIT_OUTPUT_ENABLE;
+	  udelay(1000);
+	  // Set primary status to detect autocal
+	  printk("DAC PSR = 0x%x\n",dac20bitPtr->PRIMARY_STATUS);
+	  dac20bitPtr->PRIMARY_STATUS = 2;
+	   	udelay(1000);
+	  printk("DAC PSR after reset = 0x%x\n",dac20bitPtr->PRIMARY_STATUS);
 
 	  // Start Calibration
 	  dac20bitPtr->BCR |= GSAO_20BIT_AUTOCAL_SET;
-	  // Just sleep for 5 seconds.
-	  // Put in temporarily for 20bit DAC, as seems to return immediately from autocal.
-	  timer = 6600;
-          do{
-	   	udelay(1000);
-		timer -= 1;
-          }while(timer > 0);
-
 	  // Wait for autocal to complete
 	  timer = 0;
           do{
 	   	udelay(1000);
+	  	// printk("DAC PSR in autocal = 0x%x\n",dac20bitPtr->PRIMARY_STATUS);
 		timer += 1;
           }while((dac20bitPtr->BCR &  GSAO_20BIT_AUTOCAL_SET) != 0);
 
+	  printk("DAC after autocal PSR = 0x%x\n",dac20bitPtr->PRIMARY_STATUS);
 	  if(dac20bitPtr->BCR & GSAO_20BIT_AUTOCAL_PASS) 
 		  printk("DAC AUTOCAL SUCCESS in %d milliseconds \n",timer);
 	  else
 		  printk("DAC AUTOCAL FAILED in %d milliseconds \n",timer);
+	  printk("DAC PSR = 0x%x\n",dac20bitPtr->PRIMARY_STATUS);
 
 	  // If 20bit DAC, need to enable outputs.
-	  if(dacdev->subsystem_device == DAC_20BIT_SS_ID)
-          	dac20bitPtr->BCR |= GSAO_20BIT_OUTPUT_ENABLE;
+          dac20bitPtr->BCR |= GSAO_20BIT_OUTPUT_ENABLE;
           printk("DAC OUTPUT CONFIG after init = 0x%x with BCR = 0x%x\n",dac20bitPtr->OUTPUT_CONFIG, dac20bitPtr->BCR);
 
           pHardware->pci_dac[devNum] =

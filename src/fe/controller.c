@@ -775,7 +775,7 @@ udelay(1000);
 #ifndef NO_DAC_PRELOAD
 		for(jj=0;jj<cdsPciModules.dacCount;jj++)
 		{       
-			if(cdsPciModules.dacType[jj] == GSC_18AO8 || cdsPciModules.dacType[jj] == GSC_20AO8)
+			if(cdsPciModules.dacType[jj] == GSC_18AO8)
 			{       
 				dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 				for(ii=0;ii<GSAO_18BIT_PRELOAD;ii++) dac18bitPtr->OUTPUT_BUF = 0;
@@ -1975,7 +1975,6 @@ udelay(1000);
 		if(cdsPciModules.dacType[jj] == GSC_20AO8)
 		{
 			volatile GSA_20BIT_DAC_REG *dac20bitPtr;
-			// if (cycleNum == HKP_DAC_WD_CLK) dacWatchDog ^= 1;
 			dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
 			if(iopDacEnable && !dacChanErr[jj]) {
 				dac20bitPtr->digital_io_ports = (dacWatchDog | GSAO_20BIT_DIO_RW);
@@ -2047,7 +2046,7 @@ udelay(1000);
 			volatile GSA_20BIT_DAC_REG *dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
 			out_buf_size = dac20bitPtr->OUT_BUF_SIZE;
 			dacOutBufSize[jj] = out_buf_size;
-			if((out_buf_size < 8) || (out_buf_size > 24))
+			if((out_buf_size > 24))
 			{
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
 			    if(dacTimingErrorPending[jj]) dacTimingError = 1;
