@@ -153,7 +153,8 @@ Nds::readTocFrameFileArchive()
 	tstamps.push_back(ulong_pair(times, framedt));
 	break;
       default:
-	system_log(1, "scan(): `%s' is invalid filename -- skipped", direntp -> d_name);
+	//system_log(1, "scan(): `%s' is invalid filename -- skipped", direntp -> d_name);
+	break;
       }
     }
     (void) closedir (dirp);
@@ -279,7 +280,7 @@ Nds::readTocFrameFileArchive()
   } // data directories
   if (!daqd_net.finish())
     return false;
-  system_log(1, "time=%ld read=%d updated=%d missing=%d failed=%d",
+  system_log(5, "time=%ld read=%d updated=%d missing=%d failed=%d",
 	     time(0)-t_start, nfiles_read, nfiles_updated, nfiles_open_failed, nfiles_failed);
 
   return true;
