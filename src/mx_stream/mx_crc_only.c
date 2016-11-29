@@ -145,17 +145,13 @@ int myErrorSignal;
 //struct timeval start_time;
 char *dataBuff;
 unsigned int myCrc = 0;
-int mxStatBit[2];
 
 
 mx_set_error_handler(MX_ERRORS_RETURN);
-if(my_dcu == 0) {
-	 mxStatBit[0] = 1;
-	 mxStatBit[1] = 2;
-}else{
-	 mxStatBit[0] = 4;
-	 mxStatBit[1] = 8;
-}
+// Clear CRC on startup to avoid sigfault if models not running
+for (unsigned int i = 0; i < nsys; i++) 
+	for (unsigned int j = 0; j < 16; j++) 
+		shmIpcPtr[i]->bp[j].crc = 0;
 
 do {
 	int lastCycle = 0;
