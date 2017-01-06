@@ -581,13 +581,16 @@ double realtrigger;
 			 c = -1.0;
 		       else 
 			 c = -winXScaler[chMarked[chSelect]];
+#if 0
 		       if ( uniton[chMarked[j]] ) {
 			 for (i=fPoints; i<tPoints; i++ ) {
 			   fprintf(fptemp, "%2f\t%le\n", c, offset[chMarked[j]]+slope[chMarked[j]]*tempData[j][i] );
 			   c = c + 1.0/graphRate[chMarked[j]];
 			 }
 		       }
-		       else {
+		       else 
+#endif
+		       {
 			 for (i=fPoints; i<tPoints; i++ ) {
 			   fprintf(fptemp, "%2f\t%le\n", c, tempData[j][i] );
 			   c = c + 1.0/graphRate[chMarked[j]];
@@ -605,7 +608,11 @@ double realtrigger;
 			   }
 			   else
 			     result = fabs(result);
+#if 0
 			   fprintf(fptemp, "%2f\t%le\n", c, offset[chMarked[j]]+slope[chMarked[j]]*result );
+#else
+			   fprintf(fptemp, "%2f\t%le\n", c, result );
+#endif
 			   c = c + 1.0/graphRate[chMarked[j]];
 			 }
 			 break;
@@ -618,13 +625,21 @@ double realtrigger;
 			   }
 			   else
 			     result = log(fabs(result));
+#if 0
 			   fprintf(fptemp, "%2f\t%le\n", c, offset[chMarked[j]]+slope[chMarked[j]]*result );
+#else
+			   fprintf(fptemp, "%2f\t%le\n", c, result );
+#endif
 			   c = c + 1.0/graphRate[chMarked[j]];
 			 }
 			 break;
 		       default:
 			 for (i=fPoints; i<tPoints; i++ ) {
+#if 0
 			   fprintf(fptemp, "%2f\t%le\n", c, offset[chMarked[j]]+slope[chMarked[j]]*tempData[j][i] );
+#else
+			   fprintf(fptemp, "%2f\t%le\n", c, tempData[j][i] );
+#endif
 			   c = c + 1.0/graphRate[chMarked[j]];
 			 }
 			 break;
@@ -676,7 +691,11 @@ double realtrigger;
 		   if ( graphMethod == GMODEMULTI ) {
 		     if ( uniton[chMarked[j]] ) {
 		       for (i=0; i<16; i++ ) {
+#if 0
 			 fprintf(fptemp, "%2f\t%le\n", i-15.5, offset[chMarked[j]]+slope[chMarked[j]]*tempData[j][i] );
+#else
+			 fprintf(fptemp, "%2f\t%le\n", i-15.5, result );
+#endif
 		       }
 		     }
 		     else {
@@ -696,7 +715,11 @@ double realtrigger;
 			 }
 			 else
 			   result = fabs(result);
+#if 0
 			 fprintf(fptemp, "%2f\t%le\n", i-15.5, offset[chMarked[j]]+slope[chMarked[j]]*result );
+#else
+			 fprintf(fptemp, "%2f\t%le\n", i-15.5, result );
+#endif
 		       }
 		       break;
 		     case 2: 
@@ -708,12 +731,20 @@ double realtrigger;
 			 }
 			 else
 			   result = log(fabs(result));
+#if 0
 			 fprintf(fptemp, "%2f\t%le\n", i-15.5, offset[chMarked[j]]+slope[chMarked[j]]*result );
+#else
+			 fprintf(fptemp, "%2f\t%le\n", i-15.5, result );
+#endif
 		       }
 		       break;
 		     default: 
 		       for (i=0; i<16; i++ ) 
+#if 0
 			 fprintf(fptemp, "%2f\t%le\n", i-15.5, offset[chMarked[j]]+slope[chMarked[j]]*tempData[j][i] );
+#else
+			 fprintf(fptemp, "%2f\t%le\n", i-15.5, tempData[j][i] );
+#endif
 		       break;
 		     }
 		   }
@@ -1780,7 +1811,7 @@ int i;
 	      else
 		 GracePrintf( "yaxis ticklabel prec 0" );
 	      if (uniton[chMarked[i]]
-		  && strcasecmp(chUnit[chMarked[i]], "none")) 
+		  && strcasecmp(chUnit[chMarked[i]], "none") && strcasecmp(chUnit[chMarked[i]], "undef")) 
 		GracePrintf( "yaxis label \"%s\" ", chUnit[chMarked[i]] );
  	      else
 		GracePrintf( "yaxis label \"\" ");
@@ -1949,7 +1980,7 @@ int i;
 	   else
 	      GracePrintf( "yaxis ticklabel prec 0" );
 	   if (uniton[chSelect]
-	       && strcasecmp(chUnit[chMarked[chSelect]], "none"))
+	       && strcasecmp(chUnit[chMarked[chSelect]], "none") && strcasecmp(chUnit[chMarked[i]], "undef"))
 	     GracePrintf( "yaxis label \"%s\" ", chUnit[chSelect] );
 	   else
 	     GracePrintf( "yaxis label \"\" ");

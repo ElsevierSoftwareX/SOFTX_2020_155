@@ -606,13 +606,17 @@ read_block ()
             fprintf (stderr, " read_block() - bytercv = %d, line %d\n", bytercv, __LINE__);	/* JCB */
          for (j = 0; j < windowNum; j++)
          {
+#if 0
             if (strcmp (chUnit[j], "no_conv.") == 0)
             {
+#endif
                slope[j] = 1.0;
                offset[j] = 0.0;
+#if 0
             }
             else
                (void) DataGetChSlope (chName[j], &slope[j], &offset[j], &chstatus[j]);
+#endif
          }
       }
       else if (bytercv < 0)
@@ -639,18 +643,22 @@ read_block ()
          {
             for (j = 0; j < windowNum; j++)
             {
+#if 0
                if (strcmp (chUnit[j], "no_conv.") == 0)
                {
                   if (debug != 0)
                      fprintf (stderr, "  read_block() - assigning slope = 1.0, offset = 0.0\n");	/* JCB */
+#endif
                   slope[j] = 1.0;
                   offset[j] = 0.0;
+#if 0
                }
                else
                {
                   (void) DataGetChSlope (chName[j], &slope[j], &offset[j], &chstatus[j]);
                   fprintf (stderr, "  read_block() - slope = %f, offset = %f\n", slope[j], offset[j]);
                }
+#endif
             }
          }
          DataTimestamp (timestring);

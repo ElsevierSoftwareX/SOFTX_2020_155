@@ -30,6 +30,8 @@
 #define XSHIFT          0.02
 #define YSHIFT          0.01
 
+static int debug = 0; /* JCB */
+
 struct ftm {
         int year;
         int month;
@@ -94,6 +96,8 @@ int     j, sum;
 char    rdata[32];
 
 FILE   *fd;
+
+	if (debug) fprintf(stderr, "frameMemReadXMGR - main()\n") ;
 
 	sizeDouble = sizeof(double);
 	sizeDTrend = sizeof(struct DTrend);
@@ -295,6 +299,7 @@ FILE   *fd;
 
         switch ( playMode ) {
           case PLAYDATA: 
+	      if (debug) fprintf(stderr, "main() - case PLAYDATA\n") ;
 	      if ( strcmp(starttime, "0-0-0-0-0-0") == 0 ) {
 		 fprintf ( stderr, "LongPlayBack Error: no starting time\n"  );
 		 exit(0);
@@ -308,6 +313,7 @@ FILE   *fd;
 	      }
               break;
           case PLAYTREND: 
+	      if (debug) fprintf(stderr, "main() - case PLAYTREND\n") ;
 	      processID = DataWriteTrend(starttime, duration, 1, isgps);
 	      if ( copies < 0 )
 		fprintf ( stderr, "Request second-trend: time %s, duration %d\n", starttime, duration );
@@ -315,6 +321,7 @@ FILE   *fd;
 		fprintf ( stderr, "Request second-trend Ch.%d: time %s, duration %d\n", chNum[0], starttime, duration );
               break;
           case PLAYTREND60: 
+	      if (debug) fprintf(stderr, "main() - case PLAYTREND60\n") ;
 	      processID = DataWriteTrend(starttime, duration, 60, isgps);
 	      if ( copies < 0 )
 		fprintf ( stderr, "Request minute-trend: time %s, duration %d\n", starttime, duration );
