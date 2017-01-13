@@ -145,6 +145,8 @@ sub parseParams {
 				$::flipSignals = $spp[1];
 			} elsif ($spp[0] eq "edcu") { 
 				$::edcu = $spp[1];
+			} elsif ($spp[0] eq "sdf") { 
+				$::globalsdf = $spp[1];
 			} elsif ($spp[0] eq "casdf") {
 				$::casdf = $spp[1];
 			} elsif ($spp[0] eq "biquad") { 
