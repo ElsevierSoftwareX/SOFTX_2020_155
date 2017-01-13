@@ -124,6 +124,7 @@ $virtualiop = 0;
 $rfm_via_pcie = 1;
 $edcu = 0;
 $casdf = 0;
+$globalsdf = 0;
 $pciNet = -1;
 $shmem_daq = 0; # Do not use shared memory DAQ connection
 $no_sync = 0; # Sync up to 1PPS by default
@@ -1193,6 +1194,16 @@ print EPICS "DUMMY FEC\_$dcuId\_DAQ_BYTE_COUNT int ao 0 field(HOPR,\"4000\") fie
 print EPICS "DUMMY FEC\_$dcuId\_EDCU_CHAN_NOCON int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
 print EPICS "DUMMY FEC\_$dcuId\_EDCU_CHAN_CONN int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
 print EPICS "DUMMY FEC\_$dcuId\_EDCU_CHAN_CNT int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
+}elsif ($globalsdf) {
+print OUTH "\tint timeDiag;\n";
+print EPICS "DUMMY FEC\_$dcuId\_TIME_DIAG int ai 0\n";
+print OUTH "\tint datadump;\n";
+print EPICS "DUMMY FEC\_$dcuId\_GSDF_DUMP_DATA int ao 0\n";
+print OUTH "\tint daqByteCnt;\n";
+print EPICS "DUMMY FEC\_$dcuId\_DAQ_BYTE_COUNT int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"4000\") field(HHSV,\"MINOR\")\n";
+print EPICS "DUMMY FEC\_$dcuId\_GSDF_CHAN_NOCON int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
+print EPICS "DUMMY FEC\_$dcuId\_GSDF_CHAN_CONN int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
+print EPICS "DUMMY FEC\_$dcuId\_GSDF_CHAN_CNT int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
 }elsif ($casdf) {
 print OUTH "\tint timeDiag;\n";
 print EPICS "DUMMY FEC\_$dcuId\_TIME_DIAG int ai 0\n";
@@ -2308,6 +2319,8 @@ sub createEpicsMakefile {
 	print OUTME "\n";
 	if ($edcu) {
 	print OUTME "SRC += $rcg_src_dir/src/epics/seq/edcu.c\n";
+	}elsif ($globalsdf) {
+	print OUTME "SRC += $rcg_src_dir/src/epics/seq/sdf_monitor.c\n";
 	} else {
 	print OUTME "SRC += $rcg_src_dir/src/epics/seq/main.c\n";
 	}
@@ -2351,6 +2364,10 @@ sub createEpicsMakefile {
 	print OUTME "_CODE\n";
 	print OUTME "EXTRA_CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
 	if ($edcu) {
+	  print OUTME "EXTRA_CFLAGS += -DEDCU=1\n";
+	  print OUTME "EXTRA_CFLAGS += -DNO_DAQ_IN_SKELETON=1\n";
+	}
+	if ($globalsdf) {
 	  print OUTME "EXTRA_CFLAGS += -DEDCU=1\n";
 	  print OUTME "EXTRA_CFLAGS += -DNO_DAQ_IN_SKELETON=1\n";
 	}
