@@ -241,10 +241,12 @@ sub frontEndCode {
            $calcExp .= "ipcInfo[$index]\.errTotal;\n";
 	   $calcExp .= "\tpLocalEpics->$::systemName\.$ss\_PS = 0;\n";
 	   $calcExp .= "} \n";
-	   $calcExp .= "if(!cycle && pLocalEpics->epicsInput.ipcDiagReset) { \n";
+	   $calcExp .= "if(!cycle && !ipcInfo[$index]\.errTotal) { \n";
 	   $calcExp .= "\t pLocalEpics->$::systemName\.$ss\_PS = 1;\n";
-	   $calcExp .= "\t pLocalEpics->$::systemName\.$ss\_ET = 0;\n";
 	   $calcExp .= "\t pLocalEpics->$::systemName\.$ss\_ER = 0;\n";
+	   $calcExp .= "} \n";
+	   $calcExp .= "if(!cycle && pLocalEpics->epicsInput.ipcDiagReset) { \n";
+	   $calcExp .= "\t pLocalEpics->$::systemName\.$ss\_ET = 0;\n";
 	   $calcExp .= "} \n";
         }
         else {
