@@ -1785,7 +1785,7 @@ udelay(1000);
         {
 	  pLocalEpics->epicsOutput.userTime = usrHoldTime;
 	  pLocalEpics->epicsOutput.ipcStat = ipcErrBits;
-	  if(ipcErrBits) feStatus |= FE_ERROR_IPC;
+	  if(ipcErrBits & 0xf) feStatus |= FE_ERROR_IPC;
 	  // Create FB status word for return to EPICS
 	  mxStat = 0;
 	  mxDiagR = daqPtr->status;

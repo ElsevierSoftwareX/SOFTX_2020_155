@@ -263,8 +263,32 @@ sub createGdsMedm
 	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_IPC_STATUS.adl";
         $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"RT NET STAT");
 	# Add IPC Status Monitor
-	$xpos = 314; $ypos = 119; $width = 40; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_IPC_STAT","0","3",$ecolors{red},$ecolors{green});
+	$xpos = 310; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "(a&1)";
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{red},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
+	$xpos = 322; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "(a&2)";
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{red},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
+	$xpos = 334; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "(a&4)";
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{red},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
+	$xpos = 346; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "(a&8)";
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{red},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
+
+	$xpos = 310; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "!(a&1) && (a&16)";
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{warning},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
+	$xpos = 322; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "!(a&2) && (a&32)";
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{warning},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
+	$xpos = 334; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "!(a&4) && (a&64)";
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{warning},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
+	$xpos = 346; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "!(a&8) && (a&128)";
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{warning},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
+
+	$xpos = 310; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "!(a&1) && !(a&16)";
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{green},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
+	$xpos = 322; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "!(a&2) && !(a&32)";
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{green},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
+	$xpos = 334; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "!(a&4) && !(a&64)";
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{green},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
+	$xpos = 346; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "!(a&8) && !(a&128)";
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{green},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
 
 
 	# Add Coeff Reload

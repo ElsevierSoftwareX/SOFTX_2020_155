@@ -23,7 +23,7 @@
 #include <asm/cacheflush.h>
 
 #ifdef COMMDATA_INLINE
-#  define INLINE inline
+#  define INLINE static inline
 #else
 #  define INLINE
 #endif
@@ -350,13 +350,29 @@ double tmp;			// Temp location for data for checking NaN
 		}
 	   }
 	   // Send error per second output
-	   if(cycle == 0)
-	   {
-		ipcInfo[ii].errTotal = ipcInfo[ii].errFlag;
-		if (ipcInfo[ii].errFlag) ipcErrBits |= 1 << (ipcInfo[ii].netType);
-		ipcInfo[ii].errFlag = 0;
-	   }
+	   //if(cycle == 0)
+	   //{
+		// if (ipcInfo[ii].errFlag) ipcErrBits |= 1 << (ipcInfo[ii].netType);
+		// else ipcErrBits &= ~(1 << (ipcInfo[ii].netType));
+		// ipcInfo[ii].errFlag = 0;
+	   // }
         }
+  }
+  if(cycle == 0)
+  {
+  	  ipcErrBits = ipcErrBits & 0xf0;
+	  for(ii=0;ii<connects;ii++)
+	  {
+		if(ipcInfo[ii].mode == IRCV) // Zero = Rcv and One = Send
+		{
+			ipcInfo[ii].errTotal = ipcInfo[ii].errFlag;
+			if (ipcInfo[ii].errFlag) {
+				ipcErrBits |= 1 << (ipcInfo[ii].netType);
+				ipcErrBits |= 16 << (ipcInfo[ii].netType);;
+			}
+			ipcInfo[ii].errFlag = 0;
+		}
+	   }
   }
 }
 INLINE void commData3InitSwitch(
