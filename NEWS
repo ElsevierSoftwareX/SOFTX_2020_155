@@ -2,6 +2,9 @@
 ==================================================================================================
 Changes for X.X
 ==================================================================================================
+- Added auto generation of safe.snap files for models built for the first time.
+- Changed IPC error reporting, as requested in Bugzilla 793.
+- Added support for Dolphin PCIe network Gen 2 hardware.
 - Add ability to inter-connect PCIe (Dolphin) switches between corner and end stations.
 	- Deletes need for GeFanuc RFM cards. However, option still remains to use them.
 	- Requires 2 separate computers to act as switches between Dolphin fabrics
