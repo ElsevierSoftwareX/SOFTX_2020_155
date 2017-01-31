@@ -72,6 +72,11 @@ medm_target = os.path.join('/opt/rtcds',site,ifo.lower(),'medm',model_name)
 cds_medm_path = '/'.join(['/opt/rtcds',site,ifo.lower(),'medm/templates/']) 
 cds_scripts_path = '/'.join(['/opt/rtcds',site,ifo.lower(),'/scripts/post_build/'])
 
+tmp = model_name + 'epics/burt'
+epics_sdf_file = '/'.join(['/opt/rtcds',site,ifo.lower(),'target',model_name,tmp,'safe.snap'])
+tmp = model_name + 'epics'
+epics_burt_file = '/'.join(['/opt/rtcds',site,ifo.lower(),'target',model_name,tmp,'autoBurt.req'])
+
 #Try to update default paths with actual environment variables
 
 try:
@@ -455,3 +460,36 @@ model_params = find_cdsParam(root_block)
 
 #Do something fancy with top names now
 read_tree(root_block,(model_name[2:5].upper(),))
+print epics_sdf_file
+print epics_burt_file
+if os.path.isfile(epics_sdf_file):
+	print epics_sdf_file,' is file '
+else:
+	print 'Cannot find ',epics_sdf_file
+	f = open(epics_burt_file,'r')
+	sdf = open(epics_sdf_file,'w')
+	for line in f:
+		if '.HSV' in line or '.LSV' in line or '.HIGH' in line or '.LOW' in line or '.OSV' in line or '.ZSV' in line:
+			continue
+		word = line.split()
+		if word[0] == 'RO':
+			continue
+		elif '_SW1S' in word[0]:
+			tmp = word[0] + ' 1 4.000000000000000e+00 0xffffffff \n'  
+			sdf.write(tmp)
+		elif '_SW2S' in word[0]:
+			tmp = word[0] + ' 1 1.536000000000000e+03 0xffffffff \n'  
+			sdf.write(tmp)
+		elif '_BURT_RESTORE' in word[0]:
+			tmp = word[0] + ' 1 1.000000000000000e+00 1 \n'  
+			sdf.write(tmp)
+		elif '_DACDT_ENABLE' in word[0]:
+			tmp = word[0] + ' 1 OFF 1 \n'  
+			sdf.write(tmp)
+		else:
+			tmp = word[0] + ' 1 1.000000000000000e+00 1 \n'  
+			sdf.write(tmp)
+	f.close()
+	sdf.close()
+
+
