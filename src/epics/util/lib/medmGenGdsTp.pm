@@ -423,6 +423,14 @@ sub createGdsMedm
 			} else {
 				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$b1width,$bheight,"$site\:FEC-$dcuid\_DAC_STAT_$ii","1","2",$ecolors{green},$ecolors{red});
 			}
+		} elsif($dactype[$ii] eq "GSC_20AO8" ) {
+			$medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{black},$ecolors{ltblue},"D$::dacCardNum[$ii]");
+			if($adcMaster == 1)
+			{
+				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$bwidth,$bheight,"$site\:FEC-$dcuid\_DAC_STAT_$ii","0","3",$ecolors{green},$ecolors{red});
+			} else {
+				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$b1width,$bheight,"$site\:FEC-$dcuid\_DAC_STAT_$ii","1","2",$ecolors{green},$ecolors{red});
+			}
 		} else {
 			$medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"D$::dacCardNum[$ii]");
 			if($adcMaster == 1)
