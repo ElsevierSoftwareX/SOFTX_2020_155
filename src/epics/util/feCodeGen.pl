@@ -19,6 +19,7 @@ require "lib/Switch.pm";
 require "lib/Gain.pm";
 require "lib/Abs.pm";
 require "lib/MATH.pm";
+require "lib/Dac20.pm";
 
 #// \b REQUIRED \b ARGUMENTS: \n
 #//	- Model file name with .mdl extension \n
@@ -1412,12 +1413,15 @@ for($ii=0;$ii<$partCnt;$ii++)
 		for (0 .. $dacCnt-1) {
 			if($dacType[$_] eq "GSC_16AO16") {
 				$dac16Cnt ++;
+			}elsif($dacType[$_] eq "GSC_20AO8") {
+			        $dac20Cnt ++;
 			} else {
 				$dac18Cnt ++;
 			}
 		}
 		print OUTH "\#define TARGET_DAC16_COUNT $dac16Cnt\n";
 		print OUTH "\#define TARGET_DAC18_COUNT $dac18Cnt\n";
+		print OUTH "\#define TARGET_DAC20_COUNT $dac20Cnt\n";
 	} else {
 		if($virtualiop) {
 			print OUTH "\#define TARGET_ADC_COUNT 0\n";
@@ -1426,6 +1430,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 		}
 		print OUTH "\#define TARGET_DAC16_COUNT 0\n";
 		print OUTH "\#define TARGET_DAC18_COUNT 0\n";
+		print OUTH "\#define TARGET_DAC20_COUNT 0\n";
 	}
 	print OUTH "\#define TARGET_DAQ_FLAG $no_daq\n";
 	print OUTH "\#endif\n";
@@ -2147,9 +2152,11 @@ for($ii=0;$ii<$adcCnt;$ii++)
 for($ii=0;$ii<$dacCnt;$ii++)
 {
    if ($dacType[$ii] eq "GSC_16AO16") {
-   ("CDS::Dac::createDac16Medm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii);
+      ("CDS::Dac::createDac16Medm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii);
+   } elsif ($dacType[$ii] eq "GSC_20AO8") {
+      ("CDS::Dac20::createDac20Medm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii);
    } else {
-   ("CDS::Dac18::createDac18Medm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii);
+      ("CDS::Dac18::createDac18Medm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii);
    }
 }
 
