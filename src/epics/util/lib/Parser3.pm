@@ -62,8 +62,11 @@ sub sortDacs {
                 my $w = 0;
                 if ($::dacType[$_] eq "GSC_18AO8") {
                         $w = 1;
-                } elsif ($::dacType[$_] eq "GSC_16AO16") {
+                } elsif ($::dacType[$_] eq "GSC_20AO8") {
+			print "Found 20 bit DAC \n";
                         $w = 100;
+                } elsif ($::dacType[$_] eq "GSC_16AO16") {
+                        $w = 200;
                 } else {
                         die "Unsupported DAC board type " . $::dacType[$_] ;
                 }
@@ -95,11 +98,12 @@ sub sortDacs {
                         }
                 }}
 
-		#print "DAC: moving " . $_ . " to " . $i . "\n";
+		print "DAC: moving " . $_ . " to " . $i . "\n";
                 $::dacPartNum[$i] = $dacPartNumSave[$_];
                 $::dacType[$i] = $dacTypeSave[$_];
                 $::dacNum[$i] = $dacNumSave[$_];
                 $::card2array[$::dacPartNum[$i]] = $i;
+		print "\t" .$::dacPartNum[$i] . "\t" . $::dacType[$i] . "\t" . $::card2array[$::dacPartNum[$i]] . "\n";
         }
 	return 1;
 }
@@ -273,7 +277,8 @@ sub process_line {
           $::partInput[$part_num][$dst_port - 1] = $src;
           $::partInputPort[$part_num][$dst_port - 1] = $src_port - 1;
 	  if ($::partType[$part_num] eq "Dac") { $::partInCnt[$part_num] = 16; }
-	  elsif ($::partType[$part_num] eq "Dac18") { $::partInCnt[$part_num] = 8; }  # ===  MA-2011  ===
+	  elsif ($::partType[$part_num] eq "Dac18") { $::partInCnt[$part_num] = 8; }
+	  elsif ($::partType[$part_num] eq "Dac20") { $::partInCnt[$part_num] = 8; }
 	  else { $::partInCnt[$part_num]++; }
 	} else {
 	  # This line connected to a subsystem
@@ -682,9 +687,12 @@ sub node_processing {
 		if ($part_name eq "Dac") {
         	  $::partType[$::partCnt] = CDS::Dac::initDac($node);
 		}
-		if ($part_name eq "Dac18") {                               # ===  MA-2011  ===
-        	  $::partType[$::partCnt] = CDS::Dac18::initDac($node);    # ===  MA-2011  ===
-		}                                                          # ===  MA-2011  ===
+		if ($part_name eq "Dac18") {                              
+        	  $::partType[$::partCnt] = CDS::Dac18::initDac($node); 
+		}                                                     
+		if ($part_name eq "Dac20") {                       
+        	  $::partType[$::partCnt] = CDS::Dac20::initDac($node);   
+		}                                                       
 		if ($part_name eq "Contec1616DIO") {
         	  $::partType[$::partCnt] = CDS::Contec1616DIO::initCDIO1616($node);
                   if ($::boCnt > $::maxDioMod) {
@@ -1547,9 +1555,10 @@ sub process {
   my @dac_card_nums;
 
   foreach (0 ... $::partCnt) {
+  	#if ($::partType[$_] eq "Dac" || $::partType[$_] eq "Dac18" || $::partType[$_] eq "Dac20") {
   	if ($::partType[$_] eq "Dac" || $::partType[$_] eq "Dac18") {
 		my $card_num = $::dacNum[$::card2array[$_]];
-		#print "Dac ", $::xpartName[$_], " ", $card_num, "\n";
+		print "Dac ", $::xpartName[$_], " ", $card_num, " ", $::partType[$_], "\n";
 		push @dac_card_nums, $card_num;
 
 	} elsif ($::partType[$_] eq "Adc") {
@@ -1560,6 +1569,7 @@ sub process {
 		push @adc_names, $an;
 	}
   }
+  print "DAC card numbs = @dac_card_nums \n";
   # Check that card numbers are unique
   my %hash   = map { $_, 1 } @dac_card_nums;
   my @unique = keys %hash;
@@ -1583,7 +1593,7 @@ sub process {
   # :TODO: fix main script to handle ADC parts in subsystems
   foreach (0 ... $::partCnt) {
     #if ($::partType[$_] eq "BUSS" || $::partType[$_] eq "BUSC" || $::partType[$_] eq "Dac") {
-    if ($::partType[$_] eq "Dac" || $::partType[$_] eq "Dac18") {                        # ===  MA-2011  +++
+    if ($::partType[$_] eq "Dac" || $::partType[$_] eq "Dac18" || $::partType[$_] eq "Dac20") {  
       if ($::partSubName[$_] ne "") {
 	die "All ADCs and DACs must be on the top level in the model";
       }
