@@ -2,6 +2,7 @@
 ==================================================================================================
 Changes for X.X
 ==================================================================================================
+- Added support for General Standards 20AO8 DAC module, as was done for branch-3.3.
 - Added auto generation of safe.snap files for models built for the first time.
 - Changed IPC error reporting, as requested in Bugzilla 793.
 - Added support for Dolphin PCIe network Gen 2 hardware.
