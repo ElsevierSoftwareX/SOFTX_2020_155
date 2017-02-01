@@ -463,9 +463,9 @@ read_tree(root_block,(model_name[2:5].upper(),))
 print epics_sdf_file
 print epics_burt_file
 if os.path.isfile(epics_sdf_file):
-	print epics_sdf_file,' is file '
+	print 'safe.snap exists '
 else:
-	print 'Cannot find ',epics_sdf_file
+	print 'Creating safe.snap file'
 	f = open(epics_burt_file,'r')
 	sdf = open(epics_sdf_file,'w')
 	for line in f:
