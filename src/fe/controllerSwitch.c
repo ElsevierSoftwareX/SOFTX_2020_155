@@ -11,7 +11,7 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-///	@file controller.c
+///	@file controllerSwitch.c
 ///	@brief Main scheduler program for compiled real-time kernal object. \n
 /// 	@detail More information can be found in the following DCC document:
 ///<	<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">T0900607 CDS RT Sequencer Software</a>
@@ -219,79 +219,26 @@ void *fe_start(void *arg)
   int longestWrite2 = 0;
   int tempClock[4];
   int ii,jj,kk,ll,mm;			// Dummy loop counter variables
-  static int clock1Min = 0;		///  @param clockMin Minute counter (Not Used??)
   static int cpuClock[CPU_TIMER_CNT];	///  @param cpuClock[] Code timing diag variables
-  static int chanHop = 0;		/// @param chanHop Adc channel hopping status
 
-  int adcData[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];	/// @param adcData[][]  ADC raw data
-  int adcChanErr[MAX_ADC_MODULES];
   int adcWait = 0;
-  int adcOF[MAX_ADC_MODULES];		/// @param adcOF[]  ADC overrange counters
 
-  // int dacChanErr[MAX_DAC_MODULES];
-  int dacOF[MAX_DAC_MODULES];		/// @param dacOF[]  DAC overrange counters
   static int dacWriteEnable = 0;	/// @param dacWriteEnable  No DAC outputs until >4 times through code
   					///< Code runs longer for first few cycles on startup as it settles in,
-					///< so this helps prevent long cycles during that time.
-  int limit = OVERFLOW_LIMIT_16BIT;      /// @param limit ADC/DAC overflow test value
-  int mask = GSAI_DATA_MASK;            /// @param mask Bit mask for ADC/DAC read/writes
-  int num_outs = MAX_DAC_CHN_PER_MOD;   /// @param num_outs Number of DAC channels variable
-  volatile int *packedData;		/// @param *packedData Pointer to ADC PCI data space
-  int wtmin,wtmax;			/// @param wtmin Time window for startup on IRIG-B
   int dacEnable = 0;
   int pBits[9] = {1,2,4,8,16,32,64,128,256};	/// @param pBits[] Lookup table for quick power of 2 calcs
-  int sync21ppsCycles = 0;		/// @param sync32ppsCycles Number of attempts to sync to 1PPS
-  int dkiTrip = 0;
   RFM_FE_COMMS *pEpicsComms;		/// @param *pEpicsComms Pointer to EPICS shared memory space
   int timeHoldMax = 0;			/// @param timeHoldMax Max code cycle time since last diag reset
-  int myGmError2 = 0;			/// @param myGmError2 Myrinet error variable
   int status;				/// @param status Typical function return value
-  float onePps;				/// @param onePps Value of 1PPS signal, if used, for diagnostics
-  int onePpsHi = 0;			/// @param onePpsHi One PPS diagnostic check
-  int onePpsTime = 0;			/// @param onePpsTime One PPS diagnostic check
-#ifdef DIAG_TEST
-  float onePpsTest;			/// @param onePpsTest Value of 1PPS signal, if used, for diagnostics
-  int onePpsHiTest[10];			/// @param onePpsHiTest[] One PPS diagnostic check
-  int onePpsTimeTest[10];		/// @param onePpsTimeTest[] One PPS diagnostic check
-#endif
   int dcuId;				/// @param dcuId DAQ ID number for this process
   static int missedCycle = 0;		/// @param missedCycle Incremented error counter when too many values in ADC FIFO
   int diagWord = 0;			/// @param diagWord Code diagnostic bit pattern returned to EPICS
   int system = 0;
-  int sampleCount = 1;			/// @param sampleCount Number of ADC samples to take per code cycle
-  int sync21pps = 0;			/// @param sync21pps Code startup sync to 1PPS flag
   int syncSource = SYNC_SRC_NONE;	/// @param syncSource Code startup synchronization source
-  int mxStat = 0;			/// @param mxStat Net diags when myrinet express is used
-  int mxDiag = 0;
-  int mxDiagR = 0;
-// ****** Share data
-  int ioClockDac = DAC_PRELOAD_CNT;
-  int ioMemCntr = 0;
-  int ioMemCntrDac = DAC_PRELOAD_CNT;
-  double dac_in =  0.0;			/// @param dac_in DAC value after upsample filtering
-  int dac_out = 0;			/// @param dac_out Integer value sent to DAC FIFO
 
   int feStatus = 0;
 
   static unsigned int clk, clk1;			// Used only when run on timer enabled (test mode)
-
-  static float duotone[IOP_IO_RATE];		// Duotone timing diagnostic variables
-  static float duotoneDac[IOP_IO_RATE];
-  float duotoneTimeDac;
-  float duotoneTime;
-  static float duotoneTotal = 0.0;
-  static float duotoneMean = 0.0;
-  static float duotoneTotalDac = 0.0;
-  static float duotoneMeanDac = 0.0;
-  static int dacDuoEnable = 0;
-  static int dacTimingError = 0;
-  static int dacTimingErrorPending[MAX_DAC_MODULES];
-
-  volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
-  volatile GSC_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
-  unsigned int usec = 0;
-  unsigned int offset = 0;
-
 
   int cnt = 0;
   unsigned long cpc;
@@ -346,8 +293,6 @@ void *fe_start(void *arg)
   memset(proc_futures, 0, sizeof(proc_futures));
 
 /// \> Init code synchronization source.
-  // Look for DIO card or IRIG-B Card
-  // if Contec 1616 BIO present, TDS slave will be used for timing.
   syncSource = SYNC_SRC_1PPS;
 
 printf("Sync source = %d\n",syncSource);
@@ -446,7 +391,6 @@ udelay(1000);
   printf("*     Running on timer!       *\n");
   printf("*******************************\n");
 
-  onePpsTime = cycleNum;
   timeSec = current_time() -1;
 
   rdtscl(adcTime);
@@ -471,23 +415,15 @@ udelay(1000);
 	  	// pLocalEpics->epicsOutput.awgStat = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
 		// if(pLocalEpics->epicsOutput.awgStat) feStatus |= FE_ERROR_AWG;
 		  /// - ---- Check if DAC outputs are enabled, report error.
-		if(!iopDacEnable || dkiTrip) feStatus |= FE_ERROR_DAC_ENABLE;
+		if(!iopDacEnable) feStatus |= FE_ERROR_DAC_ENABLE;
 		  // Increment GPS second on cycle 0
-		  timeSec ++;
+		  timeSec = current_time();
 		  if (cycle_gps_time == 0) startGpsTime = timeSec;
 		            cycle_gps_time = timeSec;
 		  pLocalEpics->epicsOutput.timeDiag = timeSec;
 		  // printf("Time is %d - clk = %ld\n",timeSec,clk);
 	  }
-	  // This is local CPU timer (no ADCs)
-	  // advance to the next cycle polling CPU cycles and microsleeping
-	  // udelay(1);
-	  ioMemCntr = (cycleNum % IO_MEMORY_SLOTS);
-	  // Write GPS time and cycle count as indicator to slave that adc data is ready
-	  // ioMemData->gpsSecond = timeSec;
 	  rdtscl(cpuClock[CPU_TIME_CYCLE_START]);
-
-/// End of ADC Read **************************************************************************************
 
 
 /// \> Call the front end specific application  ******************\n
@@ -495,6 +431,7 @@ udelay(1000);
         rdtscl(cpuClock[CPU_TIME_USR_START]);
  	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
         rdtscl(cpuClock[CPU_TIME_USR_END]);
+
 /// \> Send IPC info the gdsMon  ******************\n
 #ifdef ADC_MASTER
 	if(cycleNum == 5) {
@@ -520,25 +457,10 @@ udelay(1000);
 	}
 #endif
 
-/// WRITE DAC OUTPUTS ***************************************** \n
-
-/// START OF IOP DAC WRITE ***************************************** \n
-        /// \> If DAC FIFO error, always output zero to DAC modules. \n
-        /// - -- Code will require restart to clear.
-        // COMMENT OUT NEX LINE FOR TEST STAND w/bad DAC cards. 
-        // Write out data to DAC modules
-	dkiTrip = 0;
-	/// \> Loop thru all DAC modules
-
-/// END OF DAC WRITE *************************************************
-
 
 /// BEGIN HOUSEKEEPING ************************************************ \n
 
         pLocalEpics->epicsOutput.cycle = cycleNum;
-// The following, to endif, is all duotone timing diagnostics.
-/// \> Cycle 0: \n
-/// - ---- Read IRIGB time if symmetricom card (this is not standard, but supported for earlier cards. \n
 
 
 /// \> Cycle 18, Send timing info to EPICS at 1Hz
@@ -571,7 +493,6 @@ udelay(1000);
 		// feStatus = 0;
 	  }
 	  // Flip the onePPS various once/sec as a watchdog monitor.
-	  // pLocalEpics->epicsOutput.onePps ^= 1;
 	  pLocalEpics->epicsOutput.diagWord = diagWord;
         }
 
@@ -628,8 +549,6 @@ udelay(1000);
         /// \> Update internal cycle counters
           cycleNum += 1;
           cycleNum %= CYCLE_PER_SECOND;
-	  clock1Min += 1;
-	  clock1Min %= CYCLE_PER_MINUTE;
           if(subcycle == DAQ_CYCLE_CHANGE) 
 	  {
 		daqCycle = (daqCycle + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
