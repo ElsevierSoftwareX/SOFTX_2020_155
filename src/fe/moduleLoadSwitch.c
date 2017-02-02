@@ -120,25 +120,6 @@ procfile_status_read(char *buffer,
 		strcat(buffer, "\n");
 #endif
 
-#if 0
-		/* Output DAC buffer size information */
-		for (i = 0; i < cdsPciModules.dacCount; i++) {
-			if (cdsPciModules.dacType[i] == GSC_18AO8) {
-				sprintf(b, "DAC #%d 18-bit buf_size=%d\n", i, dacOutBufSize[i]);
-			} else {
-				sprintf(b, "DAC #%d 16-bit fifo_status=%d (%s)\n", i, dacOutBufSize[i],
-					dacOutBufSize[i] & 8? "full":
-						(dacOutBufSize[i] & 1? "empty":
-							(dacOutBufSize[i] & 4? "high quarter": "OK")));
-			}
-			strcat(buffer, b);
-		}
-		/* Output ADC read time information */
-		for (i = 0; i < cdsPciModules.adcCount; i++) {
-			sprintf(b, "ADC #%d read time MAX=%d Current=%d\n", i, adcRdTimeMax[i],adcRdTime[i]);
-			strcat(buffer, b);
-		}
-#endif
 #ifdef COMMDATA_INLINE
 		// See if we have any IPC with errors and print the numbers out
 		//
@@ -610,19 +591,6 @@ int init_module (void)
   	ioMemData = (IO_MEM_DATA *)(_ipc_shm+ 0x4000);
 	printf("IOMEM  at 0x%x size 0x%x\n",(_ipc_shm + 0x4000),sizeof(IO_MEM_DATA));
 
-
-// If DAQ is via shared memory (Framebuilder code running on same machine or MX networking is used)
-// attach DAQ shared memory location.
-        sprintf(fname, "%s_daq", SYSTEM_NAME_STRING_LOWER);
-        ret =  mbuf_allocate_area(fname, 64*1024*1024, 0);
-        if (ret < 0) {
-                printf("mbuf_allocate_area() failed; ret = %d\n", ret);
-                return -1;
-        }
-        _daq_shm = (unsigned char *)(kmalloc_area[ret]);
-        // printf("Allocated daq shmem; set at 0x%x\n", _daq_shm);
-	printf("DAQSM at 0x%x\n",_daq_shm);
- 	daqPtr = (struct rmIpcStr *) _daq_shm;
 
 	// Find and initialize all PCI I/O modules *******************************************************
 	  // Following I/O card info is from feCode

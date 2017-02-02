@@ -88,32 +88,9 @@ int printk(const char *fmt, ...) {
 #include "dolphinNet1.c"
 #endif
 
-// Contec 64 input bits plus 64 output bits (Standard for aLIGO)
-/// Contec6464 input register values
-unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
-/// Contec6464 - Last output request sent to module.
-unsigned int CDIO6464LastOutState[MAX_DIO_MODULES]; // Current requested value of the BO bits
-/// Contec6464 values to be written to the output register
-unsigned int CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
-
-// This Contect 16 input / 16 output DIO card is used to control timing slave by IOP
-/// Contec1616 input register values
-unsigned int CDIO1616InputInput[MAX_DIO_MODULES]; // Binary input bits
-/// Contec1616 output register values read back from the module
-unsigned int CDIO1616Input[MAX_DIO_MODULES]; // Current value of the BO bits
-/// Contec1616 values to be written to the output register
-unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
-/// Holds ID number of Contec1616 DIO card(s) used for timing control.
-int tdsControl[3];	// Up to 3 timing control modules allowed in case I/O chassis are daisy chained
-/// Total number of timing control modules found on bus
-int tdsCount = 0;
-
-
 /// Maintains present cycle count within a one second period.
 int cycleNum = 0;
-unsigned int odcStateWord = 0xffff;
 /// Value of readback from DAC FIFO size registers; used in diags for FIFO overflow/underflow.
-int out_buf_size = 0; // test checking DAC buffer size
 unsigned int cycle_gps_time = 0; // Time at which ADCs triggered
 unsigned int cycle_gps_event_time = 0; // Time at which ADCs triggered
 unsigned int   cycle_gps_ns = 0;
@@ -157,8 +134,6 @@ unsigned int cycleHistWhen[64];
 unsigned int cycleHistWhenHold[64];
 #endif
 
-
-struct rmIpcStr *daqPtr;
 
 int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
 
@@ -414,6 +389,9 @@ printf("Sync source = %d\n",syncSource);
   pLocalEpics->epicsOutput.diagWord = 0;
   pLocalEpics->epicsOutput.timeDiag = 0;
   pLocalEpics->epicsOutput.timeErr = syncSource;
+  for(ii=0;ii<32;ii++) {
+	  pLocalEpics->epicsOutput.gdsMon[ii] = 0;
+  }
 
 /// \> Init IIR filter banks
 //   Initialize filter banks  *********************************************
@@ -566,6 +544,7 @@ udelay(1000);
         rdtscl(cpuClock[CPU_TIME_USR_START]);
  	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
         rdtscl(cpuClock[CPU_TIME_USR_END]);
+/// \> Send IPC info the gdsMon  ******************\n
 #ifdef ADC_MASTER
 	if(cycleNum == 5) {
 		ioMemData->ipcDetect[0][0] = pLocalEpics->epicsOutput.gdsMon[0];
@@ -590,7 +569,6 @@ udelay(1000);
 	}
 #endif
 
-  	odcStateWord = 0;
 /// WRITE DAC OUTPUTS ***************************************** \n
 
 /// START OF IOP DAC WRITE ***************************************** \n
@@ -622,27 +600,6 @@ udelay(1000);
           timeHold = 0;
 	  timeHoldWhenHold = timeHoldWhen;
 
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
-	  memcpy(cycleHistMax, cycleHist, sizeof(cycleHist));
-	  memset(cycleHist, 0, sizeof(cycleHist));
-	  memcpy(cycleHistWhenHold, cycleHistWhen, sizeof(cycleHistWhen));
-	  memset(cycleHistWhen, 0, sizeof(cycleHistWhen));
-	  if (timeSec % 4 == 0) pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeMin;
-	  else if (timeSec % 4 == 1)
-		pLocalEpics->epicsOutput.adcWaitTime =  adcHoldTimeMax;
-	  else
-	  	pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeAvg/CYCLE_PER_SECOND;
-	  adcHoldTimeAvgPerSec = adcHoldTimeAvg/CYCLE_PER_SECOND;
-	  adcHoldTimeMax = 0;
-	  adcHoldTimeMin = 0xffff;
-	  adcHoldTimeAvg = 0;
-	  if((adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcHoldTime < CYCLE_TIME_ALRM_LO)) 
-	  {
-	  	diagWord |= FE_ADC_HOLD_ERR;
-		feStatus |= FE_ERROR_TIMING;
-	  
-	  }
-#endif
 	  if(timeHoldMax > CYCLE_TIME_ALRM) 
 	  {
 	  	diagWord |= FE_PROC_TIME_ERR;
@@ -695,19 +652,6 @@ udelay(1000);
 	}
 	// Hold the max cycle time since last diag reset
 	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
-// This produces cycle time histogram in /proc file
-	{
-#if defined(SERVO64K) || defined(SERVO32K)
-		static const int nb = 31;
-#elif defined(SERVO16K)
-		static const int nb = 63;
-#endif
-
-		cycleHist[cycleTime<nb?cycleTime:nb]++;
-		cycleHistWhen[cycleTime<nb?cycleTime:nb] = cycleNum;
-	}
-#endif
 	adcHoldTime = (cpuClock[CPU_TIME_CYCLE_START] - adcTime)/CPURATE;
 	// Avoid calculating the max hold time for the first few seconds
 	if (cycleNum != 0 && (startGpsTime+3) < cycle_gps_time) {
