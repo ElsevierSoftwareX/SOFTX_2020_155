@@ -72,11 +72,6 @@ int printk(const char *fmt, ...) {
 #include "daqmap.h"		// DAQ network layout
 #include "controller.h"
 
-#ifndef NO_DAQ
-#include "drv/fb.h"
-#include "drv/daqLib.c"		// DAQ/GDS connection software
-#endif
-
 #include "drv/map.h"		// PCI hardware defs
 #include "drv/epicsXfer.c"	// User defined EPICS to/from FE data transfer function
 #include "timing.c"		// timing module / IRIG-B  functions
@@ -423,47 +418,9 @@ printf("Sync source = %d\n",syncSource);
 
 udelay(1000);
 
-/// \> Initialize DAQ variable/software 
-#if !defined(NO_DAQ) && !defined(IOP_TASK)
-  /// - ---- Set data range limits for daqLib routine 
-#if defined(SERVO2K) || defined(SERVO4K)
-  daq.filtExMin = GDS_2K_EXC_MIN;
-  daq.filtTpMin = GDS_2K_TP_MIN;
-#else
-  daq.filtExMin = GDS_16K_EXC_MIN;
-  daq.filtTpMin = GDS_16K_TP_MIN;
-#endif
-  daq.filtExMax = daq.filtExMin + MAX_MODULES;
-  daq.filtExSize = MAX_MODULES;
-  daq.xExMin = daq.filtExMax;
-  daq.xExMax = daq.xExMin + GDS_MAX_NFM_EXC;
-  daq.filtTpMax = daq.filtTpMin + MAX_MODULES * 3;
-  daq.filtTpSize = MAX_MODULES * 3;
-  daq.xTpMin = daq.filtTpMax;
-  daq.xTpMax = daq.xTpMin + GDS_MAX_NFM_TP;
-
-  printf("DAQ Ex Min/Max = %d %d\n",daq.filtExMin,daq.filtExMax);
-  printf("DAQ XEx Min/Max = %d %d\n",daq.xExMin,daq.xExMax);
-  printf("DAQ Tp Min/Max = %d %d\n",daq.filtTpMin,daq.filtTpMax);
-  printf("DAQ XTp Min/Max = %d %d\n",daq.xTpMin,daq.xTpMax);
-
-  /// - ---- Assign DAC testpoint pointers
-
-#endif
   pLocalEpics->epicsOutput.ipcStat = 0;
   pLocalEpics->epicsOutput.fbNetStat = 0;
   pLocalEpics->epicsOutput.tpCnt = 0;
-
-#if !defined(NO_DAQ) && !defined(IOP_TASK)
-  /// - ---- Initialize DAQ function
-  status = daqWrite(0,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],0, (int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
-  if(status == -1) 
-  {
-    printf("DAQ init failed -- exiting\n");
-    vmeDone = 1;
-    return(0);
-  }
-#endif
 
   // Clear the code exit flag
   vmeDone = 0;
@@ -484,12 +441,6 @@ udelay(1000);
   adcHoldTimeAvg = 0;		
   usrHoldTime = 0;		
   missedCycle = 0;
-
-  /// \> If IOP,  Initialize the ADC modules
-  printf("ADC setup complete \n");
-
-  /// \> If IOP, Initialize the DAC module variables
-  printf("DAC setup complete \n");
 
   printf("\n*******************************\n");
   printf("*     Running on timer!       *\n");
