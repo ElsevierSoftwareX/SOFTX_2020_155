@@ -64,9 +64,9 @@ procfile_status_read(char *buffer,
 		/* we have finished to read, return 0 */
 		ret  = 0;
 	} else {
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K) || defined(COMMDATA_INLINE)
+#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K) ||   defined(SERVO256K) ||  defined(SERVO128K) || defined(COMMDATA_INLINE)
 		char b[128];
-#if defined(SERVO64K) || defined(SERVO32K)
+#if defined(SERVO64K) || defined(SERVO32K) ||   defined(SERVO256K) ||  defined(SERVO128K)
 		static const int nb = 32;
 #elif defined(SERVO16K)
 		static const int nb = 64;

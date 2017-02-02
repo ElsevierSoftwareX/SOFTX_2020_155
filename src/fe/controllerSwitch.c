@@ -545,6 +545,8 @@ udelay(1000);
 		if(!iopDacEnable || dkiTrip) feStatus |= FE_ERROR_DAC_ENABLE;
 		  // Increment GPS second on cycle 0
 		  timeSec ++;
+		  if (cycle_gps_time == 0) startGpsTime = timeSec;
+		            cycle_gps_time = timeSec;
 		  pLocalEpics->epicsOutput.timeDiag = timeSec;
 		  // printf("Time is %d - clk = %ld\n",timeSec,clk);
 	  }
@@ -666,11 +668,6 @@ udelay(1000);
         }
 
 
-/// \> Check for requests for filter module clear history requests. This is spread out over a number of cycles.
-	// Spread out filter coeff update, but keep updates at 16 Hz
-	// here we are rounding up:
-	//   x/y rounded up equals (x + y - 1) / y
-	//
 	/// \> Check if code exit is requested
 	if(cycleNum == MAX_MODULES) 
 		vmeDone = stop_working_threads | checkEpicsReset(cycleNum, (struct CDS_EPICS *)pLocalEpics);
