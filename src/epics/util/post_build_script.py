@@ -460,8 +460,6 @@ model_params = find_cdsParam(root_block)
 
 #Do something fancy with top names now
 read_tree(root_block,(model_name[2:5].upper(),))
-print epics_sdf_file
-print epics_burt_file
 if os.path.isfile(epics_sdf_file):
 	print 'safe.snap exists '
 else:

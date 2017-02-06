@@ -558,8 +558,8 @@ static unsigned long syncArray[2][IPC_BLOCKS][MAX_IPC];
 double tmp;                     // Temp location for data for checking NaN
 unsigned long syncWord;         // Combined GPS timestamp and cycle counter word received with data
 int lastPcie;                   // Pointer to next IPC data buffer
-static double cps;
-static double cpsHold;
+static double cps[2];
+static double cpsHold[2];
 int cblock,dblock,ttcache;
 
 int offset;
@@ -589,7 +589,7 @@ if(ipcInfo[0].pIpcDataRead[netFrom] != NULL && ipcInfo[0].pIpcDataWrite[netTo] !
 						dblock = kk;
 						ttcache += 1;
 						// clflush_cache_range (&(ipcInfo[0].pIpcDataWrite[netTo]->dBlock[cblock][dblock].data), 16);
-                                                cps ++;
+                                                cps[netFrom] ++;
                                         }
                                     }
                                 }
@@ -599,11 +599,11 @@ if(ipcInfo[0].pIpcDataRead[netFrom] != NULL && ipcInfo[0].pIpcDataWrite[netTo] !
 
 // Have to flush the cache to ensure data is actually transferred to the Dolphin.
 if (ttcache) clflush_cache_range (&(ipcInfo[0].pIpcDataWrite[netTo]->dBlock[cblock][dblock].data), 16);
-   if(cycle == 200 && cps != 0) {
-                cpsHold = cps;
-                cps = 0;
+   if(cycle == 200 && cps[netFrom] > 2000) {
+                cpsHold[netFrom] = cps[netFrom] * 8;
+                cps[netFrom] = 0;
    }
-   return(cpsHold);
+   return(cpsHold[netFrom]);
 }
 
 
