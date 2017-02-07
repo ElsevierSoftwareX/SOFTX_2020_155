@@ -3,13 +3,15 @@ Changes for 3.3  (NOT YET RELEASED)
 ==================================================================================================
 - Added ability to run DAC modules without a preload of the FIFO for lower latency.  This done
   specifically for MIT in RCG V2.8.8, but had not been carried over into RCG V3.x.
-- Added support for General Standards 20AO8 DAC module, as was done for branch-3.3.
+- Added support for General Standards 20AO8 DAC module, as was done for branch-3.3 as a test.
 - Added auto generation of safe.snap files for models built for the first time.
 - Changed IPC error reporting, as requested in Bugzilla 793.
 - Added support for Dolphin PCIe network Gen 2 hardware.
 - Add ability to inter-connect PCIe (Dolphin) switches between corner and end stations.
 	- Deletes need for GeFanuc RFM cards. However, option still remains to use them.
 	- Requires 2 separate computers to act as switches between Dolphin fabrics
+- Add mx_crc_only process: Required to perform CRC calculations for real-time code when DAQ run
+  in a 'standiop' mode.  This is also included in branch-3.0.
 - Bug Fix (472): Better framewriter error messages
 - Bug Fix (985): Fix daqd for single-machine framebuilder in kernel 3.2
 - Bug Fix (1010): Prevent divide-by-zero error in daqd filesys.hh
