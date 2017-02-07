@@ -2304,7 +2304,7 @@ $directDacWrite = 0;
 $noZeroPad = 0;
 
 # Set if DAC writes with no FIFO preload
-$optimizeIO = 0;`
+$optimizeIO = 0;
 
 # Clear the part input and output counters
 # This implies a maximum part count of 2000 per model.
