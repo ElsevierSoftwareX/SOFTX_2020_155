@@ -1,7 +1,8 @@
-
 ==================================================================================================
-Changes for X.X
+Changes for 3.3  (NOT YET RELEASED)
 ==================================================================================================
+- Added ability to run DAC modules without a preload of the FIFO for lower latency.  This done
+  specifically for MIT in RCG V2.8.8, but had not been carried over into RCG V3.x.
 - Added support for General Standards 20AO8 DAC module, as was done for branch-3.3.
 - Added auto generation of safe.snap files for models built for the first time.
 - Changed IPC error reporting, as requested in Bugzilla 793.
@@ -18,6 +19,21 @@ Changes for X.X
 - Bug Fix (1047): EDCU code that supports dual data concentrators was modified to work 
   with new mx_stream introduced in 3.1
 - Bug Fix: Corrected initialization for fixed and set phase oscillators at model start.
+==================================================================================================
+Changes for 3.2
+==================================================================================================
+- Bug Fix (1033): Daqd frame writer changes:
+  Split the producer thread into multiple parts to free up a thread to only receive data.
+  Split the raw frame writer thread into two compoments to allow it to catch up better to
+  when there is a slow down on frame writes.
+  Cleaned up some of the EPICS code.
+  Added more EPICS channels to give metrics on daqd.
+  	- Add leap second to dataviewer leapsecs.txt file for 12-31-16
+	- Bug Fix (1010): Prevent divide-by-zero error in daqd filesys.hh
+	- Bug Fix (1047): EDCU code that supports dual data concentrators was modified to work
+	  with new mx_stream introduced in 3.1
+	- Bug Fix: Corrected initialization for fixed and set phase oscillators at model start.
+
 ==================================================================================================
 Changes for 3.1.1
 ==================================================================================================

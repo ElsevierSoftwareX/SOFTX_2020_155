@@ -158,6 +158,8 @@ sub parseParams {
 				$::requireIOcnt = $spp[1];
 			} elsif ($spp[0] eq "virtualIOP") { 
 				$::virtualiop = $spp[1];
+			} elsif ($spp[0] eq "optimizeIO") { 
+				$::optimizeIO = $spp[1];
 			} elsif ($spp[0] eq "no_zero_pad") { 
 				$::noZeroPad = $spp[1];
 			}
