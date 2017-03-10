@@ -1,6 +1,7 @@
 #include "linux/types.h"
 #include <linux/module.h>       /* Needed by all modules */
 #include <linux/kernel.h>       /* Needed for KERN_INFO */
+#include <linux/kthread.h>       /* Needed for KERN_INFO */
 #include <genif.h>
 #include "../../include/commData3.h"
 #include <asm/cacheflush.h>
@@ -22,7 +23,7 @@
 #define ENTRY_NAME "counter"
 #define PERM 0644
 #define PARENT NULL
-#define NUM_DOLPHIN_CARDS	1
+#define NUM_DOLPHIN_CARDS	2
 #define NUM_DOLPHIN_NETS	4
 static struct file_operations fops;
 
@@ -142,7 +143,7 @@ inline void copyIpcData (int indx, int netFrom, int netTo)
 void *copyRfmDataEX2CS0(void *arg) 
 // ************************************************************************
 {
-  int indx = 32;
+  int indx = 0;
   int delay = 2;
 
   if(pIpcDataRead[0] != NULL && pIpcDataWrite[1] != NULL)
@@ -165,7 +166,7 @@ void *copyRfmDataEX2CS0(void *arg)
 void *copyRfmDataEX2CS1(void *arg) 
 // ************************************************************************
 {
-  int indx = 64;
+  int indx = 32;
   int delay = 2;
 
   if(pIpcDataRead[0] != NULL && pIpcDataWrite[1] != NULL)
