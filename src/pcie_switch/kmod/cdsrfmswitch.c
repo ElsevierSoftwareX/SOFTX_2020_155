@@ -108,7 +108,9 @@ int monitorActiveConnections(void *data)
   }
 }
 
+// ************************************************************************
 inline void copyIpcData (int indx, int netFrom, int netTo)
+// ************************************************************************
 {
   unsigned long syncWord;
   int ii,jj;
@@ -139,6 +141,7 @@ inline void copyIpcData (int indx, int netFrom, int netTo)
 	// If anything was copied, we need to flush the buffer
 	if (ttcache) clflush_cache_range (&(pIpcDataWrite[netTo]->dBlock[cblock][dblock].data), 16);
 }
+
 // ************************************************************************
 void *copyRfmDataEX2CS0(void *arg) 
 // ************************************************************************
@@ -162,6 +165,7 @@ void *copyRfmDataEX2CS0(void *arg)
 	return (void *)-1;
   }
 }
+
 // ************************************************************************
 void *copyRfmDataEX2CS1(void *arg) 
 // ************************************************************************
@@ -184,21 +188,6 @@ void *copyRfmDataEX2CS1(void *arg)
   	printk("Do not have pointers to Dolphin read - %s exiting \n","copyRfmDataEX2CS1");
 	return (void *)-1;
   }
-}
-
-// ************************************************************************
-int counter_run(void *data) {
-// ************************************************************************
-  int delay = ((struct params*)data)->delay;
-  int indx = ((struct params*)data)->idx;
-  while(!kthread_should_stop()) {
-  	ssleep(delay);
-	mycounter[indx] += 1;
-	mycounter[indx] %= 1000000000;
-	// printk("Counter %s = %d\n",((struct params*)data)->name,mycounter[indx]);
-  }
-  printk("%s thread has terminated %d\n",((struct params*)data)->name,indx);
-  return mycounter[indx];
 }
 
 // ************************************************************************
@@ -419,9 +408,6 @@ int counter_proc_release(struct inode *sp_inode,struct file *sp_file) {
 	return 0;
 }
 
-/*
- *  *  test.c The simplest kernel module.
- *   */
 static int test_data __initdata = 3;
 
 // ************************************************************************
@@ -446,72 +432,30 @@ static int __init test_3_init(void)
 
 
 	// Set thread names
-	strcpy(threads[0].name,"Thread 1");
-	strcpy(threads[1].name,"Thread 2");
-	strcpy(threads[2].name,"cdsrfmnetmon");
-	strcpy(threads[3].name,"cdsrfmcp12");
+	strcpy(threads[0].name,"cdsrfmnetmon");
 
 	// Set thread delays
-	threads[0].delay = 1;
-	threads[1].delay = 5;
-	threads[2].delay = 1000;
-	threads[3].delay = 1000;
+	threads[0].delay = 1000;
 
 	// Set thread indexes
-	threads[0].idx = 0;
-	threads[1].idx = 1;
-	threads[2].idx = 100;
-	threads[3].idx = 32;
+	threads[0].idx = 100;
 
 	// Set thread netFrom
 	threads[0].netFrom = 0;
-	threads[1].netFrom = 1;
-	threads[2].netFrom = 0;
-	threads[3].netFrom = 1;
 
 	// Set thread netto
 	threads[0].netTo = 0;
-	threads[1].netTo = 1;
-	threads[2].netTo = 0;
-	threads[3].netTo = 2;
 	//
 	// Create threads
-#if 0
-	sthread[0] = kthread_create(counter_run,(void *)&threads[0],"counter1");
+	sthread[0] = kthread_create(monitorActiveConnections,(void *)&threads[0],"cdsrfmnetmon");
 	if(IS_ERR(sthread[0])) {
 		printk("ERROR! kthread_run\n");
 		return PTR_ERR(sthread[0]);
 	}
-	sthread[1] = kthread_create(counter_run,(void *)&threads[1],"counter2");
-	if(IS_ERR(sthread[1])) {
-		printk("ERROR! kthread_run\n");
-		return PTR_ERR(sthread[1]);
-	}
-#endif
-	sthread[2] = kthread_create(monitorActiveConnections,(void *)&threads[2],"cdsrfmnetmon");
-	if(IS_ERR(sthread[2])) {
-		printk("ERROR! kthread_run\n");
-		return PTR_ERR(sthread[2]);
-	}
-#if 0
-	sthread[3] = kthread_create(copyRfmData,(void *)&threads[3],"cdsrfmcp12");
-	if(IS_ERR(sthread[3])) {
-		printk("ERROR! kthread_run\n");
-		return PTR_ERR(sthread[2]);
-	}
-
-	// Bind threads
-	kthread_bind(sthread[0],4);
-	kthread_bind(sthread[1],5);
-#endif
-	kthread_bind(sthread[2],6);
-	// kthread_bind(sthread[3],3);
+	kthread_bind(sthread[0],6);
 
 	// Start threads
-	// wake_up_process(sthread[0]);
-	// wake_up_process(sthread[1]);
-	wake_up_process(sthread[2]);
-	// wake_up_process(sthread[3]);
+	wake_up_process(sthread[0]);
 
 	printk("Shutting down CPU 3 at %ld\n",current_time());
 	set_fe_code_idle(copyRfmDataEX2CS0,3);
@@ -542,15 +486,7 @@ static void __exit test_3_exit(void)
   int ret;
   extern int __cpuinit cpu_up(unsigned int cpu);
 	printk(KERN_INFO "Goodbye, test 3\n");
-#if 0
 	ret = kthread_stop(sthread[0]);
-	if (ret != -EINTR)
-		printk("Counter thread has stopped %ld\n",mycounter[0]);
-	ret = kthread_stop(sthread[1]);
-	if (ret != -EINTR)
-		printk("Counter thread has stopped %ld\n",mycounter[1]);
-#endif
-	ret = kthread_stop(sthread[2]);
 	if (ret != -EINTR)
 		printk("RFM thread has stopped %ld\n",mycounter[1]);
 	ssleep(2);
@@ -575,17 +511,6 @@ static void __exit test_3_exit(void)
 	msleep(1000);
 	cpu_up(4);
 	printkl("Brought CPU 4 back up\n");
-#if 0
-	set_fe_code_idle(0, 4);
-	printkl("Will bring back CPU %d\n", 4);
-	msleep(1000);
-#endif
-
-#if 0
-	ret = kthread_stop(sthread[3]);
-	if (ret != -EINTR)
-		printk("RFM CP thread has stopped %ld\n",mycounter[1]);
-#endif
 
 	printk("Removing /proc/%s.\n",ENTRY_NAME);
 	remove_proc_entry(ENTRY_NAME,NULL);
