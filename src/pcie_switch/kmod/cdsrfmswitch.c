@@ -25,11 +25,17 @@
 #define PARENT NULL
 #define NUM_DOLPHIN_CARDS	2
 #define NUM_DOLPHIN_NETS	4
+
+// struct for using /proc files
 static struct file_operations fops;
 
+#if 0
 extern void *kmalloc_area[16];
 extern int mbuf_allocate_area(char *name, int size, struct file *file);
 char * _ipc_shm;
+#endif
+
+// CPU locking routines
 extern void set_fe_code_idle(void *(*ptr)(void *), unsigned int cpu);
 extern int cpu_down(unsigned int);
 
@@ -43,6 +49,7 @@ sci_map_handle_t client_map_handle[4];
 sci_r_segment_handle_t  remote_segment_handle[4];
 sci_device_info_t	sci_dev_info[4];
 
+// Structs for kernel threads
 static struct task_struct *sthread[5];
 struct params {char name[100]; int delay; int idx; int netFrom; int netTo; };
 struct params threads[5];
@@ -50,6 +57,8 @@ struct params threads[5];
 static unsigned long mycounter[10];
 static int read_p;
 static char *message;
+
+// IPC block arrays for monitoring and switching
 // IPC_BLOCKS = 64 and MAX_IPC = 512
 static unsigned long syncArray[2][IPC_BLOCKS][MAX_IPC];
 static unsigned long lastSyncWord[NUM_DOLPHIN_NETS][100];
@@ -57,9 +66,13 @@ static unsigned int myactive[NUM_DOLPHIN_NETS][10];
 static int ipcActive[NUM_DOLPHIN_NETS][100];
 static int stop_working_threads;
 
-
-// End of globals ****************************************
+// End of globals *********************************************************
+//
+//
+//
+// ************************************************************************
 inline unsigned long current_time(void) {
+// ************************************************************************
     struct timespec t;
         extern struct timespec current_kernel_time(void);
 	        t = current_kernel_time();
@@ -431,42 +444,44 @@ static int __init test_3_init(void)
 #endif
 
 
-	// Set thread names
+	// Set thread parameters for IPC channel monitoring thread
 	strcpy(threads[0].name,"cdsrfmnetmon");
 
 	// Set thread delays
 	threads[0].delay = 1000;
-
-	// Set thread indexes
+	// Set thread number of IPC channels to monitor per RFM network
 	threads[0].idx = 100;
-
-	// Set thread netFrom
+	// Set thread netFrom (NOT USED)
 	threads[0].netFrom = 0;
-
-	// Set thread netto
+	// Set thread netto (NOT USED)
 	threads[0].netTo = 0;
 	//
-	// Create threads
+	// Create thread
 	sthread[0] = kthread_create(monitorActiveConnections,(void *)&threads[0],"cdsrfmnetmon");
 	if(IS_ERR(sthread[0])) {
 		printk("ERROR! kthread_run\n");
 		return PTR_ERR(sthread[0]);
 	}
+	// Bind thread to CPU 6
 	kthread_bind(sthread[0],6);
 
-	// Start threads
+	// Start thread
 	wake_up_process(sthread[0]);
 
+	// Starting data switching threads   *****************************************************
+	// Start thread which moves data for RFM0 IPC channels 0 - 31
 	printk("Shutting down CPU 3 at %ld\n",current_time());
 	set_fe_code_idle(copyRfmDataEX2CS0,3);
 	msleep(100);
 	cpu_down(3);
 
+	// Start thread which moves data for RFM0 IPC channels 0 - 31
 	printk("Shutting down CPU 4 at %ld\n",current_time());
 	set_fe_code_idle(copyRfmDataEX2CS1,4);
 	msleep(100);
 	cpu_down(4);
 
+	// Setup /proc file to move diag info out to user space for EPICS
 	fops.open = counter_proc_open;
 	fops.read = counter_proc_read;
 	fops.release = counter_proc_release;
@@ -486,34 +501,43 @@ static void __exit test_3_exit(void)
   int ret;
   extern int __cpuinit cpu_up(unsigned int cpu);
 	printk(KERN_INFO "Goodbye, test 3\n");
+
+	// Stop the Active Channel monitor thread
 	ret = kthread_stop(sthread[0]);
 	if (ret != -EINTR)
 		printk("RFM thread has stopped %ld\n",mycounter[1]);
 	ssleep(2);
 
 
+	// Stop switching threads and bring CPUs back on line *************
 	set_fe_code_idle(0, 3);
 	msleep(1000);
 	set_fe_code_idle(0, 4);
 	msleep(1000);
 
+	// Set variable to stop the CPU locked switching tasks
 	stop_working_threads = 1;
 	msleep(1000);
 
+	// Bring CPU 3 back on line
 	set_fe_code_idle(0, 3);
 	printkl("Will bring back CPU %d\n", 3);
 	msleep(1000);
 	cpu_up(3);
 	printkl("Brought CPU 3 back up\n");
 
+	// Bring CPU 4 back on line
 	set_fe_code_idle(0, 4);
 	printkl("Will bring back CPU %d\n", 4);
 	msleep(1000);
 	cpu_up(4);
 	printkl("Brought CPU 4 back up\n");
 
+	// Remove /proc file entries
 	printk("Removing /proc/%s.\n",ENTRY_NAME);
 	remove_proc_entry(ENTRY_NAME,NULL);
+
+	// Cleanup the dolphin NIC connections
 	finish_dolphin(mdi.dolphinCount);
 }
 
