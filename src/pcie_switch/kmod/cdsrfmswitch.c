@@ -23,8 +23,9 @@
 #define ENTRY_NAME "counter"
 #define PERM 0644
 #define PARENT NULL
-#define NUM_DOLPHIN_CARDS	2
+#define NUM_DOLPHIN_CARDS	3
 #define NUM_DOLPHIN_NETS	4
+#define MAX_DOLPHIN_SW_CHANS	100
 
 // struct for using /proc files
 static struct file_operations fops;
@@ -61,10 +62,12 @@ static char *message;
 // IPC block arrays for monitoring and switching
 // IPC_BLOCKS = 64 and MAX_IPC = 512
 static unsigned long syncArray[2][IPC_BLOCKS][MAX_IPC];
-static unsigned long lastSyncWord[NUM_DOLPHIN_NETS][100];
+static unsigned long lastSyncWord[NUM_DOLPHIN_NETS][MAX_DOLPHIN_SW_CHANS];
 static unsigned int myactive[NUM_DOLPHIN_NETS][10];
-static int ipcActive[NUM_DOLPHIN_NETS][100];
+static unsigned int mytraffic[NUM_DOLPHIN_NETS];
+static int ipcActive[NUM_DOLPHIN_NETS][MAX_DOLPHIN_SW_CHANS];
 static int stop_working_threads;
+static int mysysstatus;
 
 // End of globals *********************************************************
 //
@@ -90,6 +93,8 @@ int monitorActiveConnections(void *data)
 
   unsigned long syncWord;
   int ii,jj,kk,mm;
+  static int traffic[NUM_DOLPHIN_NETS];
+  int swstatus;
 
   if(pIpcDataRead[0] != NULL && pIpcDataRead[1] != NULL && pIpcDataRead[2] != NULL && pIpcDataRead[3] != NULL)
   {
@@ -112,6 +117,15 @@ int monitorActiveConnections(void *data)
 				}
 			}
 		}
+		mycounter[9] = current_time();
+		swstatus = 0;
+		for (jj=0;jj<NUM_DOLPHIN_NETS;jj++) {
+			if(traffic[jj] != mytraffic[jj]) {
+				traffic[jj] = mytraffic[jj];
+				swstatus |= (1 << jj);
+			}
+		}
+		mysysstatus = swstatus;
 	}
 	printk("%s thread has terminated %d\n",((struct params*)data)->name,indx);
 	return 0;
@@ -122,7 +136,7 @@ int monitorActiveConnections(void *data)
 }
 
 // ************************************************************************
-inline void copyIpcData (int indx, int netFrom, int netTo)
+inline int copyIpcData (int indx, int netFrom, int netTo)
 // ************************************************************************
 {
   unsigned long syncWord;
@@ -130,6 +144,7 @@ inline void copyIpcData (int indx, int netFrom, int netTo)
   int cblock,dblock,ttcache;
   int eor = indx + 32;
   double tmp;
+  int xfers = 0;
 
 	cblock = 0;
 	dblock = 0;
@@ -139,6 +154,7 @@ inline void copyIpcData (int indx, int netFrom, int netTo)
 			for(jj=0;jj<IPC_BLOCKS;jj++) {
 				syncWord = pIpcDataRead[netFrom]->dBlock[jj][ii].timestamp;
 				if(syncWord != syncArray[0][jj][ii]) {
+					xfers ++;
 					tmp = pIpcDataRead[netFrom]->dBlock[jj][ii].data;
 					pIpcDataWrite[netTo]->dBlock[jj][ii].data = tmp;
 					pIpcDataWrite[netTo]->dBlock[jj][ii].timestamp = syncWord;
@@ -153,6 +169,7 @@ inline void copyIpcData (int indx, int netFrom, int netTo)
 		
 	// If anything was copied, we need to flush the buffer
 	if (ttcache) clflush_cache_range (&(pIpcDataWrite[netTo]->dBlock[cblock][dblock].data), 16);
+	return xfers;
 }
 
 // ************************************************************************
@@ -161,13 +178,16 @@ void *copyRfmDataEX2CS0(void *arg)
 {
   int indx = 0;
   int delay = 2;
+  static int totalxfers;
 
   if(pIpcDataRead[0] != NULL && pIpcDataWrite[1] != NULL)
   {
 	while(!stop_working_threads) {
 		udelay(delay);
-		copyIpcData (indx, 0, 1);
-		copyIpcData (indx, 1, 0);
+		totalxfers += copyIpcData (indx, 0, 1);
+		totalxfers += copyIpcData (indx, 1, 0);
+		totalxfers %= 100000000;
+		mytraffic[0] = totalxfers;
 	}
 	// printk("%s thread has terminated %d\n",((struct params*)data)->name,indx);
 	printk("%s thread has terminated %d\n","copyRfmDataEX2CS0",1);
@@ -185,13 +205,16 @@ void *copyRfmDataEX2CS1(void *arg)
 {
   int indx = 32;
   int delay = 2;
+  static int totalxfers;
 
   if(pIpcDataRead[0] != NULL && pIpcDataWrite[1] != NULL)
   {
 	while(!stop_working_threads) {
 		udelay(delay);
-		copyIpcData (indx, 0, 1);
-		copyIpcData (indx, 1, 0);
+		totalxfers += copyIpcData (indx, 0, 1);
+		totalxfers += copyIpcData (indx, 1, 0);
+		totalxfers %= 100000000;
+		mytraffic[1] = totalxfers;
 	}
 	// printk("%s thread has terminated %d\n",((struct params*)data)->name,indx);
 	printk("%s thread has terminated %d\n","copyRfmDataEX2CS1",1);
@@ -199,6 +222,60 @@ void *copyRfmDataEX2CS1(void *arg)
   } else {
   	// printk("Do not have pointers to Dolphin read - %s exiting \n",((struct params*)data)->name);
   	printk("Do not have pointers to Dolphin read - %s exiting \n","copyRfmDataEX2CS1");
+	return (void *)-1;
+  }
+}
+
+// ************************************************************************
+void *copyRfmDataEY2CS0(void *arg) 
+// ************************************************************************
+{
+  int indx = 0;
+  int delay = 2;
+  static int totalxfers;
+
+  if(pIpcDataRead[2] != NULL && pIpcDataWrite[3] != NULL)
+  {
+	while(!stop_working_threads) {
+		udelay(delay);
+		totalxfers += copyIpcData (indx, 2, 3);
+		totalxfers += copyIpcData (indx, 3, 2);
+		totalxfers %= 100000000;
+		mytraffic[2] = totalxfers;
+	}
+	// printk("%s thread has terminated %d\n",((struct params*)data)->name,indx);
+	printk("%s thread has terminated %d\n","copyRfmDataEY2CS0",1);
+	return (void *)0;
+  } else {
+  	// printk("Do not have pointers to Dolphin read - %s exiting \n",((struct params*)data)->name);
+  	printk("Do not have pointers to Dolphin read - %s exiting \n","copyRfmDataEY2CS0");
+	return (void *)-1;
+  }
+}
+
+// ************************************************************************
+void *copyRfmDataEY2CS1(void *arg) 
+// ************************************************************************
+{
+  int indx = 32;
+  int delay = 2;
+  static int totalxfers;
+
+  if(pIpcDataRead[2] != NULL && pIpcDataWrite[3] != NULL)
+  {
+	while(!stop_working_threads) {
+		udelay(delay);
+		totalxfers += copyIpcData (indx, 2, 3);
+		totalxfers += copyIpcData (indx, 3, 2);
+		totalxfers %= 100000000;
+		mytraffic[3] = totalxfers;
+	}
+	// printk("%s thread has terminated %d\n",((struct params*)data)->name,indx);
+	printk("%s thread has terminated %d\n","copyRfmDataEY2CS1",1);
+	return (void *)0;
+  } else {
+  	// printk("Do not have pointers to Dolphin read - %s exiting \n",((struct params*)data)->name);
+  	printk("Do not have pointers to Dolphin read - %s exiting \n","copyRfmDataEY2CS1");
 	return (void *)-1;
   }
 }
@@ -335,36 +412,26 @@ init_dolphin(int modules,CDS_DOLPHIN_INFO *pInfo) {
   pInfo->dolphinCount += 1;
 
     if(ii == 0) {
+	pIpcDataRead[1] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
+	pIpcDataRead[2] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
+	pIpcDataWrite[1] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
+	pIpcDataWrite[2] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
+    }
+    if(ii == 1) {
 	pIpcDataRead[0] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
 	pIpcDataWrite[0] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
     }
-    if(ii == 0 && modules == 1) {
-	pIpcDataRead[1] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
-	pIpcDataRead[2] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET);
-	pIpcDataRead[3] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
-	pIpcDataWrite[1] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
-	pIpcDataWrite[2] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
-	pIpcDataWrite[3] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
-    }
-    if(ii == 1 && modules == 2) {
-	pIpcDataRead[1] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
-	pIpcDataRead[2] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
-	pIpcDataRead[3] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
-	pIpcDataWrite[1] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
-	pIpcDataWrite[2] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
-	pIpcDataWrite[3] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
-    }
-    if(ii == 1 && modules == 3) {
-	pIpcDataRead[1] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
-	pIpcDataRead[2] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
-	pIpcDataWrite[1] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
-	pIpcDataWrite[2] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
-    }
-    if(ii == 2 && modules == 3) {
+    if(ii == 2) {
 	pIpcDataRead[3] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
 	pIpcDataWrite[3] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
     }
 }
+  for(ii=0;ii<4;ii++) {
+    printk ("Dolphin %d memory read  at 0x%p\n", ii, pIpcDataRead[ii]);
+  }
+  for(ii=0;ii<4;ii++) {
+    printk ("Dolphin %d memory write at 0x%p\n", ii, pIpcDataWrite[ii]);
+  }
 
 
   return 0;
@@ -386,17 +453,20 @@ int ii;
 // ************************************************************************
 int counter_proc_open(struct inode *sp_inode,struct file *sp_file) {
 // ************************************************************************
-	printk("proc called open \n");
+	// printk("proc called open \n");
 	read_p = 1;
 	message = kmalloc(sizeof(char)*128,__GFP_WAIT|__GFP_IO|__GFP_FS);
 	if(message == NULL) {
 		printk("ERROR counter proc open\n");
 		return -ENOMEM;
 	}
-	sprintf(message,"%ld %ld %ld %ld %d %d %d %d %d %d\n",
-						mycounter[0],mycounter[1],mycounter[2],mycounter[3],
+	sprintf(message,"%ld %ld %ld %ld %ld %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+						mycounter[0],mycounter[1],mycounter[2],mycounter[3],mycounter[9],
 						myactive[0][0],myactive[0][1],myactive[0][2],
-						myactive[1][0],myactive[1][1],myactive[1][2]);
+						myactive[1][0],myactive[1][1],myactive[1][2],
+						myactive[2][0],myactive[2][1],myactive[2][2],
+						myactive[3][0],myactive[3][1],myactive[3][2],
+						mysysstatus);
 	return 0;
 }
 
@@ -408,7 +478,7 @@ ssize_t counter_proc_read(struct file *sp_file, char __user *buf,size_t size,lof
 	read_p = !read_p;
 	if(read_p) return 0;
 	// if(offset > 0) return 0;
-	printk("proc called read \n");
+	// printk("proc called read \n");
 	ret = copy_to_user(buf,message,len);
 	return len;
 }
@@ -416,18 +486,18 @@ ssize_t counter_proc_read(struct file *sp_file, char __user *buf,size_t size,lof
 // ************************************************************************
 int counter_proc_release(struct inode *sp_inode,struct file *sp_file) {
 // ************************************************************************
-	printk("proc called release \n");
+	// printk("proc called release \n");
 	kfree(message);
 	return 0;
 }
 
-static int test_data __initdata = 3;
+static int test_data __initdata = NUM_DOLPHIN_CARDS;
 
 // ************************************************************************
 static int __init test_3_init(void)
 // ************************************************************************
 {
-	printk(KERN_INFO "Hello, world %d\n", test_data);
+	printk(KERN_INFO "Starting CDS RFM SWITCH %d\n", test_data);
 	init_dolphin(NUM_DOLPHIN_CARDS,&mdi);
 	stop_working_threads = 0;
 
@@ -450,7 +520,7 @@ static int __init test_3_init(void)
 	// Set thread delays
 	threads[0].delay = 1000;
 	// Set thread number of IPC channels to monitor per RFM network
-	threads[0].idx = 100;
+	threads[0].idx = MAX_DOLPHIN_SW_CHANS;
 	// Set thread netFrom (NOT USED)
 	threads[0].netFrom = 0;
 	// Set thread netto (NOT USED)
@@ -462,8 +532,8 @@ static int __init test_3_init(void)
 		printk("ERROR! kthread_run\n");
 		return PTR_ERR(sthread[0]);
 	}
-	// Bind thread to CPU 6
-	kthread_bind(sthread[0],6);
+	// Bind thread to CPU 2
+	kthread_bind(sthread[0],2);
 
 	// Start thread
 	wake_up_process(sthread[0]);
@@ -480,6 +550,18 @@ static int __init test_3_init(void)
 	set_fe_code_idle(copyRfmDataEX2CS1,4);
 	msleep(100);
 	cpu_down(4);
+
+	// Start thread which moves data for RFM0 IPC channels 0 - 31
+	printk("Shutting down CPU 5 at %ld\n",current_time());
+	set_fe_code_idle(copyRfmDataEY2CS0,5);
+	msleep(100);
+	cpu_down(5);
+
+	// Start thread which moves data for RFM0 IPC channels 0 - 31
+	printk("Shutting down CPU 6 at %ld\n",current_time());
+	set_fe_code_idle(copyRfmDataEY2CS1,6);
+	msleep(100);
+	cpu_down(6);
 
 	// Setup /proc file to move diag info out to user space for EPICS
 	fops.open = counter_proc_open;
@@ -514,6 +596,10 @@ static void __exit test_3_exit(void)
 	msleep(1000);
 	set_fe_code_idle(0, 4);
 	msleep(1000);
+	set_fe_code_idle(0, 5);
+	msleep(1000);
+	set_fe_code_idle(0, 6);
+	msleep(1000);
 
 	// Set variable to stop the CPU locked switching tasks
 	stop_working_threads = 1;
@@ -532,6 +618,20 @@ static void __exit test_3_exit(void)
 	msleep(1000);
 	cpu_up(4);
 	printkl("Brought CPU 4 back up\n");
+
+	// Bring CPU 5 back on line
+	set_fe_code_idle(0, 5);
+	printkl("Will bring back CPU %d\n", 5);
+	msleep(1000);
+	cpu_up(5);
+	printkl("Brought CPU 5 back up\n");
+
+	// Bring CPU 6 back on line
+	set_fe_code_idle(0, 6);
+	printkl("Will bring back CPU %d\n", 6);
+	msleep(1000);
+	cpu_up(6);
+	printkl("Brought CPU 6 back up\n");
 
 	// Remove /proc file entries
 	printk("Removing /proc/%s.\n",ENTRY_NAME);
