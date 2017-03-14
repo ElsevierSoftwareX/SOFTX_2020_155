@@ -61,7 +61,7 @@ static char *message;
 
 // IPC block arrays for monitoring and switching
 // IPC_BLOCKS = 64 and MAX_IPC = 512
-static unsigned long syncArray[2][IPC_BLOCKS][MAX_IPC];
+static unsigned long syncArray[4][IPC_BLOCKS][MAX_IPC];
 static unsigned long lastSyncWord[NUM_DOLPHIN_NETS][MAX_DOLPHIN_SW_CHANS];
 static unsigned int myactive[NUM_DOLPHIN_NETS][10];
 static unsigned int mytraffic[NUM_DOLPHIN_NETS];
@@ -114,6 +114,7 @@ int monitorActiveConnections(void *data)
 					myactive[jj][kk] |= (1<<mm);
 				} else {
 					ipcActive[jj][ii] = 0;
+					myactive[jj][kk] &= ~(1<<mm);
 				}
 			}
 		}
@@ -153,12 +154,12 @@ inline int copyIpcData (int indx, int netFrom, int netTo)
 		if(ipcActive[netFrom][ii]) {
 			for(jj=0;jj<IPC_BLOCKS;jj++) {
 				syncWord = pIpcDataRead[netFrom]->dBlock[jj][ii].timestamp;
-				if(syncWord != syncArray[0][jj][ii]) {
+				if(syncWord != syncArray[netFrom][jj][ii]) {
 					xfers ++;
 					tmp = pIpcDataRead[netFrom]->dBlock[jj][ii].data;
 					pIpcDataWrite[netTo]->dBlock[jj][ii].data = tmp;
 					pIpcDataWrite[netTo]->dBlock[jj][ii].timestamp = syncWord;
-					syncArray[0][jj][ii] = syncWord;
+					syncArray[netFrom][jj][ii] = syncWord;
 					cblock = jj;
 					dblock = ii;
 					ttcache += 1;
@@ -582,7 +583,7 @@ static void __exit test_3_exit(void)
 {
   int ret;
   extern int __cpuinit cpu_up(unsigned int cpu);
-	printk(KERN_INFO "Goodbye, test 3\n");
+	printk(KERN_INFO "Goodbye, cdsrfmswitch 3 is shutting down\n");
 
 	// Stop the Active Channel monitor thread
 	ret = kthread_stop(sthread[0]);
@@ -632,6 +633,7 @@ static void __exit test_3_exit(void)
 	msleep(1000);
 	cpu_up(6);
 	printkl("Brought CPU 6 back up\n");
+	msleep(1000);
 
 	// Remove /proc file entries
 	printk("Removing /proc/%s.\n",ENTRY_NAME);
