@@ -74,6 +74,12 @@ typedef struct CDS_IPC_KEY_LIST {
 	unsigned int masterKey;
 } CDS_IPC_KEY_LIST;
 
+typedef struct CDS_DOLPHIN_INFO {
+        volatile unsigned long *dolphinRead[4]; /* read and write Dolphin memory */
+        volatile unsigned long *dolphinWrite[4]; /* read and write Dolphin memory */
+        int dolphinCount;
+} CDS_DOLPHIN_INFO;
+
 /// Indicates data is to be sent
 #define ISND		1	
 /// Indicates data is to be received
