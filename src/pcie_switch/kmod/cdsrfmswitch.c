@@ -16,16 +16,18 @@
 #include </usr/src/linux/arch/x86/include/asm/processor.h>
 #include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
 #include <linux/timer.h>
-#include <linux/spinlock_types.h>
 #include <linux/ctype.h>
 
 #define MAX_UDELAY    19999
 #define ENTRY_NAME "counter"
 #define PERM 0644
 #define PARENT NULL
-#define NUM_DOLPHIN_CARDS	3
-#define NUM_DOLPHIN_NETS	4
-#define MAX_DOLPHIN_SW_CHANS	100
+#define RFMX_NUM_DOLPHIN_CARDS	3
+#define RFMX_NUM_DOLPHIN_NETS	4
+#define RFMX_MAX_CHANS_PER_RFM	100
+#define RFMX_CHANS_PER_THREAD	32
+#define RFMX_THREAD_DELAY	2
+#define RFMX_MAX_XFER_CNT	100000000
 
 // struct for using /proc files
 static struct file_operations fops;
@@ -41,8 +43,8 @@ extern void set_fe_code_idle(void *(*ptr)(void *), unsigned int cpu);
 extern int cpu_down(unsigned int);
 
 CDS_DOLPHIN_INFO mdi;
-CDS_IPC_COMMS *pIpcDataRead[NUM_DOLPHIN_NETS];
-CDS_IPC_COMMS *pIpcDataWrite[NUM_DOLPHIN_NETS];
+CDS_IPC_COMMS *pIpcDataRead[RFMX_NUM_DOLPHIN_NETS];
+CDS_IPC_COMMS *pIpcDataWrite[RFMX_NUM_DOLPHIN_NETS];
 
 // Dolphin driver interface
 sci_l_segment_handle_t segment[4];
@@ -62,10 +64,10 @@ static char *message;
 // IPC block arrays for monitoring and switching
 // IPC_BLOCKS = 64 and MAX_IPC = 512
 static unsigned long syncArray[4][IPC_BLOCKS][MAX_IPC];
-static unsigned long lastSyncWord[NUM_DOLPHIN_NETS][MAX_DOLPHIN_SW_CHANS];
-static unsigned int myactive[NUM_DOLPHIN_NETS][10];
-static unsigned int mytraffic[NUM_DOLPHIN_NETS];
-static int ipcActive[NUM_DOLPHIN_NETS][MAX_DOLPHIN_SW_CHANS];
+static unsigned long lastSyncWord[RFMX_NUM_DOLPHIN_NETS][RFMX_MAX_CHANS_PER_RFM];
+static unsigned int myactive[RFMX_NUM_DOLPHIN_NETS][10];
+static unsigned int mytraffic[RFMX_NUM_DOLPHIN_NETS];
+static int ipcActive[RFMX_NUM_DOLPHIN_NETS][RFMX_MAX_CHANS_PER_RFM];
 static int stop_working_threads;
 static int mysysstatus;
 
@@ -85,6 +87,8 @@ inline unsigned long current_time(void) {
 }
 
 // ************************************************************************
+// Code thread monitors all switch ports for activity.
+// Marks channels by network as active or not for use by data xfer threads.
 int monitorActiveConnections(void *data) 
 // ************************************************************************
 {
@@ -93,39 +97,53 @@ int monitorActiveConnections(void *data)
 
   unsigned long syncWord;
   int ii,jj,kk,mm;
-  static int traffic[NUM_DOLPHIN_NETS];
+  static int traffic[RFMX_NUM_DOLPHIN_NETS];
   int swstatus;
 
   if(pIpcDataRead[0] != NULL && pIpcDataRead[1] != NULL && pIpcDataRead[2] != NULL && pIpcDataRead[3] != NULL)
   {
 	while(!kthread_should_stop()) {
+		// Check port activity once per second
 		msleep(delay);
-		for (jj=0;jj<NUM_DOLPHIN_NETS;jj++) {
+		for (jj=0;jj<RFMX_NUM_DOLPHIN_NETS;jj++) {
 			mycounter[jj] = 0;
 			for(ii=0;ii<indx;ii++) {
+				// Will send port activity info to EPICS via 32 bit ints
 				kk = ii/32;
 				mm = ii % 32;
+				// Determine active channels by change in data timestamp
+				// Only checking first data block of each channel, as should have
+				// changed in the last second if active.
 				syncWord = pIpcDataRead[jj]->dBlock[0][ii].timestamp;
 				if(syncWord != lastSyncWord[jj][ii]) {
+					// Indicate channel active for data xfer threads
 					ipcActive[jj][ii] = 1;
 					lastSyncWord[jj][ii] = syncWord;
-					// mycounter[jj] |= (1<<ii);
+					// Increment the active channel counter for this network
 					mycounter[jj] += 1;
+					// Set the active port info for EPICS
 					myactive[jj][kk] |= (1<<mm);
 				} else {
+					// Indicate channel NOT active for data xfer threads
 					ipcActive[jj][ii] = 0;
+					// Unset active port info for EPICS
 					myactive[jj][kk] &= ~(1<<mm);
 				}
 			}
 		}
+		// Get current GPS time
+		// Sent to EPICS as indicator switch code running
 		mycounter[9] = current_time();
+		// Check traffic for all data xfer threads
+		// and set thread status bits.
 		swstatus = 0;
-		for (jj=0;jj<NUM_DOLPHIN_NETS;jj++) {
+		for (jj=0;jj<RFMX_NUM_DOLPHIN_NETS;jj++) {
 			if(traffic[jj] != mytraffic[jj]) {
 				traffic[jj] = mytraffic[jj];
 				swstatus |= (1 << jj);
 			}
 		}
+		// Copy data xfer thread status to be sent to EPICS
 		mysysstatus = swstatus;
 	}
 	printk("%s thread has terminated %d\n",((struct params*)data)->name,indx);
@@ -137,29 +155,38 @@ int monitorActiveConnections(void *data)
 }
 
 // ************************************************************************
+// Common code to xfer data between 2 RFM links
 inline int copyIpcData (int indx, int netFrom, int netTo)
 // ************************************************************************
 {
   unsigned long syncWord;
   int ii,jj;
   int cblock,dblock,ttcache;
-  int eor = indx + 32;
+  int eor = indx + RFMX_CHANS_PER_THREAD;
   double tmp;
   int xfers = 0;
 
+	// Reset cache flushing indices and flag
 	cblock = 0;
 	dblock = 0;
 	ttcache = 0;
+	// Scan thru switching ports for new data
 	for(ii=indx;ii<eor;ii++) {
+		// Copy data only if port is active, as marked by switch monitor task
 		if(ipcActive[netFrom][ii]) {
-			for(jj=0;jj<IPC_BLOCKS;jj++) {
+			// Scan thru 64 data blocks associated with a channel for new data
+			// Only check every 4th block, as max RFM channel rate is 16K
+			for(jj=0;jj<IPC_BLOCKS;jj+=4) {
+				// Determine new data by comparing present timestamp with last xfer timestamp
 				syncWord = pIpcDataRead[netFrom]->dBlock[jj][ii].timestamp;
 				if(syncWord != syncArray[netFrom][jj][ii]) {
 					xfers ++;
+					// Copy data and time stamp to next Dolphin switch
 					tmp = pIpcDataRead[netFrom]->dBlock[jj][ii].data;
 					pIpcDataWrite[netTo]->dBlock[jj][ii].data = tmp;
 					pIpcDataWrite[netTo]->dBlock[jj][ii].timestamp = syncWord;
 					syncArray[netFrom][jj][ii] = syncWord;
+					// Setup locations and flag for cache flushing at end of xfers
 					cblock = jj;
 					dblock = ii;
 					ttcache += 1;
@@ -170,31 +197,34 @@ inline int copyIpcData (int indx, int netFrom, int netTo)
 		
 	// If anything was copied, we need to flush the buffer
 	if (ttcache) clflush_cache_range (&(pIpcDataWrite[netTo]->dBlock[cblock][dblock].data), 16);
+	// return total xfers, which is used as code running diagnostic
 	return xfers;
 }
 
+// DATA XFER Threads  *****************************************************
+// Following 4 code modules are the switch data xfer threads. Each thread:
+// 	- Is locked to a CPU core (3-6)
+// 	- Transfers 32 channels of data between EX and CS or CS and EY.
 // ************************************************************************
 void *copyRfmDataEX2CS0(void *arg) 
+// Thread to copy data chans 0-31 between EX and CS (RFM0)
 // ************************************************************************
 {
   int indx = 0;
-  int delay = 2;
   static int totalxfers;
 
   if(pIpcDataRead[0] != NULL && pIpcDataWrite[1] != NULL)
   {
 	while(!stop_working_threads) {
-		udelay(delay);
+		udelay(RFMX_THREAD_DELAY);
 		totalxfers += copyIpcData (indx, 0, 1);
 		totalxfers += copyIpcData (indx, 1, 0);
-		totalxfers %= 100000000;
+		totalxfers %= RFMX_MAX_XFER_CNT;
 		mytraffic[0] = totalxfers;
 	}
-	// printk("%s thread has terminated %d\n",((struct params*)data)->name,indx);
 	printk("%s thread has terminated %d\n","copyRfmDataEX2CS0",1);
 	return (void *)0;
   } else {
-  	// printk("Do not have pointers to Dolphin read - %s exiting \n",((struct params*)data)->name);
   	printk("Do not have pointers to Dolphin read - %s exiting \n","copyRfmDataEX2CS0");
 	return (void *)-1;
   }
@@ -202,19 +232,19 @@ void *copyRfmDataEX2CS0(void *arg)
 
 // ************************************************************************
 void *copyRfmDataEX2CS1(void *arg) 
+// Thread to copy data chans 31-63 between EX and CS (RFM0)
 // ************************************************************************
 {
   int indx = 32;
-  int delay = 2;
   static int totalxfers;
 
   if(pIpcDataRead[0] != NULL && pIpcDataWrite[1] != NULL)
   {
 	while(!stop_working_threads) {
-		udelay(delay);
+		udelay(RFMX_THREAD_DELAY);
 		totalxfers += copyIpcData (indx, 0, 1);
 		totalxfers += copyIpcData (indx, 1, 0);
-		totalxfers %= 100000000;
+		totalxfers %= RFMX_MAX_XFER_CNT;
 		mytraffic[1] = totalxfers;
 	}
 	// printk("%s thread has terminated %d\n",((struct params*)data)->name,indx);
@@ -229,19 +259,19 @@ void *copyRfmDataEX2CS1(void *arg)
 
 // ************************************************************************
 void *copyRfmDataEY2CS0(void *arg) 
+// Thread to copy data chans 0-31 between EY and CS (RFM1)
 // ************************************************************************
 {
   int indx = 0;
-  int delay = 2;
   static int totalxfers;
 
   if(pIpcDataRead[2] != NULL && pIpcDataWrite[3] != NULL)
   {
 	while(!stop_working_threads) {
-		udelay(delay);
+		udelay(RFMX_THREAD_DELAY);
 		totalxfers += copyIpcData (indx, 2, 3);
 		totalxfers += copyIpcData (indx, 3, 2);
-		totalxfers %= 100000000;
+		totalxfers %= RFMX_MAX_XFER_CNT;
 		mytraffic[2] = totalxfers;
 	}
 	// printk("%s thread has terminated %d\n",((struct params*)data)->name,indx);
@@ -256,19 +286,19 @@ void *copyRfmDataEY2CS0(void *arg)
 
 // ************************************************************************
 void *copyRfmDataEY2CS1(void *arg) 
+// Thread to copy data chans 31-63 between EY and CS (RFM1)
 // ************************************************************************
 {
   int indx = 32;
-  int delay = 2;
   static int totalxfers;
 
   if(pIpcDataRead[2] != NULL && pIpcDataWrite[3] != NULL)
   {
 	while(!stop_working_threads) {
-		udelay(delay);
+		udelay(RFMX_THREAD_DELAY);
 		totalxfers += copyIpcData (indx, 2, 3);
 		totalxfers += copyIpcData (indx, 3, 2);
-		totalxfers %= 100000000;
+		totalxfers %= RFMX_MAX_XFER_CNT;
 		mytraffic[3] = totalxfers;
 	}
 	// printk("%s thread has terminated %d\n",((struct params*)data)->name,indx);
@@ -281,6 +311,8 @@ void *copyRfmDataEY2CS1(void *arg)
   }
 }
 
+// ************************************************************************
+// Following 3 routines are required Dolphin connection callbacks.
 // ************************************************************************
 signed32 session_callback(session_cb_arg_t IN arg,
 			  session_cb_reason_t IN reason,
@@ -302,11 +334,6 @@ signed32 connect_callback(void IN *arg,
 			  unsigned32 IN reason, unsigned32 IN status) {
 // ************************************************************************
   printkl("Connect callback reason=%d status=%d\n", reason, status);
-#if 0
-  if (reason == 1) iop_rfm_valid = 1;
-  if (reason == 3) iop_rfm_valid = 0;
-  if (reason == 5) iop_rfm_valid = 1;
-#endif
   return 0;
 }
 
@@ -322,8 +349,13 @@ signed32 create_segment_callback(void IN *arg,
 }
 
 // ************************************************************************
+// Dolphin NIC initialization software.
+// ************************************************************************
 int
 init_dolphin(int modules,CDS_DOLPHIN_INFO *pInfo) {
+// Dolphin NIC intialization software.
+// Will set up connections and return memory pointers for all threads on
+// code start.
 // ************************************************************************
   scierror_t err;
   char *addr;
@@ -412,21 +444,26 @@ init_dolphin(int modules,CDS_DOLPHIN_INFO *pInfo) {
   sci_register_session_cb(ii,0,session_callback,0);
   pInfo->dolphinCount += 1;
 
+    // NIC 0 should be connection to corner station Dolphin switch.
+    // Need Dolphin NIC read/write pointers to both RFM0 (EX) net and RFM1 (EY) net.
     if(ii == 0) {
 	pIpcDataRead[1] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
 	pIpcDataRead[2] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
 	pIpcDataWrite[1] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
 	pIpcDataWrite[2] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
     }
+    // NIC 1 should be connection to EX Dolphin switch (RFM0)
     if(ii == 1) {
 	pIpcDataRead[0] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
 	pIpcDataWrite[0] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM0_OFFSET);
     }
+    // NIC 2 should be connection to EY Dolphin switch (RFM1)
     if(ii == 2) {
 	pIpcDataRead[3] = (CDS_IPC_COMMS *)(read_addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
 	pIpcDataWrite[3] = (CDS_IPC_COMMS *)(addr + IPC_PCIE_BASE_OFFSET + RFM1_OFFSET);
     }
 }
+  // Print read/write addresses to dmesg for diagnostics
   for(ii=0;ii<4;ii++) {
     printk ("Dolphin %d memory read  at 0x%p\n", ii, pIpcDataRead[ii]);
   }
@@ -440,6 +477,7 @@ init_dolphin(int modules,CDS_DOLPHIN_INFO *pInfo) {
 
 // ************************************************************************
 void finish_dolphin(int dolphinCount) {
+// Routine to disconnect code from Dolphin NICs when existing.
 // ************************************************************************
 int ii;
   for(ii=0;ii<dolphinCount;ii++) {
@@ -451,6 +489,10 @@ int ii;
   }
 }
 
+// ************************************************************************
+// ************************************************************************
+// Switching code communicates info with user space via a /proc file.
+// The following routines provide the necessary open/read/close file functions.
 // ************************************************************************
 int counter_proc_open(struct inode *sp_inode,struct file *sp_file) {
 // ************************************************************************
@@ -492,16 +534,25 @@ int counter_proc_release(struct inode *sp_inode,struct file *sp_file) {
 	return 0;
 }
 
-static int test_data __initdata = NUM_DOLPHIN_CARDS;
+static int test_data __initdata = RFMX_NUM_DOLPHIN_CARDS;
 
 // ************************************************************************
-static int __init test_3_init(void)
+// ************************************************************************
+// ************************************************************************
+static int __init lr_switch_init(void)
+// Kernel module initialization function.
+// ************************************************************************
+// ************************************************************************
 // ************************************************************************
 {
 	printk(KERN_INFO "Starting CDS RFM SWITCH %d\n", test_data);
-	init_dolphin(NUM_DOLPHIN_CARDS,&mdi);
+	// Initialize Dolphin NICs and get data pointers.
+	init_dolphin(RFMX_NUM_DOLPHIN_CARDS,&mdi);
+	// Reset variable used to stop data xfer threads on rmmod.
 	stop_working_threads = 0;
 
+// Following code not used, but left here in case want to xfer data
+// to EPICS via shared memory at some point in the future.
 #if 0
 // Setup IPC shared memory with EPICS if needed.
 	ret =  mbuf_allocate_area("ipc", 4*1024*1024, 0);
@@ -517,17 +568,16 @@ static int __init test_3_init(void)
 
 	// Set thread parameters for IPC channel monitoring thread
 	strcpy(threads[0].name,"cdsrfmnetmon");
-
 	// Set thread delays
 	threads[0].delay = 1000;
 	// Set thread number of IPC channels to monitor per RFM network
-	threads[0].idx = MAX_DOLPHIN_SW_CHANS;
+	threads[0].idx = RFMX_MAX_CHANS_PER_RFM;
 	// Set thread netFrom (NOT USED)
 	threads[0].netFrom = 0;
 	// Set thread netto (NOT USED)
 	threads[0].netTo = 0;
 	//
-	// Create thread
+	// Create thread that monitors switch port activity.
 	sthread[0] = kthread_create(monitorActiveConnections,(void *)&threads[0],"cdsrfmnetmon");
 	if(IS_ERR(sthread[0])) {
 		printk("ERROR! kthread_run\n");
@@ -535,7 +585,6 @@ static int __init test_3_init(void)
 	}
 	// Bind thread to CPU 2
 	kthread_bind(sthread[0],2);
-
 	// Start thread
 	wake_up_process(sthread[0]);
 
@@ -546,19 +595,19 @@ static int __init test_3_init(void)
 	msleep(100);
 	cpu_down(3);
 
-	// Start thread which moves data for RFM0 IPC channels 0 - 31
+	// Start thread which moves data for RFM0 IPC channels 32 -63 
 	printk("Shutting down CPU 4 at %ld\n",current_time());
 	set_fe_code_idle(copyRfmDataEX2CS1,4);
 	msleep(100);
 	cpu_down(4);
 
-	// Start thread which moves data for RFM0 IPC channels 0 - 31
+	// Start thread which moves data for RFM1 IPC channels 0 - 31
 	printk("Shutting down CPU 5 at %ld\n",current_time());
 	set_fe_code_idle(copyRfmDataEY2CS0,5);
 	msleep(100);
 	cpu_down(5);
 
-	// Start thread which moves data for RFM0 IPC channels 0 - 31
+	// Start thread which moves data for RFM1 IPC channels 32 - 63
 	printk("Shutting down CPU 6 at %ld\n",current_time());
 	set_fe_code_idle(copyRfmDataEY2CS1,6);
 	msleep(100);
@@ -569,6 +618,7 @@ static int __init test_3_init(void)
 	fops.read = counter_proc_read;
 	fops.release = counter_proc_release;
 
+	// Create the /proc file
 	if(!proc_create(ENTRY_NAME,PERM,NULL,&fops)) {
 		printk("ERROR! proc_create\n");
 		remove_proc_entry(ENTRY_NAME,NULL);
@@ -578,7 +628,10 @@ static int __init test_3_init(void)
 }
 
 // ************************************************************************
-static void __exit test_3_exit(void)
+// ************************************************************************
+// ************************************************************************
+static void __exit lr_switch_exit(void)
+// Kernel module exit routine.
 // ************************************************************************
 {
   int ret;
@@ -643,10 +696,10 @@ static void __exit test_3_exit(void)
 	finish_dolphin(mdi.dolphinCount);
 }
 
-module_init(test_3_init);
-module_exit(test_3_exit);
+module_init(lr_switch_init);
+module_exit(lr_switch_exit);
 
 MODULE_AUTHOR("R.Bork");
 MODULE_LICENSE("GPL");
-MODULE_DESCRIPTION("Test");
+MODULE_DESCRIPTION("Long Range PCIe Switch");
 MODULE_SUPPORTED_DEVICE("Long Range PCIe Switch");
