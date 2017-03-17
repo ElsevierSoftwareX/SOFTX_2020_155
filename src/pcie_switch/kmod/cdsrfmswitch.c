@@ -19,7 +19,7 @@
 #include <linux/ctype.h>
 
 #define MAX_UDELAY    19999
-#define ENTRY_NAME "counter"
+#define ENTRY_NAME "cdsrfm"
 #define PERM 0644
 #define PARENT NULL
 #define RFMX_NUM_DOLPHIN_CARDS	3
@@ -32,6 +32,7 @@
 // struct for using /proc files
 static struct file_operations fops;
 
+// if eventually use mbuf shared memory for EPICS interface
 #if 0
 extern void *kmalloc_area[16];
 extern int mbuf_allocate_area(char *name, int size, struct file *file);
@@ -494,7 +495,7 @@ int ii;
 // Switching code communicates info with user space via a /proc file.
 // The following routines provide the necessary open/read/close file functions.
 // ************************************************************************
-int counter_proc_open(struct inode *sp_inode,struct file *sp_file) {
+int cdsrfm_proc_open(struct inode *sp_inode,struct file *sp_file) {
 // ************************************************************************
 	// printk("proc called open \n");
 	read_p = 1;
@@ -514,7 +515,7 @@ int counter_proc_open(struct inode *sp_inode,struct file *sp_file) {
 }
 
 // ************************************************************************
-ssize_t counter_proc_read(struct file *sp_file, char __user *buf,size_t size,loff_t *offset) {
+ssize_t cdsrfm_proc_read(struct file *sp_file, char __user *buf,size_t size,loff_t *offset) {
 // ************************************************************************
   int ret;
 	int len = strlen(message);
@@ -527,7 +528,7 @@ ssize_t counter_proc_read(struct file *sp_file, char __user *buf,size_t size,lof
 }
 
 // ************************************************************************
-int counter_proc_release(struct inode *sp_inode,struct file *sp_file) {
+int cdsrfm_proc_release(struct inode *sp_inode,struct file *sp_file) {
 // ************************************************************************
 	// printk("proc called release \n");
 	kfree(message);
@@ -614,9 +615,9 @@ static int __init lr_switch_init(void)
 	cpu_down(6);
 
 	// Setup /proc file to move diag info out to user space for EPICS
-	fops.open = counter_proc_open;
-	fops.read = counter_proc_read;
-	fops.release = counter_proc_release;
+	fops.open = cdsrfm_proc_open;
+	fops.read = cdsrfm_proc_read;
+	fops.release = cdsrfm_proc_release;
 
 	// Create the /proc file
 	if(!proc_create(ENTRY_NAME,PERM,NULL,&fops)) {
