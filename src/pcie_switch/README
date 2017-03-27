@@ -1,0 +1,35 @@
+The subdirectories contain the software necessary to run the long range PCIe network:
+  - kmod:
+  	Contains the cdsrfmswitch.c code. This is the source for the real-time kernel code that 
+	transfers data between corner and end station Dolphin switches.
+  - cdsrfmepics:
+  	Contains the interface code between cdsrfmswitch kernel and EPICS:
+		- cdsrfmmonitor.py: Gets data from cdsrfmswitch.ko, via /proc/cdsrfm file, and posts 
+		  		    it to EPICS database records.
+		- cdsrfm.db: Contains necessary EPICS database definitions.
+
+Building the code:
+	The kmod directory contains a Makefile to build the kernel object.  Within that directory,
+	simply execute 'make' command.  This should result in the production of a cdsrfmswitch.ko
+	file.
+
+Running the code:
+  1) Log on to the computer that is to run the cdsrfmswitch real-time code.
+  2) From the kmod directory, execute the command 'sudo insmod ./cdsrfmswitch.ko
+  	- Checking dmesg should indicate that the code has been started.
+	- Running 'cat /proc/cdsrfm' should produce a line of numbers (switch status info).
+  3) From the cdsrfmepics directory, execute the command './cdsrfmepics.py IFO &', where 
+     IFO = CDS IFO prefix eg X2,H1,L1, etc.
+     --- NOTE: This code may only be run on the cdsrfmswitch computer, as it must have
+               access to the /proc/cdsrfm file.
+  4) Startup the EPICS database.
+   	- This can be run on any CDS computer that supports the 'tmux' command.
+	- From the cdsrfmepics directory:
+		- Open a tmux session: 'tmux new -s rfm'
+			- May want to check that it doesn't already exist using 'tmux list-sessions'.
+			  If it does, then attach to terminal with 'tmux attach -t rfm' command.
+		- Startup the database: 'softIoc -m IFO=myifo -d ./cdsrfm.db', where:
+			myifo = CDS IFO prefix e.g. X2,H1,L1,etc.
+		- Exit the tmux session with '^B d'.
+			This allows softIoc to run with a console in the background.
+  5) Bring up the cdsrfmswitch MEDM screen and verify operation.
