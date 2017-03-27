@@ -685,7 +685,7 @@ daqd_c::framer_io(int science)
 
    bool write_frame_checksums = true;
    {
-       std::string checksum_flag = parameters().get<std::string>("write_frame_checksums", "1");
+       std::string checksum_flag = parameters().get<std::string>("write_frame_checksums", "0");
        write_frame_checksums = (checksum_flag == std::string("1") ? true : false);
    }
    framer_work_queue *_work_queue = 0;
