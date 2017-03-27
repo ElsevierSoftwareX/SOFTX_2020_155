@@ -26,7 +26,6 @@
 #define RFMX_NUM_DOLPHIN_NETS	4
 #define RFMX_MAX_CHANS_PER_RFM	100
 #define RFMX_CHANS_PER_THREAD	32
-#define RFMX_THREAD_DELAY	2
 #define RFMX_MAX_XFER_CNT	100000000
 
 // struct for using /proc files
@@ -217,7 +216,6 @@ void *copyRfmDataEX2CS0(void *arg)
   if(pIpcDataRead[0] != NULL && pIpcDataWrite[1] != NULL)
   {
 	while(!stop_working_threads) {
-		udelay(RFMX_THREAD_DELAY);
 		totalxfers += copyIpcData (indx, 0, 1);
 		totalxfers += copyIpcData (indx, 1, 0);
 		totalxfers %= RFMX_MAX_XFER_CNT;
@@ -242,7 +240,6 @@ void *copyRfmDataEX2CS1(void *arg)
   if(pIpcDataRead[0] != NULL && pIpcDataWrite[1] != NULL)
   {
 	while(!stop_working_threads) {
-		udelay(RFMX_THREAD_DELAY);
 		totalxfers += copyIpcData (indx, 0, 1);
 		totalxfers += copyIpcData (indx, 1, 0);
 		totalxfers %= RFMX_MAX_XFER_CNT;
@@ -269,7 +266,6 @@ void *copyRfmDataEY2CS0(void *arg)
   if(pIpcDataRead[2] != NULL && pIpcDataWrite[3] != NULL)
   {
 	while(!stop_working_threads) {
-		udelay(RFMX_THREAD_DELAY);
 		totalxfers += copyIpcData (indx, 2, 3);
 		totalxfers += copyIpcData (indx, 3, 2);
 		totalxfers %= RFMX_MAX_XFER_CNT;
@@ -296,7 +292,6 @@ void *copyRfmDataEY2CS1(void *arg)
   if(pIpcDataRead[2] != NULL && pIpcDataWrite[3] != NULL)
   {
 	while(!stop_working_threads) {
-		udelay(RFMX_THREAD_DELAY);
 		totalxfers += copyIpcData (indx, 2, 3);
 		totalxfers += copyIpcData (indx, 3, 2);
 		totalxfers %= RFMX_MAX_XFER_CNT;

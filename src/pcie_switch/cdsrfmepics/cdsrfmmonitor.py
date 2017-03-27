@@ -41,10 +41,16 @@ for item in chan_list:
 
 while True:
 	time.sleep(1)
-	with open("/proc/cdsrfm","r") as datafile:
-		first_line = datafile.readline()
-	word = first_line.split()
+	try:
+		# Read /proc file produced by kmod code
+		with open("/proc/cdsrfm","r") as datafile:
+			first_line = datafile.readline()
+		word = first_line.split()
 
-	for ii,data in enumerate(word):
-		epics_chan[ii].value = data
+		# Relay info to EPICS
+		for ii,data in enumerate(word):
+			epics_chan[ii].value = data
+	except:
+		# If /proc file does not exist, send fault status to EPICS
+		epics_chan[17].value = 0
 
