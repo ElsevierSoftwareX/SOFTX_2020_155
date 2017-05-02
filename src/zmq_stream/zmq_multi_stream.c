@@ -1,7 +1,7 @@
 //
-///	@file mx_stream.c
-///	@brief  Open-MX data sender, supports sending data
-///< from the IOP as well as from the slaves
+///	@file zmq_multi_stream.c
+///	@brief  ZeroMQ DAQ data sender, supports sending data from
+///		multiple models on the same FE computer using ZeroMQ.
 //
 
 #include <unistd.h>
@@ -23,10 +23,10 @@
 #include <zmq.h>
 #include <assert.h>
 #include "zmq_daq.h"
+#include "../include/daqmap.h"
 
 
 int do_verbose;
-volatile int threads_running;
 unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
 unsigned int wait_delay = 4; // Wait before acknowledging sends with mx_wait() for this number of cycles times nsys
 
@@ -35,7 +35,7 @@ extern void *findSharedMemory(char *);
 void
 usage()
 {
-	fprintf(stderr, "Usage: mx_stream [args] -s sys_names -d rem_host:0\n");
+	fprintf(stderr, "Usage: zmq_multi_stream [args] -s sys_names -d rem_host:0\n");
 	fprintf(stderr, "-l filename - log file name\n"); 
 	fprintf(stderr, "-s - system names: \"x1x12 x1lsc x1asc\"\n");
 	fprintf(stderr, "-v - verbose\n");
@@ -43,43 +43,6 @@ usage()
 	fprintf(stderr, "-h - help\n");
 }
 
-typedef struct blockProp {
-  unsigned int status;
-  unsigned int timeSec;
-  unsigned int timeNSec;
-  unsigned int run;
-  unsigned int cycle;
-  unsigned int crc; /* block data CRC checksum */
-} blockPropT;
-
-struct rmIpcStr {       /* IPC area structure                   */
-  unsigned int cycle;  /* Copy of latest cycle num from blocks */
-  unsigned int dcuId;          /* id of unit, unique within each site  */
-  unsigned int crc;            /* Configuration file's checksum        */
-  unsigned int command;        /* Allows DAQSC to command unit.        */
-  unsigned int cmdAck;         /* Allows unit to acknowledge DAQS cmd. */
-  unsigned int request;        /* DCU request of controller            */
-  unsigned int reqAck;         /* controller acknowledge of DCU req.   */
-  unsigned int status;         /* Status is set by the controller.     */
-  unsigned int channelCount;   /* Number of data channels in a DCU     */
-  unsigned int dataBlockSize; /* Num bytes actually written by DCU within a 1/16 data block */
-  blockPropT bp [DAQ_NUM_DATA_BLOCKS];  /* An array of block property structures */
-};
-
-/* GDS test point table structure for FE to frame builder communication */
-typedef struct cdsDaqNetGdsTpNum {
-   int count; /* test points count */
-   int tpNum[DAQ_GDS_MAX_TP_NUM];
-} cdsDaqNetGdsTpNum;
-
-
-#if 0
-struct daq0mqdata {
-	int dcuTotalModels;
-	daq_msg_header_t zmqheader[DAQ_ZMQ_MODELS_PER_FE];
-	char zmqDataBlock[DAQ_DCU_BLOCK_SIZE];
-};
-#endif
 static struct rmIpcStr *shmIpcPtr[DAQ_ZMQ_MODELS_PER_FE];
 static char *shmDataPtr[DAQ_ZMQ_MODELS_PER_FE];
 static struct cdsDaqNetGdsTpNum *shmTpTable[DAQ_ZMQ_MODELS_PER_FE];
@@ -96,8 +59,11 @@ main(int argc, char **argv)
 	int c;
 
 	extern char *optarg;
-	daq_multi_dcu_data_t mxDataBlock;
-	char *daqbuffer = (char *) &mxDataBlock;
+
+	// Declare local DAQ data buffer
+	daq_multi_dcu_data_t zmqDataBlock;
+	// Set pointer to local DAQ data buffer
+	char *daqbuffer = (char *) &zmqDataBlock;
 
 
 	/* set up defaults */
@@ -113,9 +79,9 @@ main(int argc, char **argv)
 	int new_cycle;
 	int myErrorSignal = 0;
 	int sendLength = 0;
-	int mxStatBit[2];
-	mxStatBit[0] = 1;
-	mxStatBit[1] = 2;
+	int daqStatBit[2];
+	daqStatBit[0] = 1;
+	daqStatBit[1] = 2;
 	char *dataBuff;
 	unsigned int myCrc = 0;
 	char buffer[1024000];
@@ -205,13 +171,13 @@ main(int argc, char **argv)
 		if(new_cycle == 0 && do_verbose) {
 			printf("\nTime = %d-%d with size = %d\n",shmIpcPtr[0]->bp[lastCycle].timeSec,shmIpcPtr[0]->bp[lastCycle].timeNSec,msg_size);
 			printf("\tCycle = ");
-			for(ii=0;ii<nsys;ii++) printf("\t%d",mxDataBlock.zmqheader[ii].cycle);
+			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.zmqheader[ii].cycle);
 			printf("\n\tTimeSec = ");
-			for(ii=0;ii<nsys;ii++) printf("\t%d",mxDataBlock.zmqheader[ii].timeSec);
+			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.zmqheader[ii].timeSec);
 			printf("\n\tTimeNSec = ");
-			for(ii=0;ii<nsys;ii++) printf("\t%d",mxDataBlock.zmqheader[ii].timeNSec);
+			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.zmqheader[ii].timeNSec);
 			printf("\n\tDataSize = ");
-			for(ii=0;ii<nsys;ii++) printf("\t%d",mxDataBlock.zmqheader[ii].dataBlockSize);
+			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.zmqheader[ii].dataBlockSize);
 			}
 
 		// Increment the local DAQ cycle counter
@@ -220,49 +186,49 @@ main(int argc, char **argv)
 
 		
 		// Set pointer to 0MQ message data block
-		zbuffer = (char *)&mxDataBlock.zmqDataBlock[0];
+		zbuffer = (char *)&zmqDataBlock.zmqDataBlock[0];
 		// Initialize data send length to size of message header
 		sendLength = header_size;
 		// Set number of FE models that have data in this message
-		mxDataBlock.dcuTotalModels = nsys;
+		zmqDataBlock.dcuTotalModels = nsys;
 		// Loop thru all FE models
 		for (ii=0;ii<nsys;ii++) {
 			// Set heartbeat monitor for return to DAQ software
-			if (lastCycle == 0) shmIpcPtr[ii]->status ^= mxStatBit[0];
+			if (lastCycle == 0) shmIpcPtr[ii]->status ^= daqStatBit[0];
 			// Set DCU ID in header
-			mxDataBlock.zmqheader[ii].dcuId = shmIpcPtr[ii]->dcuId;
+			zmqDataBlock.zmqheader[ii].dcuId = shmIpcPtr[ii]->dcuId;
 			// Set DAQ .ini file CRC checksum
-			mxDataBlock.zmqheader[ii].fileCrc = shmIpcPtr[ii]->crc;
+			zmqDataBlock.zmqheader[ii].fileCrc = shmIpcPtr[ii]->crc;
 			// Set Status -- Need to update for models not running
-			mxDataBlock.zmqheader[ii].status = 0;
+			zmqDataBlock.zmqheader[ii].status = 0;
 			// Set 1/16Hz cycle number
-			mxDataBlock.zmqheader[ii].cycle = shmIpcPtr[ii]->cycle;
+			zmqDataBlock.zmqheader[ii].cycle = shmIpcPtr[ii]->cycle;
 			// Set GPS seconds
-			mxDataBlock.zmqheader[ii].timeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
+			zmqDataBlock.zmqheader[ii].timeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
 			// Set GPS nanoseconds
-			mxDataBlock.zmqheader[ii].timeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
+			zmqDataBlock.zmqheader[ii].timeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
 			// Indicate size of data block
-			mxDataBlock.zmqheader[ii].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
+			zmqDataBlock.zmqheader[ii].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
 			// Prevent going beyond MAX allowed data size
-			if (mxDataBlock.zmqheader[ii].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
-				mxDataBlock.zmqheader[ii].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
+			if (zmqDataBlock.zmqheader[ii].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
+				zmqDataBlock.zmqheader[ii].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
 
 			// Set pointer to dcu data in shared memory
 			dataBuff = (char *)(shmDataPtr[ii] + lastCycle * buf_size);
 			// Copy data from shared memory into local buffer
-			memcpy((void *)zbuffer,dataBuff,mxDataBlock.zmqheader[ii].dataBlockSize);
+			memcpy((void *)zbuffer,dataBuff,zmqDataBlock.zmqheader[ii].dataBlockSize);
 			// Increment the 0mq data buffer pointer for next FE
-			zbuffer += mxDataBlock.zmqheader[ii].dataBlockSize;
+			zbuffer += zmqDataBlock.zmqheader[ii].dataBlockSize;
 			// Increment the 0mq message size with size of FE data block
-			sendLength += mxDataBlock.zmqheader[ii].dataBlockSize;
+			sendLength += zmqDataBlock.zmqheader[ii].dataBlockSize;
 
 			// Calculate CRC on the data and add to header info
-			myCrc = crc_ptr((char *)&mxDataBlock.zmqDataBlock[0],shmIpcPtr[ii]->bp[lastCycle].crc,0); // .crc is crcLength
+			myCrc = crc_ptr((char *)&zmqDataBlock.zmqDataBlock[0],shmIpcPtr[ii]->bp[lastCycle].crc,0); // .crc is crcLength
 			myCrc = crc_len(shmIpcPtr[ii]->bp[lastCycle].crc,myCrc);
-			mxDataBlock.zmqheader[ii].dataCrc = myCrc;
+			zmqDataBlock.zmqheader[ii].dataCrc = myCrc;
 
 			// Update heartbeat monitor to DAQ code
-			if (lastCycle == 0) shmIpcPtr[ii]->status ^= mxStatBit[1];
+			if (lastCycle == 0) shmIpcPtr[ii]->status ^= daqStatBit[1];
 		}
 		// Copy data to 0mq message buffer
 		memcpy(buffer,daqbuffer,sendLength);
