@@ -43,6 +43,12 @@ FRAMEDIROBJ=  FrameF.o Time.o TimeStr.o framedir.o Interval.o
 
 all: nds
 
+mergetrend: mergetrend.o
+	$(CXX) $(DEBUGFLAGS) -o mergetrend mergetrend.o $(LDASLIBFLAGS) $(LIBS)
+
+validaterawtrend: validaterawtrend.o
+	$(CXX) $(DEBUGFLAGS) -o validaterawtrend validaterawtrend.o $(LDASLIBFLAGS) $(LIBS)
+
 combiner: combiner.o $(FRAMEDIROBJ)
 	$(CXX) $(DEBUGFLAGS) -o combiner combiner.o $(FRAMEDIROBJ) $(LDASLIBFLAGS) $(LIBS)
 
@@ -88,6 +94,8 @@ nds.o: nds.cc
 spec.o: spec.cc
 main.o: main.cc
 combiner.o: combiner.cc
+mergetrend.o: mergetrend.cc
+validaterawtrend.o: validaterawtrend.cc
 
 FrameF.o: framedir/FrameF.cc
 	$(CXX) $(CCFLAGS) $<
