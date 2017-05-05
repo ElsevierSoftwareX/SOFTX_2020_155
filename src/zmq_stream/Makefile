@@ -10,10 +10,12 @@ srcdir = .
 
 #include ../common.mk
 
-TARGETS=zmq_multi_stream zmq_multi_rcvr
+TARGETS=zmq_multi_stream zmq_multi_rcvr zmq_proxy zmq_proxy_client
 
 zmq_multi_stream: zmq_multi_stream.o rfm.o
 zmq_multi_rcvr: zmq_multi_rcvr.o
+zmq_proxy: zmq_proxy.o
+zmq_proxy_client: zmq_proxy_client.o
 rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
