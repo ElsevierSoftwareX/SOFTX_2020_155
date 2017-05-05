@@ -27,7 +27,11 @@
 
 static __inline__ int vm_remap_page_range(struct vm_area_struct *vma, unsigned long from, unsigned long to)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0)
 	vma->vm_flags |= VM_RESERVED;
+#else
+	vma->vm_flags |= (VM_DONTEXPAND | VM_DONTDUMP);
+#endif
 #if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,14)
 	return vm_insert_page(vma, from, vmalloc_to_page((void *)to));
 #else
@@ -37,7 +41,11 @@ static __inline__ int vm_remap_page_range(struct vm_area_struct *vma, unsigned l
 
 static __inline__ int km_remap_page_range(struct vm_area_struct *vma, unsigned long from, unsigned long to, unsigned long size)
 {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,7,0)
 	vma->vm_flags |= VM_RESERVED;
+#else
+	vma->vm_flags |= (VM_DONTEXPAND | VM_DONTDUMP);
+#endif
 	return mm_remap_page_range(vma, from, virt_to_phys((void *)to), size, PAGE_SHARED);
 }
 
