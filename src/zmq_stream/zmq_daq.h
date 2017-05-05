@@ -25,7 +25,7 @@ typedef struct daq_data_t_v1 {
 //
 #define DAQ_ZMQ_MODELS_PER_FE	6
 #define DAQ_ZMQ_DCU_SIZE            0x1000000
-#define DAQ_ZMQ_BLOCK_SIZE      (DAQ_DCU_SIZE/DAQ_NUM_DATA_BLOCKS)
+#define DAQ_ZMQ_BLOCK_SIZE      (DAQ_ZMQ_DCU_SIZE/DAQ_NUM_DATA_BLOCKS)
 #define DAQ_DATA_PORT		5555
 #define DAQ_GDS_DATA_PORt	5556
 // 
