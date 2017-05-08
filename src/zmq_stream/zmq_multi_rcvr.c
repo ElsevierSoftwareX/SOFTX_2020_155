@@ -57,7 +57,7 @@ main(int argc, char **argv)
 
 	// Create DAQ message area in local memory
 	daq_multi_dcu_data_t mxDataBlock;
-	daq_multi_dcu_data_t mxDataBlocktest[2];
+	daq_multi_dcu_data_t mxDataBlocktest[4];
 	// Declare pointer to local memory message area
 	printf("size of mxdata = %d\n",sizeof(mxDataBlock));
 
@@ -67,6 +67,7 @@ main(int argc, char **argv)
 	int myErrorSignal = 0;
 	int size;
 	int ii;
+	int mydatardy = 0;
 
 	// Declare 0MQ message pointers
 	void *daq_context[DCU_COUNT];
@@ -78,7 +79,7 @@ main(int argc, char **argv)
 
 	// Test pointer to cpu meter data
 	int *cpu_meter;
-	int mycpu[2][6];
+	int mycpu[4][6];
 	int myconnects = 0;
 
 	while ((c = getopt(argc, argv, "hd:s:l:Vvw:x")) != EOF) switch(c) {
@@ -164,22 +165,26 @@ main(int argc, char **argv)
 		// Set data pointer to start of received data block
 		if(do_verbose) {
 		int mytotaldcu = 0;
-		for(int jj=0;jj<2;jj++) {
+		int mytotaldata = 0;
+		for(int jj=0;jj<3;jj++) {
 			char *dataPtr = (char *)&mxDataBlocktest[jj].zmqDataBlock[0];;
 			mytotaldcu += mxDataBlocktest[jj].dcuTotalModels;
 			for(ii=0;ii<mxDataBlocktest[jj].dcuTotalModels;ii++) {
 				// Increment data pointer to start of next FE data block
 				if(ii>0) dataPtr += mxDataBlocktest[jj].zmqheader[ii-1].dataBlockSize;
+				mytotaldata += mxDataBlocktest[jj].zmqheader[ii].dataBlockSize;
 				// Extract the cpu meter data for each FE
 				cpu_meter = (int *)dataPtr;
 				cpu_meter += 2;
 				mycpu[jj][ii] = *cpu_meter;
 			}
+			if(mxDataBlocktest[jj].zmqheader[0].cycle == 0) mydatardy |= (1 << jj);
 		}
 			// Print the CPU METER info on each 1 second mark
-		if(mxDataBlocktest[0].zmqheader[0].cycle == 0) {
-				printf("Total DCU = %d %d\n", mytotaldcu,myconnects);
-		for(int jj=0;jj<2;jj++) {
+		// if(mxDataBlocktest[0].zmqheader[0].cycle == 0) {
+		if(mydatardy == 7) {
+				printf("Total DCU = %d %d totalsize = %d\n", mytotaldcu,myconnects,mytotaldata);
+		for(int jj=0;jj<3;jj++) {
 				for(ii=0;ii<mxDataBlocktest[jj].dcuTotalModels;ii++) {
 					printf("DCU = %d\tCPU METER = \t%d",mxDataBlocktest[jj].zmqheader[ii].dcuId,mycpu[jj][ii]);
 					printf("\tTime = %d %d\tSize = \t%d bytes\n",
@@ -189,14 +194,16 @@ main(int argc, char **argv)
 				}
 		}
 			}
-			if(mxDataBlocktest[0].zmqheader[0].cycle == 0) {
+			// if(mxDataBlocktest[0].zmqheader[0].cycle == 0) {
+		if(mydatardy == 7) {
+			mydatardy = 0;
 				printf("\n*******************************************************\n");
 				}
 		}
 		// *******************************************************************
 		myErrorSignal ++;
 
-	}while(myErrorSignal < 320);
+	}while(myErrorSignal < 640);
 
 	for(ii=0;ii<nsys;ii++) {
 		zmq_close(daq_subscriber[ii]);
