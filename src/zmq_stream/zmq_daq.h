@@ -68,3 +68,10 @@ typedef struct gds_multi_dcu_data_t {
   char zmqDataBlock[DAQ_ZMQ_BLOCK_SIZE];
 }gds_multi_dcu_data_t;
 
+
+// DAQ Data Concentrator Transmission Structure
+typedef struct daq_dc_data_t {
+  int dcuTotalModels;
+  daq_msg_header_t zmqheader[128];
+  char zmqDataBlock[DAQ_ZMQ_DCU_SIZE];
+}daq_dc_data_t;
