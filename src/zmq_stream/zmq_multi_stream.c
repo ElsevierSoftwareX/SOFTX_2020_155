@@ -146,7 +146,8 @@ main(int argc, char **argv)
 	daq_context = zmq_ctx_new();
 	daq_publisher = zmq_socket (daq_context,ZMQ_PUB);
 	char loc[20];
-	sprintf(loc,"%s%d","tcp://*:",DAQ_DATA_PORT);
+	// sprintf(loc,"%s%d","tcp://*:",DAQ_DATA_PORT);
+	sprintf(loc,"%s%d","tcp://eth1:",DAQ_DATA_PORT);
 	rc = zmq_bind (daq_publisher, loc);
 	assert (rc == 0);
 	printf("sending data on %s\n",loc);
@@ -232,6 +233,7 @@ main(int argc, char **argv)
 		}
 		// Copy data to 0mq message buffer
 		memcpy(buffer,daqbuffer,sendLength);
+		usleep((do_wait * 500));
 		// Send Data
 		msg_size = zmq_send(daq_publisher,buffer,sendLength,0);
 
