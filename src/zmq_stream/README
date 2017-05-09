@@ -1,0 +1,26 @@
+NOTICE  ******
+	*** None of the software in this directory is presently suitable for use in a production system.
+	*** Code here is intended for prototype testing of 0MX network protocol in FE -> DAQ LAN.
+
+Files:
+- zmq_multi_stream.c:
+	- Purpose: Send DAQ data for all models running on a single FE computer via the DAQ LAN.  
+	- Usage: zmq_multi_stream -s systems, where:
+		- systems are space delimited names of all models running on the FE computer 
+		  eg -s "x2ioplsc0 x2lsc x2omc x2lscaux"
+
+- zmq_threads.c:
+	- Purpose: Receive DAQ data from FE computers. Code uses a thread to connect to each FE computer DAQ net.
+	- Usage: zmq_threads -s computer_names, where:
+		- computer_names = hostnames corresponding to FE computer DAQ LAN connection.
+		  e.g. -s "x2lsc0_daq x2oaf0_daq"
+
+- zmq_multi_rcvr:
+	- Purpose: Single threaded version of zmq_threads.c
+
+- zmq_proxy.c
+	- Purpose: Receive data from DAQ LAN and retranmit data in channel by channel blocks.
+
+- zmq_proxy_client.c
+	- Purpose: Subscribe to live data streams of single or multiple DAQ channels by name
+		   from the zmq_proxy.
