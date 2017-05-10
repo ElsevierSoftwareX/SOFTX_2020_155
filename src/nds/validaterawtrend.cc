@@ -231,6 +231,7 @@ int main (int argc, char **argv) {
 	int numGaps = 0;
 	int gapSpan = 0;
 	int lastGPS = 0;
+	int longestGap = 0;
 	nread = read (fd, &sd, RAW_TREND_REC_SIZE);
 	while (nread != 0) {
 	  numRecords++;
@@ -250,7 +251,6 @@ int main (int argc, char **argv) {
 	    if (exit_on_error) {
 	      exit (1);
 	    }
-	    lastGPS = sd.gps;
 	  } else if (sd.gps < startGPS || sd.gps > lastRecordGPS) {
 	    fprintf(stderr, "Record %d has a timestamp outside the bounds of the file: %d not within %d -> %d\n", numRecords, sd.gps, startGPS, lastRecordGPS);
 	    errorFound++;
@@ -265,6 +265,9 @@ int main (int argc, char **argv) {
 	    }
 	  } else if (lastGPS > 0 && max_gap > 0 && sd.gps - lastGPS > max_gap) {
 	    fprintf(stderr, "Gap found between %d and %d lasting %d s, exceeded max allowed gap size of %d.\n", lastGPS, sd.gps, sd.gps - lastGPS, max_gap);
+	    if (sd.gps - lastGPS > longestGap) {
+		longestGap = sd.gps = lastGPS;
+	    }
 	    errorFound++;
 	    if (exit_on_error) {
 		exit (1);
@@ -272,6 +275,9 @@ int main (int argc, char **argv) {
 	  } else if (lastGPS > 0 && sd.gps - lastGPS > 60) {
 	    if (print_gaps >= 1) {
 		fprintf(stderr, "Gap found between %d and %d lasting %d s\n", lastGPS, sd.gps, sd.gps - lastGPS);
+	    }
+	    if (sd.gps - lastGPS > longestGap) {
+		longestGap = sd.gps = lastGPS;
 	    }
 	    numGaps++;
 	    gapSpan += sd.gps - lastGPS;
@@ -300,6 +306,7 @@ int main (int argc, char **argv) {
 	}
 	if (print_summary) {
 	  fprintf(stderr, "%d records with %d gaps spanning %d seconds found\n", numRecords, numGaps, gapSpan);
+	  fprintf(stderr, "Max gap length is %d\n", longestGap);
 	  fprintf(stderr, "GPS time range: %d to %d\n", startGPS, lastGPS);
 	}
       }
