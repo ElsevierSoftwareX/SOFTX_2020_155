@@ -132,13 +132,17 @@ byteswap(char *image_ptr, int chb)
 }
 
 void print_usage(const char *progname) {
-    fprintf(stderr, "Usage:  %s [-g] [-v] [-e] [-s] [-f] [-m maxgap] <filename>\n", progname);
+    fprintf(stderr, "Usage:  %s [-g] [-v] [-e] [-s] [-f] [-G maxgap] <filename>\n", progname);
     fprintf(stderr, "        -g  Print each gap\n");
     fprintf(stderr, "        -v  Print each data record\n");
     fprintf(stderr, "        -e  Exit the first time an error is found\n");
     fprintf(stderr, "        -s  Do not print the summary of gaps and time spans\n");
     fprintf(stderr, "        -f  Purge invalid data and write the result to stdout\n");
-    fprintf(stderr, "        -m  maxgap Maximum allowed size of a gap.\n");
+    fprintf(stderr, "        -G  maxgap Maximum allowed size of a gap.\n");
+    fprintf(stderr, "        -m  minGPS Minimum allowed GPS timestamp on data records.\n");
+    fprintf(stderr, "                   Defaults to timestamp on first data record\n");
+    fprintf(stderr, "        -M  maxGPS Maximum allowed GPS timestamp on data records.\n");
+    fprintf(stderr, "                   Defaults to timestamp on final data record\n");
 }
 
 int main (int argc, char **argv) {
@@ -161,8 +165,10 @@ int main (int argc, char **argv) {
   int print_summary = 1;
   int fix_file = 0;
   int max_gap = 0;
+  int lastRecordGPS = 0;
+  int startGPS = 0;
 
-  while ((opt = getopt(argc, argv, "sgvefm:")) != -1) {
+  while ((opt = getopt(argc, argv, "sgvefG:m:M:")) != -1) {
     switch (opt) {
       case 'v':
 	verbose++;
@@ -179,8 +185,14 @@ int main (int argc, char **argv) {
       case 'f':
 	fix_file++;
 	break;
-      case 'm':
+      case 'G':
 	max_gap=atoi(optarg);
+	break;
+      case 'm':
+	startGPS=atoi(optarg);
+	break;
+      case 'M':
+	lastRecordGPS=atoi(optarg);
 	break;
       default:
 	print_usage(argv[0]);
@@ -218,24 +230,25 @@ int main (int argc, char **argv) {
 	  system_log (1, "WARNING: filesize of %s isn't multiple of %d (record size)\n", fname, RAW_TREND_REC_SIZE);
 	}
 
-	int lastRecordGPS = 0;
-	lseek (fd, -RAW_TREND_REC_SIZE, SEEK_END);
-	int nread = read (fd, &sd, RAW_TREND_REC_SIZE);
-	if (nread != 0) {
-	    lastRecordGPS = sd.gps;
+	int nread = 0;
+	if (lastRecordGPS == 0) {
+	    lseek (fd, -RAW_TREND_REC_SIZE, SEEK_END);
+	    nread = read (fd, &sd, RAW_TREND_REC_SIZE);
+	    if (nread != 0) {
+		lastRecordGPS = sd.gps;
+	    }
+	    lseek (fd, 0, SEEK_SET);
 	}
-	lseek (fd, 0, SEEK_SET);
 
-	int startGPS = 0;
 	int numRecords = 0;
 	int numGaps = 0;
 	int gapSpan = 0;
-	int lastGPS = 0;
+	int prevGPS = 0;
 	int longestGap = 0;
 	nread = read (fd, &sd, RAW_TREND_REC_SIZE);
 	while (nread != 0) {
 	  numRecords++;
-	  if (lastGPS == 0) {
+	  if (startGPS == 0) {
 	    startGPS = sd.gps;
 	    if (startGPS > lastRecordGPS) {
 		fprintf(stderr, "Timestamp of final record is less than timestamp of first record: %d vs. %d\n", startGPS, lastRecordGPS);
@@ -257,46 +270,46 @@ int main (int argc, char **argv) {
 	    if (exit_on_error) {
 	      exit (1);
 	    }
-	  } else if (lastGPS > 0 && sd.gps < lastGPS) {
-	    fprintf(stderr, "Time goes backwards at record %d: %d -> %d\n", numRecords, lastGPS, sd.gps);
+	  } else if (prevGPS > 0 && sd.gps < prevGPS) {
+	    fprintf(stderr, "Time goes backwards at record %d: %d -> %d\n", numRecords, prevGPS, sd.gps);
 	    errorFound++;
 	    if (exit_on_error) {
 	      exit (1);
 	    }
-	  } else if (lastGPS > 0 && max_gap > 0 && sd.gps - lastGPS > max_gap) {
-	    fprintf(stderr, "Gap found between %d and %d lasting %d s, exceeded max allowed gap size of %d.\n", lastGPS, sd.gps, sd.gps - lastGPS, max_gap);
-	    if (sd.gps - lastGPS > longestGap) {
-		longestGap = sd.gps = lastGPS;
+	  } else if (prevGPS > 0 && max_gap > 0 && sd.gps - prevGPS > max_gap) {
+	    fprintf(stderr, "Gap found between %d and %d lasting %d s, exceeded max allowed gap size of %d.\n", prevGPS, sd.gps, sd.gps - prevGPS, max_gap);
+	    if (sd.gps - prevGPS > longestGap) {
+		longestGap = sd.gps - prevGPS;
 	    }
 	    errorFound++;
 	    if (exit_on_error) {
 		exit (1);
 	    }
-	  } else if (lastGPS > 0 && sd.gps - lastGPS > 60) {
+	  } else if (prevGPS > 0 && sd.gps - prevGPS > 60) {
 	    if (print_gaps >= 1) {
-		fprintf(stderr, "Gap found between %d and %d lasting %d s\n", lastGPS, sd.gps, sd.gps - lastGPS);
+		fprintf(stderr, "Gap found between %d and %d lasting %d s\n", prevGPS, sd.gps, sd.gps - prevGPS);
 	    }
-	    if (sd.gps - lastGPS > longestGap) {
-		longestGap = sd.gps = lastGPS;
+	    if (sd.gps - prevGPS > longestGap) {
+		longestGap = sd.gps - prevGPS;
 	    }
 	    numGaps++;
-	    gapSpan += sd.gps - lastGPS;
-	    lastGPS = sd.gps;
-	    if (fix_file && sd.gps - lastGPS <= max_gap) {
+	    gapSpan += sd.gps - prevGPS;
+	    prevGPS = sd.gps;
+	    if (fix_file && sd.gps - prevGPS <= max_gap) {
 		fwrite(&sd, RAW_TREND_REC_SIZE, 1, stdout);
 	    }
-	  } else if (lastGPS > 0 && sd.gps - lastGPS != 60) {
-	    fprintf(stderr, "Bad gap size found at record %d between %d and %d lasting %d s\n", numRecords, lastGPS, sd.gps, sd.gps - lastGPS);
+	  } else if (prevGPS > 0 && sd.gps - prevGPS != 60) {
+	    fprintf(stderr, "Bad gap size found at record %d between %d and %d lasting %d s\n", numRecords, prevGPS, sd.gps, sd.gps - prevGPS);
 	    errorFound++;
 	    if (exit_on_error) {
 	      exit (1);
 	    }
-	    lastGPS = sd.gps;
+	    prevGPS = sd.gps;
 	  } else {
 	    if (fix_file) {
 		fwrite(&sd, RAW_TREND_REC_SIZE, 1, stdout);
 	    }
-	    lastGPS = sd.gps;
+	    prevGPS = sd.gps;
 	  }
 
 	  if (verbose) {
@@ -307,7 +320,7 @@ int main (int argc, char **argv) {
 	if (print_summary) {
 	  fprintf(stderr, "%d records with %d gaps spanning %d seconds found\n", numRecords, numGaps, gapSpan);
 	  fprintf(stderr, "Max gap length is %d\n", longestGap);
-	  fprintf(stderr, "GPS time range: %d to %d\n", startGPS, lastGPS);
+	  fprintf(stderr, "GPS time range: %d to %d\n", startGPS, prevGPS);
 	}
       }
       close (fd);
