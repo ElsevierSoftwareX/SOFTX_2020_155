@@ -37,6 +37,7 @@ daq_multi_dcu_data_t mxDataBlockFull[16];
 daq_multi_dcu_data_t mxDataBlockG[12][16];
 int stop_working_threads = 0;
 int start_acq = 0;
+static volatile int keepRunning = 1;
 
 void
 usage()
@@ -54,6 +55,10 @@ s_clock (void)
 struct timeval tv;
     gettimeofday (&tv, NULL);
     return (int64_t) (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+}
+
+void intHandler(int dummy) {
+	keepRunning = 0;
 }
 
 void *rcvr_thread(void *arg) {
@@ -120,7 +125,6 @@ main(int argc, char **argv)
 
 	/* set up defaults */
 	sysname = NULL;
-	int myErrorSignal = 0;
 	int ii;
 
 	// Declare 0MQ message pointers
@@ -145,6 +149,8 @@ main(int argc, char **argv)
 	}
 
 	if (sysname == NULL) { usage(); exit(1); }
+
+	signal(SIGINT,intHandler);
 
 	printf("Server name: %s\n", sysname);
 
@@ -185,7 +191,8 @@ main(int argc, char **argv)
 
 	dc_context = zmq_ctx_new();
 	dc_publisher = zmq_socket(dc_context,ZMQ_PUB);
-	rc = zmq_bind (dc_publisher,"tcp://eth2:7777");
+	sprintf(loc,"%s%d","tcp://eth2:",DAQ_DATA_PORT);
+	rc = zmq_bind (dc_publisher,loc);
 	assert(rc == 0);
 
 
@@ -252,8 +259,7 @@ main(int argc, char **argv)
 
 		loop ++;
 		loop %= 16;
-		myErrorSignal ++;
-	}while (myErrorSignal < 132);
+	}while (keepRunning);
 
 	printf("stopping threads %d \n",nsys);
 	stop_working_threads = 1;
@@ -266,6 +272,8 @@ main(int argc, char **argv)
 		zmq_close(daq_subscriber[ii]);
 		zmq_ctx_destroy(daq_context[ii]);
 	}
+	zmq_close(dc_publisher);
+	zmq_ctx_destroy(dc_context);
   
 	exit(0);
 }
