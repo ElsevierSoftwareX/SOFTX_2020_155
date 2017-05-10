@@ -24,8 +24,10 @@ typedef struct daq_data_t_v1 {
 } daq_data_t_v1;
 //
 #define DAQ_ZMQ_MODELS_PER_FE	6
-#define DAQ_ZMQ_DCU_SIZE            0x1000000
+#define DAQ_ZMQ_MAX_BYTE_SEC	0x6000000  	// 100MB per sec
+#define DAQ_ZMQ_DCU_SIZE        0x1000000	// 16MB per sec from FE computer
 #define DAQ_ZMQ_BLOCK_SIZE      (DAQ_ZMQ_DCU_SIZE/DAQ_NUM_DATA_BLOCKS)
+#define DAQ_ZMQ_DC_BLOCK_SIZE   (DAQ_ZMQ_MAX_BYTE_SEC/DAQ_NUM_DATA_BLOCKS)
 #define DAQ_DATA_PORT		5555
 #define DAQ_GDS_DATA_PORT	5556
 // 
@@ -73,5 +75,5 @@ typedef struct gds_multi_dcu_data_t {
 typedef struct daq_dc_data_t {
   int dcuTotalModels;
   daq_msg_header_t zmqheader[128];
-  char zmqDataBlock[DAQ_ZMQ_DCU_SIZE];
+  char zmqDataBlock[DAQ_ZMQ_DC_BLOCK_SIZE];
 }daq_dc_data_t;
