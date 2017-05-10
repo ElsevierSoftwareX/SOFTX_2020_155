@@ -43,12 +43,12 @@ usage()
 	fprintf(stderr, "-h - help\n");
 }
 
-static struct rmIpcStr *shmIpcPtr[DAQ_ZMQ_MODELS_PER_FE];
-static char *shmDataPtr[DAQ_ZMQ_MODELS_PER_FE];
-static struct cdsDaqNetGdsTpNum *shmTpTable[DAQ_ZMQ_MODELS_PER_FE];
+static struct rmIpcStr *shmIpcPtr[DAQ_ZMQ_MAX_DCU ];
+static char *shmDataPtr[DAQ_ZMQ_MAX_DCU ];
+static struct cdsDaqNetGdsTpNum *shmTpTable[DAQ_ZMQ_MAX_DCU ];
 static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
 // static const int header_size = sizeof(struct rmIpcStr) + sizeof(struct cdsDaqNetGdsTpNum);
-static const int header_size = sizeof(daq_msg_header_t) + 4;
+static const int header_size = DAQ_ZMQ_HEADER_SIZE;
 
 int
 main(int argc, char **argv)
@@ -69,7 +69,7 @@ main(int argc, char **argv)
 	/* set up defaults */
 	sysname = NULL;
 	int nsys = 1;				// Default number of models to connect to
-	char *sname[DAQ_ZMQ_MODELS_PER_FE];	// Model names
+	char *sname[DAQ_ZMQ_MAX_DCU];	// Model names
 
 	// 0MQ connection vars
 	void *daq_context;

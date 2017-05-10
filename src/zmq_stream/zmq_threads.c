@@ -30,11 +30,11 @@ int do_verbose;
 unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
 
 extern void *findSharedMemory(char *);
+unsigned int tstatus[16];
 void *daq_context[DCU_COUNT];
 void *daq_subscriber[DCU_COUNT];
-daq_dc_data_t mxDataBlockFull[16];
-daq_multi_dcu_data_t mxDataBlockG[32][16];
-unsigned int tstatus[16];
+daq_multi_dcu_data_t mxDataBlockFull[16];
+daq_multi_dcu_data_t mxDataBlockG[12][16];
 int stop_working_threads = 0;
 int start_acq = 0;
 
@@ -164,7 +164,7 @@ main(int argc, char **argv)
 	}
 		// Make 0MQ socket connection
 	for(ii=0;ii<nsys;ii++) {
-		// Make 0MQ socket connection
+		// Make 0MQ socket connection for rcvr threads
 		daq_context[ii] = zmq_ctx_new();
 		daq_subscriber[ii] = zmq_socket (daq_context[ii],ZMQ_SUB);
 		sprintf(loc,"%s%s%s%d","tcp://",sname[ii],":",DAQ_DATA_PORT);
@@ -179,6 +179,16 @@ main(int argc, char **argv)
 		dataRdy |= (1 << ii);
 	}
 
+	// Create 0MQ socket for DC data transmission
+	void *dc_context;
+	void *dc_publisher;
+
+	dc_context = zmq_ctx_new();
+	dc_publisher = zmq_socket(dc_context,ZMQ_PUB);
+	rc = zmq_bind (dc_publisher,"tcp://eth2:7777");
+	assert(rc == 0);
+
+
 	int loop = 0;
 	start_acq = 1;
 	int64_t mytime = 0;
@@ -186,23 +196,34 @@ main(int argc, char **argv)
 	int64_t myptime = 0;
 	int mytotaldcu = 0;
 	char *zbuffer;
-	int mytdbs = 0;
+	int dc_datablock_size = 0;
+	char buffer[DAQ_ZMQ_DATA_BLOCK_SIZE];
+	static const int header_size = DAQ_ZMQ_HEADER_SIZE;
+	int sendLength = 0;
+	int msg_size = 0;
+
 	do {
 		do {
 			usleep(2000);
 		}while(tstatus[loop] != dataRdy);
 		tstatus[loop] = 0;
+		// Timing diagnostics
 		mytime = s_clock();
 		myptime = mytime - mylasttime;
 		mylasttime = mytime;
 		printf("Data rday for cycle = %d\t%ld\n",loop,myptime);
+		// Reset total DCU counter
 		mytotaldcu = 0;
+		// Set pointer to start of DC data block
 		zbuffer = (char *)&mxDataBlockFull[loop].zmqDataBlock[0];
-		mytdbs = 0;
+		// Reset total DC data size counter
+		dc_datablock_size = 0;
+		// Loop over all data buffers received from FE computers
 		for(ii=0;ii<nsys;ii++) {
 			int myc = mxDataBlockG[ii][loop].dcuTotalModels;
 			// printf("\tModel %d = %d\n",ii,myc);
 			for(int jj=0;jj<myc;jj++) {
+				// Copy data header information
 				mxDataBlockFull[loop].zmqheader[mytotaldcu].dcuId = mxDataBlockG[ii][loop].zmqheader[jj].dcuId;
 				mxDataBlockFull[loop].zmqheader[mytotaldcu].fileCrc = mxDataBlockG[ii][loop].zmqheader[jj].fileCrc;
 				mxDataBlockFull[loop].zmqheader[mytotaldcu].status = mxDataBlockG[ii][loop].zmqheader[jj].status;
@@ -213,13 +234,22 @@ main(int argc, char **argv)
 				// printf("\t\tdcuid = %d\n",mydbs);
 				mxDataBlockFull[loop].zmqheader[mytotaldcu].dataBlockSize = mydbs;
 				char *mbuffer = (char *)&mxDataBlockG[ii][loop].zmqDataBlock[0];
+				// Copy data to DC buffer
 				memcpy(zbuffer,mbuffer,mydbs);
+				// Increment DC data buffer pointer for next data set
 				zbuffer += mydbs;
-				mytdbs += mydbs;
+				dc_datablock_size += mydbs;
 				mytotaldcu ++;
 			}
 		}
-		printf("\tTotal DCU = %d\tSize = %d\n",mytotaldcu,mytdbs);
+		printf("\tTotal DCU = %d\tSize = %d\n",mytotaldcu,dc_datablock_size);
+		sendLength = header_size + dc_datablock_size;
+		zbuffer = (char *)&mxDataBlockFull[loop];
+		// Copy DC data to 0MQ message block
+		memcpy(buffer,zbuffer,sendLength);
+		// Xmit the DC data block
+		msg_size = zmq_send(dc_publisher,buffer,sendLength,0);
+
 		loop ++;
 		loop %= 16;
 		myErrorSignal ++;
@@ -228,15 +258,10 @@ main(int argc, char **argv)
 	printf("stopping threads %d \n",nsys);
 	stop_working_threads = 1;
 
-#if 0
-	for(ii=0;ii<nsys;ii++) {
-		rc =  pthread_join(thread_id[ii],NULL);
-		if(rc != 0) printf("thread join fail %d %d\n",ii,rc);
-	}
-	#endif
-
+	// Wait for threads to stop
 	sleep(2);
 	printf("closing out zmq\n");
+	// Close out ZMQ connections
 	for(ii=0;ii<nsys;ii++) {
 		zmq_close(daq_subscriber[ii]);
 		zmq_ctx_destroy(daq_context[ii]);
