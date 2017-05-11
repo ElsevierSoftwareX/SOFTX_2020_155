@@ -1,18 +1,13 @@
 # Linux Epics IOC system build rules
 
-EPICS_ROOT=/opt/rtapps/epics
-
-# Switching to 3.14.6 Epics; 28 Oct 2004
-# EPICS_ROOT=/opt/CDS/h/alex/epics/base-3.14.6
-# Also need to get rid of *_foo.cc files:
-# comment out
-#    SEQ_OBJ += $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%.st=%_foo.o))) 
-#
 
 ###
-EPICS_BASE=$(EPICS_ROOT)/base
-EPICS_SEQ_BASE=$(EPICS_ROOT)/modules/sncseq
-EPICS_HOST_ARCH=linux-x86_64
+EPICS_BASE_PATH := $(EPICS_BASE)
+EPICS_SEQ_PATH := $(EPICS_SEQ)
+EPICS_EXT_PATH := $(EPICS_EXTENSIONS)
+EPICS_ARCH := $(EPICS_HOST_ARCH)
+EPICS_BIN_PATH := $(EPICS_BASE)/bin/$(EPICS_HOST_ARCH)
+EPICS_LIB_PATH := $(EPICS_BASE)/lib/$(EPICS_HOST_ARCH)
 
 # Sequencer synchronization; to fix broken seq package
 SRC += $(RCG_SRC_DIR)/src/drv/sync.c
@@ -25,13 +20,12 @@ PREPROCESS = /usr/bin/gcc -x c -E -P
 
 # Standard C and C++ compiler and C preprocessor flags
 CFLAGS += $(EXTRA_CFLAGS)
-CFLAGS += -I$(EPICS_BASE)/include/os/Linux -I$(EPICS_BASE)/include 
-CFLAGS += -I$(EPICS_SEQ_BASE)/include
-CFLAGS += -I$(EPICS_ROOT)/extensions/include
+CFLAGS += -I$(EPICS_BASE_PATH)/include/os/Linux -I$(EPICS_BASE_PATH)/include/compiler/gcc -I$(EPICS_BASE_PATH)/include 
+CFLAGS += -I$(EPICS_SEQ_PATH)/include
+CFLAGS += -I$(EPICS_EXT_PATH)/include
 CFLAGS += -I/usr/lib/rmnet -I/usr/lib/rfm2g
 CFLAGS += -Isrc/include
 CFLAGS += -I$(RCG_SRC_DIR)/src/include -I$(RCG_SRC_DIR)/src/include/drv
-CFLAGS += -I/usr/lib64
 ifeq (,$(findstring tcsepics, $(TARGET)))
 CFLAGS += -DRFM_EPICS -DNO_FM10GEN_C_CODE
 endif
@@ -52,28 +46,30 @@ SNCFLAGS += +a -c -w
 #SNCFLAGS += -e
 
 # Sequencer file (.st) compiler
-SNC = $(EPICS_SEQ_BASE)/bin/linux-x86_64/snc $(SNCFLAGS)
+SNC = $(EPICS_SEQ_PATH)/bin/$(EPICS_ARCH)/snc $(SNCFLAGS)
 
 # registration code generator
-REGGEN = $(EPICS_BASE)/bin/linux-x86_64/registerRecordDeviceDriver.pl
+REGGEN = $(EPICS_BIN_PATH)/registerRecordDeviceDriver.pl
 
 # Sequencer generator files
 FMSEQFILES = $(RCG_SRC_DIR)/src/epics/util/fmseq.pl $(RCG_SRC_DIR)/src/epics/util/skeleton.db $(RCG_SRC_DIR)/src/epics/util/skeleton.st
 
 # Standard Epics IOC server library flags
 LIBFLAGS += -g
-LIBFLAGS += -L$(EPICS_BASE)/lib/linux-x86_64
-LIBFLAGS += -L$(EPICS_SEQ_BASE)/lib/linux-x86_64
-LIBFLAGS += -L$(EPICS_ROOT)/extensions/lib/linux-x86_64
-#LIBFLAGS += $(EPICS_SEQ_BASE)/bin/linux-x86/devSequencer.o
+LIBFLAGS += -L$(EPICS_LIB_PATH)
+LIBFLAGS += -L$(EPICS_SEQ_PATH)/lib/$(EPICS_ARCH)
+LIBFLAGS += -L$(EPICS_EXT_PATH)/lib/$(EPICS_ARCH)
+
+# test for 3.15 libraries, otherwise use 3.14
+ifneq ("$(wildcard $(EPICS_LIB_PATH)/libdbCore.a)","")
+LIBFLAGS += -lseq -lpv -ldbRecStd -ldbCore
+LIBFLAGS += -lca -lCom
+else
 LIBFLAGS += -lseq -lseqDev -lpv -lsoftDevIoc -lrecIoc
-ifeq (,$(findstring tcsepics, $(TARGET)))
-LIBFLAGS += -ltestDevIoc 
-endif
-LIBFLAGS += -lrecIoc
 LIBFLAGS += -lmiscIoc -lrsrvIoc -ldbtoolsIoc
 LIBFLAGS += -lasIoc -ldbIoc -lregistryIoc -ldbStaticIoc -lca -lCom
-LIBFLAGS += -lpthread  -lreadline -lcurses -lrt
+endif
+LIBFLAGS += -lpthread -lreadline -lcurses -lrt
 
 # User Makefiles's $(SRC) variable is split here in sequencer source
 # and all the rest, which should be C files

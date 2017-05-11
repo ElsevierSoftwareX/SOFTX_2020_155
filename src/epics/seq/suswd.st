@@ -9,7 +9,7 @@ program suswd
 %%
 %% #include <errno.h>
 %% #include <unistd.h>
-%% #include <tsDefs.h>
+%% #include <epicsTime.h>
 %% #include <cadef.h>
 %% #include <ezca.h>
 
