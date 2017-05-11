@@ -12,12 +12,19 @@ Files:
 		- Needs plenty of work to handle various fault cases eg not all models running, etc.
 
 - zmq_threads.c:
-	- Purpose: Receive DAQ data from FE computers. Code uses a thread to connect to each FE computer DAQ net.
+	- Purpose: DAQ data concentrator. Code uses a thread to connect to each FE computer DAQ net.
 	- Usage: zmq_threads -s computer_names, where:
 		- computer_names = hostnames corresponding to FE computer DAQ LAN connection.
 		  e.g. -s "x2lsc0_daq x2oaf0_daq"
-	- Status: Functional to point of being able to rcv data and place into larger DC block.
-		- Again, needs plenty of work to handle rcv fault conditions.
+	- Status: Functional to point of being able to rcv data, place into larger DC block and
+		retransmit on the DAQ 10G LAN.
+
+- zmq_rcv_from_dc.c:
+	- Purpose: Receive DAQ data from data concentrator (zmq_threads).
+	- Usage: zmq_rcv_from_dc -s server, where:
+		- server is name of data concentrator on DAQ 10G network.
+	- Status: Functional to point of being able to rcv data from DC, but doesn't do anything
+		with the data as yet.
 
 - zmq_multi_rcvr:
 	- Purpose: Single threaded version of zmq_threads.c

@@ -23,10 +23,13 @@ typedef struct daq_data_t_v1 {
   char daq_data_block[DAQ_DCU_BLOCK_SIZE];	// DAQ data
 } daq_data_t_v1;
 //
-#define DAQ_ZMQ_MAX_BYTE_SEC	0x6000000  	// 100MB per sec
-#define DAQ_ZMQ_DATA_BLOCK_SIZE   	(DAQ_ZMQ_MAX_BYTE_SEC/DAQ_NUM_DATA_BLOCKS)
+#define DAQ_ZMQ_MAX_DC_BYTE_SEC		0x6000000  	// 100MB per sec
+#define DAQ_ZMQ_MAX_FE_BYTE_SEC		0x1000000  	// 100MB per sec
+#define DAQ_ZMQ_DC_DATA_BLOCK_SIZE   	(DAQ_ZMQ_MAX_DC_BYTE_SEC/DAQ_NUM_DATA_BLOCKS)
+#define DAQ_ZMQ_FE_DATA_BLOCK_SIZE   	(DAQ_ZMQ_MAX_FE_BYTE_SEC/DAQ_NUM_DATA_BLOCKS)
 #define DAQ_DATA_PORT		5555
 #define DAQ_GDS_DATA_PORT	5556
+#define DAQ_ZMQ_MAX_DCU		128
 // 
 // 
 // DAQ data message header structure
@@ -53,20 +56,26 @@ typedef struct gds_msg_header_t {
   unsigned int tpNum[DAQ_GDS_MAX_TP_NUM];	// GDS TP TABLE 
 } gds_msg_header_t;
 
-#define DAQ_ZMQ_MAX_DCU		128
 
-// DAQ Data Transmission Structure
+// DAQ FE Data Transmission Structure
 typedef struct daq_multi_dcu_data_t {
   int dcuTotalModels;
   daq_msg_header_t zmqheader[DAQ_ZMQ_MAX_DCU];
-  char zmqDataBlock[DAQ_ZMQ_DATA_BLOCK_SIZE];
+  char zmqDataBlock[DAQ_ZMQ_FE_DATA_BLOCK_SIZE];
 }daq_multi_dcu_data_t;
+
+// DAQ DC Data Transmission Structure
+typedef struct daq_dc_data_t {
+  int dcuTotalModels;
+  daq_msg_header_t zmqheader[DAQ_ZMQ_MAX_DCU];
+  char zmqDataBlock[DAQ_ZMQ_DC_DATA_BLOCK_SIZE];
+}daq_dc_data_t;
 
 // GDS TP Data Transmission Structure
 typedef struct gds_multi_dcu_data_t {
   int dcuTotalModels;
-  gds_msg_header_t zmqheader[DAQ_ZMQ_DATA_BLOCK_SIZE];
-  char zmqDataBlock[DAQ_ZMQ_DATA_BLOCK_SIZE];
+  gds_msg_header_t zmqheader[DAQ_ZMQ_MAX_DCU];
+  char zmqDataBlock[DAQ_ZMQ_FE_DATA_BLOCK_SIZE];
 }gds_multi_dcu_data_t;
 
 #define DAQ_ZMQ_HEADER_SIZE	(sizeof(daq_msg_header_t) * DAQ_ZMQ_MAX_DCU + sizeof(int))	

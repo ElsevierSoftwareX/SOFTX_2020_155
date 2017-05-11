@@ -29,12 +29,11 @@
 int do_verbose;
 unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
 
-extern void *findSharedMemory(char *);
 unsigned int tstatus[16];
 void *daq_context[DCU_COUNT];
 void *daq_subscriber[DCU_COUNT];
-daq_multi_dcu_data_t mxDataBlockFull[16];
-daq_multi_dcu_data_t mxDataBlockG[12][16];
+daq_dc_data_t mxDataBlockFull[16];
+daq_multi_dcu_data_t mxDataBlockG[32][16];
 int stop_working_threads = 0;
 int start_acq = 0;
 static volatile int keepRunning = 1;
@@ -204,7 +203,7 @@ main(int argc, char **argv)
 	int mytotaldcu = 0;
 	char *zbuffer;
 	int dc_datablock_size = 0;
-	char buffer[DAQ_ZMQ_DATA_BLOCK_SIZE];
+	char buffer[DAQ_ZMQ_DC_DATA_BLOCK_SIZE];
 	static const int header_size = DAQ_ZMQ_HEADER_SIZE;
 	int sendLength = 0;
 	int msg_size = 0;
@@ -250,6 +249,7 @@ main(int argc, char **argv)
 			}
 		}
 		printf("\tTotal DCU = %d\tSize = %d\n",mytotaldcu,dc_datablock_size);
+		mxDataBlockFull[loop].dcuTotalModels = mytotaldcu;
 		sendLength = header_size + dc_datablock_size;
 		zbuffer = (char *)&mxDataBlockFull[loop];
 		// Copy DC data to 0MQ message block
