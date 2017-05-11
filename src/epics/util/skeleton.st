@@ -12,7 +12,7 @@ program %SEQUENCER_NAME%
 %% #include <daqmap.h>
 %% #include <param.h>
 %% #include <errno.h>
-%% #include <tsDefs.h>
+%% #include <epicsTime.h>
 %% #include <cadef.h>
 %% #include <ezca.h>
 %% #include <alarm.h>                                                    /* MA */
