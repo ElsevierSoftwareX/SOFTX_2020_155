@@ -31,6 +31,12 @@ unsigned int do_wait = 0; // Wait for this number of milliseconds before startin
 unsigned int wait_delay = 4; // Wait before acknowledging sends with mx_wait() for this number of cycles times nsys
 
 extern void *findSharedMemory(char *);
+static volatile int keepRunning = 1;
+
+
+void intHandler(int dummy) {
+        keepRunning = 0;
+}
 
 void
 usage()
@@ -77,7 +83,6 @@ main(int argc, char **argv)
 	int rc;
 
 	int new_cycle;
-	int myErrorSignal = 0;
 	int sendLength = 0;
 	int daqStatBit[2];
 	daqStatBit[0] = 1;
@@ -111,6 +116,8 @@ main(int argc, char **argv)
 	}
 
 	if (sysname == NULL) { usage(); exit(1); }
+
+	signal(SIGINT,intHandler);
 
 	printf("System names: %s\n", sysname);
 	sname[0] = strtok(sysname, " ");
@@ -238,8 +245,9 @@ main(int argc, char **argv)
 		msg_size = zmq_send(daq_publisher,buffer,sendLength,0);
 
 
-	}while(!myErrorSignal);
+	}while(keepRunning);
 
+	printf("Closing out ZMQ and exiting\n");
 	zmq_close(daq_publisher);
 	zmq_ctx_destroy(daq_context);
   
