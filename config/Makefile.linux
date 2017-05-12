@@ -4,21 +4,22 @@
 ###
 #  if EPICS environment variables defined, use those
 #  - otherwise set to old defaults for now
-ifneq ($(EPICS_BASE),)
+ifeq (${EPICS_BASE},)
+EPICS_BASE = /opt/rtapps/epics/base
+EPICS_SEQ = /opt/rtapps/epics/modules/sncseq
+EPICS_EXTENSIONS = /opt/rtapps/epics/extensions
+endif
+ifeq (${EPICS_HOST_ARCH},)
+EPICS_HOST_ARCH = linux-x86_64
+endif
+
 EPICS_BASE_PATH := $(EPICS_BASE)
 EPICS_SEQ_PATH := $(EPICS_SEQ)
 EPICS_EXT_PATH := $(EPICS_EXTENSIONS)
 EPICS_ARCH := $(EPICS_HOST_ARCH)
-else
-EPICS_ROOT := /opt/rtapps/epics
-EPICS_BASE_PATH := $(EPICS_ROOT)/base
-EPICS_SEQ_PATH := $(EPICS_ROOT)/modules/seq
-EPICS_EXT_PATH := $(EPICS_ROOT)/extensions
-EPICS_ARCH := linux-x86_64
-endif
 
-EPICS_BIN_PATH := $(EPICS_BASE)/bin/$(EPICS_HOST_ARCH)
-EPICS_LIB_PATH := $(EPICS_BASE)/lib/$(EPICS_HOST_ARCH)
+EPICS_BIN_PATH := $(EPICS_BASE)/bin/$(EPICS_ARCH)
+EPICS_LIB_PATH := $(EPICS_BASE)/lib/$(EPICS_ARCH)
 
 # Sequencer synchronization; to fix broken seq package
 SRC += $(RCG_SRC_DIR)/src/drv/sync.c
