@@ -81,6 +81,11 @@ int readinifile(char *filename,int chcount,channel_t ndsdata[])
 				ndsdata[totalchans].datasize = (8 * tmpdatarate) /16;;
 				totalrate += (8 * tmpdatarate);
 			}
+			if(strstr(line,"7") != NULL)  {
+				ndsdata[totalchans].type = 7;
+				ndsdata[totalchans].datasize = (4 * tmpdatarate) /16;;
+				totalrate += (4 * tmpdatarate);
+			}
 			sprintf(ndsdata[totalchans].name,"%s",tmpname);
 			ndsdata[totalchans].datarate = tmpdatarate;
 			totalchans ++;
