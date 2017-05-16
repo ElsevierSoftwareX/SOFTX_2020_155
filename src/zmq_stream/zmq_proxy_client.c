@@ -15,28 +15,24 @@
 #include <signal.h>
 #include <zmq.h>
 #include <assert.h>
-
-typedef struct channel_t {
-    char name[64];
-    int type;
-    int value;
-}channel_t;
+#include "zmq_daq.h"
 
 int main (int argc, char *argv [])
 {
 
-channel_t ndschannel;
-channel_t *ndsptr = &ndschannel;
+nds_data_t ndschannel;
+char *ndsptr = (char *)&ndschannel;
 zmq_msg_t message;
 
 int ii;
+char loc[32];
 
-char chnames[2][32] = {"X1:ATS-CPU_METER","X1:ATS-TIME_DIAG"};
-printf ("Collecting updates from NDS proxy\n");
+    sprintf(loc,"%s%d","tcp://x2daqdc0-out:",DAQ_DATA_PORT);
     void *context = zmq_ctx_new ();
     void *subscriber = zmq_socket (context, ZMQ_SUB);
-    int rc = zmq_connect (subscriber, "tcp://scipe19:6666");
+    int rc = zmq_connect (subscriber, loc);
     assert (rc == 0);
+    printf ("Collecting updates from NDS proxy %s\n",loc);
 
     for(ii=1;ii<argc;ii++) {
     	char *filter = argv [ii];
@@ -58,7 +54,11 @@ printf ("Collecting updates from NDS proxy\n");
                 name, &datatype, &datavalue);
 	#endif
 	zmq_msg_close(&message);
-	printf("Name = %s\ttype = %d\tValue = %d\n",ndschannel.name,ndschannel.type,ndschannel.value);
+	if(ndschannel.ndschan.type == 2) {
+	    int *idata = (int *)&ndschannel.ndsdata[0];
+	    printf("Name = %s\t",ndschannel.ndschan.name);
+	    printf("data = \t%d\n",*idata);
+	}
      }
 
      zmq_close (subscriber);
