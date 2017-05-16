@@ -32,11 +32,12 @@ Files:
 
 - zmq_proxy.c
 	- Purpose: Receive data from DAQ LAN and retranmit data in channel by channel blocks.
-	- Status: Not functional. Only used as a test case on Caltech DTS for proof of principal.
-		- Easiest way to make usable and generic is to now start with zmq_threads and
-		  change out DC code with channel by channel xmission code.
+	- Status: Limited functionality --  Hard coded to run on x2daqdc0 and limited to
+		reading 1 .ini file.
 
 - zmq_proxy_client.c
 	- Purpose: Subscribe to live data streams of single or multiple DAQ channels by name
 		   from the zmq_proxy.
-	- Status: Not functional. Only used as a test case on Caltech DTS for proof of principal.
+	- Status: Functional, but limited to use on x2daqnds0 at present. 
+	- Usage: zmq_proxy_client channame, where:
+		- channame = one or more valid DAQ channel names.
