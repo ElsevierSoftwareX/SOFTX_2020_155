@@ -23,7 +23,7 @@ void intHandler(int dummy) {
         keepRunning = 0;
 }
 
-int readinifile(char *filename,channel_t ndsdata[])
+int readinifile(char *filename,int chcount,channel_t ndsdata[])
 {
 	int lft = 0;
 	int ii;
@@ -31,7 +31,7 @@ int readinifile(char *filename,channel_t ndsdata[])
 	char line[80];
 	char tmpname[60];
 	int tmpdatarate = 0;
-	int totalchans = 0;
+	int totalchans = chcount;
 	int totalrate = 0;
 	int epicstotal = 0;
 
@@ -109,6 +109,7 @@ int main(int argc, char **argv)
 
 char *sysname;
 char *modname;
+char *sname[20];
 extern char *optarg;
 sysname = NULL;
 modname = NULL;
@@ -150,17 +151,33 @@ while ((c = getopt(argc, argv, "hd:s:l:d:Vvw:x")) != EOF) switch(c) {
                exit(1);
        }
 
+	int nsys = 1;
        if (sysname == NULL || modname == NULL) { usage(); exit(1); }
 
        for(ii=0;modname[ii] != '\0';ii++) {
        	if(islower(modname[ii])) modname[ii] = toupper(modname[ii]);
        }
 
+	sname[0] = strtok(modname, " ");
+        for(;;) {
+                printf("%s\n", sname[nsys - 1]);
+                char *s = strtok(0, " ");
+                if (!s) break;
+                sname[nsys] = s;
+                nsys++;
+        }
+
+													           printf("nsys = %d\n",nsys);
+        for(ii=0;ii<nsys;ii++) {
+        	printf("sys %d = %s\n",ii,sname[ii]);
+	       sprintf(filename,"%s%s%s",basedir,sname[ii],".ini");
+	       printf("reading %s\n",filename);
+	       num_chans += readinifile(filename,num_chans,mydata);
+        }
+
+
        signal(SIGINT,intHandler);
 
-       sprintf(filename,"%s%s%s",basedir,modname,".ini");
-       printf("reading %s\n",filename);
-       num_chans = readinifile(filename,mydata);
 
 
        // Set up to rcv
