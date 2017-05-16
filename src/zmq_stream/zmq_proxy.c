@@ -22,16 +22,15 @@ static volatile int keepRunning = 1;
 void intHandler(int dummy) {
         keepRunning = 0;
 }
+int totalchans;
 
-int readinifile(char *filename,int chcount,channel_t ndsdata[])
+int readinifile(char *filename,channel_t ndsdata[])
 {
 	int lft = 0;
-	int ii;
 	FILE *fr;
 	char line[80];
 	char tmpname[60];
 	int tmpdatarate = 0;
-	int totalchans = chcount;
 	int totalrate = 0;
 	int epicstotal = 0;
 
@@ -92,12 +91,7 @@ int readinifile(char *filename,int chcount,channel_t ndsdata[])
 			lft = 0;
 		}
 	}
-	for(ii = 0;ii<totalchans;ii++) 
-		printf("%s\t%d\t%d\t%d\n",ndsdata[ii].name,ndsdata[ii].type,ndsdata[ii].datarate,
-						ndsdata[ii].datasize);
-	int fastchans = totalchans - epicstotal;
-	printf("Total chans = %d\nTotal Epics = %d\nTotalrate = %d\n",fastchans,epicstotal,totalrate);
-	return(totalchans);
+	return(0);
 }
 void
 usage()
@@ -118,11 +112,11 @@ char *sname[20];
 extern char *optarg;
 sysname = NULL;
 modname = NULL;
-channel_t mydata[8000];
+channel_t mydata[80000];
 int c;
 int ii;
-char filename[256];
-char basedir[128];
+char filename[512];
+char basedir[256];
 int num_chans = 0;
 
 daq_multi_dcu_data_t mxDataBlock;
@@ -138,6 +132,7 @@ void *nds_publisher;
 int rc;
 int size;
 zmq_msg_t message;
+totalchans = 0;
 
 sprintf(basedir,"%s","/opt/rtcds/tst/x2/chans/daq/");
 
@@ -177,11 +172,17 @@ while ((c = getopt(argc, argv, "hd:s:l:d:Vvw:x")) != EOF) switch(c) {
         	printf("sys %d = %s\n",ii,sname[ii]);
 	       sprintf(filename,"%s%s%s",basedir,sname[ii],".ini");
 	       printf("reading %s\n",filename);
-	       num_chans += readinifile(filename,num_chans,mydata);
+	       num_chans = readinifile(filename,mydata);
         }
 
 
        signal(SIGINT,intHandler);
+       num_chans = totalchans;
+
+	for(ii=0;ii<num_chans;ii++) {
+		printf("Name = %-44s\t%d\t%d\n",mydata[ii].name,mydata[ii].type,mydata[ii].datarate);
+	}
+	printf("total chans = %d\n",num_chans);
 
 
 
