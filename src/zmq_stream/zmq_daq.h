@@ -78,5 +78,17 @@ typedef struct gds_multi_dcu_data_t {
   char zmqDataBlock[DAQ_ZMQ_FE_DATA_BLOCK_SIZE];
 }gds_multi_dcu_data_t;
 
+typedef struct channel_t {
+	char name[64];
+	int type;
+	int datarate;
+	int datasize;
+}channel_t;
+
+typedef struct nds_data_t {
+	channel_t ndschan;
+	char ndsdata[10000];
+} nds_data_t;
+
 #define DAQ_ZMQ_HEADER_SIZE	(sizeof(daq_msg_header_t) * DAQ_ZMQ_MAX_DCU + sizeof(int))	
 
