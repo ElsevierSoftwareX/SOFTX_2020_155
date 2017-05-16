@@ -95,6 +95,7 @@ union ndsdatau {
 	float f[4096];
 	int i[4096];
 	unsigned int ui[4096];
+	double d[4096];
 } ndsdatau;
 
 typedef struct nds_data_r {
