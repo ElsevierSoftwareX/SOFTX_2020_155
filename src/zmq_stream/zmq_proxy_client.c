@@ -17,12 +17,14 @@
 #include <assert.h>
 #include "zmq_daq.h"
 
+
 int main (int argc, char *argv [])
 {
 
-nds_data_t ndschannel;
+nds_data_r ndschannel;
 char *ndsptr = (char *)&ndschannel;
 zmq_msg_t message;
+int num_vals;
 
 int ii;
 char loc[32];
@@ -41,23 +43,28 @@ char loc[32];
 	assert (rc == 0);
 	}
      int update_nbr;
-     for (update_nbr = 0; update_nbr < 100; update_nbr++) {
+     for (update_nbr = 0; update_nbr < 150; update_nbr++) {
         zmq_msg_init(&message);
 	int size = zmq_msg_recv(&message,subscriber,0);
 	assert(size >= 0);
 	char *string = (char *)zmq_msg_data(&message);
 	memcpy(ndsptr,string,size);
-	#if 0
- 	char name[64];
-     	int datatype, datavalue;
-        sscanf (string, "%s %d %d",
-                name, &datatype, &datavalue);
-	#endif
 	zmq_msg_close(&message);
-	if(ndschannel.ndschan.type == 2) {
-	    int *idata = (int *)&ndschannel.ndsdata[0];
-	    printf("Name = %s\t",ndschannel.ndschan.name);
-	    printf("data = \t%d\n",*idata);
+	num_vals = ndschannel.ndschan.datarate / 16;
+	if(ndschannel.ndschan.type == 2 && num_vals == 1) {
+	    int idata = ndschannel.ndsdata.i[0];
+	    printf("Name = %-44s\t",ndschannel.ndschan.name);
+	    printf("data = \t%d\tinteger\n",idata);
+	}
+	if(ndschannel.ndschan.type == 7 && num_vals == 1) {
+	    unsigned int uidata = ndschannel.ndsdata.ui[0];
+	    printf("Name = %-44s\t",ndschannel.ndschan.name);
+	    printf("data = \t%u\tunsigned int\n",uidata);
+	}
+	if(ndschannel.ndschan.type == 4 && num_vals == 1) {
+	    float fdata = ndschannel.ndsdata.f[0];
+	    printf("Name = %-44s\t",ndschannel.ndschan.name);
+	    printf("data = \t%f\tfloat\n",fdata);
 	}
      }
 

@@ -90,5 +90,17 @@ typedef struct nds_data_t {
 	char ndsdata[10000];
 } nds_data_t;
 
+union ndsdatau {
+	char s[10000];
+	float f[4096];
+	int i[4096];
+	unsigned int ui[4096];
+} ndsdatau;
+
+typedef struct nds_data_r {
+	channel_t ndschan;
+	union ndsdatau ndsdata;
+}nds_data_r;
+
 #define DAQ_ZMQ_HEADER_SIZE	(sizeof(daq_msg_header_t) * DAQ_ZMQ_MAX_DCU + sizeof(int))	
 
