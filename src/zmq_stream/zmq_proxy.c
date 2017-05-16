@@ -24,6 +24,14 @@ void intHandler(int dummy) {
 }
 int totalchans;
 
+static int64_t
+s_clock (void)
+{
+struct timeval tv;
+    gettimeofday (&tv, NULL);
+    return (int64_t) (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+}
+
 int readinifile(char *filename,channel_t ndsdata[])
 {
 	int lft = 0;
@@ -134,6 +142,9 @@ int size;
 zmq_msg_t message;
 totalchans = 0;
 
+int64_t mystarttime;
+int64_t mystoptime;
+
 sprintf(basedir,"%s","/opt/rtcds/tst/x2/chans/daq/");
 
 while ((c = getopt(argc, argv, "hd:s:l:d:Vvw:x")) != EOF) switch(c) {
@@ -211,6 +222,7 @@ while ((c = getopt(argc, argv, "hd:s:l:d:Vvw:x")) != EOF) switch(c) {
 		// Get data when message size > 0
                 size = zmq_msg_recv(&message,daq_subscriber,0);
                 if(size >= 0) {
+			mystarttime = s_clock();
 			// Get pointer to message data
 			char *string = (char *)zmq_msg_data(&message);
 			// Copy data out of 0MQ message buffer to local memory buffer
@@ -231,6 +243,9 @@ while ((c = getopt(argc, argv, "hd:s:l:d:Vvw:x")) != EOF) switch(c) {
 				memcpy(msgbuffer,ndsptr,xsize);
 				zmq_send(nds_publisher,msgbuffer,xsize,0);
 			}
+			mystoptime = s_clock();
+			int mytime = mystoptime-mystarttime;
+			// printf("xmit time = %d\n",mytime);
 		}
 	}while(keepRunning);
 

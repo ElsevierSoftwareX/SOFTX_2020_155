@@ -28,6 +28,10 @@ int num_vals;
 
 int ii;
 char loc[32];
+float fdata[4096];
+int idata[4096];
+unsigned int uidata[4096];
+double ddata[4096];
 
     sprintf(loc,"%s%d","tcp://x2daqdc0-out:",DAQ_DATA_PORT);
     void *context = zmq_ctx_new ();
@@ -51,20 +55,25 @@ char loc[32];
 	memcpy(ndsptr,string,size);
 	zmq_msg_close(&message);
 	num_vals = ndschannel.ndschan.datarate / 16;
-	if(ndschannel.ndschan.type == 2 && num_vals == 1) {
-	    int idata = ndschannel.ndsdata.i[0];
-	    printf("Name = %-44s\t",ndschannel.ndschan.name);
-	    printf("data = \t%d\tinteger\n",idata);
+	if(ndschannel.ndschan.type == 2 && num_vals > 0) {
+	    for(ii=0;ii<num_vals;ii++) idata[ii] = ndschannel.ndsdata.i[ii];
+	    printf("Name = %-44s\t%d\t",ndschannel.ndschan.name,num_vals);
+	    printf("data = \t%d\tinteger\n",idata[0]);
 	}
-	if(ndschannel.ndschan.type == 7 && num_vals == 1) {
-	    unsigned int uidata = ndschannel.ndsdata.ui[0];
-	    printf("Name = %-44s\t",ndschannel.ndschan.name);
-	    printf("data = \t%u\tunsigned int\n",uidata);
+	if(ndschannel.ndschan.type == 7 && num_vals > 0) {
+	    for(ii=0;ii<num_vals;ii++) uidata[ii] = ndschannel.ndsdata.ui[ii];
+	    printf("Name = %-44s\t%d\t",ndschannel.ndschan.name,num_vals);
+	    printf("data = \t%u\tunsigned int\n",uidata[0]);
 	}
-	if(ndschannel.ndschan.type == 4 && num_vals == 1) {
-	    float fdata = ndschannel.ndsdata.f[0];
-	    printf("Name = %-44s\t",ndschannel.ndschan.name);
-	    printf("data = \t%f\tfloat\n",fdata);
+	if(ndschannel.ndschan.type == 4 && num_vals > 0) {
+	    for(ii=0;ii<num_vals;ii++) fdata[ii] = ndschannel.ndsdata.f[ii];
+	    printf("Name = %-44s\t%d\t",ndschannel.ndschan.name,num_vals);
+	    printf("data = \t%f\tfloat\n",fdata[0]);
+	}
+	if(ndschannel.ndschan.type == 5 && num_vals > 0) {
+	    for(ii=0;ii<num_vals;ii++) ddata[ii] = ndschannel.ndsdata.d[ii];
+	    printf("Name = %-44s\t%d\t",ndschannel.ndschan.name,num_vals);
+	    printf("data = \t%f\tfloat\n",ddata[0]);
 	}
      }
 
