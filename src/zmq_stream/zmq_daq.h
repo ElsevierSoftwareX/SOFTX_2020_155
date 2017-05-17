@@ -83,6 +83,8 @@ typedef struct channel_t {
 	int type;
 	int datarate;
 	int datasize;
+	unsigned int timesec;
+	unsigned int timensec;
 }channel_t;
 
 typedef struct nds_data_t {

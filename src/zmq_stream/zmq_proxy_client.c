@@ -55,6 +55,7 @@ double ddata[4096];
 	memcpy(ndsptr,string,size);
 	zmq_msg_close(&message);
 	num_vals = ndschannel.ndschan.datarate / 16;
+	printf("Data rcvd for time %d %d\n",ndschannel.ndschan.timesec,ndschannel.ndschan.timensec);
 	if(ndschannel.ndschan.type == 2 && num_vals > 0) {
 	    for(ii=0;ii<num_vals;ii++) idata[ii] = ndschannel.ndsdata.i[ii];
 	    printf("Name = %-44s\t%d\t",ndschannel.ndschan.name,num_vals);
