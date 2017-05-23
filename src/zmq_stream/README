@@ -5,11 +5,12 @@ NOTICE  ******
 Files:
 - zmq_multi_stream.c:
 	- Purpose: Send DAQ data for all models running on a single FE computer via the DAQ LAN.  
-	- Usage: zmq_multi_stream -s systems, where:
+	- Usage: zmq_multi_stream -s systems -b ethernet interface, where:
 		- systems are space delimited names of all models running on the FE computer 
 		  eg -s "x2ioplsc0 x2lsc x2omc x2lscaux"
+		- ethernet interface = ethernet device to send data on eg eth1
 	- Status: Works fine if all models running on the FE
-		- Needs plenty of work to handle various fault cases eg not all models running, etc.
+		- Recently added some timing checks ie is model running, all on same timestamp, etc..
 
 - zmq_threads.c:
 	- Purpose: DAQ data concentrator. Code uses a thread to connect to each FE computer DAQ net.
@@ -17,7 +18,8 @@ Files:
 		- computer_names = hostnames corresponding to FE computer DAQ LAN connection.
 		  e.g. -s "x2lsc0_daq x2oaf0_daq"
 	- Status: Functional to point of being able to rcv data, place into larger DC block and
-		retransmit on the DAQ 10G LAN.
+		retransmit on the DAQ 10G LAN. By default, publishes on eth2, but should be argument
+		to program.
 
 - zmq_rcv_from_dc.c:
 	- Purpose: Receive DAQ data from data concentrator (zmq_threads).
@@ -59,3 +61,8 @@ Files:
 			zmq_proxy_client  X2:LSC-ODC_CHANNEL_   (connects to every channel that
 								begins with the string provided)
 	- Status: Functional, but limited to use on x2daqnds0 at present. 
+
+- zme_pc.py
+	- Purpose: Receive status information from zmq_threads and send to EPICS channels defined in 
+	 	   dc.db.
+	- Status: Functional, but hard coded for use on Caltech test system.
