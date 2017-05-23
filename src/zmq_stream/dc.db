@@ -1,0 +1,4 @@
+grecord(ao,${IFO}:DAQ-DC_DCUID_0")
+grecord(ao,${IFO}:DAQ-DC_DCUID_1")
+grecord(ao,${IFO}:DAQ-DC_DCUID_2")
+grecord(ao,${IFO}:DAQ-DC_DCUID_3")
