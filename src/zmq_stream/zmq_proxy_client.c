@@ -33,12 +33,12 @@ int idata[4096];
 unsigned int uidata[4096];
 double ddata[4096];
 
-    sprintf(loc,"%s%d","tcp://x2daqdc0-out:",DAQ_DATA_PORT);
+    sprintf(loc,"%s%d","tcp://scipe18_daq:",DAQ_PROXY_PORT);
     void *context = zmq_ctx_new ();
     void *subscriber = zmq_socket (context, ZMQ_SUB);
     int rc = zmq_connect (subscriber, loc);
     assert (rc == 0);
-    printf ("Collecting updates from NDS proxy %s\n",loc);
+    printf ("Collecting updates from NDS proxy %s \t%d\n",loc,sizeof(channel_t));
 
     for(ii=1;ii<argc;ii++) {
     	char *filter = argv [ii];
@@ -55,21 +55,24 @@ double ddata[4096];
 	memcpy(ndsptr,string,size);
 	zmq_msg_close(&message);
 	num_vals = ndschannel.ndschan.datarate / 16;
-	printf("Data rcvd for time %d %d\n",ndschannel.ndschan.timesec,ndschannel.ndschan.timensec);
+	printf("Data rcvd: Time %d %3d\t",ndschannel.ndschan.timesec,ndschannel.ndschan.timensec);
 	if(ndschannel.ndschan.type == 2 && num_vals > 0) {
 	    for(ii=0;ii<num_vals;ii++) idata[ii] = ndschannel.ndsdata.i[ii];
-	    printf("Name = %-44s\t%d\t",ndschannel.ndschan.name,num_vals);
+	    printf("%-44s\t%d\t",ndschannel.ndschan.name,num_vals);
 	    printf("data = \t%d\tinteger\n",idata[0]);
 	}
 	if(ndschannel.ndschan.type == 7 && num_vals > 0) {
 	    for(ii=0;ii<num_vals;ii++) uidata[ii] = ndschannel.ndsdata.ui[ii];
-	    printf("Name = %-44s\t%d\t",ndschannel.ndschan.name,num_vals);
+	    printf("%-44s\t%d\t",ndschannel.ndschan.name,num_vals);
 	    printf("data = \t%u\tunsigned int\n",uidata[0]);
 	}
 	if(ndschannel.ndschan.type == 4 && num_vals > 0) {
 	    for(ii=0;ii<num_vals;ii++) fdata[ii] = ndschannel.ndsdata.f[ii];
-	    printf("Name = %-44s\t%d\t",ndschannel.ndschan.name,num_vals);
-	    printf("data = \t%f\tfloat\n",fdata[0]);
+	    printf("%-44s\t%d\t",ndschannel.ndschan.name,num_vals);
+	    if(strstr(ndschannel.ndschan.name,"SWSTAT") != NULL)
+		    printf("data = \t0x%6x\tfloat\n",(unsigned int)fdata[0]);
+	    else
+		    printf("data = \t%f\tfloat\n",fdata[0]);
 	}
 	if(ndschannel.ndschan.type == 5 && num_vals > 0) {
 	    for(ii=0;ii<num_vals;ii++) ddata[ii] = ndschannel.ndsdata.d[ii];

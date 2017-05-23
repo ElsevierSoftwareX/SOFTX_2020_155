@@ -45,7 +45,7 @@ int readinifile(char *filename,channel_t ndsdata[])
 	fr = fopen(filename,"r");
 	if(fr == NULL) return(-1);
 	while(fgets(line,80,fr) != NULL) {
-		if(strstr(line,"X2") != NULL && strstr(line,"#") == NULL) { 
+		if(strstr(line,"X1") != NULL && strstr(line,"#") == NULL) { 
 			int sl = strlen(line) - 2;
 			memmove(line, line+1, sl);
 			line[sl-1] = 0;
@@ -145,7 +145,9 @@ totalchans = 0;
 int64_t mystarttime;
 int64_t mystoptime;
 
-sprintf(basedir,"%s","/opt/rtcds/tst/x2/chans/daq/");
+int do_verbose = 0;
+
+sprintf(basedir,"%s","/opt/rtcds/tst/x1/chans/daq/");
 
 while ((c = getopt(argc, argv, "hd:s:l:d:Vvw:x")) != EOF) switch(c) {
         case 's':
@@ -155,6 +157,9 @@ while ((c = getopt(argc, argv, "hd:s:l:d:Vvw:x")) != EOF) switch(c) {
         case 'd':
                modname = optarg;
 	       printf("modname = %s\n",modname);
+               break;
+        case 'v':
+               do_verbose = 1;
                break;
         case 'h':
         default:
@@ -210,7 +215,7 @@ while ((c = getopt(argc, argv, "hd:s:l:d:Vvw:x")) != EOF) switch(c) {
 
 	nds_context = zmq_ctx_new();
         nds_publisher = zmq_socket (nds_context,ZMQ_PUB);
-        sprintf(loc,"%s%d","tcp://eth2:",DAQ_DATA_PORT);
+        sprintf(loc,"%s%d","tcp://eth1:",DAQ_PROXY_PORT);
         rc = zmq_bind (nds_publisher,loc);
         assert (rc == 0);
         printf("send data on %s\n",loc);
@@ -240,14 +245,14 @@ while ((c = getopt(argc, argv, "hd:s:l:d:Vvw:x")) != EOF) switch(c) {
 				ndsbuffer.ndschan.timensec = mxDataBlock.zmqheader[0].timeNSec;
 				char *ndptr = (char *)&ndsbuffer.ndsdata[0];
 				memcpy(ndptr,dptr,mydata[ii].datasize);
-				dptr += mydata[ii].datasize;
 				int xsize = sizeof(channel_t) + mydata[ii].datasize;
+				dptr += mydata[ii].datasize;
 				memcpy(msgbuffer,ndsptr,xsize);
 				zmq_send(nds_publisher,msgbuffer,xsize,0);
 			}
 			mystoptime = s_clock();
 			int mytime = mystoptime-mystarttime;
-			// printf("xmit time = %d\n",mytime);
+			if(do_verbose) printf("xmit time = %d\n",mytime);
 		}
 	}while(keepRunning);
 
