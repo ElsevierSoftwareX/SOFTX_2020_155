@@ -29,6 +29,7 @@ typedef struct daq_data_t_v1 {
 #define DAQ_ZMQ_FE_DATA_BLOCK_SIZE   	(DAQ_ZMQ_MAX_FE_BYTE_SEC/DAQ_NUM_DATA_BLOCKS)
 #define DAQ_DATA_PORT		5555
 #define DAQ_GDS_DATA_PORT	5556
+#define DAQ_PROXY_PORT		5557
 #define DAQ_ZMQ_MAX_DCU		128
 // 
 // 
@@ -85,6 +86,7 @@ typedef struct channel_t {
 	int datasize;
 	unsigned int timesec;
 	unsigned int timensec;
+	int unused;	// Necessary to maintain 8byte boundary
 }channel_t;
 
 typedef struct nds_data_t {

@@ -194,6 +194,14 @@ main(int argc, char **argv)
 	rc = zmq_bind (dc_publisher,loc);
 	assert(rc == 0);
 
+	void *de_context;
+	void *de_publisher;
+
+	de_context = zmq_ctx_new();
+	de_publisher = zmq_socket(de_context,ZMQ_PUB);
+	sprintf(loc,"%s%d","tcp://eth2:",7777);
+	rc = zmq_bind (de_publisher,loc);
+	assert(rc == 0);
 
 	int loop = 0;
 	start_acq = 1;
@@ -207,6 +215,12 @@ main(int argc, char **argv)
 	static const int header_size = DAQ_ZMQ_HEADER_SIZE;
 	int sendLength = 0;
 	int msg_size = 0;
+	char dcstatus[2024];
+	char dcs[24];
+	int edcuid[10];
+	int estatus[10];
+	int edbs[10];
+	unsigned long ets = 0;
 
 	do {
 		do {
@@ -217,7 +231,7 @@ main(int argc, char **argv)
 		mytime = s_clock();
 		myptime = mytime - mylasttime;
 		mylasttime = mytime;
-		printf("Data rday for cycle = %d\t%ld\n",loop,myptime);
+		// printf("Data rday for cycle = %d\t%ld\n",loop,myptime);
 		// Reset total DCU counter
 		mytotaldcu = 0;
 		// Set pointer to start of DC data block
@@ -231,12 +245,18 @@ main(int argc, char **argv)
 			for(int jj=0;jj<myc;jj++) {
 				// Copy data header information
 				mxDataBlockFull[loop].zmqheader[mytotaldcu].dcuId = mxDataBlockG[ii][loop].zmqheader[jj].dcuId;
+				edcuid[mytotaldcu] = mxDataBlockFull[loop].zmqheader[mytotaldcu].dcuId;
 				mxDataBlockFull[loop].zmqheader[mytotaldcu].fileCrc = mxDataBlockG[ii][loop].zmqheader[jj].fileCrc;
 				mxDataBlockFull[loop].zmqheader[mytotaldcu].status = mxDataBlockG[ii][loop].zmqheader[jj].status;
+				estatus[mytotaldcu] = mxDataBlockFull[loop].zmqheader[mytotaldcu].status;
+				if(mxDataBlockFull[loop].zmqheader[mytotaldcu].status == 0xbad)
+					printf("Fault on dcuid %d\n",mxDataBlockFull[loop].zmqheader[mytotaldcu].dcuId );
+				else ets = mxDataBlockG[ii][loop].zmqheader[jj].timeSec;
 				mxDataBlockFull[loop].zmqheader[mytotaldcu].cycle = mxDataBlockG[ii][loop].zmqheader[jj].cycle;
 				mxDataBlockFull[loop].zmqheader[mytotaldcu].timeSec = mxDataBlockG[ii][loop].zmqheader[jj].timeSec;
 				mxDataBlockFull[loop].zmqheader[mytotaldcu].timeNSec = mxDataBlockG[ii][loop].zmqheader[jj].timeNSec;
 				int mydbs = mxDataBlockG[ii][loop].zmqheader[jj].dataBlockSize;
+				edbs[mytotaldcu] = mydbs;
 				// printf("\t\tdcuid = %d\n",mydbs);
 				mxDataBlockFull[loop].zmqheader[mytotaldcu].dataBlockSize = mydbs;
 				char *mbuffer = (char *)&mxDataBlockG[ii][loop].zmqDataBlock[0];
@@ -248,7 +268,7 @@ main(int argc, char **argv)
 				mytotaldcu ++;
 			}
 		}
-		printf("\tTotal DCU = %d\tSize = %d\n",mytotaldcu,dc_datablock_size);
+		// printf("\tTotal DCU = %d\tSize = %d\n",mytotaldcu,dc_datablock_size);
 		mxDataBlockFull[loop].dcuTotalModels = mytotaldcu;
 		sendLength = header_size + dc_datablock_size;
 		zbuffer = (char *)&mxDataBlockFull[loop];
@@ -256,6 +276,14 @@ main(int argc, char **argv)
 		memcpy(buffer,zbuffer,sendLength);
 		// Xmit the DC data block
 		msg_size = zmq_send(dc_publisher,buffer,sendLength,0);
+
+		sprintf(dcstatus,"%ld ",ets);
+		for(ii=0;ii<mytotaldcu;ii++) {
+			sprintf(dcs,"%d %d %d ",edcuid[ii],estatus[ii],edbs[ii]);
+			strcat(dcstatus,dcs);
+		}
+		sendLength = sizeof(dcstatus);
+		msg_size = zmq_send(de_publisher,dcstatus,sendLength,0);
 
 		loop ++;
 		loop %= 16;
