@@ -62,6 +62,7 @@ main(int argc, char **argv)
 
 
 	char *sysname;
+	char *eport;
 	int c;
 
 	extern char *optarg;
@@ -74,6 +75,7 @@ main(int argc, char **argv)
 
 	/* set up defaults */
 	sysname = NULL;
+	eport = NULL;
 	int nsys = 1;				// Default number of models to connect to
 	char *sname[DAQ_ZMQ_MAX_DCU];	// Model names
 
@@ -93,12 +95,20 @@ main(int argc, char **argv)
 	int msg_size = 0;
 	char *zbuffer;
 	int ii;
+	unsigned int reftimeSec = 0;
+	unsigned int reftimeNSec = 0;
+	int reftimeerror = 0;
+	int refcycle = 0;
 
 
 	while ((c = getopt(argc, argv, "hd:e::b:s:Vvw:x")) != EOF) switch(c) {
 	case 's':
 		sysname = optarg;
 		printf ("sysnames = %s\n",sysname);
+		break;
+	case 'b':
+		eport = optarg;
+		printf ("eport = %s\n",eport);
 		break;
 	case 'W':
 		wait_delay = atoi(optarg);
@@ -115,7 +125,7 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-	if (sysname == NULL) { usage(); exit(1); }
+	if (sysname == NULL || eport == NULL) { usage(); exit(1); }
 
 	signal(SIGINT,intHandler);
 
@@ -154,7 +164,7 @@ main(int argc, char **argv)
 	daq_publisher = zmq_socket (daq_context,ZMQ_PUB);
 	char loc[20];
 	// sprintf(loc,"%s%d","tcp://*:",DAQ_DATA_PORT);
-	sprintf(loc,"%s%d","tcp://eth1:",DAQ_DATA_PORT);
+	sprintf(loc,"%s%s%s%d","tcp://",eport,":",DAQ_DATA_PORT);
 	rc = zmq_bind (daq_publisher, loc);
 	assert (rc == 0);
 	printf("sending data on %s\n",loc);
@@ -201,25 +211,41 @@ main(int argc, char **argv)
 		zmqDataBlock.dcuTotalModels = nsys;
 		// Loop thru all FE models
 		for (ii=0;ii<nsys;ii++) {
+			reftimeerror = 0;
 			// Set heartbeat monitor for return to DAQ software
 			if (lastCycle == 0) shmIpcPtr[ii]->status ^= daqStatBit[0];
 			// Set DCU ID in header
 			zmqDataBlock.zmqheader[ii].dcuId = shmIpcPtr[ii]->dcuId;
 			// Set DAQ .ini file CRC checksum
 			zmqDataBlock.zmqheader[ii].fileCrc = shmIpcPtr[ii]->crc;
-			// Set Status -- Need to update for models not running
-			zmqDataBlock.zmqheader[ii].status = 0;
 			// Set 1/16Hz cycle number
 			zmqDataBlock.zmqheader[ii].cycle = shmIpcPtr[ii]->cycle;
+			if(ii == 0) refcycle = shmIpcPtr[ii]->cycle;
 			// Set GPS seconds
 			zmqDataBlock.zmqheader[ii].timeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
+			if (ii == 0) reftimeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
 			// Set GPS nanoseconds
 			zmqDataBlock.zmqheader[ii].timeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
-			// Indicate size of data block
-			zmqDataBlock.zmqheader[ii].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
-			// Prevent going beyond MAX allowed data size
-			if (zmqDataBlock.zmqheader[ii].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
-				zmqDataBlock.zmqheader[ii].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
+			if (ii == 0) reftimeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
+			if (ii != 0 && reftimeSec != shmIpcPtr[ii]->bp[lastCycle].timeSec) 
+				reftimeerror = 1;;
+			if (ii != 0 && reftimeNSec != shmIpcPtr[ii]->bp[lastCycle].timeNSec) 
+				reftimeerror |= 2;;
+			if(reftimeerror) {
+				zmqDataBlock.zmqheader[ii].cycle = refcycle;
+				printf("Timing error model %d\n",ii);
+				// Set Status -- Need to update for models not running
+				zmqDataBlock.zmqheader[ii].status = 0xbad;
+				// Indicate size of data block
+				zmqDataBlock.zmqheader[ii].dataBlockSize = 0;
+			} else {
+				// Set Status -- Need to update for models not running
+				zmqDataBlock.zmqheader[ii].status = 0;
+				// Indicate size of data block
+				zmqDataBlock.zmqheader[ii].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
+				// Prevent going beyond MAX allowed data size
+				if (zmqDataBlock.zmqheader[ii].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
+					zmqDataBlock.zmqheader[ii].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
 
 			// Set pointer to dcu data in shared memory
 			dataBuff = (char *)(shmDataPtr[ii] + lastCycle * buf_size);
@@ -237,12 +263,14 @@ main(int argc, char **argv)
 
 			// Update heartbeat monitor to DAQ code
 			if (lastCycle == 0) shmIpcPtr[ii]->status ^= daqStatBit[1];
+			}
 		}
 		// Copy data to 0mq message buffer
 		memcpy(buffer,daqbuffer,sendLength);
 		usleep((do_wait * 500));
 		// Send Data
 		msg_size = zmq_send(daq_publisher,buffer,sendLength,0);
+		// printf("Sending data size = %d\n",msg_size);
 
 
 	}while(keepRunning);
