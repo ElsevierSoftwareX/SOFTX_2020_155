@@ -33,6 +33,14 @@ unsigned int wait_delay = 4; // Wait before acknowledging sends with mx_wait() f
 extern void *findSharedMemory(char *);
 static volatile int keepRunning = 1;
 
+static struct rmIpcStr *shmIpcPtr[DAQ_ZMQ_MAX_DCU ];
+static char *shmDataPtr[DAQ_ZMQ_MAX_DCU ];
+static struct cdsDaqNetGdsTpNum *shmTpTable[DAQ_ZMQ_MAX_DCU ];
+static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
+// static const int header_size = sizeof(struct rmIpcStr) + sizeof(struct cdsDaqNetGdsTpNum);
+static const int header_size = DAQ_ZMQ_HEADER_SIZE;
+char modelnames[DAQ_ZMQ_MAX_DCU][64];
+
 
 void intHandler(int dummy) {
         keepRunning = 0;
@@ -41,21 +49,100 @@ void intHandler(int dummy) {
 void
 usage()
 {
-	fprintf(stderr, "Usage: zmq_multi_stream [args] -s sys_names -d rem_host:0\n");
-	fprintf(stderr, "-l filename - log file name\n"); 
+	fprintf(stderr, "Usage: zmq_multi_stream [args] -s sys_names -e ethernet name\n");
+	fprintf(stderr, "-e name of ethernet card to use (REQUIRED) \n"); 
 	fprintf(stderr, "-s - system names: \"x1x12 x1lsc x1asc\"\n");
+	fprintf(stderr, "If -s not specified, code with use hostname and testpoint.par files to auto start\n"); 
+	fprintf(stderr, "-l filename - log file name\n"); 
 	fprintf(stderr, "-v - verbose\n");
 	fprintf(stderr, "-w - wait a given number of milliseconds before starting a cycle\n");
+	fprintf(stderr, "-W - number of milliseconds before starting a cycle\n");
 	fprintf(stderr, "-h - help\n");
 }
 
-static struct rmIpcStr *shmIpcPtr[DAQ_ZMQ_MAX_DCU ];
-static char *shmDataPtr[DAQ_ZMQ_MAX_DCU ];
-static struct cdsDaqNetGdsTpNum *shmTpTable[DAQ_ZMQ_MAX_DCU ];
-static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
-// static const int header_size = sizeof(struct rmIpcStr) + sizeof(struct cdsDaqNetGdsTpNum);
-static const int header_size = DAQ_ZMQ_HEADER_SIZE;
+// Auto determine control models for this FE computer
+// Get Hostname
+// Read testpoint.par file for computer and model info
+int getmodelnames( int dcuid[]) {
+	FILE *fr;
+	int modelcount = 0;
+	char myname[64];
 
+
+	char str[64];
+	sprintf(str,"%s","[X-node25]");
+
+	char tmp[256];
+	char line[80];
+	int i,j,ii;
+	int mydcuid = 0;
+	char gdsfile[128];
+	char *token;
+	char *search = "=";
+	int inmatch = 0;
+
+	// Get computer name
+	gethostname(myname,sizeof(myname));
+	printf("My computer name is %s\n",myname);
+
+
+	   /// Need to get IFO and SITE info from environment variables.
+	   char *s = getenv("IFO");
+	   for(ii=0;s[ii] != '\0';ii++) {
+	           if(isupper(s[ii])) s[ii] = tolower(s[ii]);
+	   }
+	   char *s1 = getenv("SITE");
+	   for(ii=0;s1[ii] != '\0';ii++) {
+	           if(isupper(s1[ii])) s1[ii] = tolower(s1[ii]);
+	   }
+
+	// Create testpoint.par file name
+	sprintf(gdsfile,"%s%s%s%s%s","/opt/rtcds/",s1,"/",s,"/target/gds/param/testpoint.par");
+	// Open and read testpoint.par file
+	fr = fopen(gdsfile,"r");
+	if(fr == NULL) return (-1);
+	while(fgets(line,80,fr) != NULL) {
+	   	line[strcspn(line, "\n")] = 0;
+		// If line contains "node", then this line contains DCU ID number
+	   	if(strstr(line,"node") != NULL) {
+			for(i=0;line[i];i++)
+			{
+			  j=0;
+			  // Find the numbers in the line string
+			   while(line[i]>='0' && line[i]<='9')
+			   {
+				tmp[j]=line[i];
+				i++;
+				j++;
+			   }
+			   tmp[j]=0;
+			   // calc the dcuid
+			   mydcuid = strtol(tmp, &tmp, 10);
+			} 
+		}
+		// If line contains hostname, then get the computer name
+	   	if(strstr(line,"hostname") != NULL) {
+			token = strtok(line, search);
+			token = strtok(NULL, search);
+
+			// If computer name matches hostname, then set to capture data
+			if(strcmp(myname,token) == 0) {
+				inmatch = 1;
+			}
+		}
+		// If line contains system, then this line contains the model name
+		// If computer and hostname matched above, then use this model
+	   	if(strstr(line,"system") != NULL && inmatch) {
+			token = strtok(line, search);
+			token = strtok(NULL, search);
+			sprintf(modelnames[modelcount],"%s",token);;
+			dcuid[modelcount] = mydcuid;
+			modelcount ++;
+			inmatch = 0;
+		}
+	   }
+	   return(modelcount);
+}
 int
 main(int argc, char **argv)
 {
@@ -64,6 +151,7 @@ main(int argc, char **argv)
 	char *sysname;
 	char *eport;
 	int c;
+	int dcuId[10];
 
 	extern char *optarg;
 
@@ -77,7 +165,6 @@ main(int argc, char **argv)
 	sysname = NULL;
 	eport = NULL;
 	int nsys = 1;				// Default number of models to connect to
-	char *sname[DAQ_ZMQ_MAX_DCU];	// Model names
 
 	// 0MQ connection vars
 	void *daq_context;
@@ -101,12 +188,12 @@ main(int argc, char **argv)
 	int refcycle = 0;
 
 
-	while ((c = getopt(argc, argv, "hd:e::b:s:Vvw:x")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "hd:e:s:Vvw:x")) != EOF) switch(c) {
 	case 's':
 		sysname = optarg;
 		printf ("sysnames = %s\n",sysname);
 		break;
-	case 'b':
+	case 'e':
 		eport = optarg;
 		printf ("eport = %s\n",eport);
 		break;
@@ -125,39 +212,52 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-	if (sysname == NULL || eport == NULL) { usage(); exit(1); }
+	if (eport == NULL) { usage(); exit(1); }
 
+	if(sysname != NULL) {
+		printf("System names: %s\n", sysname);
+	        sprintf(modelnames[0],"%s",strtok(sysname, " "));
+		dcuId[0] = 0;
+	        for(;;) {
+	                char *s = strtok(0, " ");
+	                if (!s) break;
+	        	sprintf(modelnames[nsys],"%s",s);
+			dcuId[nsys] = 0;
+	                nsys++;
+	        }
+	} else {
+		nsys = getmodelnames(dcuId); 
+	}
+	   printf ("** Total number of systems is %d\n",nsys);
+	   for(ii=0;ii<nsys;ii++) {
+	    	printf ("\t%s\t%d\n",modelnames[ii],dcuId[ii]);
+		// Set data xmit header
+		zmqDataBlock.zmqheader[ii].dcuId = dcuId[ii];;
+		zmqDataBlock.zmqheader[ii].fileCrc = 0;
+		zmqDataBlock.zmqheader[ii].status = 0xbad;
+		zmqDataBlock.zmqheader[ii].cycle = 0;
+		zmqDataBlock.zmqheader[ii].timeSec = 0;
+		zmqDataBlock.zmqheader[ii].timeNSec = 0;
+		zmqDataBlock.zmqheader[ii].dataCrc = 0;
+		zmqDataBlock.zmqheader[ii].dataBlockSize = 0;
+	   }
+
+	// Setup to catch control C
 	signal(SIGINT,intHandler);
 
-	printf("System names: %s\n", sysname);
-	sname[0] = strtok(sysname, " ");
-        for(;;) {
-                printf("%s\n", sname[nsys - 1]);
-		char *s = strtok(0, " ");
-		if (!s) break;
-	        sname[nsys] = s;
-	        nsys++;
-	}
 	// Map shared memory for all systems
 	for (unsigned int i = 0; i < nsys; i++) {
                 char shmem_fname[128];
-                sprintf(shmem_fname, "%s_daq", sname[i]);
+                sprintf(shmem_fname, "%s_daq", modelnames[i]);
                 void *dcu_addr = findSharedMemory(shmem_fname);
                 if (dcu_addr <= 0) {
                         fprintf(stderr, "Can't map shmem\n");
                         exit(1);
-                } else {
-                        printf("mapped at 0x%lx\n",(unsigned long)dcu_addr);
-	        }
+                } 
                 shmIpcPtr[i] = (struct rmIpcStr *)((char *)dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
                 shmDataPtr[i] = (char *)((char *)dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
                 shmTpTable[i] = (struct cdsDaqNetGdsTpNum *)((char *)dcu_addr + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
         }
-
-	printf("Total number of systems = %d\n", nsys);
-
-
-
 
 	// Set up the data publisher socket
 	daq_context = zmq_ctx_new();
@@ -267,10 +367,10 @@ main(int argc, char **argv)
 		}
 		// Copy data to 0mq message buffer
 		memcpy(buffer,daqbuffer,sendLength);
-		usleep((do_wait * 500));
 		// Send Data
 		msg_size = zmq_send(daq_publisher,buffer,sendLength,0);
 		// printf("Sending data size = %d\n",msg_size);
+		if(do_wait) usleep((wait_delay * 1000));
 
 
 	}while(keepRunning);
