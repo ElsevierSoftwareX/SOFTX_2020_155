@@ -221,12 +221,36 @@ main(int argc, char **argv)
 	int estatus[10];
 	int edbs[10];
 	unsigned long ets = 0;
-
+	int timeout = 0;
+	int resync = 1;
 	do {
+		if(resync) {
+			loop = 0;
+			resync = 0;
+			for(ii=0;ii<16;ii++) tstatus[ii] = 0;
+		}
+		// Wait until received data from at least 1 FE
+		timeout = 0;
 		do {
 			usleep(2000);
-		}while(tstatus[loop] != dataRdy);
+			timeout += 1;
+		}while(tstatus[loop] == 0 && timeout < 50);
+		// If timeout, not getting data from anyone.
+		if(timeout >= 50) resync = 1;
+		if (resync) continue;
+
+		// Wait until data received from everyone
+		timeout = 0;
+		do {
+			usleep(1000);
+			timeout += 1;
+		}while(tstatus[loop] != dataRdy && timeout < 5);
+		// If timeout, not getting data from everyone.
+		// TODO: MARK MISSING FE DATA AS BAD
+		 
+		// Clear thread rdy for this cycle
 		tstatus[loop] = 0;
+
 		// Timing diagnostics
 		mytime = s_clock();
 		myptime = mytime - mylasttime;

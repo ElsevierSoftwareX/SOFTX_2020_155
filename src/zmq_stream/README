@@ -5,10 +5,13 @@ NOTICE  ******
 Files:
 - zmq_multi_stream.c:
 	- Purpose: Send DAQ data for all models running on a single FE computer via the DAQ LAN.  
-	- Usage: zmq_multi_stream -s systems -b ethernet interface, where:
-		- systems are space delimited names of all models running on the FE computer 
-		  eg -s "x2ioplsc0 x2lsc x2omc x2lscaux"
+	- Usage: zmq_multi_stream -s systems -e ethernet interface, where:
 		- ethernet interface = ethernet device to send data on eg eth1
+		- systems (optional) are space delimited names of all models running on the FE computer 
+		  eg -s "x2ioplsc0 x2lsc x2omc x2lscaux"
+		  - NOTE: **** If -s is not specified, code will use testpoint.par and hostname
+		    to determine which control models to attach to.
+		    *******
 	- Status: Works fine if all models running on the FE
 		- Recently added some timing checks ie is model running, all on same timestamp, etc..
 

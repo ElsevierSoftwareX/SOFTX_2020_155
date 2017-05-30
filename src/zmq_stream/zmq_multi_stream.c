@@ -26,9 +26,11 @@
 #include "../include/daqmap.h"
 
 
+#define DAQ_RDY_MAX_WAIT	80
+
 int do_verbose;
-unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
-unsigned int wait_delay = 4; // Wait before acknowledging sends with mx_wait() for this number of cycles times nsys
+unsigned int do_wait = 1; // Wait for this number of milliseconds before starting a cycle
+unsigned int wait_delay = 1; // Wait before acknowledging sends with mx_wait() for this number of cycles times nsys
 
 extern void *findSharedMemory(char *);
 static volatile int keepRunning = 1;
@@ -143,6 +145,16 @@ int getmodelnames( int dcuid[]) {
 	   }
 	   return(modelcount);
 }
+
+int sync2zero(struct rmIpcStr *ipcPtr) {
+	int lastCycle = 0;
+
+	// Find cycle zero
+	for (;ipcPtr->cycle;) usleep(1000);
+	return(lastCycle);
+}
+
+
 int
 main(int argc, char **argv)
 {
@@ -186,6 +198,7 @@ main(int argc, char **argv)
 	unsigned int reftimeNSec = 0;
 	int reftimeerror = 0;
 	int refcycle = 0;
+	int timeout = 0;
 
 
 	while ((c = getopt(argc, argv, "hd:e:s:Vvw:x")) != EOF) switch(c) {
@@ -271,19 +284,36 @@ main(int argc, char **argv)
 
 
 	// Find cycle zero
-	for (;shmIpcPtr[0]->cycle;) usleep(1000);
+	// int lastCycle = sync2zero(shmIpcPtr[0]);
+	// for (;shmIpcPtr[0]->cycle;) usleep(1000);
 	int lastCycle = 0;
-	printf("Found cycle zero\n");
 
-
+	int sync2iop = 1;
 
 	// Enter Infinit Loop
 	do {
+		if(sync2iop) {
+			printf("Syncing to IOP\n");
+			lastCycle = sync2zero(shmIpcPtr[0]);
+			sync2iop = 0;
+			printf("Found cycle zero\n");
+		}
+		timeout = 0;
 		// Wait for a new 1/16Hz DAQ data cycle
 		do{
 			usleep(1000);
 			new_cycle = shmIpcPtr[0]->cycle;
-		}while (new_cycle == lastCycle);
+			timeout += 1;
+		}while (new_cycle == lastCycle && timeout < DAQ_RDY_MAX_WAIT);
+		if(timeout >= DAQ_RDY_MAX_WAIT) {
+			sync2iop = 1;
+			lastCycle = sync2zero(shmIpcPtr[0]);
+			printf("Iop model not running\n");
+		}
+		if(sync2iop) continue;
+		// IOP will be first model ready
+		// Need to wait for 2K models to reach end of their cycled
+		usleep((do_wait * 1000));
 
 		// Print diags in verbose mode
 		if(new_cycle == 0 && do_verbose) {
@@ -333,7 +363,7 @@ main(int argc, char **argv)
 				reftimeerror |= 2;;
 			if(reftimeerror) {
 				zmqDataBlock.zmqheader[ii].cycle = refcycle;
-				printf("Timing error model %d\n",ii);
+				// printf("Timing error model %d\n",ii);
 				// Set Status -- Need to update for models not running
 				zmqDataBlock.zmqheader[ii].status = 0xbad;
 				// Indicate size of data block
@@ -370,7 +400,6 @@ main(int argc, char **argv)
 		// Send Data
 		msg_size = zmq_send(daq_publisher,buffer,sendLength,0);
 		// printf("Sending data size = %d\n",msg_size);
-		if(do_wait) usleep((wait_delay * 1000));
 
 
 	}while(keepRunning);
