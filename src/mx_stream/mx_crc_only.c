@@ -180,6 +180,9 @@ do {
 
 		loop_stats.tick();
 
+		// Allow time for slower (2k) models to complete present cycle
+		usleep(do_wait * 1000);
+
 		// Send data for each system
 		for (unsigned int i = 0; i < nsys; i++) {
 
