@@ -1,0 +1,365 @@
+#!/bin/sh
+#
+# : _nodemgr_setup 31903 2013-01-14 13:42:19Z royn $
+# Copyright (C) 1993 - 2013 Dolphin Interconnect Solutions AS
+# Dolphin ICS - dis_nodemgr daemon
+#
+# Auto-generated script - do not edit!
+#
+### BEGIN INIT INFO
+# Provides: dis_nodemgr
+# Required-Start:    dis_irm
+# Required-Stop:
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 6
+# Short-Description: Start dis_nodemgr daemon
+# Description: The dis_nodemgr daemon is required to control the Dolphin cluster
+#              interconnect. It communicates with the Dolphin network manager
+#              by providing node-specific information and executing the 
+#              network manager's command, like adapting routing tables.
+### END INIT INFO
+# chkconfig: 35 40 16
+# description: Start dis_nodemgr daemon which locally controls the Dolphin interconnect.
+# processname: dis_nodemgr
+
+BASEDIR=/opt/DIS/sbin/..
+
+SERVICE_NAME=dis_nodemgr
+LOGFILE="/var/log/dis_nodemgr.log"
+
+#
+# $Id: _common_init 27764 2009-08-28 12:09:22Z joachim $
+#
+# Copyright (C) 1993-2007 Dolphin Interconnect Solutions AS
+#
+# Common code for scripts to be created in init.d
+#
+
+# Make sure LD_PRELOAD is disabled before doing things with the driver etc
+LD_PRELOAD=""
+
+# paranoid!?
+PATH=$PATH:/sbin
+
+HAVE_LSB=""
+# if possible, source init functions as defined by LSB
+if [ -r /lib/lsb/init-functions ] ; then 
+   . /lib/lsb/init-functions
+   HAVE_LSB="yes"
+fi
+
+# return 'false' if not root. return 'true' if root, or if it could not 
+# be determined.
+is_root()
+{        
+        ID_CMD=`which id`
+        [ -z "$ID_CMD" ] || return 0
+        [ `$ID_CMD -u` != "0" ] || return 1
+        return 0
+}
+
+# log datestamp and all arguments to $LOGFILE
+log_msg()
+{
+        echo `date` $* >>$LOGFILE
+}
+
+# print to stdout, and log datestamp and all arguments to $LOGFILE
+show_msg()
+{
+        echo $*
+        [ "$1" = "-n" ] && shift
+        echo `date` $* >>$LOGFILE
+}
+
+# wrapper for LSB function
+log_warning()
+{
+        if [ -n "$HAVE_LSB" ] ; then
+                log_warning_msg $*
+        else
+                echo "#* WARNING: "$*        
+        fi
+        log_msg $*
+}
+
+# wrapper for LSB function
+log_failure()
+{
+        if [ -n "$HAVE_LSB" ] ; then
+                log_failure_msg $*
+        else
+                echo "#* ERROR: "$*
+        fi
+        log_msg $*
+}
+
+# wrapper for LSB function
+log_success()
+{
+        if [ -n "$HAVE_LSB" ] ; then
+                log_success_msg $*
+        else
+                echo $*
+        fi
+        log_msg $*
+}
+
+kill_proc()
+{
+        if [ -n "$HAVE_LSB" ] ; then
+                killproc $1
+                return $?
+        else
+                kill_pid=`process_running $1`
+                kill $kill_pid
+                process_running $1 >/dev/null
+                [ $? = "1" ] && return 0
+                return 1
+        fi
+}
+
+process_running()
+{
+        if [ -n "$HAVE_LSB" ] ; then
+                # pidofproc() matches only the basename on some distros (like RHEL4), 
+                # not the path. And it does not check if it really is the 
+                # the executable, that has the name we search for. In our
+                # case, this will i.e. make the init script "dis_networkmgr"
+                # and the binary "dis_networkmgr" *both* match the pidofproc
+                # for "dis_networkmgr", although for the script, the executable
+                # really is "sh". This will make the check for "dis_networkmgr"
+                # running succeed always if performed from within the init script
+                # with the same name. Sigh. Need to use the work around.
+                #PIDS=`pidofproc $1`
+                PIDS=`ps axuw | grep $1 | grep -v grep | awk {'print $2'}`
+        else
+                PIDS=`ps axuw | grep $1 | grep -v grep | awk {'print $2'}`
+        fi
+
+    [ -z "$PIDS" ] && return 1
+    echo $PIDS
+    return 0
+}
+
+
+# echo the suffix of kernel modules ('ko' for kernel 2.6, 'o' otherwise)
+get_mod_suffix()
+{
+        LINUX_REVISION=`uname -r`
+        KERNEL26=`echo "$LINUX_REVISION"  | awk '/^(([^012]\.)|(2\.[^012345]))/'` 
+
+        if [ -n "$KERNEL26" ] ; then
+                echo ko
+        else
+                echo o
+        fi
+}
+
+
+# determine the path to the installed modules
+get_mod_dir()
+{
+        local modpath=$1
+        local modname=$2
+
+        if [ -r "$modpath/$modname" ] ; then
+                echo $modpath
+                return 0
+        fi
+        
+        # It seems that the modules have been compiled for a different kernel
+        # version! Cut of kernel version from path string and search in all 
+        # available kernel version subdirectories. It's questionable if this 
+        # makes sense, but anyway...
+        modpath=`dirname $modpath`
+        for mp in `find $modpath -type d -name \*.\*` ; do
+            if [ -r "$mp/$modname" ] ; then
+                echo $mp
+                return 0
+            fi 
+        done
+
+        # No modules-directory found        
+        return 1
+}
+
+
+# verify if the module was built for this kernel version
+check_module_version()
+{
+    local mod_path=$1
+    local dis_service=$2
+
+    mod_version=`modinfo $mod_path | grep vermagic: | awk {'print $2'}`
+    mod_smp=`modinfo $mod_path | grep vermagic: | grep " SMP "`
+
+    # this info is only available with kernel >2.4
+    if [ -z "$mod_version" -o -z "$mod_smp" ] ; then
+	return 0
+    fi
+    if [ `uname -r` != $mod_version ] ; then
+        show_msg
+        log_warning "Dolphin $dis_service: module built for kernel $mod_version"
+        log_warning "Dolphin $dis_service: module running on kernel `uname -r`"
+    fi
+    if [ -n "`uname -v | grep ' SMP '`" -a -z "$mod_smp" ] ; then
+        show_msg
+        log_failure "Dolphin $dis_service: non-SMP module can not run on SMP kernel"
+        return 1
+    fi
+    if [ -z "`uname -v | grep ' SMP '`" -a -n "$mod_smp" ] ; then
+        show_msg
+        log_failure "Dolphin $dis_service: SMP module can not run on non-SMP kernel"
+        return 1
+    fi
+    
+    return 0
+}
+
+
+# sets global MODULE_PATH
+get_module_path()
+{
+    local mod_path=$1
+    local mod_base=$2
+    local cmd=$3
+    local srvc=$4
+
+    mod_name="$mod_base.`get_mod_suffix` "
+    new_mod_path=`get_mod_dir $mod_path $mod_name`
+    if [ $cmd != "stop" -a -z "$new_mod_path" ] ; then
+        log_failure "no valid module $mod_name found in `dirname $mod_path`"
+        return 1
+    fi
+    mod_path=$new_mod_path/$mod_name
+    if [ $cmd = "start" ] ; then
+        if ! check_module_version $mod_path $srvc ; then
+            return 1
+        fi
+    fi
+    
+    MODULE_PATH="$mod_path"
+    return 0
+}
+
+
+#
+# perform mandatory tests
+#
+if ! is_root ; then
+        log_failure Must be root to run this script.
+        exit 4
+fi
+if [ "$1" != "stop" ] ; then 
+        if [ -z "$BASEDIR" ]; then
+                echo "ERROR: BASEDIR not set to base directory of release"
+                # LSB: program not configured error
+                exit 6
+        fi
+fi
+
+
+
+#
+# $Id: _dis_nodemgr_init 35806 2015-03-19 11:10:19Z royn $
+#
+# Copyright (C) 1993-2009 Dolphin Interconnect Solutions AS
+#
+# Dolphin node manager specific code
+#
+# The first parts of this file containing the BASEDIR 
+# and common code will be created by nodemgr-install
+#
+
+MODULE_BASE="$SERVICE_NAME"
+MODULE_NAME="$MODULE_BASE"
+MODULE_PATH="$BASEDIR/sbin/$MODULE_NAME"
+PRINT_NAME="Dolphin Node Manager"
+# We should encode a numerical version code via cvs/svn
+
+MODULE_VERSION=`strings $MODULE_PATH | grep "Node - Network Manager version" | uniq | awk {'print "( Node - Network Manager version " $6 ") (" $7 " " $8 " " $9 ")"'}`
+
+
+case "$1" in
+start)
+    show_msg -n Starting $PRINT_NAME $MODULE_VERSION
+
+    # only start once
+    process_running $MODULE_PATH >/dev/null && { log_success; exit 0; }
+
+    # save old logfile
+    if [ -f ${LOGFILE} ]; then
+        mv -f ${LOGFILE} ${LOGFILE}.old
+    fi
+
+    # full daemon startup within dis_nodemgr, using a pidfile with LSB functions etc.
+    $MODULE_PATH -basedir ${BASEDIR} 2>>$LOGFILE >>$LOGFILE </dev/null 
+
+    # check if successful - sleep because process detaches itself and 
+    # thus changes it initial pid.
+    sleep 1
+    pid=`process_running $MODULE_PATH`
+    [ -z "$pid" ] && { echo ": startup failed"; log_failure check $LOGFILE; exit 1; }
+
+    # after successful start create lockfile (otherwise redhat won't execute stop). 
+    if [ -d /var/lock/subsys ] ; then
+        touch /var/lock/subsys/$SERVICE_NAME
+    fi
+    # Debian needs pidfile for proper shutdown
+    if [ -d /var/run ] ; then
+        echo $pid > /var/run/$SERVICE_NAME.pid
+    fi  
+
+    NODEID=$( $BASEDIR/sbin/dis_tool < /dev/null | grep "Board nodeId" | cut -d ':' -f 2 )
+    $BASEDIR/sbin/dis_tool mk-session 0 $NODEID
+
+
+
+    log_success 
+    ;;
+stop)
+    show_msg -n Stopping $PRINT_NAME
+
+    # check if already stopped
+    process_running $MODULE_PATH >/dev/null || { log_success; exit 0; }
+
+    kill_proc $MODULE_PATH
+    RETVAL=$?
+    [ $RETVAL -ne 0 ] && { log_failure ": shutdown failed"; exit 1; }
+
+    # after successful stop remove lockfiles
+    rm -f /var/lock/subsys/$SERVICE_NAME /var/run/$SERVICE_NAME.pid
+    
+    log_success 
+    ;;
+status)
+    PIDS=`process_running $MODULE_PATH`
+    if [ "$?" -eq 0 ] ; then
+        # Actually, we can not be sure that the process is from the executable we check above!
+        # Another way to determine the version?
+        echo $PRINT_NAME $MODULE_VERSION is running \(pid $PIDS\).
+    else    
+        if [ -r /var/lock/subsys/$SERVICE_NAME ] ; then
+            log_warning "$PRINT_NAME not running, but /var/lock/subsys/$SERVICE_NAME exists"
+            exit 2
+        elif [ -r /var/run/$SERVICE_NAME.pid ] ; then
+            log_warning "$PRINT_NAME not running, but /var/run/$SERVICE_NAME.pid exists"
+            exit 2
+        else
+            echo "$PRINT_NAME is stopped."
+            exit 3
+        fi
+    fi
+    ;;
+restart)
+    sh $0 stop
+    sh $0 start    
+    ;;
+*)
+    echo "Usage: $0 {start | stop | restart | status}"
+    exit 1
+    ;;
+esac
+
+exit 0
