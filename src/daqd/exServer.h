@@ -29,6 +29,8 @@
 #include "resourceLib.h"
 #include "tsMinMax.h"
 
+#include "atomic.hh"
+
 #ifndef NELEMENTS
 #   define NELEMENTS(A) (sizeof(A)/sizeof(A[0]))
 #endif
@@ -53,6 +55,7 @@ public:
             hopr(hoprIn), lopr(loprIn), ioType(ioTypeIn), 
             elementCount(countIn), pPV(0), valPtr(vptr)
     {
+        *valPtr = 0;
     }
 
     ~pvInfo ();

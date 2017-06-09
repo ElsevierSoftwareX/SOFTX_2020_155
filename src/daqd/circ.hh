@@ -72,7 +72,7 @@ class circ_buffer {
   /// Variables are factored out to the `circ_buffer_t' struct 
   circ_buffer_t *pbuffer;
 
-  int buffer_malloc (int consumers, int blocks, long block_size, time_t buffer_period); ///< This is a part of the constructor, really 
+  int buffer_malloc (int consumers, int blocks, long block_size, time_t buffer_period); ///< This is a part of the constructor, really
 
 public:
   circ_buffer (int consumers = 1, int blocks = 100, long block_size = 10240, time_t block_period = 1, mem_choice mem_flagp=flag_malloc, char *param1 = NULL);

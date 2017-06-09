@@ -19,12 +19,10 @@
 #include "config.h"
 #include "../../src/include/daqmap.h"
 //#include "daqd.hh"
+#include "epics_pvs.hh"
 //extern daqd_c daqd;
 
 char epicsDcuName[DCU_COUNT][40];
-
-unsigned int pvValue[128] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 // First subscript is the variable index:
 // DCU status is the first element
@@ -37,33 +35,64 @@ unsigned int epicsDcuStatus[3][2][DCU_COUNT];
 // static list of pre-created PVs
 //
 pvInfo exServer::pvList[] = {
-    pvInfo (1, "CYCLE", 0xffffffff, 0, excasIoSync, 1, pvValue),
-    pvInfo (1, "TOTAL_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+1),
-    pvInfo (1, "DATA_RATE", 0xffffffff, 0, excasIoSync, 1, pvValue+2),
-    pvInfo (1, "EDCU_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+3),
-    pvInfo (1, "EDCU_CONN_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+4),
-    pvInfo (1, "UPTIME_SECONDS", 0xffffffff, 0, excasIoSync, 1, pvValue+5),
-    pvInfo (1, "LOOKBACK_RAM",  0xffffffff, 0, excasIoSync, 1, pvValue+6),
-    pvInfo (1, "LOOKBACK_FULL",  0xffffffff, 0, excasIoSync, 1, pvValue+7),
-    pvInfo (1, "LOOKBACK_DIR",  0xffffffff, 0, excasIoSync, 1, pvValue+8),
-    pvInfo (1, "LOOKBACK_STREND",  0xffffffff, 0, excasIoSync, 1, pvValue+9),
-    pvInfo (1, "LOOKBACK_STREND_DIR",  0xffffffff, 0, excasIoSync, 1, pvValue+10),
-    pvInfo (1, "LOOKBACK_MTREND",  0xffffffff, 0, excasIoSync, 1, pvValue+11),
-    pvInfo (1, "LOOKBACK_MTREND_DIR",  0xffffffff, 0, excasIoSync, 1, pvValue+12),
-    pvInfo (1, "FAST_DATA_CRC",  0xffffffff, 0, excasIoSync, 1, pvValue+13),
-    pvInfo (1, "FAULT",  0xffffffff, 0, excasIoSync, 1, pvValue+14),
-    pvInfo (1, "BCAST_RETR",  0xffffffff, 0, excasIoSync, 1, pvValue+15),
-    pvInfo (1, "BCAST_FAILED_RETR",  0xffffffff, 0, excasIoSync, 1, pvValue+16),
-    pvInfo (0.5, "GPS",  0xffffffff, 0, excasIoSync, 1, pvValue+17),
-    pvInfo (1, "CHANS_SAVED", 0xffffffff, 0, excasIoSync, 1, pvValue+18),
-    pvInfo (1, "FRAME_SIZE", 0xffffffff, 0, excasIoSync, 1, pvValue+19),
-    pvInfo (1, "SCIENCE_FRAME_SIZE", 0xffffffff, 0, excasIoSync, 1, pvValue+20),
-    pvInfo (1, "SCIENCE_TOTAL_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+21),
-    pvInfo (1, "SCIENCE_CHANS_SAVED", 0xffffffff, 0, excasIoSync, 1, pvValue+22),
-    pvInfo (1, "FRAME_WRITE_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+23),
-    pvInfo (1, "SCIENCE_FRAME_WRITE_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+24),
-    pvInfo (1, "SECOND_FRAME_WRITE_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+25),
-    pvInfo (1, "MINUTE_FRAME_WRITE_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+26)
+    pvInfo (1, "CYCLE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_CYCLE),
+    pvInfo (1, "TOTAL_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_TOTAL_CHANS),
+    pvInfo (1, "DATA_RATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_DATA_RATE),
+    pvInfo (1, "EDCU_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_EDCU_CHANS),
+    pvInfo (1, "EDCU_CONN_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_EDCU_CONN_CHANS),
+    pvInfo (1, "UPTIME_SECONDS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_UPTIME_SECONDS),
+    pvInfo (1, "LOOKBACK_RAM",  0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_LOOKBACK_RAM),
+    pvInfo (1, "LOOKBACK_FULL",  0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_LOOKBACK_FULL),
+    pvInfo (1, "LOOKBACK_DIR",  0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_LOOKBACK_DIR),
+    pvInfo (1, "LOOKBACK_STREND",  0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_LOOKBACK_STREND),
+    pvInfo (1, "LOOKBACK_STREND_DIR",  0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_LOOKBACK_STREND_DIR),
+    pvInfo (1, "LOOKBACK_MTREND",  0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_LOOKBACK_MTREND),
+    pvInfo (1, "LOOKBACK_MTREND_DIR",  0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_LOOKBACK_MTREND_DIR),
+    pvInfo (1, "FAST_DATA_CRC",  0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_FAST_DATA_CRC),
+    pvInfo (1, "FAULT",  0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_FAULT),
+    pvInfo (1, "BCAST_RETR",  0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_BCAST_RETR),
+    pvInfo (1, "BCAST_FAILED_RETR",  0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_BCAST_FAILED_RETR),
+    pvInfo (0.5, "GPS",  0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_GPS),
+    pvInfo (1, "CHANS_SAVED", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_CHANS_SAVED),
+    pvInfo (1, "FRAME_SIZE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_FRAME_SIZE),
+    pvInfo (1, "SCIENCE_FRAME_SIZE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_FRAME_SIZE),
+    pvInfo (1, "SCIENCE_TOTAL_CHANS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_TOTAL_CHANS),
+    pvInfo (1, "SCIENCE_CHANS_SAVED", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_CHANS_SAVED),
+    pvInfo (1, "FRAME_WRITE_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_FRAME_WRITE_SEC),
+    pvInfo (1, "SCIENCE_FRAME_WRITE_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_FRAME_WRITE_SEC),
+    pvInfo (1, "SECOND_FRAME_WRITE_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SECOND_FRAME_WRITE_SEC),
+    pvInfo (1, "MINUTE_FRAME_WRITE_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_MINUTE_FRAME_WRITE_SEC),
+    pvInfo (1, "SECOND_FRAME_SIZE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SECOND_FRAME_SIZE),
+    pvInfo (1, "MINUTE_FRAME_SIZE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_MINUTE_FRAME_SIZE),
+    pvInfo (1, "RETRANSMIT_TOTAL", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_RETRANSMIT_TOTAL),
+    pvInfo (1, "PRDCR_TIME_FULL_MEAN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_TIME_FULL_MEAN_MS),
+    pvInfo (1, "PRDCR_TIME_FULL_MIN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_TIME_FULL_MIN_MS),
+    pvInfo (1, "PRDCR_TIME_FULL_MAX_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_TIME_FULL_MAX_MS),
+    pvInfo (1, "PRDCR_TIME_RECV_MEAN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_TIME_RECV_MEAN_MS),
+    pvInfo (1, "PRDCR_TIME_RECV_MIN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_TIME_RECV_MIN_MS),
+    pvInfo (1, "PRDCR_TIME_RECV_MAX_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_TIME_RECV_MAX_MS),
+    pvInfo (1, "PRDCR_CRC_TIME_FULL_MEAN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_CRC_TIME_FULL_MEAN_MS),
+    pvInfo (1, "PRDCR_CRC_TIME_FULL_MIN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_CRC_TIME_FULL_MIN_MS),
+    pvInfo (1, "PRDCR_CRC_TIME_FULL_MAX_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_CRC_TIME_FULL_MAX_MS),
+    pvInfo (1, "PRDCR_CRC_TIME_CRC_MEAN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_CRC_TIME_CRC_MEAN_MS),
+    pvInfo (1, "PRDCR_CRC_TIME_CRC_MIN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_CRC_TIME_CRC_MIN_MS),
+    pvInfo (1, "PRDCR_CRC_TIME_CRC_MAX_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_CRC_TIME_CRC_MAX_MS),
+    pvInfo (1, "PRDCR_CRC_TIME_XFER_MEAN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_CRC_TIME_XFER_MEAN_MS),
+    pvInfo (1, "PRDCR_CRC_TIME_XFER_MIN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_CRC_TIME_XFER_MIN_MS),
+    pvInfo (1, "PRDCR_CRC_TIME_XFER_MAX_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_CRC_TIME_XFER_MAX_MS),
+    pvInfo (1, "PROFILER_FREE_SEGMENTS_MAIN_BUF", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PROFILER_FREE_SEGMENTS_MAIN_BUF),
+    pvInfo (1, "RAW_FW_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_RAW_FW_STATE),
+    pvInfo (1, "RAW_FW_DATA_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_RAW_FW_DATA_STATE),
+    pvInfo (1, "RAW_FW_DATA_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_RAW_FW_DATA_SEC),
+    pvInfo (1, "SCIENCE_FW_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_FW_STATE),
+    pvInfo (1, "SCIENCE_FW_DATA_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_FW_DATA_STATE),
+    pvInfo (1, "SCIENCE_FW_DATA_SEC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_FW_DATA_SEC),
+    pvInfo (1, "STREND_FW_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_STREND_FW_STATE),
+    pvInfo (1, "MTREND_FW_STATE", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_MTREND_FW_STATE),
+    pvInfo (1, "FRAME_CHECK_SUM_TRUNC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_FRAME_CHECK_SUM_TRUNC),
+    pvInfo (1, "SCIENCE_FRAME_CHECK_SUM_TRUNC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SCIENCE_FRAME_CHECK_SUM_TRUNC),
+    pvInfo (1, "SECOND_FRAME_CHECK_SUM_TRUNC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_SECOND_FRAME_CHECK_SUM_TRUNC),
+    pvInfo (1, "MINUTE_FRAME_CHECK_SUM_TRUNC", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_MINUTE_FRAME_CHECK_SUM_TRUNC)
 };
 
 const unsigned exServer::pvListNElem = NELEMENTS (exServer::pvList);
