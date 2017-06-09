@@ -2,6 +2,7 @@
 #define DEBUG_H
 
 #include <config.h>
+#include "atomic.hh"
 
 #define LEAP_SECONDS 32
 

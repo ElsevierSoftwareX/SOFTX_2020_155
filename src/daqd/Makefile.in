@@ -25,6 +25,8 @@ RELEASEFLAGS=-DNDEBUG -DNPROBE -g -O
 #DEBUGFLAGS=-DNDEBUG -O5 -unroll=16
 DEVFLAGS=@DEVFLAGS@
 
+BUILD_MODE_FLAGS=@BUILD_MODE_FLAGS@
+
 EPICSFLAGS=@EPICSFLAGS@
 EPICSLIBFLAGS=@EPICSLIBFLAGS@
 
@@ -47,13 +49,13 @@ LDASLIBFLAGS=@LDASLIBFLAGS@ -lz -lbz2
 
 VARIOUS_DEFINES=-DSERVER_VERSION=\"2.0\" "-DPRODUCTION_DATE=\"`date`\"" "-DPRODUCTION_MACHINE=\"`uname -a`\"" ${GDSFLAGS} ${LDASFLAGS} ${EPICSFLAGS} ${MYRINET_FLAGS} ${MX_FLAGS}
 INCLUDEFLAGS=-I. -I@srcdir@ -I$(srcdir)/../include
-CFLAGS=${VARIOUS_DEFINES} ${DEVFLAGS} -c ${INCLUDEFLAGS} -D_REENTRANT  -DNO_RTL=1
+CFLAGS=${VARIOUS_DEFINES} ${DEVFLAGS} ${BUILD_MODE_FLAGS} -c ${INCLUDEFLAGS} -D_REENTRANT  -DNO_RTL=1
 CCFLAGS=${CFLAGS} @CPPFLAGS@ -g -O
 LEX=flex -+
 YACC=@YACC@ -o y.tab.c
 YFLAGS=-d
 
-SRCS= archive.cc profiler.cc gds.cc filesys.cc producer.cc trend.cc  net_writer.cc daqd.cc circ.cc comm.y comm-lex.l framesend.cc gdsmutex.cc edcu.cc @EPICS_SRCS@ @MYRINET_SRCS@ @MX_SRCS@ framerecv.cc listener.cc
+SRCS= archive.cc profiler.cc gds.cc filesys.cc epics_pvs.cc @PRODUCER_CC@ trend.cc  net_writer.cc daqd.cc circ.cc comm.y comm-lex.l framesend.cc gdsmutex.cc edcu.cc @EPICS_SRCS@ @MYRINET_SRCS@ @MX_SRCS@ framerecv.cc listener.cc
 
 EPICS_SRCS=epicsServer.cc exServer.cc exPV.cc exScalarPV.cc exVectorPV.cc exChannel.cc
 EPICS_OBJS=epicsServer.o exServer.o exPV.o exScalarPV.o exVectorPV.o exChannel.o
@@ -168,9 +170,8 @@ exScalarPV.o: exScalarPV.cc
 exVectorPV.o: exVectorPV.cc
 	$(CXX) -c ${CCFLAGS} ${EPICSFLAGS}  -D_REENTRANT $<
 
-daqd.out: archive.o $(GDSOBJECTS) profiler.o filesys.o producer.o trend.o net_writer.o comm.o daqd.o circ.o $(BROADCASTOBJECTS) edcu.o @EPICS_OBJS@ @MYRINET_OBJS@ @MX_OBJS@ framerecv.o comm-lex.o listener.o
-
-	$(CXX) $(DEBUGFLAGS) -o daqd.out archive.o $(GDSOBJECTS) profiler.o filesys.o producer.o trend.o net_writer.o daqd.o circ.o ./comm.o  $(BROADCASTOBJECTS) edcu.o framerecv.o comm-lex.o listener.o  @EPICS_OBJS@ @MYRINET_OBJS@ @MX_OBJS@ $(SCRAMLIBFLAGS) $(GDSLIBFLAGS) $(EPICSLIBFLAGS) $(LDASLIBFLAGS) @MYRINET_LDFLAGS@ @MX_LDFLAGS@ -lpthread $(LIBS) @LDFLAGS@
+daqd.out: archive.o $(GDSOBJECTS) profiler.o filesys.o epics_pvs.o @PRODUCER_O@ trend.o net_writer.o comm.o daqd.o circ.o $(BROADCASTOBJECTS) edcu.o @EPICS_OBJS@ @MYRINET_OBJS@ @MX_OBJS@ framerecv.o comm-lex.o listener.o
+	$(CXX) $(DEBUGFLAGS) -o daqd.out archive.o $(GDSOBJECTS) profiler.o filesys.o epics_pvs.o @PRODUCER_O@ trend.o net_writer.o daqd.o circ.o ./comm.o  $(BROADCASTOBJECTS) edcu.o framerecv.o comm-lex.o listener.o  @EPICS_OBJS@ @MYRINET_OBJS@ @MX_OBJS@ $(SCRAMLIBFLAGS) $(GDSLIBFLAGS) $(EPICSLIBFLAGS) $(LDASLIBFLAGS) @MYRINET_LDFLAGS@ @MX_LDFLAGS@ -lpthread $(LIBS) @LDFLAGS@
 
 daqcn: daqcn.o daqc_access.o
 	$(CC) $(DEBUGFLAGS) -o daqcn daqcn.o daqc_access.o -lpthread $(LIBS)

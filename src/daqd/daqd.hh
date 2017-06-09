@@ -69,44 +69,31 @@ using namespace std;
 #include "net_listener.hh"
 #include "producer.hh"
 #include "../../src/include/param.h"
+#include "parameter_set.hh"
 #if EPICS_EDCU == 1
 #include "edcu.hh"
 #include "epicsServer.hh"
-/// Epics IOC variable storage
-extern unsigned int pvValue[1000];
+#include "epics_pvs.hh"
 #endif
 
 /// Define real-time thread priorities (mx receiver highest, producer next, frame savers lowest)
-#ifdef USE_MX
 #define MX_THREAD_PRIORITY 10
-#endif
 #define PROD_THREAD_PRIORITY 5
+#define PROD_CRC_THREAD_PRIORITY 5
 #define SAVER_THREAD_PRIORITY 0
-/// Only use CPU affinity for systems with dedicated framebuilders (not standalone systems)
-/// Thus we use if USE_BROADCAST set (identifies frame-writers, etc) or if using a receiver (USE_GM or USE_MX or USE_UDP)
-/// We use negative numbers to count down from the highest CPU (to avoid special things on CPU0)
-/// Science frame is specified to lowest one, as not always used
-#if defined(USE_BROADCAST)
-#define FULL_SAVER_CPUAFFINITY -1
-#define SECOND_SAVER_CPUAFFINITY -2
-#define MINUTE_SAVER_CPUAFFINITY -3
-#define PROD_CPUAFFINITY -4
-#define SCIENCE_SAVER_CPUAFFINITY -5
-#else
-#if defined(USE_GM) || defined(USE_MX) || defined(USE_UDP)
-#define FULL_SAVER_CPUAFFINITY -1
-#define SECOND_SAVER_CPUAFFINITY -2
-#define MINUTE_SAVER_CPUAFFINITY -3
+
+
 #define PROD_CPUAFFINITY 0
-#define SCIENCE_SAVER_CPUAFFINITY -4
-#else
-#define FULL_SAVER_CPUAFFINITY -1
-#define SECOND_SAVER_CPUAFFINITY -2
-#define MINUTE_SAVER_CPUAFFINITY -3
-#define PROD_CPUAFFINITY 0
-#define SCIENCE_SAVER_CPUAFFINITY -4
-#endif
-#endif
+#define PROD_CRC_CPUAFFINITY 0
+#define FULL_SAVER_CPUAFFINITY 0
+#define FULL_SAVER_IO_CPUAFFINITY 0
+#define SCIENCE_SAVER_CPUAFFINITY 0
+#define SCIENCE_SAVER_IO_CPUAFFINITY 0
+#define SECOND_SAVER_CPUAFFINITY 0
+#define MINUTE_SAVER_CPUAFFINITY 0
+#define SECOND_TRENDER_CPUAFFINITY 0
+#define MINUTE_TRENDER_CPUAFFINITY 0
+#define SECOND_TREND_WORKER_CPUAFFINITY 0
 
 
 // as of ldas_tools 2.5, the LDAS_VERSION is no longer provided. Instead use FRAMECPP_VERSION_NUMBER
@@ -145,7 +132,8 @@ class daqd_c {
   };
 
  private:
-
+    void *_framer_work_queue;
+    void *_science_framer_work_queue;
   /*
     Locking on the instance of the class can be done with the
     scoped locking.
@@ -169,8 +157,12 @@ class daqd_c {
     ~locker () {dp -> unlock ();}
   };
 
+  parameter_set _params;
+
  public:
-  daqd_c () :
+  daqd_c () :\
+    _framer_work_queue(0),
+    _science_framer_work_queue(0),
     b1 (0), producer1 (0),
     num_channels (0),
     num_active_channels (0),
@@ -190,6 +182,8 @@ class daqd_c {
 
     frame_saver_tid(0),
     science_frame_saver_tid(0),
+    frame_saver_io_tid(0),
+    science_frame_saver_io_tid(0),
     data_feeds(1),
     dcu_status_check(0),
 
@@ -317,10 +311,14 @@ class daqd_c {
   int cnum; ///< Consumer number for the frame saver
   int science_cnum; ///< Consumer number for the science frame saver 
   void *framer (int); ///< Full resolution frames saver thread
+  void *framer_io (int); ///< IO for the full resolution frame saver
   static void *framer_static (void *a) { return ((daqd_c *)a) -> framer (0); };
   /// Science-mode frame saver thread.
   static void *science_framer_static (void *a) { return ((daqd_c *)a) -> framer (1); };
-
+  /// framer io thread
+  static void *framer_io_static (void *a) { return ((daqd_c *)a) -> framer_io(0); };
+  /// science-mode frame saver io thread
+  static void *science_framer_io_static (void *a) { return ((daqd_c *)a) -> framer_io(1); };
 
 #ifdef GDS_TESTPOINTS
   int num_gds_channels;
@@ -348,11 +346,18 @@ class daqd_c {
   int start_edcu (ostream *);
   int start_epics_server (ostream *, char *, char *, char *);
 #endif
+
+  parameter_set &parameters() { return _params; }
+
+  void initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, struct put_dpvec *vmic_pv);
+
   sem_t frame_saver_sem;
   sem_t science_frame_saver_sem;
 
   pthread_t frame_saver_tid;
   pthread_t science_frame_saver_tid;
+  pthread_t frame_saver_io_tid;
+  pthread_t science_frame_saver_io_tid;
 
   long writer_sleep_usec; /* pause in usecs for the main producer (-s option) */
   long main_buffer_size; ///< number of blocks in main circular buffer 
@@ -422,54 +427,7 @@ class daqd_c {
 
   int find_channel_group (const char* channel_name);
 
-// (Linux) sets thread name, and optional real-time schedule, cpu_affinity
-inline static void set_thread_priority (char *thread_name, char *thread_abbrev, int rt_priority, int cpu_affinity) {
-   // get thread ID, thread label (limit to 16 characters)
-   pid_t my_tid;
-   char my_thr_label[16];
-   my_tid = (pid_t) syscall(SYS_gettid);
-   strncpy(my_thr_label,thread_abbrev,16);
-   // Name the thread
-   prctl(PR_SET_NAME,my_thr_label,0, 0, 0);
-   system_log(1, "%s thread - label %s pid=%d", thread_name, my_thr_label, (int) my_tid);
-   // If priority is non-zero, add to the real-time scheduler at that priority
-   if (rt_priority > 0) {
-       struct sched_param my_sched_param = { rt_priority };
-       int set_stat;   
-       set_stat = pthread_setschedparam(pthread_self(), SCHED_FIFO, &my_sched_param);
-       if(set_stat != 0){
-           system_log(1, "%s thread priority error %s",thread_name, strerror(set_stat));
-       } else {
-           system_log(1, "%s thread set to priority %d",thread_name, rt_priority);
-       }   
-   }
-   // If cpu affinity is non-zero, set the affinity (if enough CPUs)
-   //  If positive, count from 0, if negative, count from max
-   // count CPUs
-   if (cpu_affinity != 0 ) {
-       int numCPU, cpuId;
-       numCPU = sysconf(_SC_NPROCESSORS_ONLN);
-       if (cpu_affinity < 0) {
-           cpuId = numCPU + cpu_affinity;
-       } else {
-	   cpuId = cpu_affinity;
-       }
-       if( numCPU > 1 && (cpuId > 0  && cpuId < numCPU)){
-           cpu_set_t my_cpu_set;
-           CPU_ZERO(&my_cpu_set);
-           CPU_SET(cpuId,&my_cpu_set);
-           int set_stat;
-	   set_stat = pthread_setaffinity_np(pthread_self(),sizeof(cpu_set_t),&my_cpu_set);
-           if(set_stat != 0){
-              system_log(1, "%s thread setaffinity error %s",thread_name, strerror(set_stat));
-           } else {
-	      system_log(1, "%s thread put on CPU %d",thread_name, cpuId);
-           }
-       } else {
-          system_log(1, "%s thread setaffinity error - numCPU %d cpuId %d",thread_name, numCPU, cpuId);
-       }
-    }
-  }
+  static void set_thread_priority (char *thread_name, char *thread_abbrev, int rt_priority, int cpu_affinity);
 
   char sweptsine_filename [FILENAME_MAX + 1];
 
@@ -492,18 +450,18 @@ inline static void set_thread_priority (char *thread_name, char *thread_abbrev, 
 
   void set_fault () { 
 #if EPICS_EDCU == 1
-	pvValue[14] = 1;
+    PV::set_pv(PV::PV_FAULT, 1);
 #endif
 	_exit(1);
   }
   void clear_fault () {
 #if EPICS_EDCU == 1
-	pvValue[14] = 0;
+    PV::set_pv(PV::PV_FAULT, 0);
 #endif
   }
   int is_fault () {
 #if EPICS_EDCU == 1
-	return pvValue[14];
+    return PV::pv(PV::PV_FAULT);
 #else
 	return 0;
 #endif

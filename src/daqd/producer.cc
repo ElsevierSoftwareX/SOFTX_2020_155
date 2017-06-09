@@ -51,6 +51,13 @@ using namespace std;
 #include <sys/ioctl.h>
 #include "../drv/rfm.c"
 
+#if EPICS_EDCU == 1
+#include "epics_pvs.hh"
+#endif
+
+#include "raii.hh"
+#include "conv.hh"
+
 extern daqd_c daqd;
 extern int shutdown_server ();
 extern unsigned int crctab[256];
@@ -107,10 +114,12 @@ gm_receiver_thread(void *this_p)
 #ifdef USE_GM
   gm_recv();
 #elif defined(USE_MX)
+  void receiver_mx(int);
   int this_eid = *static_cast<int*>(this_p);
   receiver_mx(this_eid);
 #elif defined(USE_UDP)
   int this_dcu_id = *static_cast<int*>(this_p);
+  void receiver_udp(int);
   receiver_udp(this_dcu_id);
 #endif
 
@@ -190,9 +199,20 @@ producer::frame_writer ()
 #endif
   // error message buffer
   char errmsgbuf[80]; 
+unsigned long stat_cycles = 0;
+    stats stat_full, stat_recv, stat_crc, stat_transfer;
 
 // Set thread parameters
    daqd_c::set_thread_priority("Producer","dqprod",PROD_THREAD_PRIORITY,PROD_CPUAFFINITY); 
+
+   unsigned char *move_buf = 0;
+   int vmic_pv_len = 0;
+   raii::array_ptr<struct put_dpvec> _vmic_pv(new struct put_dpvec[MAX_CHANNELS]);
+   struct put_dpvec *vmic_pv = _vmic_pv.get();
+
+   // FIXME: move_buf could leak on errors (but we would probably die anyways.
+   daqd.initialize_vmpic(&move_buf, &vmic_pv_len, vmic_pv);
+   raii::array_ptr<unsigned char> _move_buf(move_buf);
 
  if (!daqd.no_myrinet) {
 
@@ -319,13 +339,16 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
 
   }
 
+ stat_full.sample();
 // TODO make IP addresses configurable from daqdrc
 #ifdef USE_BROADCAST
+ stat_recv.sample();
   diag::frameRecv* NDS = new diag::frameRecv(0);
   if (!NDS->open("225.0.0.1", "10.110.144.0", net_writer_c::concentrator_broadcast_port)) {
         perror("Multicast receiver open failed.");
         exit(1);
   }
+  stat_recv.tick();
 #ifdef GDS_TESTPOINTS
   diag::frameRecv* NDS_TP = new diag::frameRecv(0);
   if (!NDS_TP->open("225.0.0.1", "10.110.144.0", net_writer_c::concentrator_broadcast_port_tp)) {
@@ -334,7 +357,7 @@ for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
   }
 #endif
 
-  char *bufptr = (char *)daqd.move_buf - BROADCAST_HEADER_SIZE;
+  char *bufptr = (char *)move_buf - BROADCAST_HEADER_SIZE;
   int buflen = daqd.block_size / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
   buflen += 1024*100 + BROADCAST_HEADER_SIZE; // Extra overhead for the headers
   if (buflen < 64000) buflen = 64000;
@@ -451,9 +474,8 @@ int cycle_delay = daqd.cycle_delay;
 #endif
 
 #if EPICS_EDCU == 1
-   extern unsigned int pvValue[1000];
-   pvValue[5] = 0;
-   pvValue[17] = 0;
+   PV::set_pv(PV::PV_UPTIME_SECONDS, 0);
+   PV::set_pv(PV::PV_GPS, 0);
 #endif
 #if !defined(USE_SYMMETRICOM) && !defined(USE_LOCAL_TIME)
    time_t zero_time = time(0);//  - 315964819 + 33;
@@ -470,7 +492,7 @@ int cycle_delay = daqd.cycle_delay;
      //DEBUG(6, printf("Timing %d gps=%d frac=%d\n", i, gps, frac));
 #endif
 #ifndef USE_BROADCAST
-     read_dest = daqd.move_buf;
+     read_dest = move_buf;
      for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
       //printf("DCU %d is %d bytes long\n", j, daqd.dcuSize[0][j]);
       if (daqd.dcuSize[0][j] == 0) continue; // skip unconfigured DCU nodes
@@ -679,7 +701,7 @@ int cycle_delay = daqd.cycle_delay;
 	//memcpy(read_dest, (char *)(daqd.edcu1.channel_value + daqd.edcu1.fidx), daqd.dcuSize[ifo][j]);
 			
 			  unsigned int bytes = daqd.dcuSize[0][DCU_ID_EDCU];
-			  unsigned char *cp = daqd.move_buf; // The EDCU data is in front
+              unsigned char *cp = move_buf; // The EDCU data is in front
 			  unsigned long crc = 0;
       			  while (bytes--) {
         		    crc = (crc << 8) ^ crctab[((crc >> 24) ^ *(cp++)) & 0xFF];
@@ -719,13 +741,13 @@ int cycle_delay = daqd.cycle_delay;
 
 #ifdef GDS_TESTPOINTS
      // Update testpoints data in the main buffer
-     daqd.gds.update_tp_data((unsigned int *)tpbufptr, (char *)daqd.move_buf);
+     daqd.gds.update_tp_data((unsigned int *)tpbufptr, (char *)move_buf);
 #endif
-
+     stat_crc.sample();
      // Parse received broadcast transmission header and
      // check config file CRCs and data CRCs, check DCU size and number
      // Assign DCU status and cycle.
-     unsigned int *header = (unsigned int *)(((char *)daqd.move_buf) - BROADCAST_HEADER_SIZE);
+     unsigned int *header = (unsigned int *)(((char *)move_buf) - BROADCAST_HEADER_SIZE);
      int ndcu = ntohl(*header++);
      //printf("ndcu = %d\n", ndcu);
      if (ndcu > 0 && ndcu <= MAX_BROADCAST_DCU_NUM) {
@@ -760,7 +782,7 @@ int cycle_delay = daqd.cycle_delay;
 				// Detected local configuration mismach
 				daqd.dcuStatus[ifo][dcu_number] |= 0x2000;
 			}
-			unsigned char *cp = daqd.move_buf + data_offs; // Start of data
+            unsigned char *cp = move_buf + data_offs; // Start of data
 			unsigned int bytes = dcu_size; // DCU data size
       			unsigned int crc = 0;
 			// Calculate DCU data CRC
@@ -783,30 +805,34 @@ int cycle_delay = daqd.cycle_delay;
 	data_offs += dcu_size;
      }
      }
-
+    stat_crc.tick();
 // :TODO: make sure all DCUs configuration matches; restart when the mismatch detected
 
      prop.gps = gps;
      prop.gps_n = gps_n;
 #endif
      prop.leap_seconds = daqd.gps_leap_seconds(prop.gps);
-     int nbi = daqd.b1 -> put16th_dpscattered (daqd.vmic_pv, daqd.vmic_pv_len, &prop);
+
+     stat_transfer.sample();
+     int nbi = daqd.b1 -> put16th_dpscattered (vmic_pv, vmic_pv_len, &prop);
+     stat_transfer.tick();
+
    //  printf("%d %d\n", prop.gps, prop.gps_n);
      //DEBUG1(cerr << "producer " << i << endl);
 #if EPICS_EDCU == 1
-     pvValue[0] = i;
-     pvValue[17] = prop.gps;
-	//DEBUG1(cerr << "gps=" << pvValue[17] << endl);
+     PV::set_pv(PV::PV_CYCLE, i);
+     PV::set_pv(PV::PV_GPS, prop.gps);
+    //DEBUG1(cerr << "gps=" << PV::pv(PV::PV_GPS) << endl);
      if (i % 16 == 0) {
      	  // Count how many seconds we were acquiring data
-	  pvValue[5]++;
+      PV::pv(PV::PV_UPTIME_SECONDS)++;
 #ifndef NO_BROADCAST
 	  {
 		extern unsigned long dmt_retransmit_count;
 		extern unsigned long dmt_failed_retransmit_count;
 		// Display DMT retransmit channels every second
-		pvValue[15] = dmt_retransmit_count;
-		pvValue[16] = dmt_failed_retransmit_count;
+        PV::set_pv(PV::PV_BCAST_RETR, dmt_retransmit_count);
+        PV::set_pv(PV::PV_BCAST_FAILED_RETR, dmt_failed_retransmit_count);
 		dmt_retransmit_count = 0;
 		dmt_failed_retransmit_count = 0;
 	  }
@@ -814,7 +840,37 @@ int cycle_delay = daqd.cycle_delay;
      }
 #endif
 
+     stat_full.tick();
+
+     ++stat_cycles;
+    if (stat_cycles >= 16) {
+        PV::set_pv(PV::PV_PRDCR_TIME_FULL_MIN_MS, conv::s_to_ms_int(stat_recv.getMin()));
+        PV::set_pv(PV::PV_PRDCR_TIME_FULL_MAX_MS, conv::s_to_ms_int(stat_recv.getMax()));
+        PV::set_pv(PV::PV_PRDCR_TIME_FULL_MEAN_MS, conv::s_to_ms_int(stat_recv.getMean()));
+
+        PV::set_pv(PV::PV_PRDCR_TIME_RECV_MIN_MS, conv::s_to_ms_int(stat_recv.getMin()));
+        PV::set_pv(PV::PV_PRDCR_TIME_RECV_MAX_MS, conv::s_to_ms_int(stat_recv.getMax()));
+        PV::set_pv(PV::PV_PRDCR_TIME_RECV_MEAN_MS, conv::s_to_ms_int(stat_recv.getMean()));
+
+        PV::set_pv(PV::PV_PRDCR_CRC_TIME_CRC_MEAN_MS, conv::s_to_ms_int(stat_crc.getMin()));
+        PV::set_pv(PV::PV_PRDCR_CRC_TIME_CRC_MEAN_MS, conv::s_to_ms_int(stat_crc.getMax()));
+        PV::set_pv(PV::PV_PRDCR_CRC_TIME_CRC_MEAN_MS, conv::s_to_ms_int(stat_crc.getMean()));
+
+        PV::set_pv(PV::PV_PRDCR_CRC_TIME_XFER_MIN_MS, conv::s_to_ms_int(stat_transfer.getMin()));
+        PV::set_pv(PV::PV_PRDCR_CRC_TIME_XFER_MAX_MS, conv::s_to_ms_int(stat_transfer.getMax()));
+        PV::set_pv(PV::PV_PRDCR_CRC_TIME_XFER_MEAN_MS, conv::s_to_ms_int(stat_transfer.getMean()));
+
+        stat_full.clearStats();
+        stat_crc.clearStats();
+        stat_recv.clearStats();
+        stat_transfer.clearStats();
+        stat_cycles = 0;
+    }
+
+     stat_full.sample();
+
 #ifdef USE_BROADCAST
+     stat_recv.sample();
 for(;;) {
      int old_seq = seq;
      int length = NDS->receive(bufptr, buflen, &seq, &gps, &gps_n);
@@ -825,7 +881,7 @@ for(;;) {
 	printf("received duplicate NDS DAQ broadcast sequence %d; prevpg = %d %d; gps=%d %d; length = %d\n", seq, (int)prop.gps, (int)prop.gps_n, gps, gps_n, length);
      } else break;
 }
-
+    stat_recv.tick();
 #ifdef GDS_TESTPOINTS
      // TODO: check on the continuity of the sequence and GPS time here
      unsigned int tp_seq, tp_gps, tp_gps_n;
@@ -912,7 +968,7 @@ for(;;) {
 	    for (int j = 0; j < sync_diff; j++) {
      		prop.gps = i/16 + zero_time - 315964819 + 33 + 2;
      		prop.gps_n = 1000000000/16 * (i % 16);
-     		daqd.b1 -> put16th_dpscattered (daqd.vmic_pv, daqd.vmic_pv_len, &prop);
+                daqd.b1 -> put16th_dpscattered (vmic_pv, vmic_pv_len, &prop);
 		i++;
 	    }
  	 }
@@ -958,4 +1014,22 @@ for(;;) {
      prev_frac = frac;
 #endif
    }
+}
+
+/// A main loop for a producer that does a debug crc operation
+/// in a seperate thread
+void *
+producer::frame_writer_debug_crc ()
+{
+    // not implemented
+    return (void *)NULL;
+}
+
+/// A main loop for a producer that does crc  and data transfer
+/// in a seperate thread.
+void *
+producer::frame_writer_crc ()
+{
+    // not implemented
+    return (void *)NULL;
 }

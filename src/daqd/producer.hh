@@ -14,8 +14,10 @@ private:
   int pvec_len;
   struct put_pvec pvec [MAX_CHANNELS];
 
+  void *_dbl_buf_hack;
+
 public:
-  producer (int a = 0) : pnum (0), pvec_len (0), cycle_input(3), parallel(1) {
+  producer (int a = 0) : pnum (0), pvec_len (0), cycle_input(3), parallel(1), _dbl_buf_hack(0) {
     for (int i = 0; i < 2; i++)
       for (int j = 0; j < DCU_COUNT; j++) {
 	dcuStatus[i][j] = DAQ_STATE_FAULT;
@@ -23,22 +25,32 @@ public:
 	dcuCycleStatus[i][j] = 0;
       }
     pthread_mutex_init (&prod_mutex, NULL);
+    pthread_mutex_init (&prod_crc_mutex, NULL);
     pthread_cond_init (&prod_cond_go, NULL);
     pthread_cond_init (&prod_cond_done, NULL);
+    pthread_cond_init (&prod_crc_cond, NULL);
     prod_go = 0;
     prod_done = 0;
   };
   void *frame_writer ();
-  static void *frame_writer_static (void *a) { return ((producer *)a) -> frame_writer ();};
+  static void *frame_writer_static (void *a) { return ((producer *)a) -> frame_writer ();}
+  void *frame_writer_debug_crc();
+  static void *frame_writer_debug_crc_static (void *a) {return ((producer *)a) -> frame_writer_debug_crc();}
+  void *frame_writer_crc();
+  static void *frame_writer_crc_static (void *a) { return ((producer *)a) -> frame_writer_crc();}
   void *grabIfoData (int, int, unsigned char *);
   void grabIfoDataThread (void);
   static void *grabIfoData_static(void *a) { ((producer *)a) -> grabIfoDataThread();};
 
   pthread_t tid;
   pthread_t tid1; ///< Parallel producer thread
+  pthread_t debug_crc_tid; ///< debugging thread id
+  pthread_t crc_tid;    ///< crc calculating thread
   pthread_mutex_t prod_mutex;
+  pthread_mutex_t prod_crc_mutex;
   pthread_cond_t prod_cond_go;
   pthread_cond_t prod_cond_done;
+  pthread_cond_t prod_crc_cond;
   int prod_go;
   int prod_done;
 

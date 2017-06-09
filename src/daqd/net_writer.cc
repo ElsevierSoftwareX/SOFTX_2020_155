@@ -357,6 +357,7 @@ net_writer_c::send_files (void)
   msg.msg_iov = iov;
   msg.msg_iovlen = 1;
 
+  errno = 0;
   int res = sendmsg(socketfd, &msg, 0);
   if (res != 1) {
     strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
