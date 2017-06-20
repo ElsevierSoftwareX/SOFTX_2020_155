@@ -14,3 +14,4 @@ add_executable(run_number_test_client run_number_test_client.cc)
 target_link_libraries(run_number_test_client PUBLIC zmq)
 
 add_test(_rn_basic_run_number_tests_ test_run_number)
+
