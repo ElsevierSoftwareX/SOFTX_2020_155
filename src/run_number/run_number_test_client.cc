@@ -2,8 +2,7 @@
 #include <iostream>
 #include <string>
 
-#include <zmq.hpp>
-#include "run_number_structs.h"
+#include "run_number_client.hh"
 
 bool parse_args(int argc, char *argv[], std::string& target, std::string& hash) {
     assert(argc >= 1);
@@ -37,29 +36,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    daqd_run_number_req_v1_t req;
-    assert(hash.size() <= sizeof(req.hash));
-
-    req.version = 1;
-    req.hash_size = static_cast<short>(hash.size());
-    memcpy(&req.hash[0], hash.data(), hash.size());
-
-    zmq::context_t context(1);
-    zmq::socket_t requestor(context, ZMQ_REQ);
-
-    zmq::message_t request(sizeof(req));
-    memcpy(request.data(), &req, sizeof(req));
-
-    requestor.connect(target);
-    requestor.send(request);
-
-    zmq::message_t resp_msg;
-    requestor.recv(&resp_msg);
-
-    assert(resp_msg.size() == sizeof(daqd_run_number_resp_v1_t));
-    daqd_run_number_resp_v1_t* resp = reinterpret_cast<daqd_run_number_resp_v1_t*>(resp_msg.data());
-    assert(resp->version == 1);
-    std::cout << "The new run number is " << resp->number << std::endl;
+    int number = daqd_run_number::get_run_number(target, hash);
+    std::cout << "The new run number is " << number << std::endl;
 
     return 0;
 }
