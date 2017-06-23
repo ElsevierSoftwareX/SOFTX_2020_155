@@ -66,7 +66,11 @@ void print_command_help (ostream *yyout);
 
 #define YYPARSE_PARAM lexer
 #define yylex ((my_lexer *)lexer)->my_yylex
-#define yyerror ((my_lexer *)lexer)->my_yyerror
+/*#define yyerror ((my_lexer *)lexer)->my_yyerror
+*/
+void yyerror(void *lexer, char *msg) {
+	((my_lexer *)lexer)->my_yyerror(msg);
+}
 
 #define AUTH_CHECK(lx) if (! ((lx)->auth_ok) && daqd.password [0]) { *(((my_lexer *)lexer)->get_yyout ()) << "password required" << endl; YYABORT; }
 
@@ -76,6 +80,8 @@ static int prompt_lineno;
  }
 
 %}
+
+%parse-param {void *lexer}
 
 %token <y_void>  CYCLE_DELAY
 %token <y_void>  SYMM_GPS_OFFSET
@@ -214,6 +220,9 @@ static int prompt_lineno;
 %token <y_void>  BEGIN_BEGIN
 %token <y_void>  END
 %token <y_void>  ZERO_BAD_DATA
+
+%token <y_void>  CONFIGURATION
+%token <y_void>  NUMBER
 
 %token <y_int>  TREND
 %token <y_int>  CHANNELS
@@ -1243,6 +1252,7 @@ CommandLine: /* Nothing */
 		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
 		unsigned int nchannels = daqd.num_channels;
 		int schan = ($5 == 0); // specific channels only request
+		bool bailout = false;
 
 		int num_channels = daqd.num_channels;
 		channel_t *c = daqd.channels;
@@ -1255,9 +1265,10 @@ CommandLine: /* Nothing */
  		if (schan && ((my_lexer *)lexer) -> error_code) {
 			if (((my_lexer *)lexer) -> strict)
 				*yyout << setw(4) << setfill ('0') << hex << ((my_lexer *) lexer) -> error_code << dec << flush;
-			goto status_channels_bailout;
+			bailout = true;
 		}
 
+		if (!bailout) {
 		if ($3 == 3) {
 
                   *yyout << dec; 
@@ -1574,7 +1585,7 @@ CommandLine: /* Nothing */
 		    yyout -> setf (ios::right, ios::adjustfield);
 		  }
 		}
-status_channels_bailout:
+		}
 	}
 	| STATUS INPUT TREND CHANNELS {
 		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
@@ -3336,7 +3347,7 @@ TextExpression:    TEXT
 		 | SUBSTR '(' TextExpression ',' INTNUM ')'
 			{
 			  if ($5 <= 0)
-			    yyerror ("substr(): invalid second argument value");
+			    yyerror (lexer, "substr(): invalid second argument value");
 
 			  $5--;
 			  if (strlen ($3) > $5)
@@ -3350,13 +3361,13 @@ TextExpression:    TEXT
 			  int slen = strlen ($3);
 
 			  if ($5 <= 0)
-			    yyerror ("substr(): invalid second argument value");
+			    yyerror (lexer, "substr(): invalid second argument value");
 
 			  if ($7 <= 0)
-			    yyerror ("substr(): invalid third argument value");
+			    yyerror (lexer, "substr(): invalid third argument value");
 
 			  if ($7 < $5)
-			    yyerror ("substr(): arguments are invalid");
+			    yyerror (lexer, "substr(): arguments are invalid");
 
 			  $5--;
 			  $7;
