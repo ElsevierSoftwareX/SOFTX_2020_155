@@ -20,7 +20,7 @@ namespace daqd_run_number {
         zmq::message_t request(sizeof(req));
         memcpy(request.data(), &req, sizeof(req));
 
-        requestor.connect(target);
+        requestor.connect(target.c_str());
         requestor.send(request);
 
         zmq::message_t resp_msg;
