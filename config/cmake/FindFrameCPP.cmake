@@ -13,6 +13,10 @@ if (FrameCPP_FOUND)
         # as it gets cached, hence the recursive name
         find_library(${libname}_LIBRARY_PATH name ${libname}
             PATHS ${FrameCPP_LIBRARY_DIRS}
+                /lib /usr/lib
+                /lib64 /usr/lib64
+                /usr/lib/x86_64-linux-gnu
+                /usr/local/lib /usr/local/lib64
             NO_DEFAULT_PATH)
         add_library(${libname} SHARED IMPORTED)
         set_target_properties(${libname} PROPERTIES
