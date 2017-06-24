@@ -1,5 +1,5 @@
 project(daqd-trunk)
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.0)
 
 FIND_PROGRAM(BISON_PROG bison)
 FIND_PROGRAM(FLEX_PROG flex)

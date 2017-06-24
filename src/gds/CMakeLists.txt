@@ -4,6 +4,10 @@ MESSAGE("Found rpcgen at ${RPCGEN_PROG}")
 SET(max_chnname_size "-DMAX_CHNNAME_SIZE=60")
 SET( RPCFLAGS -C -N -M -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size})
 
+if (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+    Message(FATAL_ERROR "The GDS code cannot build with source dir == build dir!")
+endif (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+
 
 SET (GDS_SRC
         awgapi.c
@@ -111,32 +115,35 @@ set(GDS_CC_HDR
         testchn.hh
         testpointmgr.hh)
 
+# in newer cmake we can do this in one step, becuase copy_if_different takes
+# a list of files in newer cmake.  Well until then this is a multi-step process.
 add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GDS_HDR} ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GDS_CC_HDR} ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
         COMMAND ${CMAKE_COMMAND} -E create_symlink . ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/dtt
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# This is the hard way, don't do this.
-#
-#FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gds_includes)
+set (GDS_BIN_HDRS "")
+foreach (GDS_HDR_FILE ${GDS_HDR})
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${GDS_HDR_FILE}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GDS_HDR_FILE} ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
+        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+    list(APPEND GDS_BIN_HDRS ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${GDS_HDR_FILE})
+endforeach(GDS_HDR_FILE)
 
-#foreach (GDS_HDR_FILE ${GDS_HDR})
-#    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${GDS_HDR_FILE}
-#            COMMAND ${RM_PROG} -f ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${GDS_HDR_FILE}
-#            COMMAND ${LN_PROG} -s ${CMAKE_CURRENT_SOURCE_DIR}/${GDS_HDR_FILE} ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${GDS_HDR_FILE}
-#            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
-#            )
-#    SET (GDS_HDR_MIRROR ${GDS_HDR_MIRROR} ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${GDS_HDR_FILE})
-#endforeach(GDS_HDR_FILE)
-
-#add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/dtt
-#        COMMAND ${LN_PROG} -s ${CMAKE_CURRENT_BINARY_DIR}/gds_includes ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/dtt
-#        DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
-#        )
+foreach (GDS_CC_HDR_FILE ${GDS_CC_HDR})
+    add_custom_command(
+            OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${GDS_CC_HDR_FILE}
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GDS_CC_HDR_FILE} ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
+            DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+    list(APPEND GDS_BIN_HDRS ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${GDS_CC_HDR_FILE})
+endforeach(GDS_CC_HDR_FILE)
 
 SET (RPC_BASE gdsrsched rawgapi rtestpoint)
 
@@ -186,6 +193,7 @@ endforeach(RPC_TEMPLATE)
 
 add_library(gds_c STATIC
         ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
+        ${GDS_BIN_HDRS}
         ${GDS_SRC}
         )
 target_compile_options(gds_c PRIVATE -std=gnu99)
