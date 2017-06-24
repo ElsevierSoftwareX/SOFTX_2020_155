@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 
     if (cfg.verbose)
         std::cout << "Binding to " << cfg.endpoint << std::endl;
-    responder.bind(cfg.endpoint);
+    responder.bind(cfg.endpoint.c_str());
 
     while (true) {
         zmq::message_t request;
