@@ -65,5 +65,6 @@ CHECK_FUNCTION_EXISTS(strchr HAVE_STRCHR)
 CHECK_FUNCTION_EXISTS(memcpy HAVE_MEMCPY)
 CHECK_FUNCTION_EXISTS(fchdir HAVE_FCHDIR)
 
+add_compile_options('-g3')
 
 add_subdirectory(src)
