@@ -919,10 +919,37 @@ daqd_c::framer (int science)
       _buf.release();
   }
 
-// error message buffer  
-  char errmsgbuf[80];
+    // error message buffer
+    char errmsgbuf[80];
 
-  // Set thread parameters. Make sure this is done after starting the io threads.
+    // Startup the IO thread
+    {
+        DEBUG(4, cerr << "starting " << (science ? "science" : "full") << " framer IO thread" << endl);
+        pthread_attr_t attr;
+        pthread_attr_init(&attr);
+        pthread_attr_setstacksize(&attr, daqd.thread_stack_size);
+        pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
+
+        int err = 0;
+        if (science) {
+            err = pthread_create( &science_frame_saver_io_tid, &attr,
+                                  (void *(*)(void *))daqd_c::science_framer_io_static,
+                                  (void *)this);
+        } else {
+            err = pthread_create( &frame_saver_io_tid, &attr,
+                                  (void *(*)(void *))daqd_c::framer_io_static,
+                                  (void *)this);
+        }
+        if (err) {
+            pthread_attr_destroy(&attr);
+            system_log(1, "pthread_create() err=%d while creating %s IO thread", err, (science ? "science" : "full"));
+            exit(1);
+        }
+        pthread_attr_destroy(&attr);
+    }
+
+
+    // Set thread parameters. Make sure this is done after starting the io threads.
   if (science) {
       daqd_c::set_thread_priority("Science frame saver","dqscifr",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_CPUAFFINITY);
   } else {
