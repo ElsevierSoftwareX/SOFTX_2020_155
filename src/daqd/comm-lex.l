@@ -253,6 +253,8 @@ yywrap ()
 "tpconfig" { return TPCONFIG; }
 "fckrs"    { return FCKRS; }
 "parameter" { return PARAMETER; }
+"configuration" { return CONFIGURATION; }
+"number" { return NUMBER; }
 
 -?[0-9]+ { 
          lvalp -> y_int = atoi (yytext);

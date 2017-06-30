@@ -134,6 +134,8 @@ class daqd_c {
  private:
     void *_framer_work_queue;
     void *_science_framer_work_queue;
+
+    int _configuration_number;
   /*
     Locking on the instance of the class can be done with the
     scoped locking.
@@ -163,6 +165,7 @@ class daqd_c {
   daqd_c () :\
     _framer_work_queue(0),
     _science_framer_work_queue(0),
+    _configuration_number(0),
     b1 (0), producer1 (0),
     num_channels (0),
     num_active_channels (0),
@@ -285,6 +288,10 @@ class daqd_c {
     pthread_mutex_destroy (&bm);
   };
 
+  int configuration_number() const {
+      return _configuration_number;
+  }
+
   /// Main circular buffer.
   circ_buffer *b1;
 
@@ -398,6 +405,7 @@ class daqd_c {
   int offline_disabled; ///< If set, off-line data requests are not allowed  
 
   int configure_channels_files ();
+  void update_configuration_number(const char *source_address);
 
   int           data_feeds;             /* The number of data feeds: 1 -default; 2 -Hanford (2 ifos) */
 

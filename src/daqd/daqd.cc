@@ -41,6 +41,7 @@
 #include <memory>
 
 #include "framecpp/Common/MD5SumFilter.hh"
+#include "run_number_client.hh"
 
 using namespace std;
 
@@ -492,6 +493,44 @@ chanConfigCallback(char *channel_name, struct CHAN_PARAM *params, void *user)
   return 1;
 }
 
+void daqd_c::update_configuration_number(const char *source_address)
+{
+    if (_configuration_number != 0 || !source_address) return;
+    if (num_channels == 0) return;
+
+    FrameCPP::Common::MD5Sum check_sum;
+
+    channel_t *cur = channels;
+    channel_t *end = channels + num_channels;
+    for (; cur < end; ++cur) {
+
+        check_sum.Update(&(cur->chNum), sizeof(cur->chNum));
+        check_sum.Update(&(cur->seq_num), sizeof(cur->seq_num));
+        size_t name_len = strnlen(cur->name, channel_t::channel_name_max_len);
+        check_sum.Update(cur->name, sizeof(name_len));
+        check_sum.Update(&(cur->sample_rate), sizeof(cur->sample_rate));
+        check_sum.Update(&(cur->active), sizeof(cur->active));
+        check_sum.Update(&(cur->trend), sizeof(cur->trend));
+        check_sum.Update(&(cur->group_num), sizeof(cur->group_num));
+        check_sum.Update(&(cur->bps), sizeof(cur->bps));
+        check_sum.Update(&(cur->dcu_id), sizeof(cur->dcu_id));
+        check_sum.Update(&(cur->data_type), sizeof(cur->data_type));
+        check_sum.Update(&(cur->signal_gain), sizeof(cur->signal_gain));
+        check_sum.Update(&(cur->signal_slope), sizeof(cur->signal_slope));
+        check_sum.Update(&(cur->signal_offset), sizeof(cur->signal_offset));
+        size_t unit_len = strnlen(cur->signal_units, channel_t::engr_unit_max_len);
+        check_sum.Update(cur->signal_units, sizeof(unit_len));
+
+    }
+    check_sum.Finalize();
+
+    std::ostringstream ss;
+    ss << check_sum;
+    std::string hash = ss.str();
+
+    _configuration_number = daqd_run_number::get_run_number(source_address, hash);
+}
+
 /// Linear search for a channel group name in channel_groups array.
 int daqd_c::find_channel_group (const char* channel_name)
 {
@@ -534,7 +573,7 @@ daqd_c::full_frame(int frame_length_seconds, int science,
   //
   try {
     frame = ldas_frame_h_type (new FrameCPP::Version::FrameH ("LIGO",
-					     0, // run number ??? buffpt -r> block_prop (nb) -> prop.run;
+                         configuration_number(), // run number ??? buffpt -r> block_prop (nb) -> prop.run;
 					     1, // frame number
 					     FrameCPP::Version::GPSTime (0, 0),
 					     0, // leap seconds
