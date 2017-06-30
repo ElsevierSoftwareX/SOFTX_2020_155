@@ -189,6 +189,7 @@ extern int iop_rfm_valid;
 volatile char *_epics_shm;      ///< Ptr to EPICS shared memory area
 char *_ipc_shm;                 ///< Ptr to inter-process communication area 
 char *_daq_shm;                 ///< Ptr to frame builder comm shared mem area 
+char *_gds_shm;                 ///< Ptr to frame builder comm shared mem area 
 int daq_fd;                     ///< File descriptor to share memory file 
 
 long daqBuffer;                 // Address for daq dual buffers in daqLib.c
