@@ -7,6 +7,7 @@ volatile DAQ_INFO_BLOCK *pInfo;		///< Ptr to DAQ config in shmem.
 extern volatile char *_epics_shm;	///< Ptr to EPICS shmem block
 extern long daqBuffer;			///< Address of daqLib swing buffers.
 extern char *_daq_shm;			///< Pointer to DAQ base address in shared memory.
+extern char *_gds_shm;			///< Pointer to GDS shared memory for ZMQ xmission.
 struct rmIpcStr *dipc;			///< Pointer to DAQ IPC data in shared memory.
 struct cdsDaqNetGdsTpNum *tpPtr;	///< Pointer to TP table in shared memory.
 char *daqShmPtr;			///< Pointer to DAQ data in shared memory.
@@ -20,8 +21,10 @@ float *pEpicsFloat;				// Pointer to current DAQ data in shared memory.
 double *pEpicsDblData1;
 
 int daqConfig(struct DAQ_INFO_BLOCK *, struct DAQ_INFO_BLOCK *, char *);
+int gdsConfig(GDS_INFO_BLOCK *, GDS_INFO_BLOCK *);
 int loadLocalTable(DAQ_XFER_INFO *, DAQ_LKUP_TABLE [], int , DAQ_INFO_BLOCK *, DAQ_RANGE *);
 int daqWrite(int,int,struct DAQ_RANGE,int,double *[],struct FILT_MOD *,int,int [],double [],char *);
+int totaltp;	// Total number of TP available in a control model based on reading tpchn file
 
 inline
 double htond(double in) {
@@ -40,6 +43,9 @@ double htond(double in) {
 
     return retVal;
 }
+
+
+
 
 
 /* ******************************************************************** */
@@ -114,6 +120,14 @@ int num_tps;
 unsigned int tpnum[DAQ_GDS_MAX_TP_ALLOWED];		// Current TP nums
 unsigned int excnum[DAQ_GDS_MAX_TP_ALLOWED];	// Current EXC nums
 double mydouble;
+static GDS_INFO_BLOCK gdsInfo;
+static volatile GDS_INFO_BLOCK *gdsInfoPtr;
+// Added channels to send GDS via separate shmem area to ZMQ software
+static volatile char *gdsDataPtr;
+static volatile char *gdsHdrPtr;
+static GDS_DATA_HEADER *gdsHdrInfo;
+static GDS_STATUS *gdsStatus;
+static float *gdsOffset;
 
 #ifdef CORE_BIQUAD
 // BIQUAD Decimation filter coefficient definitions.
@@ -248,11 +262,19 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     daqShmPtr = _daq_shm + CDS_DAQ_NET_DATA_OFFSET;
     buf_size = DAQ_DCU_BLOCK_SIZE*2;
     pWriteBuffer = (volatile char *)daqShmPtr;
-      pWriteBuffer += buf_size * 15;
+    pWriteBuffer += buf_size * 15;
     /// ----  Setup Ptr to interprocess comms with network driver
     dipc = (struct rmIpcStr *)(_daq_shm + CDS_DAQ_NET_IPC_OFFSET);
     /// ----  Setup Ptr to awgtpman shared memory (TP number table)
     tpPtr = (struct cdsDaqNetGdsTpNum *)(_daq_shm + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
+
+    gdsInfoPtr = (GDS_INFO_BLOCK *)(_gds_shm);
+    gdsHdrPtr = (char *)(_gds_shm + GDS_DATA_OFFSET);
+    gdsStatus = (GDS_STATUS *) (_gds_shm + GDS_DATA_OFFSET - sizeof(GDS_STATUS));
+    gdsStatus->valsperchan = sysRate;
+    gdsHdrPtr += GDS_BUFF_SIZE * 15;
+    gdsHdrInfo = (GDS_DATA_HEADER *)gdsHdrPtr;
+    gdsDataPtr = (char *)(gdsHdrPtr + sizeof(GDS_DATA_HEADER));
 
     /// ----  Set up pointer to DAQ configuration information in shmem */
     pInfo = (DAQ_INFO_BLOCK *)(_epics_shm + DAQ_INFO_ADDRESS);
@@ -279,6 +301,9 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 
     /// \> Load local table information with channel info
     if((status = loadLocalTable(&xferInfo,localTable,sysRate,&dataInfo,&daqRange)) == -1) return(-1);
+
+    /// \> Load GDS channel name and count information.
+    totaltp = gdsConfig(&gdsInfo, gdsInfoPtr);
 
     // Set the start of TP data after DAQ data.
     tpStart = xferInfo.offsetAccum;
@@ -310,6 +335,8 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
   {
     /// \> Calc data offset into current write swing buffer 
     daqSlot = (daqSlot + 1) % sysRate;
+    gdsOffset = (float *) gdsDataPtr;;
+    gdsOffset += daqSlot;
 
 #if 0
     /// \> At start of 1/16 sec. data block, reset the xfer sizes and done bit */
@@ -336,6 +363,7 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
     {
 
       dWord = 0;
+      if(localTable[ii].type == DAQ_SRC_NOOP) continue;
       /// \> Read data to a local variable, either from a FM TP or other TP */
       if(localTable[ii].type == DAQ_SRC_FM_TP)
       /* Data if from filter module testpoint */
@@ -413,7 +441,14 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
 			break;
 		default:
 			// Write a 32-bit float (downcast from the double passed)
-			((float *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (float)dWord;
+			if(ii >= dataInfo.numChans) {
+				if(localTable[ii].type != DAQ_SRC_NOOP) {
+					*gdsOffset = (float)dWord;
+					gdsOffset += sysRate;
+				}
+			} else {
+				((float *)(pWriteBuffer + localTable[ii].offset))[daqSlot/localTable[ii].decFactor] = (float)dWord;
+			}
 			break;
 	      }
       	} else if (dataInfo.tp[ii].dataType == DAQ_DATATYPE_32BIT_UINT) {
@@ -565,6 +600,22 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
         // Frame builder is looking for cycle change
 	/// - ------ Write IPC cycle number. This will trigger DAQ network driver to send data to DAQ
         dipc->cycle =daqXmitBlockNum; // Ready cycle (16 Hz)
+      //
+      // Write GDS Data Information
+      // Write the channel names to header
+      jj = 0;
+      for(ii=dataInfo.numChans;ii<totalChans;ii++) {
+      	if(localTable[ii].type != DAQ_SRC_NOOP) {
+		sprintf(gdsHdrInfo->chan_name[jj],"%s",localTable[ii].chname);
+		jj ++;
+	}
+      }
+      // Write GDS channel count and timing information
+      gdsHdrInfo->chan_count = jj;
+      gdsHdrInfo->timesec = cycle_gps_time;
+      gdsHdrInfo->timensec = daqXmitBlockNum;;
+      // Write cycle count to trigger ZMQ GDS data transmission code
+      gdsStatus->cycle = daqXmitBlockNum;
 
       /// - -- Increment the 1/16 sec block counter
       daqBlockNum = (daqBlockNum + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
@@ -573,6 +624,12 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
       /// - -- Set data write ptr to next block in shmem
       pWriteBuffer = (char *)daqShmPtr;
       pWriteBuffer += buf_size * daqXmitBlockNum;
+
+      // Advance GDS Data Pointers
+      gdsHdrPtr = (char *)(_gds_shm + GDS_DATA_OFFSET);
+      gdsHdrPtr += GDS_BUFF_SIZE * daqXmitBlockNum;
+      gdsHdrInfo = (GDS_DATA_HEADER *)gdsHdrPtr;
+      gdsDataPtr = (char *)(gdsHdrPtr + sizeof(GDS_DATA_HEADER));
 
       //  - -- Check for reconfig request at start of each second
       if((pInfo->reconfig == 1) && (daqBlockNum == 0))
@@ -594,6 +651,8 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 		    totalChans = dataInfo.numChans;
 
 	    }
+    	    /// \> Load GDS channel name and count information.
+    	    totaltp = gdsConfig(&gdsInfo, gdsInfoPtr);
       }
       /// - -- If last cycle of 1 sec time frame, check for new TP and load info.
       // This will cause new TP to be written to local memory at start of 1 sec block.
@@ -627,6 +686,19 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 		}
 		return -1;
 	}
+	// Function to locate TP channel names from tp number
+	inline int findTpName(int tpn, int slot) {
+	  int ii;
+
+	  for(ii=0;ii<totaltp;ii++) {
+		if(gdsInfo.tpinfo[ii].tpnumber == tpn) {
+			sprintf(localTable[slot].chname,"%s", gdsInfo.tpinfo[ii].tpname);
+			// printf("Found tpname = %s\n",localTable[slot].chname);
+			return(0);
+		}
+	  }
+	  return(-1);
+	}
 
 	// Copy TP/EXC tables into my local memory
 	memcpy(excnum, (const void *)(gdsPtr->tp[_2k_sys_offs][0]), sizeof(excnum));
@@ -649,7 +721,7 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 		    excTable[i].sigNum = 0;
 		  }
 
-		  localTable[ltSlot].type = 0;
+		  localTable[ltSlot].type = DAQ_SRC_NOOP;
           	  localTable[ltSlot].sysNum = 0;
           	  localTable[ltSlot].fmNum = 0;
           	  localTable[ltSlot].sigNum = 0;
@@ -657,6 +729,7 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
       		  dataInfo.tp[ltSlot].dataType = DAQ_DATATYPE_FLOAT;
 		}
 	}
+	validTpNet = 0;
 	
 	// tpnum and excnum lists now have only the new test points
 	// Insert these new numbers into empty localTable slots
@@ -686,6 +759,8 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 		// Populate the slot with the information
 		if (!exc) {
        		  if (tpn >= daqRange.filtTpMin && tpn < daqRange.filtTpMax) {
+		    findTpName(tpn,ltSlot);
+		    validTpNet ++;
 		    jj = tpn - daqRange.filtTpMin;
 		    localTable[ltSlot].type = DAQ_SRC_FM_TP;
           	    localTable[ltSlot].sysNum = jj / daqRange.filtTpSize;
@@ -700,6 +775,8 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 		    tpNum[slot] = tpn;
 
         	  } else if (tpn >= daqRange.xTpMin && tpn < daqRange.xTpMax) {
+		    findTpName(tpn,ltSlot);
+		    validTpNet ++;
 	 	    jj = tpn - daqRange.xTpMin;
 		    localTable[ltSlot].type = DAQ_SRC_NFM_TP;
 		    localTable[ltSlot].sigNum = jj;
@@ -712,6 +789,8 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 	        } else {
 
         	  if (tpn >= daqRange.filtExMin && tpn < daqRange.filtExMax) {
+		    findTpName(tpn,ltSlot);
+		    validTpNet ++;
 		    jj = tpn - daqRange.filtExMin;
 		    localTable[ltSlot].type = DAQ_SRC_FM_EXC;
           	    localTable[ltSlot].sysNum = jj / daqRange.filtExSize;	// filtExSize = MAX_MODULES
@@ -731,6 +810,8 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 		    tpNum[slot] = tpn;
 
         	  } else if (tpn >= daqRange.xExMin && tpn < daqRange.xExMax) {
+		    findTpName(tpn,ltSlot);
+		    validTpNet ++;
 	 	    jj = tpn - daqRange.xExMin;
 		    localTable[ltSlot].type = DAQ_SRC_NFM_EXC;
           	    localTable[ltSlot].sysNum = 0;	// filtExSize = MAX_MODULES
@@ -786,10 +867,12 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
       // Network write is one cycle behind memory write, so now update tp nums for FB xmission
       if(daqBlockNum == 0)
       {
-	for(ii=0;ii<validTp;ii++)
+	for(ii=0;ii<validTp;ii++) {
 		tpNumNet[ii] = tpNum[ii];
-	validTpNet = validTp;
-	xferInfo.totalSizeNet = xferInfo.totalSize;
+		// if(tpNum[ii] != 0) validTpNet ++;
+	}
+	// validTpNet = validTp;
+	xferInfo.totalSizeNet = xferInfo.crcLength;
       }
 
     } /* End done 16Hz Cycle */
@@ -798,6 +881,22 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
 
   /// \> Return the FE total DAQ data rate */
   return((xferInfo.totalSize*DAQ_NUM_DATA_BLOCKS_PER_SECOND)/1000);
+
+}
+
+// **************************************************************************************
+// New routine to get GDS TP channel names via GDS shmem
+// **************************************************************************************
+int gdsConfig(GDS_INFO_BLOCK *localtable, GDS_INFO_BLOCK *shmtable) {
+  int ii;
+  int tpcount = shmtable->totalchans;
+  printf(" ********** GDS total chans = %d ****************\n",tpcount);
+  for(ii=0;ii<tpcount;ii++) {
+    strcpy(localtable->tpinfo[ii].tpname,shmtable->tpinfo[ii].tpname);
+    localtable->tpinfo[ii].tpnumber = shmtable->tpinfo[ii].tpnumber;
+    // if(ii<10) printf("\t name = %s \tnumber = %d\n",localtable->tpinfo[ii].tpname,localtable->tpinfo[ii].tpnumber);
+  }
+  return(tpcount);
 
 }
 
@@ -902,6 +1001,7 @@ int mydatatype;
     /// \>  Get the DAQ configuration information for all fast DAQ channels and calc a crc checksum length
     for(ii=0;ii<dataInfo->numChans;ii++)
     {
+      strcpy(dataInfo->tp[ii].channel_name,pInfo->tp[ii].channel_name);
       dataInfo->tp[ii].tpnum = pInfo->tp[ii].tpnum;
       dataInfo->tp[ii].dataType = pInfo->tp[ii].dataType;
       dataInfo->tp[ii].dataRate = pInfo->tp[ii].dataRate;
@@ -966,6 +1066,9 @@ int mydatatype;
    /// - (This is based on decimation factors and data size.)
 for(ii=0;ii<dataInfo->numChans;ii++)
     {
+      // New feature to load channel names with DAQ info
+      // Not presently used, but may be in later versions for live data requests.
+      strcpy(localTable[ii].chname, dataInfo->tp[ii].channel_name);
       if ((dataInfo->tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS) > sysRate) {
         /* Channel data rate is greater than system rate */
         printf("Channels %d has bad data rate %d\n", ii, dataInfo->tp[ii].dataRate);
@@ -974,6 +1077,7 @@ for(ii=0;ii<dataInfo->numChans;ii++)
       /// - ---- Load decimation factor
       localTable[ii].decFactor = sysRate/(dataInfo->tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS);
       }
+      // printf("local table %d is %d name %s\n",ii,dataInfo->tp[ii].dataRate,localTable[ii].chname);
 
       /// - ---- Calc offset into swing buffer for writing data
       mydatatype = dataInfo->tp[ii].dataType;
