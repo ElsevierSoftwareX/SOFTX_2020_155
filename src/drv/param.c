@@ -41,13 +41,13 @@ int testCallback(char *channel_name, struct CHAN_PARAM *params, void *user) {
   return 1; 
 }
 
-/* Cat string and make lower case */                                     /* MA */
-static char *strcat_lower(char *dest, char *src) {                    /* MA */
-  char *d = dest;                                                     /* MA */
-  for( ; *d; d++);                                                    /* MA */
-  for( ; (*d++ = tolower(*src)); src++);                              /* MA */
-  return dest;                                                        /* MA */
-}                                                                     /* MA */
+/* Cat string and make lower case */                              
+static char *strcat_lower(char *dest, char *src) {             
+  char *d = dest;                                        
+  for( ; *d; d++);                                  
+  for( ; (*d++ = tolower(*src)); src++);         
+  return dest;                              
+}                
 
 
 
@@ -56,6 +56,59 @@ static char *strcat_lower(char *dest, char *src) {                    /* MA */
 #endif
 
 int default_dcu_rate; 
+
+int parseGdstpFile(char *fname,GDS_INFO_BLOCK *ginfo) {
+
+  char *cp;
+  char cbuf[128];
+  char val[64];
+  char id[64];
+  int channum;
+  int totalchans = 0;
+  int inloop = 0;
+  unsigned int cr;
+  char chan_name[60];
+  FILE *fp = fopen(fname, "r");
+  if (fp == NULL) {
+      return 0;
+   }
+   // Read file up to first TP channel name
+    while((cp = fgets(cbuf, 128, fp)) && cbuf[0] != '[') {
+    }
+   while(!feof(fp)) {
+       /* :TODO: there will be a problem if the closing square bracket is missing */
+       // Capture the channel name
+       for (cp = cbuf; *cp && *(cp+1) && *(cp+1) != ']'; cp++) *cp = *(cp+1);
+       *cp = 0;
+       strncpy(chan_name, cbuf, 60);
+       chan_name[59] = 0;
+
+	// Search for corresponding TP channel number, which should occur before next TP channel name.
+       while((cp = fgets(cbuf, 128, fp)) && cbuf[0] != '[' ) {
+       		for (cp = cbuf, cr = 0; *cp && *cp != '=' && cr < 64; cp++)  if (!isspace(*cp)) id[cr++] = *cp;
+	      	if (*cp != '=') continue;
+		// Get info descriptor and value based on '=' separator
+	        id[cr]=0;
+		for (cp++, cr = 0; *cp && cr < 64; cp++)  if (!isspace(*cp)) val[cr++] = *cp;
+		val[cr]=0;
+
+		if(!strcasecmp(id,"chnnum")) {
+			char *endptr;
+			channum = strtol(val,&endptr,0);
+			// Load TP info from channel name and number info
+			strcpy(ginfo->tpinfo[totalchans].tpname,chan_name);
+			ginfo->tpinfo[totalchans].tpnumber = channum;
+			totalchans ++;
+			ginfo->totalchans = totalchans;
+		}
+       }
+   }
+   printf("EOF found\n");
+   fclose(fp);
+
+   return(totalchans);
+   
+}
 
  ///Parse DAQ system config file `fname' and call `callback' function
  /// for each data channel configured. Config files's CRC will be saved in
@@ -458,6 +511,7 @@ infoCallback(char *channel_name, struct CHAN_PARAM *params, void *user) {
 	info->numEpicsFilts ++;
 	info->numEpicsTotal ++;
   } else {
+  sprintf(info->tp[info->numChans].channel_name,"%s",channel_name);
   info->tp[info->numChans].tpnum = params->chnnum;
   info->tp[info->numChans].dataType = params->datatype;
   info->tp[info->numChans].dataRate = params->datarate;
@@ -472,10 +526,11 @@ infoCallback(char *channel_name, struct CHAN_PARAM *params, void *user) {
  /// Input and archive file names are determined based on provided site, ifo
  /// and system names.
 int
-loadDaqConfigFile(DAQ_INFO_BLOCK *info, char *site, char *ifo, char *sys)
+loadDaqConfigFile(DAQ_INFO_BLOCK *info, GDS_INFO_BLOCK *gdsinfo, char *site, char *ifo, char *sys)
 {
   unsigned long crc = 0;
   char fname[256];         /* Input file name */
+  char gds_fname[256];         /* Input file name */
   char archive_fname[256]; /* Archive file name */
   char perlCommand[256];   /* String that will contain the Perl command */
   int returnValue = -999;
@@ -485,11 +540,12 @@ loadDaqConfigFile(DAQ_INFO_BLOCK *info, char *site, char *ifo, char *sys)
 
   strcpy(perlCommand, "iniChk.pl ");
 
+  strcpy(gds_fname,fname);
   strcat(fname, "/chans/daq/");
 
   strcpy(archive_fname, fname);
 
-  strcat(fname, sys);
+  strcat(fname,sys);
   strcat(fname, ".ini");
 
   strcat(archive_fname, "archive/");
@@ -503,6 +559,12 @@ loadDaqConfigFile(DAQ_INFO_BLOCK *info, char *site, char *ifo, char *sys)
      fprintf(stderr, "Failed to load DAQ configuration file\n");
      return 0;
   }
+  strcat(gds_fname,"/target/gds/param/tpchn_");
+  strcat_lower(gds_fname,sys);
+  strcat(gds_fname,".par");
+  // printf("GDS TP FILE = %s\n",gds_fname);
+int mytotal = parseGdstpFile(gds_fname,gdsinfo);
+// printf("total gds chans = %d\n",mytotal);
 
   info->numChans = 0;
 	info->numEpicsInts = 0;

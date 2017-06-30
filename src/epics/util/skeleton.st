@@ -249,9 +249,13 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 %% static DAQ_INFO_BLOCK *info;
 %% static volatile void *base;
 %% static DAQ_INFO_BLOCK infoTmp;
+%% static GDS_INFO_BLOCK gdsTmp;
+%% static GDS_INFO_BLOCK *gdsInfo;
 %% static char site[160];
 %% static char ifo[160];
 %% static char daqsys[160];
+%% static char gdssmname[64];
+%% static char gdssmname[64];
 
 %% char fName[4][256];                                                   /* MA */
 %% char fType[3][10] = {"IIR", "FIR", "IIR & FIR"};                      /* MA */
@@ -273,6 +277,8 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 %% static void copy_info() {
 %%   int i;
 %%   for (i = 0; i < infoTmp.numChans; i++) {
+%%     strcpy(info -> tp [i].channel_name, infoTmp.tp [i].channel_name);
+%%	printf("copyinfo %d = %s\n",i,info -> tp [i].channel_name);
 %%     info -> tp [i].tpnum = infoTmp.tp [i].tpnum;
 %%     info -> tp [i].dataType = infoTmp.tp [i].dataType;
 %%     info -> tp [i].dataRate = infoTmp.tp [i].dataRate;
@@ -284,6 +290,16 @@ assign tcsEnable to "{ifo}:TCS-SERVO_EN";
 %%   info->numEpicsFloats = infoTmp.numEpicsFloats;
 %%   info->numEpicsFilts = infoTmp.numEpicsFilts;
 %%   info->numEpicsTotal = infoTmp.numEpicsTotal;
+%% }
+
+%% static void copy_gds_info() {
+%%   int i;
+%%   for (i = 0; i < gdsTmp.totalchans; i++) {
+%% 	strcpy(gdsInfo->tpinfo[i].tpname,gdsTmp.tpinfo[i].tpname);;
+%%	gdsInfo->tpinfo[i].tpnumber = gdsTmp.tpinfo[i].tpnumber;
+%%      if(i<10) printf("GDS Name = %s\n",gdsInfo->tpinfo[i].tpname);
+%%   }
+%%   gdsInfo->totalchans = gdsTmp.totalchans;
 %% }
 
 
@@ -344,9 +360,11 @@ state init
 %%	}
 %%    }
 %%  }
+%% strcpy(gdssmname,fmc.system);
+%% strcat(gdssmname,"_gds");
 
 #if defined(RFM_EPICS)
-%%  printf("Init Sequencer %s; system %d\n", fmc.subSys[0].name, sysnum);
+%%  printf("Init Sequencer %s; system %d fmcsystem = %s\n", fmc.subSys[0].name, sysnum,fmc.system);
 %%  findSharedMemory(fmc.system);
 %%  pRfm = (RFM_FE_COMMS *)(findRfmCard(0));
 %%  pFilt = (FILT_MOD *)(&pRfm->%EPICS_FILT_VAR%);
@@ -359,6 +377,9 @@ state init
 %%  printf("%s pVmeCoeff size is 0x%lx\n", fmc.subSys[0].name, sizeof(*pVmeCoeff));
 %%  printf("%s pEpics is at 0x%lx\n", fmc.subSys[0].name, ((unsigned long)pEpics-(unsigned long)pRfm));
 %%  printf("%s pEpics is at 0x%lx\n", fmc.subSys[0].name, ((unsigned long)pRfm));
+%%  findSharedMemory(gdssmname);
+%%  gdsInfo = (GDS_INFO_BLOCK *)(findRfmCard(0));
+%%  printf("%s gdsinfo is at 0x%lx\n", gdssmname, (unsigned long)gdsInfo);
 #endif
 
 %% strcpy(fName[0], "/opt/rtcds/");                                        /* MA */
@@ -821,15 +842,18 @@ state daqInit
         strcpy(site, macValueGet("site"));
         strcpy(ifo, macValueGet("ifo"));
 	strcpy(daqsys, macValueGet("sysfile"));
+	findSharedMemory(daqsys);
 %%      info = ((DAQ_INFO_BLOCK *)((base = (volatile void *)findRfmCard(0)) + DAQ_INFO_ADDRESS));
 	pvPut(dcuId);
 %%    rfm_assign(pEpics->epicsInput.dcuId, dcuId);
 %%      printf("daq info at 0x%lx\n",(unsigned long)info);
 %%      memset(&infoTmp, 0, sizeof(infoTmp));
 %%      info->reconfig = 0;
-%%      if (loadDaqConfigFile(&infoTmp, site, ifo, daqsys)) {
+%%      if (loadDaqConfigFile(&infoTmp, &gdsTmp,site, ifo, daqsys)) {
            strcpy(msgDAQ, localtimestring);
 %%         copy_info();
+%%         copy_gds_info();
+%%		printf("Total gds tp = %d\n",gdsTmp.totalchans);
 %%         printf("%s%s daqConfig info is at rfm offset 0x%lx\n", ifo, daqsys, ((char *)info) - ((char *)base));
 %%         info -> reconfig = 1;
 %%         chnCnt = infoTmp.numChans;
@@ -872,8 +896,10 @@ state daqProcess
 %%          info -> reconfig = 0;
             strcpy(msgDAQ, "Reading DAQ (.ini) file...");
             pvPut(msgDAQ);
-%%          if (loadDaqConfigFile(&infoTmp, site, ifo, daqsys)) {
+%%          if (loadDaqConfigFile(&infoTmp, &gdsTmp, site, ifo, daqsys)) {
 %%            copy_info();
+%%            copy_gds_info();
+%%		printf("Total gds tp = %d\n",gdsTmp.totalchans);
 %%            printf("%s%s daqConfig info is at rfm offset 0x%lx\n", ifo, daqsys, ((char *)info) - ((char *)base))
 ;
 %%            info -> reconfig = 1;
