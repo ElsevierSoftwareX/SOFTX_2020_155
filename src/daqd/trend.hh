@@ -83,7 +83,7 @@ public:
     		 profile_mt((char *)"mt"),
 		 fsd (60), minute_fsd (3600), raw_minute_trend_saving_period (2),
 		 worker_first_channel (0),
-		 trend_worker_nb (0), worker_busy (0)
+		 trend_worker_nb (0), worker_busy (0), _configuration_number(0)
     {
       sem_init (&minute_frame_saver_sem, 0, 1);
       sem_init (&frame_saver_sem, 0, 1);
@@ -225,7 +225,13 @@ public:
 
   /// prevent two trend frames from being written at the same time
   pthread_mutex_t frame_write_lock;
+
+  void set_configuration_number(int value) {
+    _configuration_number = value;
+  }
+  int configuration_number() const { return _configuration_number; }
 private:
+  int _configuration_number;
   int shutdown_now;
   int shutdown_minute_now;
   void shutdown_trender () { shutdown_now = 1; }
