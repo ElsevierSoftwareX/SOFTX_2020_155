@@ -19,6 +19,6 @@ typedef struct CHAN_PARAM {
 
 int parseConfigFile(char *, unsigned long *, int (*callback)(char *, struct CHAN_PARAM *, void *), int, char *, void *);
 
-int loadDaqConfigFile(DAQ_INFO_BLOCK *, char *, char *, char *);
+int loadDaqConfigFile(DAQ_INFO_BLOCK *, GDS_INFO_BLOCK *, char *, char *, char *);
 
 #endif

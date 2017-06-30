@@ -10,6 +10,7 @@
 #define DAQ_CONNECT             0	///< Initialize DAQ flag
 #define DAQ_WRITE               1	///< Runtime DAQ flag ie acquiring data.
 
+#define DAQ_SRC_NOOP		-1	///< Data from filter module testpoint
 #define DAQ_SRC_FM_TP		0	///< Data from filter module testpoint
 #define DAQ_SRC_NFM_TP		1	///< Data from non filter module related testpoint
 #define DAQ_SRC_FM_EXC		2	///< Data from filter module excitation input
@@ -25,6 +26,7 @@
 #define DCU_COUNT 256		///< MAX number of real-time DAQ processes in single control system
 #define DAQ_BASE_ADDRESS	0x2000000			///< DAQ base offset from shared mem start
 #define DAQ_DATA_BASE_ADD	(DAQ_BASE_ADDRESS + 0x100000)	///< DAQ data location in shared mem
+#define GDS_DATA_ADDRESS	0x1000000
 
 /* Redefine this to change DAQ transmission size */
 #define DAQ_DCU_SIZE		0x400000	///< MAX data in bytes/sec allowed per process
@@ -41,6 +43,7 @@
 
 /// Structure for maintaining DAQ channel information
 typedef struct DAQ_LKUP_TABLE {
+	char chname[64];
         int type;       ///< 0=SFM, 1=nonSFM TP, 2= SFM EXC, 3=nonSFM EXC        
 	int sysNum;     ///< If multi-dim SFM array, which one to use.          
 	int fmNum;      ///< Filter module with signal of interest.         
@@ -279,6 +282,7 @@ typedef struct DAQ_INFO_BLOCK {
   int numEpicsFiltsLast;	///< Number of filter modules to copy data from on last xfer.
   unsigned long configFileCRC; 	///< DAQ config file checksum 
   struct {
+    char channel_name[64];
     unsigned int tpnum; 	///< Test point number to which this DAQ channel connects 
     unsigned int dataType;	///< Type cast of DAQ data channel
     unsigned int dataRate;	///< Acquisition rate of DAQ channel
@@ -342,6 +346,38 @@ typedef struct cdsDaqNetGdsTpNum {
    int tpNum[DAQ_GDS_MAX_TP_NUM];
 } cdsDaqNetGdsTpNum;
 
+typedef struct GDS_DATA_HEADER {
+	int datasize;
+	int chan_count;
+	unsigned int timesec;
+	unsigned int timensec;;
+	char chan_name[64][64];
+} GDS_DATA_HEADER;
+
+typedef struct GDS_INFO {
+	char tpname[64];
+	unsigned int tpnumber;
+} GDS_INFO;
+typedef struct GDS_INFO_BLOCK {
+	unsigned int totalchans;
+	GDS_INFO tpinfo[50000];
+} GDS_INFO_BLOCK;
+
+typedef struct GDS_STATUS {
+	int cycle;
+	int valsperchan;
+} GDS_STATUS;
+
+typedef struct tp_channel_t {
+	char name[64];
+	int dataPts;
+	int msgSize;
+	unsigned int timesec;
+	unsigned int timensec;;
+} tp_channel_t;
+
+
+
 #define GDS_TP_MAX_FE	1250
 #define GDS_MAX_NFM_TP	500
 #define GDS_MAX_NFM_EXC	50
@@ -349,6 +385,8 @@ typedef struct cdsDaqNetGdsTpNum {
 #define GDS_16K_EXC_MIN	1
 #define GDS_2K_TP_MIN	30001
 #define GDS_16K_TP_MIN	10001
+#define GDS_DATA_OFFSET	0x200000
+#define GDS_BUFF_SIZE	0x80000
 
 #endif
 
