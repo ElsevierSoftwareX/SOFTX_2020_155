@@ -140,7 +140,8 @@ target_compile_options(fw_common PRIVATE
         -Wno-deprecated -Wno-write-strings
         )
 target_link_libraries(fw_common PRIVATE
-        epics::ca epics::cas ldastools::framecpp)
+        epics::ca epics::cas ldastools::framecpp
+		run_number::run_number)
 
 #c++ -c -DSERVER_VERSION=\"2.0\" -DPRODUCTION_DATE=\"now\" -DPRODUCTION_MACHINE=\"this\" -DGDS_TESTPOINT_SUPPORT
 #  -D_GNU_SOURCE -D_DEFAULT_SOURCE
@@ -195,4 +196,5 @@ target_link_libraries(daqd_fw fw_common fw_comm fw_daqd_gds ca Com cas gdd epics
         ${EPICS_BASE_CA_LIBS} ${EPICS_BASE_CAS_LIBS}
         ${FrameCPP_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
+		run_number::run_number
         )

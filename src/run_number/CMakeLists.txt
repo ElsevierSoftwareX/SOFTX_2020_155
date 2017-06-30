@@ -19,6 +19,7 @@ target_compile_options(run_number PRIVATE ${_RN_CHECK_FLAGS})
 add_library(run_number_client STATIC run_number_client.cc run_number_client.hh)
 target_link_libraries(run_number_client PUBLIC zmq)
 target_include_directories(run_number_client PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(run_number::run_number ALIAS run_number_client)
 
 add_executable(test_run_number tests/test_main.cc tests/test_run_number.cc tests/test_run_number_structs.cc run_number.cc run_number.hh)
 target_include_directories(test_run_number PRIVATE ${CATCH_PATH})

@@ -230,7 +230,7 @@ trender_c::minute_framer ()
   //
   try {
     frame = ldas_frame_h_type (new FrameCPP::Version::FrameH ("LIGO",
-					     0, // run number ??? buffptr -> block_prop (nb) -> prop.run;
+					     configuration_number(), // run number ??? buffptr -> block_prop (nb) -> prop.run;
 					     1, // frame number
 					     FrameCPP::Version_6::GPSTime (0, 0),
 					     0, // leap seconds
@@ -680,7 +680,7 @@ trender_c::framer ()
   //
   try {
     frame = ldas_frame_h_type (new FrameCPP::Version::FrameH ("LIGO",
-					     0, // run number ??? buffptr -> block_prop (nb) -> prop.run;
+					     configuration_number(), // run number ??? buffptr -> block_prop (nb) -> prop.run;
 					     1, // frame number
 					     FrameCPP::Version_6::GPSTime (0, 0),
 					     0, // localTime

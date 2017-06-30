@@ -1218,6 +1218,11 @@ CommandLine: /* Nothing */
 		}
 	}
 	| CONFIGURE CHANNELS {AUTH_CHECK(((my_lexer *)lexer));} ConfigureChannelsBody {}
+        | UPDATE CONFIGURATION NUMBER TextExpression {
+               AUTH_CHECK(((my_lexer *)lexer));
+               daqd.update_configuration_number($4);
+               daqd.trender.set_configuration_number(daqd.configuration_number());
+        }
 	| STATUS UNITS {
 		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
 
