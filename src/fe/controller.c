@@ -48,7 +48,6 @@
 #include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
 
 // Code can be run without shutting down CPU by changing this compile flag
-#undef NO_CPU_SHUTDOWN
 #ifndef NO_CPU_SHUTDOWN
 extern int vprintkl(const char*, va_list);
 extern int printkl(const char*, ...);
@@ -480,9 +479,13 @@ printf("Sync source = %d\n",syncSource);
   printf("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRestore);
   cnt = 0;
   do{
+#ifndef NO_CPU_SHUTDOWN
 	udelay(MAX_UDELAY);
         udelay(MAX_UDELAY);
         udelay(MAX_UDELAY);
+#else
+	msleep(80);
+#endif
   	printf("Waiting for EPICS BURT %d\n", cnt++);
 	cpu_relax();
   }while(!pLocalEpics->epicsInput.burtRestore);
@@ -884,7 +887,11 @@ udelay(1000);
   cpc /= CYCLE_PER_SECOND;
 
 
+#ifdef NO_CPU_SHUTDOWN
+  while(!kthread_should_stop()){
+#else
   while(!vmeDone){ 	// Run forever until user hits reset
+#endif
   	if (run_on_timer) {  // NO ADC present, so run on CPU realtime clock
 	  // Pause until next cycle begins
 	  if (cycleNum == 0) {
@@ -895,11 +902,15 @@ udelay(1000);
 	  // advance to the next cycle polling CPU cycles and microsleeping
 	  rdtscl(clk);
 	  clk += cpc;
+#ifdef NO_CPU_SHUTDOWN
+	usleep_range(8,12);
+#else
 	  for(;;) {
 	  	rdtscl(clk1);
 		if (clk1 >= clk) break;
 		udelay(1);
 	  }
+#endif
 	    ioMemCntr = (cycleNum % IO_MEMORY_SLOTS);
 	    for(ii=0;ii<IO_MEMORY_SLOT_VALS;ii++)
 	    {
@@ -960,6 +971,9 @@ udelay(1000);
 	  cycle_gps_time = timeSec;
 #endif
 	}
+#ifdef NO_CPU_SHUTDOWN
+		    usleep_range(5,9);
+#endif
         for(ll=0;ll<sampleCount;ll++)
         {
 /// IF IOP *************************** \n
@@ -980,7 +994,6 @@ udelay(1000);
                	    else packedData += 31;
 		
 		    rdtscl(cpuClock[CPU_TIME_RDY_ADC]);
-
                     do {
 			/// - ---- Need to delay if not ready as constant banging of the input register
 			/// will slow down the ADC DMA.
@@ -1509,7 +1522,7 @@ udelay(1000);
 			gps_receiver_locked = getGpsTime(&timeSec,&usec);
 			pLocalEpics->epicsOutput.irigbTime = usec;
 		}
-		if((usec > MAX_IRIGB_SKEW) || (usec < MIN_IRIGB_SKEW)) 
+		if((usec > MAX_IRIGB_SKEW || usec < MIN_IRIGB_SKEW) && cdsPciModules.gpsType != 0) 
 		{
 			diagWord |= TIME_ERR_IRIGB;;
 			feStatus |= FE_ERROR_TIMING;;
