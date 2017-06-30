@@ -28,6 +28,7 @@ struct proc_dir_entry *proc_futures_entry;
 
 void remove_epics_proc_files(void);
 int create_epics_proc_files(void);
+struct task_struct *sthread;
 
 /// Routine to read the /proc/{model}/status file. \n \n
 ///	 We give all of our information in one go, so if the
@@ -633,6 +634,16 @@ int init_module (void)
 	printf("DAQSM at 0x%x\n",_daq_shm);
  	daqPtr = (struct rmIpcStr *) _daq_shm;
 
+// Open new GDS TP data shared memory in support of ZMQ
+        sprintf(fname, "%s_gds", SYSTEM_NAME_STRING_LOWER);
+        ret =  mbuf_allocate_area(fname, 16*1024*1024, 0);
+        if (ret < 0) {
+                printf("mbuf_allocate_area() failed; ret = %d\n", ret);
+                return -1;
+        }
+        _gds_shm = (unsigned char *)(kmalloc_area[ret]);
+	printf("GDSSM at 0x%x\n",_gds_shm);
+
 	// Find and initialize all PCI I/O modules *******************************************************
 	  // Following I/O card info is from feCode
 	  cards = sizeof(cards_used)/sizeof(cards_used[0]);
@@ -1042,14 +1053,13 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
         pLocalEpics->epicsInput.vmeReset = 0;
 
 #ifdef NO_CPU_SHUTDOWN
-        struct task_struct *p;
-        p = kthread_create(fe_start, 0, "fe_start/%d", CPUID);
-        if (IS_ERR(p)){
+        sthread = kthread_create(fe_start, 0, "fe_start/%d", CPUID);
+        if (IS_ERR(sthread)){
                 printf("Failed to kthread_create()\n");
                 return -1;
         }
-        kthread_bind(p, CPUID);
-        wake_up_process(p);
+        kthread_bind(sthread, CPUID);
+        wake_up_process(sthread);
 #endif
 
 
@@ -1066,6 +1076,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 
 void cleanup_module (void) {
 	int i;
+	int ret;
 	extern int __cpuinit cpu_up(unsigned int cpu);
 
 	remove_epics_proc_files();
@@ -1081,6 +1092,9 @@ void cleanup_module (void) {
 
 	printk("Setting stop_working_threads to 1\n");
 	// Stop the code and wait
+#ifdef NO_CPU_SHUTDOWN
+	ret = kthread_stop(sthread);
+#endif
         stop_working_threads = 1;
         msleep(1000);
 
