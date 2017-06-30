@@ -1,4 +1,9 @@
 ==================================================================================================
+Changes for 4.0  (NOT YET RELEASED)
+==================================================================================================
+- daqLib.c and supporting components modified to send out GDS TP data via separate shared memory
+  area for use with new ZMQ DAQ transmission software.
+==================================================================================================
 Changes for 3.3  (NOT YET RELEASED)
 ==================================================================================================
 - Added ability to run DAC modules without a preload of the FIFO for lower latency.  This done
