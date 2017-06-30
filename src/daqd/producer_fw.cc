@@ -90,19 +90,12 @@ namespace {
 }
 
 
-/* GM and shared memory communication area */
-/// Point into shared memory for the controller DCU cycle
-#define controller_cycle (shmemDaqIpc[daqd.controller_dcu]->cycle)
-
 #define SHMEM_DAQ 1
 #include "../../src/include/daqmap.h"
 #include "../../src/include/drv/fb.h"
 
 /// Memory mapped addresses for the DCUs
 volatile unsigned char *dcu_addr[DCU_COUNT];
-
-/// Pointers to IPC areas for each DCU
-struct rmIpcStr *shmemDaqIpc[DCU_COUNT];
 
 /// Pointers into the shared memory for the cycle and time (coming from the IOP
 /// (e.g. x00))
@@ -265,7 +258,6 @@ void *producer::frame_writer() {
 
     time_t zero_time = time(0); //  - 315964819 + 33;
 
-    int prev_controller_cycle = -1;
     int dcu_cycle = 0;
     int resync = 0;
 
@@ -329,8 +321,6 @@ void *producer::frame_writer() {
                 break;
         }
         stat_recv.tick();
-
-        prev_controller_cycle = controller_cycle;
     }
 }
 
