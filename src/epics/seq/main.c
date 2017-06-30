@@ -1975,7 +1975,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 							cdTableP[chNumP].mask = 0;
 						if (cdTableP[chNumP].mask > 0) cdTableP[chNumP].mask = ~0;
 					}
-					printf("mask: %d %s\n", cdTableP[chNumP].mask, cdTableP[chNumP].chname);
+					// printf("mask: %d %s\n", cdTableP[chNumP].mask, cdTableP[chNumP].chname);
 				} else {
 					cdTableP[chNumP].mask = 0;
 				}
@@ -2892,7 +2892,7 @@ void listLocalRecords(DBBASE *pdbbase) {
 		return;
 	}
 	while (!status) {
-		printf("%d: %s\n",ii, dbGetRecordName(pdbentry));
+		// printf("%d: %s\n",ii, dbGetRecordName(pdbentry));
 		++ii;
 		status = dbNextRecord(pdbentry);
 	}
