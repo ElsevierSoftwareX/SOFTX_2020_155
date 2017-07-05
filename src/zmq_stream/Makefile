@@ -10,9 +10,10 @@ srcdir = .
 
 #include ../common.mk
 
-TARGETS=zmq_multi_stream zmq_multi_rcvr zmq_proxy zmq_proxy_client zmq_threads zmq_rcv_from_dc.c
+TARGETS=zmq_multi_stream zmq_multi_rcvr zmq_proxy zmq_proxy_client zmq_threads zmq_rcv_from_dc.c gpstp_test.c
 
 zmq_multi_stream: zmq_multi_stream.o rfm.o
+gdstp_test: gdstp_test.o rfm.o
 zmq_multi_rcvr: zmq_multi_rcvr.o
 zmq_threads: zmq_threads.o
 zmq_rcv_from_dc: zmq_rcv_from_dc.o
