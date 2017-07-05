@@ -69,3 +69,30 @@ Files:
 	- Purpose: Receive status information from zmq_threads and send to EPICS channels defined in 
 	 	   dc.db.
 	- Status: Functional, but hard coded for use on Caltech test system.
+
+- gdstp_test.c
+	- Purpose: Test delivery of GDS TP data by channel from real-time daqLib.c code.
+	- Usage: gdstp_test -s "modelnames" where:
+		- modelnames = name of control models running on this front end computer
+		- NOTE: Code must run on same computer as the real-time front end control applications
+	- Output: If a GDS TP is selected on any one of the models listed in the -s argument, the code will
+		print out data at 16Hz:
+			- Model name and cycle number (0-15)
+			- Channel Name
+			- First 5 data values of the data stream 
+		EXAMPLE *********
+		x1iopsam - New cycle found 5 with 1 GDS chans
+		channel name = X1:IOP-SAM_ADC_DUOTONE_IN1
+		data 0 = 1836.000000
+		data 1 = 1952.000000
+		data 2 = 2052.000000
+		data 3 = 2132.000000
+		data 4 = 2198.000000
+		x1fe3tim16 - New cycle found 5 with 1 GDS chans
+		channel name = X1:FE3-TIM16_T1_INPUT_FILT_TEST1
+		data 0 = -69.822632
+		data 1 = -55.574661
+		data 2 = -33.132141
+		data 3 = -6.907826
+		data 4 = 20.496559
+
