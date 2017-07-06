@@ -1507,7 +1507,7 @@ udelay(1000);
 			gps_receiver_locked = getGpsTime(&timeSec,&usec);
 			pLocalEpics->epicsOutput.irigbTime = usec;
 		}
-		if((usec > MAX_IRIGB_SKEW) || (usec < MIN_IRIGB_SKEW)) 
+		if((usec > MAX_IRIGB_SKEW) || (usec < MIN_IRIGB_SKEW) && cdsPciModules.gpsType != 0) 
 		{
 			diagWord |= TIME_ERR_IRIGB;;
 			feStatus |= FE_ERROR_TIMING;;
