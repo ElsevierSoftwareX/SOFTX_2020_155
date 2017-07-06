@@ -18,6 +18,8 @@ TARGETS=mx_stream
 
 mx_stream: mx_stream.o rfm.o
 
+mx_crc_only: mx_crc_only.o rfm.o
+
 rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
