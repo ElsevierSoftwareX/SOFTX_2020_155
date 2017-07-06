@@ -54,7 +54,7 @@
 int do_verbose;
 int num_threads;
 volatile int threads_running;
-unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
+unsigned int do_wait = 1; // Wait for this number of milliseconds before starting a cycle
 unsigned int wait_delay = 4; // Wait before acknowledging sends with mx_wait() for this number of cycles times nsys
 
 extern void *findSharedMemory(char *);
@@ -148,6 +148,10 @@ unsigned int myCrc = 0;
 
 
 mx_set_error_handler(MX_ERRORS_RETURN);
+
+int mxStatBit[2];
+mxStatBit[0] = 1;
+mxStatBit[1] = 2;
 // Clear CRC on startup to avoid sigfault if models not running
 for (unsigned int i = 0; i < nsys; i++) 
 	for (unsigned int j = 0; j < 16; j++) 
@@ -179,13 +183,12 @@ do {
 		lastCycle %= 16;
 
 		loop_stats.tick();
-
-		// Allow time for slower (2k) models to complete present cycle
 		usleep(do_wait * 1000);
 
 		// Send data for each system
 		for (unsigned int i = 0; i < nsys; i++) {
 
+		  if (lastCycle == 0) shmIpcPtr[i]->status ^= mxStatBit[0];
 		  // Copy values from shmmem to MX buffer
 		  mxDataBlock.mxIpcData.dataBlockSize = shmIpcPtr[i]->dataBlockSize;
 		  if (mxDataBlock.mxIpcData.dataBlockSize > DAQ_DCU_BLOCK_SIZE)
@@ -199,6 +202,7 @@ do {
 		  myCrc = crc_len(shmIpcPtr[i]->bp[lastCycle].crc,myCrc);
 		  /// Send CRC back to DAQ shared memory
 		  shmIpcPtr[i]->bp[lastCycle].crc = myCrc;
+		  if (lastCycle == 0) shmIpcPtr[i]->status ^= mxStatBit[1];
 
 		}
 
