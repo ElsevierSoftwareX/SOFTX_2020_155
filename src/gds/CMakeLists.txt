@@ -186,6 +186,15 @@ foreach (RPC_TEMPLATE ${RPC_BASE})
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${RPC_TEMPLATE}.x
             )
+    set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/${RPC_TEMPLATE}_xdr.c
+            PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${RPC_TEMPLATE}.h;${GDS_BIN_HDRS}"
+            )
+    set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/${RPC_TEMPLATE}_clnt.c
+            PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${RPC_TEMPLATE}.h;${GDS_BIN_HDRS}"
+            )
+    set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/${RPC_TEMPLATE}_svc.c
+            PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${RPC_TEMPLATE}.h;${GDS_BIN_HDRS}"
+            )
 endforeach(RPC_TEMPLATE)
 
 # we do this in two libraries, as the C files need -std=gnu99, the C++ compilers give warnings
@@ -211,3 +220,41 @@ add_library(daqd::gds ALIAS gds_cc)
 
 #SET( CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-std=gnu99 -I. -I../include -g -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size}" )
 #SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size}" )
+
+
+#######
+# builds needed for specific daqd
+##
+
+######
+# Daqd dc specific
+##
+add_library(gds_daqd_dc_gds_main OBJECT
+        gdsstring.c
+        gdserr.c
+        ${CMAKE_CURRENT_BINARY_DIR}/rtestpoint_clnt.c
+        ${CMAKE_CURRENT_BINARY_DIR}/rtestpoint_xdr.c
+        gdsheartbeat.c
+        rpcinc.c
+        gdssched.c
+        tconv.c
+        gdstask.c
+        gdsxdr_util.c
+        sockutil.c)
+target_compile_definitions(gds_daqd_dc_gds_main PRIVATE
+        -D_TP_DAQD
+        -D_TESTPOINT_DIRECT=0)
+target_include_directories(gds_daqd_dc_gds_main PRIVATE
+        ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
+        )
+
+add_library(gds_daqd_dc_gds_tp OBJECT
+        testpoint.c)
+target_compile_definitions(gds_daqd_dc_gds_tp PRIVATE
+        -D_TP_DAQD -D_TESTPOINT_DIRECT=0 -D_NO_KEEP_ALIVE)
+target_include_directories(gds_daqd_dc_gds_tp PRIVATE
+        ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
+        )
+
+add_library(gds_daqd_dc_gds STATIC $<TARGET_OBJECTS:gds_daqd_dc_gds_main> $<TARGET_OBJECTS:gds_daqd_dc_gds_tp>)
+add_library(gds::dc_gds ALIAS gds_daqd_dc_gds)
