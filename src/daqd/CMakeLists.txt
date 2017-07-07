@@ -27,19 +27,14 @@ execute_process(COMMAND uname -a
         OUTPUT_VARIABLE DAQD_UNAME)
 execute_process(COMMAND date
         OUTPUT_VARIABLE DAQD_DATE)
-#message("uname ${DAQD_UNAME}")
-#set (DAQD_UNAME `uname -a`)
-#string(REPLACE " " "_" DAQD_UNAME ${DAQD_UNAME})
+
 string(REPLACE "#" "" DAQD_UNAME ${DAQD_UNAME})
 string(REPLACE "\n" "" DAQD_UNAME ${DAQD_UNAME})
-#string(REPLACE " " "_" DAQD_DATE ${DAQD_DATE})
+
 string(REPLACE "\n" "" DAQD_DATE ${DAQD_DATE})
-set(DAQD_COMMON_DEFINES -DSERVER_VERSION=\"2.0\"
+set(DAQD_BUILD_INFO_DEFINES -DSERVER_VERSION=\"2.0\"
         -DPRODUCTION_MACHINE=\"${DAQD_UNAME}\"
         -DPRODUCTION_DATE=\"${DAQD_DATE}\")
-#set(DAQD_COMMON_DEFINES -DSERVER_VERSION=\"2.0\"
-#    -DPRODUCTION_MACHINE=`uname\ -a`
-#    -DPRODUCTION_DATE=\"`date`\")
 
 set(CDS_GDSFLAGS "-DGDS_TESTPOINT_SUPPORT")
 
@@ -96,7 +91,7 @@ set (DAQD_COMMON_SRC
 
 add_library(fw_daqd_gds STATIC ${DAQD_GDS_SRC})
 target_compile_definitions(fw_daqd_gds PRIVATE
-        ${DAQD_COMMON_DEFINES}
+        ${DAQD_BUILD_INFO_DEFINES}
         -D_GNU_SOURCE -D_DEFAULT_SOURCE
         -D_X86_64_ -DUNIX -Dlinux
         -D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11
@@ -129,7 +124,7 @@ target_include_directories(fw_common PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/../include
         )
 target_compile_definitions(fw_common PRIVATE
-        ${DAQD_COMMON_DEFINES}
+        ${DAQD_BUILD_INFO_DEFINES}
         ${CDS_GDSFLAGS}
         -D_GNU_SOURCE -D_DEFAULT_SOURCE
         -D_X86_64_ -DUNIX -Dlinux -DUNIX
@@ -152,7 +147,7 @@ target_link_libraries(fw_common PRIVATE
 
 add_library(fw_comm STATIC ${CMAKE_CURRENT_BINARY_DIR}/comm.cc)
 target_compile_definitions(fw_comm PRIVATE
-        ${DAQD_COMMON_DEFINES}
+        ${DAQD_BUILD_INFO_DEFINES}
         -DDAQD_BUILD_FW ${CDS_GDSFLAGS} -D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11)
 target_compile_options(fw_comm PRIVATE
         -mtune=generic -m64
@@ -190,7 +185,7 @@ target_include_directories(daqd_fw PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_compile_definitions(daqd_fw PRIVATE ${DAQD_FCPP_FLAGS} -DDAQD_BUILD_FW ${CDS_GDSFLAGS} -D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11)
 target_compile_options(daqd_fw PRIVATE
-        ${DAQD_COMMON_DEFINES}
+        ${DAQD_BUILD_INFO_DEFINES}
         -Wno-deprecated -Wno-write-strings)
 target_link_libraries(daqd_fw fw_common fw_comm fw_daqd_gds ca Com cas gdd epics::ca epics::cas
         ${EPICS_BASE_CA_LIBS} ${EPICS_BASE_CAS_LIBS}
@@ -198,3 +193,84 @@ target_link_libraries(daqd_fw fw_common fw_comm fw_daqd_gds ca Com cas gdd epics
         ${CMAKE_THREAD_LIBS_INIT}
 		run_number::run_number
         )
+
+if (${MX_FOUND})
+###########
+# DC Build with some mx support
+# do not use, it is here in order to start
+# work on the zmq dc
+####
+set (DAQD_DC_MAIN_SRC
+		archive.cc
+		profiler.cc
+		filesys.cc
+		epics_pvs.cc
+		producer.cc
+		trend.cc
+		net_writer.cc
+		circ.cc
+		framesend.cc
+		gdsmutex.cc
+		edcu.cc
+		epicsServer.cc
+		exServer.cc
+		exScalarPV.cc
+		exVectorPV.cc
+		exPV.cc
+		exChannel.cc
+		mx_rcvr.cc
+		framerecv.cc
+		listener.cc
+		daqd.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
+
+set (DAQD_DC_GDS_SRC
+		gds.cc)
+
+add_library(dc_gds STATIC ${DAQD_DC_GDS_SRC})
+target_compile_definitions(dc_gds PRIVATE
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
+		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+		-DLIGO_GDS
+		-D_TP_DAQD
+		-DARCHIVE=\"${CMAKE_CURRENT_SOURCE_DIR}/../gds\"
+		-DDAQD_BUILD_DC)
+target_include_directories(dc_gds PUBLIC
+		${CMAKE_CURRENT_SOURCE_DIR}/../include
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_BINARY_DIR}
+		)
+target_compile_options(dc_gds PUBLIC
+		-fno-common
+		-Wno-deprecated
+		-Wno-write-strings
+		)
+target_link_libraries(dc_gds PRIVATE
+		gds::dc_gds
+		ldastools::framecpp
+		mx::myriexpress)
+
+add_executable(daqd_dc_mx ${DAQD_DC_MAIN_SRC})
+target_compile_definitions(daqd_dc_mx PUBLIC
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
+		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+		-DDAQD_BUILD_DC
+		)
+target_include_directories(daqd_dc_mx PUBLIC
+		${CMAKE_CURRENT_BINARY_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/../include
+		)
+target_link_libraries(daqd_dc_mx PUBLIC
+		gds::dc_gds
+		dc_gds
+		run_number::run_number
+		ca Com cas gdd epics::ca epics::cas
+		${EPICS_BASE_CA_LIBS} ${EPICS_BASE_CAS_LIBS}
+		ldastools::framecpp
+		${CMAKE_THREAD_LIBS_INIT}
+		mx::myriexpress
+		)
+endif(${MX_FOUND})
+
