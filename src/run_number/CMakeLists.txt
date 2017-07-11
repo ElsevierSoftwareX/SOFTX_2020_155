@@ -1,4 +1,3 @@
-find_package(ZMQ4)
 find_path(CATCH_PATH catch.hpp
         HINTS /usr/include /usr/local/include ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 

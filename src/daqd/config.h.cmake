@@ -56,4 +56,17 @@
 
 #endif
 
+    /* DC build settings */
+#ifdef DAQD_BUILD_DC_ZMQ
+
+#define DATA_CONCENTRATOR 1
+/* Using Symmetricom GPS card */
+#define USE_SYMMETRICOM 1
+/* run an ecdu */
+#define EPICS_EDCU 1
+/* Interface with the GDS Testpoint server */
+#define GDS_TESTPOINTS 1
+
+#endif
+
 #endif
