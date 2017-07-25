@@ -270,53 +270,128 @@ target_link_libraries(daqd_dc_mx PUBLIC
 		)
 endif(${MX_FOUND})
 
-#########
-# DC with ZMQ
-###
-# Reuse the main source lists from daqd_dc_mx
+##########
+## DC with ZMQ
+####
+## Reuse the main source lists from daqd_dc_mx
+#
+#add_library(dc_gds_zmq STATIC ${DAQD_DC_GDS_SRC})
+#target_compile_definitions(dc_gds_zmq PRIVATE
+#		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
+#		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+#		-DLIGO_GDS
+#		-D_TP_DAQD
+#		-DARCHIVE=\"${CMAKE_CURRENT_SOURCE_DIR}/../gds\"
+#		-DDAQD_BUILD_DC_ZMQ)
+#target_include_directories(dc_gds_zmq PUBLIC
+#		${CMAKE_CURRENT_SOURCE_DIR}/../include
+#		${CMAKE_CURRENT_SOURCE_DIR}
+#		${CMAKE_CURRENT_BINARY_DIR}
+#		)
+#target_compile_options(dc_gds_zmq PUBLIC
+#		-fno-common
+#		-Wno-deprecated
+#		-Wno-write-strings
+#		)
+#target_link_libraries(dc_gds_zmq PRIVATE
+#		gds::dc_gds
+#		ldastools::framecpp
+#		zmq
+#		)
+#
+#add_executable(daqd_dc_zmq ${DAQD_DC_MAIN_SRC} producer_zmq.cc)
+#target_compile_definitions(daqd_dc_zmq PUBLIC
+#		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
+#		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+#		-DDAQD_BUILD_DC_ZMQ
+#		)
+#target_include_directories(daqd_dc_zmq PUBLIC
+#		${CMAKE_CURRENT_BINARY_DIR}
+#		${CMAKE_CURRENT_SOURCE_DIR}
+#		${CMAKE_CURRENT_SOURCE_DIR}/../include
+#		)
+#target_link_libraries(daqd_dc_zmq PUBLIC
+#		gds::dc_gds
+#		dc_gds_zmq
+#		run_number::run_number
+#		ca Com cas gdd epics::ca epics::cas
+#		${EPICS_BASE_CA_LIBS} ${EPICS_BASE_CAS_LIBS}
+#		ldastools::framecpp
+#		${CMAKE_THREAD_LIBS_INIT}
+#		zmq
+#		)
 
-add_library(dc_gds_zmq STATIC ${DAQD_DC_GDS_SRC})
-target_compile_definitions(dc_gds_zmq PRIVATE
-		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
+if (${MX_FOUND})
+###########
+# mx-symm Build with mx support
+####
+set (DAQD_MXSYMM_MAIN_SRC
+		archive.cc
+		profiler.cc
+		filesys.cc
+		epics_pvs.cc
+		trend.cc
+		net_writer.cc
+		circ.cc
+		#framesend.cc
+		#gdsmutex.cc
+		edcu.cc
+		epicsServer.cc
+		exServer.cc
+		exScalarPV.cc
+		exVectorPV.cc
+		exPV.cc
+		exChannel.cc
+		framerecv.cc
+		listener.cc
+		daqd.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
+
+add_library(dc_mxsymm_gds STATIC gds.cc)
+target_compile_definitions(dc_mxsymm_gds PRIVATE
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux
 		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
 		-DLIGO_GDS
 		-D_TP_DAQD
 		-DARCHIVE=\"${CMAKE_CURRENT_SOURCE_DIR}/../gds\"
-		-DDAQD_BUILD_DC_ZMQ)
-target_include_directories(dc_gds_zmq PUBLIC
+		-DGDS_TESTPOINT_SUPPORT
+		-DDAQD_BUILD_MXSYMM)
+target_include_directories(dc_mxsymm_gds PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/../include
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_BINARY_DIR}
 		)
-target_compile_options(dc_gds_zmq PUBLIC
+target_compile_options(dc_mxsymm_gds PUBLIC
 		-fno-common
 		-Wno-deprecated
 		-Wno-write-strings
 		)
-target_link_libraries(dc_gds_zmq PRIVATE
+target_link_libraries(dc_mxsymm_gds PRIVATE
 		gds::dc_gds
 		ldastools::framecpp
-		zmq
-		)
+		mx::myriexpress)
 
-add_executable(daqd_dc_zmq ${DAQD_DC_MAIN_SRC} producer_zmq.cc)
-target_compile_definitions(daqd_dc_zmq PUBLIC
-		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
+add_executable(daqd_mxsymm ${DAQD_MXSYMM_MAIN_SRC} producer.cc mx_rcvr.cc)
+target_compile_definitions(daqd_mxsymm PUBLIC
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux
 		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
-		-DDAQD_BUILD_DC_ZMQ
+		-DGDS_TESTPOINT_SUPPORT
+		-DDAQD_BUILD_MXSYMM
 		)
-target_include_directories(daqd_dc_zmq PUBLIC
+target_include_directories(daqd_mxsymm PUBLIC
 		${CMAKE_CURRENT_BINARY_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/../include
 		)
-target_link_libraries(daqd_dc_zmq PUBLIC
+target_link_libraries(daqd_mxsymm PUBLIC
 		gds::dc_gds
-		dc_gds_zmq
+		dc_mxsymm_gds
 		run_number::run_number
 		ca Com cas gdd epics::ca epics::cas
 		${EPICS_BASE_CA_LIBS} ${EPICS_BASE_CAS_LIBS}
 		ldastools::framecpp
 		${CMAKE_THREAD_LIBS_INIT}
-		zmq
+		mx::myriexpress
 		)
+endif(${MX_FOUND})
