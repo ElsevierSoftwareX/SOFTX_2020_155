@@ -4,6 +4,8 @@ Changes for 3.2.2
 - Bug Fixes:
 	- controller.c: Fixed not to give timing error on IRIG-B is no IRIG-B card installed.
 	- mx_crc_only.c: Sends heartbeat back to fe code to clear DAQ error in stateword.
+	- Changed mx heartbeat return to controller to use ipc->reqAck instead of ipc->status. On
+	  standalone systems, daqd writes to this field and therefore a conflict.
 ==================================================================================================
 Changes for 3.2
 ==================================================================================================

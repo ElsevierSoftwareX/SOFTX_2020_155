@@ -790,7 +790,6 @@ udelay(1000);
                     rdtscl(cpuClock[jj]);
                     status = gsc16ai64WaitDmaDone(0, packedData);
                     kk ++;
-                    udelay(2);
                     for(ii=0;ii<kk;ii++) {
                           gsc16ai64DmaEnable(ii);
                     }
@@ -1789,7 +1788,7 @@ udelay(1000);
 	  if(ipcErrBits) feStatus |= FE_ERROR_IPC;
 	  // Create FB status word for return to EPICS
 	  mxStat = 0;
-	  mxDiagR = daqPtr->status;
+	  mxDiagR = daqPtr->reqAck;
 	  if((mxDiag & 1) != (mxDiagR & 1)) mxStat = 1;
 	  if((mxDiag & 2) != (mxDiagR & 2)) mxStat += 2;
 #ifdef DUAL_DAQ_DC
