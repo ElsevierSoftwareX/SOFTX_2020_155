@@ -26,6 +26,9 @@ Changes for 3.3  (NOT YET RELEASED)
 - Bug Fix (1047): EDCU code that supports dual data concentrators was modified to work 
   with new mx_stream introduced in 3.1
 - Bug Fix: Corrected initialization for fixed and set phase oscillators at model start.
+- Bug Fix: Change MX heartbeat betwwen controller.c and mx_stream/mx_crc_only to use ipc->reqAck
+  instead of ipc->status.  DAQD uses ipc->status on a standalone system, so was an issue there.
+  This fix also done in RCG branch-3.2.
 ==================================================================================================
 Changes for 3.2
 ==================================================================================================
