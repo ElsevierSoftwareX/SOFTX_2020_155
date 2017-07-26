@@ -1144,7 +1144,6 @@ udelay(1000);
                         }else {
 				// Need to start clocking the DAC outputs.
 				gsc18ao8Enable(&cdsPciModules);
-				udelay(2);
 				gsc16ao16Enable(&cdsPciModules);
                                 sync21pps = 1;
 				// 1PPS never found, so indicate NO SYNC to user
