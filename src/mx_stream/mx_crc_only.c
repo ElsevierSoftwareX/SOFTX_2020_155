@@ -188,7 +188,7 @@ do {
 		// Send data for each system
 		for (unsigned int i = 0; i < nsys; i++) {
 
-		  if (lastCycle == 0) shmIpcPtr[i]->status ^= mxStatBit[0];
+		  if (lastCycle == 0) shmIpcPtr[i]->reqAck ^= mxStatBit[0];
 		  // Copy values from shmmem to MX buffer
 		  mxDataBlock.mxIpcData.dataBlockSize = shmIpcPtr[i]->dataBlockSize;
 		  if (mxDataBlock.mxIpcData.dataBlockSize > DAQ_DCU_BLOCK_SIZE)
@@ -202,7 +202,7 @@ do {
 		  myCrc = crc_len(shmIpcPtr[i]->bp[lastCycle].crc,myCrc);
 		  /// Send CRC back to DAQ shared memory
 		  shmIpcPtr[i]->bp[lastCycle].crc = myCrc;
-		  if (lastCycle == 0) shmIpcPtr[i]->status ^= mxStatBit[1];
+		  if (lastCycle == 0) shmIpcPtr[i]->reqAck ^= mxStatBit[1];
 
 		}
 
