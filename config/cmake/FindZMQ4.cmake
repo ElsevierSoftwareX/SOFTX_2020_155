@@ -1,4 +1,10 @@
 
+if (cds_find_zmq4_included)
+    return()
+endif(cds_find_zmq4_included)
+set(cds_find_zmq4_included TRUE)
+
+
 FIND_PACKAGE(PkgConfig)
 
 pkg_check_modules(LibZMQ REQUIRED libzmq>=4.0.0)
@@ -7,7 +13,7 @@ if (LibZMQ_FOUND)
 
     find_library(libzmq4_LIBARY_PATH name zmq
             PATHS ${LibZMQ_LIBRARY_DIRS}
-            NO_DEFAULT_PATH)
+    )
     add_library(_zmq4 SHARED IMPORTED)
     set_target_properties(_zmq4 PROPERTIES
             IMPORTED_LOCATION ${libzmq4_LIBARY_PATH})
