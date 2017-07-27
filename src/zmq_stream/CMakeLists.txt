@@ -28,7 +28,12 @@ add_executable(zmq_rcv_from_dc zmq_rcv_from_dc.c)
 target_link_libraries(zmq_rcv_from_dc PUBLIC zmq4::zmq)
 target_compile_options(zmq_rcv_from_dc PUBLIC -std=gnu99)
 
-add_executable(zmq_daq_test_data_firehose tests/zmq_firehose.cc)
+add_executable(zmq_daq_test_data_firehose tests/zmq_firehose_pub.cc tests/zmq_firehose_common.cc)
 target_include_directories(zmq_daq_test_data_firehose PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 target_link_libraries(zmq_daq_test_data_firehose PUBLIC zmq4::zmq)
 target_compile_features(zmq_daq_test_data_firehose PUBLIC cxx_defaulted_functions)
+
+add_executable(zmq_daq_test_data_firehose_recv tests/zmq_firehose_sub.cc tests/zmq_firehose_common.cc)
+target_include_directories(zmq_daq_test_data_firehose_recv PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+target_link_libraries(zmq_daq_test_data_firehose_recv PUBLIC zmq4::zmq)
+target_compile_features(zmq_daq_test_data_firehose_recv PUBLIC cxx_defaulted_functions)
