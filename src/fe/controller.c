@@ -1563,13 +1563,10 @@ udelay(1000);
 /// \> Cycle 16, perform duotone diag calcs.
         if(cycleNum == HKP_DT_CALC)
         {
-		if(syncSource == SYNC_SRC_1PPS) {
-			duotoneTime = 5;
-		} else {
-			duotoneTime = duotime(DT_SAMPLE_CNT, duotoneMean, duotone);
-		}
+		duotoneTime = duotime(DT_SAMPLE_CNT, duotoneMean, duotone);
 		pLocalEpics->epicsOutput.dtTime = duotoneTime;
-		if((duotoneTime < MIN_DT_DIAG_VAL) || (duotoneTime > MAX_DT_DIAG_VAL)) 
+		if(((duotoneTime < MIN_DT_DIAG_VAL) || (duotoneTime > MAX_DT_DIAG_VAL)) &&
+		   syncSource != SYNC_SRC_1PPS)
 			feStatus |= FE_ERROR_TIMING;
 		duotoneTimeDac = duotime(DT_SAMPLE_CNT, duotoneMeanDac, duotoneDac);
                 pLocalEpics->epicsOutput.dacDtTime = duotoneTimeDac;
