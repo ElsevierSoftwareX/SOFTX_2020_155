@@ -1,6 +1,7 @@
 //
 // Created by jonathan.hanks on 7/26/17.
 //
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <ctime>
@@ -25,7 +26,11 @@ struct Config {
     int max_generators;
     std::mt19937_64::result_type random_seed;
     size_t data_size;
+    int rate_limit;
+    int recovery_ms;
+    int threads;
     bool verbose;
+    bool zero_copy;
 
     Config(): bind_point{"tcp://*:5555"},
               master_filename{"master_file"},
@@ -33,7 +38,11 @@ struct Config {
               max_generators{50},
               random_seed{static_cast<std::mt19937_64::result_type >(std::time(nullptr))},
               data_size{1024*1024*64},
-              verbose{false}
+              rate_limit{1024*100},
+              recovery_ms{1000},
+              threads{1},
+              verbose{false},
+              zero_copy{false}
     {}
     Config(const Config& other) = default;
     Config(Config&& other) = default;
@@ -52,17 +61,44 @@ Config parse_args(int argc, char **argv) {
             has_next = true;
         }
         if (arg == "--bind") {
-            if (has_next)
+            if (has_next) {
                 cfg.bind_point = next_arg;
+                ++i;
+            }
         }
         if (arg == "--size") {
             if (has_next) {
                 std::istringstream is{next_arg};
                 is >> cfg.data_size;
+                ++i;
+            }
+        }
+        if (arg == "--rate-limit") {
+            if (has_next) {
+                std::istringstream is{next_arg};
+                is >> cfg.rate_limit;
+                ++i;
+            }
+        }
+        if (arg == "--recovery-ms") {
+            if (has_next) {
+                std::istringstream is{next_arg};
+                is >> cfg.recovery_ms;
+                ++i;
+            }
+        }
+        if (arg == "--threads") {
+            if (has_next) {
+                std::istringstream is{next_arg};
+                is >> cfg.threads;
+                ++i;
             }
         }
         if (arg == "-v" || arg == "--verbose") {
             cfg.verbose = true;
+        }
+        if (arg == "-z" || arg == "--zero-copy") {
+            cfg.zero_copy = true;
         }
     }
     return cfg;
@@ -99,14 +135,21 @@ void simple_send_loop(zmq::socket_t& publisher, const Config& config) {
     while(true) {
         wait_for(gps, gps_n);
 
-        // write the time into the buffer
-        {
+        if (config.zero_copy) {
+            zmq::message_t msg(buffers[cur_segment].data(), config.data_size, nullptr, nullptr);
             long* tmp = reinterpret_cast<long*>(buffers[cur_segment].data());
             tmp[0] = gps;
             tmp[1] = gps_n;
+            publisher.send(msg);
+        } else {
+            zmq::message_t msg(config.data_size);
+            char* data = reinterpret_cast<char*>(msg.data());
+            std::fill(data, data + config.data_size, static_cast<char>(cur_segment));
+            long* tmp = reinterpret_cast<long*>(data);
+            tmp[0] = gps;
+            tmp[1] = gps_n;
+            publisher.send(msg);
         }
-        zmq::message_t msg(buffers[cur_segment].data(), config.data_size, nullptr, nullptr);
-        publisher.send(msg);
 
         ++cur_segment;
         if (cur_segment >= segments) {
@@ -151,9 +194,13 @@ int main(int argc, char **argv) {
 //
 //    std::cout << "Did lots of sin calls in " << delta.count() << " units of time" << std::endl;
 
-    zmq::context_t context(1);
+    zmq::context_t context(cfg.threads);
     zmq::socket_t publisher(context, ZMQ_PUB);
 
+    {
+        publisher.setsockopt(ZMQ_RATE, &cfg.rate_limit, sizeof(cfg.rate_limit));
+        publisher.setsockopt(ZMQ_RECOVERY_IVL, &cfg.recovery_ms, sizeof(cfg.recovery_ms));
+    }
     publisher.bind(cfg.bind_point.c_str());
 
     simple_send_loop(publisher, cfg);
