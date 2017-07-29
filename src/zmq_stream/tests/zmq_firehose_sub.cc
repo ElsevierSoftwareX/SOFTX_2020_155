@@ -17,9 +17,13 @@
 
 struct Config {
     std::string bind_point;
+    int rate_limit;
+    int threads;
     bool verbose;
 
     Config(): bind_point{"tcp://127.0.0.1:5555"},
+              rate_limit{1024*100},
+              threads{1},
               verbose{false}
     {}
     Config(const Config& other) = default;
@@ -38,9 +42,16 @@ Config parse_args(int argc, char **argv) {
             next_arg = argv[i+1];
             has_next = true;
         }
-        if (arg == "--bind") {
+        if (arg == "--connect") {
             if (has_next)
                 cfg.bind_point = next_arg;
+        }
+        if (arg == "--threads") {
+            if (has_next) {
+                std::istringstream is{next_arg};
+                is >> cfg.threads;
+                ++i;
+            }
         }
         if (arg == "-v" || arg == "--verbose") {
             cfg.verbose = true;
@@ -90,10 +101,14 @@ void simple_recv_loop(zmq::socket_t& subscriber, const Config& config) {
 int main(int argc, char **argv) {
     Config cfg = parse_args(argc, argv);
 
-    zmq::context_t context(1);
+    zmq::context_t context(cfg.threads);
     zmq::socket_t subscriber(context, ZMQ_SUB);
 
-    subscriber.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+    {
+        subscriber.setsockopt(ZMQ_RATE, &cfg.rate_limit, sizeof(cfg.rate_limit));
+        subscriber.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+    }
+
     subscriber.connect(cfg.bind_point.c_str());
 
     simple_recv_loop(subscriber, cfg);
