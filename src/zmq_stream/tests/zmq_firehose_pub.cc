@@ -29,7 +29,9 @@ struct Config {
     int rate_limit;
     int recovery_ms;
     int threads;
+    int chunk_size;
     bool verbose;
+    bool extra_verbose;
     bool zero_copy;
 
     Config(): bind_point{"tcp://*:5555"},
@@ -38,10 +40,12 @@ struct Config {
               max_generators{50},
               random_seed{static_cast<std::mt19937_64::result_type >(std::time(nullptr))},
               data_size{1024*1024*64},
-              rate_limit{1024*100},
-              recovery_ms{1000},
+              rate_limit{0},
+              recovery_ms{10000},
               threads{1},
+              chunk_size{100*1024*1024},
               verbose{false},
+              extra_verbose{false},
               zero_copy{false}
     {}
     Config(const Config& other) = default;
@@ -65,48 +69,54 @@ Config parse_args(int argc, char **argv) {
                 cfg.bind_point = next_arg;
                 ++i;
             }
-        }
-        if (arg == "--size") {
+        } else if (arg == "--size") {
             if (has_next) {
                 std::istringstream is{next_arg};
                 is >> cfg.data_size;
                 ++i;
             }
-        }
-        if (arg == "--rate-limit") {
+        } else if (arg == "--rate-limit") {
             if (has_next) {
                 std::istringstream is{next_arg};
                 is >> cfg.rate_limit;
                 ++i;
             }
-        }
-        if (arg == "--recovery-ms") {
+            std::cout << "rate limit = " << cfg.rate_limit << std::endl;
+        } else if (arg == "--recovery-ms") {
             if (has_next) {
                 std::istringstream is{next_arg};
                 is >> cfg.recovery_ms;
                 ++i;
             }
-        }
-        if (arg == "--threads") {
+        } else if (arg == "--threads") {
             if (has_next) {
                 std::istringstream is{next_arg};
                 is >> cfg.threads;
                 ++i;
             }
-        }
-        if (arg == "-v" || arg == "--verbose") {
+        } else if (arg == "-v" || arg == "--verbose") {
             cfg.verbose = true;
-        }
-        if (arg == "-z" || arg == "--zero-copy") {
+        } else if (arg == "-vv") {
+            cfg.verbose = true;
+            cfg.extra_verbose = true;
+        } else if (arg == "-z" || arg == "--zero-copy") {
             cfg.zero_copy = true;
+        } else if (arg == "--chunk") {
+            if (has_next) {
+                std::istringstream is{next_arg};
+                is >> cfg.chunk_size;
+                ++i;
+            }
+        } else {
+            std::cerr << "Unknown argument " << arg << std::endl;
         }
     }
     return cfg;
 };
 
 void simple_send_loop(zmq::socket_t& publisher, const Config& config) {
-    if (config.data_size < 1024*1024) {
-        std::cerr << "Data size is too small, please try at least 1MB" << std::endl;
+    if (config.data_size < 1024) {
+        std::cerr << "Data size is too small, please try at least 1KB" << std::endl;
         return;
     }
     const int segments = 16;
@@ -115,6 +125,10 @@ void simple_send_loop(zmq::socket_t& publisher, const Config& config) {
 
     long gps=0;
     long gps_n=0;
+
+    if (config.verbose) {
+        std::cout << "Sending " << config.data_size * 16 << " bytes in 1/16s chunks" << std::endl;
+    }
 
     // initialize a full seconds worth of buffers
     std::array<std::vector<char>, segments> buffers;
@@ -135,20 +149,44 @@ void simple_send_loop(zmq::socket_t& publisher, const Config& config) {
     while(true) {
         wait_for(gps, gps_n);
 
+        int parts = 0;
+        size_t total_size = 0;
+
         if (config.zero_copy) {
             zmq::message_t msg(buffers[cur_segment].data(), config.data_size, nullptr, nullptr);
             long* tmp = reinterpret_cast<long*>(buffers[cur_segment].data());
             tmp[0] = gps;
             tmp[1] = gps_n;
             publisher.send(msg);
+            parts = 1;
+            total_size = config.data_size;
         } else {
-            zmq::message_t msg(config.data_size);
-            char* data = reinterpret_cast<char*>(msg.data());
-            std::fill(data, data + config.data_size, static_cast<char>(cur_segment));
-            long* tmp = reinterpret_cast<long*>(data);
-            tmp[0] = gps;
-            tmp[1] = gps_n;
-            publisher.send(msg);
+            size_t cur = 0;
+            const size_t chunk_size = config.chunk_size;
+            while (cur < config.data_size) {
+                size_t end = cur + chunk_size;
+                bool last_message = false;
+                if (end >= config.data_size) {
+                    last_message = true;
+                    end = config.data_size;
+                }
+                size_t message_size = end - cur;
+                total_size += message_size;
+                zmq::message_t msg(message_size);
+                char *data = reinterpret_cast<char *>(msg.data());
+                std::fill(data, data + message_size, static_cast<char>(cur_segment));
+                if (cur == 0) {
+                    long *tmp = reinterpret_cast<long *>(data);
+                    tmp[0] = gps;
+                    tmp[1] = gps_n;
+                }
+                publisher.send(msg, (last_message ? 0 : ZMQ_SNDMORE));
+                if (config.extra_verbose)
+                    std::cerr << "\t" << message_size << "-" << (last_message ? 0 : ZMQ_SNDMORE) << "\n";
+                parts++;
+
+                cur = end;
+            }
         }
 
         ++cur_segment;
@@ -167,7 +205,7 @@ void simple_send_loop(zmq::socket_t& publisher, const Config& config) {
             if (cur_gps > gps || (cur_gps == gps && cur_gps_n >= gps_n)) {
                 std::cerr << "Late wanted " << gps << ":" << gps_n << " got " << cur_gps << ":" << cur_gps_n << std::endl;
             } else if (config.verbose) {
-                std::cout << "Sent " << gps << ":" << gps_n << " by " << cur_gps << ":" << cur_gps_n << "\n";
+                std::cout << "Sent " << total_size << " bytes at " << gps << ":" << gps_n << " by " << cur_gps << ":" << cur_gps_n << " in " << parts << " parts\n";
             }
         }
     }
@@ -198,11 +236,22 @@ int main(int argc, char **argv) {
     zmq::socket_t publisher(context, ZMQ_PUB);
 
     {
-        publisher.setsockopt(ZMQ_RATE, &cfg.rate_limit, sizeof(cfg.rate_limit));
+        if (cfg.rate_limit > 0) {
+            std::cout << "Setting rate limit to " << cfg.rate_limit << "Kb/s" << std::endl;
+            publisher.setsockopt(ZMQ_RATE, &cfg.rate_limit, sizeof(cfg.rate_limit));
+        }
+        std::cout << "Setting recovery_ivl to " << cfg.recovery_ms << std::endl;
         publisher.setsockopt(ZMQ_RECOVERY_IVL, &cfg.recovery_ms, sizeof(cfg.recovery_ms));
+        int rate = 0;
+        size_t rate_size = sizeof(rate);
+        publisher.getsockopt(ZMQ_RATE, &rate, &rate_size);
+        std::cout << "Rate limit confirmed at " << rate << "Kb/s" << std::endl;
     }
+    if (cfg.verbose)
+        std::cout << "Binding to " << cfg.bind_point << std::endl;
     publisher.bind(cfg.bind_point.c_str());
-
+    if (cfg.verbose)
+        std::cout << "Starting send loop" << std::endl;
     simple_send_loop(publisher, cfg);
     return 1;
 }

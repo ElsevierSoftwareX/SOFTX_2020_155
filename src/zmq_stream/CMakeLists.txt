@@ -16,6 +16,10 @@ add_executable(zmq_threads zmq_threads.c)
 target_link_libraries(zmq_threads PUBLIC zmq ${CMAKE_THREAD_LIBS_INIT})
 target_compile_options(zmq_threads PUBLIC -std=gnu99)
 
+add_executable(zmq_threads_cxx zmq_threads.cc)
+target_link_libraries(zmq_threads_cxx PUBLIC zmq ${CMAKE_THREAD_LIBS_INIT})
+target_compile_options(zmq_threads_cxx PUBLIC "-std=c++11")
+
 add_executable(zmq_proxy zmq_proxy.c)
 target_link_libraries(zmq_proxy PUBLIC zmq4::zmq)
 target_compile_options(zmq_proxy PUBLIC -std=gnu99)

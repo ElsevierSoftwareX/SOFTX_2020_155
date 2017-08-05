@@ -20,11 +20,13 @@ struct Config {
     int rate_limit;
     int threads;
     bool verbose;
+    bool extra_verbose;
 
     Config(): bind_point{"tcp://127.0.0.1:5555"},
-              rate_limit{1024*100},
+              rate_limit{0},
               threads{1},
-              verbose{false}
+              verbose{false},
+              extra_verbose{false}
     {}
     Config(const Config& other) = default;
     Config(Config&& other) = default;
@@ -56,6 +58,17 @@ Config parse_args(int argc, char **argv) {
         if (arg == "-v" || arg == "--verbose") {
             cfg.verbose = true;
         }
+        if (arg == "-vv") {
+            cfg.verbose = true;
+            cfg.extra_verbose = true;
+        }
+        if (arg == "--rate-limit") {
+            if (has_next) {
+                std::istringstream is{next_arg};
+                is >> cfg.rate_limit;
+                ++i;
+            }
+        }
     }
     return cfg;
 };
@@ -71,29 +84,47 @@ void simple_recv_loop(zmq::socket_t& subscriber, const Config& config) {
 
     while(true) {
         zmq::message_t msg(0);
+        size_t total_size = 0;
 
-        subscriber.recv(&msg);
-        long gps, gps_n;
+        long gps = 0, gps_n = 0;
         bool error = false;
-        {
-            long *tmp = reinterpret_cast<long *>(msg.data());
-            gps = tmp[0];
-            gps_n = tmp[1];
+        bool first = true;
 
-            if (expected_gps != 0) {
-                if (expected_gps != gps || expected_gps_n != gps_n) {
-                    std::cerr << "ERROR: expecting " << expected_gps << ":" << expected_gps_n << " got " << gps << ":"  << gps_n << " instead." << std::endl;
-                }
+        int parts = 0;
+        int more_parts = 0;
+        size_t opt_len = sizeof(more_parts);
+        do {
+            subscriber.recv(&msg);
+            ++parts;
+
+            if (first) {
+                long *tmp = reinterpret_cast<long *>(msg.data());
+                gps = tmp[0];
+                gps_n = tmp[1];
+                first = false;
             }
-            expected_gps = gps;
-            expected_gps_n = gps_n + step;
-            if (expected_gps_n >= max_gps_n) {
-                ++expected_gps;
-                expected_gps_n = 0;
+
+            total_size += msg.size();
+            opt_len = sizeof(more_parts);
+            subscriber.getsockopt(ZMQ_RCVMORE, &more_parts, &opt_len);
+            if (config.extra_verbose)
+                std::cerr << "\t" << msg.size() << "-" << more_parts << "\n";
+        } while (more_parts != 0);
+
+        if (expected_gps != 0) {
+            if (expected_gps != gps || expected_gps_n != gps_n) {
+                std::cerr << "ERROR: expecting " << expected_gps << ":" << expected_gps_n << " got " << gps << ":"  << gps_n << " instead." << std::endl;
             }
         }
+        expected_gps = gps;
+        expected_gps_n = gps_n + step;
+        if (expected_gps_n >= max_gps_n) {
+            ++expected_gps;
+            expected_gps_n = 0;
+        }
+
         if (config.verbose) {
-            std::cout << "Recieved " << msg.size() << " bytes for " << gps << ":" << gps_n << std::endl;
+            std::cout << "Recieved " << total_size << " bytes for " << gps << ":" << gps_n << " in " << parts << " parts\n";
         }
     }
 }
@@ -105,12 +136,21 @@ int main(int argc, char **argv) {
     zmq::socket_t subscriber(context, ZMQ_SUB);
 
     {
-        subscriber.setsockopt(ZMQ_RATE, &cfg.rate_limit, sizeof(cfg.rate_limit));
+        if (cfg.rate_limit > 0) {
+            std::cout << "Setting rate limit to " << cfg.rate_limit << "Kb/s" << std::endl;
+            subscriber.setsockopt(ZMQ_RATE, &cfg.rate_limit, sizeof(cfg.rate_limit));
+        }
         subscriber.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+        int rate = 0;
+        size_t rate_size = sizeof(rate);
+        subscriber.getsockopt(ZMQ_RATE, &rate, &rate_size);
+        std::cout << "Rate limit confirmed at " << rate << "Kb/s" << std::endl;
     }
 
+    std::cout << "connecting to " << cfg.bind_point << std::endl;
     subscriber.connect(cfg.bind_point.c_str());
 
+    std::cout << "Beginning receive loop " << std::endl;
     simple_recv_loop(subscriber, cfg);
     return 1;
 }
