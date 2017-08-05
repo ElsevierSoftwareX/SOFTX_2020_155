@@ -30,6 +30,7 @@ int do_verbose;
 unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
 
 unsigned int tstatus[16];
+int thread_index[DCU_COUNT];
 void *daq_context[DCU_COUNT];
 void *daq_subscriber[DCU_COUNT];
 daq_dc_data_t mxDataBlockFull[16];
@@ -70,6 +71,7 @@ void *rcvr_thread(void *arg) {
 	int acquire = 0;
 	daq_multi_dcu_data_t mxDataBlock;
 
+	printf("Starting receive loop for thread %d\n", mt);
 	do {
 		zmq_msg_init(&message);
 		// Get data when message size > 0
@@ -82,6 +84,8 @@ void *rcvr_thread(void *arg) {
 		memcpy(daqbuffer,string,size);
 		// Destroy the received message buffer
 		zmq_msg_close(&message);
+
+		//printf("Received block of %d on %d\n", size, mt);
 		for (ii = 0;ii<mxDataBlock.dcuTotalModels;ii++) {
 			cycle = mxDataBlock.zmqheader[ii].cycle;
 			// Copy data to global buffer
@@ -105,14 +109,14 @@ void *rcvr_thread(void *arg) {
 int
 main(int argc, char **argv)
 {
-
-
 	pthread_t thread_id[4];
 	unsigned int nsys = 1; // The number of mapped shared memories (number of data sources)
 	char *sysname;
 	char *sname[DCU_COUNT];
 	int c;
 	int dataRdy = 0;
+	static char *default_pub_iface = "eth2";
+	char *pub_iface = default_pub_iface;
 
 	extern char *optarg;
 
@@ -131,7 +135,7 @@ main(int argc, char **argv)
 	char loc[40];
 
 
-	while ((c = getopt(argc, argv, "hd:s:l:Vvw:x")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "hd:s:p:l:Vvw:x")) != EOF) switch(c) {
 	case 's':
 		sysname = optarg;
 		break;
@@ -141,6 +145,8 @@ main(int argc, char **argv)
 	case 'w':
 		do_wait = atoi(optarg);
 		break;
+	case 'p':
+		pub_iface = optarg;
 	case 'h':
 	default:
 		usage();
@@ -158,6 +164,8 @@ main(int argc, char **argv)
                 printf("%s\n", sname[nsys - 1]);
                 char *s = strtok(0, " ");
                 if (!s) break;
+				// do not overflow our fixed size buffers
+				assert(sname < DCU_COUNT);
                 sname[nsys] = s;
                 nsys++;
         }
@@ -172,15 +180,20 @@ main(int argc, char **argv)
 		// Make 0MQ socket connection for rcvr threads
 		daq_context[ii] = zmq_ctx_new();
 		daq_subscriber[ii] = zmq_socket (daq_context[ii],ZMQ_SUB);
-		sprintf(loc,"%s%s%s%d","tcp://",sname[ii],":",DAQ_DATA_PORT);
-		printf("sys %d = %s\n",ii,loc);
-		rc = zmq_connect (daq_subscriber[ii], loc);
-		assert (rc == 0);
+
 		// Subscribe to all data from the server
 		rc = zmq_setsockopt(daq_subscriber[ii],ZMQ_SUBSCRIBE,"",0);
 		assert (rc == 0);
-		int tnum = ii;
-		pthread_create(&thread_id[ii],NULL,rcvr_thread,(void *)&tnum); 
+
+		// connect to the publisher
+		sprintf(loc,"%s%s%s%d","tcp://",sname[ii],":",DAQ_DATA_PORT);
+		printf("sys connection %d = %s ...",ii,loc);
+		rc = zmq_connect (daq_subscriber[ii], loc);
+		assert (rc == 0);
+		printf(" done\n");
+
+		thread_index[ii] = ii;
+		pthread_create(&thread_id[ii],NULL,rcvr_thread,(void *)&thread_index);
 		dataRdy |= (1 << ii);
 	}
 
@@ -190,7 +203,7 @@ main(int argc, char **argv)
 
 	dc_context = zmq_ctx_new();
 	dc_publisher = zmq_socket(dc_context,ZMQ_PUB);
-	sprintf(loc,"%s%d","tcp://eth2:",DAQ_DATA_PORT);
+    sprintf(loc,"%s%s:%d","tcp://",pub_iface,DAQ_DATA_PORT);
 	rc = zmq_bind (dc_publisher,loc);
 	assert(rc == 0);
 
@@ -199,7 +212,7 @@ main(int argc, char **argv)
 
 	de_context = zmq_ctx_new();
 	de_publisher = zmq_socket(de_context,ZMQ_PUB);
-	sprintf(loc,"%s%d","tcp://eth2:",7777);
+	sprintf(loc,"%s%s:%d","tcp://",pub_iface,7777);
 	rc = zmq_bind (de_publisher,loc);
 	assert(rc == 0);
 
