@@ -3,7 +3,11 @@
 VERSION = $(shell dpkg-parsechangelog | grep ^Version: | cut -d" " -f2)
 
 %:
-	dh $@
+	dh $@ --builddirectory=build
+
+override_dh_auto_configure:
+	mkdir -p build
+	(cd build && cmake ..)
 
 override_dh_auto_test:
 	true

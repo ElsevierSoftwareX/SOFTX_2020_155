@@ -1,0 +1,5 @@
+#build/src/daqd/daqd_dc_mx usr/bin/
+build/src/daqd/daqd_fw usr/bin/
+#build/src/daqd/daqd_rcv usr/bin/
+#build/src/daqd/daqd_standiop usr/bin/
+build/src/nds/nds usr/bin/
