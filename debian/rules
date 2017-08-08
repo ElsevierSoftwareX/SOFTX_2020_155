@@ -1,13 +1,28 @@
 #!/usr/bin/make -f
 
-VERSION = $(shell dpkg-parsechangelog | grep ^Version: | cut -d" " -f2)
+SVERSION := $(shell dpkg-parsechangelog --show-field=Version | rev | cut -d- -f2- | rev)
 
 %:
 	dh $@ --builddirectory=build
 
+
+install-mbuf:
+	dh_installdirs -padvligorts-mbuf-dkms usr/src/mbuf-$(SVERSION)
+	install --mode=644 -t debian/advligorts-mbuf-dkms/usr/src/mbuf-$(SVERSION) src/drv/mbuf/*
+	sed "s/__VERSION__/$(SVERSION)/g" debian/advligorts-mbuf-dkms.conf.in > debian/advligorts-mbuf-dkms/usr/src/mbuf-$(SVERSION)/dkms.conf
+
+install-symmetricom:
+	dh_installdirs -padvligorts-symmetricom-dkms usr/src/symmetricom-$(SVERSION)
+	install --mode=644 -t debian/advligorts-symmetricom-dkms/usr/src/symmetricom-$(SVERSION) src/drv/symmetricom-4.4/*
+	sed "s/__VERSION__/$(SVERSION)/g" debian/advligorts-symmetricom-dkms.conf.in > debian/advligorts-symmetricom-dkms/usr/src/symmetricom-$(SVERSION)/dkms.conf
+
+
 override_dh_auto_configure:
 	mkdir -p build
-	(cd build && cmake ..)
+	(cd build && cmake -DMX_PATH=/opt/mx ..)
+
+override_dh_install: install-symmetricom install-mbuf
+	dh_install
 
 override_dh_auto_test:
 	true
