@@ -1,3 +1,5 @@
+if (MX_FOUND)
+else (MX_FOUND)
 
 find_path(mx_MYRIEXPRESS_H myriexpress.h
         hints /opt/mx/include
@@ -28,3 +30,5 @@ else (mx_MYRIEXPRESS_H AND mx_MYRIEXPRESS_SO)
     SET (MX_FOUND FALSE)
     Message("MX Libraries not found")
 endif(mx_MYRIEXPRESS_H AND mx_MYRIEXPRESS_SO)
+
+endif (MX_FOUND)
