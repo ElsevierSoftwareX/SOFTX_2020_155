@@ -56,7 +56,9 @@ volatile int threads_running;
 unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
 unsigned int wait_delay = 4; // Wait before acknowledging sends with mx_wait() for this number of cycles times nsys
 
+extern "C" {
 extern void *findSharedMemory(char *);
+}
 
 void
 usage()
