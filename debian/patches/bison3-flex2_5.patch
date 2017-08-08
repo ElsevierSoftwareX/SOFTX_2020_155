@@ -1,0 +1,79 @@
+--- a/src/daqd/comm.y	(revision 4237)
++++ b/src/daqd/comm.y	(working copy)
+@@ -65,7 +65,11 @@
+ 
+ #define YYPARSE_PARAM lexer
+ #define yylex ((my_lexer *)lexer)->my_yylex
+-#define yyerror ((my_lexer *)lexer)->my_yyerror
++/*#define yyerror ((my_lexer *)lexer)->my_yyerror
++*/
++void yyerror(void *lexer, char *msg) {
++	((my_lexer *)lexer)->my_yyerror(msg);
++}
+ 
+ #define AUTH_CHECK(lx) if (! ((lx)->auth_ok) && daqd.password [0]) { *(((my_lexer *)lexer)->get_yyout ()) << "password required" << endl; YYABORT; }
+ 
+@@ -76,6 +80,8 @@
+ 
+ %}
+ 
++%parse-param {void *lexer}
++
+ %token <y_void>  CYCLE_DELAY
+ %token <y_void>  SYMM_GPS_OFFSET
+ %token <y_void>  NO_COMPRESSION
+@@ -1237,6 +1243,7 @@
+ 		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
+ 		unsigned int nchannels = daqd.num_channels;
+ 		int schan = ($5 == 0); // specific channels only request
++		bool bailout = false;
+ 
+ 		int num_channels = daqd.num_channels;
+ 		channel_t *c = daqd.channels;
+@@ -1249,9 +1256,9 @@
+  		if (schan && ((my_lexer *)lexer) -> error_code) {
+ 			if (((my_lexer *)lexer) -> strict)
+ 				*yyout << setw(4) << setfill ('0') << hex << ((my_lexer *) lexer) -> error_code << dec << flush;
+-			goto status_channels_bailout;
++			bailout = true;
+ 		}
+-
++		if (!bailout) {
+ 		if ($3 == 3) {
+ 
+                   *yyout << dec; 
+@@ -1568,7 +1575,7 @@
+ 		    yyout -> setf (ios::right, ios::adjustfield);
+ 		  }
+ 		}
+-status_channels_bailout:
++		}
+ 	}
+ 	| STATUS INPUT TREND CHANNELS {
+ 		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
+@@ -3330,7 +3337,7 @@
+ 		 | SUBSTR '(' TextExpression ',' INTNUM ')'
+ 			{
+ 			  if ($5 <= 0)
+-			    yyerror ("substr(): invalid second argument value");
++			    yyerror (lexer, "substr(): invalid second argument value");
+ 
+ 			  $5--;
+ 			  if (strlen ($3) > $5)
+@@ -3344,13 +3351,13 @@
+ 			  int slen = strlen ($3);
+ 
+ 			  if ($5 <= 0)
+-			    yyerror ("substr(): invalid second argument value");
++			    yyerror (lexer, "substr(): invalid second argument value");
+ 
+ 			  if ($7 <= 0)
+-			    yyerror ("substr(): invalid third argument value");
++			    yyerror (lexer, "substr(): invalid third argument value");
+ 
+ 			  if ($7 < $5)
+-			    yyerror ("substr(): arguments are invalid");
++			    yyerror (lexer, "substr(): arguments are invalid");
+ 
+ 			  $5--;
+ 			  $7;

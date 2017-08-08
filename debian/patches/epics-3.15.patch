@@ -1,0 +1,11 @@
+--- a/src/daqd/configure.ac	(revision 4238)
++++ b/src/daqd/configure.ac	(working copy)
+@@ -271,7 +271,7 @@
+       fi
+     fi
+     if test $have_epics = "yes"; then
+-       EPICSLIBFLAGS="$EPICSLIBS -lca -lcas -lasHost -lCom -lgdd -lm -lrecIoc -lsoftDevIoc"
++       EPICSLIBFLAGS="$EPICSLIBS -lca -lcas -lCom -lgdd -lm"
+        AC_DEFINE(EPICS_EDCU)
+     else
+        AC_MSG_ERROR([Do not have EPICS, Skipping EPICS EDUC, IOC in build])

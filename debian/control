@@ -1,0 +1,93 @@
+Source: advligorts
+Section: science
+Priority: optional
+Maintainer: Jameson Graef Rollins <jameson.rollins@ligo.org>
+Build-Depends:
+ cmake,
+ debhelper (>= 9),
+ libtool,
+ epics-dev,
+ ldas-tools-framecpp-dev,
+ flex,
+ libxt-dev,
+ libmotif-dev,
+ libxpm-dev,
+Standards-Version: 3.9.8
+Vcs-Svn: https://redoubt.ligo-wa.caltech.edu/svn/advLigoRTS
+
+Package: dataviewer
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ grace,
+Description: NDS1 dataviewer application
+ GUI application to view time series data from NDS1 servers.
+
+Package: advligorts-awgtpman
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: advLigoRTS awgtpman process
+ Core component of advLigoRTS.
+ .
+ Testpoint/excitation interface.
+
+Package: advligorts-mbuf
+Architecture: any
+Depends:
+ ${misc:Depends},
+ make,
+ libncurses5-dev,
+ pciutils,
+Description: advLigoRTS mbuf kernel module
+ Core component of advLigoRTS.
+ .
+ Memory buffer kernel module.
+
+Package: advligorts-symmetricom
+Architecture: any
+Depends:
+ ${misc:Depends},
+ make,
+ libncurses5-dev,
+ pciutils,
+Description: advLigoRTS symmetricom kernel module
+ Core component of advLigoRTS.
+ .
+ GPS card interface kernel module.
+
+Package: advligorts-daqd-standiop
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: advLigoRTS stand-alone daqd process
+ Core component of advLigoRTS.
+ .
+ Stand-alone version of daqd data acquisition binary.
+
+Package: advligorts-rcg-support
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: advLigoRTS real-time code generator (RCG) support scripts
+ Core component of advLigoRTS.
+ .
+ Support script for the RCG.
+
+Package: advligorts-cymac
+Architecture: all
+Depends:
+ ${misc:Depends},
+ linux-image-3.2.0-rts-amd64,
+ advligorts-mbuf,
+ advligorts-symmetricom,
+ advligorts-awgtpman,
+ advligorts-daqd-standiop,
+ dataviewer,
+ cds-workstation,
+Description: advLigoRTS stand-alone "cymac" metapackage
+ Advanced LIGO data acquisition system, stand-alone version.
