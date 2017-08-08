@@ -44,6 +44,9 @@ LDFLAGS = -L${prefix}/lib -lmyriexpress -lpthread  -g
 #M_MAKE_BSD#	$(CC) -o $@ $^ $(LDFLAGS)
 #M_MAKE_BSD#.endfor
 
+.cc.o:
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+
 .c.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
