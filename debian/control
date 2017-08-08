@@ -13,7 +13,7 @@ Build-Depends:
  libmotif-dev,
  libxpm-dev,
  libzmq3-dev,
-Standards-Version: 3.9.8
+Standards-Version: 3.9.6
 Vcs-Svn: https://redoubt.ligo-wa.caltech.edu/svn/advLigoRTS
 
 # Package: dataviewer
@@ -25,17 +25,17 @@ Vcs-Svn: https://redoubt.ligo-wa.caltech.edu/svn/advLigoRTS
 # Description: NDS1 dataviewer application
 #  GUI application to view time series data from NDS1 servers.
 
-Package: advligorts-awgtpman
-Architecture: any
-Depends:
- ${shlibs:Depends},
- ${misc:Depends},
-Description: advLigoRTS awgtpman process
- Core component of advLigoRTS.
- .
- Testpoint/excitation interface.
+# Package: advligorts-awgtpman
+# Architecture: any
+# Depends:
+#  ${shlibs:Depends},
+#  ${misc:Depends},
+# Description: advLigoRTS awgtpman process
+#  Core component of advLigoRTS.
+#  .
+#  Testpoint/excitation interface.
 
-Package: advligorts-mbuf
+Package: advligorts-mbuf-dkms
 Architecture: any
 Depends:
  ${misc:Depends},
@@ -47,7 +47,7 @@ Description: advLigoRTS mbuf kernel module
  .
  Memory buffer kernel module.
 
-Package: advligorts-symmetricom
+Package: advligorts-symmetricom-dkms
 Architecture: any
 Depends:
  ${misc:Depends},
@@ -68,11 +68,11 @@ Description: advLigoRTS daqd binaries
  Core component of advLigoRTS.
  .
  This package installs all daqd components:
- * daqd_dc_mx: data concentrator
- * daqd_fw: frame writer
- * daqd_rcv: NDS1 server
- * nds: archive data retriever for NDS1
- * daqd_standiop: daqd for stand-alone systems
+  * daqd_dc_mx: data concentrator
+  * daqd_fw: frame writer
+  * daqd_rcv: NDS1 server
+  * nds: archive data retriever for NDS1
+  * daqd_standiop: daqd for stand-alone systems
 
 Package: advligorts-rcg-support
 Architecture: any
@@ -89,8 +89,8 @@ Architecture: all
 Depends:
  ${misc:Depends},
  linux-image-3.2.0-rts-amd64,
- advligorts-mbuf,
- advligorts-symmetricom,
+ advligorts-mbuf-dkms,
+ advligorts-symmetricom-dkms,
  advligorts-awgtpman,
  advligorts-daqd,
  advligorts-rcg-support,
