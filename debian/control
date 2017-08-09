@@ -5,13 +5,13 @@ Maintainer: Jameson Graef Rollins <jameson.rollins@ligo.org>
 Build-Depends:
  cmake,
  debhelper (>= 9),
- libtool,
  epics-dev,
- ldas-tools-framecpp-dev,
  flex,
- libxt-dev,
+ ldas-tools-framecpp-dev,
  libmotif-dev,
+ libtool,
  libxpm-dev,
+ libxt-dev,
  libzmq3-dev,
 Standards-Version: 3.9.6
 Vcs-Svn: https://redoubt.ligo-wa.caltech.edu/svn/advLigoRTS
@@ -19,8 +19,8 @@ Vcs-Svn: https://redoubt.ligo-wa.caltech.edu/svn/advLigoRTS
 Package: advligorts-daqd
 Architecture: any
 Depends:
- ${shlibs:Depends},
  ${misc:Depends},
+ ${shlibs:Depends},
 Description: advLigoRTS daqd binaries
  Core component of advLigoRTS.
  .
@@ -34,10 +34,10 @@ Description: advLigoRTS daqd binaries
 Package: advligorts-mbuf-dkms
 Architecture: any
 Depends:
- ${misc:Depends},
- make,
  libncurses5-dev,
+ make,
  pciutils,
+ ${misc:Depends},
 Description: advLigoRTS mbuf kernel module
  Core component of advLigoRTS.
  .
@@ -46,45 +46,46 @@ Description: advLigoRTS mbuf kernel module
 Package: advligorts-symmetricom-dkms
 Architecture: any
 Depends:
- ${misc:Depends},
- make,
  libncurses5-dev,
+ make,
  pciutils,
+ ${misc:Depends},
 Description: advLigoRTS symmetricom kernel module
  Core component of advLigoRTS.
  .
  GPS card interface kernel module.
 
+Package: advligorts-front-end
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: advLigoRTS front-end binaries
+ Core component of advLigoRTS.
+ .
+ Binaries for the front ends (awgtpman, mx_stream).
+
 Package: advligorts-rcg-support
 Architecture: any
 Depends:
- ${shlibs:Depends},
  ${misc:Depends},
+ ${shlibs:Depends},
 Description: advLigoRTS real-time code generator (RCG) support scripts
  Core component of advLigoRTS.
  .
- Support script for the RCG.
+ Support scripts for the RCG.
 
 Package: advligorts-cymac
 Architecture: all
 Depends:
- ${misc:Depends},
- linux-image-3.2.0-rts-amd64,
- advligorts-mbuf-dkms,
- advligorts-symmetricom-dkms,
- advligorts-awgtpman,
  advligorts-daqd,
+ advligorts-front-end,
+ advligorts-mbuf-dkms,
  advligorts-rcg-support,
- dataviewer,
+ advligorts-symmetricom-dkms,
  cds-workstation,
+ dataviewer,
+ linux-image-3.2.88-csp,
+ ${misc:Depends},
 Description: advLigoRTS stand-alone "cymac" metapackage
  Advanced LIGO data acquisition system, stand-alone version.
-
-# Package: dataviewer
-# Architecture: any
-# Depends:
-#  ${shlibs:Depends},
-#  ${misc:Depends},
-#  grace,
-# Description: NDS1 dataviewer application
-#  GUI application to view time series data from NDS1 servers.

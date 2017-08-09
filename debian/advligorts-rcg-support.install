@@ -1,3 +1,1 @@
 src/epics/util/iniChk.pl usr/bin/
-build/src/mx_stream/mx_stream usr/bin/
-#build/src/awgtpman/awgtpman usr/bin/
