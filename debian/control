@@ -16,24 +16,20 @@ Build-Depends:
 Standards-Version: 3.9.6
 Vcs-Svn: https://redoubt.ligo-wa.caltech.edu/svn/advLigoRTS
 
-# Package: dataviewer
-# Architecture: any
-# Depends:
-#  ${shlibs:Depends},
-#  ${misc:Depends},
-#  grace,
-# Description: NDS1 dataviewer application
-#  GUI application to view time series data from NDS1 servers.
-
-# Package: advligorts-awgtpman
-# Architecture: any
-# Depends:
-#  ${shlibs:Depends},
-#  ${misc:Depends},
-# Description: advLigoRTS awgtpman process
-#  Core component of advLigoRTS.
-#  .
-#  Testpoint/excitation interface.
+Package: advligorts-daqd
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+Description: advLigoRTS daqd binaries
+ Core component of advLigoRTS.
+ .
+ This package installs all daqd components:
+  * daqd_dc_mx: data concentrator
+  * daqd_fw: frame writer
+  * daqd_rcv: NDS1 server
+  * daqd_mxsymm: daqd for stand-alone systems
+  * nds: archive data retriever for NDS1
 
 Package: advligorts-mbuf-dkms
 Architecture: any
@@ -59,21 +55,6 @@ Description: advLigoRTS symmetricom kernel module
  .
  GPS card interface kernel module.
 
-Package: advligorts-daqd
-Architecture: any
-Depends:
- ${shlibs:Depends},
- ${misc:Depends},
-Description: advLigoRTS daqd binaries
- Core component of advLigoRTS.
- .
- This package installs all daqd components:
-  * daqd_dc_mx: data concentrator
-  * daqd_fw: frame writer
-  * daqd_rcv: NDS1 server
-  * nds: archive data retriever for NDS1
-  * daqd_standiop: daqd for stand-alone systems
-
 Package: advligorts-rcg-support
 Architecture: any
 Depends:
@@ -98,3 +79,12 @@ Depends:
  cds-workstation,
 Description: advLigoRTS stand-alone "cymac" metapackage
  Advanced LIGO data acquisition system, stand-alone version.
+
+# Package: dataviewer
+# Architecture: any
+# Depends:
+#  ${shlibs:Depends},
+#  ${misc:Depends},
+#  grace,
+# Description: NDS1 dataviewer application
+#  GUI application to view time series data from NDS1 servers.
