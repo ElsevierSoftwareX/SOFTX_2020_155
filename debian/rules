@@ -19,7 +19,7 @@ install-symmetricom:
 
 override_dh_auto_configure:
 	mkdir -p build
-	(cd build && cmake -DMX_PATH=/opt/mx ..)
+	(cd build && cmake ..)
 
 override_dh_install: install-symmetricom install-mbuf
 	dh_install
