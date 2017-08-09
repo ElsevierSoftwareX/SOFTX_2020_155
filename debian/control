@@ -5,6 +5,7 @@ Maintainer: Jameson Graef Rollins <jameson.rollins@ligo.org>
 Build-Depends:
  cmake,
  debhelper (>= 9),
+ dkms,
  epics-dev,
  flex,
  ldas-tools-framecpp-dev,
