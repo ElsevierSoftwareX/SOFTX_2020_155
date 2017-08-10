@@ -1,3 +1,4 @@
+include(FindThreads)
 FIND_PROGRAM(RPCGEN_PROG rpcgen)
 MESSAGE("Found rpcgen at ${RPCGEN_PROG}")
 
@@ -43,6 +44,7 @@ SET (GDS_SRC
         gdssched.c
         gdssched_server.c
         gdssched_util.c
+        awgtpman.c
         )
 
 SET (GDS_CC_SRC
@@ -200,7 +202,7 @@ endforeach(RPC_TEMPLATE)
 # we do this in two libraries, as the C files need -std=gnu99, the C++ compilers give warnings
 # when building with this, so split the C & C++ portions into seperate pieces
 
-add_library(gds_c STATIC
+add_library(gds_c OBJECT
         ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
         ${GDS_BIN_HDRS}
         ${GDS_SRC}
@@ -210,13 +212,15 @@ target_include_directories(gds_c PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_include_directories(gds_c PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/gds_includes)
 target_compile_definitions(gds_c PRIVATE -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size})
 
-add_library(gds_cc STATIC
+add_library(gds_cc OBJECT
     ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
     ${GDS_CC_SRC}
     )
 target_compile_definitions(gds_cc PRIVATE -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size})
-target_link_libraries(gds_cc PUBLIC gds_c)
-add_library(daqd::gds ALIAS gds_cc)
+
+
+add_executable(awgtpman $<TARGET_OBJECTS:gds_c> $<TARGET_OBJECTS:gds_cc>)
+target_link_libraries(awgtpman ${CMAKE_THREAD_LIBS_INIT})
 
 #SET( CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-std=gnu99 -I. -I../include -g -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size}" )
 #SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size}" )
