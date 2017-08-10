@@ -20,6 +20,7 @@ Vcs-Svn: https://redoubt.ligo-wa.caltech.edu/svn/advLigoRTS
 Package: advligorts-daqd
 Architecture: any
 Depends:
+ advligorts-symmetricom-dkms
  ${misc:Depends},
  ${shlibs:Depends},
 Description: advLigoRTS daqd binaries
