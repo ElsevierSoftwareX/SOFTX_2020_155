@@ -85,4 +85,18 @@
 
 #endif
 
+/* RCV build settings */
+#ifdef DAQD_BUILD_RCV
+
+    /* Interface with the GDS Testpoint server */
+    #define GDS_TESTPOINTS 1
+    /* do not broadcast data */
+    #define NO_BROADCAST 1
+    /* run an ecdu */
+    #define EPICS_EDCU 1
+    /* receive broadcasts */
+    #define USE_BROADCAST
+
 #endif
+
+#endif /* CONFIG_H */
