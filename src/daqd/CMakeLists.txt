@@ -243,7 +243,7 @@ target_compile_options(dc_mx_gds PUBLIC
 		-Wno-write-strings
 		)
 target_link_libraries(dc_mx_gds PRIVATE
-		gds::dc_gds
+		gds::daqd
 		ldastools::framecpp
 		mx::myriexpress)
 
@@ -259,7 +259,7 @@ target_include_directories(daqd_dc_mx PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/../include
 		)
 target_link_libraries(daqd_dc_mx PUBLIC
-		gds::dc_gds
+		gds::daqd
 		dc_mx_gds
 		run_number::run_number
 		ca Com cas gdd epics::ca epics::cas
@@ -294,7 +294,7 @@ endif(${MX_FOUND})
 #		-Wno-write-strings
 #		)
 #target_link_libraries(dc_gds_zmq PRIVATE
-#		gds::dc_gds
+#		gds::daqd
 #		ldastools::framecpp
 #		zmq
 #		)
@@ -311,7 +311,7 @@ endif(${MX_FOUND})
 #		${CMAKE_CURRENT_SOURCE_DIR}/../include
 #		)
 #target_link_libraries(daqd_dc_zmq PUBLIC
-#		gds::dc_gds
+#		gds::daqd
 #		dc_gds_zmq
 #		run_number::run_number
 #		ca Com cas gdd epics::ca epics::cas
@@ -368,7 +368,7 @@ target_compile_options(dc_mxsymm_gds PUBLIC
 		-Wno-write-strings
 		)
 target_link_libraries(dc_mxsymm_gds PRIVATE
-		gds::dc_gds
+		gds::daqd
 		ldastools::framecpp
 		mx::myriexpress)
 
@@ -385,7 +385,7 @@ target_include_directories(daqd_mxsymm PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/../include
 		)
 target_link_libraries(daqd_mxsymm PUBLIC
-		gds::dc_gds
+		gds::daqd
 		dc_mxsymm_gds
 		run_number::run_number
 		ca Com cas gdd epics::ca epics::cas
@@ -395,3 +395,76 @@ target_link_libraries(daqd_mxsymm PUBLIC
 		mx::myriexpress
 		)
 endif(${MX_FOUND})
+
+###########
+# daqd_rcv A receiver daqd
+####
+set (DAQD_RCV_MAIN_SRC
+		archive.cc
+		profiler.cc
+		filesys.cc
+		epics_pvs.cc
+		trend.cc
+		net_writer.cc
+		circ.cc
+		edcu.cc
+		epicsServer.cc
+		exServer.cc
+		exPV.cc
+		exChannel.cc
+		framerecv.cc
+		listener.cc
+		daqd.cc
+		exScalarPV.cc
+		exVectorPV.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
+
+add_library(dc_rcv_gds STATIC gds.cc)
+target_compile_definitions(dc_rcv_gds PRIVATE
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux
+		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+		-DLIGO_GDS
+		-D_TP_DAQD
+		-DARCHIVE=\"${CMAKE_CURRENT_SOURCE_DIR}/../gds\"
+		-DGDS_TESTPOINT_SUPPORT
+		-DDAQD_BUILD_RCV
+		-D_GNU_SOURCE -D_DEFAULT_SOURCE
+		)
+target_include_directories(dc_rcv_gds PUBLIC
+		${CMAKE_CURRENT_SOURCE_DIR}/../include
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_BINARY_DIR}
+		)
+target_compile_options(dc_rcv_gds PUBLIC
+		-fno-common
+		-Wno-deprecated
+		-Wno-write-strings
+		)
+target_link_libraries(dc_rcv_gds PRIVATE
+		gds::daqd
+		ldastools::framecpp
+		)
+
+add_executable(daqd_rcv ${DAQD_RCV_MAIN_SRC} producer.cc)
+target_compile_definitions(daqd_rcv PUBLIC
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux
+		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+		-DGDS_TESTPOINT_SUPPORT
+		-DDAQD_BUILD_RCV
+		-D_GNU_SOURCE -D_DEFAULT_SOURCE
+		)
+target_include_directories(daqd_rcv PUBLIC
+		${CMAKE_CURRENT_BINARY_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/../include
+		)
+target_link_libraries(daqd_rcv PUBLIC
+		gds::daqd
+		dc_rcv_gds
+		run_number::run_number
+		ca Com cas gdd epics::ca epics::cas
+		${EPICS_BASE_CA_LIBS} ${EPICS_BASE_CAS_LIBS}
+		ldastools::framecpp
+		${CMAKE_THREAD_LIBS_INIT}
+		)
