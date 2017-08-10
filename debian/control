@@ -35,10 +35,8 @@ Description: advLigoRTS daqd binaries
 Package: advligorts-mbuf-dkms
 Architecture: any
 Depends:
- libncurses5-dev,
- make,
- pciutils,
  ${misc:Depends},
+ ${shlibs:Depends},
 Description: advLigoRTS mbuf kernel module
  Core component of advLigoRTS.
  .
@@ -47,10 +45,8 @@ Description: advLigoRTS mbuf kernel module
 Package: advligorts-symmetricom-dkms
 Architecture: any
 Depends:
- libncurses5-dev,
- make,
- pciutils,
  ${misc:Depends},
+ ${shlibs:Depends},
 Description: advLigoRTS symmetricom kernel module
  Core component of advLigoRTS.
  .
@@ -59,6 +55,8 @@ Description: advLigoRTS symmetricom kernel module
 Package: advligorts-front-end
 Architecture: any
 Depends:
+ advligorts-mbuf-dkms,
+ advligorts-symmetricom-dkms,
  ${misc:Depends},
  ${shlibs:Depends},
 Description: advLigoRTS front-end binaries
