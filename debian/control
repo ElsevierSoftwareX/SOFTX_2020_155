@@ -17,22 +17,6 @@ Build-Depends:
 Standards-Version: 3.9.6
 Vcs-Svn: https://redoubt.ligo-wa.caltech.edu/svn/advLigoRTS
 
-Package: advligorts-daqd
-Architecture: any
-Depends:
- advligorts-symmetricom-dkms
- ${misc:Depends},
- ${shlibs:Depends},
-Description: advLigoRTS daqd binaries
- Core component of advLigoRTS.
- .
- This package installs all daqd components:
-  * daqd_dc_mx: data concentrator
-  * daqd_fw: frame writer
-  * daqd_rcv: NDS1 server
-  * daqd_mxsymm: daqd for stand-alone systems
-  * nds: archive data retriever for NDS1
-
 Package: advligorts-mbuf-dkms
 Architecture: any
 Depends:
@@ -52,6 +36,22 @@ Description: advLigoRTS symmetricom kernel module
  Core component of advLigoRTS.
  .
  GPS card interface kernel module.
+
+Package: advligorts-daqd
+Architecture: any
+Depends:
+ advligorts-symmetricom-dkms,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: advLigoRTS daqd binaries
+ Core component of advLigoRTS.
+ .
+ This package installs all daqd components:
+  * daqd_dc_mx: data concentrator
+  * daqd_fw: frame writer
+  * daqd_rcv: NDS1 server
+  * daqd_mxsymm: daqd for stand-alone systems
+  * nds: archive data retriever for NDS1
 
 Package: advligorts-front-end
 Architecture: any
