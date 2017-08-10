@@ -229,9 +229,9 @@ target_link_libraries(awgtpman ${CMAKE_THREAD_LIBS_INIT})
 ##
 
 ######
-# Daqd dc specific
+# Daqd specific
 ##
-add_library(gds_daqd_dc_gds_main OBJECT
+add_library(gds_daqd_general OBJECT
         gdsstring.c
         gdserr.c
         ${CMAKE_CURRENT_BINARY_DIR}/rtestpoint_clnt.c
@@ -243,20 +243,20 @@ add_library(gds_daqd_dc_gds_main OBJECT
         gdstask.c
         gdsxdr_util.c
         sockutil.c)
-target_compile_definitions(gds_daqd_dc_gds_main PRIVATE
+target_compile_definitions(gds_daqd_general PRIVATE
         -D_TP_DAQD
         -D_TESTPOINT_DIRECT=0)
-target_include_directories(gds_daqd_dc_gds_main PRIVATE
+target_include_directories(gds_daqd_general PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
         )
 
-add_library(gds_daqd_dc_gds_tp OBJECT
+add_library(gds_daqd_testpoint OBJECT
         testpoint.c)
-target_compile_definitions(gds_daqd_dc_gds_tp PRIVATE
+target_compile_definitions(gds_daqd_testpoint PRIVATE
         -D_TP_DAQD -D_TESTPOINT_DIRECT=0 -D_NO_KEEP_ALIVE)
-target_include_directories(gds_daqd_dc_gds_tp PRIVATE
+target_include_directories(gds_daqd_testpoint PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
         )
 
-add_library(gds_daqd_dc_gds STATIC $<TARGET_OBJECTS:gds_daqd_dc_gds_main> $<TARGET_OBJECTS:gds_daqd_dc_gds_tp>)
-add_library(gds::dc_gds ALIAS gds_daqd_dc_gds)
+add_library(gds_daqd_libs STATIC $<TARGET_OBJECTS:gds_daqd_general> $<TARGET_OBJECTS:gds_daqd_testpoint>)
+add_library(gds::daqd ALIAS gds_daqd_libs)
