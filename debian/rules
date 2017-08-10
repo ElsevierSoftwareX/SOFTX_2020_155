@@ -16,7 +16,6 @@ install-symmetricom:
 	install -d debian/advligorts-symmetricom-dkms/usr/src/symmetricom-$(SVERSION)/include/drv
 	install --mode=644 -t debian/advligorts-symmetricom-dkms/usr/src/symmetricom-$(SVERSION)/include/drv src/include/drv/*
 	install --mode=644 -t debian/advligorts-symmetricom-dkms/usr/src/symmetricom-$(SVERSION)/include/ src/include/proc.h
-	install --mode=644 debian/advligorts-symmetricom-dkms.Makefile debian/advligorts-symmetricom-dkms/usr/src/symmetricom-$(SVERSION)/Makefile
 
 
 override_dh_auto_configure:
@@ -31,3 +30,6 @@ override_dh_dkms:
 
 override_dh_auto_test:
 	true
+
+override_dh_clean:
+	rm -rf build
