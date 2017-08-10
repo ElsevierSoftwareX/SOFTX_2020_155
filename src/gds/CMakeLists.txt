@@ -203,7 +203,6 @@ endforeach(RPC_TEMPLATE)
 # when building with this, so split the C & C++ portions into seperate pieces
 
 add_library(gds_c OBJECT
-        ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
         ${GDS_BIN_HDRS}
         ${GDS_SRC}
         )
@@ -213,13 +212,12 @@ target_include_directories(gds_c PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
 target_compile_definitions(gds_c PRIVATE -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size})
 
 add_library(gds_cc OBJECT
-    ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
     ${GDS_CC_SRC}
     )
 target_compile_definitions(gds_cc PRIVATE -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size})
 
 
-add_executable(awgtpman $<TARGET_OBJECTS:gds_c> $<TARGET_OBJECTS:gds_cc>)
+add_executable(awgtpman $<TARGET_OBJECTS:gds_c> $<TARGET_OBJECTS:gds_cc> ${CMAKE_CURRENT_BINARY_DIR}/gds_includes)
 target_link_libraries(awgtpman ${CMAKE_THREAD_LIBS_INIT})
 
 #SET( CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-std=gnu99 -I. -I../include -g -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size}" )
