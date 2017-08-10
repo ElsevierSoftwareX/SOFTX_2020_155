@@ -1,2 +1,2 @@
-src/gds/awgtpman usr/bin/
-src/mx_stream/mx_stream usr/bin/
+build/src/gds/awgtpman usr/bin/
+build/src/mx_stream/mx_stream usr/bin/
