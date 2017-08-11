@@ -1,4 +1,5 @@
 usr/bin/dataviewer
-usr/lib/dataviewer/dc3
-usr/lib/dataviewer/frameMemRead
-usr/lib/dataviewer/framer4
+usr/bin/dataviewer_msgwin
+usr/bin/dv
+usr/bin/frameMemRead
+usr/bin/framer4
