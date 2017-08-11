@@ -24,8 +24,8 @@ if (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${X11_Xpm_FOUND} AND ${X11_Xt_FOUND} A
     add_subdirectory(Display)
     add_subdirectory(Control)
 
-    configure_file(dataviewer.sh ${CMAKE_CURRENT_BINARY_DIR}/dataviewer COPYONLY)
-    configure_file(dataviewer_msgwin.sh ${CMAKE_CURRENT_BINARY_DIR}/dataviewer_msgwin COPYONLY)
+    configure_file(dataviewer.sh.cmake ${CMAKE_CURRENT_BINARY_DIR}/dataviewer @ONLY)
+    configure_file(dataviewer_msgwin.sh.cmake ${CMAKE_CURRENT_BINARY_DIR}/dataviewer_msgwin @ONLY)
 
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/dataviewer"
             "${CMAKE_CURRENT_BINARY_DIR}/dataviewer_msgwin"
