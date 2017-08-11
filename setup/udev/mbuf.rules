@@ -1,0 +1,2 @@
+KERNEL=="mbuf", ACTION=="add", RUN+="__PREFIX__/share/module-manage.sh add mbuf"
+KERNEL=="mbuf", ACTION=="remove", RUN+="__PREFIX__/share/module-node.sh remove mbuf"
