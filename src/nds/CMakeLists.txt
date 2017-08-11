@@ -53,4 +53,6 @@ target_include_directories(nds PRIVATE
 )
 target_link_libraries(nds PRIVATE ldastools::framecpp z bz2 dl nsl)
 
+install(TARGETS nds DESTINATION bin)
+
 # -L/opt/ldas-tools-al-2.5.5/lib -L/opt/ldas-tools-framecpp-2.5.2/lib -lframecpp -lframecpp8 -lframecpp7 -lframecpp6 -lframecpp4 -lframecpp3 -lframecppcmn -lldastoolsal -lz -lbz2 -ldl -lnsl

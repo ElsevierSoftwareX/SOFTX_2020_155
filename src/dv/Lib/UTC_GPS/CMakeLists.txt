@@ -55,3 +55,9 @@ add_custom_target(build_leapsec.dat ALL
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         SOURCES leapsecs.txt
         )
+
+install(TARGETS tai_leapsecs DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/leapsecs.dat
+        DESTINATION bin
+        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+        )

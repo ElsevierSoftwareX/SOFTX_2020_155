@@ -27,6 +27,11 @@ if (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${X11_Xpm_FOUND} AND ${X11_Xt_FOUND} A
     configure_file(dataviewer.sh ${CMAKE_CURRENT_BINARY_DIR}/dataviewer COPYONLY)
     configure_file(dataviewer_msgwin.sh ${CMAKE_CURRENT_BINARY_DIR}/dataviewer_msgwin COPYONLY)
 
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/dataviewer"
+            "${CMAKE_CURRENT_BINARY_DIR}/dataviewer_msgwin"
+            DESTINATION bin
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
 else (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${X11_Xpm_FOUND} AND ${X11_Xt_FOUND} AND ${X11_FOUND})
     Message("Dataviewer will NOT be built")
     Message("X11 found = ${X11_FOUND}")

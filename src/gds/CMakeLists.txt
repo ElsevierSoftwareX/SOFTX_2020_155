@@ -260,3 +260,5 @@ target_include_directories(gds_daqd_testpoint PRIVATE
 
 add_library(gds_daqd_libs STATIC $<TARGET_OBJECTS:gds_daqd_general> $<TARGET_OBJECTS:gds_daqd_testpoint>)
 add_library(gds::daqd ALIAS gds_daqd_libs)
+
+install(TARGETS awgtpman DESTINATION bin)

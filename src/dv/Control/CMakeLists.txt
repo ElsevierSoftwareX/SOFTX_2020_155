@@ -21,3 +21,5 @@ target_link_libraries(dv PUBLIC
         m
         tai::tai
         ${CMAKE_THREAD_LIBS_INIT})
+
+install(TARGETS dv DESTINATION bin)
