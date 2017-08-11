@@ -1,0 +1,2 @@
+KERNEL=="symmetricom", ACTION=="add", RUN+="__PREFIX__/share/module-manage.sh add symmetricom"
+KERNEL=="symmetricom", ACTION=="remove", RUN+="__PREFIX__/share/module-manage.sh remove symmetricom"

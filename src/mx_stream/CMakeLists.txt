@@ -14,4 +14,6 @@ if (OPENMX_FOUND)
             ${CMAKE_CURRENT_SOURCE_DIR}/../common/bsd)
     target_link_libraries(mx_stream PUBLIC openmx::openmx ${MAKE_THREAD_LIBS_INIT})
     set_target_properties(mx_stream PROPERTIES LINKER_LANGUAGE CXX)
+
+    install(TARGETS mx_stream DESTINATION bin)
 endif (OPENMX_FOUND)
