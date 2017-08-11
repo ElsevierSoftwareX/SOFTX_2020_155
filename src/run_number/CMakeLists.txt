@@ -11,9 +11,9 @@ else(${HAS_CXX_11})
     set(_RN_CHECK_FLAGS "")
 endif (${HAS_CXX_11})
 
-add_executable(run_number run_number_main.cc run_number.cc run_number.hh)
-target_link_libraries(run_number PUBLIC zmq)
-target_compile_options(run_number PRIVATE ${_RN_CHECK_FLAGS})
+add_executable(run_number_server run_number_main.cc run_number.cc run_number.hh)
+target_link_libraries(run_number_server PUBLIC zmq)
+target_compile_options(run_number_server PRIVATE ${_RN_CHECK_FLAGS})
 
 add_library(run_number_client STATIC run_number_client.cc run_number_client.hh)
 target_link_libraries(run_number_client PUBLIC zmq)
@@ -29,3 +29,6 @@ target_link_libraries(run_number_test_client PUBLIC run_number_client)
 
 add_test(_rn_basic_run_number_tests_ test_run_number)
 
+install(TARGETS run_number_server
+        DESTINATION bin
+        )

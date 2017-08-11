@@ -14,3 +14,5 @@ target_link_libraries(frameMemRead PUBLIC
         m
         ${CMAKE_THREAD_LIBS_INIT}
         grace::grace)
+
+install(TARGETS framer4 frameMemRead DESTINATION bin)

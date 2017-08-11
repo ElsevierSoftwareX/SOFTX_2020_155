@@ -16,9 +16,9 @@ add_executable(zmq_threads zmq_threads.c)
 target_link_libraries(zmq_threads PUBLIC zmq ${CMAKE_THREAD_LIBS_INIT})
 target_compile_options(zmq_threads PUBLIC -std=gnu99)
 
-add_executable(zmq_threads_cxx zmq_threads.cc)
-target_link_libraries(zmq_threads_cxx PUBLIC zmq ${CMAKE_THREAD_LIBS_INIT})
-target_compile_options(zmq_threads_cxx PUBLIC "-std=c++11")
+add_executable(zmq_dc zmq_threads.cc)
+target_link_libraries(zmq_dc PUBLIC zmq ${CMAKE_THREAD_LIBS_INIT})
+target_compile_options(zmq_dc PUBLIC "-std=c++11")
 
 add_executable(zmq_proxy zmq_proxy.c)
 target_link_libraries(zmq_proxy PUBLIC zmq4::zmq)
@@ -43,3 +43,5 @@ target_include_directories(zmq_daq_test_data_firehose_recv PRIVATE ${CMAKE_CURRE
 target_link_libraries(zmq_daq_test_data_firehose_recv PUBLIC zmq4::zmq)
 target_compile_options(zmq_daq_test_data_firehose_recv PUBLIC -std=c++11)
 #target_compile_features(zmq_daq_test_data_firehose_recv PUBLIC cxx_defaulted_functions)
+
+install(TARGETS zmq_multi_stream zmq_dc DESTINATION bin)
