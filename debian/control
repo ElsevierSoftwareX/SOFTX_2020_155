@@ -9,6 +9,7 @@ Build-Depends:
  epics-dev,
  flex,
  ldas-tools-framecpp-dev,
+ libc-dev-bin,
  libmotif-dev,
  libtool,
  libxpm-dev,
