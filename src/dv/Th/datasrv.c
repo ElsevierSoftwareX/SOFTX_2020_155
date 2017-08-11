@@ -43,7 +43,7 @@ void dfprintf(FILE *file, ...) {}
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 
-inline
+static inline
 double ntohd(double in) {
     double retVal;
     char* p = (char*)&retVal;

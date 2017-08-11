@@ -1,5 +1,6 @@
 add_subdirectory(gds)
 add_subdirectory(daqd)
+add_subdirectory(dv)
 add_subdirectory(nds)
 add_subdirectory(mx_stream)
 add_subdirectory(run_number)
