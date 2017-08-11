@@ -18,27 +18,27 @@ Build-Depends:
 Standards-Version: 3.9.6
 Vcs-Svn: https://redoubt.ligo-wa.caltech.edu/svn/advLigoRTS
 
-# Package: advligorts-mbuf-dkms
-# Architecture: any
-# Depends:
-#  advligorts-module-support,
-#  ${misc:Depends},
-#  ${shlibs:Depends},
-# Description: advLigoRTS mbuf kernel module
-#  Core component of advLigoRTS.
-#  .
-#  Memory buffer kernel module.
+Package: advligorts-mbuf-dkms
+Architecture: any
+Depends:
+ advligorts-module-support,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: advLigoRTS mbuf kernel module
+ Core component of advLigoRTS.
+ .
+ Memory buffer kernel module.
 
-# Package: advligorts-symmetricom-dkms
-# Architecture: any
-# Depends:
-#  advligorts-module-support,
-#  ${misc:Depends},
-#  ${shlibs:Depends},
-# Description: advLigoRTS symmetricom kernel module
-#  Core component of advLigoRTS.
-#  .
-#  GPS card interface kernel module.
+Package: advligorts-symmetricom-dkms
+Architecture: any
+Depends:
+ advligorts-module-support,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: advLigoRTS symmetricom kernel module
+ Core component of advLigoRTS.
+ .
+ GPS card interface kernel module.
 
 Package: advligorts-module-support
 Architecture: all
@@ -50,64 +50,62 @@ Description: advLigoRTS kernel module support
  .
  Kernel module device creation scripts.
 
-# Package: advligorts-daqd
-# Architecture: any
-# Depends:
-#  advligorts-symmetricom-dkms,
-#  ${misc:Depends},
-#  ${shlibs:Depends},
-# Description: advLigoRTS daqd binaries
-#  Core component of advLigoRTS.
-#  .
-#  This package installs all daqd components:
-#   * daqd_dc_mx: data concentrator
-#   * daqd_fw: frame writer
-#   * daqd_rcv: NDS1 server
-#   * daqd_mxsymm: daqd for stand-alone systems
-#   * nds: archive data retriever for NDS1
+Package: advligorts-daqd
+Architecture: any
+Depends:
+ advligorts-symmetricom-dkms,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: advLigoRTS daqd binaries
+ Core component of advLigoRTS.
+ .
+ This package installs all daqd components:
+  * daqd_dc_mx: data concentrator
+  * daqd_fw: frame writer
+  * daqd_rcv: NDS1 server
+  * daqd_mxsymm: daqd for stand-alone systems
+  * nds: archive data retriever for NDS1
 
-# Package: advligorts-front-end
-# Architecture: any
-# Depends:
-#  advligorts-mbuf-dkms,
-#  advligorts-symmetricom-dkms,
-#  ${misc:Depends},
-#  ${shlibs:Depends},
-# Description: advLigoRTS front-end binaries
-#  Core component of advLigoRTS.
-#  .
-#  Binaries for the front ends (awgtpman, mx_stream).
+Package: advligorts-front-end
+Architecture: any
+Depends:
+ advligorts-mbuf-dkms,
+ advligorts-symmetricom-dkms,
+ linux-image-3.2.88-csp,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: advLigoRTS front-end binaries
+ Core component of advLigoRTS.
+ .
+ Binaries for the front ends (awgtpman, mx_stream).
 
-# Package: advligorts-rcg-support
-# Architecture: any
-# Depends:
-#  ${misc:Depends},
-#  ${shlibs:Depends},
-# Description: advLigoRTS real-time code generator (RCG) support scripts
-#  Core component of advLigoRTS.
-#  .
-#  Support scripts for the RCG.
+Package: advligorts-rcg-support
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: advLigoRTS real-time code generator (RCG) support scripts
+ Core component of advLigoRTS.
+ .
+ Support scripts for the RCG.
 
-# Package: advligorts-cymac
-# Architecture: all
-# Depends:
-#  advligorts-daqd,
-#  advligorts-front-end,
-#  advligorts-mbuf-dkms,
-#  advligorts-rcg-support,
-#  advligorts-symmetricom-dkms,
-#  cds-workstation,
-#  dataviewer,
-#  linux-image-3.2.88-csp,
-#  ${misc:Depends},
-# Description: advLigoRTS stand-alone "cymac" metapackage
-#  Advanced LIGO data acquisition system, stand-alone version.
+Package: advligorts-cymac
+Architecture: all
+Depends:
+ advligorts-daqd,
+ advligorts-front-end,
+ advligorts-rcg-support,
+ cds-workstation,
+ dataviewer,
+ ${misc:Depends},
+Description: advLigoRTS stand-alone "cymac" metapackage
+ Advanced LIGO data acquisition system, stand-alone version.
 
-# Package: dataviewer
-# Architecture: any
-# Depends:
-#  grace,
-#  ${misc:Depends},
-#  ${shlibs:Depends},
-# Description: NDS1 dataviewer application
-#  GUI application to view time series data from NDS1 servers.
+Package: dataviewer
+Architecture: any
+Depends:
+ grace,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: NDS1 dataviewer application
+ GUI application to view time series data from NDS1 servers.
