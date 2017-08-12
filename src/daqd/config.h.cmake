@@ -99,4 +99,32 @@
 
 #endif
 
+/* BCST build settings */
+#ifdef DAQD_BUILD_BCST
+
+    /* Interface with the GDS Testpoint server */
+    #define GDS_TESTPOINTS 1
+    /* run an edcu */
+    #define EPICS_EDCU 1
+    /* receive broadcasts */
+    #define USE_BROADCAST
+
+#endif
+
+/* StandIOP build settings */
+#ifdef DAQD_BUILD_STANDIOP
+
+    /* Interface with the GPS Testpoint server */
+    #define GDS_TESTPOINTS 1
+    /* do not broadcast data */
+    #define NO_BROADCAST 1
+    /* run an edcu */
+    #define EPICS_EDCU 1
+    /* use the symmetricom timing system */
+    #define USE_SYMMETRICOM 1
+    /* use an iop */
+    #define USE_IOP 1
+
+#endif
+
 #endif /* CONFIG_H */
