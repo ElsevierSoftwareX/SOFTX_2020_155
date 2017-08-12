@@ -61,9 +61,11 @@ Description: advLigoRTS daqd binaries
  .
  This package installs all daqd components:
   * daqd_dc_mx: data concentrator
+  * daqd_bcst: frame broadcaster
   * daqd_fw: frame writer
   * daqd_rcv: NDS1 server
-  * daqd_mxsymm: daqd for stand-alone systems
+  * daqd_mxsymm: all-in-one mx receiver systems
+  * daqd_standiop: daqd for stand-alone systems
   * nds: archive data retriever for NDS1
 
 Package: advligorts-front-end
