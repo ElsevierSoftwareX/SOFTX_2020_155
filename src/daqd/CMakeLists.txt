@@ -471,4 +471,153 @@ target_link_libraries(daqd_rcv PUBLIC
 		${CMAKE_THREAD_LIBS_INIT}
 		)
 
-install(TARGETS daqd_fw daqd_rcv DESTINATION bin)
+###########
+# daqd_bcst A gds broadcaster daqd
+####
+set (DAQD_BCST_MAIN_SRC
+		archive.cc
+		profiler.cc
+		filesys.cc
+		epics_pvs.cc
+		trend.cc
+		net_writer.cc
+		circ.cc
+		framesend.cc
+		gdsmutex.cc
+		edcu.cc
+		epicsServer.cc
+		exServer.cc
+		exPV.cc
+		exChannel.cc
+		framerecv.cc
+		listener.cc
+		daqd.cc
+		exScalarPV.cc
+		exVectorPV.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
+
+add_library(dc_bcst_gds STATIC gds.cc)
+target_compile_definitions(dc_bcst_gds PRIVATE
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux
+		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+		-DLIGO_GDS
+		-D_TP_DAQD
+		-DARCHIVE=\"${CMAKE_CURRENT_SOURCE_DIR}/../gds\"
+		-DGDS_TESTPOINT_SUPPORT
+		-DDAQD_BUILD_BCST
+		-D_GNU_SOURCE -D_DEFAULT_SOURCE
+		)
+target_include_directories(dc_bcst_gds PUBLIC
+		${CMAKE_CURRENT_SOURCE_DIR}/../include
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_BINARY_DIR}
+		)
+target_compile_options(dc_bcst_gds PUBLIC
+		-fno-common
+		-Wno-deprecated
+		-Wno-write-strings
+		)
+target_link_libraries(dc_bcst_gds PRIVATE
+		gds::daqd
+		ldastools::framecpp
+		)
+
+add_executable(daqd_bcst ${DAQD_BCST_MAIN_SRC} producer.cc)
+target_compile_definitions(daqd_bcst PUBLIC
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux
+		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+		-DGDS_TESTPOINT_SUPPORT
+		-DDAQD_BUILD_BCST
+		-D_GNU_SOURCE -D_DEFAULT_SOURCE
+		)
+target_include_directories(daqd_bcst PUBLIC
+		${CMAKE_CURRENT_BINARY_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/../include
+		)
+target_link_libraries(daqd_bcst PUBLIC
+		gds::daqd
+		dc_bcst_gds
+		run_number::run_number
+		ca Com cas gdd epics::ca epics::cas
+		${EPICS_BASE_CA_LIBS} ${EPICS_BASE_CAS_LIBS}
+		ldastools::framecpp
+		${CMAKE_THREAD_LIBS_INIT}
+		)
+
+###########
+# daqd_standiop A standalone system with iop
+####
+set (DAQD_STANDIOP_MAIN_SRC
+		archive.cc
+		profiler.cc
+		filesys.cc
+		epics_pvs.cc
+		trend.cc
+		net_writer.cc
+		circ.cc
+		edcu.cc
+		epicsServer.cc
+		exServer.cc
+		exPV.cc
+		exChannel.cc
+		framerecv.cc
+		listener.cc
+		daqd.cc
+		exScalarPV.cc
+		exVectorPV.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
+
+add_library(dc_standiop_gds STATIC gds.cc)
+target_compile_definitions(dc_standiop_gds PRIVATE
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux
+		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+		-DLIGO_GDS
+		-D_TP_DAQD
+		-DARCHIVE=\"${CMAKE_CURRENT_SOURCE_DIR}/../gds\"
+		-DGDS_TESTPOINT_SUPPORT
+		-DDAQD_BUILD_STANDIOP
+		-D_GNU_SOURCE -D_DEFAULT_SOURCE
+		)
+target_include_directories(dc_standiop_gds PUBLIC
+		${CMAKE_CURRENT_SOURCE_DIR}/../include
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_BINARY_DIR}
+		)
+target_compile_options(dc_standiop_gds PUBLIC
+		-fno-common
+		-Wno-deprecated
+		-Wno-write-strings
+		)
+target_link_libraries(dc_standiop_gds PRIVATE
+		gds::daqd
+		ldastools::framecpp
+		)
+
+add_executable(daqd_standiop ${DAQD_STANDIOP_MAIN_SRC} producer.cc)
+target_compile_definitions(daqd_standiop PUBLIC
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux
+		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+		-DGDS_TESTPOINT_SUPPORT
+		-DDAQD_BUILD_STANDIOP
+		-D_GNU_SOURCE -D_DEFAULT_SOURCE
+		)
+target_include_directories(daqd_standiop PUBLIC
+		${CMAKE_CURRENT_BINARY_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/../include
+		)
+target_link_libraries(daqd_standiop PUBLIC
+		gds::daqd
+		dc_standiop_gds
+		run_number::run_number
+		ca Com cas gdd epics::ca epics::cas
+		${EPICS_BASE_CA_LIBS} ${EPICS_BASE_CAS_LIBS}
+		ldastools::framecpp
+		${CMAKE_THREAD_LIBS_INIT}
+		)
+
+
+install(TARGETS daqd_fw daqd_rcv daqd_bcst daqd_standiop DESTINATION bin)
