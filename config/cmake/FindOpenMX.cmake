@@ -23,7 +23,7 @@ if (openmx_OPENMX_H AND openmx_OPENMX_SO)
 
     add_library(_openmx_intl INTERFACE)
     target_include_directories(_openmx_intl INTERFACE ${openmx_OPENMX_H})
-    target_link_libraries(_openmx_intl INTERFACE _myriexpress)
+    target_link_libraries(_openmx_intl INTERFACE _openmx)
 
     add_library(openmx::openmx ALIAS _openmx_intl)
 
