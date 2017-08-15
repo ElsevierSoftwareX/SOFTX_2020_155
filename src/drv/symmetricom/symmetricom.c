@@ -95,7 +95,7 @@ int get_cur_time(unsigned long *req) {
         extern struct timespec current_kernel_time(void);
         t = current_kernel_time();
         t.tv_sec += - 315964819 + 37;
- 	req[0] = t.tv_sec; req[1] = 0; req[2] = t.tv_nsec;
+ 	req[0] = t.tv_sec; req[1] = t.tv_nsec/1000; req[2] = t.tv_nsec%1000;
 	return 1;
   }
   // Never reached
