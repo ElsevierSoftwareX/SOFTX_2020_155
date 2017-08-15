@@ -9,21 +9,21 @@ SVERSION := $(shell dpkg-parsechangelog --show-field=Version | rev | cut -d- -f2
 install-mbuf:
 	dh_installdirs -padvligorts-mbuf-dkms usr/src/mbuf-$(SVERSION)
 	dh_installdirs -padvligorts-mbuf-dkms lib/udev/rules.d
-	dh_installdirs -padvligorts-mbuf-dkms etc/modules-load.d
+	dh_installdirs -padvligorts-mbuf-dkms usr/lib/modules-load.d
 	install --mode=644 -t debian/advligorts-mbuf-dkms/usr/src/mbuf-$(SVERSION) src/drv/mbuf/*
 	sed 's|__SHARE__|/usr/share/advligorts-module-support|' <setup/udev/mbuf.rules >debian/advligorts-mbuf-dkms/lib/udev/rules.d/60-mbuf.rules
-	echo mbuf > debian/advligorts-mbuf-dkms/etc/modules-load.d/mbuf.conf
+	echo mbuf > debian/advligorts-mbuf-dkms/usr/lib/modules-load.d/mbuf.conf
 
 install-symmetricom:
 	dh_installdirs -padvligorts-symmetricom-dkms usr/src/symmetricom-$(SVERSION)/drv/symmetricom
 	dh_installdirs -padvligorts-symmetricom-dkms usr/src/symmetricom-$(SVERSION)/include/drv
 	dh_installdirs -padvligorts-symmetricom-dkms lib/udev/rules.d
-	dh_installdirs -padvligorts-symmetricom-dkms etc/modules-load.d
+	dh_installdirs -padvligorts-symmetricom-dkms usr/lib/modules-load.d
 	install --mode=644 -t debian/advligorts-symmetricom-dkms/usr/src/symmetricom-$(SVERSION)/drv/symmetricom src/drv/symmetricom/*
 	install --mode=644 -t debian/advligorts-symmetricom-dkms/usr/src/symmetricom-$(SVERSION)/include/drv src/include/drv/*
 	install --mode=644 -t debian/advligorts-symmetricom-dkms/usr/src/symmetricom-$(SVERSION)/include/ src/include/proc.h
 	sed 's|__SHARE__|/usr/share/advligorts-module-support|' <setup/udev/symmetricom.rules >debian/advligorts-symmetricom-dkms/lib/udev/rules.d/60-symmetricom.rules
-	echo symmetricom > debian/advligorts-symmetricom-dkms/etc/modules-load.d/symmetricom.conf
+	echo symmetricom > debian/advligorts-symmetricom-dkms/usr/lib/modules-load.d/symmetricom.conf
 
 
 override_dh_auto_configure:
