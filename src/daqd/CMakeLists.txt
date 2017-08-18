@@ -347,56 +347,58 @@ target_link_libraries(daqd_mxsymm PUBLIC
 install(TARGETS daqd_mxsymm daqd_dc_mx DESTINATION bin)
 endif(${MX_FOUND})
 
+if (${DEV_BUILD})
 ##########
 ## DC with ZMQ
 ####
 ## Reuse the main source lists from daqd_dc_mx
 #
-#add_library(dc_gds_zmq STATIC ${DAQD_DC_GDS_SRC})
-#target_compile_definitions(dc_gds_zmq PRIVATE
-#		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
-#		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
-#		-DLIGO_GDS
-#		-D_TP_DAQD
-#		-DARCHIVE=\"${CMAKE_CURRENT_SOURCE_DIR}/../gds\"
-#		-DDAQD_BUILD_DC_ZMQ)
-#target_include_directories(dc_gds_zmq PUBLIC
-#		${CMAKE_CURRENT_SOURCE_DIR}/../include
-#		${CMAKE_CURRENT_SOURCE_DIR}
-#		${CMAKE_CURRENT_BINARY_DIR}
-#		)
-#target_compile_options(dc_gds_zmq PUBLIC
-#		-fno-common
-#		-Wno-deprecated
-#		-Wno-write-strings
-#		)
-#target_link_libraries(dc_gds_zmq PRIVATE
-#		gds::daqd
-#		ldastools::framecpp
-#		zmq
-#		)
-#
-#add_executable(daqd_dc_zmq ${DAQD_DC_MAIN_SRC} producer_zmq.cc)
-#target_compile_definitions(daqd_dc_zmq PUBLIC
-#		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
-#		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
-#		-DDAQD_BUILD_DC_ZMQ
-#		)
-#target_include_directories(daqd_dc_zmq PUBLIC
-#		${CMAKE_CURRENT_BINARY_DIR}
-#		${CMAKE_CURRENT_SOURCE_DIR}
-#		${CMAKE_CURRENT_SOURCE_DIR}/../include
-#		)
-#target_link_libraries(daqd_dc_zmq PUBLIC
-#		gds::daqd
-#		dc_gds_zmq
-#		run_number::run_number
-#		ca Com cas gdd epics::ca epics::cas
-#		${EPICS_BASE_CA_LIBS} ${EPICS_BASE_CAS_LIBS}
-#		ldastools::framecpp
-#		${CMAKE_THREAD_LIBS_INIT}
-#		zmq
-#		)
+add_library(dc_gds_zmq STATIC ${DAQD_DC_GDS_SRC})
+target_compile_definitions(dc_gds_zmq PRIVATE
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
+		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+		-DLIGO_GDS
+		-D_TP_DAQD
+		-DARCHIVE=\"${CMAKE_CURRENT_SOURCE_DIR}/../gds\"
+		-DDAQD_BUILD_DC_ZMQ)
+target_include_directories(dc_gds_zmq PUBLIC
+		${CMAKE_CURRENT_SOURCE_DIR}/../include
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_BINARY_DIR}
+		)
+target_compile_options(dc_gds_zmq PUBLIC
+		-fno-common
+		-Wno-deprecated
+		-Wno-write-strings
+		)
+target_link_libraries(dc_gds_zmq PRIVATE
+		gds::daqd
+		ldastools::framecpp
+		zmq
+		)
+
+add_executable(daqd_dc_zmq ${DAQD_DC_MAIN_SRC} producer_zmq.cc)
+target_compile_definitions(daqd_dc_zmq PUBLIC
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
+		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+		-DDAQD_BUILD_DC_ZMQ
+		)
+target_include_directories(daqd_dc_zmq PUBLIC
+		${CMAKE_CURRENT_BINARY_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/../include
+		)
+target_link_libraries(daqd_dc_zmq PUBLIC
+		gds::daqd
+		dc_gds_zmq
+		run_number::run_number
+		ca Com cas gdd epics::ca epics::cas
+		${EPICS_BASE_CA_LIBS} ${EPICS_BASE_CAS_LIBS}
+		ldastools::framecpp
+		${CMAKE_THREAD_LIBS_INIT}
+		zmq
+		)
+endif(${DEV_BUILD})
 
 ###########
 # daqd_rcv A receiver daqd
