@@ -1,16 +1,5 @@
-<<<<<<< HEAD
-advligorts (3.3-1) unstable; urgency=medium
-=======
-advligorts (3.3~rc1-1) unstable; urgency=medium
-
-  * Upstream bug fixes
-  * put modules-load rules in correct place
-
- -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Mon, 14 Aug 2017 22:06:56 -0700
-
-advligorts (3.3~rc0-1) unstable; urgency=medium
->>>>>>> new upstream and fix to modules-load install location
+advligorts (3.4~rc0-1) unstable; urgency=medium
 
   * Initial packaging.
 
- -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Tue, 17 Jan 2017 17:27:09 -0800
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Tue, 22 Aug 2017 15:21:27 -0700
