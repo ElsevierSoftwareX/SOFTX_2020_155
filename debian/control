@@ -4,11 +4,15 @@ Priority: optional
 Maintainer: Jameson Graef Rollins <jameson.rollins@ligo.org>
 Build-Depends:
  cmake,
+ bison,
  debhelper (>= 9),
  dkms,
  epics-dev,
  flex,
+ grace,
+ ldas-tools-al-dev,
  ldas-tools-framecpp-dev,
+ libbz2-dev,
  libc-dev-bin,
  libmotif-dev,
  libtool,
@@ -17,6 +21,7 @@ Build-Depends:
  libzmq3-dev,
  mx,
  open-mx,
+ pkg-config,
 Standards-Version: 3.9.6
 Vcs-Svn: https://redoubt.ligo-wa.caltech.edu/svn/advLigoRTS
 
