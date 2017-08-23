@@ -1,9 +1,12 @@
 #!/usr/bin/make -f
 
+export DH_VERBOSE = t
+
 SVERSION := $(shell dpkg-parsechangelog --show-field=Version | rev | cut -d- -f2- | rev)
 
 %:
-	dh $@ --builddirectory=build --with dkms
+	#dh $@ --builddirectory=build --with dkms
+	dh $@
 
 
 install-mbuf:
@@ -27,17 +30,18 @@ install-symmetricom:
 
 
 override_dh_auto_configure:
-	mkdir -p build
-	(cd build && cmake -DCMAKE_INSTALL_PREFIX=$(DESTDIR)/usr ..)
-
-override_dh_install: install-symmetricom install-mbuf
-	dh_install
-
-override_dh_dkms:
-	dh_dkms -V $(SVERSION)
-
-override_dh_auto_test:
 	true
+# 	mkdir -p build
+# 	(cd build && cmake -DCMAKE_INSTALL_PREFIX=$(DESTDIR)/usr ..)
 
-override_dh_clean:
-	rm -rf build
+# override_dh_install: install-symmetricom install-mbuf
+# 	dh_install
+
+# override_dh_dkms:
+# 	dh_dkms -V $(SVERSION)
+
+# override_dh_auto_test:
+# 	true
+
+# override_dh_clean:
+# 	rm -rf build

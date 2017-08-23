@@ -1,3 +1,9 @@
+advligorts (3.4~rc0-2) unstable; urgency=medium
+
+  * Include RCG package
+
+ -- controls <controls@eve.caltech.edu>  Wed, 23 Aug 2017 08:40:32 -0700
+
 advligorts (3.4~rc0-1) unstable; urgency=medium
 
   * Initial packaging.

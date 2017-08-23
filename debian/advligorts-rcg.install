@@ -1,0 +1,9 @@
+config usr/share/advligorts-rcg/src/
+src usr/share/advligorts-rcg/src/
+doc usr/share/advligorts-rcg/src/
+configure usr/share/advligorts-rcg/src/
+configure.in usr/share/advligorts-rcg/src/
+Makefile.in usr/share/advligorts-rcg/src/
+install usr/share/advligorts-rcg/src/
+NEWS usr/share/advligorts-rcg/src/
+src/epics/util/iniChk.pl usr/bin/
