@@ -1,0 +1,3 @@
+[Unit]
+Description=Advanced LIGO RTS model target: %i
+Requires=rts-epics@%i.service rts-module@%i.service rts-awgtpman@%i.service 
