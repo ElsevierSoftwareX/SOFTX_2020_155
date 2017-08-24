@@ -1,0 +1,21 @@
+#!/bin/bash -e
+. /etc/advligorts/env
+cmd="$1"
+sys="$2"
+if [ -z "$sys" ] ; then
+    echo "must supply system name"
+    exit 1
+fi
+TARGET=${OPTRTCDS}/target/${sys}
+case $cmd in
+    start)
+        /sbin/insmod "$TARGET"/bin/${sys}.ko
+        ;;
+    stop)
+        /sbin/rmmod ${sys}
+        ;;
+    *)
+        echo "unknown command '$cmd'"
+        exit 1
+        ;;
+esac

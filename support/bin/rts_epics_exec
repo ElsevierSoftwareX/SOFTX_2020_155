@@ -1,0 +1,11 @@
+#!/bin/bash -e
+. /etc/advligorts/env
+sys="$1"
+if [ -z "$sys" ] ; then
+    echo "must supply system name"
+    exit 1
+fi
+export EPICS_DB_INCLUDE_PATH=/usr/lib/epics/dbd
+TARGET=${OPTRTCDS}/target/${sys}/${sys}epics
+cd ${TARGET}
+exec ${TARGET}/${sys}epics ${sys}epics${IFO}.cmd
