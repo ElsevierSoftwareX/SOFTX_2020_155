@@ -1,1 +1,1 @@
-setup/udev/module-manage.sh usr/share/advligorts-module-support/
+support/udev/module-manage.sh usr/share/advligorts/

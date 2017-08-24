@@ -1,9 +1,17 @@
-config usr/share/advligorts-rcg/src/
-src usr/share/advligorts-rcg/src/
-doc usr/share/advligorts-rcg/src/
-configure usr/share/advligorts-rcg/src/
-configure.in usr/share/advligorts-rcg/src/
-Makefile.in usr/share/advligorts-rcg/src/
-install usr/share/advligorts-rcg/src/
-NEWS usr/share/advligorts-rcg/src/
+Makefile.in usr/share/advligorts/src/
+NEWS usr/share/advligorts/src/
+config usr/share/advligorts/src/
+configure usr/share/advligorts/src/
+configure.in usr/share/advligorts/src/
+doc usr/share/advligorts/src/
+install usr/share/advligorts/src/
+src usr/share/advligorts/src/
 src/epics/util/iniChk.pl usr/bin/
+support/bin/rts_awgtpman_exec usr/bin/
+support/bin/rts_epics_exec usr/bin/
+support/bin/rts_module_ctrl usr/bin/
+support/systemd/rts-awgtpman@.service lib/systemd/
+support/systemd/rts-epics@.service lib/systemd/
+support/systemd/rts-module@.service lib/systemd/
+support/systemd/rts@.target lib/systemd/
+usr/bin/awgtpman

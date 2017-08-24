@@ -1,8 +1,14 @@
+advligorts (3.4~rc1-1) unstable; urgency=medium
+
+  * add systemd support scripts/files
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Thu, 24 Aug 2017 15:25:31 -0700
+
 advligorts (3.4~rc0-2) unstable; urgency=medium
 
   * Include RCG package
 
- -- controls <controls@eve.caltech.edu>  Wed, 23 Aug 2017 08:40:32 -0700
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Wed, 23 Aug 2017 08:40:32 -0700
 
 advligorts (3.4~rc0-1) unstable; urgency=medium
 

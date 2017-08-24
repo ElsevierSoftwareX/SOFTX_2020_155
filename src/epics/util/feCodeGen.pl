@@ -2386,7 +2386,6 @@ sub createEpicsMakefile {
 	  print OUTME "EXTRA_CFLAGS += -DUSE_SYSTEM_TIME=1\n";
 	}
 	print OUTME "\n";
-	print OUTME "LIBFLAGS += -lezca\n";
 	if($systemName eq "sei" || $useFIRs)
 	{
 	print OUTME "EXTRA_CFLAGS += -DFIR_FILTERS\n";

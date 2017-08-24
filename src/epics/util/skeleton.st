@@ -14,7 +14,6 @@ program %SEQUENCER_NAME%
 %% #include <errno.h>
 %% #include <epicsTime.h>
 %% #include <cadef.h>
-%% #include <ezca.h>
 %% #include <alarm.h>                                                    /* MA */
 %% #include <sys/types.h>                                                /* MA */
 %% #include <sys/stat.h>                                                 /* MA */
