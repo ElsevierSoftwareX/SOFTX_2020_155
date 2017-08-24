@@ -1804,7 +1804,7 @@ udelay(1000);
 	  if(ipcErrBits) feStatus |= FE_ERROR_IPC;
 	  // Create FB status word for return to EPICS
 	  mxStat = 0;
-	  mxDiagR = daqPtr->reqAck;
+	  mxDiagR = daqPtr->status;
 	  if((mxDiag & 1) != (mxDiagR & 1)) mxStat = 1;
 	  if((mxDiag & 2) != (mxDiagR & 2)) mxStat += 2;
 #ifdef DUAL_DAQ_DC

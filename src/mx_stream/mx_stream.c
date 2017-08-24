@@ -185,12 +185,12 @@ do {
 		if (conStat != MX_SUCCESS) {
 			fprintf(stderr, "mx_connect failed %s\n", mx_strerror(conStat));
 			myErrorSignal = 1;
-			for (unsigned int i = 0; i < nsys; i++) shmIpcPtr[i]->reqAck ^= mxStatBit[0];
+			for (unsigned int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= mxStatBit[0];
 			exit(1);
 		}
 		else {
 			myErrorSignal = 0;
-			for (unsigned int i = 0; i < nsys; i++) shmIpcPtr[i]->reqAck ^= mxStatBit[1];
+			for (unsigned int i = 0; i < nsys; i++) shmIpcPtr[i]->status ^= mxStatBit[1];
 			fprintf(stderr, "Connection Made\n");
 			fflush(stderr);
 		}
@@ -235,7 +235,7 @@ do {
 		  // printf("data copy\n");
 
 		  // Copy values from shmmem to MX buffer
-		  if (lastCycle == 0) shmIpcPtr[i]->reqAck ^= mxStatBit[0];
+		  if (lastCycle == 0) shmIpcPtr[i]->status ^= mxStatBit[0];
 		  mxDataBlock.mxIpcData.cycle = shmIpcPtr[i]->cycle;
 		  mxDataBlock.mxIpcData.dcuId = shmIpcPtr[i]->dcuId;
 		  mxDataBlock.mxIpcData.crc = shmIpcPtr[i]->crc;
@@ -327,7 +327,7 @@ again:
 		  mx_total_stats.accumulateNext(stats::cur_time() - lst); // finish the measurement
 		  cur_req = (cur_req + 1) % NUM_SREQ;
 		 // if(lastCycle == 15) myErrorSignal = 1;
-		  if(lastCycle == 0) shmIpcPtr[i]->reqAck ^= mxStatBit[1];
+		  if(lastCycle == 0) shmIpcPtr[i]->status ^= mxStatBit[1];
 		}
 
 	} while(!myErrorSignal);
