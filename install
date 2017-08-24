@@ -15,6 +15,7 @@ hostname=`grep TARGET_HOST_NAME src/include/${system}.h | head -1 | awk '{print 
 adccount=`grep TARGET_ADC_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
 daccount16=`grep TARGET_DAC16_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
 daccount18=`grep TARGET_DAC18_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
+daccount20=`grep TARGET_DAC20_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
 site=`grep site= target/${system}epics/${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`
 if test ${site}no = no; then echo Please make $system first; exit 1; fi
 upper_site=`echo $site | tr a-z A-Z`
@@ -131,9 +132,11 @@ sleep 5
 ADC_COUNT=\`/usr/sbin/lspci -v -n | grep 3101 | wc -l\`
 DAC16_COUNT=\`/usr/sbin/lspci -v -n | grep 3120 | wc -l\`
 DAC18_COUNT=\`/usr/sbin/lspci -v -n | grep 3357 | wc -l\`
+DAC20_COUNT=\`/usr/sbin/lspci -v -n | grep 3574 | wc -l\`
 echo Number of ADC cards on bus = \$ADC_COUNT 
 echo Number of DAC16 cards on bus = \$DAC16_COUNT 
 echo Number of DAC18 cards on bus = \$DAC18_COUNT 
+echo Number of DAC20 cards on bus = \$DAC20_COUNT 
 if (( \$ADC_COUNT < $adccount )); then
         echo Cannot run: Expected $adccount ADC cards, but only found \$ADC_COUNT cards on bus
         exit 1
@@ -149,6 +152,10 @@ if (( \$DAC18_COUNT < $daccount18 )); then
         exit 1
 fi
 
+if (( \$DAC20_COUNT < $daccount20 )); then
+        echo Cannot run: Expected $daccount20 20bitDAC cards, but only found \$DAC20 cards on bus
+        exit 1
+fi
 
 (cd /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics && ./startup${ifo})
 sleep 5
