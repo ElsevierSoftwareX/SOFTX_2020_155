@@ -1101,7 +1101,7 @@ void cleanup_module (void) {
 	// Bring the CPU back up
         cpu_up(CPUID);
         //msleep(1000);
-	printkl("Brought the CPU back up\n");
+	printk("Brought the CPU back up\n");
 #endif
 	printk("Just before returning from cleanup_module for " SYSTEM_NAME_STRING_LOWER "\n");
 
