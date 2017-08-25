@@ -1,0 +1,8 @@
+#!/bin/bash -e
+daqd="$1"
+shift
+models="$@"
+exec /usr/bin/mx_stream \
+    -e 0 -r 0 -w 0 -W 0 \
+    -s "${MODELS[*]}" \
+    -d fb1:0

@@ -1,0 +1,300 @@
+#!/bin/bash -e
+
+VERSION=__VERSION__
+ENV=/etc/advligorts/env
+SYSTAB=/etc/rtsystab
+SRC=/usr/share/advligorts/src
+BUILDD=/var/cache/advligorts/rcg-$VERSION
+
+source "$ENV"
+
+OPTRTCDS=${OPTRTCDS:=/opt/rtcds/${site}/${ifo}}
+
+##################################################
+
+log() {
+    echo "$@" >&2
+}
+
+check_env() {
+    vars=(SITE site IFO ifo OPTRTCDS BUILDD TARGET USER RCG_LIB_PATH)
+    for var in ${vars[*]} ; do
+	if [ $var ] ; then
+	    log "$var=${!var}"
+	    export $var
+	else
+	    log "variable $var not set"
+	    exit 1
+	fi
+    done
+    log
+}
+
+prep_target(){
+    log "creating OPTRTCDS..."
+    mkdir -p ${OPTRTCDS}/{target,chans}/tmp
+}
+
+prep_buildd() {
+    sudo mkdir -p "$BUILDD"
+    sudo chown "$USER" "$BUILDD"
+    if [ -e "$BUILDD"/Makefile ] ; then
+	return
+    fi
+    log "configuring BUILDD..."
+    cd "$BUILDD"
+    "$SRC"/configure
+    log
+}
+
+########
+
+list_host_sys() {
+    local host=$(hostname -s)
+    local systems=($(grep "^${host}" $SYSTAB | sed s/$host//))
+    echo ${systems[@]}
+}
+
+tname() {
+    if [[ ${1,,*} == 'iop' ]] ; then
+	list_host_sys | head -1
+    else
+	echo "$1"
+    fi
+}
+
+check_host_fe() {
+    if [ -z "$(list_host_sys)" ] ; then
+	log "This is not a front-end machine.
+Plese log on to an appropriate front-end machine and try again."
+	exit 3
+    fi
+}
+
+check_host_sys() {
+    for sys ; do
+	for hsys in $(list_host_sys) ; do
+	    [[ "$hsys" == "$sys" ]] && return 0
+	done
+	log "Cannot start/stop model '$sys' on host $(hostname -s)."
+	exit 4
+    done
+}
+
+########
+
+build_sys() {
+    cd $BUILDD
+    for sys ; do
+	sys=$(tname "$sys")
+	log "### building $sys..."
+	make $sys
+    done
+}
+
+install_sys() {
+    cd $BUILDD
+    for sys ; do
+	sys=$(tname "$sys")
+	log "### installing $sys..."
+	make install-$sys
+    done
+}
+
+start_sys() {
+    for sys ; do
+	sys=$(tname "$sys")
+	log "### starting $sys..."
+	sudo systemctl start rts@${sys}.target
+    done
+}
+
+stop_sys() {
+    for sys ; do
+	sys=$(tname "$sys")
+	log "### stopping $sys..."
+	#${SCRIPTD}/kill${sys}
+	sudo systemctl stop rts@${sys}.target
+    done
+}
+
+_lsmod() {
+    local models=($(list_host_sys))
+    local rts=(mbuf symmetricom)
+    local omx=(open_mx)
+    local dis=(dis_kosif dis_dx dis_irm)
+
+    modules=(${rts[*]} ${omx[*]} ${dis[*]})
+    
+    local allloaded=0
+    for m in ${modules[*]}; do
+	md=$(lsmod | grep "^${m}") || true
+	if [ -z "$md" ] ; then
+	    printf "%-18s ****MISSING****\n" "$m" 
+	    allloaded=1
+	else
+	    echo "$md"
+	fi
+    done
+    echo
+    for m in ${models[*]}; do
+	md=$(lsmod | grep "^${m}") || true
+	if [ -z "$md" ] ; then
+	    printf "%-18s ****MISSING****\n" "$m" 
+	    allloaded=1
+	else
+	    echo "$md"
+	fi
+    done
+    return $allloaded
+    # # echo ${models[*]} ${rts[*]} ${dis[*]} | sed -e 's/ / -e /g'
+    # g=$(printf ' -e %s' ${rts[*]} ${dis[*]} ${omx[*]})
+    # lsmod | grep $g
+    # echo
+    # g=$(printf ' -e %s' ${models[*]})
+    # lsmod | grep $g
+}
+
+############################################################
+
+usage() {
+    echo 'Usage: $(basename $0) <command> [args]
+
+Available commands:
+
+  build|make <model>       build model
+  install <model>          install model
+
+  start <model>|--all      start model
+  restart <model>|--all    restart running model
+  stop|kill <model>|--all  stop running model
+
+  log <model>              show last compile log for model
+    --info                   show log info
+  list|ls                  list all models for current host
+  lsmod                    list loaded RTS kernel modules
+  dtail|dmesg              tail dmesg logs
+  env                      print system environment info
+  help                     this help
+'
+}
+
+if [ "$1" ] ; then
+    cmd=$1
+    shift
+else
+    log "You must specify a command."
+    log
+    usage
+    exit 1
+fi
+
+case $cmd in
+    'build'|'make')
+	if [ -z "$1" ] ; then
+	    log "You must specify at least one model to build."
+	    exit 2
+	fi
+	check_env
+	prep_buildd
+	build_sys $@
+	;;
+    'install')
+	if [ -z "$1" ] ; then
+	    log "You must specify at least one model to install."
+	    exit 2
+	fi
+	check_env
+	check_host_fe
+	install_sys $@
+	;;
+    'start')
+	if [ -z "$1" ] ; then
+	    log "You must specify at least one model to start (or '--all')."
+	    exit 2
+	fi
+	check_host_fe
+	if [[ "$1" == '--all' ]] ; then
+	    start_sys $(list_host_sys)
+	else
+	    check_host_sys $@
+	    start_sys $@
+	fi
+	;;
+    'restart')
+	if [ -z "$1" ] ; then
+	    log "You must specify at least one model to restart (or '--all')."
+	    exit 2
+	fi
+	check_host_fe
+	if [[ "$1" == '--all' ]] ; then
+	    # we do this in reverse so the IOP is stopped last
+	    stop_sys $(list_host_sys | tac)
+	    start_sys $(list_host_sys)
+	else
+	    check_host_sys $@
+	    stop_sys $@
+	    start_sys $@
+	fi
+	;;
+    'stop'|'kill')
+	if [ -z "$1" ] ; then
+	    log "You must specify at least one model to stop (or '--all')."
+	    exit 2
+	fi
+	check_host_fe
+	if [[ "$1" == '--all' ]] ; then
+	    # we do this in reverse so the IOP is stopped last
+	    stop_sys $(list_host_sys | tac)
+	else
+	    check_host_sys $@
+	    stop_sys $@
+	fi
+	;;
+    'log')
+	format=full
+	if [[ "$1" == '-i' ]] ; then
+	    format=info
+	    shift
+	fi
+	if [ -z "$1" ] ; then
+	    log "You must specify at least one model to view."
+	    exit 2
+	fi
+	olog="${BUILDD}/${1}.log"
+	elog="${BUILDD}/${1}_error.log"
+	echo $olog
+	case "$format" in
+	    info)
+		ls -al "$olog" "$elog"
+		;;
+	    full)
+		sed 's/^/stdout:/' < "$olog"
+		sed 's/^/stderr:/' < "$elog"
+		;;
+	esac
+	;;
+    'list'|'ls')
+	check_host_fe
+	list_host_sys | tr ' ' '\n'
+	;;
+    'lsmod'|'lsmods')
+	_lsmod
+	;;
+    'dtail'|'dmesg')
+	LINES=$(($(tput lines) - 14))
+	watch -n1 "dmesg | tail -$LINES"
+	;;
+    'env')
+	log "not implemented yet :("
+	;;
+    'help')
+	usage
+	;;
+    *)
+	log "Unknown command: $cmd"
+	log
+	usage
+	exit 1
+	;;
+esac
