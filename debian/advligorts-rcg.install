@@ -10,8 +10,8 @@ src/epics/util/iniChk.pl usr/bin/
 support/bin/rts_awgtpman_exec usr/bin/
 support/bin/rts_epics_exec usr/bin/
 support/bin/rts_module_ctrl usr/bin/
-support/systemd/rts-awgtpman@.service lib/systemd/
-support/systemd/rts-epics@.service lib/systemd/
-support/systemd/rts-module@.service lib/systemd/
-support/systemd/rts@.target lib/systemd/
+support/systemd/rts-awgtpman@.service lib/systemd/system/
+support/systemd/rts-epics@.service lib/systemd/system/
+support/systemd/rts-module@.service lib/systemd/system/
+support/systemd/rts@.target lib/systemd/system/
 usr/bin/awgtpman
