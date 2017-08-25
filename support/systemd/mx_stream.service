@@ -1,0 +1,16 @@
+[Unit]
+Description=Advanced LIGO RTS front end mx stream
+After=network-online.target
+
+[Service]
+User=controls
+Type=simple
+ExecStart=/etc/advligorts/mx_stream_exec
+StandardOutput=journal
+StandardError=journal
+Restart=always
+RestartSec=5
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target

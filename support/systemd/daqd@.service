@@ -1,0 +1,8 @@
+[Unit]
+Description=Advanced LIGO RTS daqd: %i
+After=network-online.target
+
+[Service]
+User=controls
+ExecStart=/usr/bin/daqd_%i -c /etc/advligorts/daqdrc.%i
+Restart=always
