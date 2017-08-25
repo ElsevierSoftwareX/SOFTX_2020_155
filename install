@@ -15,7 +15,7 @@ hostname=`grep TARGET_HOST_NAME src/include/${system}.h | head -1 | awk '{print 
 adccount=`grep TARGET_ADC_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
 daccount16=`grep TARGET_DAC16_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
 daccount18=`grep TARGET_DAC18_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
-daccount20=`grep TARGET_DAC20_COUNT src/include/${system}.h | head -1 | awk '{print $3}'
+daccount20=`grep TARGET_DAC20_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
 nodaq=`grep TARGET_DAQ_FLAG src/include/${system}.h | head -1 | awk '{print $3}'`
 site=`grep site= target/${system}epics/${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`
 if test ${site}no = no; then echo Please make $system first; exit 1; fi
