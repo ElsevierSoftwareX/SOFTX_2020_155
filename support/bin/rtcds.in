@@ -1,15 +1,15 @@
 #!/bin/bash -e
 
-VERSION=__VERSION__
-ENV=/etc/advligorts/env
+VERSION=${RTS_VERSION:-__VERSION__}
+ENV=${RTS_ENV:-/etc/advligorts/env}
 SYSTAB=/etc/rtsystab
-SRC=/usr/share/advligorts/src
-BUILDD=/var/cache/advligorts/rcg-$VERSION
-RTS_USER=controls
+SRC=${RTS_SRC:-/usr/share/advligorts/src}
+BUILDD=${RTS_BUILDD:-/var/cache/advligorts/rcg-$VERSION}
+RTS_USER=${RTS_USER:-controls}
 
 source "$ENV"
 
-OPTRTCDS=${OPTRTCDS:=/opt/rtcds/${site}/${ifo}}
+OPTRTCDS=${OPTRTCDS:-/opt/rtcds/${site}/${ifo}}
 
 ##################################################
 
@@ -157,7 +157,7 @@ _lsmod() {
 ############################################################
 
 usage() {
-    echo 'Usage: $(basename $0) <command> [args]
+    echo "Usage: $(basename $0) <command> [args]
 
 Available commands:
 
@@ -169,13 +169,13 @@ Available commands:
   stop|kill <model>|--all  stop running model
 
   log <model>              show last compile log for model
-    --info                   show log info
+    -i                       show log info
   list|ls                  list all models for current host
   lsmod                    list loaded RTS kernel modules
   dtail|dmesg              tail dmesg logs
   env                      print system environment info
   help                     this help
-'
+"
 }
 
 if [ "$1" ] ; then
