@@ -5,6 +5,7 @@ ENV=/etc/advligorts/env
 SYSTAB=/etc/rtsystab
 SRC=/usr/share/advligorts/src
 BUILDD=/var/cache/advligorts/rcg-$VERSION
+RTS_USER=controls
 
 source "$ENV"
 
@@ -17,7 +18,7 @@ log() {
 }
 
 check_env() {
-    vars=(SITE site IFO ifo OPTRTCDS BUILDD TARGET USER RCG_LIB_PATH)
+    vars=(SITE site IFO ifo OPTRTCDS RTS_USER BUILDD RCG_LIB_PATH)
     for var in ${vars[*]} ; do
 	if [ $var ] ; then
 	    log "$var=${!var}"
@@ -36,7 +37,7 @@ prep_target(){
 
 prep_buildd() {
     sudo mkdir -p "$BUILDD"
-    sudo chown "$USER" "$BUILDD"
+    sudo chown "$RTS_USER" "$BUILDD"
     if [ -e "$BUILDD"/Makefile ] ; then
 	return
     fi
