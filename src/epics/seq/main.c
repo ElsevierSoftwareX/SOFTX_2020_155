@@ -3058,7 +3058,7 @@ sleep(5);
 	double myversion;
 
 	SETUP;
-	listLocalRecords(*iocshPpdbbase);
+	// listLocalRecords(*iocshPpdbbase);
 	myversion = majorversion + 0.1 * subversion1 + 0.01 * subversion2;
 	if(!myreleased) myversion *= -1.0;
 	char rcgversionname[256]; sprintf(rcgversionname, "%s_%s", pref, "RCG_VERSION");	// Set RCG Version EPICS
