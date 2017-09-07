@@ -1,3 +1,6 @@
+#ifndef ZMQ_DAQ_H
+#define ZMQ_DAQ_H
+
 #define DAQ_NUM_DATA_BLOCKS     16
 #define DAQ_NUM_DATA_BLOCKS_PER_SECOND  16
 #define CDS_DAQ_NET_IPC_OFFSET 0x0
@@ -94,7 +97,7 @@ typedef struct nds_data_t {
 	char ndsdata[10000];
 } nds_data_t;
 
-union ndsdatau {
+typedef union ndsdatau {
 	char s[10000];
 	float f[4096];
 	int i[4096];
@@ -109,3 +112,4 @@ typedef struct nds_data_r {
 
 #define DAQ_ZMQ_HEADER_SIZE	(sizeof(daq_msg_header_t) * DAQ_ZMQ_MAX_DCU + sizeof(int))	
 
+#endif /* ZMQ_DAQ_H */

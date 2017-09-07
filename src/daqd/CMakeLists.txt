@@ -194,7 +194,6 @@ target_link_libraries(daqd_fw fw_common fw_comm fw_daqd_gds ca Com cas gdd epics
 		run_number::run_number
         )
 
-
 if (${MX_FOUND})
 ###########
 # DC Build with mx support
@@ -353,7 +352,30 @@ if (${DEV_BUILD})
 ####
 ## Reuse the main source lists from daqd_dc_mx
 #
-add_library(dc_gds_zmq STATIC ${DAQD_DC_GDS_SRC})
+set (DAQD_DC_ZMQ_MAIN_SRC
+		archive.cc
+		profiler.cc
+		filesys.cc
+		epics_pvs.cc
+		trend.cc
+		net_writer.cc
+		circ.cc
+		framesend.cc
+		gdsmutex.cc
+		edcu.cc
+		epicsServer.cc
+		exServer.cc
+		exScalarPV.cc
+		exVectorPV.cc
+		exPV.cc
+		exChannel.cc
+		framerecv.cc
+		listener.cc
+		daqd.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
+
+add_library(dc_gds_zmq STATIC gds.cc)
 target_compile_definitions(dc_gds_zmq PRIVATE
 		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
 		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
@@ -377,7 +399,7 @@ target_link_libraries(dc_gds_zmq PRIVATE
 		zmq
 		)
 
-add_executable(daqd_dc_zmq ${DAQD_DC_MAIN_SRC} producer_zmq.cc)
+add_executable(daqd_dc_zmq ${DAQD_DC_ZMQ_MAIN_SRC} producer_dc_zmq.cc)
 target_compile_definitions(daqd_dc_zmq PUBLIC
 		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
 		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION

@@ -78,13 +78,7 @@ int controller_cycle = 0;
 /// Pointer to GDS TP tables
 struct cdsDaqNetGdsTpNum *gdsTpNum[2][DCU_COUNT];
 
-/// Data receiving thread
-void *gm_receiver_thread(void *this_p) {
 
-    void receiver_mx(int);
-    int this_eid = *static_cast<int *>(this_p);
-    receiver_mx(this_eid);
-}
 
 /// The main data movement thread (the producer)
 void *producer::frame_writer() {
@@ -113,82 +107,47 @@ void *producer::frame_writer() {
     daqd.initialize_vmpic(&move_buf, &vmic_pv_len, vmic_pv);
     raii::array_ptr<unsigned char> _move_buf(move_buf);
 
-    if (!daqd.no_myrinet) {
+    // Allocate receive buffers for each configured DCU
+    for (int i = 5; i < DCU_COUNT; i++) {
+        if (0 == daqd.dcuSize[0][i])
+            continue;
 
-        unsigned int max_endpoints = open_mx();
-        unsigned int nics_available = max_endpoints >> 8;
-        max_endpoints &= 0xff;
-
-        // Allocate receive buffers for each configured DCU
-        for (int i = 5; i < DCU_COUNT; i++) {
-            if (0 == daqd.dcuSize[0][i])
-                continue;
-
-            directed_receive_buffer[i] =
-                malloc(2 * DAQ_DCU_BLOCK_SIZE * DAQ_NUM_DATA_BLOCKS);
-            if (directed_receive_buffer[i] == 0) {
-                system_log(1, "[MX recv] Couldn't allocate recv buffer\n");
-                exit(1);
-            }
+        directed_receive_buffer[i] =
+            malloc(2 * DAQ_DCU_BLOCK_SIZE * DAQ_NUM_DATA_BLOCKS);
+        if (directed_receive_buffer[i] == 0) {
+            system_log(1, "[MX recv] Couldn't allocate recv buffer\n");
+            exit(1);
         }
-
-        // Allocate local test point tables
-        static struct cdsDaqNetGdsTpNum gds_tp_table[2][DCU_COUNT];
-
-        for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
-            for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
-                if (daqd.dcuSize[ifo][j] == 0)
-                    continue; // skip unconfigured DCU nodes
-                if (IS_MYRINET_DCU(j)) {
-                    gdsTpNum[ifo][j] = gds_tp_table[ifo] + j;
-
-                } else {
-                    gdsTpNum[ifo][j] = 0;
-                }
-            }
-        }
-
-        {
-            pthread_t gm_tid;
-            pthread_attr_t attr;
-            pthread_attr_init(&attr);
-            pthread_attr_setstacksize(&attr, daqd.thread_stack_size);
-            pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-            int my_err_no;
-
-            for (int j = 0; j < DCU_COUNT; j++) {
-                class stats s;
-                rcvr_stats.push_back(s);
-            }
-
-            /* Create array to hold mx thread card+endpoint data
-             We will pass a point to the individual array element.
-             This is to avoid a race condition where the
-             gm_receiver_thread gets interleaved values
-             Keith Thorne   2015-07-10 */
-            int bp_aray[MX_MAX_BOARDS][MX_MAX_ENDPOINTS];
-            for (int bnum = 0; bnum < nics_available; bnum++) { // Start
-                for (int j = 0; j < max_endpoints; j++) {
-                    int bp = j;
-                    bp = bp + (bnum * 256);
-                    /* calculate address within array */
-                    bp_aray[bnum][j] = bp;
-                    void *bpPtr = (int *)(bp_aray + bnum) + j;
-                    if (my_err_no = pthread_create(&gm_tid, &attr,
-                                                   gm_receiver_thread, bpPtr)) {
-                        pthread_attr_destroy(&attr);
-                        strerror_r(my_err_no, errmsgbuf, sizeof(errmsgbuf));
-                        system_log(1, "pthread_create() err=%s", errmsgbuf);
-                        exit(1);
-                    }
-                }
-            }
-
-            pthread_attr_destroy(&attr);
-        }
-
-        sleep(1);
     }
+
+    // Allocate local test point tables
+    static struct cdsDaqNetGdsTpNum gds_tp_table[2][DCU_COUNT];
+
+    for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
+        for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
+            if (daqd.dcuSize[ifo][j] == 0)
+                continue; // skip unconfigured DCU nodes
+            if (IS_MYRINET_DCU(j)) {
+                gdsTpNum[ifo][j] = gds_tp_table[ifo] + j;
+
+            } else {
+                gdsTpNum[ifo][j] = 0;
+            }
+        }
+    }
+
+    {
+        for (int j = 0; j < DCU_COUNT; j++) {
+            class stats s;
+            rcvr_stats.push_back(s);
+        }
+
+        // FIXME: launch zmq_receiver thread here!
+
+    }
+
+    sleep(1);
+
 
     stat_full.sample();
 // TODO make IP addresses configurable from daqdrc
