@@ -419,6 +419,7 @@ target_link_libraries(daqd_dc_zmq PUBLIC
 		ldastools::framecpp
 		${CMAKE_THREAD_LIBS_INIT}
 		zmq
+		zmq::dc_recv
 		)
 endif(${DEV_BUILD})
 

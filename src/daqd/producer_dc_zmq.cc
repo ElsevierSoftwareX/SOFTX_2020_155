@@ -51,6 +51,8 @@ using namespace std;
 #include <sys/ioctl.h>
 #include "../drv/rfm.c"
 
+#include "zmq_dc_recv.h"
+
 #if EPICS_EDCU == 1
 #include "epics_pvs.hh"
 #endif
@@ -136,15 +138,15 @@ void *producer::frame_writer() {
         }
     }
 
-    {
-        for (int j = 0; j < DCU_COUNT; j++) {
-            class stats s;
-            rcvr_stats.push_back(s);
-        }
-
-        // FIXME: launch zmq_receiver thread here!
-
+    for (int j = 0; j < DCU_COUNT; j++) {
+        class stats s;
+        rcvr_stats.push_back(s);
     }
+
+    // FIXME: launch zmq_receiver thread here!
+    std::vector<std::string> zmq_endpoints(zmq_dc::parse_endpoint_list(daqd.parameters().get("zmq_fecs", "")));
+    zmq::context_t zcontext(1);
+    zmq_dc::ZMQDCReceiver zmq_receiver(zcontext, zmq_endpoints);
 
     sleep(1);
 

@@ -9,7 +9,9 @@ find_package(ZMQ4 REQUIRED)
 
 
 add_library(zmq_dc_recv STATIC zmq_dc_recv.cc)
+target_include_directories(zmq_dc_recv PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(zmq_dc_recv PUBLIC zmq4::zmq ${CMAKE_THREAD_LIBS_INIT})
+add_library(zmq::dc_recv ALIAS zmq_dc_recv)
 
 
 add_executable(zmq_multi_stream zmq_multi_stream.c ../drv/rfm.c)

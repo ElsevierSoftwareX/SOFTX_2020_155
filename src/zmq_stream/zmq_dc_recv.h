@@ -9,7 +9,7 @@
 
 #include <zmq.hpp>
 
-#include "zmq_daq.h"
+#include "zmq_daq_core.h"
 
 namespace zmq_dc {
     class ZMQDCReceiver;
@@ -136,6 +136,7 @@ namespace zmq_dc {
         void verbose(bool val) { _verbose = val; }
     };
 
+    extern std::vector<std::string> parse_endpoint_list(const std::string& endpoints);
 }
 
 #endif /* ZMQ_DC_RECV_H */

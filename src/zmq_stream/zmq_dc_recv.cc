@@ -194,4 +194,18 @@ namespace zmq_dc {
         _loop %= 16;
         return results;
     }
+
+    std::vector<std::string> parse_endpoint_list(const std::string& endpoints)
+    {
+        std::vector<std::string> sname;
+        const char *sysname = endpoints.c_str();
+        char *save_ptr = nullptr;
+        sname.emplace_back(strtok_r(const_cast<char*>(sysname), " ", &save_ptr));
+        for(;;) {
+            char *s = strtok_r(nullptr, " ", &save_ptr);
+            if (s == nullptr) break;
+            sname.emplace_back(std::string(s));
+        }
+        return sname;
+    }
 }
