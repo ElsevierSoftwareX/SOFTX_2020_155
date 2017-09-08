@@ -28,6 +28,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <array>
 #include <cctype>      // old <ctype.h>
 #include <sys/prctl.h>
 
@@ -72,9 +73,9 @@ struct ToLower {
 
 /* GM and shared memory communication area */
 
+/* This may still be needed for test points */
 struct rmIpcStr gmDaqIpc[DCU_COUNT];
 /// DMA memory area pointers
-void *directed_receive_buffer[DCU_COUNT];
 int controller_cycle = 0;
 
 /// Pointer to GDS TP tables
@@ -109,19 +110,6 @@ void *producer::frame_writer() {
     daqd.initialize_vmpic(&move_buf, &vmic_pv_len, vmic_pv);
     raii::array_ptr<unsigned char> _move_buf(move_buf);
 
-    // Allocate receive buffers for each configured DCU
-    for (int i = 5; i < DCU_COUNT; i++) {
-        if (0 == daqd.dcuSize[0][i])
-            continue;
-
-        directed_receive_buffer[i] =
-            malloc(2 * DAQ_DCU_BLOCK_SIZE * DAQ_NUM_DATA_BLOCKS);
-        if (directed_receive_buffer[i] == 0) {
-            system_log(1, "[MX recv] Couldn't allocate recv buffer\n");
-            exit(1);
-        }
-    }
-
     // Allocate local test point tables
     static struct cdsDaqNetGdsTpNum gds_tp_table[2][DCU_COUNT];
 
@@ -150,9 +138,7 @@ void *producer::frame_writer() {
 
     sleep(1);
 
-
     stat_full.sample();
-// TODO make IP addresses configurable from daqdrc
 
     // No waiting here if compiled as broadcasts receiver
 
@@ -189,6 +175,7 @@ void *producer::frame_writer() {
             controller_cycle = 1;
         }
     }
+    zmq_receiver.begin_acquiring();
 
     PV::set_pv(PV::PV_UPTIME_SECONDS, 0);
     PV::set_pv(PV::PV_GPS, 0);
@@ -205,10 +192,30 @@ void *producer::frame_writer() {
 
         // DEBUG(6, printf("Timing %d gps=%d frac=%d\n", i, gps, frac));
 
+        std::array<int, DCU_COUNT> dcu_to_zmq_lookup;
+        std::array<char*,  DCU_COUNT> dcu_data_from_zmq;
+        std::fill(dcu_to_zmq_lookup.begin(), dcu_to_zmq_lookup.end(), -1);
+        std::fill(dcu_data_from_zmq.begin(), dcu_data_from_zmq.end(), nullptr);
+        // retreive 1/16s of data from zmq
+        zmq_dc::data_block zmq_data_block = zmq_receiver.receive_data();
+
+        // map out the order of the dcuids in the zmq data, this could change
+        // with each data block
+        {
+            int total_zmq_models = zmq_data_block.full_data_block->dcuTotalModels;
+            char *cur_dcu_zmq_ptr = zmq_data_block.full_data_block->zmqDataBlock;
+            for (int i = 0; i < total_zmq_models; ++i) {
+                unsigned int cur_dcuid = zmq_data_block.full_data_block->zmqheader[i].dcuId;
+                dcu_to_zmq_lookup[cur_dcuid] = i;
+                dcu_data_from_zmq[cur_dcuid] = cur_dcu_zmq_ptr;
+                cur_dcu_zmq_ptr += zmq_data_block.full_data_block->zmqheader[i].dataBlockSize;
+            }
+        }
+
         read_dest = move_buf;
         for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
             // printf("DCU %d is %d bytes long\n", j, daqd.dcuSize[0][j]);
-            if (daqd.dcuSize[0][j] == 0)
+            if (daqd.dcuSize[0][j] == 0 || dcu_to_zmq_lookup[i] < 0 || dcu_data_from_zmq[i] == nullptr)
                 continue; // skip unconfigured DCU nodes
             long read_size = daqd.dcuDAQsize[0][j];
             if (IS_EPICS_DCU(j)) {
@@ -226,14 +233,13 @@ void *producer::frame_writer() {
                 // printf("cycl=%d ctrl=%d dcu=%d\n", gmDaqIpc[j].cycle,
                 // controller_cycle, j);
                 // Get the data from myrinet
+                // Get the data from the buffers returned by the zmq receiver
+                int zmq_index = dcu_to_zmq_lookup[j];
+                daq_msg_header_t& cur_dcu = zmq_data_block.full_data_block->zmqheader[zmq_index];
+                assert(read_size == cur_dcu.dataBlockSize);
                 memcpy((void *)read_dest,
-                       ((char *)directed_receive_buffer[j]) +
-                           dcu_cycle * 2 * DAQ_DCU_BLOCK_SIZE,
-                       2 * DAQ_DCU_BLOCK_SIZE);
-
-                volatile struct rmIpcStr *ipc;
-
-                ipc = &gmDaqIpc[j];
+                       dcu_data_from_zmq[j],
+                       cur_dcu.dataBlockSize);
 
                 int cblk1 = (i + 1) % DAQ_NUM_DATA_BLOCKS;
                 static const int ifo = 0; // For now
@@ -275,23 +281,23 @@ void *producer::frame_writer() {
                                           << "); status "
                                           << dcuCycleStatus[ifo][j]
                                           << dcuStatCycle[ifo][j] << endl);
-                            ipc->status = DAQ_STATE_FAULT;
+                            cur_dcu.status = DAQ_STATE_FAULT;
                         }
 
                         if ((dcuStatus[ifo][j] ==
                              DAQ_STATE_RUN) /* && (lastStatus != DAQ_STATE_RUN) */) {
                             DEBUG(4, cerr << "New " << daqd.dcuName[j]
                                           << " (dcu " << j << ")" << endl);
-                            ipc->status = DAQ_STATE_RUN;
+                            cur_dcu.status = DAQ_STATE_RUN;
                         }
 
                         dcuCycleStatus[ifo][j] = 0;
                         dcuStatCycle[ifo][j] = 0;
-                        ipc->status = ipc->status;
+                        cur_dcu.status = cur_dcu.status;
                     }
 
                     {
-                        int intCycle = ipc->cycle % DAQ_NUM_DATA_BLOCKS;
+                        int intCycle = cur_dcu.cycle % DAQ_NUM_DATA_BLOCKS;
                         if (intCycle != dcuLastCycle[ifo][j])
                             dcuStatCycle[ifo][j]++;
                         dcuLastCycle[ifo][j] = intCycle;
@@ -299,9 +305,9 @@ void *producer::frame_writer() {
                 }
 
                 // Update DCU status
-                int newStatus = ipc->status != DAQ_STATE_RUN ? 0xbad : 0;
+                int newStatus = cur_dcu.status != DAQ_STATE_RUN ? 0xbad : 0;
 
-                int newCrc = gmDaqIpc[j].crc;
+                int newCrc = cur_dcu.dataCrc;
 
                 // printf("%x\n", *((int *)read_dest));
                 if (!IS_EXC_DCU(j)) {
@@ -319,7 +325,7 @@ void *producer::frame_writer() {
                 }
                 daqd.dcuStatus[0][j] = newStatus;
 
-                daqd.dcuCycle[0][j] = gmDaqIpc[j].cycle;
+                daqd.dcuCycle[0][j] = cur_dcu.cycle;
 
                 /* Check DCU data checksum */
                 unsigned long crc = 0;
@@ -385,9 +391,12 @@ void *producer::frame_writer() {
                         daqd.dcuCrcErrCnt[0][j]++;
                         daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
                     }
+                    // FIXME: is this right? Why 2* DAQ_DCU_BLOCK_SIZE?
+                    read_dest += 2 * DAQ_DCU_BLOCK_SIZE;
+                } else {
+                    read_dest += cur_dcu.dataBlockSize;
                 }
 
-                read_dest += 2 * DAQ_DCU_BLOCK_SIZE;
             }
         }
 
