@@ -40,7 +40,7 @@ int do_verbose;
 unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
 
 
-std::vector<zmq_dc::receiver_thread_info> thread_info;
+//std::vector<zmq_dc::receiver_thread_info> thread_info;
 
 
 static volatile bool keep_running = true;
@@ -163,8 +163,7 @@ main(int argc, char **argv)
         std::cout << "sys " << ii << " =  " << sname[ii] << "\n";
     }
 
-    zmq::context_t recv_context(nsys);
-    zmq_dc::ZMQDCReceiver dc_receiver(recv_context, sname);
+    zmq_dc::ZMQDCReceiver dc_receiver(sname);
     int dataRdy = dc_receiver.data_mask();
 
     // Create 0MQ socket for DC data transmission

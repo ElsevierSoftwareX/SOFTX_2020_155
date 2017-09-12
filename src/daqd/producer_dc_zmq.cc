@@ -131,10 +131,8 @@ void *producer::frame_writer() {
         rcvr_stats.push_back(s);
     }
 
-    // FIXME: launch zmq_receiver thread here!
     std::vector<std::string> zmq_endpoints(zmq_dc::parse_endpoint_list(daqd.parameters().get("zmq_fecs", "")));
-    zmq::context_t zcontext(1);
-    zmq_dc::ZMQDCReceiver zmq_receiver(zcontext, zmq_endpoints);
+    zmq_dc::ZMQDCReceiver zmq_receiver(zmq_endpoints);
 
     sleep(1);
 
@@ -198,6 +196,7 @@ void *producer::frame_writer() {
         std::fill(dcu_data_from_zmq.begin(), dcu_data_from_zmq.end(), nullptr);
         // retreive 1/16s of data from zmq
         zmq_dc::data_block zmq_data_block = zmq_receiver.receive_data();
+        std::cout << "#" << std::endl;
 
         // map out the order of the dcuids in the zmq data, this could change
         // with each data block

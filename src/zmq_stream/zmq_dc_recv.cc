@@ -25,16 +25,22 @@ namespace zmq_dc {
 
     void ZMQDCReceiver::run_thread(receiver_thread_info& my_thread_info) {
         int mt = my_thread_info.index();
-        std::cout << "starting receive loop for myarg = " << mt << std::endl;
         int ii;
         int cycle = 0;
         int acquire = 0;
         daq_multi_dcu_data_t mxDataBlock;
 
+        zmq::socket_t socket(_context, ZMQ_SUB);
+        socket.setsockopt(ZMQ_SUBSCRIBE, nullptr, 0);
+        std::cout << "reader thread " << mt << " connecting to " << my_thread_info.conn_str() << std::endl;
+        socket.connect(my_thread_info.conn_str());
+
+        std::cout << "thread " << mt << " entering main loop " << std::endl;
         do {
             zmq::message_t message;
             // Get data when message size > 0
-            my_thread_info.socket().recv(&message, 0);
+            socket.recv(&message, 0);
+            //std::cout << "." << std::endl;
             assert(message.size() >= 0);
             // Get pointer to message data
             char *string = reinterpret_cast<char *>(message.data());
@@ -47,13 +53,13 @@ namespace zmq_dc {
             for (ii = 0; ii < mxDataBlock.dcuTotalModels; ii++) {
                 cycle = mxDataBlock.zmqheader[ii].cycle;
                 // Copy data to global buffer
-                char *localbuff = (char *) &_mxDataBlockG[mt][cycle];
+                char *localbuff = (char *) &(_mxDataBlockG[mt][cycle]);
                 memcpy(localbuff, daqbuffer, message.size());
             }
             // Always start on cycle 0 after told to start by main thread
             if (cycle == 0 && start_acquire()) {
                 if (acquire != 1) {
-                    std::cout << "starting to acquire\n";
+                    std::cout << "thread " << mt << " starting to acquire\n";
                 }
                 acquire = 1;
             }
@@ -75,22 +81,13 @@ namespace zmq_dc {
         _thread_info.reserve(sname.size());
         // Make 0MQ socket connection
         for(int ii=0;ii<sname.size();ii++) {
-            // Make 0MQ socket connection for rcvr threads
-            zmq::socket_t subscriber(_context, ZMQ_SUB);
-
-            // Subscribe to all data from the server
-            subscriber.setsockopt(ZMQ_SUBSCRIBE, "", 0);
-
             // connect to the publisher
-            {
-                std::ostringstream os;
-                os << "tcp://" << sname[ii] << ":" << DAQ_DATA_PORT;
-                std::string conn_str = os.str();
-                std::cout << "Sys connection " << ii << " = " << conn_str << "\n";
-                subscriber.connect(conn_str);
-            }
+            std::ostringstream os;
+            os << "tcp://" << sname[ii] << ":" << DAQ_DATA_PORT;
+            std::string conn_str = os.str();
+            std::cout << "Sys connection " << ii << " = " << conn_str << "\n";
 
-            _thread_info.emplace_back(receiver_thread_info(ii, std::move(subscriber), this));
+            _thread_info.emplace_back(receiver_thread_info(ii, conn_str, this));
         }
         _data_mask = 0;
         // we don't actually do anything with this.
@@ -200,9 +197,9 @@ namespace zmq_dc {
         std::vector<std::string> sname;
         const char *sysname = endpoints.c_str();
         char *save_ptr = nullptr;
-        sname.emplace_back(strtok_r(const_cast<char*>(sysname), " ", &save_ptr));
+        sname.emplace_back(strtok_r(const_cast<char*>(sysname), ",", &save_ptr));
         for(;;) {
-            char *s = strtok_r(nullptr, " ", &save_ptr);
+            char *s = strtok_r(nullptr, ",", &save_ptr);
             if (s == nullptr) break;
             sname.emplace_back(std::string(s));
         }

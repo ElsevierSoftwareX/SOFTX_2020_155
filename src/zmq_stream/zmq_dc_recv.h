@@ -4,8 +4,9 @@
 #include <sys/time.h>
 
 #include <algorithm>
-#include <vector>
+#include <atomic>
 #include <string>
+#include <vector>
 
 #include <zmq.hpp>
 
@@ -16,25 +17,27 @@ namespace zmq_dc {
 
     class receiver_thread_info {
     public:
-        receiver_thread_info(int index, zmq::socket_t &&socket, ZMQDCReceiver* dc_receiver) :
-                index_(index), socket_(std::move(socket)), _dc_receiver(dc_receiver) {}
+        receiver_thread_info(int index, const std::string& conn_str, ZMQDCReceiver* dc_receiver) :
+                index_(index), _conn_str(conn_str), _dc_receiver(dc_receiver) {}
 
         receiver_thread_info(receiver_thread_info &&other) : index_(other.index_),
-                                                             socket_(std::move(other.socket_)) {}
+                                                             _conn_str(other._conn_str),
+                                                             _dc_receiver(other._dc_receiver)
+                                                              {}
 
         receiver_thread_info &operator=(receiver_thread_info &&other) {
             index_ = other.index_;
-            socket_ = std::move(other.socket_);
+            _conn_str = std::move(other._conn_str);
+            _dc_receiver = other._dc_receiver;
         }
 
         int index() const { return index_; }
-
-        zmq::socket_t &socket() { return socket_; }
+        const std::string& conn_str() const { return _conn_str; }
 
         void run_thread();
     private:
         int index_;
-        zmq::socket_t socket_;
+        std::string _conn_str;
         ZMQDCReceiver* _dc_receiver;
 
         receiver_thread_info();
@@ -57,12 +60,12 @@ namespace zmq_dc {
 
         static const int header_size = DAQ_ZMQ_HEADER_SIZE;
 
-        zmq::context_t& _context;
-        std::array<volatile unsigned int, 16> _tstatus;
+        zmq::context_t _context;
+        std::array<std::atomic<unsigned int>, 16> _tstatus;
         std::vector<receiver_thread_info> _thread_info;
         int _data_mask;
-        volatile bool _run_threads;
-        volatile bool _start_acq;
+        std::atomic<bool> _run_threads;
+        std::atomic<bool> _start_acq;
         int _nsys;
 
         /* variables used for the receive data call */
@@ -73,8 +76,10 @@ namespace zmq_dc {
         bool _verbose;
 
         /* data tables */
-        daq_dc_data_t _mxDataBlockFull[16];
-        daq_multi_dcu_data_t _mxDataBlockG[32][16];
+        // Use vectors to make sure they are dynamically allocated
+        // if not we can easily blow a stack
+        std::vector<daq_dc_data_t> _mxDataBlockFull;
+        std::vector<std::vector<daq_multi_dcu_data_t>> _mxDataBlockG;
 
         void create_subscriber_threads(std::vector<std::string>& sname);
 
@@ -96,16 +101,20 @@ namespace zmq_dc {
             return (int64_t) (tv.tv_sec * 1000 + tv.tv_usec / 1000);
         }
     public:
-        ZMQDCReceiver(zmq::context_t& context, std::vector<std::string> sname):
-                _context(context), _tstatus(),
+        explicit ZMQDCReceiver(std::vector<std::string> sname):
+                _context(static_cast<int>(sname.size())), _tstatus(),
                 _run_threads(true), _start_acq(false), _data_mask(0),
-                _nsys(0),
+                _nsys(static_cast<int>(sname.size())),
                 _resync(true), _loop(0),_mylasttime(0),
-                _verbose(false)
+                _verbose(false),
+                _mxDataBlockFull(16),
+                _mxDataBlockG(32)
         {
+            for (auto it = _mxDataBlockG.begin(); it != _mxDataBlockG.end(); ++it) {
+                it->resize(16);
+            }
             clear_status();
             create_subscriber_threads(sname);
-            _nsys = static_cast<int>(sname.size());
         }
 
         void clear_status() {
