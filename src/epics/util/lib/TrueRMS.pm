@@ -76,8 +76,8 @@ sub frontEndCode {
 	my ($i) = @_;
 $here = <<END;
 // TrueRMS:  $::xpartName[$i]
-// Square the input value
-\L$::xpartName[$i]_sqrin = $::fromExp[0] * $::fromExp[0];
+// Square the input value 
+\L$::xpartName[$i]_sqrin \E= $::fromExp[0] * $::fromExp[0];
 if (\L$::xpartName[$i]_first_time_through) {
 	\L$::xpartName[$i]_first_time_through = 0;
 	\L$::xpartName[$i]_is_first_cycle = 1;
@@ -86,7 +86,7 @@ if (\L$::xpartName[$i]_first_time_through) {
 	\L$::xpartName[$i]_sqrsumrun = \L$::xpartName[$i]_sqrin;
 	\L$::xpartName[$i]_indatsqrd[0] = \L$::xpartName[$i]_sqrin;
 	\L$::xpartName[$i]_sqrval = 0.0;
-	\L$::xpartName[$i] = $::fromExp[0];
+	\L$::xpartName[$i] \E = $::fromExp[0];
 
 } else {
 	// update sums with new input value
