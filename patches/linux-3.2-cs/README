@@ -1,0 +1,16 @@
+These are the patches developed by Gerrit Kuehn, AEI to 
+create a stable 'cs' (CPU Shutdown) linux kernel 3.2 for 
+CDS real-time.  All patches are required.
+
+- Basic CDS patch - adds CPU Shutdown, printkl()
+kernel-3.2-cs.patch
+
+- Patches to revert kernel changes that caused lockup 
+when unloading real-time modules
+
+enlighten-3.0.79-revert.patch
+kmod-3.0.79-revert.patch       
+printk-3.0.66-revert.patch
+tick-sched-3.0.79-revert.patch
+timer-3.0.79-revert.patch
+
