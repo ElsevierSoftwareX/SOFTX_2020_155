@@ -13,3 +13,7 @@ B) Total patch
 
 -linux-3.2.88-rtcds.patch
 Used to create real-time kernel source from 3.2.88 source 
+
+C) Debian config
+-debian-linux-3.2.88-config
+Linux source .config file for building Debian kernel after patches
