@@ -36,7 +36,6 @@
 #include <utility>
 
 
-int do_verbose;
 unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
 
 
@@ -122,13 +121,14 @@ main(int argc, char **argv)
 
     // Declare 0MQ message pointers
     int rc;
+    bool do_verbose = false;
 
     while ((c = getopt(argc, argv, "hd:s:p:l:Vvw:x")) != EOF) switch(c) {
             case 's':
                 sysname = optarg;
                 break;
             case 'v':
-                do_verbose = 1;
+                do_verbose = true;
                 break;
             case 'w':
                 do_wait = atoi(optarg);
@@ -187,6 +187,7 @@ main(int argc, char **argv)
     }
 
     int loop = 0;
+    dc_receiver.verbose(do_verbose);
     dc_receiver.begin_acquiring();
 
     size_t msg_size = 0;

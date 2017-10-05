@@ -31,7 +31,7 @@ namespace zmq_dc {
         daq_multi_dcu_data_t mxDataBlock;
 
         zmq::socket_t socket(_context, ZMQ_SUB);
-        socket.setsockopt(ZMQ_SUBSCRIBE, nullptr, 0);
+        socket.setsockopt(ZMQ_SUBSCRIBE, "", 0);
         std::cout << "reader thread " << mt << " connecting to " << my_thread_info.conn_str() << std::endl;
         socket.connect(my_thread_info.conn_str());
 
@@ -66,6 +66,7 @@ namespace zmq_dc {
             // Set the cycle data ready bit
             if (acquire) {
                 _tstatus[cycle] |= (1 << mt);
+                // std::cout << "." << _tstatus[cycle] << std::endl;
             }
             // if (acquire && cycle == 0)
             //    std::cout << "thread " << mt << " received " << message.size() << " bytes" << std::endl;
@@ -110,12 +111,14 @@ namespace zmq_dc {
                 _loop = 0;
                 _resync = false;
                 clear_status();
+                timeout = 0;
             }
 
             do {
                 usleep(2000);
                 timeout += 1;
             } while (get_status(_loop) == 0 && timeout < 50);
+            // std::cout << get_status(_loop) << ":" << data_mask() << " (" << timeout << ")" << std::endl;
             // If timeout, not getting data from anyone.
             if (timeout >= 50) _resync = true;
         } while (_resync);
@@ -125,9 +128,14 @@ namespace zmq_dc {
         do {
             usleep(1000);
             timeout += 1;
-        } while (get_status(_loop) != data_mask() && timeout < 5);
+        } while (get_status(_loop) != _data_mask && timeout < 5);
         // If timeout, not getting data from everyone.
         // TODO: MARK MISSING FE DATA AS BAD
+
+        //if (timeout >= 5)
+        //    std::cout << "TTT" << std::endl;
+        //else
+        //    std::cout << "###" << std::endl;
 
         // Clear thread rdy for this cycle
         clear_status(_loop);
@@ -180,9 +188,9 @@ namespace zmq_dc {
         // printf("\tTotal DCU = %d\tSize = %d\n",mytotaldcu,dc_datablock_size);
         _mxDataBlockFull[_loop].dcuTotalModels = mytotaldcu;
 
-        if (_loop == 0 && _verbose) {
+        // if (_loop == 0 && _verbose) {
             printf("Recieved %d bytes from %d dcuids\n", dc_datablock_size, mytotaldcu);
-        }
+        //}
 
         results.send_length = header_size + dc_datablock_size;
         results.full_data_block = &_mxDataBlockFull[_loop];

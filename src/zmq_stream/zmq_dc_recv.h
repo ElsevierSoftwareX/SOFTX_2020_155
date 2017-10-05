@@ -62,6 +62,7 @@ namespace zmq_dc {
 
         zmq::context_t _context;
         std::array<std::atomic<unsigned int>, 16> _tstatus;
+        //std::atomic<unsigned int> _tstatus[16];
         std::vector<receiver_thread_info> _thread_info;
         int _data_mask;
         std::atomic<bool> _run_threads;
@@ -119,6 +120,8 @@ namespace zmq_dc {
 
         void clear_status() {
             std::fill(_tstatus.begin(), _tstatus.end(), 0);
+            //for (int i = 0; i < 16; ++i)
+            //    _tstatus[i] = 0;
         }
 
         void clear_status(int segment) {
@@ -126,7 +129,7 @@ namespace zmq_dc {
         }
 
         unsigned int get_status(int segment) {
-            return _tstatus[segment];
+            return _tstatus[segment].load();
         }
 
         int data_mask() const { return _data_mask; }
