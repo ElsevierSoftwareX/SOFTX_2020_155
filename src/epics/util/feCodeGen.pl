@@ -205,9 +205,14 @@ print "file out is $skeleton\n";
 $cFile = "../../fe/";
 $cFile .= $ARGV[1];
 $cFileDirectory = $cFile;
+$cFileDirectory2 = $cFileDirectory . "_usp";
 $cFile .= "/";
 $cFile .= $ARGV[1];
 $cFile .= ".c";
+$cFile2 = $cFileDirectory2;
+$cFile2 .= "/";
+$cFile2 .= $ARGV[1];
+$cFile2 .= ".c";
 $hFile = "../../include/";
 $hFile .= $ARGV[1];
 $hFile .= ".h";
@@ -215,6 +220,9 @@ $mFile = "../../fe/";
 $mFile .= $ARGV[1];
 $mFile .= "/";
 $mFile .= "Makefile";
+$mFile2 = $cFileDirectory2;
+$mFile2 .= "/";
+$mFile2 .= "Makefile";
 $meFile = "../../../config/";
 $meFile .= "Makefile\.";
 $meFile .= $ARGV[1];
@@ -236,7 +244,9 @@ open(DAQ,">../fmseq/".$ARGV[1]."_daq") || die "cannot open DAQ output file for w
 open(WARNINGS,">$warnMsgFile") || die "cannot open compile warnings output file for writing";
 open(CONN_ERRORS,">$connectErrFile") || die "cannot open compile warnings output file for writing";
 mkdir $cFileDirectory, 0755;
+mkdir $cFileDirectory2, 0755;
 open(OUT,">./".$cFile) || die "cannot open c file for writing $cFile";
+open(OUT2,">./".$cFile2) || die "cannot open c file for writing $cFile2";
 # Save existing front-end Makefile
 @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
   my ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
@@ -1529,6 +1539,8 @@ for($ii=0;$ii<$partCnt;$ii++)
 
 
 END
+
+
 ;
 	@adcCardNum;
 	@dacCardNum;
@@ -1794,8 +1806,27 @@ close OUT;
 close OUTD;
 close WARNINGS;
 
+#// Write the User Space Code Here
+open(OUT,"<./".$cFile) || die "cannot open c file for reading $cFile";
+open(OUT2,">./".$cFile2) || die "cannot open c file for writing $cFile2";
+while(my $line = <OUT>) {
+	if(index($line,"fe.h") != -1) {
+		print OUT2 "#include \"feuser.h\" \n";
+	} 
+	elsif(index($line,"controller") != -1) {
+		my @values = split('con',$line);
+		my $text = $values[0].'controllerUser.c"';
+		print OUT2 "$text";
+	} else {
+		print OUT2 "$line";
+	}
+}
+close OUT;
+close OUT2;
+
 #//	- Write C code MAKEFILE
 createCmakefile();
+createUsermakefile();
 
 #//	- Write EPICS code MAKEFILE
 createEpicsMakefile();
@@ -2628,6 +2659,223 @@ print OUTM "\n";
 close OUTM;
 }
 
+#// \b sub \b createUsermakefile \n
+#// Generate the user C code Makefile  \n\n
+sub createUsermakefile{
+
+open(OUTM,">./".$mFile2) || die "cannot open Makefile file for writing";
+
+print OUTM "# User Space Linux\n";
+print OUTM "CFLAGS += -O -w -I../../include\n";
+print OUTM "CFLAGS += -I/opt/mx/include\n";
+
+if($rate == 480) { print OUTM "CFLAGS += -DSERVO2K\n"; }
+elsif($rate == 240) { print OUTM "CFLAGS += -DSERVO4K\n"; }
+elsif($rate == 60) { print OUTM "CFLAGS += -DSERVO16K\n"; }
+elsif($rate == 30) { print OUTM "CFLAGS += -DSERVO32K\n"; }
+elsif($rate == 15) { print OUTM "CFLAGS += -DSERVO64K\n"; }
+elsif($rate == 7) { print OUTM "CFLAGS += -DSERVO128K\n"; }
+elsif($rate == 4) { print OUTM "CFLAGS += -DSERVO256K\n"; }
+
+print OUTM "CFLAGS += -D";
+print OUTM "\U$skeleton";
+print OUTM "_CODE\n";
+print OUTM "CFLAGS += -DFE_SRC=\\\"\L$skeleton/\L$skeleton.c\\\"\n";
+print OUTM "CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
+print OUTM "CFLAGS += -DFE_PROC_FILE=\\\"\L${skeleton}_proc.h\\\"\n";
+
+print OUTM "EXTRA_CFLAGS += -g\n";
+
+if ($daq2dc) {
+  print OUTM "CFLAGS += -DDUAL_DAQ_DC\n";
+}
+if ($remoteGPS) {
+  print OUTM "CFLAGS += -DREMOTE_GPS\n";
+}
+if ($no_sync) {
+  print OUTM "#Comment out to enable 1PPS synchronization\n";
+  print OUTM "CFLAGS += -DNO_SYNC\n";
+} else {
+  print OUTM "#Uncomment to disable 1PPS signal sinchronization (channel 31 (last), ADC 0)\n";
+  print OUTM "#CFLAGS += -DNO_SYNC\n";
+}
+if (0 == $dac_testpoint_names && 0 == $::extraTestPoints && 0 == $filtCnt) {
+	print "Not compiling DAQ into the front-end\n";
+	$no_daq = 1;
+}
+if ($no_daq) {
+  print OUTM "#Comment out to enable DAQ\n";
+  print OUTM "CFLAGS += -DNO_DAQ\n";
+} else {
+  print OUTM "#Uncomment to disable DAQ and testpoints\n";
+  print OUTM "#CFLAGS += -DNO_DAQ\n";
+}
+
+# SHMEM_DAQ set as the default for RCG V2.8 - No longer support GM
+  print OUTM "#Comment out to disable local frame builder connection\n";
+  print OUTM "CFLAGS += -DSHMEM_DAQ\n";
+
+# Use oversampling code if not 64K system
+if($rate > 15) {
+  if ($no_oversampling) {
+    print OUTM "#Uncomment to oversample A/D inputs\n";
+    print OUTM "#CFLAGS += -DOVERSAMPLE\n";
+    print OUTM "#Uncomment to interpolate D/A outputs\n";
+    print OUTM "#CFLAGS += -DOVERSAMPLE_DAC\n";
+  } else {
+    print OUTM "#Comment out to stop A/D oversampling\n";
+    print OUTM "CFLAGS += -DOVERSAMPLE\n";
+    if ($no_dac_interpolation) {
+    } else {
+      print OUTM "#Comment out to stop interpolating D/A outputs\n";
+      print OUTM "CFLAGS += -DOVERSAMPLE_DAC\n";
+    }
+  }
+}
+if ($dac_internal_clocking) {
+  print OUTM "#Comment out to enable external D/A converter clocking\n";
+  print OUTM "CFLAGS += -DDAC_INTERNAL_CLOCKING\n";
+}
+if ($adcMaster > -1) {
+  print OUTM "CFLAGS += -DADC_MASTER\n";
+  $modelType = "MASTER";
+  if($diagTest > -1) {
+  print OUTM "CFLAGS += -DDIAG_TEST\n";
+  }
+  if($dacWdOverride > -1) {
+  print OUTM "CFLAGS += -DDAC_WD_OVERRIDE\n";
+  }
+  # ADD DAC_AUTOCAL to IOPs
+  print OUTM "CFLAGS += -DDAC_AUTOCAL\n";
+} else {
+  print OUTM "#Uncomment to run on an I/O Master \n";
+  print OUTM "#CFLAGS += -DADC_MASTER\n";
+}
+if ($adcSlave > -1) {
+  print OUTM "CFLAGS += -DADC_SLAVE\n";
+  $modelType = "SLAVE";
+} else {
+  print OUTM "#Uncomment to run on an I/O slave process\n";
+  print OUTM "#CFLAGS += -DADC_SLAVE\n";
+}
+if ($timeMaster > -1) {
+  print OUTM "CFLAGS += -DTIME_MASTER=1\n";
+} else {
+  print OUTM "#Uncomment to build a time master\n";
+  print OUTM "#CFLAGS += -DTIME_MASTER=1\n";
+}
+if ($timeSlave > -1) {
+  print OUTM "CFLAGS += -DTIME_SLAVE=1\n";
+} else {
+  print OUTM "#Uncomment to build a time slave\n";
+  print OUTM "#CFLAGS += -DTIME_SLAVE=1\n";
+}
+if ($iopTimeSlave > -1) {
+  print OUTM "CFLAGS += -DIOP_TIME_SLAVE=1\n";
+} else {
+  print OUTM "#Uncomment to build an IOP time slave\n";
+  print OUTM "#CFLAGS += -DIOP_TIME_SLAVE=1\n";
+}
+if($rfm_via_pcie == 1) {
+  print OUTM "CFLAGS += -DRFM_VIA_PCIE=1\n";
+}
+if ($rfmTimeSlave > -1) {
+  print OUTM "CFLAGS += -DRFM_TIME_SLAVE=1\n";
+} else {
+  print OUTM "#Uncomment to build an RFM time slave\n";
+  print OUTM "#CFLAGS += -DRFM_TIME_SLAVE=1\n";
+}
+if ($flipSignals) {
+  print OUTM "CFLAGS += -DFLIP_SIGNALS=1\n";
+}
+if ($pciNet == 1) {
+  print OUTM "#Enable use of PCIe RFM Network Gen 1\n";
+  print OUTM "DISDIR = /opt/srcdis\n";
+  print OUTM "CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
+} elsif($pciNet == 2) {
+  print OUTM "#Enable use of PCIe RFM Network Gen 2\n";
+  print OUTM "DISDIR = /opt/srcdis\n";
+  print OUTM "CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM_GX/drv/src -I\$(DISDIR)/src/IRM_GX/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -I\$(DISDIR)/src/COMMON/osif/kernel/include -I\$(DISDIR)/src/COMMON/osif/kernel/include/LINUX -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
+} else {
+  print OUTM "#Uncomment to use PCIe RFM Network\n";
+  print OUTM "#DISDIR = /home/controls/DIS\n";
+  print OUTM "#CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
+}
+if($virtualiop > 1) {
+  print OUTM "CFLAGS += -DDOLPHIN_SWITCH=1\n";
+}
+if ($specificCpu > -1) {
+  print OUTM "#Comment out to run on first available CPU\n";
+  print OUTM "CFLAGS += -DSPECIFIC_CPU=$specificCpu\n";
+} else {
+  print OUTM "#Uncomment to run on a specific CPU\n";
+  print OUTM "#CFLAGS += -DSPECIFIC_CPU=2\n";
+}
+
+# Set BIQUAD as default starting RCG V2.8
+  print OUTM "#Comment out to go back to old iir_filter calculation form\n";
+  print OUTM "CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
+
+if ($::directDacWrite) {
+  print OUTM "CFLAGS += -DDIRECT_DAC_WRITE=1\n";
+} else {
+  print OUTM "#CFLAGS += -DDIRECT_DAC_WRITE=1\n";
+}
+
+if ($::noZeroPad) {
+  print OUTM "CFLAGS += -DNO_ZERO_PAD=1\n";
+} else {
+  print OUTM "#CFLAGS += -DNO_ZERO_PAD=1\n";
+}
+
+if ($::optimizeIO) {
+  print OUTM "CFLAGS += -DNO_DAC_PRELOAD=1\n";
+} else {
+  print OUTM "#CFLAGS += -DNO_DAC_PRELOAD=1\n";
+}
+  
+
+if ($::rfmDma) {
+  print OUTM "#Comment out to run with RFM DMA\n";
+  print OUTM "#CFLAGS += -DRFM_DIRECT_READ=1\n";
+} else {
+  print OUTM "#Comment out to run with RFM DMA\n";
+  print OUTM "CFLAGS += -DRFM_DIRECT_READ=1\n";
+}
+
+if ($::rfmDelay) {
+  print OUTM "#Comment out to run without RFM Delayed by 1 cycle\n";
+  print OUTM "CFLAGS += -DRFM_DELAY=1\n";
+} else {
+  print OUTM "#Clear comment to run with RFM Delayed by 1 cycle\n";
+  print OUTM "#CFLAGS += -DRFM_DELAY=1\n";
+}
+  print OUTM "CFLAGS += -DUSER_SPACE=1\n";
+
+
+print OUTM "\n";
+
+print OUTM "\n";
+#print OUTM "all: \$(ALL)\n";
+print OUTM "\n";
+#print OUTM "clean:\n";
+#print OUTM "\trm -f \$(ALL) *.o\n";
+print OUTM "\n";
+
+print OUTM "CFLAGS += -I\$(SUBDIRS)/../../include -I$rcg_src_dir\/src/drv -I$rcg_src_dir\/src/include \n";
+print OUTM "LDFLAGS = -lrt \n";
+
+print OUTM "TARGET=$skeleton\n\n\n";
+print OUTM "$skeleton: $skeleton.o rfm.o \n\n";
+print OUTM "rfm.o: $rcg_src_dir\/src/drv/rfm.c \n";
+my $ccf = "\$\(CC\) \$\(CFLAGS\) \$\(CPPFLAGS\) \-c \$\< \-o \$\@";
+print OUTM "\t$ccf \n";
+print OUTM ".c.o: \n";
+print OUTM "\t$ccf \n";
+
+print OUTM "\n";
+close OUTM;
+}
 #// \b sub \b printVariables \n
 #// Add top level variable declarations to generated C Code for selected CDS parts. \n\n
 sub printVariables {
