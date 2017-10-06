@@ -24,6 +24,9 @@
 #include "zmq_daq.h"
 #include "../include/daqmap.h"
 
+#include <sys/ioctl.h>
+#include "../drv/symmetricom/symmetricom.h"
+
 #include <zmq.hpp>
 
 #include "zmq_dc_recv.h"
@@ -44,11 +47,73 @@ unsigned int do_wait = 0; // Wait for this number of milliseconds before startin
 
 static volatile bool keep_running = true;
 
+struct gps_time {
+    long sec;
+    long nanosec;
+
+    gps_time(): sec(0), nanosec(0) {}
+    explicit gps_time(long s): sec(s), nanosec(0) {}
+    gps_time(long s, long ns): sec(s), nanosec(ns) {}
+    gps_time(const gps_time& other): sec(other.sec), nanosec(other.nanosec) {}
+
+    gps_time operator-(const gps_time& other)
+    {
+
+        gps_time result(sec - other.sec, nanosec - other.nanosec);
+        while (result.nanosec < 0) {
+            result.nanosec += 1000000000;
+            --result.sec;
+        }
+        return result;
+    }
+};
+
+std::ostream& operator<<(std::ostream& os, const gps_time& gps)
+{
+    os << gps.sec << ":" << gps.nanosec;
+    return os;
+}
+
+
+class gps_clock {
+    int _offset;
+    int _fd;
+    bool _ok;
+
+    static bool symm_ok(int fd) {
+        if (fd < 0)
+            return false;
+        unsigned long req = 0;
+        ioctl(fd, IOCTL_SYMMETRICOM_STATUS, &req);
+        return req != 0;
+    }
+public:
+    explicit gps_clock(int offset): _offset(offset), _fd(open("/dev/symmetricom",O_RDWR | O_SYNC)), _ok(gps_clock::symm_ok(_fd)) {}
+    ~gps_clock() {
+        if (_fd >= 0) close(_fd);
+    }
+
+    gps_time now() const
+    {
+        gps_time result;
+
+        if (!_ok)
+            return result;
+        unsigned long t[3];
+        ioctl(_fd, IOCTL_SYMMETRICOM_TIME, &t);
+        result.sec = t[0] + _offset;
+        result.nanosec = t[1]*1000 + t[2];
+        return result;
+    }
+};
+
 
 void
 usage()
 {
     std::cerr << "Usage: zmq_multi_rcvr [args] -s server name" << std::endl;
+    std::cerr << "-t - use the LIGO timing drivers to check time on each received block of data" << std::endl;
+    std::cerr << "-g offset - offset to add to the gps, defaults to 0" << std::endl;
     std::cerr << "-l filename - log file name" << std::endl;
     std::cerr << "-s - server name eg x1lsc0, x1susex, etc." << std::endl;
     std::cerr << "-v - verbose prints cpu_meter test data" << std::endl;
@@ -107,6 +172,8 @@ main(int argc, char **argv)
     unsigned int nsys = 1; // The number of mapped shared memories (number of data sources)
     char *sysname = nullptr;
     int c;
+    bool timing_check = false;
+    int timing_offset = 0;
     std::string pub_iface = "eth2";
 
     // Create DAQ message area in local memory
@@ -123,7 +190,16 @@ main(int argc, char **argv)
     int rc;
     bool do_verbose = false;
 
-    while ((c = getopt(argc, argv, "hd:s:p:l:Vvw:x")) != EOF) switch(c) {
+    while ((c = getopt(argc, argv, "tg:hd:s:p:l:Vvw:x")) != EOF) switch(c) {
+            case 't':
+                timing_check = true;
+                break;
+            case 'g':
+                {
+                    std::istringstream os(optarg);
+                    os >> timing_offset;
+                }
+                break;
             case 's':
                 sysname = optarg;
                 break;
@@ -145,6 +221,8 @@ main(int argc, char **argv)
     if (sysname == nullptr) { usage(); exit(1); }
 
     signal(SIGINT,intHandler);
+
+    gps_clock clock(timing_offset);
 
     std::cout << "Server name: " << sysname << std::endl;
 
@@ -195,6 +273,16 @@ main(int argc, char **argv)
     char dcs[12*4];
     do {
         zmq_dc::data_block results = dc_receiver.receive_data();
+        if (timing_check) {
+            gps_time now = clock.now();
+            unsigned long nsec = results.full_data_block->zmqheader[0].timeNSec;
+            nsec *= (1000000000/16);
+            gps_time msg_time(
+                results.full_data_block->zmqheader[0].timeSec,
+                nsec);
+            gps_time delta = now - msg_time;
+            std::cout << "Now: " << now << " block: " << msg_time << " delta: " << delta << std::endl;
+        }
 
         std::string debug_message = create_debug_message(results);
 
