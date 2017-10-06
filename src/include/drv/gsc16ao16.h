@@ -34,8 +34,10 @@ typedef struct GSC_DAC_REG{
 #define GSAO_16BIT_MASK         0xffff
 #define GSAO_16BIT_CHAN_COUNT   16
 
+#ifndef USER_SPACE
 volatile PLX_9056_DMA *dacDma[MAX_DAC_MODULES]; /* DMA struct for GSA DAC */
 volatile GSC_DAC_REG *dacPtr[MAX_DAC_MODULES];  /* Ptr to DAC registers */
 dma_addr_t dac_dma_handle[MAX_DAC_MODULES];     /* PCI add of DAC DMA memory */
+#endif
 
 
