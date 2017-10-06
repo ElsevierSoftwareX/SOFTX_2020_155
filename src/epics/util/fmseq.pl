@@ -582,38 +582,51 @@ while (<IN>) {
 	}
 	$vardb .= "{\n";
 	$vardb .= "}\n";
-    } elsif (substr($_,0,11) eq "EZ_CA_WRITE") {
-	($junk, $v_name, $var_name, $v_var) = split(/\s+/, $_);
-	#$vupdate .= "%% ezcaPut(\"$v_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
+     } elsif (substr($_,0,11) eq "EZ_CA_WRITE") {
+        ($junk, $v_name, $var_name, $v_var) = split(/\s+/, $_);
+        #$vupdate .= "%% ezcaPut(\"$v_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
         $v_name =~ tr/:-/__/;
-        $vdecl .= "double evar_$v_name;\n";
-        $vdecl .= "assign evar_$v_name to \"${var_name}\";\n";
-
-        $vinit .= "%% evar_$v_name  = 0.0;\n";
-        $vinit .= "pvPut(evar_$v_name);\n";
-        $vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
-							       
-        $vupdate .= "evar_$v_name = fpvalidate(pEpics->${v_var});\n";
-        $vupdate .= "pvPut(evar_$v_name);\n";
-    } elsif (substr($_,0,10) eq "EZ_CA_READ") {
-	($junk, $v_name, $var_name, $v_var) = split(/\s+/, $_);
-	#$vupdate .= "%%ezcaGet(\"$var_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
-        $v_name =~ tr/:-/__/;
-	$v_name_err = $v_name . "_ERR";
+        $v_name_err = $v_name . "_ERR";
+#        $v_var_err = $v_var . "_ERR";
         $vdecl .= "double evar_$v_name;\n";
         $vdecl .= "assign evar_$v_name to \"${var_name}\";\n";
         $vdecl .= "double evar_$v_name_err;\n";
 
-        $vinit .= "%% evar_$v_name  = 0.0;\n";
-        $vinit .= "pvGet(evar_$v_name);\n";
+        $vinit .= "evar_$v_name  = 0.0;\n";
         $vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
-							       
-	$vupdate .= "pvGet(evar_$v_name);\n";
-	$vupdate .= "%%       pEpics->${v_var} = evar_$v_name;\n";
-	$vupdate .= "evar_$v_name_err = pvConnected(evar_$v_name);\n";
-	$v_var .= "_ERR";
-        $vupdate .= "%%       pEpics->${v_var} = evar_$v_name_err;\n";
-	print "FOUND EZCA\n";
+                                                               
+        $vupdate .= "evar_$v_name_err = pvConnected(evar_$v_name);\n";
+#        $vupdate .= "%%       pEpics->${v_var_err} = evar_$v_name_err;\n";
+        $vupdate .= "if (evar_$v_name_err) {;\n";
+        $vupdate .= "  if (pvPutComplete(evar_$v_name)) {;\n";
+        $vupdate .= "    evar_$v_name = fpvalidate(pEpics->${v_var});\n";
+        $vupdate .= "    pvPut(evar_$v_name);\n";
+        $vupdate .= "  };\n";
+        $vupdate .= "};\n";
+        print "FOUND EZCAWRITE\n";
+    } elsif (substr($_,0,10) eq "EZ_CA_READ") {
+        ($junk, $v_name, $var_name, $v_var) = split(/\s+/, $_);
+        #$vupdate .= "%%ezcaGet(\"$var_name\", ezcaDouble, 1, &pEpics->${v_var});\n";
+        $v_name =~ tr/:-/__/;
+        $v_name_err = $v_name . "_ERR";
+        $v_var_err = $v_var . "_ERR";
+        $vdecl .= "double evar_$v_name;\n";
+        $vdecl .= "assign evar_$v_name to \"${var_name}\";\n";
+        $vdecl .= "double evar_$v_name_err;\n";
+
+        $vinit .= "evar_$v_name  = 0.0;\n";
+        $vinit .= "%%       pEpics->${v_var} = evar_$v_name;\n";
+        $vinit .= "pvGet(evar_$v_name);\n";                                                               
+ 
+        $vupdate .= "evar_$v_name_err = pvConnected(evar_$v_name);\n";
+        $vupdate .= "%%       pEpics->${v_var_err} = evar_$v_name_err;\n";
+        $vupdate .= "if (evar_$v_name_err) {;\n";
+        $vupdate .= "  if (pvGetComplete(evar_$v_name)) {;\n";
+        $vupdate .= "%%       pEpics->${v_var} = evar_$v_name;\n";
+        $vupdate .= "    pvGet(evar_$v_name);\n";
+        $vupdate .= "  };\n";
+        $vupdate .= "};\n";
+        print "FOUND EZCAREAD\n";
     } elsif (substr($_,0,6) eq "DAQVAR") {
 	die "Unspecified EPICS parameters" unless $epics_specified;
 	($junk, $v_name, $v_type, $ve_type, $v_init, $v_efield1, $v_efield2, $v_efield3, $v_efield4 ) = split(/\s+/, $_);
