@@ -1,6 +1,7 @@
 ==================================================================================================
 Changes for 3.3  (NOT YET RELEASED)
 ==================================================================================================
+- Bug Fix (1098): Fix EZ_CA_READ/WRITE calls to work with EPICS Sequencer 2.2
 - Added ability to run DAC modules without a preload of the FIFO for lower latency.  This done
   specifically for MIT in RCG V2.8.8, but had not been carried over into RCG V3.x.
 - Added support for General Standards 20AO8 DAC module, as was done for branch-3.3 as a test.
