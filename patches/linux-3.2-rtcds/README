@@ -1,0 +1,19 @@
+These patches create a real-time linux kernel with improved stability
+
+A) Sub-patches
+
+-linux-3.2-csp2.patch
+Updated cs patch that has a new printkl() that is derived from 
+printk() in kernel 3.2, not a holdover from 2.6
+
+-tick-sched-3.0.79-revert.patch
+Last remaining kernel patch to still be reverted
+
+B) Total patch
+
+-linux-3.2.88-rtcds.patch
+Used to create real-time kernel source from 3.2.88 source 
+
+C) Debian config
+-debian-linux-3.2.88-config
+Linux source .config file for building Debian kernel after patches
