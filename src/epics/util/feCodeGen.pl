@@ -1443,6 +1443,11 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUTH "\#define TARGET_DAC20_COUNT 0\n";
 	}
 	print OUTH "\#define TARGET_DAQ_FLAG $no_daq\n";
+	if ($specificCpu > -1) {
+  		print OUTH "\#define TARGET_CPU $specificCpu\n";
+	} else {
+  		print OUTH "\#define TARGET_CPU 1\n";
+	}
 	print OUTH "\#endif\n";
 
 	#//	- Write EPICS database info file for later use by fmseq.pl in generating EPICS code/database.

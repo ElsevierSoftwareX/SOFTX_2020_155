@@ -17,6 +17,7 @@ daccount16=`grep TARGET_DAC16_COUNT src/include/${system}.h | head -1 | awk '{pr
 daccount18=`grep TARGET_DAC18_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
 daccount20=`grep TARGET_DAC20_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
 nodaq=`grep TARGET_DAQ_FLAG src/include/${system}.h | head -1 | awk '{print $3}'`
+targetcpu=`grep TARGET_CPU src/include/${system}.h | head -1 | awk '{print $3}'`
 site=`grep site= target/${system}epics/${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`
 if test ${site}no = no; then echo Please make $system first; exit 1; fi
 upper_site=`echo $site | tr a-z A-Z`
@@ -76,12 +77,19 @@ fi
 if test -e src/fe/${system}/${system}.ko; then
 	/bin/cp -fp src/fe/${system}/${system}.ko /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/
 fi
+if test -e src/fe/${system}_usp/${system}; then
+	/bin/cp -fp src/fe/${system}_usp/${system} /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/
+fi
 if test -e src/fe/${system}/${system}.rtl; then
 	/bin/cp -fp src/fe/${system}/${system}.rtl /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/
 fi
 if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko; then
 	echo 'sudo /sbin/insmod' /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko ' >  '/opt/rtcds/$site/${lower_ifo}/target/${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
 	/bin/chmod +x /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
+fi
+if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}; then
+	echo  'taskset -c '$targetcpu /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system} '-m ' ${system} ' >  '/opt/rtcds/$site/${lower_ifo}/target/${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}usp
+	/bin/chmod +x /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}usp
 fi
 if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.rtl; then
 	echo sudo /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.rtl ' >  '/opt/rtcds/$site/${lower_ifo}/target/${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
@@ -104,6 +112,7 @@ if [ "x\`ps h -C ${system}epics\`" != x ]; then
 	sleep 1
 fi
 
+sudo killall ${system}
 sudo killall ${system}epics
 sudo /sbin/rmmod ${system} 2&>/dev/null
 
@@ -196,6 +205,38 @@ touch /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
 chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
 
 EOF
+
+echo /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp
+/bin/touch /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp
+/bin/chmod +x /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp
+
+cat > /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp << EOF
+#!/bin/bash
+#
+
+if [ \`hostname\` != '${hostname}' ]; then
+	echo Cannot run \`basename \$0\` on \`hostname\` computer
+	exit 1
+fi
+
+/opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
+sleep 5
+
+(cd /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics && ./startup${ifo})
+sleep 5
+/opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}usp
+sleep 10
+if [ -e /var/run/init.d/awgtpman_${system} ]; then
+	sudo /var/run/init.d/awgtpman_${system} start
+else
+	(cd /opt/rtcds/$site/${lower_ifo}/target/gds && ./awgtpman_startup/awgtpman_${system}.cmd)
+fi
+
+touch /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
+chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
+
+EOF
+
 
 /bin/sed 's/caltech/'$site'/' $srcdir/src/epics/util/daqconfig.tcl > build/${system}epics/config/daqconfig
 /bin/sed -i 's/ifolower/'${lower_ifo}'/' build/${system}epics/config/daqconfig

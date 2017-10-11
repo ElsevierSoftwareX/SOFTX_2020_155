@@ -50,6 +50,10 @@ DEVFLAGS=@DEVFLAGS@
 	@make -C src/fe/$@ >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@$(srcdir)/src/epics/util/checkUndefined.pl $@_error.log >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@echo Done
+	@echo Building front-end user space object $@...
+	@/bin/rm -rf src/fe/$@_usp/*.o ;
+	@make -C src/fe/$@_usp >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
+	@echo Done
 	@/bin/mkdir -p target/$@epics/src
 	@echo $(srcdir) > target/$@epics/src/rcg_location.txt
 	@echo Build date `date` > target/$@epics/src/build.txt
