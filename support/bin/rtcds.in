@@ -11,6 +11,9 @@ source "$ENV"
 
 OPTRTCDS=${OPTRTCDS:-/opt/rtcds/${site}/${ifo}}
 
+export RCG_LIB_PATH=${RCG_LIB_PATH}:${SRC}/src/epics/simLink:${SRC}/src/epics/simLink/lib
+export MATLABPATH=$RCG_LIB_PATH
+
 ##################################################
 
 log() {
@@ -18,7 +21,7 @@ log() {
 }
 
 check_env() {
-    vars=(SITE site IFO ifo OPTRTCDS RTS_USER BUILDD RCG_LIB_PATH)
+    vars=(SITE site IFO ifo OPTRTCDS RTS_USER BUILDD RCG_LIB_PATH MATLABPATH)
     for var in ${vars[*]} ; do
 	if [ $var ] ; then
 	    log "$var=${!var}"
