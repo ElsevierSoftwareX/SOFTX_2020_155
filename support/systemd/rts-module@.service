@@ -4,5 +4,7 @@ After=rts-epics@%i.service
 PartOf=rts@%i.target
 
 [Service]
+Type=oneshot
+RemainAfterExit=yes
 ExecStart=/usr/bin/rts_module_ctrl start %i
 ExecStop=/usr/bin/rts_module_ctrl stop %i
