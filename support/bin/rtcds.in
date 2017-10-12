@@ -1,15 +1,30 @@
 #!/bin/bash -e
 
-VERSION=${RTS_VERSION:-__VERSION__}
-ENV=${RTS_ENV:-/etc/advligorts/env}
-SYSTAB=/etc/rtsystab
-SRC=${RTS_SRC:-/usr/share/advligorts/src}
-BUILDD=${RTS_BUILDD:-/var/cache/advligorts/rcg-$VERSION}
+RTS_VERSION=${RTS_VERSION:-__VERSION__}
+if [[ $RTS_VERSION == __VERSION__ ]] ; then
+    echo "RTS_VERSION not set." >&2
+    exit 1
+fi
+ENV_FILE=${RTS_ENV:-/etc/advligorts/env}
+RCG_SRC=${RCG_SRC:-/usr/share/advligorts/src}
+RCG_BUILDD=${RCG_BUILDD:-/var/cache/advligorts/rcg-$RTS_VERSION}
 RTS_USER=${RTS_USER:-controls}
+RTSYSTAB=/etc/rtsystab
 
-source "$ENV"
+source "$ENV_FILE" 2>/dev/null || true
 
-OPTRTCDS=${OPTRTCDS:-/opt/rtcds/${site}/${ifo}}
+SITE=${SITE^^*}
+site=${SITE,,*}
+IFO=${IFO^^*}
+ifo=${ifo,,*}
+
+# search paths for C source code
+CDS_SRC=${CDS_SRC:-$RCG_LIB_PATH}
+CDS_IFO_SRC=${CDS_IFO_SRC:-$CDS_SRC}
+
+USER_VARS=(SITE IFO OPTRTCDS RCG_LIB_PATH)
+LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RTS_USER RTSYSTAB)
+EXPORT_VARS=(${USER_VARS[@]} CDS_SRC CDS_IFO_SRC)
 
 ##################################################
 
@@ -18,15 +33,21 @@ log() {
 }
 
 check_env() {
-    vars=(SITE site IFO ifo OPTRTCDS RTS_USER BUILDD RCG_LIB_PATH)
-    for var in ${vars[*]} ; do
-	if [ $var ] ; then
-	    log "$var=${!var}"
-	    export $var
-	else
-	    log "variable $var not set"
+    for var in ${USER_VARS[*]} ; do
+	if [ ! "${!var}" ] ; then
+	    log "ERROR: variable '$var' not set."
+	    log "The following environment variables must be set (in e.g. $ENV_FILE):"
+	    for vv in ${USER_VARS[*]} ; do
+		log "   $vv"
+	    done
 	    exit 1
 	fi
+    done
+    for var in ${LIST_VARS[*]} ; do
+	log "$var=${!var}"
+    done
+    for var in ${EXPORT_VARS[*]} ; do
+	export $var
     done
 }
 
@@ -36,21 +57,21 @@ prep_target(){
 }
 
 prep_buildd() {
-    sudo mkdir -p "$BUILDD"
-    sudo chown "$RTS_USER" "$BUILDD"
-    if [ -e "$BUILDD"/Makefile ] ; then
+    sudo mkdir -p "$RCG_BUILDD"
+    sudo chown "$RTS_USER" "$RCG_BUILDD"
+    if [ -e "$RCG_BUILDD"/Makefile ] ; then
 	return
     fi
-    log "configuring BUILDD..."
-    cd "$BUILDD"
-    "$SRC"/configure
+    log "configuring RCG_BUILDD..."
+    cd "$RCG_BUILDD"
+    "$RCG_SRC"/configure
 }
 
 ########
 
 list_host_sys() {
     local host=$(hostname -s)
-    local systems=($(grep "^${host}" $SYSTAB | sed s/$host//))
+    local systems=($(grep -s "^${host}" $RTSYSTAB | sed s/$host//))
     echo ${systems[@]}
 }
 
@@ -64,8 +85,7 @@ tname() {
 
 check_host_fe() {
     if [ -z "$(list_host_sys)" ] ; then
-	log "This is not a front-end machine.
-Plese log on to an appropriate front-end machine and try again."
+	log "No $RTSYSTAB defined for this system."
 	exit 3
     fi
 }
@@ -75,7 +95,7 @@ check_host_sys() {
 	for hsys in $(list_host_sys) ; do
 	    [[ "$hsys" == "$sys" ]] && return 0
 	done
-	log "Cannot start/stop model '$sys' on host $(hostname -s)."
+	log "Cannot start/stop system '$sys' on host $(hostname -s)."
 	exit 4
     done
 }
@@ -83,7 +103,7 @@ check_host_sys() {
 ########
 
 build_sys() {
-    cd $BUILDD
+    cd $RCG_BUILDD
     for sys ; do
 	sys=$(tname "$sys")
 	log "### building $sys..."
@@ -92,7 +112,7 @@ build_sys() {
 }
 
 install_sys() {
-    cd $BUILDD
+    cd $RCG_BUILDD
     for sys ; do
 	sys=$(tname "$sys")
 	log "### installing $sys..."
@@ -117,41 +137,56 @@ stop_sys() {
     done
 }
 
+enable_sys() {
+    for sys ; do
+	sys=$(tname "$sys")
+	log "### enabling $sys..."
+	sudo systemctl enable rts@${sys}.target
+    done
+}
+
+disable_sys() {
+    for sys ; do
+	sys=$(tname "$sys")
+	log "### disabling $sys..."
+	sudo systemctl disable rts@${sys}.target
+    done
+}
+
 _lsmod() {
-    local models=($(list_host_sys))
+    local systems=($(list_host_sys))
     local rts=(mbuf symmetricom)
     local omx=(open_mx)
     local dis=(dis_kosif dis_dx dis_irm)
 
+    # FIXME: how to test for needed modules?
     modules=(${rts[*]} ${omx[*]} ${dis[*]})
     
-    local allloaded=0
+    local allloaded=
     for m in ${modules[*]}; do
 	md=$(lsmod | grep "^${m}") || true
 	if [ -z "$md" ] ; then
-	    printf "%-18s ****MISSING****\n" "$m" 
+	    printf "%-18s ***NOT LOADED***\n" "$m"
 	    allloaded=1
 	else
 	    echo "$md"
 	fi
     done
-    echo
-    for m in ${models[*]}; do
-	md=$(lsmod | grep "^${m}") || true
-	if [ -z "$md" ] ; then
-	    printf "%-18s ****MISSING****\n" "$m" 
-	    allloaded=1
-	else
-	    echo "$md"
-	fi
-    done
-    return $allloaded
-    # # echo ${models[*]} ${rts[*]} ${dis[*]} | sed -e 's/ / -e /g'
-    # g=$(printf ' -e %s' ${rts[*]} ${dis[*]} ${omx[*]})
-    # lsmod | grep $g
-    # echo
-    # g=$(printf ' -e %s' ${models[*]})
-    # lsmod | grep $g
+    if [ "$systems" ] ; then
+	echo
+	for m in ${systems[*]}; do
+	    md=$(lsmod | grep "^${m}") || true
+	    if [ -z "$md" ] ; then
+		printf "%-18s ***NOT LOADED***\n" "$m"
+		allloaded=1
+	    else
+		echo "$md"
+	    fi
+	done
+    fi
+    if [ "$allloaded" ] ; then
+	return 4
+    fi
 }
 
 ############################################################
@@ -159,22 +194,26 @@ _lsmod() {
 usage() {
     echo "Usage: $(basename $0) <command> [args]
 
+Advanced LIGO Real Time System control interface.
+
 Available commands:
 
-  build|make <model>       build model
-  install <model>          install model
+  build|make <sys>           build system
+  install <sys>              install system
 
-  start <model>|--all      start model
-  restart <model>|--all    restart running model
-  stop|kill <model>|--all  stop running model
+  start <sys>...|--all       start systems
+  restart <sys>...|--all     restart running systems
+  stop|kill <sys>...|--all   stop running systems
+  enable <sys>...|--all      enable system start at boot
+  disable <sys>...|--all     disable system start at boot
 
-  log <model>              show last compile log for model
-    -i                       show log info
-  list|ls                  list all models for current host
-  lsmod                    list loaded RTS kernel modules
-  dtail|dmesg              tail dmesg logs
-  env                      print system environment info
-  help                     this help
+  log <sys>                  show last compile log for system
+    -i                         show log info
+  list|ls                    list all systems for current host
+  lsmod                      list loaded RTS kernel modules
+  dtail|dmesg                tail dmesg logs
+  env                        print system environment info
+  help                       this help
 "
 }
 
@@ -191,7 +230,7 @@ fi
 case $cmd in
     'build'|'make')
 	if [ -z "$1" ] ; then
-	    log "You must specify at least one model to build."
+	    log "You must specify at least one system to build."
 	    exit 2
 	fi
 	check_env
@@ -200,16 +239,15 @@ case $cmd in
 	;;
     'install')
 	if [ -z "$1" ] ; then
-	    log "You must specify at least one model to install."
+	    log "You must specify at least one system to install."
 	    exit 2
 	fi
 	check_env
-	check_host_fe
 	install_sys $@
 	;;
     'start')
 	if [ -z "$1" ] ; then
-	    log "You must specify at least one model to start (or '--all')."
+	    log "You must specify at least one system to start (or '--all')."
 	    exit 2
 	fi
 	check_host_fe
@@ -222,7 +260,7 @@ case $cmd in
 	;;
     'restart')
 	if [ -z "$1" ] ; then
-	    log "You must specify at least one model to restart (or '--all')."
+	    log "You must specify at least one system to restart (or '--all')."
 	    exit 2
 	fi
 	check_host_fe
@@ -238,7 +276,7 @@ case $cmd in
 	;;
     'stop'|'kill')
 	if [ -z "$1" ] ; then
-	    log "You must specify at least one model to stop (or '--all')."
+	    log "You must specify at least one system to stop (or '--all')."
 	    exit 2
 	fi
 	check_host_fe
@@ -250,6 +288,20 @@ case $cmd in
 	    stop_sys $@
 	fi
 	;;
+    'enable'|'disable')
+	if [ -z "$1" ] ; then
+	    log "You must specify at least one system to $cmd (or '--all')."
+	    exit 2
+	fi
+	check_host_fe
+	if [[ "$1" == '--all' ]] ; then
+	    # we do this in reverse so the IOP is stopped last
+	    ${cmd}_sys $(list_host_sys | tac)
+	else
+	    check_host_sys $@
+	    ${cmd}_sys $@
+	fi
+	;;
     'log')
 	format=full
 	if [[ "$1" == '-i' ]] ; then
@@ -257,11 +309,11 @@ case $cmd in
 	    shift
 	fi
 	if [ -z "$1" ] ; then
-	    log "You must specify at least one model to view."
+	    log "You must specify at least one system to view."
 	    exit 2
 	fi
-	olog="${BUILDD}/${1}.log"
-	elog="${BUILDD}/${1}_error.log"
+	olog="${RCG_BUILDD}/${1}.log"
+	elog="${RCG_BUILDD}/${1}_error.log"
 	echo $olog
 	case "$format" in
 	    info)
@@ -287,7 +339,7 @@ case $cmd in
     'env')
 	check_env
 	;;
-    'help')
+    'help'|'-h'|'--help')
 	usage
 	;;
     *)
