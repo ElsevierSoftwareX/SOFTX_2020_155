@@ -27,7 +27,6 @@ check_env() {
 	    exit 1
 	fi
     done
-    log
 }
 
 prep_target(){
@@ -44,7 +43,6 @@ prep_buildd() {
     log "configuring BUILDD..."
     cd "$BUILDD"
     "$SRC"/configure
-    log
 }
 
 ########
@@ -286,7 +284,7 @@ case $cmd in
 	watch -n1 "dmesg | tail -$LINES"
 	;;
     'env')
-	log "not implemented yet :("
+	check_env
 	;;
     'help')
 	usage
