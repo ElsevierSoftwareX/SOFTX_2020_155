@@ -1,0 +1,14 @@
+#!/bin/bash -e
+. /etc/advligorts/env
+sys="$1"
+if [ -z "$sys" ] ; then
+    echo "must supply system name"
+    exit 1
+fi
+# add 
+if [[ $sys == *iop* ]] ; then
+    rate=${AWG_IOP_RATE:=-4}
+fi
+exec awgtpman \
+    -s $sys \
+    $rate

@@ -1,0 +1,8 @@
+[Unit]
+Description=Advanced LIGO RTS kernel module: %i
+After=rts-epics@%i.service
+PartOf=rts@%i.target
+
+[Service]
+ExecStart=/usr/bin/rts_module_ctrl start %i
+ExecStop=/usr/bin/rts_module_crtl stop %i
