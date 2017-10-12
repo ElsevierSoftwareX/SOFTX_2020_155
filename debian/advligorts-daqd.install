@@ -1,0 +1,9 @@
+support/systemd/daqd@.service lib/systemd/system/
+support/systemd/nds.service lib/systemd/system/
+usr/bin/daqd_bcst
+usr/bin/daqd_dc_mx
+usr/bin/daqd_fw
+usr/bin/daqd_mxsymm
+usr/bin/daqd_rcv
+usr/bin/daqd_standiop
+usr/bin/nds

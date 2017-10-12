@@ -1,0 +1,49 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE = t
+
+SVERSION := $(shell dpkg-parsechangelog --show-field=Version | rev | cut -d- -f2- | rev)
+
+%:
+	dh $@ --builddirectory=build --with dkms
+
+
+install-mbuf:
+	dh_installdirs -padvligorts-mbuf-dkms usr/src/mbuf-$(SVERSION)
+	dh_installdirs -padvligorts-mbuf-dkms lib/udev/rules.d
+	dh_installdirs -padvligorts-mbuf-dkms usr/lib/modules-load.d
+	install --mode=644 -t debian/advligorts-mbuf-dkms/usr/src/mbuf-$(SVERSION) src/drv/mbuf/*
+	sed 's|__SHARE__|/usr/share/advligorts|' <support/udev/mbuf.rules >debian/advligorts-mbuf-dkms/lib/udev/rules.d/60-mbuf.rules
+	echo mbuf > debian/advligorts-mbuf-dkms/usr/lib/modules-load.d/mbuf.conf
+
+install-symmetricom:
+	dh_installdirs -padvligorts-symmetricom-dkms usr/src/symmetricom-$(SVERSION)/drv/symmetricom
+	dh_installdirs -padvligorts-symmetricom-dkms usr/src/symmetricom-$(SVERSION)/include/drv
+	dh_installdirs -padvligorts-symmetricom-dkms lib/udev/rules.d
+	dh_installdirs -padvligorts-symmetricom-dkms usr/lib/modules-load.d
+	install --mode=644 -t debian/advligorts-symmetricom-dkms/usr/src/symmetricom-$(SVERSION)/drv/symmetricom src/drv/symmetricom/*
+	install --mode=644 -t debian/advligorts-symmetricom-dkms/usr/src/symmetricom-$(SVERSION)/include/drv src/include/drv/*
+	install --mode=644 -t debian/advligorts-symmetricom-dkms/usr/src/symmetricom-$(SVERSION)/include/ src/include/proc.h
+	sed 's|__SHARE__|/usr/share/advligorts|' <support/udev/symmetricom.rules >debian/advligorts-symmetricom-dkms/lib/udev/rules.d/60-symmetricom.rules
+	echo symmetricom > debian/advligorts-symmetricom-dkms/usr/lib/modules-load.d/symmetricom.conf
+
+install-rtcds:
+	dh_installdirs -padvligorts-rcg usr/bin
+	sed s/__VERSION__/$(SVERSION)/ <support/bin/rtcds.in >debian/advligorts-rcg/usr/bin/rtcds
+
+
+override_dh_auto_configure:
+	mkdir -p build
+	(cd build && cmake -DCMAKE_INSTALL_PREFIX=$(DESTDIR)/usr ..)
+
+override_dh_install: install-symmetricom install-mbuf install-rtcds
+	dh_install
+
+override_dh_dkms:
+	dh_dkms -V $(SVERSION)
+
+override_dh_auto_test:
+	true
+
+override_dh_clean:
+	rm -rf build
