@@ -89,8 +89,9 @@ the kernel header package for the running kernel.  For this system:
 
 /usr/src/linux -> $ls
 
-Please create this link, or set the RCG_IGNORE_KERNEL_RELEASE
+Please create/update this link, or set the RCG_IGNORE_KERNEL_RELEASE
 environment variable to bypass this check."
+
     exit 10
 }
 
@@ -250,13 +251,14 @@ Available commands:
   enable <sys>...|--all      enable system start at boot
   disable <sys>...|--all     disable system start at boot
 
-  log <sys>                  show last compile log for system
-    -i                         show log info
+  blog <sys>                 show last build log for system
+    -i                         print log paths
   list|ls                    list all systems for current host
   lsmod                      list loaded RTS kernel modules
   dtail|dmesg                tail dmesg logs
   env                        print system environment info
-  help                       this help
+  version|--version|-v       print version
+  help|--help|-h             this help
 "
 }
 
@@ -346,7 +348,7 @@ case $cmd in
 	    ${cmd}_sys $@
 	fi
 	;;
-    'log')
+    'blog')
 	format=full
 	if [[ "$1" == '-i' ]] ; then
 	    format=info
@@ -382,6 +384,9 @@ case $cmd in
 	;;
     'env')
 	check_env
+	;;
+    'version'|'v'|'vers'|'-v'|'--version')
+	echo $RTS_VERSION
 	;;
     'help'|'-h'|'--help')
 	usage
