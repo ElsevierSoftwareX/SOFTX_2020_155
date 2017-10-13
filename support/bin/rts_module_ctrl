@@ -3,7 +3,7 @@
 cmd="$1"
 sys="$2"
 if [ -z "$sys" ] ; then
-    echo "must supply system name"
+    echo "usage: $(basename $0) start|stop <sys>"
     exit 1
 fi
 TARGET=${OPTRTCDS}/target/${sys}
