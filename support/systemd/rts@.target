@@ -1,3 +1,6 @@
 [Unit]
 Description=Advanced LIGO RTS target: %i
 Requires=rts-epics@%i.service rts-module@%i.service rts-awgtpman@%i.service 
+
+[Install]
+WantedBy=multi-user.target
