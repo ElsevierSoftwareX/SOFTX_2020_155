@@ -27,7 +27,7 @@ RCG_LIB_PATH=$RCG_LIB_PATH:${RCG_SRC}/src/epics/simLink/:${RCG_SRC}/src/epics/si
 
 USER_VARS=(SITE IFO OPTRTCDS RCG_LIB_PATH)
 LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RTS_USER RTSYSTAB)
-EXPORT_VARS=(${USER_VARS[@]} CDS_SRC CDS_IFO_SRC)
+EXPORT_VARS=(${USER_VARS[@]} site ifo CDS_SRC CDS_IFO_SRC)
 
 ##################################################
 
