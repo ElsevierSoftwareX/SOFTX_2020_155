@@ -1,10 +1,6 @@
 #!/bin/bash -e
 
 RTS_VERSION=${RTS_VERSION:-__VERSION__}
-if [[ $RTS_VERSION == __VERSION__ ]] ; then
-    echo "RTS_VERSION not set." >&2
-    exit 1
-fi
 ENV_FILE=${RTS_ENV:-/etc/advligorts/env}
 RCG_SRC=${RCG_SRC:-/usr/share/advligorts/src}
 RCG_BUILDD=${RCG_BUILDD:-/var/cache/advligorts/rcg-$RTS_VERSION}
