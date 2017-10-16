@@ -19,8 +19,10 @@
 
 
 #include "commData3.h"
-#include "isnan.h"
-#include <asm/cacheflush.h>
+#ifndef USER_SPACE
+	#include "isnan.h"
+	#include <asm/cacheflush.h>
+#endif
 
 #ifdef COMMDATA_INLINE
 #  define INLINE static inline
@@ -239,10 +241,12 @@ INLINE void commData3Send(int connects,  	 	// Total number of IPC connections i
   }
   // Flush out the last PCIe transmission
   #ifdef RFM_VIA_PCIE
+  #ifndef USER_SPACE
   if (lastPcie >= 0) {
 		clflush_cache_range (&(ipcInfo[lastPcie].pIpcDataWrite[0]->dBlock[sendBlock][ipcInfo[lastPcie].ipcNum].data), 16);
   }
   lastPcie = -1;
+  #endif
   #endif
 #ifdef RFM_DELAY
 // We don't want to delay SHMEM or PCIe writes, so calc block as usual,
@@ -281,9 +285,11 @@ INLINE void commData3Send(int connects,  	 	// Total number of IPC connections i
         }
   }
   // Flush out the last PCIe transmission
+  #ifndef USER_SPACE
   if (lastPcie >= 0) {
 		clflush_cache_range (&(ipcInfo[lastPcie].pIpcDataWrite[0]->dBlock[sendBlock][ipcInfo[lastPcie].ipcNum].data), 16);
   }
+  #endif
 }
 
 // *************************************************************************************************
@@ -598,7 +604,9 @@ if(ipcInfo[0].pIpcDataRead[netFrom] != NULL && ipcInfo[0].pIpcDataWrite[netTo] !
         }
 
 // Have to flush the cache to ensure data is actually transferred to the Dolphin.
+  #ifndef USER_SPACE
 if (ttcache) clflush_cache_range (&(ipcInfo[0].pIpcDataWrite[netTo]->dBlock[cblock][dblock].data), 16);
+#endif
    if(cycle == 200 && cps[netFrom] > 2000) {
                 cpsHold[netFrom] = cps[netFrom] * 8;
                 cps[netFrom] = 0;
