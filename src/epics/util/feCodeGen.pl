@@ -1819,9 +1819,7 @@ while(my $line = <OUT>) {
 		print OUT2 "#include \"feuser.h\" \n";
 	} 
 	elsif(index($line,"controller") != -1) {
-		my @values = split('con',$line);
-		my $text = $values[0].'controllerUser.c"';
-		print OUT2 "$text";
+		print OUT2 "#include \"$rcg_src_dir/src/fe/controllerUser.c\"\n";
 	} else {
 		print OUT2 "$line";
 	}

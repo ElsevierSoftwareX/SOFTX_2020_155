@@ -18,6 +18,7 @@
 
 
 
+#include <stddef.h>
 #include "commData3.h"
 #ifndef USER_SPACE
 	#include "isnan.h"
