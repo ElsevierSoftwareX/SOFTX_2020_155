@@ -343,7 +343,7 @@ main(int argc, char **argv)
 		for (ii=0;ii<nsys;ii++) {
 			reftimeerror = 0;
 			// Set heartbeat monitor for return to DAQ software
-			if (lastCycle == 0) shmIpcPtr[ii]->status ^= daqStatBit[0];
+			if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[0];
 			// Set DCU ID in header
 			zmqDataBlock.zmqheader[ii].dcuId = shmIpcPtr[ii]->dcuId;
 			// Set DAQ .ini file CRC checksum
@@ -392,7 +392,7 @@ main(int argc, char **argv)
 			zmqDataBlock.zmqheader[ii].dataCrc = myCrc;
 
 			// Update heartbeat monitor to DAQ code
-			if (lastCycle == 0) shmIpcPtr[ii]->status ^= daqStatBit[1];
+			if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[1];
 			}
 		}
 		// Copy data to 0mq message buffer
