@@ -203,18 +203,18 @@ void *producer::frame_writer() {
         {
             int total_zmq_models = zmq_data_block.full_data_block->dcuTotalModels;
             char *cur_dcu_zmq_ptr = zmq_data_block.full_data_block->zmqDataBlock;
-            for (int i = 0; i < total_zmq_models; ++i) {
-                unsigned int cur_dcuid = zmq_data_block.full_data_block->zmqheader[i].dcuId;
-                dcu_to_zmq_lookup[cur_dcuid] = i;
+            for (int cur_block = 0; cur_block < total_zmq_models; ++cur_block) {
+                unsigned int cur_dcuid = zmq_data_block.full_data_block->zmqheader[cur_block].dcuId;
+                dcu_to_zmq_lookup[cur_dcuid] = cur_block;
                 dcu_data_from_zmq[cur_dcuid] = cur_dcu_zmq_ptr;
-                cur_dcu_zmq_ptr += zmq_data_block.full_data_block->zmqheader[i].dataBlockSize;
+                cur_dcu_zmq_ptr += zmq_data_block.full_data_block->zmqheader[cur_block].dataBlockSize;
             }
         }
 
         read_dest = move_buf;
         for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
             // printf("DCU %d is %d bytes long\n", j, daqd.dcuSize[0][j]);
-            if (daqd.dcuSize[0][j] == 0 || dcu_to_zmq_lookup[i] < 0 || dcu_data_from_zmq[i] == nullptr)
+            if (daqd.dcuSize[0][j] == 0 || dcu_to_zmq_lookup[j] < 0 || dcu_data_from_zmq[j] == nullptr)
                 continue; // skip unconfigured DCU nodes
             long read_size = daqd.dcuDAQsize[0][j];
             if (IS_EPICS_DCU(j)) {
@@ -538,7 +538,7 @@ void *producer::frame_writer() {
 
         // printf("gps=%d  prev_gps=%d bfrac=%d prev_frac=%d\n", gps, prev_gps,
         // frac, prev_frac);
-        const int polls_per_sec = 320; // 320 polls gives 1 millisecond stddev
+        /*const int polls_per_sec = 320; // 320 polls gives 1 millisecond stddev
                                        // of cycle time (AEI Nov 2012)
         for (int ntries = 0;; ntries++) {
             struct timespec tspec = {
@@ -585,7 +585,7 @@ void *producer::frame_writer() {
 
                 exit(1);
             }
-        }
+        }*/
         // printf("gps=%d prev_gps=%d ifrac=%d prev_frac=%d\n", gps,  prev_gps,
         // frac, prev_frac);
         controller_cycle++;
