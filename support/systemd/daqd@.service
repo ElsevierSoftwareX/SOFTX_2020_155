@@ -6,3 +6,6 @@ After=network-online.target
 User=controls
 ExecStart=/bin/sh -c "/usr/bin/daqd_%i -c /etc/advligorts/daqdrc.%i"
 Restart=always
+
+[Install]
+WantedBy=multi-user.target

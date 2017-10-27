@@ -7,3 +7,6 @@ User=controls
 Environment=LD_BIND_NOW=true
 ExecStart=/usr/bin/nds /etc/advligorts/pipe
 Restart=always
+
+[Install]
+WantedBy=multi-user.target
