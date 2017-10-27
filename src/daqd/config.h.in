@@ -226,4 +226,7 @@
 /* Define if using atomic for C++11 atomics */
 #undef HAVE_ATOMIC
 
+/* Define if FlexLexer holds its iostreams (yyin/yyout) as references instead of pointers */
+#undef FLEX_USES_IOSTREAM_REF
+
 #endif

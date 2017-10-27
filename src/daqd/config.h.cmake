@@ -29,6 +29,8 @@
 
 #cmakedefine HAVE_ATOMIC
 
+#cmakedefine FLEX_USES_IOSTREAM_REF
+
 /* FW build settings */
 #ifdef DAQD_BUILD_FW
 

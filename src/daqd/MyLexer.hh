@@ -18,6 +18,9 @@ using namespace std;
 
 
 class my_lexer : public yyFlexLexer {
+private:
+    std::istream* yyin_;
+    std::ostream* yyout_;
 public:
   my_lexer (std::ifstream* arg_yyin = 0, std::ofstream* arg_yyout = 0, int ifd = 0, int ofd = 0, int pstrict = 0, int pprompt = 0) 
     : yyFlexLexer (arg_yyin, arg_yyout), strict (pstrict), error_code (0), num_channels (0), prompt (pprompt),
@@ -30,6 +33,14 @@ public:
     prompt_lineno = 1;
     cptr = cmnd;
     yy_flex_debug=1;
+
+#ifndef FLEX_USES_IOSTREAM_REF
+    yyin_ = yyin;
+    yyout_ = yyout;
+#else
+    yyin_ = &yyin;
+    yyout_ = &yyout;
+#endif
   };
 
   enum { max_channels = 128 };
@@ -41,9 +52,9 @@ public:
   int my_yylex (YYSTYPE *lvalp);
   int my_yyerror (char *mesg) { 
     if (strict)
-      *yyout << "0001" << std::flush;
+      *yyout_ << "0001" << std::flush;
     else
-      *yyout << "yyerror: <" << yylineno << "> " << mesg << std::endl; 
+      *yyout_ << "yyerror: <" << yylineno << "> " << mesg << std::endl;
     return 0;
   }
 
@@ -77,9 +88,9 @@ public:
     return ret;
   }
 
-  std::istream *get_yyin () { return yyin; }
+  std::istream *get_yyin () { return yyin_; }
   int get_ifd () { return ifd; }
-  std::ostream *get_yyout () { return yyout; }
+  std::ostream *get_yyout () { return yyout_; }
 
   /*
     Set if the propmt should be displayed
