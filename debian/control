@@ -14,6 +14,7 @@ Build-Depends:
  ldas-tools-framecpp-dev,
  libbz2-dev,
  libc-dev-bin,
+ libfl-dev,
  libmotif-dev,
  libtool,
  libxpm-dev,
