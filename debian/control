@@ -117,6 +117,8 @@ Architecture: all
 Depends:
  advligorts-daqd,
  advligorts-rcg,
+ cds-workstation,
+ linux-image-3.2.88-rtcds,
  ${misc:Depends},
 Description: advLigoRTS stand-alone "cymac" metapackage
  Advanced LIGO data acquisition system, stand-alone version.
