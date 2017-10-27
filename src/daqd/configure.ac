@@ -204,6 +204,21 @@ AC_SUBST(LDASLIBFLAGS)
 AC_SUBST(LDASFLAGS)
 
 dnl======================================================================
+dnl   Detect how FlexLexer holds yyin/yyout as refs or pointers
+dnl======================================================================
+AC_LANG_PUSH([C++])
+AC_LANG_ASSERT([C++])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <iostream>
+                  #include <FlexLexer.h>
+                  struct TestLexer: public yyFlexLexer {
+                  	TestLexer(std::ifstream* arg_yyin = 0, std::ofstream* arg_yyout = 0)
+                  	{ std::ostream& tmp = yyout; }
+                  };
+                  int main(int argc, char **argv)
+                  { return 1; }]])],[AC_DEFINE(FLEX_USES_IOSTREAM_REF)],[])
+AC_LANG_POP([C++])
+
+dnl======================================================================
 dnl   Get EPICS HOST and OS architecure
 dnl======================================================================
 host_arch=

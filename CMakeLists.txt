@@ -11,6 +11,7 @@ INCLUDE(CheckCXXCompilerFlag)
 INCLUDE(CheckIncludeFile)
 INCLUDE(CheckIncludeFileCXX)
 INCLUDE(CheckFunctionExists)
+INCLUDE(CheckCXXSourceCompiles)
 INCLUDE(FindThreads)
 INCLUDE(Sanitizers)
 INCLUDE(Cpp11)
@@ -20,6 +21,15 @@ FIND_PACKAGE(FrameCPP REQUIRED)
 FIND_PACKAGE(MX)
 FIND_PACKAGE(OpenMX)
 FIND_PACKAGE(ZMQ4)
+
+CHECK_CXX_SOURCE_COMPILES("#include <iostream>
+#include <FlexLexer.h>
+struct TestLexer: public yyFlexLexer {
+	TestLexer(std::ifstream* arg_yyin = 0, std::ofstream* arg_yyout = 0)
+	{ std::ostream& tmp = yyout; }
+};
+int main(int argc, char **argv)
+{ return 1; }" FLEX_USES_IOSTREAM_REF)
 
 CHECK_CXX_COMPILER_FLAG(-Wno-deprecated-declarations CAN_AVOID_DEPR_DECL)
 if(CAN_AVOID_DEPR_DECL)
