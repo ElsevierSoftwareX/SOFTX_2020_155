@@ -4,6 +4,7 @@ target_include_directories(fe_stream_generator INTERFACE ${CMAKE_CURRENT_SOURCE_
 add_executable(fe_stream_test
         fe_stream_test.cc
         ../drv/rfm.c
+        gps.hh
         )
 target_link_libraries(fe_stream_test
         PRIVATE
