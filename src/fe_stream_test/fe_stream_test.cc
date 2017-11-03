@@ -21,7 +21,7 @@
 
 extern "C" {
 
-extern volatile void* findSharedMemory(char* sys_name);
+#include "../drv/rfm.c"
 
 #include "../drv/crc.c"
 
@@ -58,8 +58,8 @@ void output_ini_files(const std::string& ini_dir, const std::string& system_name
 
     string fname_ini = generate_ini_filename(ini_dir, system_name);
     string fname_par = generate_par_filename(ini_dir, system_name);
-    ofstream os_ini(fname_ini);
-    ofstream os_par(fname_par);
+    ofstream os_ini(fname_ini.c_str());
+    ofstream os_par(fname_par.c_str());
     os_ini << "[default]\ngain=1.0\nacquire=1\ndcuid=" << dcuid << "\nifoid=0\n";
     os_ini << "datatype=4\ndatarate=2048\noffset=0\nslope=1.0\nunits=undef\n\n";
 
