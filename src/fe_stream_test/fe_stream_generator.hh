@@ -103,7 +103,7 @@ namespace Generators {
         GPSSecondGenerator(const SimChannel& ch):
                 SimChannelGenerator(ch) {}
 
-        std::string generator_name() const { return "gps_sec"; }
+        std::string generator_name() const { return "gpssec"; }
 
         char* generate(int gps_sec, int gps_nano, char* out)
         {
@@ -125,7 +125,7 @@ namespace Generators {
         GPSSecondWithOffset(const SimChannel& ch, int offset):
                 SimChannelGenerator(ch), offset_(offset) {}
 
-        std::string generator_name() const { return "gps_sec_off1p"; }
+        std::string generator_name() const { return "gpssoff1p"; }
 
         std::string other_params() const
         {

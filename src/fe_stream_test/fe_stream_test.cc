@@ -107,6 +107,20 @@ void usage()
     cout << "-S allow the use of the system clock" << endl;
 }
 
+std::string get_shmem_sysname(const std::string &system_name) {
+    std::ostringstream os;
+    for (int i = 0; i < system_name.size(); ++i)
+    {
+        int ch = system_name[i];
+        if (isupper(ch))
+            os << (char)tolower(ch);
+        else if (!(ch == ':' || ch == '-' || ch == '_'))
+            os << (char)ch;
+    }
+    os << "_daq";
+    return os.str();
+}
+
 int main(int argc, char *argv[]) {
     std::string system_name;
     std::string ini_dir;
@@ -170,7 +184,7 @@ int main(int argc, char *argv[]) {
         int chnum = chDb.next(4);
 
         std::ostringstream ss;
-        ss << system_name << "-CHANNEL_" << i;
+        ss << system_name << "-" << i;
         generators.push_back(GeneratorPtr(new Generators::GPSSecondWithOffset(SimChannel(ss.str(), 4, 1024, chnum), i%21)));
     }
 
@@ -184,14 +198,13 @@ int main(int argc, char *argv[]) {
     }
 
     volatile char *shmem = 0;
-    {
-        std::ostringstream os;
-        os << system_name << "_daq";
 
-        shmem = reinterpret_cast<volatile char*>(findSharedMemory(const_cast<char*>(os.str().c_str())));
-        if (shmem == 0)
-            throw std::runtime_error("Received null shmem pointer");
-    }
+    std::string shmem_sysname = get_shmem_sysname(system_name);
+
+    shmem = reinterpret_cast<volatile char*>(findSharedMemory(const_cast<char*>(shmem_sysname.c_str())));
+    if (shmem == 0)
+        throw std::runtime_error("Received null shmem pointer");
+
     volatile struct rmIpcStr* ipc = reinterpret_cast<volatile struct rmIpcStr*>(shmem + CDS_DAQ_NET_IPC_OFFSET);
     volatile char *data = shmem + CDS_DAQ_NET_DATA_OFFSET;
     volatile struct cdsDaqNetGdsTpNum* tpData = reinterpret_cast<volatile struct cdsDaqNetGdsTpNum*>(shmem + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
@@ -251,7 +264,7 @@ int main(int argc, char *argv[]) {
 
         if (verbose && cycle == 0)
         {
-            std::cout << ". " << transmit_time << " " << now << std::endl;
+            std::cout << ". " << shmem_sysname << " " << transmit_time << " " << now << std::endl;
         }
 
         volatile char *data_cur = data + cycle*block_size;
