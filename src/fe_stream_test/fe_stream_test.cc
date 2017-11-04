@@ -278,7 +278,7 @@ int main(int argc, char *argv[]) {
         }
 
         ipc->status = 0;
-        ipc->bp[cycle].status = 0;
+        ipc->bp[cycle].status = 2;
         ipc->bp[cycle].timeSec = transmit_time.sec;
         ipc->bp[cycle].timeNSec = transmit_time.nanosec;
         ipc->bp[cycle].cycle = cycle;

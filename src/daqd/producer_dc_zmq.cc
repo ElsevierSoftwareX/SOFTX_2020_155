@@ -216,6 +216,7 @@ void *producer::frame_writer() {
             // printf("DCU %d is %d bytes long\n", j, daqd.dcuSize[0][j]);
             if (daqd.dcuSize[0][j] == 0 || dcu_to_zmq_lookup[j] < 0 || dcu_data_from_zmq[j] == nullptr)
                 continue; // skip unconfigured DCU nodes
+            std::cout << "dcu " << j << std::endl;
             long read_size = daqd.dcuDAQsize[0][j];
             if (IS_EPICS_DCU(j)) {
 
@@ -226,6 +227,7 @@ void *producer::frame_writer() {
 
                 read_dest += read_size;
             } else if (IS_MYRINET_DCU(j)) {
+                std::cout << "is a myrinet dcu" << std::endl;
                 dcu_cycle = i % DAQ_NUM_DATA_BLOCKS;
 
                 // dcu_cycle = gmDaqIpc[j].cycle;
@@ -240,11 +242,14 @@ void *producer::frame_writer() {
                        dcu_data_from_zmq[j],
                        cur_dcu.dataBlockSize);
 
+                std::cout << "is zmq dcu number " << zmq_index << std::endl;
+
                 int cblk1 = (i + 1) % DAQ_NUM_DATA_BLOCKS;
                 static const int ifo = 0; // For now
 
                 // Calculate DCU status, if needed
                 if (daqd.dcu_status_check & (1 << ifo)) {
+                    std::cout << "need status check" << std::endl;
                     if (cblk1 % 16 == 0) {
                         /* DCU checking mask (Which DCUs to check for SYNC
                          * fault) */
@@ -305,13 +310,16 @@ void *producer::frame_writer() {
 
                 // Update DCU status
                 int newStatus = cur_dcu.status != DAQ_STATE_RUN ? 0xbad : 0;
+                std::cout << "newStatus = " << (hex) << newStatus << " cur_dcu.status = " << (dec) << cur_dcu.status << std::endl;
 
-                int newCrc = cur_dcu.dataCrc;
+                int newCrc = cur_dcu.fileCrc;
 
                 // printf("%x\n", *((int *)read_dest));
                 if (!IS_EXC_DCU(j)) {
-                    if (newCrc != daqd.dcuConfigCRC[0][j])
+                    if (newCrc != daqd.dcuConfigCRC[0][j]) {
                         newStatus |= 0x2000;
+                        std::cout << "config crc mismatch" << std::endl;
+                    }
                 }
                 if (newStatus != daqd.dcuStatus[0][j]) {
                     // system_log(1, "DCU %d IFO %d (%s) %s", j, 0,
@@ -325,6 +333,7 @@ void *producer::frame_writer() {
                 daqd.dcuStatus[0][j] = newStatus;
 
                 daqd.dcuCycle[0][j] = cur_dcu.cycle;
+                std::cout << "status and cycle are " << (hex) << newStatus << (dec) << " " << cur_dcu.cycle << std::endl;
 
                 /* Check DCU data checksum */
                 unsigned long crc = 0;
