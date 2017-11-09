@@ -370,7 +370,7 @@ main(int argc, char **argv)
 				zmqDataBlock.zmqheader[ii].dataBlockSize = 0;
 			} else {
 				// Set Status -- Need to update for models not running
-				zmqDataBlock.zmqheader[ii].status = 0;
+				zmqDataBlock.zmqheader[ii].status = 2;
 				// Indicate size of data block
 				zmqDataBlock.zmqheader[ii].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
 				// Prevent going beyond MAX allowed data size
