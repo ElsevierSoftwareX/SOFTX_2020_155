@@ -60,8 +60,8 @@ void output_ini_files(const std::string& ini_dir, const std::string& system_name
     string fname_par = generate_par_filename(ini_dir, system_name);
     ofstream os_ini(fname_ini.c_str());
     ofstream os_par(fname_par.c_str());
-    os_ini << "[default]\ngain=1.0\nacquire=1\ndcuid=" << dcuid << "\nifoid=0\n";
-    os_ini << "datatype=4\ndatarate=2048\noffset=0\nslope=1.0\nunits=undef\n\n";
+    os_ini << "[default]\ngain=1.0\nacquire=3\ndcuid=" << dcuid << "\nifoid=0\n";
+    os_ini << "datatype=2\ndatarate=2048\noffset=0\nslope=1.0\nunits=undef\n\n";
 
     vector<GeneratorPtr>::iterator cur = channels.begin();
     for(; cur != channels.end(); ++cur)
@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
 
         std::ostringstream ss;
         ss << system_name << "-" << i;
-        generators.push_back(GeneratorPtr(new Generators::GPSSecondWithOffset(SimChannel(ss.str(), 4, 1024, chnum), i%21)));
+        generators.push_back(GeneratorPtr(new Generators::GPSSecondWithOffset(SimChannel(ss.str(), 2, 1024, chnum), i%21)));
     }
 
     if (true)
