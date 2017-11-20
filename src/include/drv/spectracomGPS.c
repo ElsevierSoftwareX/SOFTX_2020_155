@@ -88,18 +88,37 @@ for(ii=0;ii<2;ii++)
   if(i < 1000000000)
   {
         printk("TSYNC NOT receiving YEAR info, defaulting to by year patch\n");
+      /* Historically we would hardwire a offset here.
+       * With RCG 3.4 we have moved to configuring this in
+       * the symmetricom/gpstime driver.
+       *
+       * This file is built 2 ways
+       * 1. as part of the symmetricom/gpstime driver, in which case
+       * it sets the gpsOffset to 0 (and allows the user
+       * to configure it).
+       * 2. as part of an IOP, in which it gets the offset from
+       * the symmetricom/gpstime driver.
+       *
+       * We are leaving the offsets in as comments so that we have a history/example of what was done
+       */
 /* add offsets for leap-seconds - +15 through 2008 */
 /* add offset at end of 2011 (31536000 normal year) */
 /* Add offset for June 30, 2012 leap second */
 /* add offset at end of 2012 (31622400 leap year) */
 /* add offset at end of 2013 (31536000 normal year) */
-	    pHardware->gpsOffset = 31190400 + 15 + 31536000 + 1 + 31622400 + 31536000;
+	    /*pHardware->gpsOffset = 31190400 + 15 + 31536000 + 1 + 31622400 + 31536000;*/
 /* add offset at end of 2014 (31536000 normal year) */
-	    pHardware->gpsOffset = pHardware->gpsOffset + 31536000;
+	    /*pHardware->gpsOffset = pHardware->gpsOffset + 31536000;*/
 /* 2015 had 365 days plus a July 1, 2015 leap second */
-	     pHardware->gpsOffset += 31536000 + 1;
+	     /*pHardware->gpsOffset += 31536000 + 1;*/
 /* 2016 had 366 days plus a Dec 31, 2016/Jan 1, 2017 leap second */
-       pHardware->gpsOffset += 31622400 + 1;
+       /*pHardware->gpsOffset += 31622400 + 1;*/
+#ifndef IN_LIGO_GPS_KERNEL_DRIVER
+      extern long ligo_get_gps_driver_offset(void);
+      pHardware->gpsOffset = ligo_get_gps_driver_offset();
+#else
+      pHardware->gpsOffset = 0;
+#endif
   } else {
         printk("TSYNC receiving YEAR info\n");
         pHardware->gpsOffset = -315964800;
