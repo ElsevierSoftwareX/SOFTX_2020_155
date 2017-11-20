@@ -5,8 +5,9 @@ Changes for 4.0  (NOT YET RELEASED)
   area for use with new ZMQ DAQ transmission software.
 - RCG now builds user space code as well as kernel objects.
 ==================================================================================================
-Changes for 3.3  (NOT YET RELEASED)
+Changes for 3.4  (NOT YET RELEASED)
 ==================================================================================================
+- Bug Fix (1085): Default daqd behavior is to disable md5 checksum file creation
 - Bug Fix (1098): Fix EZ_CA_READ/WRITE calls to work with EPICS Sequencer 2.2
 - Improve lock-up on model shutdown by removing erroneous printkl() in moduleLoad.c (r4486)
 - Added ability to run DAC modules without a preload of the FIFO for lower latency.  This done
