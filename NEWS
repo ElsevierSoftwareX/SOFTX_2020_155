@@ -1,6 +1,7 @@
 ==================================================================================================
 Changes for 3.4  
 ==================================================================================================
+- Bug Fix (1085): Default daqd behavior is to disable md5 checksum file creation
 - Bug Fix (1098): Fix EZ_CA_READ/WRITE calls to work with EPICS Sequencer 2.2
 - Reduce lockup on model shutdown by removing erroneous printkl() in moduleLoad.c (r4501)
 - Added ability to run DAC modules without a preload of the FIFO for lower latency.  This done
