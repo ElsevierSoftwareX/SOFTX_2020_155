@@ -24,6 +24,9 @@ add_executable(test_run_number tests/test_main.cc tests/test_run_number.cc tests
 target_include_directories(test_run_number PRIVATE ${CATCH_PATH})
 target_compile_options(test_run_number PRIVATE ${_RN_CHECK_FLAGS})
 
+add_executable(test_run_number_client tests/test_client_main.cc)
+target_link_libraries(test_run_number_client PUBLIC run_number::run_number)
+
 add_executable(run_number_test_client run_number_test_client.cc)
 target_link_libraries(run_number_test_client PUBLIC run_number_client)
 

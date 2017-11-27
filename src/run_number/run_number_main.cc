@@ -8,12 +8,14 @@
 struct config {
     std::string endpoint;
     bool verbose;
+    bool test_crash;
 
-    config(): endpoint("tcp://*:5556"), verbose(false) {}
-    config(const config& other): endpoint(other.endpoint), verbose(other.verbose) {}
+    config(): endpoint("tcp://*:5556"), verbose(false), test_crash(false) {}
+    config(const config& other): endpoint(other.endpoint), verbose(other.verbose), test_crash(other.test_crash) {}
     config& operator=(const config& other) {
         endpoint = other.endpoint;
         verbose = other.verbose;
+        test_crash = other.test_crash;
         return *this;
     }
 };
@@ -36,6 +38,9 @@ bool parse_args(int argc, char *argv[], config& cfg) {
         } else if (arg == "-h" || arg == "--help") {
             need_help = true;
             break;
+        } else if (arg == "--test-crash") {
+            cfg.test_crash = true;
+            break;
         } else {
             if (endpoint_assigned) {
                 need_help = true;
@@ -47,7 +52,8 @@ bool parse_args(int argc, char *argv[], config& cfg) {
     }
     if (need_help) {
         std::cerr << "Usage:\n\t" << prog_name << " [options] [endpoint]\n\n";
-        std::cerr << "Where options are:\n\t-v\tVerbose\n\n";
+        std::cerr << "Where options are:\n\t-v\tVerbose\n\t--test-crash\t";
+        std::cerr << "A debug/test mode where the server does not complete a request.  DO NOT USE in production\n";
         std::cerr << "Endpoint defaults to '" << cfg.endpoint << "' if not specified" << std::endl;
         return false;
     }
@@ -75,6 +81,11 @@ int main(int argc, char *argv[]) {
 
         responder.recv(&request);
 
+        if (cfg.test_crash) {
+            std::cerr << "crashing on purpose" << std::endl;
+            std::exit(1);
+        }
+
         if (request.size() != sizeof(::daqd_run_number_req_v1_t)) {
             if (cfg.verbose) {
                 std::cout << "Received a bad request [invalid size]" << std::endl;
@@ -85,10 +96,15 @@ int main(int argc, char *argv[]) {
         daqd_run_number_req_v1_t* req = reinterpret_cast<daqd_run_number_req_v1_t *>(request.data());
         if (req->version != 1 || req->hash_size < 0 || req->hash_size> sizeof(req->hash)) {
             if (cfg.verbose) {
-                std::cout << "Recieved a bad request [invalid parameters]" << std::endl;
+                std::cout << "Received a bad request [invalid parameters]" << std::endl;
                 send_zero_response(responder);
                 continue;
             }
+        }
+
+        if (cfg.verbose) {
+            std::string hash(req->hash, req->hash_size);
+            std::cout << "Received a v" << req->version << " request with hash " << hash << " ";
         }
 
         daqd_run_number_resp_v1_t resp;
@@ -99,7 +115,7 @@ int main(int argc, char *argv[]) {
         memcpy(response.data(), &resp, sizeof(resp));
         responder.send(response);
         if (cfg.verbose) {
-            std::cout << "Sent a run number of " << resp.number << std::endl;
+            std::cout << "returning run number = " << resp.number << std::endl;
         }
     }
     return 0;
