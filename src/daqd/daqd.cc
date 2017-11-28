@@ -529,6 +529,7 @@ void daqd_c::update_configuration_number(const char *source_address)
     std::string hash = ss.str();
 
     _configuration_number = daqd_run_number::get_run_number(source_address, hash);
+    system_log(0, "configuration/run number = %d", (int)_configuration_number);
 }
 
 /// Linear search for a channel group name in channel_groups array.
