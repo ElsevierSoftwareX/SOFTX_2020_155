@@ -701,11 +701,6 @@ daqd_c::framer_io(int science)
    const int STATE_WRITING = 1;
    const int STATE_BROADCAST = 2;
 
-   bool write_frame_checksums = true;
-   {
-       std::string checksum_flag = parameters().get<std::string>("write_frame_checksums", "0");
-       write_frame_checksums = (checksum_flag == std::string("1") ? true : false);
-   }
    framer_work_queue *_work_queue = 0;
    if (science) {
        daqd_c::set_thread_priority("Science frame saver IO","dqscifrio",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_IO_CPUAFFINITY);
@@ -776,28 +771,9 @@ daqd_c::framer_io(int science)
                    obuf->close();
                    md5filter.Finalize();
 
-                   if (write_frame_checksums) {
-                       const static std::string md5(".md5");
-
-                       std::string chksumFilename (cur_buf->tmpf);
-                       std::string::size_type dot = chksumFilename.rfind('.');
-                       std::string::size_type slash = chksumFilename.rfind('/');
-
-                       // if there is an extension, don't count a leading '.' for the extension
-                       if (dot != std::string::npos &&
-                           dot != 0 &&
-                           (slash == std::string::npos || slash < dot-1))
-                       {
-                           // erase the extension
-                           chksumFilename.erase(dot);
-                       }
-                       // add .md5
-                       chksumFilename += md5;
-                       DEBUG1(cout << "Writing md5sum out to '" << chksumFilename << "' of '" << md5filter << "'" << std::endl);
-                       std::ofstream chksumFile(chksumFilename.c_str(), std::ios::binary | std::ios::out);
-                       chksumFile << md5filter << std::endl;
-                       chksumFile.close();
-                   }
+                   queue_frame_checksum(cur_buf->tmpf,
+                                        (science ? daqd_c::science_frame : daqd_c::raw_frame),
+                                        md5filter);
 
                    PV::set_pv( (science ? PV::PV_SCIENCE_FRAME_CHECK_SUM_TRUNC : PV::PV_FRAME_CHECK_SUM_TRUNC),
                               *reinterpret_cast<const unsigned int*>(md5filter.Value()));
@@ -1196,6 +1172,82 @@ daqd_c::framer (int science)
     }
 
   return NULL;
+}
+
+void
+daqd_c::queue_frame_checksum(const char *frame_filename, daqd_c::frame_type type,
+                             FrameCPP::Common::MD5SumFilter &md5sum) {
+    if (!frame_filename) return;
+
+    raii::lock_guard<pthread_mutex_t> lock(_checksum_lock);
+    if (!_checksum_file_transform_initted) {
+        std::string src, dest;
+        daqd_c::frame_type frame_types[] = {
+                daqd_c::raw_frame,
+                daqd_c::science_frame,
+                daqd_c::minute_trend_frame,
+                daqd_c::second_trend_frame,
+        };
+        dest = parameters().get("full_frame_checksum_dir", "");
+        if (!dest.empty()) {
+            _string_pair p(fsd.get_path(), dest);
+            _checksum_file_transform.insert(_path_transform::value_type(daqd_c::raw_frame, p));
+        }
+        dest = parameters().get("science_frame_checksum_dir", "");
+        if (!dest.empty()) {
+            _string_pair p(science_fsd.get_path(), dest);
+            _checksum_file_transform.insert(_path_transform::value_type(daqd_c::science_frame, p));
+        }
+        dest = parameters().get("minute_trend_frame_checksum_dir", "");
+        if (!dest.empty()) {
+            _string_pair p(trender.minute_fsd.get_path(), dest);
+            _checksum_file_transform.insert(_path_transform::value_type(daqd_c::minute_trend_frame, p));
+        }
+        dest = parameters().get("trend_frame_checksum_dir", "");
+        if (!dest.empty()) {
+            _string_pair p(trender.fsd.get_path(), dest);
+            _checksum_file_transform.insert(_path_transform::value_type(daqd_c::second_trend_frame, p));
+        }
+        _checksum_file_transform_initted = true;
+    }
+
+    _path_transform::iterator cur = _checksum_file_transform.find(type);
+    if (cur == _checksum_file_transform.end())
+        return;
+
+    const static std::string md5(".md5");
+    std::string filename(frame_filename);
+    std::string::size_type dot = filename.rfind('.');
+    std::string::size_type slash = filename.rfind('/');
+    // if there is an extension, don't count a leading '.' for the extension
+    if (dot != std::string::npos &&
+        dot != 0 &&
+        (slash == std::string::npos || slash < dot-1))
+    {
+        // erase the extension
+        filename.erase(dot);
+    }
+    // add .md5
+    filename += md5;
+
+    if (cur->second.second != "" && cur->second.first.size() < filename.size()) {
+        filename = cur->second.second + filename.substr(cur->second.first.size());
+    }
+    std::ostringstream os;
+    os << md5sum;
+    _checksum_queue.push_back(std::make_pair(filename, os.str()));
+}
+
+bool
+daqd_c::dequeue_frame_checksum(std::string& filename, std::string& checksum)
+{
+    raii::lock_guard<pthread_mutex_t> lock(_checksum_lock);
+    if (_checksum_queue.empty())
+        return false;
+    filename = _checksum_queue.front().first;
+    checksum = _checksum_queue.front().second;
+    _checksum_queue.pop_front();
+    return true;
 }
 
 // Allocate and initialize main circular buffer.
