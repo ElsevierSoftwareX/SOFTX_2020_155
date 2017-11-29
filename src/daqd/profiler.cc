@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <errno.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include "daqd.hh"
 #include "epics_pvs.hh"
@@ -59,14 +60,30 @@ profile_c::profiler ()
       counters[bfree]++;
 
     main_avg_free += bfree;
-    if (main_min_free < 0 || bfree < main_min_free)
+    if (main_min_free < 0 || bfree < main_min_free) {
       main_min_free = bfree;
+    }
 
+    additional_checks();
+  }
+  started = 0;
+  shutdown = 0;
+  return NULL;
+}
+
+void
+profile_c::additional_checks()
+{
     if (this -> cb == daqd.b1) {
         std::string filename;
         try {
             std::string hash;
             while (daqd.dequeue_frame_checksum(filename, hash)) {
+                std::string::size_type index = filename.rfind('/');
+                if (index != std::string::npos) {
+                    std::string directory(filename.substr(0, index));
+                    mkdir(directory.c_str(), 0777);
+                }
                 DEBUG1(cout << "Writing md5sum out to '" << filename << "' of '" << hash << "'" << std::endl);
                 std::ofstream chksumFile(filename.c_str(), std::ios::binary | std::ios::out);
                 chksumFile << hash << std::endl;
@@ -77,10 +94,6 @@ profile_c::profiler ()
             system_log(1, "Error raised while writing a checksum file");
         }
     }
-  }
-  started = 0;
-  shutdown = 0;
-  return NULL;
 }
 
 void
