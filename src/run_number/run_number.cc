@@ -1,7 +1,10 @@
 #include "run_number.hh"
 
+#include <time.h>
+
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 namespace {
@@ -38,11 +41,16 @@ namespace daqdrn {
         run_number_state results;
         std::ifstream fs;
         fs.open(_path, std::fstream::in);
-        while (fs) {
+        std::string buffer;
+        while (std::getline(fs, buffer)) {
+            // The input line is:
+            // number hash [optional_timestamp]
+            // we only need the number and the hash
+            std::istringstream is(buffer);
             run_number_state tmp_state;
             std::string tmp = "";
-            fs >> tmp_state.value >> tmp;
-            if (fs) {
+            is >> tmp_state.value >> tmp;
+            if (is) {
                 tmp_state.hash = hex_to_bin_str(tmp);
                 std::swap(results, tmp_state);
             }
@@ -60,9 +68,28 @@ namespace daqdrn {
         }
         std::string hex_val(hex_tmp.data(), hex_tmp.size());
 
+        time_t cur_time_t = time(0);
+        struct tm cur_time_tm;
+        gmtime_r(&cur_time_t, &cur_time_tm);
+
+        // fallback is to write the seconds since UNIX EPOCH
+        std::string time_stamp;
+        {
+            std::ostringstream os;
+            os << cur_time_t;
+            time_stamp = os.str();
+        }
+
+        // But really we want to write the time in a human readable way
+        std::vector<char> time_buf(200);
+        size_t count = strftime(&time_buf[0], time_buf.size(), "%F %T %Z", &cur_time_tm);
+        if (count != 0) {
+            time_stamp = &time_buf[0];
+        }
+
         std::ofstream fs;
         fs.open(_path, std::fstream::out | std::fstream::app);
-        fs << state.value << " " << hex_val << "\n";
+        fs << state.value << " " << hex_val << " " << time_stamp << "\n";
         fs.close();
     }
 

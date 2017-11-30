@@ -1,0 +1,13 @@
+[Unit]
+Description=Ensure the run number server is running
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/run_number_server -v
+WorkingDirectory=/var/lib/run_number
+Restart=on-failure
+User=controls
+Group=controls
+
+[Install]
+WantedBy=multi-user.target
