@@ -2,7 +2,19 @@ FIND_PACKAGE(Grace)
 FIND_PACKAGE(Motif)
 FIND_PACKAGE(X11)
 
-if (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${X11_Xpm_FOUND} AND ${X11_Xt_FOUND} AND ${X11_FOUND})
+if (${X11_Xpm_FOUND})
+    set(_has_X11_Xpm TRUE)
+else (${X11_Xpm_FOUND})
+    set(_has_X11_Xpm FALSE)
+endif (${X11_Xpm_FOUND})
+
+if (${X11_Xt_FOUND})
+    set(_has_X11_Xt TRUE)
+else (${X11_Xt_FOUND})
+    set(_has_X11_Xt FALSE)
+endif (${X11_Xt_FOUND})
+
+if (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xpm} AND ${_has_X11_Xt} AND ${X11_FOUND})
     Message("Dataviewr will be built")
 
     # create some targets to make things look nice
@@ -32,10 +44,10 @@ if (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${X11_Xpm_FOUND} AND ${X11_Xt_FOUND} A
             DESTINATION bin
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
-else (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${X11_Xpm_FOUND} AND ${X11_Xt_FOUND} AND ${X11_FOUND})
+else (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xpm} AND ${_has_X11_Xt} AND ${X11_FOUND})
     Message("Dataviewer will NOT be built")
     Message("X11 found = ${X11_FOUND}")
     Message("motif found = ${MOTIF_FOUND}")
     Message("Xpm found = ${X11_Xpm_FOUND}")
     Message("Xt found = ${X11_Xt_FOUND}")
-endif (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${X11_Xpm_FOUND} AND ${X11_Xt_FOUND} AND ${X11_FOUND})
+endif (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xpm} AND ${_has_X11_Xt} AND ${X11_FOUND})
