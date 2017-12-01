@@ -62,6 +62,21 @@ profile_c::profiler ()
     if (main_min_free < 0 || bfree < main_min_free)
       main_min_free = bfree;
 
+    if (this -> cb == daqd.b1) {
+        std::string filename;
+        try {
+            std::string hash;
+            while (daqd.dequeue_frame_checksum(filename, hash)) {
+                DEBUG1(cout << "Writing md5sum out to '" << filename << "' of '" << hash << "'" << std::endl);
+                std::ofstream chksumFile(filename.c_str(), std::ios::binary | std::ios::out);
+                chksumFile << hash << std::endl;
+                chksumFile.close();
+            }
+        } catch(...) {
+            std::cerr << "Error raised while writing a checksum file " << filename << std::endl;
+            system_log(1, "Error raised while writing a checksum file");
+        }
+    }
   }
   started = 0;
   shutdown = 0;
