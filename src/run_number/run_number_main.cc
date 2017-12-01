@@ -5,14 +5,19 @@
 #include "run_number.hh"
 #include "run_number_structs.h"
 
+static const std::string default_db = "run-number.db";
+static const std::string default_endpoint = "tcp://*:5556";
+
 struct config {
+    std::string db_path;
     std::string endpoint;
     bool verbose;
     bool test_crash;
 
-    config(): endpoint("tcp://*:5556"), verbose(false), test_crash(false) {}
-    config(const config& other): endpoint(other.endpoint), verbose(other.verbose), test_crash(other.test_crash) {}
+    config(): db_path(default_db), endpoint(default_endpoint), verbose(false), test_crash(false) {}
+    config(const config& other): db_path(other.db_path), endpoint(other.endpoint), verbose(other.verbose), test_crash(other.test_crash) {}
     config& operator=(const config& other) {
+        db_path = other.db_path;
         endpoint = other.endpoint;
         verbose = other.verbose;
         test_crash = other.test_crash;
@@ -41,6 +46,13 @@ bool parse_args(int argc, char *argv[], config& cfg) {
         } else if (arg == "--test-crash") {
             cfg.test_crash = true;
             break;
+        } else if (arg == "-f" || arg == "--file") {
+            if (i + 1 >= argc) {
+                need_help = true;
+                break;
+            }
+            cfg.db_path = argv[i+1];
+            i++;
         } else {
             if (endpoint_assigned) {
                 need_help = true;
@@ -54,7 +66,9 @@ bool parse_args(int argc, char *argv[], config& cfg) {
         std::cerr << "Usage:\n\t" << prog_name << " [options] [endpoint]\n\n";
         std::cerr << "Where options are:\n\t-v\tVerbose\n\t--test-crash\t";
         std::cerr << "A debug/test mode where the server does not complete a request.  DO NOT USE in production\n";
-        std::cerr << "Endpoint defaults to '" << cfg.endpoint << "' if not specified" << std::endl;
+        std::cerr << "\t-f|--file <filename>\tDatabase file to use.\n";
+        std::cerr << "The endpoint defaults to '" << default_endpoint << "' if not specified.\n";
+        std::cerr << "The database file defaults to '" << default_db << "' if not specified." << std::endl;
         return false;
     }
     return true;
@@ -66,7 +80,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    daqdrn::file_backing_store db("run-number.db");
+    daqdrn::file_backing_store db(cfg.db_path);
     daqdrn::run_number<daqdrn::file_backing_store> run_number_generator(db);
 
     zmq::context_t context(1);
