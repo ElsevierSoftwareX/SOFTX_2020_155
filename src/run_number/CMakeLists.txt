@@ -1,3 +1,12 @@
+project(run_number)
+cmake_minimum_required(VERSION 3.0.0)
+
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../config/cmake")
+
+INCLUDE(CheckCXXCompilerFlag)
+include(FindThreads)
+find_package(ZMQ4 REQUIRED)
+
 find_path(CATCH_PATH catch.hpp
         HINTS /usr/include /usr/local/include ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
