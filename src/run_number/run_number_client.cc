@@ -24,10 +24,14 @@ namespace daqd_run_number {
             zmq::message_t request(sizeof(req));
             memcpy(request.data(), &req, sizeof(req));
 
-            requestor.setsockopt(ZMQ_CONNECT_TIMEOUT, timeout);
-            requestor.setsockopt(ZMQ_SNDTIMEO, timeout);
-            requestor.setsockopt(ZMQ_RCVTIMEO, timeout);
-            requestor.setsockopt(ZMQ_LINGER, 0);
+            int dummy = timeout;
+#ifdef ZMQ_CONNECT_TIMEOUT
+            requestor.setsockopt(ZMQ_CONNECT_TIMEOUT, &dummy, sizeof(dummy));
+#endif
+            requestor.setsockopt(ZMQ_SNDTIMEO, &dummy, sizeof(dummy));
+            requestor.setsockopt(ZMQ_RCVTIMEO, &dummy, sizeof(dummy));
+            dummy = 0;
+            requestor.setsockopt(ZMQ_LINGER, &dummy, sizeof(dummy));
 
             requestor.connect(target.c_str());
             requestor.send(request);
