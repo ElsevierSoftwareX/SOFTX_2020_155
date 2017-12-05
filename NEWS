@@ -1,6 +1,7 @@
 ==================================================================================================
 Changes for 3.4  
 ==================================================================================================
+- Matlab CDS_PARTS updated to use Matlab version 2015b.
 - Added run_number server to generate configuration/run numbers for frames.  This is a separate proces
   to prepare for future dual data concentrator work.
 - Updating the symmetricom driver to build on kernels from 3.0.8-4.9+.
