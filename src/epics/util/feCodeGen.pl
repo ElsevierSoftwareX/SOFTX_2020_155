@@ -2551,7 +2551,7 @@ if ($rfmTimeSlave > -1) {
 if ($flipSignals) {
   print OUTM "EXTRA_CFLAGS += -DFLIP_SIGNALS=1\n";
 }
-if ($pciNet) {
+if ($pciNet > 0) {
 	if (-e "$pciegenfile") {
 	  print OUTM "#Enable use of PCIe RFM Network Gen 2\n";
 	  print OUTM "DISDIR = /opt/srcdis\n";
