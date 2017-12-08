@@ -205,7 +205,7 @@ rcv:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/rcv
 	/bin/mkdir -p build/rcv
-	(mysrc=$(srcdir); cd build/rcv; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-epics'  && make)
+	(mysrc=$(srcdir); cd build/rcv; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--enable-rcv' '--with-epics'  && make)
 
 # Build frame writer (broadcast receiver) without test points support
 fw:
