@@ -338,6 +338,8 @@ AC_ARG_ENABLE([fw],
 [ --enable-fw                 Build daqd with framewriter specific producer])
 AC_ARG_ENABLE([standiop],
 [ --enable-standiop           Build daqd with the standiop specified producer])
+AC_ARG_ENABLE([rcv],
+[ --enable-rcv                Build daqd with rcv specific producer])
 
 BUILD_MODE=""
 BUILD_MODE_FLAGS=""
@@ -362,6 +364,14 @@ AS_IF([test "x$enable_standiop" != "x" ], [
     PRODUCER_CC="producer_standiop.cc"
     PRODUCER_O="producer_standiop.o"
 ])
+
+AS_IF([test "x$enable_rcv" != "x" ], [
+    BUILD_MODE="rcv"
+    BUILD_MODE_FLAGS="-DDAQD_BUILD_RCV"
+    PRODUCER_CC="producer_rcv.cc"
+    PRODUCER_O="producer_rcv.o"
+])
+
 
 
 AC_SUBST(BUILD_MODE)

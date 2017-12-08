@@ -473,7 +473,7 @@ target_link_libraries(dc_rcv_gds PRIVATE
 		ldastools::framecpp
 		)
 
-add_executable(daqd_rcv ${DAQD_RCV_MAIN_SRC} producer.cc)
+add_executable(daqd_rcv ${DAQD_RCV_MAIN_SRC} producer_rcv.cc)
 target_compile_definitions(daqd_rcv PUBLIC
 		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux
 		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
