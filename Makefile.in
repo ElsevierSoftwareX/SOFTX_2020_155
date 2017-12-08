@@ -212,7 +212,7 @@ fw:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/fw
 	/bin/mkdir -p build/fw
-	(mysrc=$(srcdir); cd build/fw; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-epics' --disable-testpoints  && make)
+	(mysrc=$(srcdir); cd build/fw; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-epics' '--enable-fw' --disable-testpoints  && make)
 
 #
 # Build DMT 1-second frame broadcaster
@@ -255,7 +255,7 @@ standiop:
 	(cd $(srcdir)/src/daqd; autoconf)
 	/bin/rm -rf build/standiop
 	/bin/mkdir -p build/standiop
-	(mysrc=$(srcdir); cd build/standiop; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics' --enable-iop && make)
+	(mysrc=$(srcdir); cd build/standiop; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics' '--enable-standiop' --enable-iop && make)
 
 
 standiop-localtime:
