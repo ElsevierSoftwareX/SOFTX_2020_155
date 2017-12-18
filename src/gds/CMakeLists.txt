@@ -126,6 +126,8 @@ add_custom_command(
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+add_custom_target(_gds_incl_dir DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/gds_includes)
+
 set (GDS_BIN_HDRS "")
 foreach (GDS_HDR_FILE ${GDS_HDR})
     add_custom_command(
@@ -147,6 +149,10 @@ foreach (GDS_CC_HDR_FILE ${GDS_CC_HDR})
     list(APPEND GDS_BIN_HDRS ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${GDS_CC_HDR_FILE})
 endforeach(GDS_CC_HDR_FILE)
 
+add_custom_target(_gds_incl_copy DEPENDS ${GDS_BIN_HDRS})
+add_dependencies(_gds_incl_copy _gds_incl_dir)
+
+SET (GDS_GEN_RPC_HDRS "")
 SET (RPC_BASE gdsrsched rawgapi rtestpoint)
 
 foreach (RPC_TEMPLATE ${RPC_BASE})
@@ -157,6 +163,7 @@ foreach (RPC_TEMPLATE ${RPC_BASE})
             ${CMAKE_CURRENT_BINARY_DIR}/${RPC_TEMPLATE}.h
             )
     set (GDS_SRC "${GDS_SRC}" ${RPC_TEMPLATE_OUT})
+    list(APPEND GDS_GEN_RPC_HDRS ${CMAKE_CURRENT_BINARY_DIR}/${RPC_TEMPLATE}.h)
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${RPC_TEMPLATE}.x
             COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/${RPC_TEMPLATE}.x ${CMAKE_CURRENT_BINARY_DIR}/${RPC_TEMPLATE}.x
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -188,16 +195,10 @@ foreach (RPC_TEMPLATE ${RPC_BASE})
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${RPC_TEMPLATE}.x
             )
-    set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/${RPC_TEMPLATE}_xdr.c
-            PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${RPC_TEMPLATE}.h;${GDS_BIN_HDRS}"
-            )
-    set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/${RPC_TEMPLATE}_clnt.c
-            PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${RPC_TEMPLATE}.h;${GDS_BIN_HDRS}"
-            )
-    set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/${RPC_TEMPLATE}_svc.c
-            PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${RPC_TEMPLATE}.h;${GDS_BIN_HDRS}"
-            )
 endforeach(RPC_TEMPLATE)
+
+add_custom_target(_gds_rpc_gen_hdrs DEPENDS ${GDS_GEN_RPC_HDRS})
+add_dependencies(_gds_rpc_gen_hdrs _gds_incl_copy)
 
 # we do this in two libraries, as the C files need -std=gnu99, the C++ compilers give warnings
 # when building with this, so split the C & C++ portions into seperate pieces
@@ -210,18 +211,17 @@ target_compile_options(gds_c PRIVATE -std=gnu99)
 target_include_directories(gds_c PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_include_directories(gds_c PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/gds_includes)
 target_compile_definitions(gds_c PRIVATE -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size})
+add_dependencies(gds_c _gds_rpc_gen_hdrs)
 
 add_library(gds_cc OBJECT
     ${GDS_CC_SRC}
     )
 target_compile_definitions(gds_cc PRIVATE -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size})
+add_dependencies(gds_cc _gds_rpc_gen_hdrs)
 
 
 add_executable(awgtpman $<TARGET_OBJECTS:gds_c> $<TARGET_OBJECTS:gds_cc> ${CMAKE_CURRENT_BINARY_DIR}/gds_includes)
 target_link_libraries(awgtpman ${CMAKE_THREAD_LIBS_INIT})
-
-#SET( CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-std=gnu99 -I. -I../include -g -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size}" )
-#SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size}" )
 
 
 #######
@@ -249,6 +249,7 @@ target_compile_definitions(gds_daqd_general PRIVATE
 target_include_directories(gds_daqd_general PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
         )
+add_dependencies(gds_daqd_general _gds_rpc_gen_hdrs)
 
 add_library(gds_daqd_testpoint OBJECT
         testpoint.c)
@@ -257,6 +258,7 @@ target_compile_definitions(gds_daqd_testpoint PRIVATE
 target_include_directories(gds_daqd_testpoint PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
         )
+add_dependencies(gds_daqd_testpoint _gds_rpc_gen_hdrs)
 
 add_library(gds_daqd_libs STATIC $<TARGET_OBJECTS:gds_daqd_general> $<TARGET_OBJECTS:gds_daqd_testpoint>)
 add_library(gds::daqd ALIAS gds_daqd_libs)
