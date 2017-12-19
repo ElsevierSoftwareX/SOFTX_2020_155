@@ -8,16 +8,17 @@ The current effort is to update the daqd to be built via cmake, the main motivat
 
 At this time the RCG and real time modules are not being converted to cmake.
 
-As mentioned to build daqd for production the autotools methods should probably still be used (at least until the cmake
-build supports all the required targets).
-
 Building daqd via cmake.
 
 1. create a build directory
 2. change directory to the build directory
 3. Make sure that there are package config files available for framecpp & EPICS
 4. cmake <path to advLigoRTS>/
-5. make
+5. make -DCMAKE_BUILD_TYPE=RelWithDebInfo -j 8
+
+Notes:
+RelWithDebInfo does a release build with debug.  On gcc this means -O -g.
+-j 8 is to do parallel builds with 8 cores.  Replace the 8 with the number of cores on your build box.
 
 The following components will be built:
 
@@ -26,6 +27,8 @@ daqd_fw
 daqd_dc_mx
 daqd_rcv
 daqd_mx_symm
+daqd_standiop
+daqd_bcst
 nds
 dataviewer (in its many pieces)
 mx_stream
