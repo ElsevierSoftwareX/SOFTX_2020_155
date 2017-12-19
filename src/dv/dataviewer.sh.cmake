@@ -11,6 +11,10 @@ else
 fi
 export GRACE_HOME
 export LANG=C
+if [ -z "${LIGONDSIP}" ]; then
+    echo "Your environment is not setup.  Plese set LIGONDSIP"
+    exit 1
+fi
 PATH=${PATH}:${GRACE_HOME}/bin
 $DVPATH/dv -s ${LIGONDSIP} -a $$ -b $DVPATH $*
 /bin/rm -f -r /tmp/$$DC
