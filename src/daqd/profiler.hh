@@ -18,6 +18,8 @@ class profile_c {
   /// Thread to collect program statistics
   void *profiler ();
   static void *profiler_static (void *a) { return ((profile_c *)a) -> profiler (); };
+
+  void additional_checks();
  public:
 
   profile_c(string pname) :

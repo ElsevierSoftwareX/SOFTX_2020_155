@@ -14,6 +14,9 @@
 #include <sys/syscall.h>
 #include <sys/prctl.h>
 
+#include <deque>
+#include <map>
+
 #ifdef USE_LDAS_VERSION
 #include "ldas/ldasconfig.hh"
 #endif
@@ -119,6 +122,14 @@ typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
 #endif
 #endif
 
+namespace FrameCPP {
+    namespace Common {
+        // forward declaration needed to handle writting of checksum files
+        class MD5SumFilter;
+
+    }
+}
+
 /// Daqd server main class. This is a top-level class, which encloses various objects
 /// representing threads of execution.
 class daqd_c {
@@ -131,11 +142,26 @@ class daqd_c {
     frame_buf_size = 10 * 1024 * 1024 // Should it be calculated based on saved data size?
   };
 
+ enum frame_type {
+    raw_frame,
+    science_frame,
+    minute_trend_frame,
+    second_trend_frame
+ };
+
  private:
+    typedef std::pair<std::string, std::string> _string_pair;
+    typedef std::pair<std::string, std::string> _checksum_pair;
+    typedef std::map<daqd_c::frame_type, _string_pair> _path_transform;
     void *_framer_work_queue;
     void *_science_framer_work_queue;
 
     int _configuration_number;
+
+    pthread_mutex_t _checksum_lock;
+    std::deque<_checksum_pair> _checksum_queue;
+    _path_transform _checksum_file_transform;
+    bool _checksum_file_transform_initted;
   /*
     Locking on the instance of the class can be done with the
     scoped locking.
@@ -228,12 +254,15 @@ class daqd_c {
     , controller_dcu(DCU_ID_SUS_1), avoid_reconnect(0)
     , tp_allow(-1), no_myrinet(0), allow_tpman_connect_failure(0), no_compression(0)
     , symm_gps_offset(0), cycle_delay(4), old_raw_minute_trend_dirs(""), enable_fckrs(false)
+    , _checksum_file_transform_initted(false)
+
     {
       // Initialize frame saver startup synchronization semaphore
       sem_init (&frame_saver_sem, 0, 1);
       sem_init (&science_frame_saver_sem, 0, 1);
 
       pthread_mutex_init (&bm, NULL);
+      pthread_mutex_init (&_checksum_lock, NULL);
 
       // Set password initially to empty string
       password [0] = 0;
@@ -285,6 +314,7 @@ class daqd_c {
   ~daqd_c () {
     sem_destroy (&frame_saver_sem);
     sem_destroy (&science_frame_saver_sem);
+    pthread_mutex_destroy (&_checksum_lock);
     pthread_mutex_destroy (&bm);
   };
 
@@ -327,6 +357,12 @@ class daqd_c {
   /// science-mode frame saver io thread
   static void *science_framer_io_static (void *a) { return ((daqd_c *)a) -> framer_io(1); };
 
+
+  /// Queue frame file checksums for output
+  void queue_frame_checksum(const char *frame_filename, daqd_c::frame_type type,
+                            FrameCPP::Common::MD5SumFilter &md5sum);
+  /// Retrieve a checksum entry from the checksum queue if one is available.
+  bool dequeue_frame_checksum(std::string& filename, std::string& checksum);
 #ifdef GDS_TESTPOINTS
   int num_gds_channels;
   int num_gds_channel_aliases;

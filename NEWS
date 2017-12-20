@@ -1,6 +1,13 @@
 ==================================================================================================
 Changes for 3.4  
 ==================================================================================================
+- Changed method for setting compile options to use Dolphin Gen2 cards and Long Range PCIe.
+- Matlab CDS_PARTS updated to use Matlab version 2015b.
+- Added run_number server to generate configuration/run numbers for frames.  This is a separate proces
+  to prepare for future dual data concentrator work.
+- Updating the symmetricom driver to build on kernels from 3.0.8-4.9+.
+- Symmetricom driver exposes /proc/gps_offset which can be used to set the appropriate time adjustment
+  to handle leap seconds and year changes.
 - Bug Fix (1085): Default daqd behavior is to disable md5 checksum file creation
 - Bug Fix (1098): Fix EZ_CA_READ/WRITE calls to work with EPICS Sequencer 2.2
 - Reduce lockup on model shutdown by removing erroneous printkl() in moduleLoad.c (r4501)

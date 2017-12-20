@@ -18,7 +18,7 @@ Library {
       $ObjectID		      2
       $ClassName	      "Simulink.WindowInfo"
       IsActive		      [1]
-      Location		      [694.0, 33.0, 1036.0, 1047.0]
+      Location		      [404.0, 23.0, 1036.0, 877.0]
       Object {
 	$PropName		"ModelBrowserInfo"
 	$ObjectID		3
@@ -42,9 +42,9 @@ Library {
 	IsActive		[1]
 	ViewObjType		"SimulinkTopLevel"
 	LoadSaveID		"0"
-	Extents			[1002.0, 885.0]
+	Extents			[1002.0, 715.0]
 	ZoomFactor		[1.4799999999999998]
-	Offset			[-5.6843418860808015e-14, -5.6843418860808015e-14]
+	Offset			[1.1368683772161603e-13, 0.0]
       }
     }
   }
@@ -54,9 +54,9 @@ Library {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Oct 19 14:38:02 2016"
-  RTWModifiedTimeStamp	  398788668
-  ModelVersionFormat	  "1.%<AutoIncrement:392>"
+  LastModifiedDate	  "Tue Dec 05 12:49:43 2017"
+  RTWModifiedTimeStamp	  434377914
+  ModelVersionFormat	  "1.%<AutoIncrement:393>"
   ConfigurationManager	  "none"
   SampleTimeColors	  off
   SampleTimeAnnotations	  off
@@ -932,7 +932,7 @@ Library {
   }
   System {
     Name		    "CDS_PARTS"
-    Location		    [694, 33, 1730, 1080]
+    Location		    [404, 23, 1440, 900]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -5465,8 +5465,9 @@ Library {
     }
     Annotation {
       SID		      "346"
-      Name		      "Matlab Parts Library for Use with aLIGO Real-time Code Generator - V3.3"
-      Position		      [330, 30, 876, 50]
+      Name		      "Matlab Parts Library for Use with aLIGO Real-time Code Generator - V3.4\nDefault Matlab Version is "
+      "now 2015b"
+      Position		      [330, 30, 876, 68]
       InternalMargins	      [0, 0, 0, 0]
       FixedHeight	      off
       FixedWidth	      off

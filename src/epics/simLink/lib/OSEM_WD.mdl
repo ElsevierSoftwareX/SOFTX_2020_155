@@ -1,21 +1,95 @@
 Library {
   Name			  "OSEM_WD"
-  Version		  7.5
+  Version		  8.6
   MdlSubVersion		  0
-  SavedCharacterEncoding  "US-ASCII"
+  SavedCharacterEncoding  "ISO-8859-1"
   LibraryType		  "BlockLibrary"
-  SaveDefaultBlockParams  on
   ScopeRefreshTime	  0.035000
   OverrideScopeRefreshTime on
   DisableAllScopes	  off
+  FPTRunName		  "Run 1"
   MaxMDLFileLineLength	  120
-  Created		  "Wed Mar  7 14:52:08 2012"
+  Object {
+    $PropName		    "BdWindowsInfo"
+    $ObjectID		    1
+    $ClassName		    "Simulink.BDWindowsInfo"
+    Array {
+      Type		      "Simulink.WindowInfo"
+      Dimension		      2
+      Object {
+	$ObjectID		2
+	IsActive		[0]
+	Location		[0.0, 23.0, 1440.0, 877.0]
+	Object {
+	  $PropName		  "ModelBrowserInfo"
+	  $ObjectID		  3
+	  $ClassName		  "Simulink.ModelBrowserInfo"
+	  Visible		  [0]
+	  DockPosition		  "Left"
+	  Width			  [50]
+	  Height		  [50]
+	  Filter		  [9]
+	}
+	Object {
+	  $PropName		  "ExplorerBarInfo"
+	  $ObjectID		  4
+	  $ClassName		  "Simulink.ExplorerBarInfo"
+	  Visible		  [1]
+	}
+	Object {
+	  $PropName		  "EditorsInfo"
+	  $ObjectID		  5
+	  $ClassName		  "Simulink.EditorInfo"
+	  IsActive		  [1]
+	  ViewObjType		  "SimulinkSubsys"
+	  LoadSaveID		  "1"
+	  Extents		  [1406.0, 715.0]
+	  ZoomFactor		  [1.0]
+	  Offset		  [0.0, 0.0]
+	}
+      }
+      Object {
+	$ObjectID		6
+	IsActive		[1]
+	Location		[820.0, 462.0, 620.0, 438.0]
+	Object {
+	  $PropName		  "ModelBrowserInfo"
+	  $ObjectID		  7
+	  $ClassName		  "Simulink.ModelBrowserInfo"
+	  Visible		  [0]
+	  DockPosition		  "Left"
+	  Width			  [50]
+	  Height		  [50]
+	  Filter		  [9]
+	}
+	Object {
+	  $PropName		  "ExplorerBarInfo"
+	  $ObjectID		  8
+	  $ClassName		  "Simulink.ExplorerBarInfo"
+	  Visible		  [1]
+	}
+	Object {
+	  $PropName		  "EditorsInfo"
+	  $ObjectID		  9
+	  $ClassName		  "Simulink.EditorInfo"
+	  IsActive		  [1]
+	  ViewObjType		  "SimulinkTopLevel"
+	  LoadSaveID		  "0"
+	  Extents		  [586.0, 276.0]
+	  ZoomFactor		  [1.0]
+	  Offset		  [0.0, 0.0]
+	}
+      }
+      PropName		      "WindowsInfo"
+    }
+  }
+  Created		  "Wed Mar 07 14:52:08 2012"
   Creator		  "controls"
   UpdateHistory		  "UpdateHistoryNever"
   ModifiedByFormat	  "%<Auto>"
-  LastModifiedBy	  "controls"
+  LastModifiedBy	  "rolf"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Wed Mar 14 16:56:22 2012"
+  LastModifiedDate	  "Tue Dec 05 12:48:35 2017"
   RTWModifiedTimeStamp	  253644974
   ModelVersionFormat	  "1.%<AutoIncrement:17>"
   ConfigurationManager	  "none"
@@ -25,6 +99,7 @@ Library {
   WideLines		  off
   ShowLineDimensions	  off
   ShowPortDataTypes	  off
+  ShowDesignRanges	  off
   ShowLoopsOnError	  on
   IgnoreBidirectionalLines off
   ShowStorageClass	  off
@@ -34,6 +109,8 @@ Library {
   SortedOrder		  off
   ExecutionContextIcon	  off
   ShowLinearizationAnnotations on
+  ShowVisualizeInsertedRTB on
+  ShowMarkup		  on
   BlockNameDataTip	  off
   BlockParametersDataTip  off
   BlockDescriptionStringDataTip	off
@@ -42,21 +119,14 @@ Library {
   BrowserShowLibraryLinks off
   BrowserLookUnderMasks	  off
   SimulationMode	  "normal"
+  PauseTimes		  "5"
+  NumberOfSteps		  1
+  SnapshotBufferSize	  10
+  SnapshotInterval	  10
+  NumberOfLastSnapshots	  0
   LinearizationMsg	  "none"
   Profile		  off
   ParamWorkspaceSource	  "MATLABWorkspace"
-  RecordCoverage	  off
-  CovSaveName		  "covdata"
-  CovMetricSettings	  "dw"
-  CovNameIncrementing	  off
-  CovHtmlReporting	  on
-  CovForceBlockReductionOff on
-  covSaveCumulativeToWorkspaceVar on
-  CovSaveSingleToWorkspaceVar on
-  CovCumulativeReport	  off
-  CovReportOnPause	  on
-  CovModelRefEnable	  "Off"
-  CovExternalEMLEnable	  off
   ExtModeBatchMode	  off
   ExtModeEnableFloating	  on
   ExtModeTrigType	  "manual"
@@ -84,14 +154,14 @@ Library {
     Type		    "Handle"
     Dimension		    1
     Simulink.ConfigSet {
-      $ObjectID		      1
-      Version		      "1.10.0"
+      $ObjectID		      10
+      Version		      "1.15.1"
       Array {
 	Type			"Handle"
-	Dimension		8
+	Dimension		9
 	Simulink.SolverCC {
-	  $ObjectID		  2
-	  Version		  "1.10.0"
+	  $ObjectID		  11
+	  Version		  "1.15.1"
 	  StartTime		  "0.0"
 	  StopTime		  "10.0"
 	  AbsTol		  "auto"
@@ -109,6 +179,8 @@ Library {
 	  MaxConsecutiveMinStep	  "1"
 	  RelTol		  "1e-3"
 	  SolverMode		  "Auto"
+	  EnableConcurrentExecution off
+	  ConcurrentTasks	  off
 	  Solver		  "ode45"
 	  SolverName		  "ode45"
 	  SolverJacobianMethodControl "auto"
@@ -116,6 +188,8 @@ Library {
 	  ZeroCrossControl	  "UseLocalSettings"
 	  ZeroCrossAlgorithm	  "Nonadaptive"
 	  AlgebraicLoopSolver	  "TrustRegion"
+	  SolverInfoToggleStatus  off
+	  IsAutoAppliedInSIP	  off
 	  SolverResetMethod	  "Fast"
 	  PositivePriorityOrder	  off
 	  AutoInsertRateTranBlk	  off
@@ -123,8 +197,8 @@ Library {
 	  InsertRTBMode		  "Whenever possible"
 	}
 	Simulink.DataIOCC {
-	  $ObjectID		  3
-	  Version		  "1.10.0"
+	  $ObjectID		  12
+	  Version		  "1.15.1"
 	  Decimation		  "1"
 	  ExternalInput		  "[t, u]"
 	  FinalStateName	  "xFinal"
@@ -136,11 +210,15 @@ Library {
 	  SaveFinalState	  off
 	  SaveCompleteFinalSimState off
 	  SaveFormat		  "Array"
+	  SignalLoggingSaveFormat "ModelDataLogs"
 	  SaveOutput		  on
 	  SaveState		  off
 	  SignalLogging		  on
 	  DSMLogging		  on
 	  InspectSignalLogs	  off
+	  VisualizeSimOutput	  on
+	  StreamToWorkspace	  off
+	  StreamVariableName	  "streamout"
 	  SaveTime		  on
 	  ReturnWorkspaceOutputs  off
 	  StateSaveName		  "xout"
@@ -152,10 +230,11 @@ Library {
 	  OutputTimes		  "[]"
 	  ReturnWorkspaceOutputsName "out"
 	  Refine		  "1"
+	  LoggingIntervals	  "[-inf, inf]"
 	}
 	Simulink.OptimizationCC {
-	  $ObjectID		  4
-	  Version		  "1.10.0"
+	  $ObjectID		  13
+	  Version		  "1.15.1"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    7
@@ -171,28 +250,31 @@ Library {
 	  BlockReduction	  on
 	  BooleanDataType	  on
 	  ConditionallyExecuteInputs on
-	  InlineParams		  off
-	  UseIntDivNetSlope	  off
+	  DefaultParameterBehavior "Tunable"
+	  UseDivisionForNetSlopeComputation "off"
+	  UseFloatMulNetSlope	  off
+	  DefaultUnderspecifiedDataType	"double"
+	  UseSpecifiedMinMax	  off
 	  InlineInvariantSignals  off
 	  OptimizeBlockIOStorage  on
 	  BufferReuse		  on
 	  EnhancedBackFolding	  off
+	  CachingGlobalReferences off
+	  GlobalBufferReuse	  on
 	  StrengthReduction	  off
-	  EnforceIntegerDowncast  on
 	  ExpressionFolding	  on
 	  BooleansAsBitfields	  off
 	  BitfieldContainerType	  "uint_T"
 	  EnableMemcpy		  on
 	  MemcpyThreshold	  64
 	  PassReuseOutputArgsAs	  "Structure reference"
+	  PassReuseOutputArgsThreshold 12
 	  ExpressionDepthLimit	  2147483647
-	  FoldNonRolledExpr	  on
 	  LocalBlockOutputs	  on
 	  RollThreshold		  5
-	  SystemCodeInlineAuto	  off
 	  StateBitsets		  off
 	  DataBitsets		  off
-	  UseTempVars		  off
+	  ActiveStateOutputEnumStorageType "Native Integer"
 	  ZeroExternalMemoryAtStartup on
 	  ZeroInternalMemoryAtStartup on
 	  InitFltsAndDblsToZero	  off
@@ -203,12 +285,12 @@ Library {
 	  LifeSpan		  "inf"
 	  MaxStackSize		  "Inherit from target"
 	  BufferReusableBoundary  on
-	  SimCompilerOptimization "Off"
+	  SimCompilerOptimization "off"
 	  AccelVerboseBuild	  off
 	}
 	Simulink.DebuggingCC {
-	  $ObjectID		  5
-	  Version		  "1.10.0"
+	  $ObjectID		  14
+	  Version		  "1.15.1"
 	  RTPrefix		  "error"
 	  ConsistencyChecking	  "none"
 	  ArrayBoundsChecking	  "none"
@@ -231,9 +313,10 @@ Library {
 	  MinStepSizeMsg	  "warning"
 	  TimeAdjustmentMsg	  "none"
 	  MaxConsecutiveZCsMsg	  "error"
+	  MaskedZcDiagnostic	  "warning"
+	  IgnoredZcDiagnostic	  "warning"
 	  SolverPrmCheckMsg	  "warning"
 	  InheritedTsInSrcMsg	  "warning"
-	  DiscreteInheritContinuousMsg "warning"
 	  MultiTaskDSMMsg	  "error"
 	  MultiTaskCondExecSysMsg "error"
 	  MultiTaskRateTransMsg	  "error"
@@ -255,54 +338,80 @@ Library {
 	  UnnecessaryDatatypeConvMsg "none"
 	  VectorMatrixConversionMsg "none"
 	  InvalidFcnCallConnMsg	  "error"
-	  FcnCallInpInsideContextMsg "Use local settings"
+	  FcnCallInpInsideContextMsg "UseLocalSettings"
 	  SignalLabelMismatchMsg  "none"
 	  UnconnectedInputMsg	  "warning"
 	  UnconnectedOutputMsg	  "warning"
 	  UnconnectedLineMsg	  "warning"
 	  SFcnCompatibilityMsg	  "none"
+	  FrameProcessingCompatibilityMsg "error"
 	  UniqueDataStoreMsg	  "none"
 	  BusObjectLabelMismatch  "warning"
 	  RootOutportRequireBusObject "warning"
 	  AssertControl		  "UseLocalSettings"
-	  EnableOverflowDetection off
+	  AllowSymbolicDim	  off
 	  ModelReferenceIOMsg	  "none"
+	  ModelReferenceMultiInstanceNormalModeStructChecksumCheck "error"
 	  ModelReferenceVersionMismatchMessage "none"
 	  ModelReferenceIOMismatchMessage "none"
-	  ModelReferenceCSMismatchMessage "none"
 	  UnknownTsInhSupMsg	  "warning"
 	  ModelReferenceDataLoggingMessage "warning"
 	  ModelReferenceSymbolNameMessage "warning"
 	  ModelReferenceExtraNoncontSigs "error"
 	  StateNameClashWarn	  "warning"
 	  SimStateInterfaceChecksumMismatchMsg "warning"
+	  SimStateOlderReleaseMsg "error"
+	  InitInArrayFormatMsg	  "warning"
 	  StrictBusMsg		  "ErrorLevel1"
 	  BusNameAdapt		  "WarnAndRepair"
 	  NonBusSignalsTreatedAsBus "none"
-	  LoggingUnavailableSignals "error"
+	  SymbolicDimMinMaxWarning "warning"
 	  BlockIODiagnostic	  "none"
+	  SFUnusedDataAndEventsDiag "warning"
+	  SFUnexpectedBacktrackingDiag "warning"
+	  SFInvalidInputDataAccessInChartInitDiag "warning"
+	  SFNoUnconditionalDefaultTransitionDiag "warning"
+	  SFTransitionOutsideNaturalParentDiag "warning"
+	  SFUnconditionalTransitionShadowingDiag "warning"
+	  SFUndirectedBroadcastEventsDiag "warning"
+	  SFTransitionActionBeforeConditionDiag	"warning"
+	  SFOutputUsedAsStateInMooreChartDiag "error"
+	  IntegerSaturationMsg	  "warning"
 	}
 	Simulink.HardwareCC {
-	  $ObjectID		  6
-	  Version		  "1.10.0"
+	  $ObjectID		  15
+	  Version		  "1.15.1"
 	  ProdBitPerChar	  8
 	  ProdBitPerShort	  16
 	  ProdBitPerInt		  32
 	  ProdBitPerLong	  32
+	  ProdBitPerLongLong	  64
+	  ProdBitPerFloat	  32
+	  ProdBitPerDouble	  64
+	  ProdBitPerPointer	  32
+	  ProdLargestAtomicInteger "Char"
+	  ProdLargestAtomicFloat  "None"
 	  ProdIntDivRoundTo	  "Undefined"
 	  ProdEndianess		  "Unspecified"
 	  ProdWordSize		  32
 	  ProdShiftRightIntArith  on
+	  ProdLongLongMode	  off
 	  ProdHWDeviceType	  "32-bit Generic"
 	  TargetBitPerChar	  8
 	  TargetBitPerShort	  16
 	  TargetBitPerInt	  32
 	  TargetBitPerLong	  32
+	  TargetBitPerLongLong	  64
+	  TargetBitPerFloat	  32
+	  TargetBitPerDouble	  64
+	  TargetBitPerPointer	  32
+	  TargetLargestAtomicInteger "Char"
+	  TargetLargestAtomicFloat "None"
 	  TargetShiftRightIntArith on
+	  TargetLongLongMode	  off
 	  TargetIntDivRoundTo	  "Undefined"
 	  TargetEndianess	  "Unspecified"
 	  TargetWordSize	  32
-	  TargetTypeEmulationWarnSuppressLevel 0
 	  TargetPreprocMaxBitsSint 32
 	  TargetPreprocMaxBitsUint 32
 	  TargetHWDeviceType	  "Specified"
@@ -310,11 +419,13 @@ Library {
 	  ProdEqTarget		  on
 	}
 	Simulink.ModelReferenceCC {
-	  $ObjectID		  7
-	  Version		  "1.10.0"
+	  $ObjectID		  16
+	  Version		  "1.15.1"
 	  UpdateModelReferenceTargets "IfOutOfDateOrStructuralChange"
+	  EnableRefExpFcnMdlSchedulingChecks on
 	  CheckModelReferenceTargetMessage "error"
 	  EnableParallelModelReferenceBuilds off
+	  ParallelModelReferenceErrorOnInvalidPool on
 	  ParallelModelReferenceMATLABWorkerInit "None"
 	  ModelReferenceNumInstancesAllowed "Multi"
 	  PropagateVarSize	  "Infer from blocks in model"
@@ -324,22 +435,20 @@ Library {
 	  SupportModelReferenceSimTargetCustomCode off
 	}
 	Simulink.SFSimCC {
-	  $ObjectID		  8
-	  Version		  "1.10.0"
-	  SFSimEnableDebug	  on
-	  SFSimOverflowDetection  on
+	  $ObjectID		  17
+	  Version		  "1.15.1"
 	  SFSimEcho		  on
-	  SimBlas		  on
 	  SimCtrlC		  on
-	  SimExtrinsic		  on
 	  SimIntegrity		  on
 	  SimUseLocalCustomCode	  off
+	  SimParseCustomCode	  on
 	  SimBuildMode		  "sf_incremental_build"
+	  SimGenImportedTypeDefs  off
 	}
 	Simulink.RTWCC {
 	  $BackupClass		  "Simulink.RTWCC"
-	  $ObjectID		  9
-	  Version		  "1.10.0"
+	  $ObjectID		  18
+	  Version		  "1.15.1"
 	  Array {
 	    Type		    "Cell"
 	    Dimension		    6
@@ -352,10 +461,14 @@ Library {
 	    PropName		    "DisabledProps"
 	  }
 	  SystemTargetFile	  "grt.tlc"
+	  TLCOptions		  ""
 	  GenCodeOnly		  off
 	  MakeCommand		  "make_rtw"
 	  GenerateMakefile	  on
+	  PackageGeneratedCodeAndArtifacts off
 	  TemplateMakefile	  "grt_default_tmf"
+	  PostCodeGenCommand	  ""
+	  Description		  ""
 	  GenerateReport	  off
 	  SaveLog		  off
 	  RTWVerbose		  on
@@ -364,31 +477,40 @@ Library {
 	  TLCDebug		  off
 	  TLCCoverage		  off
 	  TLCAssert		  off
-	  ProcessScriptMode	  "Default"
-	  ConfigurationMode	  "Optimized"
-	  ConfigAtBuild		  off
 	  RTWUseLocalCustomCode	  off
 	  RTWUseSimCustomCode	  off
+	  Toolchain		  "Automatically locate an installed toolchain"
+	  BuildConfiguration	  "Faster Builds"
 	  IncludeHyperlinkInReport off
 	  LaunchReport		  off
+	  PortableWordSizes	  off
+	  CreateSILPILBlock	  "None"
+	  CodeExecutionProfiling  off
+	  CodeExecutionProfileVariable "executionProfile"
+	  CodeProfilingSaveOptions "SummaryOnly"
+	  CodeProfilingInstrumentation off
+	  SILDebugging		  off
 	  TargetLang		  "C"
 	  IncludeBusHierarchyInRTWFileBlockHierarchyMap	off
-	  IncludeERTFirstTime	  off
 	  GenerateTraceInfo	  off
 	  GenerateTraceReport	  off
 	  GenerateTraceReportSl	  off
 	  GenerateTraceReportSf	  off
 	  GenerateTraceReportEml  off
-	  GenerateCodeInfo	  off
-	  RTWCompilerOptimization "Off"
+	  GenerateWebview	  off
+	  GenerateCodeMetricsReport off
+	  GenerateCodeReplacementReport	off
+	  GenerateMissedCodeReplacementReport off
+	  RTWCompilerOptimization "off"
+	  RTWCustomCompilerOptimizations ""
 	  CheckMdlBeforeBuild	  "Off"
-	  CustomRebuildMode	  "OnUpdate"
+	  SharedConstantsCachingThreshold 1024
 	  Array {
 	    Type		    "Handle"
 	    Dimension		    2
 	    Simulink.CodeAppCC {
-	      $ObjectID		      10
-	      Version		      "1.10.0"
+	      $ObjectID		      19
+	      Version		      "1.15.1"
 	      Array {
 		Type			"Cell"
 		Dimension		19
@@ -415,6 +537,7 @@ Library {
 	      }
 	      ForceParamTrailComments off
 	      GenerateComments	      on
+	      CommentStyle	      "Auto"
 	      IgnoreCustomStorageClasses on
 	      IgnoreTestpoints	      off
 	      IncHierarchyInIds	      off
@@ -422,74 +545,81 @@ Library {
 	      PreserveName	      off
 	      PreserveNameWithParent  off
 	      ShowEliminatedStatement off
+	      OperatorAnnotations     off
 	      IncAutoGenComments      off
 	      SimulinkDataObjDesc     off
 	      SFDataObjDesc	      off
+	      MATLABFcnDesc	      off
 	      IncDataTypeInIds	      off
 	      MangleLength	      1
 	      CustomSymbolStrGlobalVar "$R$N$M"
-	      CustomSymbolStrType     "$N$R$M"
+	      CustomSymbolStrType     "$N$R$M_T"
 	      CustomSymbolStrField    "$N$M"
 	      CustomSymbolStrFcn      "$R$N$M$F"
 	      CustomSymbolStrFcnArg   "rt$I$N$M"
 	      CustomSymbolStrBlkIO    "rtb_$N$M"
 	      CustomSymbolStrTmpVar   "$N$M"
 	      CustomSymbolStrMacro    "$R$N$M"
+	      CustomSymbolStrUtil     "$N$C"
 	      DefineNamingRule	      "None"
 	      ParamNamingRule	      "None"
 	      SignalNamingRule	      "None"
 	      InsertBlockDesc	      off
+	      InsertPolySpaceComments off
 	      SimulinkBlockComments   on
+	      MATLABSourceComments    off
 	      EnableCustomComments    off
+	      InternalIdentifier      "Shortened"
 	      InlinedPrmAccess	      "Literals"
 	      ReqsInCode	      off
 	      UseSimReservedNames     off
 	    }
 	    Simulink.GRTTargetCC {
 	      $BackupClass	      "Simulink.TargetCC"
-	      $ObjectID		      11
-	      Version		      "1.10.0"
+	      $ObjectID		      20
+	      Version		      "1.15.1"
 	      Array {
 		Type			"Cell"
-		Dimension		17
+		Dimension		15
 		Cell			"GeneratePreprocessorConditionals"
 		Cell			"IncludeMdlTerminateFcn"
-		Cell			"CombineOutputUpdateFcns"
+		Cell			"SupportNonInlinedSFcns"
 		Cell			"SuppressErrorStatus"
 		Cell			"ERTCustomFileBanners"
 		Cell			"GenerateSampleERTMain"
 		Cell			"GenerateTestInterfaces"
 		Cell			"ModelStepFunctionPrototypeControlCompliant"
 		Cell			"CPPClassGenCompliant"
-		Cell			"MultiInstanceERTCode"
+		Cell			"PortableWordSizes"
 		Cell			"PurelyIntegerCode"
-		Cell			"SupportNonFinite"
+		Cell			"GenerateAllocFcn"
 		Cell			"SupportComplex"
 		Cell			"SupportAbsoluteTime"
 		Cell			"SupportContinuousTime"
-		Cell			"SupportNonInlinedSFcns"
-		Cell			"PortableWordSizes"
 		PropName		"DisabledProps"
 	      }
 	      TargetFcnLib	      "ansi_tfl_table_tmw.mat"
 	      TargetLibSuffix	      ""
 	      TargetPreCompLibLocation ""
-	      TargetFunctionLibrary   "ANSI_C"
+	      GenFloatMathFcnCalls    "NOT IN USE"
+	      TargetLangStandard      "C89/C90 (ANSI)"
+	      CodeReplacementLibrary  "None"
 	      UtilityFuncGeneration   "Auto"
 	      ERTMultiwordTypeDef     "System defined"
-	      ERTCodeCoverageTool     "None"
 	      ERTMultiwordLength      256
 	      MultiwordLength	      2048
 	      GenerateFullHeader      on
+	      InferredTypesCompatibility off
 	      GenerateSampleERTMain   off
 	      GenerateTestInterfaces  off
-	      IsPILTarget	      off
 	      ModelReferenceCompliant on
 	      ParMdlRefBuildCompliant on
 	      CompOptLevelCompliant   on
+	      ConcurrentExecutionCompliant on
 	      IncludeMdlTerminateFcn  on
 	      GeneratePreprocessorConditionals "Disable all"
 	      CombineOutputUpdateFcns off
+	      CombineSignalStateStructs	off
 	      SuppressErrorStatus     off
 	      ERTFirstTimeCompliant   off
 	      IncludeFileDelimiter    "Auto"
@@ -498,18 +628,23 @@ Library {
 	      LogVarNameModifier      "rt_"
 	      MatFileLogging	      on
 	      MultiInstanceERTCode    off
+	      CodeInterfacePackaging  "Nonreusable function"
 	      SupportNonFinite	      on
 	      SupportComplex	      on
 	      PurelyIntegerCode	      off
 	      SupportContinuousTime   on
 	      SupportNonInlinedSFcns  on
 	      SupportVariableSizeSignals off
-	      EnableShiftOperators    on
 	      ParenthesesLevel	      "Nominal"
-	      PortableWordSizes	      off
+	      CastingMode	      "Nominal"
+	      MATLABClassNameForMDSCustomization "Simulink.SoftwareTarget.GRTCustomization"
 	      ModelStepFunctionPrototypeControlCompliant off
-	      CPPClassGenCompliant    off
+	      CPPClassGenCompliant    on
 	      AutosarCompliant	      off
+	      GRTInterface	      on
+	      GenerateAllocFcn	      off
+	      UseToolchainInfoCompliant	on
+	      GenerateSharedConstants on
 	      UseMalloc		      off
 	      ExtMode		      off
 	      ExtModeStaticAlloc      off
@@ -521,19 +656,49 @@ Library {
 	      RTWCAPISignals	      off
 	      RTWCAPIParams	      off
 	      RTWCAPIStates	      off
+	      RTWCAPIRootIO	      off
 	      GenerateASAP2	      off
+	      MultiInstanceErrorCode  "Error"
 	    }
 	    PropName		    "Components"
 	  }
+	}
+	SlCovCC.ConfigComp {
+	  $ObjectID		  21
+	  Version		  "1.15.1"
+	  Description		  "Simulink Coverage Configuration Component"
+	  Name			  "Simulink Coverage"
+	  RecordCoverage	  off
+	  CovPath		  "/"
+	  CovSaveName		  "covdata"
+	  CovMetricSettings	  "dw"
+	  CovNameIncrementing	  off
+	  CovHtmlReporting	  on
+	  CovForceBlockReductionOff on
+	  CovEnableCumulative	  on
+	  CovSaveCumulativeToWorkspaceVar on
+	  CovSaveSingleToWorkspaceVar on
+	  CovCumulativeVarName	  "covCumulativeData"
+	  CovCumulativeReport	  off
+	  CovReportOnPause	  on
+	  CovModelRefEnable	  "Off"
+	  CovExternalEMLEnable	  off
+	  CovSFcnEnable		  on
+	  CovBoundaryAbsTol	  1e-05
+	  CovBoundaryRelTol	  0.01
+	  CovUseTimeInterval	  off
+	  CovStartTime		  0
+	  CovStopTime		  0
 	}
 	PropName		"Components"
       }
       Name		      "Configuration"
       CurrentDlgPage	      "Solver"
-      ConfigPrmDlgPosition    " [ 2120, 405, 3000, 1035 ] "
+      ConfigPrmDlgPosition     [ 2120, 405, 3000, 1035 ] 
     }
     PropName		    "ConfigurationSets"
   }
+  ExplicitPartitioning	  off
   BlockDefaults {
     ForegroundColor	    "black"
     BackgroundColor	    "white"
@@ -565,6 +730,25 @@ Library {
     FontWeight		    "normal"
     FontAngle		    "normal"
   }
+  MaskDefaults {
+    SelfModifiable	    "off"
+    IconFrame		    "on"
+    IconOpaque		    "on"
+    RunInitForIconRedraw    "off"
+    IconRotate		    "none"
+    PortRotate		    "default"
+    IconUnits		    "autoscale"
+  }
+  MaskParameterDefaults {
+    Evaluate		    "on"
+    Tunable		    "on"
+    NeverSave		    "off"
+    Internal		    "off"
+    ReadOnly		    "off"
+    Enabled		    "on"
+    Visible		    "on"
+    ToolTip		    "on"
+  }
   BlockParameterDefaults {
     Block {
       BlockType		      Constant
@@ -573,10 +757,6 @@ Library {
       SamplingMode	      "Sample based"
       OutMin		      "[]"
       OutMax		      "[]"
-      OutDataTypeMode	      "Inherit from 'Constant value'"
-      OutDataType	      "fixdt(1,16,0)"
-      ConRadixGroup	      "Use specified scaling"
-      OutScaling	      "[]"
       OutDataTypeStr	      "Inherit: Inherit from 'Constant value'"
       LockScale		      off
       SampleTime	      "inf"
@@ -592,19 +772,15 @@ Library {
     Block {
       BlockType		      Inport
       Port		      "1"
-      UseBusObject	      off
-      BusObject		      "BusObject"
+      OutputFunctionCall      off
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: auto"
+      LockScale		      off
       BusOutputAsStruct	      off
       PortDimensions	      "-1"
       VarSizeSig	      "Inherit"
       SampleTime	      "-1"
-      OutMin		      "[]"
-      OutMax		      "[]"
-      DataType		      "auto"
-      OutDataType	      "fixdt(1,16,0)"
-      OutScaling	      "[]"
-      OutDataTypeStr	      "Inherit: auto"
-      LockScale		      off
       SignalType	      "auto"
       SamplingMode	      "auto"
       LatchByDelayingOutsideSignal off
@@ -617,8 +793,6 @@ Library {
       Inputs		      "2"
       IconShape		      "rectangular"
       AllPortsSameDT	      on
-      OutDataTypeMode	      "Logical (see Configuration Parameters: Optimization)"
-      LogicDataType	      "uint(8)"
       OutDataTypeStr	      "Inherit: Logical (see Configuration Parameters: Optimization)"
       SampleTime	      "-1"
     }
@@ -633,19 +807,14 @@ Library {
     Block {
       BlockType		      Outport
       Port		      "1"
-      UseBusObject	      off
-      BusObject		      "BusObject"
+      OutMin		      "[]"
+      OutMax		      "[]"
+      OutDataTypeStr	      "Inherit: auto"
+      LockScale		      off
       BusOutputAsStruct	      off
       PortDimensions	      "-1"
       VarSizeSig	      "Inherit"
       SampleTime	      "-1"
-      OutMin		      "[]"
-      OutMax		      "[]"
-      DataType		      "auto"
-      OutDataType	      "fixdt(1,16,0)"
-      OutScaling	      "[]"
-      OutDataTypeStr	      "Inherit: auto"
-      LockScale		      off
       SignalType	      "auto"
       SamplingMode	      "auto"
       SourceOfInitialOutputValue "Dialog"
@@ -656,8 +825,6 @@ Library {
       BlockType		      RelationalOperator
       Operator		      ">="
       InputSameDT	      on
-      LogicOutDataTypeMode    "Logical (see Configuration Parameters: Optimization)"
-      LogicDataType	      "uint(8)"
       OutDataTypeStr	      "Inherit: Logical (see Configuration Parameters: Optimization)"
       ZeroCross		      on
       SampleTime	      "-1"
@@ -668,10 +835,15 @@ Library {
       Permissions	      "ReadWrite"
       PermitHierarchicalResolution "All"
       TreatAsAtomicUnit	      off
+      MinAlgLoopOccurrences   off
+      PropExecContextOutsideSubsystem off
       CheckFcnCallInpInsideContextMsg off
       SystemSampleTime	      "-1"
+      RTWSystemCode	      "Auto"
       RTWFcnNameOpts	      "Auto"
       RTWFileNameOpts	      "Auto"
+      FunctionInterfaceSpec   "void_void"
+      FunctionWithSeparateData off
       RTWMemSecFuncInitTerm   "Inherit from model"
       RTWMemSecFuncExecute    "Inherit from model"
       RTWMemSecDataConstants  "Inherit from model"
@@ -679,7 +851,14 @@ Library {
       RTWMemSecDataParameters "Inherit from model"
       SimViewingDevice	      off
       DataTypeOverride	      "UseLocalSettings"
+      DataTypeOverrideAppliesTo	"AllNumericTypes"
       MinMaxOverflowLogging   "UseLocalSettings"
+      Opaque		      off
+      MaskHideContents	      off
+      SFBlockType	      "NONE"
+      GeneratePreprocessorConditionals off
+      ContentPreviewEnabled   off
+      IsWebBlock	      off
     }
     Block {
       BlockType		      Sum
@@ -691,9 +870,6 @@ Library {
       AccumDataTypeStr	      "Inherit: Inherit via internal rule"
       OutMin		      "[]"
       OutMax		      "[]"
-      OutDataTypeMode	      "Same as first input"
-      OutDataType	      "fixdt(1,16,0)"
-      OutScaling	      "[]"
       OutDataTypeStr	      "Inherit: Same as first input"
       LockScale		      off
       RndMeth		      "Floor"
@@ -703,7 +879,7 @@ Library {
   }
   System {
     Name		    "OSEM_WD"
-    Location		    [2814, 682, 3394, 942]
+    Location		    [820, 462, 1440, 900]
     Open		    on
     ModelBrowserVisibility  off
     ModelBrowserWidth	    200
@@ -717,23 +893,19 @@ Library {
     ShowPageBoundaries	    off
     ZoomFactor		    "100"
     ReportName		    "simulink-default.rpt"
-    SIDHighWatermark	    59
+    SIDHighWatermark	    "60"
     Block {
       BlockType		      SubSystem
       Name		      "OSEM_WD"
-      SID		      1
+      SID		      "1"
       Ports		      [2, 1]
       Position		      [100, 43, 270, 112]
-      MinAlgLoopOccurrences   off
-      PropExecContextOutsideSubsystem off
-      RTWSystemCode	      "Auto"
-      FunctionWithSeparateData off
-      Opaque		      off
+      ZOrder		      -1
       RequestExecContextInheritance off
-      MaskHideContents	      off
+      Variant		      off
       System {
 	Name			"OSEM_WD"
-	Location		[167, 273, 1930, 1279]
+	Location		[0, 23, 1440, 900]
 	Open			on
 	ModelBrowserVisibility	off
 	ModelBrowserWidth	200
@@ -749,15 +921,17 @@ Library {
 	Block {
 	  BlockType		  Inport
 	  Name			  "OSEM_IN"
-	  SID			  2
+	  SID			  "2"
 	  Position		  [30, 228, 60, 242]
+	  ZOrder		  -1
 	  IconDisplay		  "Port number"
 	}
 	Block {
 	  BlockType		  Inport
 	  Name			  "RESET_IN"
-	  SID			  57
+	  SID			  "57"
 	  Position		  [30, 323, 60, 337]
+	  ZOrder		  -2
 	  ForegroundColor	  "red"
 	  Port			  "2"
 	  IconDisplay		  "Port number"
@@ -765,100 +939,87 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "100MHZHP"
-	  SID			  25
+	  SID			  "25"
 	  Tag			  "cdsFunctionCall"
 	  Description		  "inline FILTER100MHZHP $RCG_DIR/src/drv/susWatchdogFilters.c"
 	  Ports			  [1, 1]
 	  Position		  [315, 415, 355, 475]
+	  ZOrder		  -3
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.3"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsFunctionCall/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "10MHZLP"
-	  SID			  19
+	  SID			  "19"
 	  Tag			  "cdsFunctionCall"
 	  Description		  "inline FILTER10MHZLP $RCG_DIR/src/drv/susWatchdogFilters.c"
 	  Ports			  [1, 1]
 	  Position		  [325, 270, 365, 330]
+	  ZOrder		  -4
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.3"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsFunctionCall/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "10MHZLP1"
-	  SID			  22
+	  SID			  "22"
 	  Tag			  "cdsFunctionCall"
 	  Description		  "inline FILTER10MHZLP $RCG_DIR/src/drv/susWatchdogFilters.c"
 	  Ports			  [1, 1]
 	  Position		  [570, 365, 610, 425]
+	  ZOrder		  -5
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.3"
+	  LibraryVersion	  "1.4"
 	  SourceBlock		  "cdsFunctionCall/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Constant
 	  Name			  "Constant"
-	  SID			  52
+	  SID			  "52"
 	  Position		  [620, 244, 665, 276]
+	  ZOrder		  -6
 	  Value			  "10000"
 	}
 	Block {
 	  BlockType		  Constant
 	  Name			  "Constant1"
-	  SID			  53
+	  SID			  "53"
 	  Position		  [650, 309, 700, 341]
+	  ZOrder		  -7
 	  Value			  "-10000"
 	}
 	Block {
 	  BlockType		  Constant
 	  Name			  "Constant2"
-	  SID			  54
+	  SID			  "54"
 	  Position		  [835, 410, 865, 440]
+	  ZOrder		  -8
 	  Value			  "15000"
 	}
 	Block {
 	  BlockType		  Constant
 	  Name			  "Constant3"
-	  SID			  59
+	  SID			  "59"
 	  Position		  [115, 269, 175, 301]
+	  ZOrder		  -9
 	  Value			  "-12000"
 	}
 	Block {
 	  BlockType		  Demux
 	  Name			  "Demux"
-	  SID			  20
+	  SID			  "20"
 	  Ports			  [1, 1]
 	  Position		  [385, 246, 390, 354]
+	  ZOrder		  -10
 	  BackgroundColor	  "black"
 	  ShowName		  off
 	  Outputs		  "1"
@@ -867,9 +1028,10 @@ Library {
 	Block {
 	  BlockType		  Demux
 	  Name			  "Demux1"
-	  SID			  23
+	  SID			  "23"
 	  Ports			  [1, 1]
 	  Position		  [630, 341, 635, 449]
+	  ZOrder		  -11
 	  BackgroundColor	  "black"
 	  ShowName		  off
 	  Outputs		  "1"
@@ -878,9 +1040,10 @@ Library {
 	Block {
 	  BlockType		  Demux
 	  Name			  "Demux2"
-	  SID			  26
+	  SID			  "26"
 	  Ports			  [1, 1]
 	  Position		  [375, 381, 380, 509]
+	  ZOrder		  -12
 	  BackgroundColor	  "black"
 	  ShowName		  off
 	  Outputs		  "1"
@@ -889,7 +1052,7 @@ Library {
 	Block {
 	  BlockType		  Reference
 	  Name			  "LPOUT"
-	  SID			  56
+	  SID			  "56"
 	  Tag			  "cdsEpicsOutput"
 	  Description		  "Purpose:                                          \nOutput a FE signal to an EPICS channel.        "
 	  "   \n                                                  \nOperation:                                        \nTakes "
@@ -897,47 +1060,42 @@ Library {
 	  "                                 \nName the part with the desired EPICS rrecord name."
 	  Ports			  [1, 1]
 	  Position		  [425, 180, 505, 210]
+	  ZOrder		  -13
 	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.1"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Logic
 	  Name			  "LogicalOperator"
-	  SID			  15
+	  SID			  "15"
 	  Ports			  [2, 1]
 	  Position		  [830, 197, 860, 228]
+	  ZOrder		  -14
 	  AllPortsSameDT	  off
-	  OutDataTypeMode	  "boolean"
 	  OutDataTypeStr	  "boolean"
 	}
 	Block {
 	  BlockType		  Logic
 	  Name			  "LogicalOperator1"
-	  SID			  16
+	  SID			  "16"
 	  Ports			  [2, 1]
 	  Position		  [995, 302, 1025, 333]
+	  ZOrder		  -15
 	  AllPortsSameDT	  off
-	  OutDataTypeMode	  "boolean"
 	  OutDataTypeStr	  "boolean"
 	}
 	Block {
 	  BlockType		  Mux
 	  Name			  "Mux"
-	  SID			  21
+	  SID			  "21"
 	  Ports			  [2, 1]
 	  Position		  [295, 245, 300, 360]
+	  ZOrder		  -16
 	  ShowName		  off
 	  Inputs		  "2"
 	  DisplayOption		  "bar"
@@ -945,9 +1103,10 @@ Library {
 	Block {
 	  BlockType		  Mux
 	  Name			  "Mux1"
-	  SID			  24
+	  SID			  "24"
 	  Ports			  [2, 1]
 	  Position		  [540, 340, 545, 455]
+	  ZOrder		  -17
 	  ShowName		  off
 	  Inputs		  "2"
 	  DisplayOption		  "bar"
@@ -955,9 +1114,10 @@ Library {
 	Block {
 	  BlockType		  Mux
 	  Name			  "Mux2"
-	  SID			  27
+	  SID			  "27"
 	  Ports			  [2, 1]
 	  Position		  [285, 386, 290, 504]
+	  ZOrder		  -18
 	  ShowName		  off
 	  Inputs		  "2"
 	  DisplayOption		  "bar"
@@ -965,40 +1125,40 @@ Library {
 	Block {
 	  BlockType		  RelationalOperator
 	  Name			  "Operator"
-	  SID			  46
+	  SID			  "46"
 	  Ports			  [2, 1]
 	  Position		  [710, 187, 740, 218]
+	  ZOrder		  -19
 	  Operator		  "<"
 	  InputSameDT		  off
-	  LogicOutDataTypeMode	  "boolean"
 	  OutDataTypeStr	  "boolean"
 	}
 	Block {
 	  BlockType		  RelationalOperator
 	  Name			  "Operator1"
-	  SID			  48
+	  SID			  "48"
 	  Ports			  [2, 1]
 	  Position		  [745, 292, 775, 323]
+	  ZOrder		  -20
 	  Operator		  ">"
 	  InputSameDT		  off
-	  LogicOutDataTypeMode	  "boolean"
 	  OutDataTypeStr	  "boolean"
 	}
 	Block {
 	  BlockType		  RelationalOperator
 	  Name			  "Operator2"
-	  SID			  51
+	  SID			  "51"
 	  Ports			  [2, 1]
 	  Position		  [905, 377, 935, 408]
+	  ZOrder		  -21
 	  Operator		  "<"
 	  InputSameDT		  off
-	  LogicOutDataTypeMode	  "boolean"
 	  OutDataTypeStr	  "boolean"
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "RMSOUT"
-	  SID			  55
+	  SID			  "55"
 	  Tag			  "cdsEpicsOutput"
 	  Description		  "Purpose:                                          \nOutput a FE signal to an EPICS channel.        "
 	  "   \n                                                  \nOperation:                                        \nTakes "
@@ -1006,72 +1166,63 @@ Library {
 	  "                                 \nName the part with the desired EPICS rrecord name."
 	  Ports			  [1, 1]
 	  Position		  [685, 370, 765, 400]
+	  ZOrder		  -22
 	  BackgroundColor	  "[0.686275, 0.372549, 0.313725]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Tag>"
-	  LibraryVersion	  "1.1"
+	  LibraryVersion	  "1.2"
 	  SourceBlock		  "cdsEpicsOut/Subsystem"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Sum
 	  Name			  "Sum"
-	  SID			  58
+	  SID			  "58"
 	  Ports			  [2, 1]
 	  Position		  [210, 225, 230, 245]
+	  ZOrder		  -23
 	  ShowName		  off
 	  IconShape		  "round"
 	  Inputs		  "|++"
 	  InputSameDT		  off
-	  OutDataTypeMode	  "Inherit via internal rule"
 	  OutDataTypeStr	  "Inherit: Inherit via internal rule"
 	  SaturateOnIntegerOverflow off
 	}
 	Block {
 	  BlockType		  Reference
 	  Name			  "TrueRMS"
-	  SID			  17
+	  SID			  "17"
 	  Tag			  "cdsTrueRMS"
 	  Description		  "window_size=655360"
 	  Ports			  [1, 1]
 	  Position		  [410, 371, 495, 419]
+	  ZOrder		  -24
 	  BackgroundColor	  "[0.462745, 0.721569, 0.337255]"
 	  DropShadow		  on
 	  AttributesFormatString  "%<Description>\\n%<Tag>"
-	  LibraryVersion	  "1.7"
+	  LibraryVersion	  "1.8"
 	  SourceBlock		  "cdsTrueRMS/TrueRMS"
 	  SourceType		  "SubSystem"
-	  ShowPortLabels	  "FromPortIcon"
-	  SystemSampleTime	  "-1"
-	  FunctionWithSeparateData off
-	  RTWMemSecFuncInitTerm	  "Inherit from model"
-	  RTWMemSecFuncExecute	  "Inherit from model"
-	  RTWMemSecDataConstants  "Inherit from model"
-	  RTWMemSecDataInternal	  "Inherit from model"
-	  RTWMemSecDataParameters "Inherit from model"
+	  ContentPreviewEnabled	  off
 	}
 	Block {
 	  BlockType		  Outport
 	  Name			  "WD"
-	  SID			  18
+	  SID			  "18"
 	  Position		  [1090, 313, 1120, 327]
+	  ZOrder		  -25
 	  IconDisplay		  "Port number"
 	}
 	Line {
+	  ZOrder		  1
 	  SrcBlock		  "LogicalOperator1"
 	  SrcPort		  1
 	  DstBlock		  "WD"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  2
 	  SrcBlock		  "Operator2"
 	  SrcPort		  1
 	  Points		  [15, 0; 0, -70]
@@ -1079,6 +1230,7 @@ Library {
 	  DstPort		  2
 	}
 	Line {
+	  ZOrder		  3
 	  SrcBlock		  "LogicalOperator"
 	  SrcPort		  1
 	  Points		  [60, 0; 0, 95]
@@ -1086,6 +1238,7 @@ Library {
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  4
 	  SrcBlock		  "Operator1"
 	  SrcPort		  1
 	  Points		  [35, 0]
@@ -1093,12 +1246,14 @@ Library {
 	  DstPort		  2
 	}
 	Line {
+	  ZOrder		  5
 	  SrcBlock		  "Operator"
 	  SrcPort		  1
 	  DstBlock		  "LogicalOperator"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  6
 	  SrcBlock		  "Demux"
 	  SrcPort		  1
 	  Points		  [15, 0]
@@ -1106,6 +1261,7 @@ Library {
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  7
 	  SrcBlock		  "TrueRMS"
 	  SrcPort		  1
 	  Points		  [25, 0]
@@ -1113,12 +1269,14 @@ Library {
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  8
 	  SrcBlock		  "10MHZLP"
 	  SrcPort		  1
 	  DstBlock		  "Demux"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  9
 	  SrcBlock		  "Mux"
 	  SrcPort		  1
 	  Points		  [0, -5]
@@ -1126,12 +1284,14 @@ Library {
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  10
 	  SrcBlock		  "10MHZLP1"
 	  SrcPort		  1
 	  DstBlock		  "Demux1"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  11
 	  SrcBlock		  "Mux1"
 	  SrcPort		  1
 	  Points		  [5, 0]
@@ -1139,6 +1299,7 @@ Library {
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  12
 	  SrcBlock		  "Demux1"
 	  SrcPort		  1
 	  Points		  [30, 0]
@@ -1146,18 +1307,21 @@ Library {
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  13
 	  SrcBlock		  "100MHZHP"
 	  SrcPort		  1
 	  DstBlock		  "Demux2"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  14
 	  SrcBlock		  "Mux2"
 	  SrcPort		  1
 	  DstBlock		  "100MHZHP"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  15
 	  SrcBlock		  "Demux2"
 	  SrcPort		  1
 	  Points		  [5, 0; 0, -50]
@@ -1165,6 +1329,7 @@ Library {
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  16
 	  SrcBlock		  "Constant"
 	  SrcPort		  1
 	  Points		  [15, 0; 0, -50]
@@ -1172,6 +1337,7 @@ Library {
 	  DstPort		  2
 	}
 	Line {
+	  ZOrder		  17
 	  SrcBlock		  "Constant2"
 	  SrcPort		  1
 	  Points		  [20, 0]
@@ -1179,6 +1345,7 @@ Library {
 	  DstPort		  2
 	}
 	Line {
+	  ZOrder		  18
 	  SrcBlock		  "Constant1"
 	  SrcPort		  1
 	  Points		  [10, 0; 0, -10]
@@ -1186,41 +1353,49 @@ Library {
 	  DstPort		  2
 	}
 	Line {
+	  ZOrder		  19
 	  SrcBlock		  "RMSOUT"
 	  SrcPort		  1
 	  DstBlock		  "Operator2"
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  20
 	  SrcBlock		  "LPOUT"
 	  SrcPort		  1
 	  Points		  [25, 0]
 	  Branch {
+	    ZOrder		    21
 	    DstBlock		    "Operator"
 	    DstPort		    1
 	  }
 	  Branch {
+	    ZOrder		    22
 	    Points		    [0, 105]
 	    DstBlock		    "Operator1"
 	    DstPort		    1
 	  }
 	}
 	Line {
+	  ZOrder		  23
 	  SrcBlock		  "RESET_IN"
 	  SrcPort		  1
 	  Points		  [175, 0]
 	  Branch {
+	    ZOrder		    24
 	    DstBlock		    "Mux"
 	    DstPort		    2
 	  }
 	  Branch {
+	    ZOrder		    25
 	    Points		    [0, 145]
 	    Branch {
-	      Points		      [0, 0]
+	      ZOrder		      26
 	      DstBlock		      "Mux2"
 	      DstPort		      2
 	    }
 	    Branch {
+	      ZOrder		      27
 	      Points		      [0, 55; 285, 0]
 	      DstBlock		      "Mux1"
 	      DstPort		      2
@@ -1228,6 +1403,7 @@ Library {
 	  }
 	}
 	Line {
+	  ZOrder		  28
 	  SrcBlock		  "Sum"
 	  SrcPort		  1
 	  Points		  [15, 0; 0, 40]
@@ -1235,6 +1411,7 @@ Library {
 	  DstPort		  1
 	}
 	Line {
+	  ZOrder		  29
 	  SrcBlock		  "Constant3"
 	  SrcPort		  1
 	  Points		  [40, 0]
@@ -1242,23 +1419,30 @@ Library {
 	  DstPort		  2
 	}
 	Line {
+	  ZOrder		  30
 	  SrcBlock		  "OSEM_IN"
 	  SrcPort		  1
 	  Points		  [15, 0]
 	  Branch {
+	    ZOrder		    31
 	    DstBlock		    "Sum"
 	    DstPort		    1
 	  }
 	  Branch {
+	    ZOrder		    32
 	    Points		    [0, 180]
 	    DstBlock		    "Mux2"
 	    DstPort		    1
 	  }
 	}
 	Annotation {
+	  SID			  "60"
 	  Name			  "Outputs 1 when DAC enabled\nOutputs 0 when DAC disabled"
-	  Position		  [785, 159]
-	  FontName		  "*"
+	  Position		  [785, 159, 1027, 197]
+	  InternalMargins	  [0, 0, 0, 0]
+	  FixedHeight		  off
+	  FixedWidth		  off
+	  ZOrder		  -1
 	  FontSize		  18
 	}
       }
