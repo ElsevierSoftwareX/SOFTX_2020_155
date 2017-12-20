@@ -33,7 +33,7 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Description: advLigoRTS mbuf kernel module
- Core component of advLigoRTS.
+ Advanced LIGO Real-Time System, core component.
  .
  Memory buffer kernel module.
 
@@ -44,7 +44,7 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Description: advLigoRTS symmetricom kernel module
- Core component of advLigoRTS.
+ Advanced LIGO Real-Time System, core component.
  .
  GPS card interface kernel module.
 
@@ -54,7 +54,7 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Description: advLigoRTS kernel module support
- Core component of advLigoRTS.
+ Advanced LIGO Real-Time System, core component.
  .
  Kernel module device creation scripts.
 
@@ -66,9 +66,9 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Description: advLigoRTS daqd binaries
- Core component of advLigoRTS.
+ Advanced LIGO Real-Time System, data acquisition components.
  .
- This package installs all non-MX daqd components:
+ This package installs the core non-MX components of daqd:
   * daqd_bcst: frame broadcaster
   * daqd_fw: frame writer
   * daqd_rcv: NDS1 server
@@ -82,8 +82,8 @@ Depends:
  mx,
  ${misc:Depends},
  ${shlibs:Depends},
-Description: advLigoRTS daqd binaries (MX support)
- Core component of advLigoRTS.
+Description: advLigoRTS daqd MX receiver data concentrator
+ Advanced LIGO Real-Time System, data acquisition components.
  .
  This package installs MX daqd components:
   * daqd_dc_mx: data concentrator
@@ -96,9 +96,7 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Description: advLigoRTS front-end binaries
- Core component of advLigoRTS.
- .
- Binaries for the front ends (awgtpman, mx_stream).
+ Advanced LIGO Real-Time System, mx_stream component.
 
 Package: advligorts-rcg
 Architecture: any
@@ -118,11 +116,11 @@ Depends:
  ${misc:Depends},
 Recommends:
  linux-image-3.2.88-rtcds,
-Description: advLigoRTS real-time code generator (RCG)
- Core component of advLigoRTS.
+Description: advLigoRTS Real-Time Code Generator (RCG)
+ Advanced LIGO Real-Time System, Real-time Code Generator.
  .
- Real-time Code Generator system for building real-time signal
- processing kernel modules from Simulink description graphs.
+ System for building real-time signal processing kernel modules from
+ Simulink description graphs.
 
 Package: advligorts-cymac
 Architecture: all
@@ -133,7 +131,7 @@ Depends:
  linux-image-3.2.88-rtcds,
  ${misc:Depends},
 Description: advLigoRTS stand-alone "cymac" metapackage
- Advanced LIGO data acquisition system, stand-alone version.
+ Advanced LIGO Real-Time System, stand-alone system components.
 
 Package: dataviewer
 Architecture: any
