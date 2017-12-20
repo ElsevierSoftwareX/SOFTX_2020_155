@@ -34,7 +34,7 @@ install-rtcds:
 
 override_dh_auto_configure:
 	mkdir -p build
-	(cd build && cmake -DCMAKE_INSTALL_PREFIX=$(DESTDIR)/usr ..)
+	(cd build && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$(DESTDIR)/usr ..)
 
 override_dh_install: install-symmetricom install-mbuf install-rtcds
 	dh_install
