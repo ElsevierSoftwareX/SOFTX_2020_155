@@ -75,7 +75,7 @@ Description: advLigoRTS daqd binaries
   * daqd_standiop: daqd for stand-alone systems
   * nds: archive data retriever for NDS1
 
-Package: advligorts-daqd-mx
+Package: advligorts-daqd-dc-mx
 Architecture: any
 Depends:
  advligorts-daqd,
@@ -85,9 +85,8 @@ Depends:
 Description: advLigoRTS daqd MX receiver data concentrator
  Advanced LIGO Real-Time System, data acquisition components.
  .
- This package installs MX daqd components:
-  * daqd_dc_mx: data concentrator
-  * daqd_mxsymm: all-in-one mx receiver systems
+ This package installs daqd "MX" receiver data concentrator:
+  * daqd_dc_mx: MX data concentrator
 
 Package: advligorts-mx-stream
 Architecture: any
