@@ -3,5 +3,4 @@ support/systemd/nds.service lib/systemd/system/
 usr/bin/daqd_bcst
 usr/bin/daqd_fw
 usr/bin/daqd_rcv
-usr/bin/daqd_standiop
 usr/bin/nds

@@ -61,7 +61,6 @@ Description: advLigoRTS kernel module support
 Package: advligorts-daqd
 Architecture: any
 Depends:
- advligorts-mbuf-dkms,
  advligorts-symmetricom-dkms,
  ${misc:Depends},
  ${shlibs:Depends},
@@ -72,7 +71,6 @@ Description: advLigoRTS daqd binaries
   * daqd_bcst: frame broadcaster
   * daqd_fw: frame writer
   * daqd_rcv: NDS1 server
-  * daqd_standiop: daqd for stand-alone systems
   * nds: archive data retriever for NDS1
 
 Package: advligorts-daqd-dc-mx
@@ -87,6 +85,20 @@ Description: advLigoRTS daqd MX receiver data concentrator
  .
  This package installs daqd "MX" receiver data concentrator:
   * daqd_dc_mx: MX data concentrator
+
+Package: advligorts-daqd-standiop
+Architecture: any
+Depends:
+ advligorts-daqd,
+ advligorts-mbuf-dkms,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: advLigoRTS daqd "standiop" binary
+ Advanced LIGO Real-Time System, data acquisition components.
+ .
+ This package installs the "stand-alone" daqd component suitable for
+ test stands (e.g. "cymac"):
+  * daqd_standiop: all-in-one dc/fw
 
 Package: advligorts-mx-stream
 Architecture: any
@@ -124,7 +136,7 @@ Description: advLigoRTS Real-Time Code Generator (RCG)
 Package: advligorts-cymac
 Architecture: all
 Depends:
- advligorts-daqd,
+ advligorts-daqd-standiop,
  advligorts-rcg,
  cds-workstation,
  linux-image-3.2.88-rtcds,
