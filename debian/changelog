@@ -1,3 +1,9 @@
+advligorts (3.4~rc4-1) unstable; urgency=medium
+
+  * new release candidate
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Wed, 20 Dec 2017 14:56:34 -0800
+
 advligorts (3.4~rc3-1) unstable; urgency=medium
 
   * support for strech builds
