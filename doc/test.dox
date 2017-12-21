@@ -8,11 +8,9 @@
 
 \section tc RCG Core Functionality Testing
 	- \ref rcgCoreTest "RCG Core Test"
-	- \ref tpTestData "GDS Testpoint Test"
 	- \ref duotoneTest "Duotone Test"
 	- \ref ovfTest "Overflow Counter Test"
 	- \ref uint32Test "DAQ UINT32 Data Type Test"
-	- \ref cpuTimeTest "CPU times by SVN"
 	- \ref decFiltTest "IOP Decimation Filter Test"
 	- \ref daqFiltTest "DAQ (daqLib) Decimation Filter Test"
 	- \ref sdf "Setpoint MonitoringTest"
@@ -41,7 +39,6 @@
 \subsection gds GDS
 	- \ref xextpTest "EXC/TP Parts"
 \subsection wdt WatchDogs
-	- \ref dackillTest "DACKILL w/OSEM Watchdog Test"
 	- \ref dacKillIopTest "DACKILL IOP w/OSEM Watchdog Test"
 	- \ref dktTest "DACKILL Timed"
 */
