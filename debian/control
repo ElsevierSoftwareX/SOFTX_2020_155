@@ -41,6 +41,7 @@ Package: advligorts-symmetricom-dkms
 Architecture: any
 Depends:
  advligorts-module-support,
+ python,
  ${misc:Depends},
  ${shlibs:Depends},
 Description: advLigoRTS symmetricom kernel module
