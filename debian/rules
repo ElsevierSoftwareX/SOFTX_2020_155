@@ -1,11 +1,11 @@
 #!/usr/bin/make -f
 
-export DH_VERBOSE = t
+export DH_VERBOSE=t
 
 SVERSION := $(shell dpkg-parsechangelog --show-field=Version | rev | cut -d- -f2- | rev)
 
 %:
-	dh $@ --builddirectory=build --with dkms
+	dh $@ --builddirectory=build --with dkms --parallel
 
 
 install-mbuf:
