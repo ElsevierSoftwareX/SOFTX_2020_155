@@ -579,7 +579,7 @@ class daqd_c {
   /// Keep pointers to the data samples for each data channel
   /// An array of two pointers, fast_adc_ptr and aux_data_valid_ptr
   typedef std::vector<std::pair<unsigned char *, INT_2U *> > adc_data_ptr_type;
-  ldas_frame_h_type full_frame(int frame_length_seconds, int sience, adc_data_ptr_type &dptr) throw();
+  ldas_frame_h_type full_frame(int frame_length_seconds, int sience, adc_data_ptr_type &dptr);
 
   /// How many full frames to pack in single file
   int frames_per_file;

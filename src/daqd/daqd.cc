@@ -548,7 +548,7 @@ int daqd_c::find_channel_group (const char* channel_name)
 ldas_frame_h_type
 daqd_c::full_frame(int frame_length_seconds, int science,
 		   adc_data_ptr_type &dptr)
-  throw() {
+{
   unsigned long nchans = 0;
 
   if (science) {
