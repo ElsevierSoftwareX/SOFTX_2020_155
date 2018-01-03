@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include "symmetricom.h"
+#include "gpstime.h"
 
 /* this is a test program that opens the mbuf_drv.
    It reads out values of the kmalloc() and vmalloc()
@@ -19,7 +19,7 @@ int main (void)
 {
   int fd;
 
-  if ((fd = open ("/dev/symmetricom", O_RDWR | O_SYNC)) < 0) {
+  if ((fd = open ("/dev/gpstime", O_RDWR | O_SYNC)) < 0) {
       perror ("open");
       exit (-1);
   }

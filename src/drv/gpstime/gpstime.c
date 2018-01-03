@@ -24,7 +24,7 @@
 #  include <linux/modversions.h>
 #endif
 #include <asm/io.h>
-#include "symmetricom.h"
+#include "gpstime.h"
 #include "../../include/drv/cdsHardware.h"
 #include "../../include/proc.h"
 
@@ -273,7 +273,7 @@ static int __init symmetricom_init(void)
     proc_gps_offset_entry = NULL;
 
         /* get the major number of the character device */
-        if ((ret = alloc_chrdev_region(&symmetricom_dev, 0, 1, "symmetricom")) < 0) {
+        if ((ret = alloc_chrdev_region(&symmetricom_dev, 0, 1, "gpstime")) < 0) {
                 printk(KERN_ERR "could not allocate major number for symmetricom\n");
                 goto out;
         }

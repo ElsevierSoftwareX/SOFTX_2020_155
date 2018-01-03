@@ -10,9 +10,9 @@
 /opt/rtapps/epics/base/bin/linux-x86_64/caRepeater&
 
 # IRIG card removed 2013-09-10
-#/sbin/modprobe symmetricom
-#mknod /dev/symmetricom c `grep symmetricom /proc/devices|awk '{print $1}'` 0
-#chown controls /dev/symmetricom 
+#/sbin/modprobe gpstime
+#mknod /dev/gpstime c `grep gpstime /proc/devices|awk '{print $1}'` 0
+#chown controls /dev/gpstime 
 
 insmod /etc/conf.d/myri10ge.ko myri10ge_big_rxring=1
 rmmod myri10ge
