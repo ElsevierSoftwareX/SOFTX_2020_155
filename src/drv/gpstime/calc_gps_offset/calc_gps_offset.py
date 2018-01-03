@@ -136,7 +136,7 @@ for the LIGO gpstime driver.""")
     help_txt = "Calculate offset where there is no IRIG-B signal"
     parser.add_argument("-s", "--system-time", help=help_txt,
                         action="store_true", default=False)
-    default = "leap-seconds.list"
+    default = "/var/cache/ietf-leap-seconds/leap-seconds.list"
     help_txt = "Location of a leap-second database [{0}]".format(default)
     parser.add_argument("-l", "--leap-second-db", help=help_txt,
                         default=default)
