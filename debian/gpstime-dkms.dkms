@@ -1,0 +1,8 @@
+PACKAGE_NAME="gpstime"
+PACKAGE_VERSION="#MODULE_VERSION#"
+BUILT_MODULE_NAME="gpstime"
+DEST_MODULE_LOCATION=/extra
+AUTOINSTALL=yes
+MAKE="make -C ${kernel_source_dir} M=${dkms_tree}/${PACKAGE_NAME}/${PACKAGE_VERSION}/build/drv/gpstime"
+CLEAN="make -C ${kernel_source_dir} M=${dkms_tree}/${PACKAGE_NAME}/${PACKAGE_VERSION}/build/drv/gpstime clean"
+BUILT_MODULE_LOCATION="drv/gpstime"

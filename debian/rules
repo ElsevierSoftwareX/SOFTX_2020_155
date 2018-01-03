@@ -16,13 +16,18 @@ install-mbuf:
 	sed 's|__SHARE__|/usr/share/advligorts|' <support/udev/mbuf.rules >debian/advligorts-mbuf-dkms/lib/udev/rules.d/60-mbuf.rules
 	echo mbuf > debian/advligorts-mbuf-dkms/usr/lib/modules-load.d/mbuf.conf
 
-install-symmetricom:
-	dh_installdirs -padvligorts-symmetricom-dkms usr/src/symmetricom-$(SVERSION)/drv/symmetricom
-	dh_installdirs -padvligorts-symmetricom-dkms lib/udev/rules.d
-	dh_installdirs -padvligorts-symmetricom-dkms usr/lib/modules-load.d
-	install --mode=644 -t debian/advligorts-symmetricom-dkms/usr/src/symmetricom-$(SVERSION)/drv/symmetricom src/drv/symmetricom/* || true
-	sed 's|__SHARE__|/usr/share/advligorts|' <support/udev/symmetricom.rules >debian/advligorts-symmetricom-dkms/lib/udev/rules.d/60-symmetricom.rules
-	echo symmetricom > debian/advligorts-symmetricom-dkms/usr/lib/modules-load.d/symmetricom.conf
+install-gpstime:
+	dh_installdirs -padvligorts-gpstime-dkms usr/src/gpstime-$(SVERSION)/drv/gpstime
+	dh_installdirs -padvligorts-gpstime-dkms usr/src/gpstime-$(SVERSION)/include/drv
+	dh_installdirs -padvligorts-gpstime-dkms lib/udev/rules.d
+	dh_installdirs -padvligorts-gpstime-dkms usr/lib/modules-load.d
+	install --mode=644 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION)/drv/gpstime src/drv/gpstime/* || true
+	install --mode=644 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION)/include/ src/include/proc.h
+	install --mode=644 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION)/include/drv src/include/drv/cdsHardware.h
+	install --mode=644 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION)/include/drv src/include/drv/spectracomGPS.*
+	install --mode=644 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION)/include/drv src/include/drv/symmetricomGps.*
+	sed 's|__SHARE__|/usr/share/advligorts|' <support/udev/gpstime.rules >debian/advligorts-gpstime-dkms/lib/udev/rules.d/60-gpstime.rules
+	echo gpstime > debian/advligorts-gpstime-dkms/usr/lib/modules-load.d/gpstime.conf
 
 install-rtcds:
 	dh_installdirs -padvligorts-rcg usr/bin
@@ -33,7 +38,7 @@ override_dh_auto_configure:
 	mkdir -p build
 	(cd build && cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$(DESTDIR)/usr ..)
 
-override_dh_install: install-symmetricom install-mbuf install-rtcds
+override_dh_install: install-gpstime install-mbuf install-rtcds
 	dh_install
 
 override_dh_dkms:

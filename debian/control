@@ -37,14 +37,15 @@ Description: advLigoRTS mbuf kernel module
  .
  Memory buffer kernel module.
 
-Package: advligorts-symmetricom-dkms
+Package: advligorts-gpstime-dkms
 Architecture: any
 Depends:
  advligorts-module-support,
+ ietf-leap-seconds,
  python,
  ${misc:Depends},
  ${shlibs:Depends},
-Description: advLigoRTS symmetricom kernel module
+Description: advLigoRTS gpstime kernel module
  Advanced LIGO Real-Time System, core component.
  .
  GPS card interface kernel module.
@@ -62,7 +63,7 @@ Description: advLigoRTS kernel module support
 Package: advligorts-daqd
 Architecture: any
 Depends:
- advligorts-symmetricom-dkms,
+ advligorts-gpstime-dkms,
  ${misc:Depends},
  ${shlibs:Depends},
 Description: advLigoRTS daqd binaries
@@ -114,7 +115,7 @@ Package: advligorts-rcg
 Architecture: any
 Depends:
  advligorts-mbuf-dkms,
- advligorts-symmetricom-dkms,
+ advligorts-gpstime-dkms,
  autoconf,
  epics-seq-dev,
  g++,
