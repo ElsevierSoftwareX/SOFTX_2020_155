@@ -67,7 +67,7 @@ using namespace std;
 #ifdef USE_SYMMETRICOM
 #ifndef USE_IOP
 //#include <bcuser.h>
-#include <../drv/symmetricom/symmetricom.h>
+#include <../drv/gpstime/gpstime.h>
 #endif
 #endif
 
@@ -548,7 +548,7 @@ int daqd_c::find_channel_group (const char* channel_name)
 ldas_frame_h_type
 daqd_c::full_frame(int frame_length_seconds, int science,
 		   adc_data_ptr_type &dptr)
-  throw() {
+{
   unsigned long nchans = 0;
 
   if (science) {
@@ -1823,9 +1823,9 @@ main (int argc, char *argv [])
 
 #ifdef USE_SYMMETRICOM
 #ifndef USE_IOP
-  symmetricom_fd =  open ("/dev/symmetricom", O_RDWR | O_SYNC);
+  symmetricom_fd =  open ("/dev/gpstime", O_RDWR | O_SYNC);
   if (symmetricom_fd < 0) {
-	perror("/dev/symmetricom");
+	perror("/dev/gpstime");
 	exit(1);
   }
 

@@ -1,9 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 from __future__ import unicode_literals, print_function, division
 
 import argparse
 import collections
+import os.path
 import sys
 import time
 
@@ -67,26 +68,52 @@ class YMD(object):
 
 
 class Config(object):
-    def __init__(self, do_year, do_system, leap_filename, ref_time):
-        if do_year == do_system:
-            errmsg = "You must choose year based or system based offsets"
+    def __init__(self, do_auto, do_year, do_system, leap_filename, ref_time, status_only):
+        def valid_flags():
+            if do_auto:
+                return do_year == False and do_system == False
+            return do_year != do_system
+
+        def get_offset_type():
+            with open("/sys/kernel/gpstime/offset_type", "rt") as f:
+                return int(f.readline().strip())
+
+
+        if not valid_flags() and not status_only:
+            errmsg = "You must choose auto, year based, system based offsets"
             raise ValueError(errmsg)
+        if do_auto:
+            offset_type = get_offset_type()
+            do_year = False
+            do_system = False
+            if offset_type == 0:
+                pass
+            elif offset_type == 1:
+                do_year = True
+            elif offset_type == 2:
+                do_system = True
+            else:
+                raise ValueError("Unkown gps offset type, do not know how to calculate the offset")
         self.__do_year = do_year
         self.__do_system = do_system
         self.__ref_time = YMD.convert(ref_time)
         self.__filename = leap_filename
+        self.__status_only = status_only
 
     def year_based(self):
         return self.__do_year
 
     def system_time_based(self):
-        return not self.year_based()
+        return self.__do_system
 
     def leapsec_filename(self):
         return self.__filename
 
     def reference_time(self):
         return self.__ref_time
+
+    def status_only(self):
+        return self.__status_only
 
     def __unicode__(self):
         mode = "year"
@@ -100,13 +127,16 @@ class Config(object):
 def parse_arguments(argv):
     parser = argparse.ArgumentParser(description="""Generate GPS offsets
 for the LIGO gpstime driver.""")
+    help_txt = "Autodetect the type of offset needed"
+    parser.add_argument("-a", "--auto", help=help_txt,
+                        action="store_true", default="False")
     help_txt = "Calculate offset where the year is not in the IRIG-B signal"
     parser.add_argument("-y", "--year-based", help=help_txt,
                         action="store_true", default=False)
     help_txt = "Calculate offset where there is no IRIG-B signal"
     parser.add_argument("-s", "--system-time", help=help_txt,
                         action="store_true", default=False)
-    default = "leap-seconds.list"
+    default = "/var/cache/ietf-leap-seconds/leap-seconds.list"
     help_txt = "Location of a leap-second database [{0}]".format(default)
     parser.add_argument("-l", "--leap-second-db", help=help_txt,
                         default=default)
@@ -115,6 +145,7 @@ for the LIGO gpstime driver.""")
     "(UNIX time in seconds) defaults to now"
     parser.add_argument("-t", "--time", help=help_txt,
                         default=default)
+    parser.add_argument("--status", help="Print driver status", action="store_true")
 
     opts = parser.parse_args(argv[1:])
 
@@ -127,10 +158,12 @@ for the LIGO gpstime driver.""")
                 tm.tm_mon,
                 tm.tm_mday,
             )
-        return Config(opts.year_based,
+        return Config(opts.auto,
+                      opts.year_based,
                       opts.system_time,
                       opts.leap_second_db,
-                      tm)
+                      tm,
+                      opts.status)
     except ValueError as e:
         parser.error(e)
 
@@ -240,14 +273,65 @@ def system_time_based_offset(unix_leaps, ymd):
     return offset
 
 
+def print_card_status():
+    def read_val(fname):
+        with open(os.path.join("/sys/kernel/gpstime", fname), "rt") as f:
+            return f.readline().strip()
+
+    def explain_card_type(card_present, card_type):
+        if card_present == 0:
+            return "none"
+        elif card_type == 0:
+            return "symmetricom"
+        elif card_type == 1:
+            return "spectracom"
+        else:
+            return "unkown"
+
+    def explain_offset_type(val):
+        if val == 0:
+            return "none"
+        elif val == 1:
+            return "year"
+        elif val == 2:
+            return "system time"
+        return "unknown"
+
+    card_present = int(read_val("card_present"))
+    card_type = int(read_val("card_type"))
+    offset_type = int(read_val("offset_type"))
+    offset = int(read_val("offset"))
+    status = int(read_val("status"))
+
+    print(
+        "Card Present: {0}\nCard Type: {1} ({2})\nOffset Type: {3} ({4})\nOffset: {5}\nStatus: {6}\nCur Time: {7}".format(
+            card_present,
+            card_type,
+            explain_card_type(
+                card_present,
+                card_type),
+            offset_type,
+            explain_offset_type(
+                offset_type),
+            offset,
+            status,
+            read_val("time")))
+
+
 def main(argv):
     cfg = parse_arguments(argv)
     leap_sec_db = parse_leap_sec_to_unix(cfg.leapsec_filename())
+    if cfg.status_only():
+        print_card_status()
+        return
     if cfg.year_based():
         offset = year_based_offset(leap_sec_db, cfg.reference_time())
-    else:
+    elif cfg.system_time_based():
         offset = system_time_based_offset(leap_sec_db, cfg.reference_time())
+    else:
+        offset = 0
     print("{0}".format(offset))
+
 
 if __name__ == '__main__':
     main(sys.argv)

@@ -12,9 +12,9 @@ ntpdate -b 10.110.140.2
 /opt/rtapps/epics/base/bin/linux-x86_64/caRepeater&
 
 # remove Sep 10, 2013 as IRIG removed
-# /sbin/modprobe symmetricom
-# mknod /dev/symmetricom c `grep symmetricom /proc/devices|awk '{print $1}'` 0
-# chown controls /dev/symmetricom 
+# /sbin/modprobe gpstime
+# mknod /dev/gpstime c `grep gpstime /proc/devices|awk '{print $1}'` 0
+# chown controls /dev/gpstime 
 
 # Disabled MSIX to fix retransmission error; 
 # Wed Jun  6 09:52:35 PDT 2012 by Alex Ivanov

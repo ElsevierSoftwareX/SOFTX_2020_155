@@ -12,7 +12,7 @@
 ///<            register mapping information.
 ///	@param *gpsdev PCI address information passed by the mapping code in map.c
 // *****************************************************************************
-int spectracomGpsInit(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
+static int spectracomGpsInitCheckSync(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev, int *need_sync)
 {
   unsigned int i,ii;
   static unsigned int pci_io_addr;	/// @param pci_io_addr Bus address of PCI card I/O register.
@@ -21,6 +21,10 @@ int spectracomGpsInit(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
   unsigned char *addr1;
   TSYNC_REGISTER *myTime;
   void *TSYNC_FIFO;     		/// @param *TSYNC_FIFO Pointer to board uP FIFO
+  int sync_dummy = 0;
+
+  if (!need_sync)
+      need_sync = &sync_dummy;
 
   pedStatus = pci_enable_device(gpsdev);
   pci_read_config_dword(gpsdev, PCI_BASE_ADDRESS_0, &pci_io_addr);
@@ -88,6 +92,7 @@ for(ii=0;ii<2;ii++)
   if(i < 1000000000)
   {
         printk("TSYNC NOT receiving YEAR info, defaulting to by year patch\n");
+        *need_sync = 1;
       /* Historically we would hardwire a offset here.
        * With RCG 3.4 we have moved to configuring this in
        * the symmetricom/gpstime driver.
@@ -120,6 +125,7 @@ for(ii=0;ii<2;ii++)
       pHardware->gpsOffset = 0;
 #endif
   } else {
+        *need_sync = 0;
         printk("TSYNC receiving YEAR info\n");
         pHardware->gpsOffset = -315964800;
   }
@@ -132,6 +138,18 @@ for(ii=0;ii<2;ii++)
   printk("Board sync = %d\n",tsync);
 }
   return(0);
+}
+
+// *****************************************************************************
+/// \brief Initialize TSYNC GPS card (model BC635PCI-U)
+///     @param[in,out] *pHardware Pointer to global data structure for storing I/O
+///<            register mapping information.
+///	@param *gpsdev PCI address information passed by the mapping code in map.c
+// *****************************************************************************
+int spectracomGpsInit(CDS_HARDWARE *pHardware, struct pci_dev *gpsdev)
+{
+    int need_sync_dummy = 0;
+    return spectracomGpsInitCheckSync(pHardware, gpsdev, &need_sync_dummy);
 }
 
 //***********************************************************************

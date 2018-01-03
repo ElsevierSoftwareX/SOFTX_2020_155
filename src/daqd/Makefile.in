@@ -166,7 +166,7 @@ sockutil.o:	${GDS_ARCHIVE}/sockutil.c
 	$(CC) -c -D_TP_DAQD -D_TESTPOINT_DIRECT=0 $<
 
 run_number_client.o: ${RUN_NUMBER_ARCHIVE}/run_number_client.cc
-	$(CXX) -c ${CXXFLAGS} $<
+	$(CXX) -c ${CXXFLAGS} -I$(srcdir)/@ZMQ_INCLUDES@ $<
 
 
 # -DNDEBUG is killing Channel Access server code (Epics R3.14.4)
