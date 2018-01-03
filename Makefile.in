@@ -47,7 +47,7 @@ DEVFLAGS=@DEVFLAGS@
 	@/bin/mv -f build/$@epics-config build/$@epics/config
 	@echo Building front-end Linux kernel module $@...
 	@make -sC src/fe/$@ clean
-	@cp $(srcdir)/src/drv/symmetricom/Module.symvers src/fe/$@
+	@cp $(srcdir)/src/drv/gpstime/Module.symvers src/fe/$@
 	@make -C src/fe/$@ >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@$(srcdir)/src/epics/util/checkUndefined.pl $@_error.log >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@echo Done

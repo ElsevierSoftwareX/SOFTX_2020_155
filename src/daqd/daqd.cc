@@ -67,7 +67,7 @@ using namespace std;
 #ifdef USE_SYMMETRICOM
 #ifndef USE_IOP
 //#include <bcuser.h>
-#include <../drv/symmetricom/symmetricom.h>
+#include <../drv/gpstime/gpstime.h>
 #endif
 #endif
 
@@ -1823,9 +1823,9 @@ main (int argc, char *argv [])
 
 #ifdef USE_SYMMETRICOM
 #ifndef USE_IOP
-  symmetricom_fd =  open ("/dev/symmetricom", O_RDWR | O_SYNC);
+  symmetricom_fd =  open ("/dev/gpstime", O_RDWR | O_SYNC);
   if (symmetricom_fd < 0) {
-	perror("/dev/symmetricom");
+	perror("/dev/gpstime");
 	exit(1);
   }
 

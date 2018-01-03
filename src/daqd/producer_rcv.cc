@@ -34,7 +34,7 @@
 #ifdef USE_SYMMETRICOM
 #ifndef USE_IOP
 //#include <bcuser.h>
-#include <../drv/symmetricom/symmetricom.h>
+#include <../drv/gpstime/gpstime.h>
 #endif
 #endif
 
