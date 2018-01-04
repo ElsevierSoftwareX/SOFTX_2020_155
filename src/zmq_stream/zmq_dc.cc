@@ -25,7 +25,7 @@
 #include "../include/daqmap.h"
 
 #include <sys/ioctl.h>
-#include "../drv/symmetricom/symmetricom.h"
+#include "../drv/gpstime/gpstime.h"
 
 #include <zmq.hpp>
 

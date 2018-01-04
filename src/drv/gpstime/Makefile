@@ -6,7 +6,7 @@
 # MODULENAME_test.c	the driver test program
 # MODULENAME_test.sh	the driver test script
 #
-MODULENAME 	:= symmetricom
+MODULENAME 	:= gpstime
 
 
 ### should not need to change stuff below ######################
@@ -19,7 +19,7 @@ PWD		:= $(shell pwd)
 
 CC		:= gcc -Wall -g
 
-TARGET		:= symmetricom.ko
+TARGET		:= gpstime.ko
 INSTDIR		:= /lib/modules/$(KVER)/extra
 
 ifeq ($(KERNELRELEASE),)

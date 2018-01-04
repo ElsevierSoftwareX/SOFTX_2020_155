@@ -31,9 +31,9 @@ DAQIP=`hostname -i | sed 's/10.144.0/10.146.0/g'`
 /bin/chown controls /dev/mbuf
 
 # Load IRIG-B driver
-/sbin/modprobe symmetricom
-/bin/mknod /dev/symmetricom c `grep symmetricom /proc/devices | /usr/bin/awk '{print $1}'` 0
-/bin/chown controls /dev/symmetricom
+/sbin/modprobe gpstime
+/bin/mknod /dev/gpstime c `grep gpstime /proc/devices | /usr/bin/awk '{print $1}'` 0
+/bin/chown controls /dev/gpstime
 
 # start open-mx driver
 /opt/open-mx/sbin/omx_init start

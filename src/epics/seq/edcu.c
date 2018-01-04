@@ -43,7 +43,7 @@ of this distribution.
 #include "findSharedMemory.h"
 #include "cadef.h"
 #include "fb.h"
-#include "../../drv/symmetricom/symmetricom.h"
+#include "../../drv/gpstime/gpstime.h"
 
 #define EDCU_MAX_CHANS	30000
 // Gloabl variables		****************************************************************************************
@@ -130,9 +130,9 @@ int symm_gps_ok() {
 unsigned long symm_initialize()
 // **************************************************************************
 {
-	symmetricom_fd =  open ("/dev/symmetricom", O_RDWR | O_SYNC);
+	symmetricom_fd =  open ("/dev/gpstime", O_RDWR | O_SYNC);
 	if (symmetricom_fd < 0) {
-	       perror("/dev/symmetricom");
+	       perror("/dev/gpstime");
 	       exit(1);
 	}
 	unsigned long gpsSec, gpsuSec;
