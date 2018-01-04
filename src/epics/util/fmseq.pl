@@ -1076,6 +1076,7 @@ print "grecord(stringout,\"%IFO%:FEC-${dcuId}_MSG\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_MSG2\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_MSGDAQ\")\n";
 print "grecord(stringout,\"%IFO%:FEC-${dcuId}_TIME_STRING\")\n";
+print "grecord(stringout,\"%IFO%:FEC-${dcuId}_BUILD_DATE\")\n";
 
 for(my $fmi = 0; $fmi < 1000; $fmi ++)
 {

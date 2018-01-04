@@ -84,6 +84,11 @@ program %SEQUENCER_NAME%
 %% static %EPICS_TYPE% *pEpics = &pEpicsSpace;
 #endif
 
+%% char *build_date = __DATE__ " " __TIME__;
+
+string build_time;
+assign build_time to "{ifo}:FEC-{sysnum}_BUILD_DATE";
+
 string msg;
 assign msg to "{ifo}:FEC-{sysnum}_MSG";
 
@@ -130,6 +135,15 @@ assign dataSize to "{ifo}:DAQ-FEC_{sysnum}_TOTAL";
 
 int dcuId;
 assign dcuId to "{ifo}:DAQ-FEC_{sysnum}_DCU_ID";
+
+int uptime_day;
+assign uptime_day to "{ifo}:FEC-{sysnum}_UPTIME_DAY";
+
+int uptime_hour;
+assign uptime_hour to "{ifo}:FEC-{sysnum}_UPTIME_HOUR";
+
+int uptime_minute;
+assign uptime_minute to "{ifo}:FEC-{sysnum}_UPTIME_MINUTE";
 
 #endif
 
@@ -315,6 +329,8 @@ state init
 %% strcpy(localtimestring, ctime(&lt));
 %% localtimestring[strlen(localtimestring) - 1] = 0; /* Delete newline character */
    pvPut(localtimestring);
+%% strcpy(build_time, build_date);
+   pvPut(build_time);
 
 #if defined(RFM_EPICS)
     sysnum = atoi(macValueGet("sysnum"));
@@ -512,6 +528,7 @@ state monScreen{
 %% int ij;
 %% int rtruns = 0;
 %% int myTimeout;
+%% int uptime;
 
 %% rtruns = 1;
 %%    stateWord = pEpics->epicsOutput.stateWord
@@ -544,6 +561,15 @@ state monScreen{
 %% if(prev_seqTrig == 0) epicsSyncTime += 1;
    epicsWait = myTimeout;
    pvPut(epicsWait);
+%% uptime = pEpics->epicsOutput.timeDiag - pEpics->epicsOutput.startgpstime;
+   uptime_day = uptime / 86400;
+   uptime -= uptime_day * 86400;
+   uptime_hour = uptime / 3600;
+   uptime -= uptime_hour * 3600;
+   uptime_minute = uptime /60;
+   pvPut(uptime_day);
+   pvPut(uptime_hour);
+   pvPut(uptime_minute);
 
 %% pthread_mutex_lock (&seq_lock);
 
