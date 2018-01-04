@@ -35,8 +35,20 @@ AC_CHECK_HEADERS(FlexLexer.h arpa/inet.h assert.h ctype.h \
 	errno.h fcntl.h fstream.h iostream.h limits.h math.h \
 	netinet/in.h pthread.h signal.h stdio.h stdlib.h stream.h \
     string.h sys/socket.h sys/types.h time.h unistd.h tnf/probe.h \
-    regex.h regexp.h)
+    regex.h regexp.h zmq.h)
 AC_HEADER_TIME
+
+dnl check for zmq c++ wrapper
+dnl =========================
+AC_LANG_PUSH([C++])
+AC_CHECK_HEADER(zmq.hpp, [HAVE_ZMQ_HPP=1], [HAVE_ZMQ_HPP=0])
+AC_LANG_POP([C++])
+
+ZMQ_INCLUDES=
+AS_IF([test "$HAVE_ZMQ_HPP" = "0"], [
+  ZMQ_INCLUDES="../include/thirdparty/zmq"
+])
+AC_SUBST(ZMQ_INCLUDES)
 
 
 dnl checks for typedefs

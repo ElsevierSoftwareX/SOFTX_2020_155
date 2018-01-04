@@ -21,13 +21,12 @@ target_compile_options(zmq_multi_stream PUBLIC -std=gnu99)
 
 
 add_executable(zmq_threads zmq_threads.c)
-target_link_libraries(zmq_threads PUBLIC zmq ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(zmq_threads PUBLIC zmq4::zmq ${CMAKE_THREAD_LIBS_INIT})
 target_compile_options(zmq_threads PUBLIC -std=gnu99)
 
 add_executable(zmq_dc zmq_dc.cc)
-target_link_libraries(zmq_dc PUBLIC zmq_dc_recv zmq ${CMAKE_THREAD_LIBS_INIT})
-target_compile_options(zmq_dc PUBLIC)
-target_requires_cpp11(zmq_dc PUBLIC)
+target_link_libraries(zmq_dc PUBLIC zmq_dc_recv zmq4::zmq ${CMAKE_THREAD_LIBS_INIT})
+target_compile_options(zmq_dc PUBLIC "-std=c++11")
 
 add_executable(zmq_proxy zmq_proxy.c)
 target_link_libraries(zmq_proxy PUBLIC zmq4::zmq)

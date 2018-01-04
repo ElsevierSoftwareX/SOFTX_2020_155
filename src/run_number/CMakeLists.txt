@@ -21,11 +21,11 @@ else(${HAS_CXX_11})
 endif (${HAS_CXX_11})
 
 add_executable(run_number_server run_number_main.cc run_number.cc run_number.hh)
-target_link_libraries(run_number_server PUBLIC zmq)
+target_link_libraries(run_number_server PUBLIC zmq4::zmq)
 target_compile_options(run_number_server PRIVATE ${_RN_CHECK_FLAGS})
 
 add_library(run_number_client STATIC run_number_client.cc run_number_client.hh)
-target_link_libraries(run_number_client PUBLIC zmq)
+target_link_libraries(run_number_client PUBLIC zmq4::zmq)
 target_include_directories(run_number_client PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(run_number::run_number ALIAS run_number_client)
 
