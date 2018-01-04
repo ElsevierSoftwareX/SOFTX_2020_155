@@ -7,7 +7,7 @@ set(cds_find_zmq4_included TRUE)
 
 FIND_PACKAGE(PkgConfig)
 
-pkg_check_modules(LibZMQ REQUIRED libzmq>=4.0.0)
+pkg_check_modules(LibZMQ libzmq>=4.0.0)
 if (LibZMQ_FOUND)
     set (_fcpp_lib_list "")
 
