@@ -10,6 +10,9 @@
 #include <linux/vmalloc.h>
 #include <linux/mm.h>
 #include <linux/pci.h>
+#include <linux/kernel.h>
+#include <linux/kobject.h>
+#include <linux/sysfs.h>
 
 #include <linux/types.h>
 #include <linux/errno.h>
@@ -44,6 +47,9 @@ struct proc_dir_entry *proc_gps_entry;
 struct proc_dir_entry *proc_gps_offset_entry;
 
 atomic64_t gps_offset = ATOMIC_INIT(0);
+
+/* What type of syncing does the driver need */
+static int gps_module_sync_type = STATUS_SYMMETRICOM_NO_SYNC;
 
 /* character device structures */
 static dev_t symmetricom_dev;
@@ -120,22 +126,20 @@ static long symmetricom_ioctl(struct file *inode, unsigned int cmd, unsigned lon
 static int symmetricom_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned long arg)
 #endif
 {
+    unsigned long req[3];
+    unsigned long res = 0;
 
-        switch(cmd){
+    printk("gpstime iotcl called cmd = %d", (int)cmd);
+
+    switch(cmd){
         case IOCTL_SYMMETRICOM_STATUS:
-                {
-        	  unsigned long req[3];
-		  unsigned long res = get_cur_time(req);
-                  if (copy_to_user ((void *) arg, &res,  sizeof (res))) return -EFAULT;
-                }
-                break;
+            res = get_cur_time(req);
+            if (copy_to_user ((void *) arg, &res,  sizeof (res))) return -EFAULT;
+            break;
         case IOCTL_SYMMETRICOM_TIME:
-		{
-        	  unsigned long req[3];
-		  get_cur_time(req);
-                  if (copy_to_user ((void *) arg, req,  sizeof (req))) return -EFAULT;
-		}
-		break;
+            get_cur_time(req);
+            if (copy_to_user ((void *) arg, req,  sizeof (req))) return -EFAULT;
+		    break;
         default:
                 return -EINVAL;
         }
@@ -170,72 +174,71 @@ static struct file_operations gps_file_ops = {
 	.release = single_release
 };
 
-
-static int gps_offset_seq_show(struct seq_file *s, void *v)
+/* The output buffer provided to all sysfs calls here is PAGE_SIZED (ie typically 4k bytes) */
+static ssize_t gpstime_sysfs_card_present_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
-	seq_printf(s, "%ld\n", atomic64_read(&gps_offset));
-	return 0;
+    return sprintf(buf, "%d\n", (int)card_present);
 }
 
-static ssize_t gps_offset_write(struct file *f, const char __user *buffer, size_t count,  loff_t *data)
+static ssize_t gpstime_sysfs_card_type_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
-	int i = 0;
-	long new_offset = 0;
+    return sprintf(buf, "%d\n", (int)card_type);
+}
+
+static ssize_t gpstime_sysfs_gps_offset_type_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
+{
+    return sprintf(buf, "%d\n", (int)gps_module_sync_type);
+}
+
+static ssize_t gpstime_sysfs_gps_offset_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
+{
+    return sprintf(buf, "%lld\n", (long long)atomic64_read(&gps_offset));
+}
+
+static ssize_t gpstime_sysfs_gps_offset_store(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count)
+{
+	long long new_offset = 0;
 	char localbuf[CDS_LOCAL_GPS_BUFFER_SIZE+1];
     size_t full_count = count;
-    size_t remaining = 0;
     int conv_ret = 0;
 
     memset(localbuf, 0, CDS_LOCAL_GPS_BUFFER_SIZE+1);
-    // The symmetricom driver doesn't need a tweak on the timing, so don't allow it
+    // The symmetricom driver doesn't need a tweak on the timing, so don't allow non-zero tweaks
     if (card_present && card_type == 0) {
-        printk("gps_offset_write called when a symmetricom card is present, ignoring the value");
+        printk("gpstime_sysfs_gps_offset_store called when a symmetricom card is present, ignoring the value");
         return full_count;
     }
     // just ignore input when it is too big
 	if (count >= CDS_LOCAL_GPS_BUFFER_SIZE) {
-        printk("gps_offset_write called with too much input, ignoring the value");
+        printk("gpstime_sysfs_gps_offset_store called with too much input, ignoring the value");
         return -EFAULT;
     }
-	remaining = copy_from_user(localbuf, buffer, count);
-	if (remaining != 0) {
-        printk("gps_offset_write was unable to move input to userspace");
-        return -EFAULT;
-    }
-    localbuf[CDS_LOCAL_GPS_BUFFER_SIZE] = 0;
-	for (i = 0; localbuf[i] != 0 && i < count; ++i)
-	{
-        if (!((localbuf[i] >= '0' && localbuf[i] <= '9') || (i == 0 && localbuf[i] == '-')))
-        {
-            localbuf[i] = 0;
-            break;
-        }
-	}
-    localbuf[i] = 0;
-    if ((conv_ret = kstrtol(localbuf, 10, &new_offset)) != 0) {
-        printk("gps_offset_write error converting offset into an integer - %s", (conv_ret == -ERANGE ? "range" : "overflow"));
+    memcpy(localbuf, buf, count);
+	localbuf[count] = '\0';
+
+    if ((conv_ret = kstrtoll(localbuf, 10, &new_offset)) != 0) {
+        printk("gpstime_sysfs_gps_offset_store error converting offset into an integer - %s %d", (conv_ret == -ERANGE ? "range" : "overflow"), conv_ret);
         return -EFAULT;
     }
     atomic64_set(&gps_offset, new_offset);
-    printk("gps_offset_write success - new value = %ld", new_offset);
+    printk("gpstime_sysfs_gps_offset_store success - new value = %lld", new_offset);
     /* tell it we consumed everything */
-	return full_count;
+	return (ssize_t)count;
 }
 
-
-static int gps_offset_open(struct inode *inode, struct file *file)
+static ssize_t gpstime_sysfs_status_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
-	return single_open(file, gps_offset_seq_show, NULL);
+    unsigned long req[3];
+    int status = (int)get_cur_time(req);
+    return sprintf(buf, "%d\n", status);
 }
 
-static struct file_operations gps_offset_file_ops = {
-	.owner = THIS_MODULE,
-	.open = gps_offset_open,
-	.read = seq_read,
-	.write = gps_offset_write,
-	.llseek = seq_lseek,
-	.release = single_release
-};
+static ssize_t gpstime_sysfs_gpstime_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf) {
+    unsigned long req[3];
+    get_cur_time(req);
+    return sprintf(buf, "%ld.%02ld\n", req[0], req[1]/10000);
+}
+
 
 static void config_proc_entry(struct proc_dir_entry *proc_entry, int uid)
 {
@@ -264,28 +267,57 @@ long ligo_get_gps_driver_offset(void)
     return atomic64_read(&gps_offset);
 }
 
+
+/* sysfs related structures */
+static struct kobject *gpstime_sysfs_dir = NULL;
+
+/* Individual sysfs attributes (ie files) */
+static struct kobj_attribute sysfs_card_present_attr = __ATTR(card_present, 0444, gpstime_sysfs_card_present_show, NULL);
+static struct kobj_attribute sysfs_card_type_attr = __ATTR(card_type, 0444, gpstime_sysfs_card_type_show, NULL);
+static struct kobj_attribute sysfs_gps_offset_type_attr = __ATTR(offset_type, 0444, gpstime_sysfs_gps_offset_type_show, NULL);
+static struct kobj_attribute sysfs_gps_offset_attr = __ATTR(offset, 0644, gpstime_sysfs_gps_offset_show, gpstime_sysfs_gps_offset_store);
+static struct kobj_attribute sysfs_status_attr = __ATTR(status, 0444, gpstime_sysfs_status_show, NULL);
+static struct kobj_attribute sysfs_gpstime_attr = __ATTR(time, 0444, gpstime_sysfs_gpstime_show, NULL);
+
+/* group the attributes together for bulk operations */
+static struct attribute *gpstime_fields[] = {
+        &sysfs_card_present_attr.attr,
+        &sysfs_card_type_attr.attr,
+        &sysfs_gps_offset_type_attr.attr,
+        &sysfs_gps_offset_attr.attr,
+        &sysfs_status_attr.attr,
+        &sysfs_gpstime_attr.attr,
+        NULL,
+};
+
+static struct attribute_group gpstime_attr_group = {
+        .attrs = gpstime_fields,
+};
+
+
+
 /* module initialization - called at module load time */
 static int __init symmetricom_init(void)
 {
-        int ret = 0;
+    int ret = 0;
+    int card_needs_sync = STATUS_SYMMETRICOM_NO_SYNC;
     struct pci_dev *symdev = NULL;
     proc_gps_entry = NULL;
-    proc_gps_offset_entry = NULL;
 
-        /* get the major number of the character device */
-        if ((ret = alloc_chrdev_region(&symmetricom_dev, 0, 1, "gpstime")) < 0) {
-                printk(KERN_ERR "could not allocate major number for symmetricom\n");
-                goto out;
-        }
+    /* get the major number of the character device */
+    if ((ret = alloc_chrdev_region(&symmetricom_dev, 0, 1, "gpstime")) < 0) {
+            printk(KERN_ERR "could not allocate major number for symmetricom\n");
+            goto out;
+    }
 
-        /* initialize the device structure and register the device with the kernel */
-        cdev_init(&symmetricom_cdev, &symmetricom_fops);
-        if ((ret = cdev_add(&symmetricom_cdev, symmetricom_dev, 1)) < 0) {
-                printk(KERN_ERR "could not allocate chrdev for buf\n");
-                goto out_unalloc_region;
-        }
+    /* initialize the device structure and register the device with the kernel */
+    cdev_init(&symmetricom_cdev, &symmetricom_fops);
+    if ((ret = cdev_add(&symmetricom_cdev, symmetricom_dev, 1)) < 0) {
+            printk(KERN_ERR "could not allocate chrdev for buf\n");
+            goto out_unalloc_region;
+    }
 
-        // Create /proc/gps filesystem tree
+    // Create /proc/gps filesystem tree
 	proc_gps_entry = proc_create("gps", PROC_MODE | S_IFREG | S_IRUGO, NULL, &gps_file_ops);
         if (proc_gps_entry == NULL) {
                 printk(KERN_ALERT "Error: Could not initialize /proc/gps\n");
@@ -293,12 +325,15 @@ static int __init symmetricom_init(void)
         }
 	config_proc_entry(proc_gps_entry, PROC_UID);
 
-    proc_gps_offset_entry = proc_create("gps_offset", PROC_MODE | S_IFREG | S_IRUGO, NULL, &gps_offset_file_ops);
-    if (proc_gps_entry == NULL) {
-        printk(KERN_ALERT "Error: Could not initialize /proc/gps_offset\n");
+    gpstime_sysfs_dir = kobject_create_and_add("gpstime", kernel_kobj);
+    if (gpstime_sysfs_dir == NULL) {
+        printk(KERN_ERR "Could not create /sys/kernel/gpstime directory!\n");
         goto out_remove_proc_entry;
     }
-    config_proc_entry(proc_gps_offset_entry, 0);
+    if (sysfs_create_group(gpstime_sysfs_dir, &gpstime_attr_group) != 0) {
+        printk(KERN_ERR "Could not create /sys/kernel/gpstime/... fields!\n");
+        goto out_remove_proc_entry;
+    }
 
 	/* find the Symmetricom device */
 	symdev = pci_get_device (SYMCOM_VID, SYMCOM_BC635_TID, 0);
@@ -328,31 +363,41 @@ static int __init symmetricom_init(void)
 	}
 
 	if (!card_present) {
-        	printk("Symmetricom/Spectracom GPS card not found\n");
+        printk("Symmetricom/Spectracom GPS card not found\n");
+        gps_module_sync_type = STATUS_SYMMETRICOM_LOCALTIME_SYNC;
 	} else if (card_type == 1) {
-		spectracomGpsInit(&cdsPciModules, symdev);
+        spectracomGpsInitCheckSync(&cdsPciModules, symdev, &card_needs_sync);
+        gps_module_sync_type = ( card_needs_sync ? STATUS_SYMMETRICOM_YEAR_SYNC : STATUS_SYMMETRICOM_NO_SYNC);
 	} else if (card_type == 0) {
 		symmetricomGpsInit(&cdsPciModules, symdev);
+        gps_module_sync_type = STATUS_SYMMETRICOM_NO_SYNC;
 	}
 
 
         return ret;
-  out_remove_proc_entry:
-	remove_proc_entry("gps", NULL);
-  out_unalloc_region:
+out_remove_proc_entry:
+    if (gpstime_sysfs_dir != NULL) {
+        kobject_del(gpstime_sysfs_dir);
+        gpstime_sysfs_dir = NULL;
+    }
+    remove_proc_entry("gps", NULL);
+out_unalloc_region:
         unregister_chrdev_region(symmetricom_dev, 1);
-  out:
+out:
         return ret;
 }
 
 /* module unload */
 static void __exit symmetricom_exit(void)
 {
-        /* remove the character deivce */
-        cdev_del(&symmetricom_cdev);
-        unregister_chrdev_region(symmetricom_dev, 1);
+    /* remove the character deivce */
+    cdev_del(&symmetricom_cdev);
+    unregister_chrdev_region(symmetricom_dev, 1);
 	remove_proc_entry("gps", NULL);
-	remove_proc_entry("gps_offset", NULL);
+    if (gpstime_sysfs_dir != NULL) {
+        kobject_del(gpstime_sysfs_dir);
+        gpstime_sysfs_dir = NULL;
+    }
 }
 
 EXPORT_SYMBOL(ligo_get_gps_driver_offset);
