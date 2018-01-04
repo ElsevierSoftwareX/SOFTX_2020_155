@@ -1694,6 +1694,7 @@ usleep(1000);
 			     cpuClock[CPU_TIME_CYCLE_START].tv_nsec - adcTime.tv_nsec;
 	adcHoldTime /= 1000;
 	// Avoid calculating the max hold time for the first few seconds
+	 pLocalEpics->epicsOutput.startgpstime = startGpsTime;
 	if (cycleNum != 0 && (startGpsTime+3) < cycle_gps_time) {
 		if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
 		if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
