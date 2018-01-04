@@ -68,7 +68,7 @@ class YMD(object):
 
 
 class Config(object):
-    def __init__(self, do_auto, do_year, do_system, leap_filename, ref_time, status_only):
+    def __init__(self, do_auto, do_year, do_system, leap_filename, ref_time, status_only, dry_run):
         def valid_flags():
             if do_auto:
                 return do_year == False and do_system == False
@@ -77,7 +77,6 @@ class Config(object):
         def get_offset_type():
             with open("/sys/kernel/gpstime/offset_type", "rt") as f:
                 return int(f.readline().strip())
-
 
         if not valid_flags() and not status_only:
             errmsg = "You must choose auto, year based, system based offsets"
@@ -99,6 +98,7 @@ class Config(object):
         self.__ref_time = YMD.convert(ref_time)
         self.__filename = leap_filename
         self.__status_only = status_only
+        self.__dry_run = dry_run
 
     def year_based(self):
         return self.__do_year
@@ -114,6 +114,9 @@ class Config(object):
 
     def status_only(self):
         return self.__status_only
+
+    def dry_run(self):
+        return self.__dry_run
 
     def __unicode__(self):
         mode = "year"
@@ -140,6 +143,10 @@ for the LIGO gpstime driver.""")
     help_txt = "Location of a leap-second database [{0}]".format(default)
     parser.add_argument("-l", "--leap-second-db", help=help_txt,
                         default=default)
+
+    help_txt = "Do NOT attempt to set the gps_offset to the computed value"
+    parser.add_argument("-n", "--dry-run", help=help_txt, action="store_true",
+                        default=False)
     default = None
     help_txt = "Time to calculate the offset for "
     "(UNIX time in seconds) defaults to now"
@@ -163,7 +170,8 @@ for the LIGO gpstime driver.""")
                       opts.system_time,
                       opts.leap_second_db,
                       tm,
-                      opts.status)
+                      opts.status,
+                      opts.dry_run)
     except ValueError as e:
         parser.error(e)
 
@@ -318,6 +326,16 @@ def print_card_status():
             read_val("time")))
 
 
+def apply_offset(offset):
+    fname = '/sys/kernel/gpstime/offset'
+    try:
+        with open('/sys/kernel/gpstime/offset', 'wt') as f:
+            f.write("{0}".format(offset))
+    except:
+        print("Unable to apply offset of {0} to {1}.  Please make sure the gpstime module is loaded and you have "
+              "permission to write to the offset file.".format(offset, fname))
+        sys.exit(1)
+
 def main(argv):
     cfg = parse_arguments(argv)
     leap_sec_db = parse_leap_sec_to_unix(cfg.leapsec_filename())
@@ -330,8 +348,12 @@ def main(argv):
         offset = system_time_based_offset(leap_sec_db, cfg.reference_time())
     else:
         offset = 0
-    print("{0}".format(offset))
+    if cfg.dry_run():
+        print("{0}".format(offset))
+    else:
+        apply_offset(offset)
 
 
 if __name__ == '__main__':
     main(sys.argv)
+    sys.exit(0)
