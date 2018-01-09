@@ -147,6 +147,9 @@
 #define DAC_OVERFLOW_BIT	4
 #define DAC_FIFO_BIT		8
 #define DAC_WD_BIT		16	
+#define DAC_FIFO_EMPTY		32	
+#define DAC_FIFO_HI_QTR		64	
+#define DAC_FIFO_FULL		128	
 
 #define MAX_IRIGB_SKEW		20
 #define MIN_IRIGB_SKEW		5
