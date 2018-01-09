@@ -1195,6 +1195,7 @@ if($frate == 15)
 	$frate =  $rate * .85;
 	$brate = $frate;
 }
+$cpuM = $site . ":FEC-" . $dcuId . "_CPU_METER";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\") field(EGU,\"usec\")\n";
 
 print OUTH "\tint cpuMeterMax;\n";
@@ -1462,6 +1463,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 	} else {
   		print OUTH "\#define TARGET_CPU 1\n";
 	}
+	print OUTH "\#define TARGET_METER $cpuM\n";
 	print OUTH "\#endif\n";
 
 	#//	- Write EPICS database info file for later use by fmseq.pl in generating EPICS code/database.
