@@ -1596,6 +1596,16 @@ udelay(1000);
 			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
   			    dacTimingErrorPending[jj] = 0;
 			}
+			if(out_buf_size < 4) {
+			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_EMPTY;
+			} else { 
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_EMPTY);
+			}
+			if(out_buf_size > 32) {
+			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_FULL;
+			} else { 
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_FULL);
+			}
 
 		}
 		if(cdsPciModules.dacType[jj] == GSC_16AO16)
@@ -1610,6 +1620,21 @@ udelay(1000);
 			} else {
 			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
   			    dacTimingErrorPending[jj] = 0;
+			}
+			if(status & 1) {
+			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_EMPTY;
+			} else { 
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_EMPTY);
+			}
+			if(status & 8) {
+			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_FULL;
+			} else { 
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_FULL);
+			}
+			if(status & 4) {
+			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_HI_QTR;
+			} else { 
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_HI_QTR);
 			}
 		}
 	}

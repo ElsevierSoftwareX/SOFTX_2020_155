@@ -254,8 +254,6 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
         ioMemData->dolphinRead[0] = 0;
         ioMemData->dolphinWrite[0] = 0;
 #endif
-	cdsPciModules.gps = 0;
-	cdsPciModules.gpsType = 0;
         printf("***************************************************************************\n");
   	if (cdsPciModules.gps) {
 	printf("IRIG-B card found %d\n",cdsPciModules.gpsType);
