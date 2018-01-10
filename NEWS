@@ -1,6 +1,7 @@
 ==================================================================================================
 Changes for 3.4  
 ==================================================================================================
+- Bug Fix (1102): Remove use on unitialized array in daqd rcv build
 - Changed method for setting compile options to use Dolphin Gen2 cards and Long Range PCIe.
 - Matlab CDS_PARTS updated to use Matlab version 2015b.
 - Added run_number server to generate configuration/run numbers for frames.  This is a separate proces
@@ -15,7 +16,7 @@ Changes for 3.4
   specifically for MIT in RCG V2.8.8, but had not been carried over into RCG V3.x.
 - Added support for General Standards 20AO8 DAC module, as was done for branch-3.3 as a test.
 - Added auto generation of safe.snap files for models built for the first time.
-- Changed IPC error reporting, as requested in Bugzilla 793.
+- Enhancement (793): Changed IPC error reporting
 - Added support for Dolphin PCIe network Gen 2 hardware.
 *** NOTE: Following disabled in branch-3.4. *********
 - Add ability to inter-connect PCIe (Dolphin) switches between corner and end stations.
@@ -26,13 +27,12 @@ Changes for 3.4
   in a 'standiop' mode.  This is also included in branch-3.0.
 - Bug Fix (472): Better framewriter error messages
 - Bug Fix (985): Fix daqd for single-machine framebuilder in kernel 3.2
-- Bug Fix (1010): Prevent divide-by-zero error in daqd filesys.hh
+- Bug Fix (957): Add OSC part with phase synched to fixed reference time
 - Bug Fix (513): Cleanup debug schemes.  Also created separate udp_rcvr files, fixed mx_rcvr header
 - Bug Fix (1015): Update daqd,nds build for ldas-tools 2.5
 - Add leap second to dataviewer for Dec. 31, 2016
 - Bug Fix (1047): EDCU code that supports dual data concentrators was modified to work 
   with new mx_stream introduced in 3.1
-- Bug Fix: Corrected initialization for fixed and set phase oscillators at model start.
 - Bug Fix: Change MX heartbeat betwwen controller.c and mx_stream/mx_crc_only to use ipc->reqAck
   instead of ipc->status.  DAQD uses ipc->status on a standalone system, so was an issue there.
   This fix also done in RCG branch-3.2.
@@ -45,12 +45,11 @@ Changes for 3.2
   when there is a slow down on frame writes.
   Cleaned up some of the EPICS code.
   Added more EPICS channels to give metrics on daqd.
-  	- Add leap second to dataviewer leapsecs.txt file for 12-31-16
-	- Bug Fix (1010): Prevent divide-by-zero error in daqd filesys.hh
-	- Bug Fix (1047): EDCU code that supports dual data concentrators was modified to work
+- Add leap second to dataviewer leapsecs.txt file for 12-31-16
+- Bug Fix (1010): Prevent divide-by-zero error in daqd filesys.hh
+- Bug Fix (1047): EDCU code that supports dual data concentrators was modified to work
 	  with new mx_stream introduced in 3.1
-	- Bug Fix: Corrected initialization for fixed and set phase oscillators at model start.
-
+- Bug Fix (1053): Corrected initialization for fixed and set phase oscillators at model start.
 ==================================================================================================
 Changes for 3.1.1
 ==================================================================================================
