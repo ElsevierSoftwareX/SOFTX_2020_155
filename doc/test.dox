@@ -21,7 +21,7 @@
 	- \ref ipcTestData "RCG IPC Test"
 \subsection ep EPICS Parts
 	- \ref eicTest "EPICS input w/control"
-	- \ref ezca "EzcaRead / EzcaWrite"
+	- \ref ezcaTest "EzcaRead / EzcaWrite"
 \subsection slp Simulink Parts
 	- \ref simPartsTest "Supported Simulink Parts"
 \subsection mp Matrix Parts
@@ -34,7 +34,7 @@
 	- \ref phase "Phase"
 	- \ref wfsphase "WfsPhase"
 \subsection ft IIR Filters
-	- \ref sfmTest "IIR Filter Module"
+	- \ref fmcTest "IIR Filter Module"
 	- \ref fmcControlTest "Filter Module w/Control"
 	- \ref fmcControl2Test "Filter Module w/Control2"
 	- \ref inputFiltTest "Input Filter (Single pole/zero)"
@@ -45,11 +45,5 @@
 	- \ref dackillTest "DACKILL w/OSEM Watchdog Test"
 	- \ref dacKillIopTest "DACKILL IOP w/OSEM Watchdog Test"
 	- \ref dktTest "DACKILL Timed"
-\section sushwwd SUSPENSION HARDWARE WATCHDOG 
-	- \ref sushwwdTest "UNIT UNDER TEST"
-	- \ref sushwwdTest_S1301698 "HWWD #S1301698"
-	- \ref sushwwdTest_S1301709 "HWWD #S1301709"
-	- \ref sushwwdTest_S1301712 "HWWD #S1301712"
-	- \ref sushwwdTest_S1301714 "HWWD #S1301714"
 */
 
