@@ -35,8 +35,20 @@ AC_CHECK_HEADERS(FlexLexer.h arpa/inet.h assert.h ctype.h \
 	errno.h fcntl.h fstream.h iostream.h limits.h math.h \
 	netinet/in.h pthread.h signal.h stdio.h stdlib.h stream.h \
     string.h sys/socket.h sys/types.h time.h unistd.h tnf/probe.h \
-    regex.h regexp.h zmq.h)
+    regex.h regexp.h)
 AC_HEADER_TIME
+
+dnl check for zmq headers
+dnl =====================
+AC_CHECK_HEADER(zmq.h, [HAVE_ZMQ_H=1], [HAVE_ZMQ_H=0])
+RUN_NUMBER_CLIENT="run_number_client"
+RUN_NUMBER_LIBS="-lzmq"
+AS_IF([test "$HAVE_ZMQ_H" = "0"], [
+  RUN_NUMBER_CLIENT="null_run_number_client";
+  RUN_NUMBER_LIBS=""
+])
+AC_SUBST(RUN_NUMBER_CLIENT)
+AC_SUBST(RUN_NUMBER_LIBS)
 
 dnl check for zmq c++ wrapper
 dnl =========================
