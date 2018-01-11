@@ -1647,9 +1647,7 @@ udelay(1000);
 	/// \> Compute code cycle time diag information.
 	cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
 	if (longestWrite2 < ((tempClock[3]-tempClock[2])/CPURATE)) longestWrite2 = (tempClock[3]-tempClock[2])/CPURATE;
-	if (cycleTime > (1000000/CYCLE_PER_SECOND))  {
-		// printf("cycle %d time %d; adcWait %d; write1 %d; write2 %d; longest write2 %d\n", cycleNum, cycleTime, adcWait, (tempClock[1]-tempClock[0])/CPURATE, (tempClock[3]-tempClock[2])/CPURATE, longestWrite2);
-	}
+	if(cycleTime > 20) printf("Long Cycle = at cycle %d\n",cycleTime,cycleNum); 
 	// Hold the max cycle time over the last 1 second
 	if(cycleTime > timeHold) { 
 		timeHold = cycleTime;

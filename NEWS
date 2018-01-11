@@ -1,9 +1,14 @@
 ==================================================================================================
-Changes for 4.0  (NOT YET RELEASED)
+Changes for 3.5  (NOT YET RELEASED)
 ==================================================================================================
 - daqLib.c and supporting components modified to send out GDS TP data via separate shared memory
   area for use with new ZMQ DAQ transmission software.
 - RCG now builds user space code as well as kernel objects.
+- controller.c and moduleLoad.c now split into new files to clean out #defs:
+	- controllerIop.c and moduleLoadIop.c for IOP model builds.
+	- controllerApp.c and moduleLoadApp.c for user application model builds.
+- Removed /proc entries from all FE code. This should alleviate issue with change to /proc
+  in later Linux kernels.
 ==================================================================================================
 Changes for 3.4  (NOT YET RELEASED)
 ==================================================================================================

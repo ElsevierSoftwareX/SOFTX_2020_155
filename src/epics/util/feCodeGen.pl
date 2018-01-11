@@ -1341,9 +1341,9 @@ for($ii=0;$ii<32;$ii++)
 }
 print OUTH "\tint startgpstime;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_START_GPS epicsOutput.startgpstime int ao 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_UPTIME_DAY int ai 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_UPTIME_HOUR int ai 0\n";
-print EPICS "DUMMY FEC\_$dcuId\_UPTIME_MINUTE int ai 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_UPTIME_DAY int ao 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_UPTIME_HOUR int ao 0\n";
+print EPICS "DUMMY FEC\_$dcuId\_UPTIME_MINUTE int ao 0\n";
 
 
 # The following code is in solely for automated testing.
