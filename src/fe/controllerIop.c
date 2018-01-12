@@ -74,7 +74,11 @@ int printk(const char *fmt, ...) {
 
 #ifndef NO_DAQ
 #include "drv/fb.h"
-#include "drv/daqLib.c"		// DAQ/GDS connection software
+#ifdef USE_ZMQ
+        #include "drv/daqLibZmq.c"              // DAQ/GDS connection software
+#else
+        #include "drv/daqLib.c"         // DAQ/GDS connection software
+#endif
 #endif
 
 #include "drv/map.h"		// PCI hardware defs
@@ -1127,7 +1131,7 @@ udelay(1000);
                                 if(cycleNum < 100) dac_out = limit / 20;
                                 else dac_out = 0;
                         }
-                        if((ii==0) && (jj == 6))
+                        if((ii==0) && (jj == 2))
                         {
                                 if(cycleNum < 100) dac_out = limit / 20;
                                 else dac_out = 0;
@@ -1647,7 +1651,7 @@ udelay(1000);
 	/// \> Compute code cycle time diag information.
 	cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
 	if (longestWrite2 < ((tempClock[3]-tempClock[2])/CPURATE)) longestWrite2 = (tempClock[3]-tempClock[2])/CPURATE;
-	if(cycleTime > 20) printf("Long Cycle = at cycle %d\n",cycleTime,cycleNum); 
+	if(cycleTime > 20) printf("Long Cycle = %d at cycle %d\n",cycleTime,cycleNum); 
 	// Hold the max cycle time over the last 1 second
 	if(cycleTime > timeHold) { 
 		timeHold = cycleTime;

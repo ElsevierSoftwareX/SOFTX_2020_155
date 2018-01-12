@@ -1,8 +1,10 @@
 ==================================================================================================
 Changes for 3.5  (NOT YET RELEASED)
 ==================================================================================================
-- daqLib.c and supporting components modified to send out GDS TP data via separate shared memory
-  area for use with new ZMQ DAQ transmission software.
+- daqLibZmq.c developed to send out GDS TP data via separate shared memory area for use with 
+  new ZMQ DAQ transmission software.
+  - This code is inserted if USE_ZMQ file exists in release/src/include directory. If not, then
+    build will default to using mx_stream version (daqLib.c).
 - RCG now builds user space code as well as kernel objects.
 - controller.c and moduleLoad.c now split into new files to clean out #defs:
 	- controllerIop.c and moduleLoadIop.c for IOP model builds.

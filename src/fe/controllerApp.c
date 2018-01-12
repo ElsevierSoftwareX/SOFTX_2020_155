@@ -73,7 +73,11 @@ int printk(const char *fmt, ...) {
 
 #ifndef NO_DAQ
 #include "drv/fb.h"
-#include "drv/daqLib.c"		// DAQ/GDS connection software
+#ifdef USE_ZMQ
+	#include "drv/daqLibZmq.c"		// DAQ/GDS connection software
+#else
+	#include "drv/daqLib.c"		// DAQ/GDS connection software
+#endif
 #endif
 
 #include "drv/map.h"		// PCI hardware defs

@@ -70,7 +70,13 @@ $currWorkDir = &Cwd::cwd();
 $rcg_src_dir = $ENV{"RCG_SRC_DIR"};
 $lrpciefile = $rcg_src_dir . "/src/include/USE_LR_PCIE";
 $pciegenfile = $rcg_src_dir . "/src/include/USE_DOLPHIN_GEN2";
+$zmqfile = $rcg_src_dir . "/src/include/USE_ZMQ";
+$usezmq = 0;
 
+if (-e "$zmqfile") {
+        print "Using ZMQ for DAQ\n";
+        $usezmq = 1;
+}
 if (-e "$lrpciefile") {
         print "PCIE LR exists\n";
         $rfm_via_pcie = 1;
@@ -2583,6 +2589,9 @@ if ($iopTimeSlave > -1) {
 }
 if($rfm_via_pcie == 1) {
   print OUTM "EXTRA_CFLAGS += -DRFM_VIA_PCIE=1\n";
+}
+if($usezmq == 1) {
+  print OUTM "EXTRA_CFLAGS += -DUSE_ZMQ=1\n";
 }
 if ($rfmTimeSlave > -1) {
   print OUTM "EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
