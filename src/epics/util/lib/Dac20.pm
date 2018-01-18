@@ -260,15 +260,18 @@ sub createDac20Medm
 	}
 
         # ************* Add Data Monitors  ***************************************************************************
+	if($::adcMaster == 1) {
         # Add On Line Status Monitor
         $xpos = 26; $ypos = 52; $width = 12; $height = 12;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","0","0",$ecolors{green},$ecolors{red});
+	}
         # Add Watchdog Status Monitor
         $xpos = 26; $ypos = 67; $width = 12; $height = 12;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","1","1",$ecolors{green},$ecolors{red});
         # Add Overrange Status Monitor
         $xpos = 26; $ypos = 82; $width = 12; $height = 12;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","2","2",$ecolors{green},$ecolors{red});
+	if($::adcMaster == 1) {
         # Add AI Chassis WD Status Monitor
         $xpos = 26; $ypos = 97; $width = 12; $height = 12;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","4","4",$ecolors{green},$ecolors{red});
@@ -287,12 +290,14 @@ sub createDac20Medm
 	# Add ON LINE Label
         $xpos = 51; $ypos = 52; $width = 100; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"ON LINE",$ecolors{black});
+	}
 	# Add WATCHDOG Label
         $xpos = 51; $ypos = 67; $width = 100; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"WATCHDOG",$ecolors{black});
 	# Add OVERRANGE Label
         $xpos = 51; $ypos = 82; $width = 100; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"OVERRANGE",$ecolors{black});
+	if($::adcMaster == 1) {
 	# Add AI CHASSIS WD Label
         $xpos = 51; $ypos = 97; $width = 100; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"AI CHASSIS WD",$ecolors{black});
@@ -308,6 +313,7 @@ sub createDac20Medm
 	# Add FIFO FULL Label
         $xpos = 81; $ypos = 162; $width = 100; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"FULL",$ecolors{black});
+	}
 
 print OUTMEDM "$medmdata \n";
 close OUTMEDM;
