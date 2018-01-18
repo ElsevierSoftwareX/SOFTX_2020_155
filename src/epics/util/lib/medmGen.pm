@@ -122,6 +122,35 @@ text {
 END
 }
 
+#// \b sub \b medmGenTextLeft ($xpos,$ypos,$wid,$ht,$tix,$fgc) \n
+#// This sub will create an MEDM text block ************************************************* \n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = Text string \n
+#//	5 = Text color \n\n
+sub medmGenTextLeft
+{
+my ($xpos,$ypos,$wid,$ht,$tix,$fgc) = @_;
+        return <<END;
+text {
+        object {
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
+        }
+	"basic attribute" {
+                clr=$fgc
+        }
+        align="horiz. left"
+        textix="$tix"
+
+}
+END
+}
+
 #// \b sub \b medmGenTextDyn ($xpos,$ypos,$wid,$ht,$tix,$fgc,$mcalc,$chan) \n
 #// This sub will create an MEDM dynamic text block ************************************************* \n
 #//	0 = xpos \n
@@ -185,6 +214,43 @@ byte {
                 clr=$oclr
                 bclr=$zclr
         }
+	sbit=$sb
+	ebit=$eb
+}
+
+
+
+END
+}
+
+#// \b sub \b medmGenByteDown ($xpos,$ypos,$wid,$ht,$chan,$sb,$eb,$oclr,$zclr) \n
+#// This sub will create an MEDM byte monitor ************************************************* \n
+#//	0 = xpos \n
+#//	1 = ypos \n
+#//	2 = width \n
+#//	3 = height \n
+#//	4 = EPICS channel name \n
+#//	5 = Starting bit \n
+#//	6 = End bit \n
+#//	7 = "1" color \n
+#//	8= "0" color \n\n
+sub medmGenByteDown
+{
+my ($xpos,$ypos,$wid,$ht,$chan,$sb,$eb,$oclr,$zclr) = @_;
+        return <<END;
+byte {
+        object {
+                x=$xpos
+                y=$ypos
+                width=$wid
+                height=$ht
+        }
+        monitor {
+                chan="$chan"
+                clr=$oclr
+                bclr=$zclr
+        }
+	direction="down"
 	sbit=$sb
 	ebit=$eb
 }

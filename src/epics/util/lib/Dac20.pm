@@ -171,6 +171,7 @@ sub frontEndCode {
 #// This code requires /lib/medmGen.pm \n\n
 sub createDac20Medm
 {
+
         my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$dacNum) = @_;
  # Define colors to be sent to screen gen.
         my %ecolors = ( "white" => "0",
@@ -193,7 +194,7 @@ sub createDac20Medm
         print "creating file $medmDir\/$fname \n";
         open(OUTMEDM, ">$medmDir/$fname") || die "cannot open $medmDir/$fname for writing ";
 
-        my $xpos = 0; my $ypos = 0; my $width = 235; my $height = 275;
+        my $xpos = 0; my $ypos = 0; my $width = 235; my $height = 410;
         $medmdata = ("CDS::medmGen::medmGenFile") -> ($medmDir,$fname,$width,$height);
 
 	# ************* Create Banner ******************************************************************************
@@ -206,62 +207,109 @@ sub createDac20Medm
 
         # ************* Create Background **************************************************************************
         # Add Background rectangles
-        $xpos = 13; $ypos = 27; $width = 210; $height = 238;
+        $xpos = 14; $ypos = 27; $width = 210; $height = 150;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{gray},"","","");
+        $xpos = 14; $ypos = 198; $width = 210; $height = 200;
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{gray},"","","");
+        $xpos = 14; $ypos = 27; $width = 210; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{black},"","","");
+        $xpos = 14; $ypos = 180; $width = 210; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{black},"","","");
 
         # ************* Add Text  **********************************************************************************
         # Add DAC top label
-        $xpos = 46; $ypos = 32; $width = 140; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DAC $::dacCardNum[$dacNum] - 20bit",$ecolors{black});
+        $xpos = 48; $ypos = 27; $width = 140; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DAC $::dacCardNum[$dacNum] - 20 Bit",$ecolors{white});
         # Add DAC OUT label
-        $xpos = 49; $ypos = 52; $width = 45; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"OUT",$ecolors{black});
+        $xpos = 50; $ypos = 221; $width = 45; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"OUTPUT",$ecolors{black});
         # Add OFC OUT label
-        $xpos = 134; $ypos = 52; $width = 45; $height = 15;
+        $xpos = 135; $ypos = 203; $width = 45; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"OVERFLOW",$ecolors{black});
-        $xpos = 108; $ypos = 70; $width = 45; $height = 15;
+        $xpos = 109; $ypos = 221; $width = 45; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"PER SEC",$ecolors{black});
-        $xpos = 160; $ypos = 70; $width = 45; $height = 15;
+        $xpos = 161; $ypos = 221; $width = 45; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"ACCUM",$ecolors{black});
 
         # Add DAC Channel labels
-        $xpos = 14; $ypos = 103; $width = 35; $height = 15;
+        $xpos = 15; $ypos = 240; $width = 35; $height = 15;
 	for($ii=0;$ii<8;$ii+=2)
 	{
 		$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"CH $ii",$ecolors{black});
 		$ypos += 40;
 	}
 
-        # ************* Add Data Monitors  ***************************************************************************
-        # Add Output Status Monitor
-        $xpos = 49; $ypos = 88; $width = 45; $height = 12;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","1","1",$ecolors{green},$ecolors{red});
-        # Add Overflow Status Monitor
-        $xpos = 109; $ypos = 88; $width = 45; $height = 12;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","2","2",$ecolors{green},$ecolors{red});
-
         # Add DAC Data Monitors
-        $xpos = 49; $ypos = 102; $width = 45; $height = 15;
+        $xpos = 50; $ypos = 238; $width = 45; $height = 15;
 	for($ii=0;$ii<8;$ii++)
 	{
         	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_OUTPUT_$dacNum\_$ii",$ecolors{white},$ecolors{blue},"static");
 		$ypos += 20;
 	}
-        $xpos = 109; $ypos = 102; $width = 45; $height = 15;
+        $xpos = 110; $ypos = 238; $width = 45; $height = 15;
 	for($ii=0;$ii<8;$ii++)
 	{
         	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_OVERFLOW_$dacNum\_$ii",$ecolors{white},$ecolors{blue},"static");
 		$ypos += 20;
 	}
-        $xpos = 159; $ypos = 102; $width = 55; $height = 15;
+        $xpos = 160; $ypos = 238; $width = 55; $height = 15;
 	for($ii=0;$ii<8;$ii++)
 	{
         	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_OVERFLOW_ACC_$dacNum\_$ii",$ecolors{white},$ecolors{blue},"static");
 		$ypos += 20;
 	}
 
+        # ************* Add Data Monitors  ***************************************************************************
+        # Add On Line Status Monitor
+        $xpos = 26; $ypos = 52; $width = 12; $height = 12;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","0","0",$ecolors{green},$ecolors{red});
+        # Add Watchdog Status Monitor
+        $xpos = 26; $ypos = 67; $width = 12; $height = 12;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","1","1",$ecolors{green},$ecolors{red});
+        # Add Overrange Status Monitor
+        $xpos = 26; $ypos = 82; $width = 12; $height = 12;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","2","2",$ecolors{green},$ecolors{red});
+        # Add AI Chassis WD Status Monitor
+        $xpos = 26; $ypos = 97; $width = 12; $height = 12;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","4","4",$ecolors{green},$ecolors{red});
+        # Add FIFO Status Monitor
+        $xpos = 26; $ypos = 112; $width = 12; $height = 12;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","3","3",$ecolors{green},$ecolors{red});
+        # Add FIFO EMPTY Monitor
+        $xpos = 58; $ypos = 132; $width = 12; $height = 12;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","5","5",$ecolors{red},$ecolors{green});
+        # Add FIFO HI QTR Monitor
+        $xpos = 58; $ypos = 147; $width = 12; $height = 12;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","6","6",$ecolors{red},$ecolors{green});
+        # Add FIFO FULL Monitor
+        $xpos = 58; $ypos = 162; $width = 12; $height = 12;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","7","7",$ecolors{red},$ecolors{green});
+	# Add ON LINE Label
+        $xpos = 51; $ypos = 52; $width = 100; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"ON LINE",$ecolors{black});
+	# Add WATCHDOG Label
+        $xpos = 51; $ypos = 67; $width = 100; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"WATCHDOG",$ecolors{black});
+	# Add OVERRANGE Label
+        $xpos = 51; $ypos = 82; $width = 100; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"OVERRANGE",$ecolors{black});
+	# Add AI CHASSIS WD Label
+        $xpos = 51; $ypos = 97; $width = 100; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"AI CHASSIS WD",$ecolors{black});
+	# Add FIFO STATUS Label
+        $xpos = 51; $ypos = 112; $width = 100; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"FIFO STATUS",$ecolors{black});
+	# Add FIFO EMPTY Label
+        $xpos = 81; $ypos = 132; $width = 100; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"EMPTY",$ecolors{black});
+	# Add FIFO HI QTR Label
+        $xpos = 81; $ypos = 147; $width = 100; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"HIGH QUARTER",$ecolors{black});
+	# Add FIFO FULL Label
+        $xpos = 81; $ypos = 162; $width = 100; $height = 15;
+        $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"FULL",$ecolors{black});
+
 print OUTMEDM "$medmdata \n";
 close OUTMEDM;
-
 
 }
