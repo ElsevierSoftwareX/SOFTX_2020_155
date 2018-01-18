@@ -23,6 +23,7 @@
 #define SYNC_SRC_1PPS           2
 #define SYNC_SRC_TDS            4
 #define SYNC_SRC_MASTER         8
+#define SYNC_SRC_TIMER         16
 #define TIME_ERR_IRIGB          0x10
 #define TIME_ERR_1PPS           0x20
 #define TIME_ERR_TDS            0x40
@@ -290,6 +291,63 @@ int rioOutputHold1[MAX_DIO_MODULES];
 unsigned int CDO32Input[MAX_DIO_MODULES];
 /// Write value to Contec 32bit I/O module
 unsigned int CDO32Output[MAX_DIO_MODULES];
+
+#endif
+
+// Up/Down Sampling Filter Coeffs
+// All systems not running at 64K require up/down sampling to communicate I/O data
+// with IOP, which is running at 64K.
+// Following defines the filter coeffs for these up/down filters.
+#ifdef OVERSAMPLE
+/* Recalculated filters in biquad form */
+
+/* Oversamping base rate is 64K */
+/* Coeffs for the 2x downsampling (32K system) filter */
+static double __attribute__ ((unused)) feCoeff2x[9] =
+        {0.053628649721183,
+         0.2568759660371100, -0.3225906481359000, 1.2568801238621801, 1.6774135096891700,
+        -0.2061764045745400, -1.0941543149527400, 2.0846376586498803, 2.1966597482716801};
+
+/* RCG V3.0 Coeffs for the 4x downsampling (16K system) filter */
+static double __attribute__ ((unused)) feCoeff4x[9] =
+        {0.054285975,
+         0.3890221, -0.17645085, -0.0417771600000001, 0.41775916,
+         0.52191125, -0.37884382, 1.52190741336686, 1.69347541336686};
+
+// Pre RCG 3.0 filters
+//      {0.014805052402446,  
+//      0.7166258547451800, -0.0683289874517300, 0.3031629575762000, 0.5171469569032900,
+//      0.6838596423885499, -0.2534855521841101, 1.6838609161411500, 1.7447155374502499};
+
+//
+// New Brian Lantz 4k decimation filter
+static double __attribute__ ((unused)) feCoeff16x[9] =
+        {0.010203728365,
+        0.8052941009065100, -0.0241751519071000, 0.3920490703701900, 0.5612099784288400,
+        0.8339678987936501, -0.0376022631287799, -0.0131581721533700, 0.1145865116421301};
+
+/* Coeffs for the 32x downsampling filter (2K system) */
+#if 0
+/* Original Rana coeffs from 40m lab elog */
+static double __attribute__ ((unused)) feCoeff32x[9] =
+        {0.0001104130574447,
+        0.9701834961388200, -0.0010837026165800, -0.0200761119821899, 0.0085463156103800,
+        0.9871502388637901, -0.0039246182095299, 3.9871502388637898, 3.9960753817904697};
+#endif
+
+/* Coeffs for the 32x downsampling filter (2K system) per Brian Lantz May 5, 2009 */
+static double __attribute__ ((unused)) feCoeff32x[9] =
+        {0.010581064947739,
+         0.90444302586137004, -0.0063413204375699639, -0.056459743474659874, 0.032075154877300172,
+         0.92390910024681006, -0.0097523655540199261, 0.077383808424050127, 0.14238741130302013};
+
+// History buffers for oversampling filters
+double dHistory[(MAX_ADC_MODULES * 32)][MAX_HISTRY];
+double dDacHistory[(MAX_DAC_MODULES * 16)][MAX_HISTRY];
+
+#else
+
+#define OVERSAMPLE_TIMES 1
 
 #endif
 
