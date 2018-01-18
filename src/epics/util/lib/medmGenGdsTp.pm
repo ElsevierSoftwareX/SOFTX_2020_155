@@ -210,6 +210,9 @@ sub createGdsMedm
 	# Add IOP Sync Monitor
 	$xpos = 126; $ypos = 125; $width = 50; $height = 16;
 	$medmdata .= ("CDS::medmGen::medmGenTextDyn") -> ($xpos,$ypos,$width,$height,"IOP",$ecolors{green},"A&8","$site\:FEC-$dcuid\_TIME_ERR");
+	# Add internal timer Sync Monitor
+	$xpos = 126; $ypos = 125; $width = 50; $height = 16;
+	$medmdata .= ("CDS::medmGen::medmGenTextDyn") -> ($xpos,$ypos,$width,$height,"TIMER",$ecolors{green},"A&16","$site\:FEC-$dcuid\_TIME_ERR");
 	# Add NO SYNC Alaram Monitor
 	$xpos = 125; $ypos = 125; $width = 50; $height = 16;
 	$medmdata .= ("CDS::medmGen::medmGenTextDyn") -> ($xpos,$ypos,$width,$height,"NO SYNC",$ecolors{red},"(A&255) == 0","$site\:FEC-$dcuid\_TIME_ERR");

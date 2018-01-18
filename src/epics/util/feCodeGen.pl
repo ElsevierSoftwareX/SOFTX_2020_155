@@ -1841,8 +1841,11 @@ while(my $line = <OUT>) {
 	if(index($line,"fe.h") != -1) {
 		print OUT2 "#include \"feuser.h\" \n";
 	} 
-	elsif(index($line,"controller") != -1) {
-		print OUT2 "#include \"$rcg_src_dir/src/fe/controllerUser.c\"\n";
+	elsif(index($line,"controller") != -1 && $adcMaster != 1) {
+		print OUT2 "#include \"$rcg_src_dir/src/fe/controllerAppUser.c\"\n";
+	}
+	elsif(index($line,"controller") != -1 && $adcMaster == 1) {
+		print OUT2 "#include \"$rcg_src_dir/src/fe/controllerIopUser.c\"\n";
 	} else {
 		print OUT2 "$line";
 	}
@@ -2472,7 +2475,7 @@ open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 print OUTM "# CPU-Shutdown Real Time Linux\n";
 print OUTM "KBUILD_EXTRA_SYMBOLS=$rcg_src_dir/src/drv/ExtraSymbols.symvers\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
-print OUTM "EXTRA_CFLAGS += -O -w -I../../include\n";
+print OUTM "EXTRA_CFLAGS += -O3 -w -I../../include\n";
 print OUTM "EXTRA_CFLAGS += -I/opt/gm/include\n";
 print OUTM "EXTRA_CFLAGS += -I/opt/mx/include\n";
 
