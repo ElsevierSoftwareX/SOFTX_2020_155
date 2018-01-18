@@ -271,7 +271,7 @@ unsigned int getGpsTimeProc() {
   int status;
   unsigned int mytime;
 
-	timef = fopen("/proc/gps","r");
+	timef = fopen("/sys/kernel/gpstime/time","r");
 	if(!timef) {
 		printf("Cannot find GPS time \n");
 		return(0);
@@ -676,8 +676,10 @@ usleep(1000);
     		clock_gettime(CLOCK_MONOTONIC, &myTimer[0]);
 		cycleTime = myTimer[0].tv_nsec / 1000;
     	  } while(cycleTime > 10);
-	  timeSec = myTimer[0].tv_sec - 1;
+	  // timeSec = myTimer[0].tv_sec - 1;
 	  timeSec = getGpsTimeProc();
+		startGpsTime = timeSec;
+		pLocalEpics->epicsOutput.startgpstime = startGpsTime;
     printf("Triggered the ADC at %d and %d usec\n",timeSec,cycleTime);
   } else {
   	printf("Can't run with I/O \n");
@@ -792,7 +794,11 @@ usleep(1000);
 	  /// - ---- If IOP, Increment GPS second
           timeSec ++;
           pLocalEpics->epicsOutput.timeDiag = timeSec;
-	  if (cycle_gps_time == 0) startGpsTime = timeSec;
+	  if (cycle_gps_time == 0) {
+		startGpsTime = timeSec;
+		pLocalEpics->epicsOutput.startgpstime = startGpsTime;
+		printf("Cycle gps = %d\n",startGpsTime);
+	  }
 	  cycle_gps_time = timeSec;
 #endif
 	}
@@ -1021,7 +1027,10 @@ usleep(1000);
                                 // kk++;
                         }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (adcWait < MAX_ADC_WAIT_SLAVE));
 			timeSec = ioMemData->iodata[mm][ioMemCntr].timeSec;
-			if (cycle_gps_time == 0) startGpsTime = timeSec;
+			if (cycle_gps_time == 0) {
+				startGpsTime = timeSec;
+				pLocalEpics->epicsOutput.startgpstime = startGpsTime;
+			}
 			cycle_gps_time = timeSec;
 
 			/// - --------- If data not ready in time, set error, release DAC channel reservation and exit the code.
