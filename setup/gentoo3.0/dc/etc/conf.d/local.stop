@@ -1,0 +1,26 @@
+# /etc/conf.d/local.stop
+
+# This is a good place to unload any misc.
+# programs you started above.
+# For example, if you are using OSS and have
+# "/usr/local/bin/soundon" above, put
+# "/usr/local/bin/soundoff" here.
+
+# stop monit
+/etc/init.d/monit stop
+
+# stop daqd
+/etc/init.d/daqd_dc0 stop
+
+# stop 10ge myricom
+rmmod myri10ge
+
+# kill mx driver
+/etc/init.d/mx stop
+
+# kill IRIG-B driver
+rmmod gpstime
+
+# stop caRepeater
+/etc/init.d/caRepeater stop
+

@@ -1,0 +1,11 @@
+# Table of Dolphin IX adapters
+# <hostname>  <switch> <port> <ser.no.> where switch is unique string,  port is 1-8
+# ** Only need serial numbers if multiple adapters on a machine
+x2lsc0     C  1 
+x2oaf0     C  3 
+x2cdsrfm   C  8 002216
+x2iscex    X  1
+x2seiex    X  3 
+x2cdsrfm   X  7 002336
+x2iscey    Y  4
+x2cdsrfm   Y  6 002230
