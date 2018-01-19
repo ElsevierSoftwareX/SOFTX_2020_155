@@ -1,15 +1,39 @@
-# remove DX node from list (if present)
-if /etc/dolphin_dx_config.sh
-then
-    /opt/DIS/sbin/dxtool prepare-shutdown 0
-    echo Dolphin DX prepared for shutdown
-    sleep 3
-fi
-# stop monit
+#
+#  Stop real-time node (do inverse of local.start
+#
+#  Shut down monit
 /etc/init.d/monit stop
 
-# kill mx_streams
-pkill mx_stream
+# Shut down mx_stream
+/etc/init.d/mx_stream stop
 
-# stop open-mx
+# Shut down the real-time models
+/etc/kill_models.sh
+
+# Stop open-mx driver
 /etc/init.d/open-mx stop
+
+# Prepare to shutdown dolphin nodes if present
+if /etc/dolphin_dx_present.sh
+   if  /etc/dolphin_dx_config.sh
+   then
+       /etc/dolphin_dx_stop_node.sh
+       /opt/DIS/sbin/dxtool prepare-shutdown 0
+       echo Dolphin DX prepared for shutdown
+       sleep 3
+       /etc/dolphin_dx_unload_drivers.sh
+   fi
+fi
+
+# Prepare to shutdown dolphin nodes if present and configured
+if /etc/dolphin_ix_present.sh
+then
+  if  /etc/dolphin_ix_config.sh
+  then
+     /etc/dolphin_ix_stop_node.sh
+     /etc/dolphin_ix_unload_drivers.sh
+     /etc/dolphin_ix_disable_ports.sh
+  fi
+fi
+
+

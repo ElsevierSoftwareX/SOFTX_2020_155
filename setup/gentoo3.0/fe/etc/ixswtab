@@ -1,0 +1,6 @@
+#  List of Dolphin IX switches
+# <switch>  <IP Address>
+C 10.144.0.83
+X 10.144.0.81
+Y 10.144.0.82
+

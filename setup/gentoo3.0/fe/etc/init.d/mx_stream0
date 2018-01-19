@@ -9,13 +9,26 @@ then
 fi
 
 # find line number in rtsystab. Use that to mx_stream slot on card (0-15)
-#  Test stand has 4 FEs, so spread across cards
+# --- if we have two MX adapters, put 3 FEs on each card
+##  Test stand has up to 6 FEs, so spread across cards (3 on each card)
+#line_num=`grep -v ^# /etc/rtsystab | grep --perl-regexp -n "^${hostname}\s" | sed 's/^\([0-9]*\):.*/\1/g'`
+#line_off=$(expr $line_num - 1)
+## end-point will run 0,1,2,0,1,2
+#epcalc=$(expr $line_off % 3)
+## add 1 to avoid end-point 0
+#epnum=$(expr $epcalc + 1)
+## card num will run 0,0,0,1,1,1
+#cnum=$(expr $line_off / 3)
+
+# ---- If we have one MX adapter, put all 6 FEs on the one card
 line_num=`grep -v ^# /etc/rtsystab | grep --perl-regexp -n "^${hostname}\s" | sed 's/^\([0-9]*\):.*/\1/g'`
 line_off=$(expr $line_num - 1)
-epcalc=$(expr $line_off % 2)
+# end-point will run 0,1,2,4,5,6
+epcalc=$line_off
 # add 1 to avoid end-point 0
 epnum=$(expr $epcalc + 1)
-cnum=$(expr $line_off / 2)
+# card num will run 0,0,0,0,0,0
+cnum=0
 
 start() {
 	ebegin "Starting mx_stream rt $line_num on ep $epnum card $cnum x2daqdc0"
