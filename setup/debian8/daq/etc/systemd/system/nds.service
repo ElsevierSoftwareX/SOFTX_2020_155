@@ -1,0 +1,14 @@
+[Unit]
+Description=Advanced LIGO RTS nds1 server
+After=network-online.target
+
+[Service]
+User=controls
+EnvironmentFile=/etc/systemd/nds.config
+ExecStartPre=/bin/archive_nds_logs.sh ${NDS_LOG_DIR}
+ExecStart=/bin/sh -c "stamp=`date +%%s`; ${NDS_TARGET_DIR}/nds ${NDS_TARGET_DIR}/pipe  -l ${NDS_LOG_DIR}/nds.log.$${stamp}"
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
+
