@@ -2377,7 +2377,11 @@ void subscriptionHandler(struct event_handler_args args) {
 		if (entry->datatype == SDF_NUM) {
 			entry->data.chval = (double)(eVal->value);
 		} else {
-			strncpy(entry->data.strval, eVal->strs[eVal->value], MAX_STR_LEN);
+			if (eVal->value > 0 && eVal->value < eVal->no_str) {
+				strncpy(entry->data.strval, eVal->strs[eVal->value], MAX_STR_LEN);
+			} else {
+				snprintf(entry->data.strval, MAX_STR_LEN, "Unexpected enum value received - %d", (int)eVal->value);
+			}
 			entry->data.strval[MAX_STR_LEN - 1] = '\0';
 		}
 		// The dbr_gr_enum type does not have time information, so we use current time
