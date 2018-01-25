@@ -20,7 +20,6 @@
 
 // These externs and "16" need to go to a header file (mbuf.h)
 extern int fe_start();
-extern int run_on_timer;
 extern char daqArea[2*DAQ_DCU_SIZE];           // Space allocation for daqLib buffers
 extern char *addr;
 
@@ -387,9 +386,6 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
         printf("***************************************************************************\n");
   	}
 
-
-	// Code will run on internal timer if no ADC modules are found
-	run_on_timer = 1;
 
 	// Initialize buffer for daqLib.c code
 	printf("Initializing space for daqLib buffers\n");

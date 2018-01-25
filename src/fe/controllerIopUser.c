@@ -11,8 +11,8 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-///	@file controller.c
-///	@brief Main scheduler program for compiled real-time kernal object. \n
+///	@file controllerIopUser.c
+///	@brief Main scheduler program for compiled user space IOP  object. \n
 /// 	@detail More information can be found in the following DCC document:
 ///<	<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">T0900607 CDS RT Sequencer Software</a>
 ///	@author R.Bork, A.Ivanov
@@ -97,14 +97,9 @@ unsigned int timeSec = 0;
 unsigned int timeSecDiag = 0;
 /* 1 - error occured on shmem; 2 - RFM; 3 - Dolphin */
 unsigned int ipcErrBits = 0;
-struct timespec adcTime;			///< Used in code cycle timing
-struct timespec myTimer[2];			///< Used in code cycle timing
+struct timespec myTimer[3];			///< Used in code cycle timing
 int adcHoldTime;		///< Stores time between code cycles
 int adcHoldTimeMax;		///< Stores time between code cycles
-int adcHoldTimeEverMax;		///< Maximum cycle time recorded
-int adcHoldTimeEverMaxWhen;
-int cpuTimeEverMax;		///< Maximum code cycle time recorded
-int cpuTimeEverMaxWhen;
 int startGpsTime;
 int adcHoldTimeMin;
 int adcHoldTimeAvg;
@@ -114,22 +109,6 @@ int usrHoldTime;		///< Max time spent in user app code
 int cardCountErr = 0;
 int cycleTime;			///< Current cycle time
 int timeHold = 0;			///< Max code cycle time within 1 sec period
-int timeHoldHold = 0;			///< Max code cycle time within 1 sec period; hold for another sec
-int timeHoldWhen= 0;			///< Cycle number within last second when maximum reached; running
-int timeHoldWhenHold = 0;		///< Cycle number within last second when maximum reached
-
-// The following are for timing histograms written to /proc files
-#if defined(SERVO64K) || defined(SERVO32K)
-unsigned int cycleHist[32];
-unsigned int cycleHistMax[32];
-unsigned int cycleHistWhen[32];
-unsigned int cycleHistWhenHold[32];
-#elif defined(SERVO16K)
-unsigned int cycleHist[64];
-unsigned int cycleHistMax[64];
-unsigned int cycleHistWhen[64];
-unsigned int cycleHistWhenHold[64];
-#endif
 
 
 struct rmIpcStr *daqPtr;
@@ -148,9 +127,6 @@ int cpuId = 1;
 #else
 	#define MX_OK	3
 #endif
-
-// Whether run on internal timer (when no ADC cards found)
-int run_on_timer = 0;
 
 // Initial diag reset flag
 int initialDiagReset = 1;
@@ -296,6 +272,10 @@ int fe_start()
   int cnt = 0;
   unsigned long cpc;
 
+  static int cyclensec = 15259;
+  int pdiff = 0;
+  static int nextstep = 0;
+
 /// **********************************************************************************************\n
 /// Start Initialization Process \n
 /// **********************************************************************************************\n
@@ -307,25 +287,12 @@ int fe_start()
 
   fz_daz(); /// \> Kill the denorms!
 
-// Set memory for cycle time history diagnostics
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
-  memset(cycleHist, 0, sizeof(cycleHist));
-  memset(cycleHistMax, 0, sizeof(cycleHistMax));
-  memset(cycleHistWhen, 0, sizeof(cycleHistWhen));
-  memset(cycleHistWhenHold, 0, sizeof(cycleHistWhenHold));
-#endif
 
   /// \> Init comms with EPICS processor */
   pEpicsComms = (RFM_FE_COMMS *)_epics_shm;
   pLocalEpics = (CDS_EPICS *)&pEpicsComms->epicsSpace;
   pEpicsDaq = (char *)&(pLocalEpics->epicsOutput);
 // printf("Epics at 0x%x and DAQ at 0x%x  size = %d \n",pLocalEpics,pEpicsDaq,sizeof(CDS_EPICS_IN));
-
-#ifdef OVERSAMPLE
-  /// \> Zero out filter histories
-  memset(dHistory, 0, sizeof(dHistory));
-  memset(dDacHistory, 0, sizeof(dDacHistory));
-#endif
 
   /// \> Zero out DAC outputs
   for (ii = 0; ii < MAX_DAC_MODULES; ii++)
@@ -487,10 +454,6 @@ usleep(1000);
   // Clear timing diags.
   adcHoldTime = 0;
   adcHoldTimeMax = 0;
-  adcHoldTimeEverMax = 0;	
-  adcHoldTimeEverMaxWhen = 0;	
-  cpuTimeEverMax = 0;		
-  cpuTimeEverMaxWhen = 0;	
   startGpsTime = 0;
   adcHoldTimeMin = 0xffff;	
   adcHoldTimeAvg = 0;		
@@ -503,52 +466,40 @@ usleep(1000);
   /// \> If IOP, Initialize the DAC module variables
   initDacModules();
 
-  if (run_on_timer) {	// NOT normal operating mode; used for test systems without I/O cards/chassis
-    printf("*******************************\n");
-    printf("*     Running on timer!       *\n");
-    printf("*******************************\n");
-          do {
-		usleep(1);
-    		clock_gettime(CLOCK_MONOTONIC, &myTimer[0]);
-		cycleTime = myTimer[0].tv_nsec / 1000;
-    	  } while(cycleTime > 10);
-	  // timeSec = myTimer[0].tv_sec - 1;
-	  timeSec = getGpsTimeProc();
-		startGpsTime = timeSec;
-		pLocalEpics->epicsOutput.startgpstime = startGpsTime;
-    printf("Triggered the ADC at %d and %d usec\n",timeSec,cycleTime);
-  } else {
-  	printf("Can't run with I/O \n");
-	exit(-1);
-  }
+  printf("*******************************\n");
+  printf("*     Running on timer!       *\n");
+  printf("*******************************\n");
+  /// Sync up to the 1Hz boundary
+  do {
+	usleep(1);
+    	clock_gettime(CLOCK_MONOTONIC, &myTimer[0]);
+	cycleTime = myTimer[0].tv_nsec / 1000;
+  } while(cycleTime > 10);
+  timeSec = getGpsTimeProc() - 1;
+  startGpsTime = timeSec;
+  pLocalEpics->epicsOutput.startgpstime = startGpsTime;
+  printf("Triggered the ADC at %d and %d usec\n",timeSec,cycleTime);
   onePpsTime = cycleNum;
 
-  clock_gettime(CLOCK_MONOTONIC, &adcTime);
 
   /// ******************************************************************************\n
   /// Enter the infinite FE control loop  ******************************************\n
 
   /// ******************************************************************************\n
-  // Calculate how many CPU cycles per code cycle
-  // cpc = cpu_khz * 1000;
-  // cpc /= CYCLE_PER_SECOND;
 
 
   while(!vmeDone){ 	// Run forever until user hits reset
-  	if (run_on_timer) {  // NO ADC present, so run on CPU realtime clock
-	  // Pause until next cycle begins
-	  if (cycleNum == 0) {
-	    	//printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
-	  	pLocalEpics->epicsOutput.awgStat = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
-	  }
 	  // This is local CPU timer (no ADCs)
 	  // advance to the next cycle polling CPU cycles and microsleeping
 	  do {
     		clock_gettime(CLOCK_MONOTONIC, &myTimer[1]);
-	        clk = BILLION * (myTimer[1].tv_sec - myTimer[0].tv_sec) + 
-	    	                 myTimer[1].tv_nsec - myTimer[0].tv_nsec;
-	  	clk /= 1000;
-	  } while(clk < 15);
+		clk = myTimer[1].tv_nsec;
+	  } while(clk < nextstep);
+	    adcHoldTime = (myTimer[1].tv_nsec - myTimer[0].tv_nsec) / 1000;
+	    if(adcHoldTime < 0) adcHoldTime += 1000000;
+		if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
+		if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
+		adcHoldTimeAvg += adcHoldTime;
 	    myTimer[0].tv_sec = myTimer[1].tv_sec;
 	    myTimer[0].tv_nsec = myTimer[1].tv_nsec;
 	    // printf("My clock is %d and %d usec \n", myTimer[0].tv_sec, (myTimer[0].tv_nsec / 1000));
@@ -569,44 +520,16 @@ usleep(1000);
 
          if(cycleNum == 0) {
 
-	  // Increment GPS second on cycle 0
-          timeSec ++;
-          pLocalEpics->epicsOutput.timeDiag = timeSec;
+	  	pLocalEpics->epicsOutput.awgStat = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
+		if(pLocalEpics->epicsOutput.awgStat) feStatus |= FE_ERROR_AWG;
+	 	// Increment GPS second on cycle 0
+          	timeSec ++;
+          	pLocalEpics->epicsOutput.timeDiag = timeSec;
+		int pll = myTimer[0].tv_nsec / 1000;
+		if(pll > 500000) pdiff = (1000000 - pll) * -1 ; 
+		else pdiff = pll;
+          	pLocalEpics->epicsOutput.irigbTime = (pdiff + 11);
 	  }
-	} else {
-	// **********************************************************************************************************
-	// NORMAL OPERATION -- Wait for ADC data ready
-	// On startup, only want to read one sample such that first cycle
-	// coincides with GPS 1PPS. Thereafter, sampleCount will be 
-	// increased to appropriate number of 65536 s/sec to match desired
-	// code rate eg 32 samples each time thru before proceeding to match 2048 system.
-	// **********************************************************************************************************
-
-/// \> On 1PPS mark \n
-       if(cycleNum == 0)
-        {
-	  /// - ---- Check awgtpman status.
-	  //printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
-	  pLocalEpics->epicsOutput.awgStat = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
-	  if(pLocalEpics->epicsOutput.awgStat) feStatus |= FE_ERROR_AWG;
-	  /// - ---- Check if DAC outputs are enabled, report error.
-	  if(!iopDacEnable || dkiTrip) feStatus |= FE_ERROR_DAC_ENABLE;
-
-	  /// - ---- If IOP, Increment GPS second
-          timeSec ++;
-          pLocalEpics->epicsOutput.timeDiag = timeSec;
-	  if (cycle_gps_time == 0) {
-		startGpsTime = timeSec;
-		pLocalEpics->epicsOutput.startgpstime = startGpsTime;
-		printf("Cycle gps = %d\n",startGpsTime);
-	  }
-	  cycle_gps_time = timeSec;
-	}
-
-	// After first synced ADC read, must set to code to read number samples/cycle
-        sampleCount = OVERSAMPLE_TIMES;
-	}
-/// End of ADC Read **************************************************************************************
 
 
 
@@ -737,8 +660,6 @@ usleep(1000);
         if(dacWriteEnable < 10) dacWriteEnable ++;
 /// END OF IOP DAC WRITE *************************************************
 
-/// END OF DAC WRITE *************************************************
-
 
 /// BEGIN HOUSEKEEPING ************************************************ \n
 
@@ -750,22 +671,10 @@ usleep(1000);
 	  pLocalEpics->epicsOutput.cpuMeter = timeHold;
 	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
   	  pLocalEpics->epicsOutput.dacEnable = dacEnable;
-          timeHoldHold = timeHold;
           timeHold = 0;
-	  timeHoldWhenHold = timeHoldWhen;
 
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
-	  memcpy(cycleHistMax, cycleHist, sizeof(cycleHist));
-	  memset(cycleHist, 0, sizeof(cycleHist));
-	  memcpy(cycleHistWhenHold, cycleHistWhen, sizeof(cycleHistWhen));
-	  memset(cycleHistWhen, 0, sizeof(cycleHistWhen));
-#endif
-	  if (timeSec % 4 == 0) pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeMin;
-	  else if (timeSec % 4 == 1)
-		pLocalEpics->epicsOutput.adcWaitTime =  adcHoldTimeMax;
-	  else
-	  	pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeAvg/CYCLE_PER_SECOND;
 	  adcHoldTimeAvgPerSec = adcHoldTimeAvg/CYCLE_PER_SECOND;
+	  pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeAvgPerSec;
 	  adcHoldTimeMax = 0;
 	  adcHoldTimeMin = 0xffff;
 	  adcHoldTimeAvg = 0;
@@ -824,111 +733,6 @@ usleep(1000);
 	if(cycleNum == MAX_MODULES) 
 		vmeDone = stop_working_threads | checkEpicsReset(cycleNum, (struct CDS_EPICS *)pLocalEpics);
 
-	// If synced to 1PPS on startup, continue to check that code
-	// is still in sync with 1PPS.
-	// This is NOT normal aLIGO mode.
-	if(syncSource == SYNC_SRC_1PPS)
-	{
-
-		// Assign chan 32 to onePps 
-		onePps = adcData[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN];
-		if((onePps > ONE_PPS_THRESH) && (onePpsHi == 0))  
-		{
-			onePpsTime = cycleNum;
-			onePpsHi = 1;
-		}
-		if(onePps < ONE_PPS_THRESH) onePpsHi = 0;  
-
-		// Check if front end continues to be in sync with 1pps
-		// If not, set sync error flag
-		if(onePpsTime > 1) pLocalEpics->epicsOutput.timeErr |= TIME_ERR_1PPS;
-	}
-#ifdef DIAG_TEST
-	for(ii=0;ii<10;ii++)
-	{
-		if(ii<5) onePpsTest = adcData[0][ii];
-		else onePpsTest = adcData[1][(ii-5)];
-		if((onePpsTest > 400) && (onePpsHiTest[ii] == 0))  
-		{
-			onePpsTimeTest[ii] = cycleNum;
-			onePpsHiTest[ii] = 1;
-			if((ii == 0) || (ii == 5)) pLocalEpics->epicsOutput.timingTest[ii] = cycleNum * 15.26;
-			// Slaves do not see 1pps until after IOP signal loops around and back into ADC channel 0,
-			// therefore, need to subtract IOP loop time.
-			else pLocalEpics->epicsOutput.timingTest[ii] = (cycleNum * 15.26) - pLocalEpics->epicsOutput.timingTest[0];
-		}
-		// Reset the diagnostic for next cycle
-		if(cycleNum > 2000) onePpsHiTest[ii] = 0;  
-	}
-#endif
-
-#ifdef ADC_NOTHING
-/// \> Cycle 10 to number of BIO cards:\n
- /// - ---- If User App, Read Dio cards once per second \n
- /// - ---- IOP does not handle binary I/O module traffic, as it can take too long
-
-	if(cdsPciModules.doCount)
-        // if((cycleNum < (HKP_READ_DIO + cdsPciModules.doCount)) && (cycleNum >= HKP_READ_DIO))
-        {
-                // kk = cycleNum - HKP_READ_DIO;
-		kk = cycleNum % cdsPciModules.doCount;
-                ii = cdsPciModules.doInstance[kk];
-                if(cdsPciModules.doType[kk] == ACS_8DIO)
-                {
-	  		rioInputInput[ii] = accesIiro8ReadInputRegister(&cdsPciModules, kk) & 0xff;
-	  		rioInputOutput[ii] = accesIiro8ReadOutputRegister(&cdsPciModules, kk) & 0xff;
-                }
-                if(cdsPciModules.doType[kk] == ACS_16DIO)
-                {
-                        rioInput1[ii] = accesIiro16ReadInputRegister(&cdsPciModules, kk) & 0xffff;
-                }
-		if(cdsPciModules.doType[kk] == ACS_24DIO)
-		{
-		  dioInput[ii] = accesDio24ReadInputRegister(&cdsPciModules, kk);
-		}
-		if (cdsPciModules.doType[kk] == CON_6464DIO) {
-	 		CDIO6464InputInput[ii] = contec6464ReadInputRegister(&cdsPciModules, kk);
-		}
-		if (cdsPciModules.doType[kk] == CDI64) {
-	 		CDIO6464InputInput[ii] = contec6464ReadInputRegister(&cdsPciModules, kk);
-		}
-        }
-/// \> If user app, write Dio cards only on change
-        for(kk=0;kk < cdsPciModules.doCount;kk++)
-        {
-                ii = cdsPciModules.doInstance[kk];
-                if((cdsPciModules.doType[kk] == ACS_8DIO) && (rioOutput[ii] != rioOutputHold[ii]))
-                {
-                        accesIiro8WriteOutputRegister(&cdsPciModules, kk, rioOutput[ii]);
-                        rioOutputHold[ii] = rioOutput[ii];
-                } else 
-                if((cdsPciModules.doType[kk] == ACS_16DIO) && (rioOutput1[ii] != rioOutputHold1[ii]))
-                {
-                        accesIiro16WriteOutputRegister(&cdsPciModules, kk, rioOutput1[ii]);
-                        rioOutputHold1[ii] = rioOutput1[ii];
-                } else 
-                if(cdsPciModules.doType[kk] == CON_32DO)
-                {
-                        if (CDO32Input[ii] != CDO32Output[ii]) {
-                          CDO32Input[ii] = contec32WriteOutputRegister(&cdsPciModules, kk, CDO32Output[ii]);
-                        }
-		} else if (cdsPciModules.doType[kk] == CON_6464DIO) {
-			if (CDIO6464LastOutState[ii] != CDIO6464Output[ii]) {
-			  CDIO6464LastOutState[ii] = contec6464WriteOutputRegister(&cdsPciModules, kk, CDIO6464Output[ii]);
-			}
-		} else if (cdsPciModules.doType[kk] == CDO64) {
-			if (CDIO6464LastOutState[ii] != CDIO6464Output[ii]) {
-			  CDIO6464LastOutState[ii] = contec6464WriteOutputRegister(&cdsPciModules, kk, CDIO6464Output[ii]);
-			}
-                } else
-                if((cdsPciModules.doType[kk] == ACS_24DIO) && (dioOutputHold[ii] != dioOutput[ii]))
-		{
-                        accesDio24WriteOutputRegister(&cdsPciModules, kk, dioOutput[ii]);
-			dioOutputHold[ii] = dioOutput[ii];
-		}
-        }
-
-#endif end remove
 
 /// \>  Write data to DAQ.
 #ifndef NO_DAQ
@@ -1088,45 +892,11 @@ usleep(1000);
 	// Hold the max cycle time over the last 1 second
 	if(cycleTime > timeHold) { 
 		timeHold = cycleTime;
-		timeHoldWhen = cycleNum;
 	}
 	// Hold the max cycle time since last diag reset
 	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
-// This produces cycle time histogram in /proc file
-	{
-#if defined(SERVO64K) || defined(SERVO32K)
-		static const int nb = 31;
-#elif defined(SERVO16K)
-		static const int nb = 63;
-#endif
-
-		cycleHist[cycleTime<nb?cycleTime:nb]++;
-		cycleHistWhen[cycleTime<nb?cycleTime:nb] = cycleNum;
-	}
-#endif
-	// BILLION
-	adcHoldTime = BILLION * (cpuClock[CPU_TIME_CYCLE_START].tv_sec - adcTime.tv_sec) + 
-			     cpuClock[CPU_TIME_CYCLE_START].tv_nsec - adcTime.tv_nsec;
-	adcHoldTime /= 1000;
 	// Avoid calculating the max hold time for the first few seconds
 	 pLocalEpics->epicsOutput.startgpstime = startGpsTime;
-	if (cycleNum != 0 && (startGpsTime+3) < cycle_gps_time) {
-		if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
-		if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
-		adcHoldTimeAvg += adcHoldTime;
-		if (adcHoldTimeMax > adcHoldTimeEverMax)  {
-			adcHoldTimeEverMax = adcHoldTimeMax;
-			adcHoldTimeEverMaxWhen = cycle_gps_time;
-			//printf("Maximum adc hold time %d on cycle %d gps %d\n", adcHoldTimeMax, cycleNum, cycle_gps_time);
-		}
-		if (timeHoldMax > cpuTimeEverMax)  {
-			cpuTimeEverMax = timeHoldMax;
-			cpuTimeEverMaxWhen = cycle_gps_time;
-		}
-	}
-	adcTime.tv_sec = cpuClock[CPU_TIME_CYCLE_START].tv_sec;
-	adcTime.tv_nsec = cpuClock[CPU_TIME_CYCLE_START].tv_nsec;
 	// Calc the max time of one cycle of the user code
 	// For IOP, more interested in time to get thru ADC read code and send to slave apps
 	usrTime = BILLION * (cpuClock[CPU_TIME_USR_END].tv_sec - cpuClock[CPU_TIME_CYCLE_START].tv_sec) + 
@@ -1137,6 +907,7 @@ usleep(1000);
         /// \> Update internal cycle counters
           cycleNum += 1;
           cycleNum %= CYCLE_PER_SECOND;
+	  nextstep = cycleNum * cyclensec;
 	  clock1Min += 1;
 	  clock1Min %= CYCLE_PER_MINUTE;
           if(subcycle == DAQ_CYCLE_CHANGE) 
