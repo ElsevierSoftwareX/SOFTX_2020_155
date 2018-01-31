@@ -109,6 +109,7 @@ int usrHoldTime;		///< Max time spent in user app code
 int cardCountErr = 0;
 int cycleTime;			///< Current cycle time
 int timeHold = 0;			///< Max code cycle time within 1 sec period
+int cycleOffset = 0;
 
 
 struct rmIpcStr *daqPtr;
@@ -469,17 +470,21 @@ usleep(1000);
   printf("*******************************\n");
   printf("*     Running on timer!       *\n");
   printf("*******************************\n");
+  int timeoff = BILLION-(60000000 * cycleOffset);
   /// Sync up to the 1Hz boundary
   do {
 	usleep(1);
-    	clock_gettime(CLOCK_MONOTONIC, &myTimer[0]);
-	cycleTime = myTimer[0].tv_nsec / 1000;
-  } while(cycleTime > 10);
-  timeSec = getGpsTimeProc() - 1;
+    	clock_gettime(CLOCK_REALTIME, &myTimer[0]);
+	cycleTime = myTimer[0].tv_nsec;
+  } while(cycleTime > timeoff && cycleTime < (timeoff - 10000));
+printf("cycle time = %d\n",cycleTime);
+  timeSec = getGpsTimeProc() ;
   startGpsTime = timeSec;
   pLocalEpics->epicsOutput.startgpstime = startGpsTime;
   printf("Triggered the ADC at %d and %d usec\n",timeSec,cycleTime);
   onePpsTime = cycleNum;
+
+  nextstep = timeoff + 20000;
 
 
   /// ******************************************************************************\n
@@ -510,10 +515,14 @@ usleep(1000);
 	    {
 		    for(ii=0;ii<IO_MEMORY_SLOT_VALS;ii++)
 		    {
-			ioMemData->iodata[jj][ioMemCntr].data[ii] = cycleNum/4;
+			ioMemData->iodata[jj][ioMemCntr].data[ii] = ioMemDataIop->iodata[jj][cycleNum].data[ii];
+			dWord[jj][ii] = ioMemData->iodata[jj][ioMemCntr].data[ii];
+			ioMemDataIop->iodata[jj][cycleNum].data[ii] = 0;
 		    }
 	    	ioMemData->iodata[jj][ioMemCntr].timeSec = timeSec;;
 	    	ioMemData->iodata[jj][ioMemCntr].cycle = cycleNum;
+		ioMemDataIop->gpsSecond = timeSec;
+		ioMemDataIop->cycleNum = cycleNum;
 	    }
 	    ioMemData->gpsSecond = timeSec;
 	  clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_CYCLE_START]);
@@ -525,10 +534,13 @@ usleep(1000);
 	 	// Increment GPS second on cycle 0
           	timeSec ++;
           	pLocalEpics->epicsOutput.timeDiag = timeSec;
-		int pll = myTimer[0].tv_nsec / 1000;
+		int pll = myTimer[0].tv_nsec / 1000 + (1000000 - (timeoff / 1000));
+		pll %= 1000000;
 		if(pll > 500000) pdiff = (1000000 - pll) * -1 ; 
 		else pdiff = pll;
-          	pLocalEpics->epicsOutput.irigbTime = (pdiff + 11);
+          	pLocalEpics->epicsOutput.irigbTime = pdiff + 10;
+          	// pLocalEpics->epicsOutput.irigbTime = (pdiff + (timeoff / 1000) + 11) ;
+		cycle_gps_time = timeSec;
 	  }
 
 
@@ -907,7 +919,7 @@ usleep(1000);
         /// \> Update internal cycle counters
           cycleNum += 1;
           cycleNum %= CYCLE_PER_SECOND;
-	  nextstep = cycleNum * cyclensec;
+	  nextstep = ((cycleNum * cyclensec) + timeoff)% 1000000000;
 	  clock1Min += 1;
 	  clock1Min %= CYCLE_PER_MINUTE;
           if(subcycle == DAQ_CYCLE_CHANGE) 

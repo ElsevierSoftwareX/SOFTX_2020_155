@@ -22,6 +22,7 @@
 extern int fe_start();
 extern char daqArea[2*DAQ_DCU_SIZE];           // Space allocation for daqLib buffers
 extern char *addr;
+extern int cycleOffset;
 
 // Scan a double
 #if 0
@@ -57,7 +58,7 @@ void usage()
 int main (int argc, char **argv)
 {
  	int status;
-	int ii,jj,kk;		/// @param ii,jj,kk default loop counters
+	int ii,jj,kk,mm;		/// @param ii,jj,kk default loop counters
 	char fname[128];	/// @param fname[128] Name of shared mem area to allocate for DAQ data
 	int cards;		/// @param cards Number of PCIe cards found on bus
 	int adcCnt;		/// @param adcCnt Number of ADC cards found by slave model.
@@ -74,12 +75,18 @@ int main (int argc, char **argv)
 	char *sysname;
 	char shm_name[64];
 	int c;
+	char *modelname;
 
+	cycleOffset = 0;
 
-	while ((c = getopt(argc, argv, "m:help")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "m:t:help")) != EOF) switch(c) {
 		case 'm':
 			sysname = optarg;
 			printf("sysname = %s\n",sysname);
+			break;
+		case 't':
+			cycleOffset = atoi(optarg);
+			printf("cycle offset = %d\n",cycleOffset);
 			break;
 		case 'help':
 		default:
@@ -90,7 +97,19 @@ int main (int argc, char **argv)
 	kk = 0;
 
 	jj = 0;
-	// printf("cpu clock %u\n",cpu_khz);
+  	int i = 0;
+	char *p = strtok (argv[0], "/");
+	char *array[5];
+
+    while (p != NULL)
+    {
+        array[i++] = p;
+        p = strtok (NULL, "/");
+    }
+	modelname = array[i-1];
+	sysname = array[i-1];
+	
+	printf("model name is %s \n",sysname);
 
 
 	sprintf(shm_name,"%s",sysname);
@@ -139,6 +158,17 @@ int main (int argc, char **argv)
         }
 	printf("GDSSM at 0x%lx\n",_gds_shm);
 
+// Open new IO shared memory in support of no hardware I/O
+        sprintf(shm_name, "%s_io_space", sysname);
+	findSharedMemory(shm_name);
+	_io_shm = (char *)addr;
+        if (_io_shm < 0) {
+                printf("mbuf_allocate_area() failed; ret = %d\n", _io_shm);
+                return -1;
+        }
+	printf("IO SPACE at 0x%lx\n",_io_shm);
+	ioMemDataIop = (volatile IO_MEM_DATA_IOP *)(((char *)_io_shm)) ;
+
 	// Find and initialize all PCI I/O modules *******************************************************
 	  // Following I/O card info is from feCode
 	  cards = sizeof(cards_used)/sizeof(cards_used[0]);
@@ -148,7 +178,7 @@ int main (int argc, char **argv)
           //return -1;
 	printf("Initializing PCI Modules for IOP\n");
 	for(jj=0;jj<cards;jj++)
-		printf("Card % type = %d\n",cdsPciModules.cards_used[jj].type);
+		printf("Card %d type = %d\n",jj,cdsPciModules.cards_used[jj].type);
 	cdsPciModules.adcCount = 0;
 	cdsPciModules.dacCount = 0;
 	cdsPciModules.dioCount = 0;
@@ -253,19 +283,26 @@ int main (int argc, char **argv)
 
 	// Print out all the I/O information
         printf("***************************************************************************\n");
-		// Master send module counds to SLAVE via ipc shm
-		ioMemData->totalCards = status;
-		ioMemData->adcCount = cdsPciModules.adcCount;
-		ioMemData->dacCount = cdsPciModules.dacCount;
-		ioMemData->bioCount = cdsPciModules.doCount;
-		// kk will act as ioMem location counter for mapping modules
-		kk = cdsPciModules.adcCount;
+	// Master send module counds to SLAVE via ipc shm
+	ioMemData->totalCards = status;
+	ioMemData->adcCount = cdsPciModules.adcCount;
+	ioMemData->dacCount = cdsPciModules.dacCount;
+	ioMemData->bioCount = cdsPciModules.doCount;
+	// kk will act as ioMem location counter for mapping modules
+	kk = cdsPciModules.adcCount;
 	printf("%d ADC cards found\n",cdsPciModules.adcCount);
 	for(ii=0;ii<cdsPciModules.adcCount;ii++)
         {
 		// MASTER maps ADC modules first in ipc shm for SLAVES
 		ioMemData->model[ii] = cdsPciModules.adcType[ii];
 		ioMemData->ipc[ii] = ii;	// ioData memory buffer location for SLAVE to use
+		ioMemDataIop->model[ii] = cdsPciModules.adcType[ii];
+		ioMemDataIop->ipc[ii] = ii;	// ioData memory buffer location for SLAVE to use
+		for(jj=0;jj<65536;jj++) {
+			for(mm=0;mm<32;mm++) {
+				ioMemDataIop->iodata[ii][jj].data[mm] = jj - 32767;
+			}
+		}
                 if(cdsPciModules.adcType[ii] == GSC_18AISS6C)
                 {
                         printf("\tADC %d is a GSC_18AISS6C module\n",ii);

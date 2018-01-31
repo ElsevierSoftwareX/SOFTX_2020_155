@@ -11,7 +11,7 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-///	@file controller.c
+///	@file controllerApp.c
 ///	@brief Main scheduler program for compiled real-time kernal object. \n
 /// 	@detail More information can be found in the following DCC document:
 ///<	<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">T0900607 CDS RT Sequencer Software</a>

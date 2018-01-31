@@ -12,6 +12,7 @@ extern int mbuf_allocate_area(char *name, int size, struct file *file);
 extern void *fe_start(void *arg);
 extern int run_on_timer;
 extern char daqArea[2*DAQ_DCU_SIZE];           // Space allocation for daqLib buffers
+struct task_struct *sthread;
 
 
 // MAIN routine: Code starting point ****************************************************************

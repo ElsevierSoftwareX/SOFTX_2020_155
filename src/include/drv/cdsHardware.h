@@ -109,6 +109,28 @@ typedef struct IO_MEM_DATA{
 	unsigned int ipcDetect[2][8];
 }IO_MEM_DATA;
 
+typedef struct IO_MEM_DATA_IOP{
+	int gpsSecond;
+	int cycleNum;
+	int totalCards;
+	int adcCount;
+	int dacCount;
+	int bioCount;
+	int model[MAX_IO_MODULES];
+	int ipc[MAX_IO_MODULES];
+	int rfmCount;
+	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
+	long pci_rfm_dma[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
+        int dolphinCount;
+	volatile unsigned long *dolphinRead[4]; /* read and write Dolphin memory */
+	volatile unsigned long *dolphinWrite[4]; /* read and write Dolphin memory */
+	MEM_DATA_BLOCK iodata[6][65536];
+	// Combined DAC channels map; used to check on slaves DAC channel allocations
+	unsigned int dacOutUsed[MAX_DAC_MODULES][16];
+	unsigned int ipcDetect[2][8];
+}IO_MEM_DATA_IOP;
+
+
 
 // Timing control register definitions for use with Contec1616 control of timing slave.
 

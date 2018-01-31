@@ -9,6 +9,7 @@ Changes for 3.5  (NOT YET RELEASED)
 - controller.c and moduleLoad.c now split into new files to clean out #defs:
 	- controllerIop.c and moduleLoadIop.c for IOP model builds.
 	- controllerApp.c and moduleLoadApp.c for user application model builds.
+	- controllerIopUser.c and controllerAppUser.c, which are user space equivalents.
 - Removed /proc entries from all FE code. This should alleviate issue with change to /proc
   in later Linux kernels.
 ==================================================================================================

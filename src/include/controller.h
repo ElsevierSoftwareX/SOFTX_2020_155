@@ -194,11 +194,13 @@ volatile char *_epics_shm;      ///< Ptr to EPICS shared memory area
 char *_ipc_shm;                 ///< Ptr to inter-process communication area 
 char *_daq_shm;                 ///< Ptr to frame builder comm shared mem area 
 char *_gds_shm;                 ///< Ptr to frame builder comm shared mem area 
+char *_io_shm;                 	///< Ptr to user space I/O area 
 int daq_fd;                     ///< File descriptor to share memory file 
 
 long daqBuffer;                 // Address for daq dual buffers in daqLib.c
 CDS_HARDWARE cdsPciModules;     // Structure of PCI hardware addresses
 volatile IO_MEM_DATA *ioMemData;
+volatile IO_MEM_DATA_IOP *ioMemDataIop;
 volatile int vmeDone = 0;       // Code kill command
 volatile int stop_working_threads = 0;
 
@@ -350,6 +352,18 @@ double dDacHistory[(MAX_DAC_MODULES * 16)][MAX_HISTRY];
 #define OVERSAMPLE_TIMES 1
 
 #endif
+
+typedef struct duotone_diag_t {
+  float adc[IOP_IO_RATE];            // Duotone timing diagnostic variables
+  float dac[IOP_IO_RATE];
+  float timeDac;
+  float timeAdc;
+  float totalAdc;
+  float meanAdc;
+  float totalDac;
+  float meanDac;
+  int dacDuoEnable;
+}duotone_diag_t;
 
 // /proc epics channel interface
 struct proc_epics {
