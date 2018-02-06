@@ -348,6 +348,80 @@ endif(${MX_FOUND})
 
 if (${DEV_BUILD})
 ##########
+## generic daq with shmem (new standiop)
+####
+## Reuse the main source lists from daqd_dc_mx
+#
+set (DAQD_SHMEM_MAIN_SRC
+		archive.cc
+		profiler.cc
+		filesys.cc
+		epics_pvs.cc
+		trend.cc
+		net_writer.cc
+		circ.cc
+		framesend.cc
+		gdsmutex.cc
+		edcu.cc
+		epicsServer.cc
+		exServer.cc
+		exScalarPV.cc
+		exVectorPV.cc
+		exPV.cc
+		exChannel.cc
+		framerecv.cc
+		listener.cc
+		daqd.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
+		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
+
+add_library(dc_gds_shmem STATIC gds.cc)
+target_compile_definitions(dc_gds_shmem PRIVATE
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
+		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+		-DLIGO_GDS
+		-D_TP_DAQD
+		-DARCHIVE=\"${CMAKE_CURRENT_SOURCE_DIR}/../gds\"
+		-DDAQD_BUILD_SHMEM)
+target_include_directories(dc_gds_shmem PUBLIC
+		${CMAKE_CURRENT_SOURCE_DIR}/../include
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_BINARY_DIR}
+		)
+target_compile_options(dc_gds_shmem PUBLIC
+		-fno-common
+		-Wno-deprecated
+		-Wno-write-strings
+		)
+target_link_libraries(dc_gds_shmem PRIVATE
+		gds::daqd
+		ldastools::framecpp
+		)
+
+add_executable(daqd_shmem ${DAQD_SHMEM_MAIN_SRC} producer_shmem.cc)
+target_compile_definitions(daqd_shmem PUBLIC
+		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
+		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
+		-DDAQD_BUILD_SHMEM
+		)
+target_include_directories(daqd_shmem PUBLIC
+		${CMAKE_CURRENT_BINARY_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/../include
+		${CMAKE_CURRENT_SOURCE_DIR}/../zmq_stream
+		)
+target_link_libraries(daqd_shmem PUBLIC
+		gds::daqd
+		dc_gds_shmem
+		run_number::run_number
+		ca Com cas gdd epics::ca epics::cas
+		${EPICS_BASE_CA_LIBS} ${EPICS_BASE_CAS_LIBS}
+		ldastools::framecpp
+		driver::shmem
+		${CMAKE_THREAD_LIBS_INIT}
+		)
+
+##########
 ## DC with ZMQ
 ####
 ## Reuse the main source lists from daqd_dc_mx

@@ -267,8 +267,9 @@ int main(int argc, char *argv[]) {
             std::cout << ". " << shmem_sysname << " " << transmit_time << " " << now << std::endl;
         }
 
-        volatile char *data_cur = data + cycle*block_size;
-        volatile char *data_end = data_cur + block_size;
+        // The block size is the maximal block size * 2 (to allow for TP data)
+        volatile char *data_cur = data + cycle*(DAQ_DCU_BLOCK_SIZE * 2);
+        volatile char *data_end = data_cur + (DAQ_DCU_BLOCK_SIZE * 2);
 
         for (int i = 0; i < generators.size(); ++i)
         {

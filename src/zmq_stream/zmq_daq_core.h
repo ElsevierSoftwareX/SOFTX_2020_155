@@ -84,6 +84,7 @@ typedef struct daq_multi_dcu_data_t {
 // DAQ DC Data Transmission Structure
 typedef struct daq_dc_data_t {
     int dcuTotalModels;
+    // int dataBlockSize;   // <-- do we need a marker of the max actually used?
     daq_msg_header_t zmqheader[DAQ_ZMQ_MAX_DCU];
     char zmqDataBlock[DAQ_ZMQ_DC_DATA_BLOCK_SIZE];
 }daq_dc_data_t;
@@ -94,6 +95,15 @@ typedef struct gds_multi_dcu_data_t {
     gds_msg_header_t zmqheader[DAQ_ZMQ_MAX_DCU];
     char zmqDataBlock[DAQ_ZMQ_FE_DATA_BLOCK_SIZE];
 }gds_multi_dcu_data_t;
+
+// Data structure to support multiple cylces of multiple dcus
+typedef struct daq_multi_cycle_data_t {
+    unsigned int curCycle;
+    unsigned int maxCycle;
+    unsigned int maxDcuCount;
+    unsigned int cycleDataSize;
+    char dataBlock[DAQ_ZMQ_DC_DATA_BLOCK_SIZE]; // daq_dc_data_t/daq_multi_dcu...
+}daq_multi_cycle_data_t;
 
 #define DAQ_ZMQ_HEADER_SIZE	(sizeof(daq_msg_header_t) * DAQ_ZMQ_MAX_DCU + sizeof(int))
 

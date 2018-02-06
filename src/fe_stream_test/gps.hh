@@ -96,7 +96,7 @@ namespace GPS {
         }
 
     public:
-        explicit gps_clock(int offset):fd_(open ("/dev/symmetricom", O_RDWR | O_SYNC)),
+        explicit gps_clock(int offset):fd_(open ("/dev/gpstime", O_RDWR | O_SYNC)),
                                        offset_(offset),
                                        ok_(gps_clock::symm_ok(fd_)) {}
         ~gps_clock()
