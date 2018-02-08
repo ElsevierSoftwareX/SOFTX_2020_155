@@ -157,7 +157,7 @@ namespace comm_impl {
 	    daqd.dcuTPOffsetRmem[ifo][mdcu] = rm_offs;
 
 	    // One test point data size
-	    int tp_size = daqd.dcuRagmDaqIpcte[ifo][mdcu] * 4 / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+	    int tp_size = daqd.dcuRate[ifo][mdcu] * 4 / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 	    int tp_buf_size = 0;
 	    if (IS_TP_DCU(mdcu)) {
 #if 0

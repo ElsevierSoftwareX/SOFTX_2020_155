@@ -15,7 +15,7 @@ target_link_libraries(zmq_dc_recv PUBLIC zmq4::zmq ${CMAKE_THREAD_LIBS_INIT})
 add_library(zmq::dc_recv ALIAS zmq_dc_recv)
 
 
-add_executable(zmq_multi_stream zmq_multi_stream.c ../drv/rfm.c)
+add_executable(zmq_multi_stream zmq_multi_stream.c ../drv/rfm.c zmq_daq_core.h)
 target_link_libraries(zmq_multi_stream PUBLIC zmq4::zmq)
 target_compile_options(zmq_multi_stream PUBLIC -std=gnu99)
 
@@ -28,7 +28,7 @@ add_executable(zmq_dc zmq_dc.cc)
 target_link_libraries(zmq_dc PUBLIC zmq_dc_recv zmq4::zmq ${CMAKE_THREAD_LIBS_INIT})
 target_compile_options(zmq_dc PUBLIC "-std=c++11")
 
-add_executable(zmq_recv zmq_recv.cc ../drv/rfm.c)
+add_executable(zmq_recv zmq_recv.cc ../drv/rfm.c zmq_daq_core.h)
 target_link_libraries(zmq_recv PUBLIC zmq_dc_recv zmq4::zmq driver::shmem ${CMAKE_THREAD_LIBS_INIT})
 target_compile_options(zmq_dc PUBLIC "-std=c++11")
 

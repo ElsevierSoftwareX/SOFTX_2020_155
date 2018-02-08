@@ -377,6 +377,7 @@ set (DAQD_SHMEM_MAIN_SRC
 		listener.cc
 		daqd.cc
 		comm_impl.cc
+		../zmq_stream/zmq_daq_core.h
 		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
 
@@ -452,6 +453,7 @@ set (DAQD_DC_ZMQ_MAIN_SRC
 		listener.cc
 		daqd.cc
 		comm_impl.cc
+		../zmq_stream/zmq_daq_core.h
 		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
 

@@ -235,14 +235,14 @@ while ((c = getopt(argc, argv, "hd:s:l:d:Vvw:x")) != EOF) switch(c) {
 			// Destroy the received message buffer
 			zmq_msg_close(&message);
 			// printf("message rcvd\n");
-			char *dptr = (char *)&mxDataBlock.zmqDataBlock[0];
+			char *dptr = (char *)&mxDataBlock.dataBlock[0];
 			for(ii=0;ii<num_chans;ii++) {
 				sprintf(ndsbuffer.ndschan.name,"%s",mydata[ii].name);
 				ndsbuffer.ndschan.type = mydata[ii].type;
 				ndsbuffer.ndschan.datarate = mydata[ii].datarate;
 				ndsbuffer.ndschan.datasize = mydata[ii].datasize;
-				ndsbuffer.ndschan.timesec = mxDataBlock.dcuheader[0].timeSec;
-				ndsbuffer.ndschan.timensec = mxDataBlock.dcuheader[0].timeNSec;
+				ndsbuffer.ndschan.timesec = mxDataBlock.header.dcuheader[0].timeSec;
+				ndsbuffer.ndschan.timensec = mxDataBlock.header.dcuheader[0].timeNSec;
 				char *ndptr = (char *)&ndsbuffer.ndsdata[0];
 				memcpy(ndptr,dptr,mydata[ii].datasize);
 				int xsize = sizeof(channel_t) + mydata[ii].datasize;

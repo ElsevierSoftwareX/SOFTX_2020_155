@@ -49,29 +49,36 @@ typedef struct daq_msg_header_t {
     unsigned int tpNum[DAQ_GDS_MAX_TP_NUM];	// GDS TP TABLE
 } daq_msg_header_t;
 
+typedef struct daq_multi_dcu_header_t {
+    int dcuTotalModels;                                 // Number of models
+    int dataBlockSize;                                  // Number of bytes actually used in the data block
+    daq_msg_header_t dcuheader[DAQ_ZMQ_MAX_DCU];
+} daq_multi_dcu_header_t;
+
 // DAQ FE Data Transmission Structure
 typedef struct daq_multi_dcu_data_t {
-    int dcuTotalModels;                                 // Number of models
-    int dataBlockSize;                                  // Number of bytes actually used in the zmqDataBlock
-    daq_msg_header_t dcuheader[DAQ_ZMQ_MAX_DCU];
-    char zmqDataBlock[DAQ_ZMQ_FE_DATA_BLOCK_SIZE];
+    daq_multi_dcu_header_t header;
+    char dataBlock[DAQ_ZMQ_FE_DATA_BLOCK_SIZE];
 }daq_multi_dcu_data_t;
 
 // DAQ DC Data Transmission Structure
 typedef struct daq_dc_data_t {
-    int dcuTotalModels;                                 // Number of models
-    int dataBlockSize;                                  // Number of bytes actually used in the data block
-    daq_msg_header_t dcuheader[DAQ_ZMQ_MAX_DCU];
-    char zmqDataBlock[DAQ_ZMQ_DC_DATA_BLOCK_SIZE];
+    daq_multi_dcu_header_t header;
+    char dataBlock[DAQ_ZMQ_DC_DATA_BLOCK_SIZE];
 }daq_dc_data_t;
 
-// Data structure to support multiple cylces of multiple dcus
+typedef struct daq_multi_cycle_header_t {
+    unsigned int curCycle;                  // current cycle
+    unsigned int maxCycle;                  // max cycle
+    unsigned int cycleDataSize;             // stride in bytes of the data
+                                            // max data size is assumed to be
+                                            // at least maxCycle * cycleDataSize
+} daq_multi_cycle_header_t;
+
+// Data structure to support multiple cycles of multiple dcus
 typedef struct daq_multi_cycle_data_t {
-    unsigned int curCycle;
-    unsigned int maxCycle;
-    unsigned int maxDcuCount;
-    unsigned int cycleDataSize;
-    char dataBlock[DAQ_ZMQ_DC_DATA_BLOCK_SIZE]; // daq_dc_data_t/daq_multi_dcu...
+    daq_multi_cycle_header_t header;
+    char dataBlock[DAQ_ZMQ_DC_DATA_BLOCK_SIZE*DAQ_NUM_DATA_BLOCKS_PER_SECOND];
 }daq_multi_cycle_data_t;
 
 #define DAQ_ZMQ_HEADER_SIZE	(sizeof(daq_msg_header_t) * DAQ_ZMQ_MAX_DCU + sizeof(int))

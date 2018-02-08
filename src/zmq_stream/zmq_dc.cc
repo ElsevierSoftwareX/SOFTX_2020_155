@@ -32,11 +32,9 @@
 #include "zmq_dc_recv.h"
 
 #include <algorithm>
-#include <array>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <utility>
 
 
 unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
@@ -154,11 +152,11 @@ std::string create_debug_message(zmq_dc::data_block& block_info) {
     std::ostringstream os;
 
     daq_dc_data_t *block = block_info.full_data_block;
-    int dcuids = block->dcuTotalModels;
-    unsigned long ets = block->dcuheader[dcuids-1].timeSec;
+    int dcuids = block->header.dcuTotalModels;
+    unsigned long ets = block->header.dcuheader[dcuids-1].timeSec;
     os << ets << " ";
     for (int i = 0; i < dcuids; ++i) {
-        daq_msg_header_t* cur_header = block->dcuheader + i;
+        daq_msg_header_t* cur_header = block->header.dcuheader + i;
         os << cur_header->dcuId << " " << cur_header->status << " " << cur_header->dataBlockSize<< " ";
     }
     msg = os.str();
@@ -275,10 +273,10 @@ main(int argc, char **argv)
         zmq_dc::data_block results = dc_receiver.receive_data();
         if (timing_check) {
             gps_time now = clock.now();
-            unsigned long nsec = results.full_data_block->dcuheader[0].timeNSec;
+            unsigned long nsec = results.full_data_block->header.dcuheader[0].timeNSec;
             nsec *= (1000000000/16);
             gps_time msg_time(
-                results.full_data_block->dcuheader[0].timeSec,
+                results.full_data_block->header.dcuheader[0].timeSec,
                 nsec);
             gps_time delta = now - msg_time;
             std::cout << "Now: " << now << " block: " << msg_time << " delta: " << delta << std::endl;

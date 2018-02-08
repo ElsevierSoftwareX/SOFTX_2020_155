@@ -35,11 +35,9 @@
 
 #include <algorithm>
 #include <atomic>
-#include <array>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <utility>
 
 unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
 
@@ -114,12 +112,12 @@ void
 usage()
 {
     std::cerr << "Usage: zmq_recv [args] -s server name" << std::endl;
-    std::cerr << "-d dcu count - max number of dcus to support [1-" << DAQ_ZMQ_MAX_DCU << "]" << std::endl;
     std::cerr << "-t - use the LIGO timing drivers to check time on each received block of data" << std::endl;
     std::cerr << "-g offset - offset to add to the gps, defaults to 0" << std::endl;
     std::cerr << "-s - server name eg x1lsc0, x1susex, etc." << std::endl;
     std::cerr << "-v - verbose prints cpu_meter test data" << std::endl;
     std::cerr << "-b name - name of the shared memory buffer to write to, defaults to ifo" << std::endl;
+    std::cerr << "-m size (in mb) - size of the destination buffer in megabytes" << std::endl;
     std::cerr << "-h - help" << std::endl;
 }
 
@@ -156,11 +154,11 @@ std::string create_debug_message(zmq_dc::data_block& block_info) {
     std::ostringstream os;
 
     daq_dc_data_t *block = block_info.full_data_block;
-    int dcuids = block->dcuTotalModels;
-    unsigned long ets = block->dcuheader[dcuids-1].timeSec;
+    int dcuids = block->header.dcuTotalModels;
+    unsigned long ets = block->header.dcuheader[dcuids-1].timeSec;
     os << ets << " ";
     for (int i = 0; i < dcuids; ++i) {
-        daq_msg_header_t* cur_header = block->dcuheader + i;
+        daq_msg_header_t* cur_header = block->header.dcuheader + i;
         os << cur_header->dcuId << " " << cur_header->status << " " << cur_header->dataBlockSize<< " ";
     }
     msg = os.str();
@@ -176,7 +174,7 @@ main(int argc, char **argv)
     int c;
     bool timing_check = false;
     int timing_offset = 0;
-    size_t max_dcu = DAQ_ZMQ_MAX_DCU;
+    size_t max_data_size = (DAQ_ZMQ_DC_DATA_BLOCK_SIZE*DAQ_NUM_DATA_BLOCKS_PER_SECOND);
     std::string dest_buffer_name = "ifo";
 
     // Create DAQ message area in local memory
@@ -193,16 +191,17 @@ main(int argc, char **argv)
     int rc;
     bool do_verbose = false;
 
-    while ((c = getopt(argc, argv, "d:tg:hs:b:v")) != EOF) switch(c) {
-            case 'd':
+    while ((c = getopt(argc, argv, "m:tg:hs:b:v")) != EOF) switch(c) {
+            case 'm':
                 {
                     std::istringstream os(optarg);
-                    os >> max_dcu;
+                    os >> max_data_size;
                 }
-                if (max_dcu < 1 || max_dcu > DAQ_ZMQ_MAX_DCU) {
+                if (max_data_size < 1) {
                     usage();
                     exit(1);
                 }
+                max_data_size *= 1024*1024;
                 break;
             case 't':
                 timing_check = true;
@@ -257,18 +256,14 @@ main(int argc, char **argv)
     zmq_dc::ZMQDCReceiver dc_receiver(sname);
     int dataRdy = dc_receiver.data_mask();
 
-    size_t shmem_size =
-            (sizeof(daq_multi_cycle_data_t) - DAQ_ZMQ_DC_DATA_BLOCK_SIZE) +
-            ((sizeof(daq_dc_data_t) - DAQ_ZMQ_DC_DATA_BLOCK_SIZE) * DAQ_NUM_DATA_BLOCKS) +
-            (DAQ_DCU_SIZE * max_dcu * 2);
     // lookup the destination buffer
     volatile void *dest_buffer = shmem_open_segment(
             const_cast<char*>(dest_buffer_name.c_str()),
-            shmem_size
+            max_data_size
     );
     if (!dest_buffer) {
         std::cerr << "Unable to open shmem buffer " << dest_buffer_name << " with a size of at least ";
-        std::cerr << shmem_size << " bytes." << std::endl;
+        std::cerr << max_data_size << " bytes." << std::endl;
         exit(1);
     }
 
@@ -276,12 +271,11 @@ main(int argc, char **argv)
     dc_receiver.verbose(do_verbose);
     dc_receiver.begin_acquiring();
 
-    size_t cycle_data_size = (DAQ_DCU_SIZE * max_dcu * 2)/DAQ_NUM_DATA_BLOCKS_PER_SECOND + (sizeof(daq_dc_data_t) - DAQ_ZMQ_DC_DATA_BLOCK_SIZE);
+    size_t cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t))/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
     volatile daq_multi_cycle_data_t* multi_cycle_header = reinterpret_cast<volatile daq_multi_cycle_data_t*>(dest_buffer);
-    multi_cycle_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-    multi_cycle_header->maxDcuCount = static_cast<unsigned int>(max_dcu);
-    multi_cycle_header->cycleDataSize = static_cast<unsigned int>(cycle_data_size);
+    multi_cycle_header->header.maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+    multi_cycle_header->header.cycleDataSize = static_cast<unsigned int>(cycle_data_size);
     volatile char *data_block_start = &(multi_cycle_header->dataBlock[0]);
 
     //size_t msg_size = 0;
@@ -289,12 +283,12 @@ main(int argc, char **argv)
     //char dcs[12*4];
 
     std::atomic<unsigned int>* cycle_ptr = reinterpret_cast<std::atomic<unsigned int>*>(
-            const_cast<unsigned int*>(&(multi_cycle_header->curCycle))
+            const_cast<unsigned int*>(&(multi_cycle_header->header.curCycle))
     );
     unsigned int prev_cylce = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
     do {
         zmq_dc::data_block results = dc_receiver.receive_data();
-        unsigned int cur_cycle = results.full_data_block->dcuheader[0].cycle;
+        unsigned int cur_cycle = results.full_data_block->header.dcuheader[0].cycle;
 
         // write the data out
         std::copy(reinterpret_cast<char*>(results.full_data_block),
@@ -305,14 +299,14 @@ main(int argc, char **argv)
         *cycle_ptr = cur_cycle;
 
         //std::string debug_message = create_debug_message(results);
-        //std::cout << results.full_data_block->dcuheader[0].cycle << ": tpcount " << results.full_data_block->dcuheader[0].tpCount << std::endl;
+        //std::cout << results.full_data_block->header.dcuheader[0].cycle << ": tpcount " << results.full_data_block->header.dcuheader[0].tpCount << std::endl;
 
         if (timing_check) {
             gps_time now = clock.now();
-            unsigned long nsec = results.full_data_block->dcuheader[0].timeNSec;
+            unsigned long nsec = results.full_data_block->header.dcuheader[0].timeNSec;
             nsec *= (1000000000/16);
             gps_time msg_time(
-                    results.full_data_block->dcuheader[0].timeSec,
+                    results.full_data_block->header.dcuheader[0].timeSec,
                     nsec);
             gps_time delta = now - msg_time;
             std::cout << "Now: " << now << " block: " << msg_time << " delta: " << delta << std::endl;

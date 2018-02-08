@@ -113,7 +113,6 @@ class daq_multi_cycle_data_t(BasicStructure):
                          [
                              Field('curCycle', 'I'),
                              Field('maxCycle', 'I'),
-                             Field('maxDcuCount', 'I'),
                              Field('cycleDataSize', 'I'),
                          ],
                          blob,
@@ -134,6 +133,7 @@ class daq_dc_data_t(BasicStructure):
         super().__init__('daq_dc_data_t',
                          [
                              Field('dcuTotalModels', 'i'),
+                             Field('dataBlockSize', 'i'),
                          ],
                          blob,
                          alias={

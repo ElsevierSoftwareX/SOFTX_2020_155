@@ -315,17 +315,17 @@ main(int argc, char **argv)
 	   for(ii=0;ii<nsys;ii++) {
 	    	printf ("\t%s\t%d\n",modelnames[ii],dcuId[ii]);
 		// Set data xmit header
-		zmqDataBlock.dcuheader[ii].dcuId = dcuId[ii];;
-		zmqDataBlock.dcuheader[ii].fileCrc = 0;
-		zmqDataBlock.dcuheader[ii].status = 0xbad;
-		zmqDataBlock.dcuheader[ii].cycle = 0;
-		zmqDataBlock.dcuheader[ii].timeSec = 0;
-		zmqDataBlock.dcuheader[ii].timeNSec = 0;
-		zmqDataBlock.dcuheader[ii].dataCrc = 0;
-		zmqDataBlock.dcuheader[ii].dataBlockSize = 0;
-        zmqDataBlock.dcuheader[ii].tpBlockSize = 0;
-        zmqDataBlock.dcuheader[ii].tpCount = 0;
-        memset(zmqDataBlock.dcuheader[ii].tpNum, 0, sizeof(zmqDataBlock.dcuheader[ii].tpNum));
+		zmqDataBlock.header.dcuheader[ii].dcuId = dcuId[ii];;
+		zmqDataBlock.header.dcuheader[ii].fileCrc = 0;
+		zmqDataBlock.header.dcuheader[ii].status = 0xbad;
+		zmqDataBlock.header.dcuheader[ii].cycle = 0;
+		zmqDataBlock.header.dcuheader[ii].timeSec = 0;
+		zmqDataBlock.header.dcuheader[ii].timeNSec = 0;
+		zmqDataBlock.header.dcuheader[ii].dataCrc = 0;
+		zmqDataBlock.header.dcuheader[ii].dataBlockSize = 0;
+        zmqDataBlock.header.dcuheader[ii].tpBlockSize = 0;
+        zmqDataBlock.header.dcuheader[ii].tpCount = 0;
+        memset(zmqDataBlock.header.dcuheader[ii].tpNum, 0, sizeof(zmqDataBlock.header.dcuheader[ii].tpNum));
 	   }
 
 	// Setup to catch control C
@@ -392,15 +392,15 @@ main(int argc, char **argv)
 		if(new_cycle == 0 && do_verbose) {
 			printf("\nTime = %d-%d with size = %d\n",shmIpcPtr[0]->bp[lastCycle].timeSec,shmIpcPtr[0]->bp[lastCycle].timeNSec,msg_size);
 			printf("\tCycle = ");
-			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.dcuheader[ii].cycle);
+			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.header.dcuheader[ii].cycle);
 			printf("\n\tTimeSec = ");
-			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.dcuheader[ii].timeSec);
+			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.header.dcuheader[ii].timeSec);
 			printf("\n\tTimeNSec = ");
-			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.dcuheader[ii].timeNSec);
+			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.header.dcuheader[ii].timeNSec);
 			printf("\n\tDataSize = ");
-			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.dcuheader[ii].dataBlockSize);
+			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.header.dcuheader[ii].dataBlockSize);
             printf("\n\tTPSize = ");
-            for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.dcuheader[ii].tpBlockSize);
+            for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.header.dcuheader[ii].tpBlockSize);
 			}
 
 		// Increment the local DAQ cycle counter
@@ -409,81 +409,86 @@ main(int argc, char **argv)
 
 		
 		// Set pointer to 0MQ message data block
-		zbuffer = (char *)&zmqDataBlock.zmqDataBlock[0];
+		zbuffer = (char *)&zmqDataBlock.dataBlock[0];
 		// Initialize data send length to size of message header
 		sendLength = header_size;
 		// Set number of FE models that have data in this message
-		zmqDataBlock.dcuTotalModels = nsys;
+		zmqDataBlock.header.dcuTotalModels = nsys;
+		zmqDataBlock.header.dataBlockSize = 0;
 		// Loop thru all FE models
 		for (ii=0;ii<nsys;ii++) {
 			reftimeerror = 0;
 			// Set heartbeat monitor for return to DAQ software
 			if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[0];
 			// Set DCU ID in header
-			zmqDataBlock.dcuheader[ii].dcuId = shmIpcPtr[ii]->dcuId;
+			zmqDataBlock.header.dcuheader[ii].dcuId = shmIpcPtr[ii]->dcuId;
 			// Set DAQ .ini file CRC checksum
-			zmqDataBlock.dcuheader[ii].fileCrc = shmIpcPtr[ii]->crc;
+			zmqDataBlock.header.dcuheader[ii].fileCrc = shmIpcPtr[ii]->crc;
 			// Set 1/16Hz cycle number
-			zmqDataBlock.dcuheader[ii].cycle = shmIpcPtr[ii]->cycle;
+			zmqDataBlock.header.dcuheader[ii].cycle = shmIpcPtr[ii]->cycle;
 			if(ii == 0) refcycle = shmIpcPtr[ii]->cycle;
 			// Set GPS seconds
-			zmqDataBlock.dcuheader[ii].timeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
+			zmqDataBlock.header.dcuheader[ii].timeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
 			if (ii == 0) reftimeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
 			// Set GPS nanoseconds
-			zmqDataBlock.dcuheader[ii].timeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
+			zmqDataBlock.header.dcuheader[ii].timeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
 			if (ii == 0) reftimeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
 			if (ii != 0 && reftimeSec != shmIpcPtr[ii]->bp[lastCycle].timeSec) 
 				reftimeerror = 1;;
 			if (ii != 0 && reftimeNSec != shmIpcPtr[ii]->bp[lastCycle].timeNSec) 
 				reftimeerror |= 2;;
 			if(reftimeerror) {
-				zmqDataBlock.dcuheader[ii].cycle = refcycle;
+				zmqDataBlock.header.dcuheader[ii].cycle = refcycle;
 				// printf("Timing error model %d\n",ii);
 				// Set Status -- Need to update for models not running
-				zmqDataBlock.dcuheader[ii].status = 0xbad;
+				zmqDataBlock.header.dcuheader[ii].status = 0xbad;
 				// Indicate size of data block
-				zmqDataBlock.dcuheader[ii].dataBlockSize = 0;
-                zmqDataBlock.dcuheader[ii].tpBlockSize = 0;
-                zmqDataBlock.dcuheader[ii].tpCount = 0;
+				zmqDataBlock.header.dcuheader[ii].dataBlockSize = 0;
+                zmqDataBlock.header.dcuheader[ii].tpBlockSize = 0;
+                zmqDataBlock.header.dcuheader[ii].tpCount = 0;
 			} else {
 				// Set Status -- Need to update for models not running
-				zmqDataBlock.dcuheader[ii].status = 2;
+				zmqDataBlock.header.dcuheader[ii].status = 2;
 				// Indicate size of data block
-				zmqDataBlock.dcuheader[ii].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
+				zmqDataBlock.header.dcuheader[ii].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
 				// Prevent going beyond MAX allowed data size
-				if (zmqDataBlock.dcuheader[ii].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
-					zmqDataBlock.dcuheader[ii].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
+				if (zmqDataBlock.header.dcuheader[ii].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
+					zmqDataBlock.header.dcuheader[ii].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
 
-                zmqDataBlock.dcuheader[ii].tpCount = (unsigned int)shmTpTable[ii]->count;
-				zmqDataBlock.dcuheader[ii].tpBlockSize = sizeof(float) * modelrates[ii] * zmqDataBlock.dcuheader[ii].tpCount;
+                zmqDataBlock.header.dcuheader[ii].tpCount = (unsigned int)shmTpTable[ii]->count;
+				zmqDataBlock.header.dcuheader[ii].tpBlockSize = sizeof(float) * modelrates[ii] * zmqDataBlock.header.dcuheader[ii].tpCount;
 				// Prevent going beyond MAX allowed data size
-				if (zmqDataBlock.dcuheader[ii].tpBlockSize > DAQ_DCU_BLOCK_SIZE)
-					zmqDataBlock.dcuheader[ii].tpBlockSize = DAQ_DCU_BLOCK_SIZE;
+				if (zmqDataBlock.header.dcuheader[ii].tpBlockSize > DAQ_DCU_BLOCK_SIZE)
+					zmqDataBlock.header.dcuheader[ii].tpBlockSize = DAQ_DCU_BLOCK_SIZE;
 
-				memcpy(&(zmqDataBlock.dcuheader[ii].tpNum[0]),
+				memcpy(&(zmqDataBlock.header.dcuheader[ii].tpNum[0]),
 				       &(shmTpTable[ii]->tpNum[0]),
-					   sizeof(int)*zmqDataBlock.dcuheader[ii].tpCount);
+					   sizeof(int)*zmqDataBlock.header.dcuheader[ii].tpCount);
 
 			// Set pointer to dcu data in shared memory
 			dataBuff = (char *)(shmDataPtr[ii] + lastCycle * buf_size);
 			// Copy data from shared memory into local buffer
-			dataTPLength = zmqDataBlock.dcuheader[ii].dataBlockSize + zmqDataBlock.dcuheader[ii].tpBlockSize;
+			dataTPLength = zmqDataBlock.header.dcuheader[ii].dataBlockSize + zmqDataBlock.header.dcuheader[ii].tpBlockSize;
 			memcpy((void *)zbuffer, dataBuff, dataTPLength);
 
+
 			// Calculate CRC on the data and add to header info
-			myCrc = crc_ptr((char *)zbuffer, zmqDataBlock.dcuheader[ii].dataBlockSize, 0); // .crc is crcLength
-			myCrc = crc_len(zmqDataBlock.dcuheader[ii].dataBlockSize, myCrc);
-			zmqDataBlock.dcuheader[ii].dataCrc = myCrc;
+			myCrc = crc_ptr((char *)zbuffer, zmqDataBlock.header.dcuheader[ii].dataBlockSize, 0); // .crc is crcLength
+			myCrc = crc_len(zmqDataBlock.header.dcuheader[ii].dataBlockSize, myCrc);
+			zmqDataBlock.header.dcuheader[ii].dataCrc = myCrc;
 
 			// Increment the 0mq data buffer pointer for next FE
 			zbuffer += dataTPLength;
 			// Increment the 0mq message size with size of FE data block
 			sendLength += dataTPLength;
+			// Increment the data block size for the message
+			zmqDataBlock.header.dataBlockSize += (unsigned int)dataTPLength;
 
 			// Update heartbeat monitor to DAQ code
 			if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[1];
 			}
 		}
+
 		// Copy data to 0mq message buffer
 		memcpy(buffer,daqbuffer,sendLength);
 		// Send Data

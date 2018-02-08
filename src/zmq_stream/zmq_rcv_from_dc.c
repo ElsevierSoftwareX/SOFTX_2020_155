@@ -121,7 +121,7 @@ main(int argc, char **argv)
 		memcpy(daqbuffer,string,size);
 		// Destroy the received message buffer
 		zmq_msg_close(&message);
-		printf("RCV with tdcu = %d\n",mxDataBlock.dcuTotalModels);
+		printf("RCV with tdcu = %d\n",mxDataBlock.header.dcuTotalModels);
 
 		// *******************************************************************
 

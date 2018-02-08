@@ -86,8 +86,8 @@ void *rcvr_thread(void *arg) {
 		zmq_msg_close(&message);
 
 		//printf("Received block of %d on %d\n", size, mt);
-		for (ii = 0;ii<mxDataBlock.dcuTotalModels;ii++) {
-			cycle = mxDataBlock.dcuheader[ii].cycle;
+		for (ii = 0;ii<mxDataBlock.header.dcuTotalModels;ii++) {
+			cycle = mxDataBlock.header.dcuheader[ii].cycle;
 			// Copy data to global buffer
 			char *localbuff = (char *)&mxDataBlockG[mt][cycle];
 			memcpy(localbuff,daqbuffer,size);
@@ -272,31 +272,31 @@ main(int argc, char **argv)
 		// Reset total DCU counter
 		mytotaldcu = 0;
 		// Set pointer to start of DC data block
-		zbuffer = (char *)&mxDataBlockFull[loop].zmqDataBlock[0];
+		zbuffer = (char *)&mxDataBlockFull[loop].dataBlock[0];
 		// Reset total DC data size counter
 		dc_datablock_size = 0;
 		// Loop over all data buffers received from FE computers
 		for(ii=0;ii<nsys;ii++) {
-			int myc = mxDataBlockG[ii][loop].dcuTotalModels;
+			int myc = mxDataBlockG[ii][loop].header.dcuTotalModels;
 			// printf("\tModel %d = %d\n",ii,myc);
 			for(int jj=0;jj<myc;jj++) {
 				// Copy data header information
-				mxDataBlockFull[loop].dcuheader[mytotaldcu].dcuId = mxDataBlockG[ii][loop].dcuheader[jj].dcuId;
-				edcuid[mytotaldcu] = mxDataBlockFull[loop].dcuheader[mytotaldcu].dcuId;
-				mxDataBlockFull[loop].dcuheader[mytotaldcu].fileCrc = mxDataBlockG[ii][loop].dcuheader[jj].fileCrc;
-				mxDataBlockFull[loop].dcuheader[mytotaldcu].status = mxDataBlockG[ii][loop].dcuheader[jj].status;
-				estatus[mytotaldcu] = mxDataBlockFull[loop].dcuheader[mytotaldcu].status;
-				if(mxDataBlockFull[loop].dcuheader[mytotaldcu].status == 0xbad)
-					printf("Fault on dcuid %d\n",mxDataBlockFull[loop].dcuheader[mytotaldcu].dcuId );
-				else ets = mxDataBlockG[ii][loop].dcuheader[jj].timeSec;
-				mxDataBlockFull[loop].dcuheader[mytotaldcu].cycle = mxDataBlockG[ii][loop].dcuheader[jj].cycle;
-				mxDataBlockFull[loop].dcuheader[mytotaldcu].timeSec = mxDataBlockG[ii][loop].dcuheader[jj].timeSec;
-				mxDataBlockFull[loop].dcuheader[mytotaldcu].timeNSec = mxDataBlockG[ii][loop].dcuheader[jj].timeNSec;
-				int mydbs = mxDataBlockG[ii][loop].dcuheader[jj].dataBlockSize;
+				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].dcuId = mxDataBlockG[ii][loop].header.dcuheader[jj].dcuId;
+				edcuid[mytotaldcu] = mxDataBlockFull[loop].header.dcuheader[mytotaldcu].dcuId;
+				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].fileCrc = mxDataBlockG[ii][loop].header.dcuheader[jj].fileCrc;
+				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].status = mxDataBlockG[ii][loop].header.dcuheader[jj].status;
+				estatus[mytotaldcu] = mxDataBlockFull[loop].header.dcuheader[mytotaldcu].status;
+				if(mxDataBlockFull[loop].header.dcuheader[mytotaldcu].status == 0xbad)
+					printf("Fault on dcuid %d\n",mxDataBlockFull[loop].header.dcuheader[mytotaldcu].dcuId );
+				else ets = mxDataBlockG[ii][loop].header.dcuheader[jj].timeSec;
+				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].cycle = mxDataBlockG[ii][loop].header.dcuheader[jj].cycle;
+				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].timeSec = mxDataBlockG[ii][loop].header.dcuheader[jj].timeSec;
+				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].timeNSec = mxDataBlockG[ii][loop].header.dcuheader[jj].timeNSec;
+				int mydbs = mxDataBlockG[ii][loop].header.dcuheader[jj].dataBlockSize;
 				edbs[mytotaldcu] = mydbs;
 				// printf("\t\tdcuid = %d\n",mydbs);
-				mxDataBlockFull[loop].dcuheader[mytotaldcu].dataBlockSize = mydbs;
-				char *mbuffer = (char *)&mxDataBlockG[ii][loop].zmqDataBlock[0];
+				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].dataBlockSize = mydbs;
+				char *mbuffer = (char *)&mxDataBlockG[ii][loop].dataBlock[0];
 				// Copy data to DC buffer
 				memcpy(zbuffer,mbuffer,mydbs);
 				// Increment DC data buffer pointer for next data set
@@ -306,7 +306,7 @@ main(int argc, char **argv)
 			}
 		}
 		// printf("\tTotal DCU = %d\tSize = %d\n",mytotaldcu,dc_datablock_size);
-		mxDataBlockFull[loop].dcuTotalModels = mytotaldcu;
+		mxDataBlockFull[loop].header.dcuTotalModels = mytotaldcu;
 		sendLength = header_size + dc_datablock_size;
 		zbuffer = (char *)&mxDataBlockFull[loop];
 		// Copy DC data to 0MQ message block
