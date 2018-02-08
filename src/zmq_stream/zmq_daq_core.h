@@ -53,7 +53,7 @@ typedef struct daq_msg_header_t {
 typedef struct daq_multi_dcu_data_t {
     int dcuTotalModels;                                 // Number of models
     int dataBlockSize;                                  // Number of bytes actually used in the zmqDataBlock
-    daq_msg_header_t zmqheader[DAQ_ZMQ_MAX_DCU];
+    daq_msg_header_t dcuheader[DAQ_ZMQ_MAX_DCU];
     char zmqDataBlock[DAQ_ZMQ_FE_DATA_BLOCK_SIZE];
 }daq_multi_dcu_data_t;
 
@@ -61,7 +61,7 @@ typedef struct daq_multi_dcu_data_t {
 typedef struct daq_dc_data_t {
     int dcuTotalModels;                                 // Number of models
     int dataBlockSize;                                  // Number of bytes actually used in the data block
-    daq_msg_header_t zmqheader[DAQ_ZMQ_MAX_DCU];
+    daq_msg_header_t dcuheader[DAQ_ZMQ_MAX_DCU];
     char zmqDataBlock[DAQ_ZMQ_DC_DATA_BLOCK_SIZE];
 }daq_dc_data_t;
 

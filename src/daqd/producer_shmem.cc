@@ -240,9 +240,9 @@ void *producer::frame_writer() {
         ++sync_tries;
         if (block->dcuTotalModels == 0)
             continue;
-        gps = block->zmqheader[0].timeSec;
-        frac = block->zmqheader[0].timeNSec;
-        std::cerr << block->zmqheader[0].timeNSec << std::endl;
+        gps = block->dcuheader[0].timeSec;
+        frac = block->dcuheader[0].timeNSec;
+        std::cerr << block->dcuheader[0].timeNSec << std::endl;
         // as of 8 Nov 2017 zmq_multi_stream sends the gps nanoseconds as a cycle number
         if (frac == DATA_BLOCKS-1 || frac >= 937500000)
             break;
@@ -278,13 +278,13 @@ void *producer::frame_writer() {
         daq_dc_data_t* data_block = shmem_receiver.receive_data();
         std::cout << "#" << std::endl;
         if (data_block->dcuTotalModels > 0) {
-            gps = data_block->zmqheader[0].timeSec;
-            frac = data_block->zmqheader[0].timeNSec;
+            gps = data_block->dcuheader[0].timeSec;
+            frac = data_block->dcuheader[0].timeNSec;
 
             {
                 for (int i = 0; i < data_block->dcuTotalModels; ++i)
                 {
-                    if (data_block->zmqheader[i].dataBlockSize == 0)
+                    if (data_block->dcuheader[i].dataBlockSize == 0)
                         std::cerr << "block " << i << " has 0 bytes" << std::endl;
                 }
             }
@@ -294,10 +294,10 @@ void *producer::frame_writer() {
 //                char *_data = &(data_block->zmqDataBlock[0]);
 //                for (int kk = 0; kk < data_block->dcuTotalModels; kk++)
 //                {
-//                    if (data_block->zmqheader[kk].dcuId != 21)
+//                    if (data_block->dcuheader[kk].dcuId != 21)
 //                    {
-//                        offset += data_block->zmqheader[kk].dataBlockSize;
-//                        _data += data_block->zmqheader[kk].dataBlockSize;
+//                        offset += data_block->dcuheader[kk].dataBlockSize;
+//                        _data += data_block->dcuheader[kk].dataBlockSize;
 //                        continue;
 //                    }
 //                    int errors = 0;
@@ -321,10 +321,10 @@ void *producer::frame_writer() {
                 is_good = (gps == prev_gps + 1 && frac == 0);
                 for (int i = 0; i < data_block->dcuTotalModels; ++i)
                 {
-                    int dcuid = data_block->zmqheader[i].dcuId;
-                    gds_tp_table[0][dcuid].count = data_block->zmqheader[i].tpCount;
-                    std::copy(&data_block->zmqheader[i].tpNum[0],
-                              &data_block->zmqheader[i].tpNum[256],
+                    int dcuid = data_block->dcuheader[i].dcuId;
+                    gds_tp_table[0][dcuid].count = data_block->dcuheader[i].tpCount;
+                    std::copy(&data_block->dcuheader[i].tpNum[0],
+                              &data_block->dcuheader[i].tpNum[256],
                               &gds_tp_table[0][dcuid].tpNum[0]);
                 }
             } else {
@@ -343,11 +343,11 @@ void *producer::frame_writer() {
             int total_zmq_models = data_block->dcuTotalModels;
             char *cur_dcu_zmq_ptr = data_block->zmqDataBlock;
             for (int cur_block = 0; cur_block < total_zmq_models; ++cur_block) {
-                unsigned int cur_dcuid = data_block->zmqheader[cur_block].dcuId;
+                unsigned int cur_dcuid = data_block->dcuheader[cur_block].dcuId;
                 dcu_to_zmq_lookup[cur_dcuid] = cur_block;
                 dcu_data_from_zmq[cur_dcuid] = cur_dcu_zmq_ptr;
-                cur_dcu_zmq_ptr += data_block->zmqheader[cur_block].dataBlockSize +
-                                   data_block->zmqheader[cur_block].tpBlockSize;
+                cur_dcu_zmq_ptr += data_block->dcuheader[cur_block].dataBlockSize +
+                                   data_block->dcuheader[cur_block].tpBlockSize;
             }
         }
 
@@ -376,7 +376,7 @@ void *producer::frame_writer() {
                 // Get the data from myrinet
                 // Get the data from the buffers returned by the zmq receiver
                 int zmq_index = dcu_to_zmq_lookup[j];
-                daq_msg_header_t& cur_dcu = data_block->zmqheader[zmq_index];
+                daq_msg_header_t& cur_dcu = data_block->dcuheader[zmq_index];
                 if (read_size != cur_dcu.dataBlockSize) {
                     std::cerr << "read_size = " << read_size << " cur dcu size " << cur_dcu.dataBlockSize << std::endl;
                 }
@@ -389,7 +389,7 @@ void *producer::frame_writer() {
 
 //                if (j == 21)
 //                {
-//                    int block_time = static_cast<int>(data_block->zmqheader[zmq_index].timeSec);
+//                    int block_time = static_cast<int>(data_block->dcuheader[zmq_index].timeSec);
 //                    int data_error = 0;
 //                    for (int k = 0; k < 64; ++k)
 //                    {

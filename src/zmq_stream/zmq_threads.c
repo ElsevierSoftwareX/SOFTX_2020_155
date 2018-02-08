@@ -87,7 +87,7 @@ void *rcvr_thread(void *arg) {
 
 		//printf("Received block of %d on %d\n", size, mt);
 		for (ii = 0;ii<mxDataBlock.dcuTotalModels;ii++) {
-			cycle = mxDataBlock.zmqheader[ii].cycle;
+			cycle = mxDataBlock.dcuheader[ii].cycle;
 			// Copy data to global buffer
 			char *localbuff = (char *)&mxDataBlockG[mt][cycle];
 			memcpy(localbuff,daqbuffer,size);
@@ -281,21 +281,21 @@ main(int argc, char **argv)
 			// printf("\tModel %d = %d\n",ii,myc);
 			for(int jj=0;jj<myc;jj++) {
 				// Copy data header information
-				mxDataBlockFull[loop].zmqheader[mytotaldcu].dcuId = mxDataBlockG[ii][loop].zmqheader[jj].dcuId;
-				edcuid[mytotaldcu] = mxDataBlockFull[loop].zmqheader[mytotaldcu].dcuId;
-				mxDataBlockFull[loop].zmqheader[mytotaldcu].fileCrc = mxDataBlockG[ii][loop].zmqheader[jj].fileCrc;
-				mxDataBlockFull[loop].zmqheader[mytotaldcu].status = mxDataBlockG[ii][loop].zmqheader[jj].status;
-				estatus[mytotaldcu] = mxDataBlockFull[loop].zmqheader[mytotaldcu].status;
-				if(mxDataBlockFull[loop].zmqheader[mytotaldcu].status == 0xbad)
-					printf("Fault on dcuid %d\n",mxDataBlockFull[loop].zmqheader[mytotaldcu].dcuId );
-				else ets = mxDataBlockG[ii][loop].zmqheader[jj].timeSec;
-				mxDataBlockFull[loop].zmqheader[mytotaldcu].cycle = mxDataBlockG[ii][loop].zmqheader[jj].cycle;
-				mxDataBlockFull[loop].zmqheader[mytotaldcu].timeSec = mxDataBlockG[ii][loop].zmqheader[jj].timeSec;
-				mxDataBlockFull[loop].zmqheader[mytotaldcu].timeNSec = mxDataBlockG[ii][loop].zmqheader[jj].timeNSec;
-				int mydbs = mxDataBlockG[ii][loop].zmqheader[jj].dataBlockSize;
+				mxDataBlockFull[loop].dcuheader[mytotaldcu].dcuId = mxDataBlockG[ii][loop].dcuheader[jj].dcuId;
+				edcuid[mytotaldcu] = mxDataBlockFull[loop].dcuheader[mytotaldcu].dcuId;
+				mxDataBlockFull[loop].dcuheader[mytotaldcu].fileCrc = mxDataBlockG[ii][loop].dcuheader[jj].fileCrc;
+				mxDataBlockFull[loop].dcuheader[mytotaldcu].status = mxDataBlockG[ii][loop].dcuheader[jj].status;
+				estatus[mytotaldcu] = mxDataBlockFull[loop].dcuheader[mytotaldcu].status;
+				if(mxDataBlockFull[loop].dcuheader[mytotaldcu].status == 0xbad)
+					printf("Fault on dcuid %d\n",mxDataBlockFull[loop].dcuheader[mytotaldcu].dcuId );
+				else ets = mxDataBlockG[ii][loop].dcuheader[jj].timeSec;
+				mxDataBlockFull[loop].dcuheader[mytotaldcu].cycle = mxDataBlockG[ii][loop].dcuheader[jj].cycle;
+				mxDataBlockFull[loop].dcuheader[mytotaldcu].timeSec = mxDataBlockG[ii][loop].dcuheader[jj].timeSec;
+				mxDataBlockFull[loop].dcuheader[mytotaldcu].timeNSec = mxDataBlockG[ii][loop].dcuheader[jj].timeNSec;
+				int mydbs = mxDataBlockG[ii][loop].dcuheader[jj].dataBlockSize;
 				edbs[mytotaldcu] = mydbs;
 				// printf("\t\tdcuid = %d\n",mydbs);
-				mxDataBlockFull[loop].zmqheader[mytotaldcu].dataBlockSize = mydbs;
+				mxDataBlockFull[loop].dcuheader[mytotaldcu].dataBlockSize = mydbs;
 				char *mbuffer = (char *)&mxDataBlockG[ii][loop].zmqDataBlock[0];
 				// Copy data to DC buffer
 				memcpy(zbuffer,mbuffer,mydbs);

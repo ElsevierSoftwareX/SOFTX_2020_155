@@ -51,7 +51,7 @@ namespace zmq_dc {
 
             //printf("Received block of %d on %d\n", size, mt);
             for (ii = 0; ii < mxDataBlock.dcuTotalModels; ii++) {
-                cycle = mxDataBlock.zmqheader[ii].cycle;
+                cycle = mxDataBlock.dcuheader[ii].cycle;
                 // Copy data to global buffer
                 char *localbuff = (char *) &(_mxDataBlockG[mt][cycle]);
                 memcpy(localbuff, daqbuffer, message.size());
@@ -160,31 +160,31 @@ namespace zmq_dc {
 
             for (int jj = 0; jj < cur_sys_dcu_count; jj++) {
                 // Copy data header information
-                _mxDataBlockFull[_loop].zmqheader[mytotaldcu].dcuId = _mxDataBlockG[ii][_loop].zmqheader[jj].dcuId;
-                int cur_dcuid = _mxDataBlockFull[_loop].zmqheader[mytotaldcu].dcuId;
-                _mxDataBlockFull[_loop].zmqheader[mytotaldcu].fileCrc = _mxDataBlockG[ii][_loop].zmqheader[jj].fileCrc;
-                _mxDataBlockFull[_loop].zmqheader[mytotaldcu].status = _mxDataBlockG[ii][_loop].zmqheader[jj].status;
-                _mxDataBlockFull[_loop].zmqheader[mytotaldcu].status;
-                if (_mxDataBlockFull[_loop].zmqheader[mytotaldcu].status == 0xbad)
-                    std::cout << "Fault on dcuid " << _mxDataBlockFull[_loop].zmqheader[mytotaldcu].dcuId
+                _mxDataBlockFull[_loop].dcuheader[mytotaldcu].dcuId = _mxDataBlockG[ii][_loop].dcuheader[jj].dcuId;
+                int cur_dcuid = _mxDataBlockFull[_loop].dcuheader[mytotaldcu].dcuId;
+                _mxDataBlockFull[_loop].dcuheader[mytotaldcu].fileCrc = _mxDataBlockG[ii][_loop].dcuheader[jj].fileCrc;
+                _mxDataBlockFull[_loop].dcuheader[mytotaldcu].status = _mxDataBlockG[ii][_loop].dcuheader[jj].status;
+                _mxDataBlockFull[_loop].dcuheader[mytotaldcu].status;
+                if (_mxDataBlockFull[_loop].dcuheader[mytotaldcu].status == 0xbad)
+                    std::cout << "Fault on dcuid " << _mxDataBlockFull[_loop].dcuheader[mytotaldcu].dcuId
                               << "\n";
-                _mxDataBlockFull[_loop].zmqheader[mytotaldcu].cycle = _mxDataBlockG[ii][_loop].zmqheader[jj].cycle;
-                _mxDataBlockFull[_loop].zmqheader[mytotaldcu].timeSec = _mxDataBlockG[ii][_loop].zmqheader[jj].timeSec;
-                _mxDataBlockFull[_loop].zmqheader[mytotaldcu].timeNSec = _mxDataBlockG[ii][_loop].zmqheader[jj].timeNSec;
-                int mydbs = _mxDataBlockG[ii][_loop].zmqheader[jj].dataBlockSize;
+                _mxDataBlockFull[_loop].dcuheader[mytotaldcu].cycle = _mxDataBlockG[ii][_loop].dcuheader[jj].cycle;
+                _mxDataBlockFull[_loop].dcuheader[mytotaldcu].timeSec = _mxDataBlockG[ii][_loop].dcuheader[jj].timeSec;
+                _mxDataBlockFull[_loop].dcuheader[mytotaldcu].timeNSec = _mxDataBlockG[ii][_loop].dcuheader[jj].timeNSec;
+                int mydbs = _mxDataBlockG[ii][_loop].dcuheader[jj].dataBlockSize;
 
                 //if (_loop == 0 && do_verbose)
                 //    printf("\t\tdcuid = %d ; data size= %d\n", cur_dcuid, mydbs);
 
-                _mxDataBlockFull[_loop].zmqheader[mytotaldcu].dataBlockSize = mydbs;
+                _mxDataBlockFull[_loop].dcuheader[mytotaldcu].dataBlockSize = mydbs;
 
-                int mytpbs = _mxDataBlockG[ii][_loop].zmqheader[jj].tpBlockSize;
+                int mytpbs = _mxDataBlockG[ii][_loop].dcuheader[jj].tpBlockSize;
                 int used_tpbs = mytpbs;
-                _mxDataBlockFull[_loop].zmqheader[mytotaldcu].tpBlockSize = mytpbs;
-                _mxDataBlockFull[_loop].zmqheader[mytotaldcu].tpCount = _mxDataBlockG[ii][_loop].zmqheader[jj].tpCount;
+                _mxDataBlockFull[_loop].dcuheader[mytotaldcu].tpBlockSize = mytpbs;
+                _mxDataBlockFull[_loop].dcuheader[mytotaldcu].tpCount = _mxDataBlockG[ii][_loop].dcuheader[jj].tpCount;
                 {
-                    unsigned int *tp_table = &_mxDataBlockG[ii][_loop].zmqheader[jj].tpNum[0];
-                    unsigned int *tp_dest = &_mxDataBlockFull[_loop].zmqheader[mytotaldcu].tpNum[0];
+                    unsigned int *tp_table = &_mxDataBlockG[ii][_loop].dcuheader[jj].tpNum[0];
+                    unsigned int *tp_dest = &_mxDataBlockFull[_loop].dcuheader[mytotaldcu].tpNum[0];
                     std::copy(tp_table, tp_table + DAQ_GDS_MAX_TP_NUM, tp_dest);
                 }
 

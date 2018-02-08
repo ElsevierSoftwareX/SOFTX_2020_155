@@ -187,8 +187,8 @@ void *producer::frame_writer() {
         ++sync_tries;
         if (block.full_data_block->dcuTotalModels == 0)
             continue;
-        gps = block.full_data_block->zmqheader[0].timeSec;
-        frac = block.full_data_block->zmqheader[0].timeNSec;
+        gps = block.full_data_block->dcuheader[0].timeSec;
+        frac = block.full_data_block->dcuheader[0].timeNSec;
         // as of 8 Nov 2017 zmq_multi_stream sends the gps nanoseconds as a cycle number
         if (frac == DATA_BLOCKS-1 || frac >= 937500000)
             break;
@@ -224,8 +224,8 @@ void *producer::frame_writer() {
         zmq_dc::data_block zmq_data_block = zmq_receiver.receive_data();
         std::cout << "#" << std::endl;
         if (zmq_data_block.full_data_block->dcuTotalModels > 0) {
-            gps = zmq_data_block.full_data_block->zmqheader[0].timeSec;
-            frac = zmq_data_block.full_data_block->zmqheader[0].timeNSec;
+            gps = zmq_data_block.full_data_block->dcuheader[0].timeSec;
+            frac = zmq_data_block.full_data_block->dcuheader[0].timeNSec;
 
             bool new_sec = (i % 16) == 0;
             bool is_good = false;
@@ -247,10 +247,10 @@ void *producer::frame_writer() {
             int total_zmq_models = zmq_data_block.full_data_block->dcuTotalModels;
             char *cur_dcu_zmq_ptr = zmq_data_block.full_data_block->zmqDataBlock;
             for (int cur_block = 0; cur_block < total_zmq_models; ++cur_block) {
-                unsigned int cur_dcuid = zmq_data_block.full_data_block->zmqheader[cur_block].dcuId;
+                unsigned int cur_dcuid = zmq_data_block.full_data_block->dcuheader[cur_block].dcuId;
                 dcu_to_zmq_lookup[cur_dcuid] = cur_block;
                 dcu_data_from_zmq[cur_dcuid] = cur_dcu_zmq_ptr;
-                cur_dcu_zmq_ptr += zmq_data_block.full_data_block->zmqheader[cur_block].dataBlockSize;
+                cur_dcu_zmq_ptr += zmq_data_block.full_data_block->dcuheader[cur_block].dataBlockSize;
             }
         }
 
@@ -279,7 +279,7 @@ void *producer::frame_writer() {
                 // Get the data from myrinet
                 // Get the data from the buffers returned by the zmq receiver
                 int zmq_index = dcu_to_zmq_lookup[j];
-                daq_msg_header_t& cur_dcu = zmq_data_block.full_data_block->zmqheader[zmq_index];
+                daq_msg_header_t& cur_dcu = zmq_data_block.full_data_block->dcuheader[zmq_index];
                 assert(read_size == cur_dcu.dataBlockSize);
                 memcpy((void *)read_dest,
                        dcu_data_from_zmq[j],

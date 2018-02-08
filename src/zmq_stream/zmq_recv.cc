@@ -157,10 +157,10 @@ std::string create_debug_message(zmq_dc::data_block& block_info) {
 
     daq_dc_data_t *block = block_info.full_data_block;
     int dcuids = block->dcuTotalModels;
-    unsigned long ets = block->zmqheader[dcuids-1].timeSec;
+    unsigned long ets = block->dcuheader[dcuids-1].timeSec;
     os << ets << " ";
     for (int i = 0; i < dcuids; ++i) {
-        daq_msg_header_t* cur_header = block->zmqheader + i;
+        daq_msg_header_t* cur_header = block->dcuheader + i;
         os << cur_header->dcuId << " " << cur_header->status << " " << cur_header->dataBlockSize<< " ";
     }
     msg = os.str();
@@ -294,7 +294,7 @@ main(int argc, char **argv)
     unsigned int prev_cylce = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
     do {
         zmq_dc::data_block results = dc_receiver.receive_data();
-        unsigned int cur_cycle = results.full_data_block->zmqheader[0].cycle;
+        unsigned int cur_cycle = results.full_data_block->dcuheader[0].cycle;
 
         // write the data out
         std::copy(reinterpret_cast<char*>(results.full_data_block),
@@ -305,14 +305,14 @@ main(int argc, char **argv)
         *cycle_ptr = cur_cycle;
 
         //std::string debug_message = create_debug_message(results);
-        //std::cout << results.full_data_block->zmqheader[0].cycle << ": tpcount " << results.full_data_block->zmqheader[0].tpCount << std::endl;
+        //std::cout << results.full_data_block->dcuheader[0].cycle << ": tpcount " << results.full_data_block->dcuheader[0].tpCount << std::endl;
 
         if (timing_check) {
             gps_time now = clock.now();
-            unsigned long nsec = results.full_data_block->zmqheader[0].timeNSec;
+            unsigned long nsec = results.full_data_block->dcuheader[0].timeNSec;
             nsec *= (1000000000/16);
             gps_time msg_time(
-                    results.full_data_block->zmqheader[0].timeSec,
+                    results.full_data_block->dcuheader[0].timeSec,
                     nsec);
             gps_time delta = now - msg_time;
             std::cout << "Now: " << now << " block: " << msg_time << " delta: " << delta << std::endl;
