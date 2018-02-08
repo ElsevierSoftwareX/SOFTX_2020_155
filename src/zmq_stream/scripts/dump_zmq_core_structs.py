@@ -27,6 +27,32 @@ class Field(object):
         return struct.calcsize(self.__format)
 
 
+class FieldArray(object):
+    def __init__(self, name, count, format):
+        self.__name = name
+        self.__count = count
+        self.__format = format
+        self.__unit_size = struct.calcsize("<" + self.__format)
+        self.__value = None
+
+    def name(self):
+        return self.__name
+
+    def format(self):
+        return "{0}s".format(self.__count * self.__unit_size)
+
+    def set(self, value):
+        self.__value = struct.unpack("<{0}{1}".format(self.__count,
+                                                      self.__format),
+                                     value)
+
+    def get(self):
+        return self.__value
+
+    def __len__(self):
+        return struct.calcsize(self.format())
+
+
 class BasicStructure(object):
     def __init__(self, name, fields, blob, alias={}):
         self.__format = "<" + ''.join([x.format() for x in fields])
@@ -36,7 +62,14 @@ class BasicStructure(object):
         self.__field_alias = alias
         field_names = []
         fields = struct.unpack(self.__format, blob[0: self.__size])
-        assert (len(fields) == len(self.__fields))
+        try:
+            assert (len(fields) == len(self.__fields))
+        except:
+            print(len(fields))
+            print(fields)
+            print(len(self.__fields))
+            print(self.__fields)
+            raise
         for i in range(len(fields)):
             self.__fields[i].set(fields[i])
             field_names.append(self.__fields[i].name())
@@ -120,6 +153,9 @@ class daq_msg_header_t(BasicStructure):
                              Field('timeNSec', 'I'),
                              Field('dataCrc', 'I'),
                              Field('dataBlockSize', 'I'),
+                             Field('tpBlockSize', 'I'),
+                             Field('tpCount', 'I'),
+                             FieldArray('tpNum', 256, 'I'),
                          ],
                          blob)
 
@@ -160,12 +196,20 @@ class rmIpcStr(BasicStructure):
                          })
         self.max_cycle = 16
         self.block_props = []
+        tp_offset = 0x1000
+        tp_count = struct.unpack("=I", blob[tp_offset:tp_offset + 4])[0]
+        tp_offset += 4
+        self.tp_table = struct.unpack("={0}I".format(tp_count),
+                                      blob[tp_offset:tp_offset + 4 * tp_count])
 
         cur_offset = len(self)
         for i in range(self.max_cycle):
             block_prop = blockProp(blob[cur_offset:])
             self.block_props.append(block_prop)
             cur_offset += len(block_prop)
+
+    def get_tp_table(self):
+        return self.tp_table
 
     def get_block_prop(self, cycle):
         return self.block_props[cycle]
@@ -177,7 +221,7 @@ class rmIpcStr(BasicStructure):
             ))
         DAQ_DCU_SIZE = 0x400000
         DAQ_NUM_DATA_BLOCK = 16
-        DAQ_DCU_BLOCK_SIZE = DAQ_DCU_SIZE/DAQ_NUM_DATA_BLOCK
+        DAQ_DCU_BLOCK_SIZE = DAQ_DCU_SIZE // DAQ_NUM_DATA_BLOCK
         return 0x2000 + (DAQ_DCU_BLOCK_SIZE * 2 * cycle)
 
 
@@ -283,6 +327,7 @@ def handle_daq_multi_cycle(args, buffer):
         ))
 
     dcu_offset = cycle_offset + len(cycle_header)
+    cur_dcu_data_offset = 0
     dcu_struct_size = 0
     for i in range(model_count):
         dcu = daq_msg_header_t(buffer[dcu_offset:])
@@ -292,12 +337,14 @@ def handle_daq_multi_cycle(args, buffer):
             print(dcu.dump())
             if cur_dcu == i:
                 break
+        cur_dcu_data_offset += dcu.get('dataBlockSize') + dcu.get('tpBlockSize')
         dcu_offset += len(dcu)
 
     if not dumper.should_dump():
         return
 
-    data_block_offset = cycle_offset + len(cycle_header) + dcu_struct_size * 128
+    data_block_offset = cycle_offset + len(cycle_header) + dcu_struct_size * 128 + cur_dcu_data_offset
+    print("Offset {0}:".format(data_block_offset))
     dumper.dump(buffer[data_block_offset:])
 
 
@@ -314,11 +361,15 @@ def handle_rmipc(args, buffer):
 
     print("{0}".format(rmipc.dump()))
 
+    tp_table = rmipc.get_tp_table()
+    print("Test Point Table:\n\tCount: {0}\n\t{1}\n".format(len(tp_table), tp_table))
+
     print("{0}".format(rmipc.get_block_prop(cur_cycle).dump()))
 
     data_block_offset = rmipc.offset_to_cycle(cur_cycle)
     print("offset = {0}".format(data_block_offset))
-    dumper.dump(buffer[data_block_offset:])
+    if dumper.should_dump():
+        dumper.dump(buffer[data_block_offset:])
 
 
 def main(argv):

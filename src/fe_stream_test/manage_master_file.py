@@ -20,8 +20,8 @@ def create_master(master_dir):
         file_list.extend(files)
     f = open(os.path.join(master_dir, 'master'), 'wt')
     for line in file_list:
-        if line.endswith('.par'):
-            f.write('# ')
+        # if line.endswith('.par'):
+        #     f.write('# ')
         f.write(line + '\n')
     f.close()
 

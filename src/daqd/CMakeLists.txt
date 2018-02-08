@@ -13,6 +13,7 @@ set(MAIN_DAQD_SRC
         net_writer.cc
         #${CMAKE_CURRENT_BINARY_DIR}/comm.cc
         daqd.cc
+		comm_impl.cc
         circ.cc
         edcu.cc
         framerecv.cc
@@ -83,6 +84,7 @@ set (DAQD_COMMON_SRC
         daqd.cc
         exScalarPV.cc
         exVectorPV.cc
+		comm_impl.cc
         )
 
 ########
@@ -218,6 +220,7 @@ set (DAQD_DC_MAIN_SRC
 		framerecv.cc
 		listener.cc
 		daqd.cc
+		comm_impl.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
 
@@ -292,6 +295,7 @@ set (DAQD_MXSYMM_MAIN_SRC
 		framerecv.cc
 		listener.cc
 		daqd.cc
+		comm_impl.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
 
@@ -372,6 +376,7 @@ set (DAQD_SHMEM_MAIN_SRC
 		framerecv.cc
 		listener.cc
 		daqd.cc
+		comm_impl.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
 
@@ -446,6 +451,7 @@ set (DAQD_DC_ZMQ_MAIN_SRC
 		framerecv.cc
 		listener.cc
 		daqd.cc
+		comm_impl.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
 
@@ -518,6 +524,7 @@ set (DAQD_RCV_MAIN_SRC
 		daqd.cc
 		exScalarPV.cc
 		exVectorPV.cc
+		comm_impl.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
 
@@ -593,6 +600,7 @@ set (DAQD_BCST_MAIN_SRC
 		daqd.cc
 		exScalarPV.cc
 		exVectorPV.cc
+		comm_impl.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
 
@@ -666,6 +674,7 @@ set (DAQD_STANDIOP_MAIN_SRC
 		daqd.cc
 		exScalarPV.cc
 		exVectorPV.cc
+		comm_impl.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc)
 

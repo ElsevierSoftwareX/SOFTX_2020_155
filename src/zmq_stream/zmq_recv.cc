@@ -260,7 +260,7 @@ main(int argc, char **argv)
     size_t shmem_size =
             (sizeof(daq_multi_cycle_data_t) - DAQ_ZMQ_DC_DATA_BLOCK_SIZE) +
             ((sizeof(daq_dc_data_t) - DAQ_ZMQ_DC_DATA_BLOCK_SIZE) * DAQ_NUM_DATA_BLOCKS) +
-            DAQ_DCU_SIZE * max_dcu;
+            (DAQ_DCU_SIZE * max_dcu * 2);
     // lookup the destination buffer
     volatile void *dest_buffer = shmem_open_segment(
             const_cast<char*>(dest_buffer_name.c_str()),
@@ -276,7 +276,7 @@ main(int argc, char **argv)
     dc_receiver.verbose(do_verbose);
     dc_receiver.begin_acquiring();
 
-    size_t cycle_data_size = (DAQ_DCU_SIZE * max_dcu)/DAQ_NUM_DATA_BLOCKS_PER_SECOND + (sizeof(daq_dc_data_t) - DAQ_ZMQ_DC_DATA_BLOCK_SIZE);
+    size_t cycle_data_size = (DAQ_DCU_SIZE * max_dcu * 2)/DAQ_NUM_DATA_BLOCKS_PER_SECOND + (sizeof(daq_dc_data_t) - DAQ_ZMQ_DC_DATA_BLOCK_SIZE);
 
     volatile daq_multi_cycle_data_t* multi_cycle_header = reinterpret_cast<volatile daq_multi_cycle_data_t*>(dest_buffer);
     multi_cycle_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
@@ -296,19 +296,6 @@ main(int argc, char **argv)
         zmq_dc::data_block results = dc_receiver.receive_data();
         unsigned int cur_cycle = results.full_data_block->zmqheader[0].cycle;
 
-        if (timing_check) {
-            gps_time now = clock.now();
-            unsigned long nsec = results.full_data_block->zmqheader[0].timeNSec;
-            nsec *= (1000000000/16);
-            gps_time msg_time(
-                results.full_data_block->zmqheader[0].timeSec,
-                nsec);
-            gps_time delta = now - msg_time;
-            std::cout << "Now: " << now << " block: " << msg_time << " delta: " << delta << std::endl;
-        }
-
-        std::string debug_message = create_debug_message(results);
-
         // write the data out
         std::copy(reinterpret_cast<char*>(results.full_data_block),
                   reinterpret_cast<char*>(results.full_data_block) + results.send_length,
@@ -316,6 +303,20 @@ main(int argc, char **argv)
                           data_block_start + (cur_cycle*cycle_data_size)
                   ));
         *cycle_ptr = cur_cycle;
+
+        //std::string debug_message = create_debug_message(results);
+        //std::cout << results.full_data_block->zmqheader[0].cycle << ": tpcount " << results.full_data_block->zmqheader[0].tpCount << std::endl;
+
+        if (timing_check) {
+            gps_time now = clock.now();
+            unsigned long nsec = results.full_data_block->zmqheader[0].timeNSec;
+            nsec *= (1000000000/16);
+            gps_time msg_time(
+                    results.full_data_block->zmqheader[0].timeSec,
+                    nsec);
+            gps_time delta = now - msg_time;
+            std::cout << "Now: " << now << " block: " << msg_time << " delta: " << delta << std::endl;
+        }
 
     } while (keep_running);
 

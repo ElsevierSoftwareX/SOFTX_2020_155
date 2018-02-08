@@ -22,13 +22,14 @@ private:
     int chtype_;
     int rate_;
     int chnum_;
+    int dcuid_;
 public:
-    SimChannel(): name_(""), chtype_(0), rate_(0), chnum_(0) {}
-    SimChannel(std::string name, int chtype, int rate, int chnum):
-            name_(name), chtype_(chtype), rate_(rate), chnum_(chnum) {}
+    SimChannel(): name_(""), chtype_(0), rate_(0), chnum_(0), dcuid_(0) {}
+    SimChannel(std::string name, int chtype, int rate, int chnum, int dcuid=0):
+            name_(name), chtype_(chtype), rate_(rate), chnum_(chnum), dcuid_(dcuid) {}
     SimChannel(const SimChannel& other):
             name_(other.name_), chtype_(other.chtype_), rate_(other.rate_),
-            chnum_(other.chnum_) {}
+            chnum_(other.chnum_), dcuid_(other.dcuid_) {}
 
     SimChannel& operator=(const SimChannel& other)
     {
@@ -38,6 +39,7 @@ public:
             chtype_ = other.chtype_;
             rate_ = other.rate_;
             chnum_ = other.chnum_;
+            dcuid_ = other.dcuid_;
         }
         return *this;
     }
@@ -45,6 +47,7 @@ public:
     int data_type() const { return chtype_; }
     int data_rate() const { return rate_; }
     int channel_num() const { return chnum_; }
+    int dcuid() const { return dcuid_; }
 
     const std::string& name() const { return name_; }
 };
@@ -90,7 +93,7 @@ namespace Generators {
 
         virtual size_t bytes_per_sec() const
         {
-            if (ch_.data_type() != 2)
+            if (ch_.data_type() != 2 && ch_.data_type() != 4)
                 throw std::runtime_error("Unsupported type");
             return ch_.data_rate()*4;
         }
@@ -103,7 +106,20 @@ namespace Generators {
             os << "chnnum=" << ch_.channel_num() << "\n";
         }
 
-        virtual void output_par_entry(std::ostream& os) {}
+        virtual void output_par_entry(std::ostream& os)
+        {
+            if (data_rate() != 2048)
+                throw std::runtime_error("Cannot generate a par entry for a non 2k channel right now");
+            if (data_type() != 4)
+                throw std::runtime_error("Cannot generate a par entry for a non float channel");
+            os << "[" << full_channel_name() << "]\n";
+            os << "ifoid = 1\n";
+            os << "rmid = " << ch_.dcuid() << "\n";
+            os << "dcuid = " << 16 << "\n";
+            os << "chnnum = " << ch_.channel_num() << "\n";
+            os << "datatype = " << data_type() << "\n";
+            os << "datarate = " << data_rate() << "\n";
+        }
     };
 
     
@@ -128,7 +144,8 @@ namespace Generators {
             return reinterpret_cast<char*>(out_);
         }
     };
-    
+
+    template <typename T>
     class GPSSecondWithOffset: public SimChannelGenerator
     {
         int offset_;
@@ -148,13 +165,39 @@ namespace Generators {
         char* generate(int gps_sec, int gps_nano, char* out)
         {
             int rate = data_rate() / 16;
-            int *out_ = reinterpret_cast<int*>(out);
+            T *out_ = reinterpret_cast<T*>(out);
             for (int i = 0; i < rate; ++i)
             {
-                *out_ = gps_sec + offset_;
+                *out_ = static_cast<T>(gps_sec + offset_);
                 ++out_;
             }
             return reinterpret_cast<char*>(out_);
+        }
+    };
+
+    template <typename T>
+    class StaticValue: public SimChannelGenerator
+    {
+        T value_;
+    public:
+        StaticValue(const SimChannel& ch, T value):
+                SimChannelGenerator(ch), value_(value) {}
+
+        std::string generator_name() const { return "static"; }
+
+        std::string other_params() const
+        {
+            std::ostringstream os;
+            os << "--" << value_;
+            return os.str();
+        }
+
+        char* generate(int gps_sec, int gps_nano, char* out)
+        {
+            int rate = data_rate() / 16;
+            T *out_ = reinterpret_cast<T*>(out);
+            std::fill(out_, out_ + rate, value_);
+            return reinterpret_cast<char*>(out_ + rate);
         }
     };
 }
@@ -184,7 +227,7 @@ GeneratorPtr create_generator(const std::string& channel_name)
         std::istringstream is (parts[parts.size()-1]);
         is >> rate;
     }
-    if (data_type != 2 || rate < 16)
+    if (!(data_type == 2 || data_type == 4) || rate < 16)
         throw std::runtime_error("Invalid data type or rate found");
     std::string& base = parts[0];
     std::string& name = parts[1];
@@ -194,7 +237,11 @@ GeneratorPtr create_generator(const std::string& channel_name)
         std::istringstream is(parts[2]);
         int offset = 0;
         is >> offset;
-        return GeneratorPtr(new Generators::GPSSecondWithOffset(SimChannel(base, data_type, rate, 0), offset));
+        if (data_type == 2)
+            return GeneratorPtr(new Generators::GPSSecondWithOffset<int>(SimChannel(base, data_type, rate, 0), offset));
+        else
+            return GeneratorPtr(new Generators::GPSSecondWithOffset<float>(SimChannel(base, data_type, rate, 0), offset));
+
     }
     else
     {

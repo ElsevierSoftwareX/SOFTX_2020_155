@@ -96,8 +96,8 @@ class ShMemReceiver {
 public:
     ShMemReceiver() = delete;
     ShMemReceiver(ShMemReceiver& other) = delete;
-    explicit ShMemReceiver(const std::string& endpoint):
-            _shmem(static_cast<volatile daq_multi_cycle_data_t*>(shmem_open_segment(endpoint.c_str(), 21041152))),
+    ShMemReceiver(const std::string &endpoint, size_t shmem_size) :
+            _shmem(static_cast<volatile daq_multi_cycle_data_t*>(shmem_open_segment(endpoint.c_str(), shmem_size))),
             _prev_cycle(0xffffffff)
     {
     }
@@ -185,7 +185,8 @@ void *producer::frame_writer() {
         rcvr_stats.push_back(s);
     }
 
-    ShMemReceiver shmem_receiver(daqd.parameters().get("shmem_input", ""));
+    ShMemReceiver shmem_receiver(daqd.parameters().get("shmem_input", ""),
+                                 daqd.parameters().get<size_t>("shmem_size", 21041152));
 
 
     sleep(1);
@@ -281,35 +282,51 @@ void *producer::frame_writer() {
             frac = data_block->zmqheader[0].timeNSec;
 
             {
-                size_t offset = 0;
-                char *_data = &(data_block->zmqDataBlock[0]);
-                for (int kk = 0; kk < data_block->dcuTotalModels; kk++)
+                for (int i = 0; i < data_block->dcuTotalModels; ++i)
                 {
-                    if (data_block->zmqheader[kk].dcuId != 21)
-                    {
-                        offset += data_block->zmqheader[kk].dataBlockSize;
-                        _data += data_block->zmqheader[kk].dataBlockSize;
-                        continue;
-                    }
-                    int errors = 0;
-                    int *int_data = reinterpret_cast<int*>(_data);
-                    for (int jj = 0; jj < 64; ++jj)
-                    {
-                        if (int_data[jj] != static_cast<int>(gps))
-                            ++errors;
-                    }
-                    if (errors > 0)
-                    {
-                        std::cerr << "@@@@@@@@@@@@ data is wrong err cnt " << errors << " offsets " << offset << std::endl;
-                    }
-                    break;
+                    if (data_block->zmqheader[i].dataBlockSize == 0)
+                        std::cerr << "block " << i << " has 0 bytes" << std::endl;
                 }
             }
+
+//            {
+//                size_t offset = 0;
+//                char *_data = &(data_block->zmqDataBlock[0]);
+//                for (int kk = 0; kk < data_block->dcuTotalModels; kk++)
+//                {
+//                    if (data_block->zmqheader[kk].dcuId != 21)
+//                    {
+//                        offset += data_block->zmqheader[kk].dataBlockSize;
+//                        _data += data_block->zmqheader[kk].dataBlockSize;
+//                        continue;
+//                    }
+//                    int errors = 0;
+//                    int *int_data = reinterpret_cast<int*>(_data);
+//                    for (int jj = 0; jj < 64; ++jj)
+//                    {
+//                        if (int_data[jj] != static_cast<int>(gps))
+//                            ++errors;
+//                    }
+//                    if (errors > 0)
+//                    {
+//                        std::cerr << "@@@@@@@@@@@@ data is wrong err cnt " << errors << " offsets " << offset << std::endl;
+//                    }
+//                    break;
+//                }
+//            }
 
             bool new_sec = (i % 16) == 0;
             bool is_good = false;
             if (new_sec) {
                 is_good = (gps == prev_gps + 1 && frac == 0);
+                for (int i = 0; i < data_block->dcuTotalModels; ++i)
+                {
+                    int dcuid = data_block->zmqheader[i].dcuId;
+                    gds_tp_table[0][dcuid].count = data_block->zmqheader[i].tpCount;
+                    std::copy(&data_block->zmqheader[i].tpNum[0],
+                              &data_block->zmqheader[i].tpNum[256],
+                              &gds_tp_table[0][dcuid].tpNum[0]);
+                }
             } else {
                 const unsigned int step = 1000000000/16;
                 is_good = (gps == prev_gps && ((frac == prev_frac + 1) || (frac == prev_frac + step)));
@@ -329,7 +346,8 @@ void *producer::frame_writer() {
                 unsigned int cur_dcuid = data_block->zmqheader[cur_block].dcuId;
                 dcu_to_zmq_lookup[cur_dcuid] = cur_block;
                 dcu_data_from_zmq[cur_dcuid] = cur_dcu_zmq_ptr;
-                cur_dcu_zmq_ptr += data_block->zmqheader[cur_block].dataBlockSize;
+                cur_dcu_zmq_ptr += data_block->zmqheader[cur_block].dataBlockSize +
+                                   data_block->zmqheader[cur_block].tpBlockSize;
             }
         }
 
@@ -359,26 +377,29 @@ void *producer::frame_writer() {
                 // Get the data from the buffers returned by the zmq receiver
                 int zmq_index = dcu_to_zmq_lookup[j];
                 daq_msg_header_t& cur_dcu = data_block->zmqheader[zmq_index];
+                if (read_size != cur_dcu.dataBlockSize) {
+                    std::cerr << "read_size = " << read_size << " cur dcu size " << cur_dcu.dataBlockSize << std::endl;
+                }
                 assert(read_size == cur_dcu.dataBlockSize);
                 memcpy((void *)read_dest,
                        dcu_data_from_zmq[j],
                        cur_dcu.dataBlockSize);
 
-                std::cout << "is zmq dcu number " << zmq_index << std::endl;
+//                std::cout << "is zmq dcu number " << zmq_index << std::endl;
 
-                if (j == 21)
-                {
-                    int block_time = static_cast<int>(data_block->zmqheader[zmq_index].timeSec);
-                    int data_error = 0;
-                    for (int k = 0; k < 64; ++k)
-                    {
-                        if (((int*)read_dest)[k] != block_time)
-                            data_error++;
-                    }
-                    if (data_error > 0) {
-                        std::cerr << "!!!!!!!!!!!! invalid data found in test " << data_error << " times at " << block_time << std::endl;
-                    }
-                }
+//                if (j == 21)
+//                {
+//                    int block_time = static_cast<int>(data_block->zmqheader[zmq_index].timeSec);
+//                    int data_error = 0;
+//                    for (int k = 0; k < 64; ++k)
+//                    {
+//                        if (((int*)read_dest)[k] != block_time)
+//                            data_error++;
+//                    }
+//                    if (data_error > 0) {
+//                        std::cerr << "!!!!!!!!!!!! invalid data found in test " << data_error << " times at " << block_time << std::endl;
+//                    }
+//                }
 
                 int cblk1 = (i + 1) % DAQ_NUM_DATA_BLOCKS;
                 static const int ifo = 0; // For now

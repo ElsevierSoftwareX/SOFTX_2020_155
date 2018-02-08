@@ -156,6 +156,8 @@ namespace zmq_dc {
         for (int ii = 0; ii < _nsys; ii++) {
             int cur_sys_dcu_count = _mxDataBlockG[ii][_loop].dcuTotalModels;
             // printf("\tModel %d = %d\n",ii,cur_sys_dcu_count);
+            char* mbuffer = (char*) &_mxDataBlockG[ii][_loop].zmqDataBlock[0];
+
             for (int jj = 0; jj < cur_sys_dcu_count; jj++) {
                 // Copy data header information
                 _mxDataBlockFull[_loop].zmqheader[mytotaldcu].dcuId = _mxDataBlockG[ii][_loop].zmqheader[jj].dcuId;
@@ -175,12 +177,24 @@ namespace zmq_dc {
                 //    printf("\t\tdcuid = %d ; data size= %d\n", cur_dcuid, mydbs);
 
                 _mxDataBlockFull[_loop].zmqheader[mytotaldcu].dataBlockSize = mydbs;
-                char *mbuffer = (char *) &_mxDataBlockG[ii][_loop].zmqDataBlock[0];
+
+                int mytpbs = _mxDataBlockG[ii][_loop].zmqheader[jj].tpBlockSize;
+                int used_tpbs = mytpbs;
+                _mxDataBlockFull[_loop].zmqheader[mytotaldcu].tpBlockSize = mytpbs;
+                _mxDataBlockFull[_loop].zmqheader[mytotaldcu].tpCount = _mxDataBlockG[ii][_loop].zmqheader[jj].tpCount;
+                {
+                    unsigned int *tp_table = &_mxDataBlockG[ii][_loop].zmqheader[jj].tpNum[0];
+                    unsigned int *tp_dest = &_mxDataBlockFull[_loop].zmqheader[mytotaldcu].tpNum[0];
+                    std::copy(tp_table, tp_table + DAQ_GDS_MAX_TP_NUM, tp_dest);
+                }
+
                 // Copy data to DC buffer
-                memcpy(zbuffer, mbuffer, mydbs);
+                memcpy(zbuffer, mbuffer, mydbs + used_tpbs);
                 // Increment DC data buffer pointer for next data set
-                zbuffer += mydbs;
-                dc_datablock_size += mydbs;
+                zbuffer += mydbs + used_tpbs;
+                dc_datablock_size += mydbs + used_tpbs;
+                // increment mbuffer by the source tp size not the used tp size
+                mbuffer += mydbs + mytpbs;
                 mytotaldcu++;
             }
         }

@@ -58,7 +58,7 @@ LEX=flex -+
 YACC=@YACC@ -o y.tab.c
 YFLAGS=-d
 
-SRCS= archive.cc profiler.cc gds.cc filesys.cc epics_pvs.cc @PRODUCER_CC@ trend.cc  net_writer.cc daqd.cc circ.cc comm.y comm-lex.l framesend.cc gdsmutex.cc edcu.cc @EPICS_SRCS@ @MYRINET_SRCS@ @MX_SRCS@ framerecv.cc listener.cc
+SRCS= archive.cc profiler.cc gds.cc filesys.cc epics_pvs.cc comm_impl.cc @PRODUCER_CC@ trend.cc  net_writer.cc daqd.cc circ.cc comm.y comm-lex.l framesend.cc gdsmutex.cc edcu.cc @EPICS_SRCS@ @MYRINET_SRCS@ @MX_SRCS@ framerecv.cc listener.cc
 
 EPICS_SRCS=epicsServer.cc exServer.cc exPV.cc exScalarPV.cc exVectorPV.cc exChannel.cc
 EPICS_OBJS=epicsServer.o exServer.o exPV.o exScalarPV.o exVectorPV.o exChannel.o
