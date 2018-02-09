@@ -58,7 +58,7 @@ namespace zmq_dc {
     class ZMQDCReceiver {
         friend class receiver_thread_info;
 
-        static const int header_size = DAQ_ZMQ_HEADER_SIZE;
+        static const int header_size = sizeof(daq_multi_dcu_header_t);
 
         zmq::context_t _context;
         std::array<std::atomic<unsigned int>, 16> _tstatus;

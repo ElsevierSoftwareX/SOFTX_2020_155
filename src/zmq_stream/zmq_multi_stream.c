@@ -35,14 +35,14 @@ unsigned int wait_delay = 1; // Wait before acknowledging sends with mx_wait() f
 extern void *findSharedMemory(char *);
 static volatile int keepRunning = 1;
 
-static struct rmIpcStr *shmIpcPtr[DAQ_ZMQ_MAX_DCU ];
-static char *shmDataPtr[DAQ_ZMQ_MAX_DCU ];
-static struct cdsDaqNetGdsTpNum *shmTpTable[DAQ_ZMQ_MAX_DCU ];
+static struct rmIpcStr *shmIpcPtr[DAQ_TRANSIT_MAX_DCU ];
+static char *shmDataPtr[DAQ_TRANSIT_MAX_DCU ];
+static struct cdsDaqNetGdsTpNum *shmTpTable[DAQ_TRANSIT_MAX_DCU ];
 static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
 // static const int header_size = sizeof(struct rmIpcStr) + sizeof(struct cdsDaqNetGdsTpNum);
-static const int header_size = DAQ_ZMQ_HEADER_SIZE;
-char modelnames[DAQ_ZMQ_MAX_DCU][64];
-int modelrates[DAQ_ZMQ_MAX_DCU];
+static const int header_size = sizeof(daq_multi_dcu_header_t);
+char modelnames[DAQ_TRANSIT_MAX_DCU][64];
+int modelrates[DAQ_TRANSIT_MAX_DCU];
 
 
 void intHandler(int dummy) {
@@ -256,7 +256,7 @@ main(int argc, char **argv)
 	char *gds_tp_dir = 0;
 
 
-    for (ii = 0; ii < DAQ_ZMQ_MAX_DCU; ++ii) {
+    for (ii = 0; ii < DAQ_TRANSIT_MAX_DCU; ++ii) {
         modelnames[ii][0] = '\0';
         modelrates[ii] = 0;
     }

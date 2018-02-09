@@ -224,8 +224,8 @@ main(int argc, char **argv)
 	int mytotaldcu = 0;
 	char *zbuffer;
 	int dc_datablock_size = 0;
-	char buffer[DAQ_ZMQ_DC_DATA_BLOCK_SIZE];
-	static const int header_size = DAQ_ZMQ_HEADER_SIZE;
+	char buffer[DAQ_TRANSIT_DC_DATA_BLOCK_SIZE];
+	static const int header_size = sizeof(daq_multi_dcu_header_t);
 	int sendLength = 0;
 	int msg_size = 0;
 	char dcstatus[2024];

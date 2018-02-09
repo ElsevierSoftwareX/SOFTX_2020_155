@@ -51,7 +51,7 @@ main(int argc, char **argv)
 
 	char *sysname;
 	int c;
-	static const int header_size = DAQ_ZMQ_HEADER_SIZE;
+	static const int header_size = sizeof(daq_multi_dcu_header_t);
 
 	extern char *optarg;
 

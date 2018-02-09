@@ -174,7 +174,7 @@ main(int argc, char **argv)
     int c;
     bool timing_check = false;
     int timing_offset = 0;
-    size_t max_data_size = (DAQ_ZMQ_DC_DATA_BLOCK_SIZE*DAQ_NUM_DATA_BLOCKS_PER_SECOND);
+    size_t max_data_size = (DAQ_TRANSIT_DC_DATA_BLOCK_SIZE*DAQ_NUM_DATA_BLOCKS_PER_SECOND);
     std::string dest_buffer_name = "ifo";
 
     // Create DAQ message area in local memory

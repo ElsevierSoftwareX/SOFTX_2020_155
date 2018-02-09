@@ -1,14 +1,9 @@
-#ifndef ZMQ_DAQ_CORE_H
-#define ZMQ_DAQ_CORE_H
+#ifndef DAQ_GENERAL_TRANSIT_CORE_H
+#define DAQ_GENERAL_TRANSIT_CORE_H
 
 /*
- * This is split out from zmq_daq.h as zmq_daq.h contains its own
- * channel_t definition which conflicts with the daqd channel_t
- * structures.
- *
- * So move the core parts needed for data transmission out to allow
- * a data concentrator to be built which does not care about the
- * zmq_daqd.h channel_t types.
+ * This file defines the core structures and definitions needed for the
+ * general network agnostic movement of data between the FE and the daqd.
  */
 
 #define DAQ_NUM_DATA_BLOCKS     16
@@ -22,14 +17,14 @@
 #define MMAP_SIZE 1024*1024*64-5000
 
 //
-#define DAQ_ZMQ_MAX_DC_BYTE_SEC		0x6000000  	// 100MB per sec
-#define DAQ_ZMQ_MAX_FE_BYTE_SEC		0x1000000  	// 100MB per sec
-#define DAQ_ZMQ_DC_DATA_BLOCK_SIZE   	(DAQ_ZMQ_MAX_DC_BYTE_SEC/DAQ_NUM_DATA_BLOCKS)
-#define DAQ_ZMQ_FE_DATA_BLOCK_SIZE   	(DAQ_ZMQ_MAX_FE_BYTE_SEC/DAQ_NUM_DATA_BLOCKS)
+#define DAQ_TRANSIT_MAX_DC_BYTE_SEC		0x6000000  	// 100MB per sec
+#define DAQ_TRANSIT_MAX_FE_BYTE_SEC		0x1000000  	// 100MB per sec
+#define DAQ_TRANSIT_DC_DATA_BLOCK_SIZE   	(DAQ_TRANSIT_MAX_DC_BYTE_SEC/DAQ_NUM_DATA_BLOCKS)
+#define DAQ_TRANSIT_FE_DATA_BLOCK_SIZE   	(DAQ_TRANSIT_MAX_FE_BYTE_SEC/DAQ_NUM_DATA_BLOCKS)
 #define DAQ_DATA_PORT		5555
 #define DAQ_GDS_DATA_PORT	5556
 #define DAQ_PROXY_PORT		5557
-#define DAQ_ZMQ_MAX_DCU		128
+#define DAQ_TRANSIT_MAX_DCU		128
 
 
 //
@@ -52,19 +47,19 @@ typedef struct daq_msg_header_t {
 typedef struct daq_multi_dcu_header_t {
     int dcuTotalModels;                                 // Number of models
     int dataBlockSize;                                  // Number of bytes actually used in the data block
-    daq_msg_header_t dcuheader[DAQ_ZMQ_MAX_DCU];
+    daq_msg_header_t dcuheader[DAQ_TRANSIT_MAX_DCU];
 } daq_multi_dcu_header_t;
 
 // DAQ FE Data Transmission Structure
 typedef struct daq_multi_dcu_data_t {
     daq_multi_dcu_header_t header;
-    char dataBlock[DAQ_ZMQ_FE_DATA_BLOCK_SIZE];
+    char dataBlock[DAQ_TRANSIT_FE_DATA_BLOCK_SIZE];
 }daq_multi_dcu_data_t;
 
 // DAQ DC Data Transmission Structure
 typedef struct daq_dc_data_t {
     daq_multi_dcu_header_t header;
-    char dataBlock[DAQ_ZMQ_DC_DATA_BLOCK_SIZE];
+    char dataBlock[DAQ_TRANSIT_DC_DATA_BLOCK_SIZE];
 }daq_dc_data_t;
 
 typedef struct daq_multi_cycle_header_t {
@@ -78,9 +73,7 @@ typedef struct daq_multi_cycle_header_t {
 // Data structure to support multiple cycles of multiple dcus
 typedef struct daq_multi_cycle_data_t {
     daq_multi_cycle_header_t header;
-    char dataBlock[DAQ_ZMQ_DC_DATA_BLOCK_SIZE*DAQ_NUM_DATA_BLOCKS_PER_SECOND];
+    char dataBlock[DAQ_TRANSIT_DC_DATA_BLOCK_SIZE*DAQ_NUM_DATA_BLOCKS_PER_SECOND];
 }daq_multi_cycle_data_t;
 
-#define DAQ_ZMQ_HEADER_SIZE	(sizeof(daq_msg_header_t) * DAQ_ZMQ_MAX_DCU + sizeof(int))
-
-#endif /* ZMQ_DAQ_CORE_H */
+#endif /* DAQ_GENERAL_TRANSIT_CORE_H */
