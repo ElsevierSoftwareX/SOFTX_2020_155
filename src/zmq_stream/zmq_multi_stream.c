@@ -71,7 +71,6 @@ int getmodelrate( char *modelname, char *gds_tp_dir) {
     FILE *f = 0;
     char *token = 0;
     char *search = "=";
-    char tmp[256];
     char line[80];
 	char *s = 0;
 	char *s1 = 0;

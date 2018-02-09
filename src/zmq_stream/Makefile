@@ -22,7 +22,7 @@ zmq_proxy_client: zmq_proxy_client.o
 rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-CFLAGS = -I${prefix}/include -I.
+CFLAGS = -I${prefix}/include -I. -I../include
 CFLAGS += -Wall -g -O2 -std=gnu99 -lpthread
 CFLAGS += $(OPTIM_CFLAGS)
 
