@@ -688,7 +688,7 @@ udelay(1000);
 	  rdtscl(clk);
 	  clk += cpc;
 #ifdef NO_CPU_SHUTDOWN
-	usleep_range(8,12);
+	if((cycleNum % 16) == 0) usleep_range(2,4);
 #else
 	  for(;;) {
 	  	rdtscl(clk1);
@@ -756,7 +756,7 @@ udelay(1000);
 	  cycle_gps_time = timeSec;
 	}
 #ifdef NO_CPU_SHUTDOWN
-		    if(vmeDone)usleep_range(2,4);
+        usleep_range(2,4);
 #endif
         for(ll=0;ll<sampleCount;ll++)
         {
@@ -1496,7 +1496,7 @@ udelay(1000);
 /// code must set a proper FIFO size in map.c code.
 // This code runs once per second.
 #ifndef NO_DAC_PRELOAD
-       	if (cycleNum >= HKP_DAC_FIFO_CHK && cycleNum < (HKP_DAC_FIFO_CHK + cdsPciModules.dacCount) && !dacTimingError) 
+       	if (cycleNum >= HKP_DAC_FIFO_CHK && cycleNum < (HKP_DAC_FIFO_CHK + cdsPciModules.dacCount)) 
 	{
 		jj = cycleNum - HKP_DAC_FIFO_CHK;
 		if(cdsPciModules.dacType[jj] == GSC_18AO8)
@@ -1504,14 +1504,16 @@ udelay(1000);
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 			out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
 			dacOutBufSize[jj] = out_buf_size;
-			if((out_buf_size < 8) || (out_buf_size > 24))
-			{
-			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
-			    if(dacTimingErrorPending[jj]) dacTimingError = 1;
-  			    dacTimingErrorPending[jj] = 1;
-			} else {
-			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
-  			    dacTimingErrorPending[jj] = 0;
+			if(!dacTimingError) {
+				if((out_buf_size < 8) || (out_buf_size > 24))
+				{
+				    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
+				    if(dacTimingErrorPending[jj]) dacTimingError = 1;
+				    dacTimingErrorPending[jj] = 1;
+				} else {
+				    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
+				    dacTimingErrorPending[jj] = 0;
+				}
 			}
 			if(out_buf_size < 4) {
 			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_EMPTY;
@@ -1529,14 +1531,16 @@ udelay(1000);
 		{
 			status = gsc16ao16CheckDacBuffer(jj);
 			dacOutBufSize[jj] = status;
-			if(status != 2)
-			{
-			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
-			    if(dacTimingErrorPending[jj]) dacTimingError = 1;
-  			    dacTimingErrorPending[jj] = 1;
-			} else {
-			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
-  			    dacTimingErrorPending[jj] = 0;
+			if(!dacTimingError) {
+				if(status != 2)
+				{
+				    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
+				    if(dacTimingErrorPending[jj]) dacTimingError = 1;
+				    dacTimingErrorPending[jj] = 1;
+				} else {
+				    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
+				    dacTimingErrorPending[jj] = 0;
+				}
 			}
 			if(status & 1) {
 			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_EMPTY;
