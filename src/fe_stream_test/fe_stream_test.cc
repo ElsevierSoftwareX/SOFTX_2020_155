@@ -13,7 +13,7 @@
 #include <unistd.h>
 
 #include "../include/daqmap.h"
-#include "../zmq_stream/zmq_daq_core.h"
+#include "../zmq_stream/daq_core.h"
 
 #include "fe_stream_generator.hh"
 

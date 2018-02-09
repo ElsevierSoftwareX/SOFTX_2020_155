@@ -59,7 +59,7 @@ using namespace std;
 #include "conv.hh"
 #include "circ.h"
 #include "drv/shmem.h"
-#include "zmq_daq_core.h"
+#include "daq_core.h"
 
 extern daqd_c daqd;
 extern int shutdown_server();

@@ -1,7 +1,7 @@
 #ifndef ZMQ_DAQ_H
 #define ZMQ_DAQ_H
 
-#include "zmq_daq_core.h"
+#include "daq_core.h"
 
 typedef struct channel_t {
 	char name[64];

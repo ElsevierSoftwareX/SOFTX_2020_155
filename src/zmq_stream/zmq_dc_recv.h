@@ -10,7 +10,7 @@
 
 #include <zmq.hpp>
 
-#include "zmq_daq_core.h"
+#include "daq_core.h"
 
 namespace zmq_dc {
     class ZMQDCReceiver;
