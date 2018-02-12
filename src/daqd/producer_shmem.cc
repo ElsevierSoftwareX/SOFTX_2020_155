@@ -365,6 +365,7 @@ void *producer::frame_writer() {
                 memcpy((void*)(read_dest + cur_dcu.dataBlockSize),
                        (void*)(((char*)dcu_data_from_zmq[j]) + cur_dcu.dataBlockSize),
                        tp_size);
+                int tp_off = reinterpret_cast<char*>(move_buf) - reinterpret_cast<char*>(read_dest) + cur_dcu.dataBlockSize;
 
 //                std::cout << "is zmq dcu number " << zmq_index << std::endl;
 
@@ -550,7 +551,7 @@ void *producer::frame_writer() {
                     // FIXME: is this right? Why 2* DAQ_DCU_BLOCK_SIZE?
                     read_dest += 2 * DAQ_DCU_BLOCK_SIZE;
                 } else {
-                    read_dest += cur_dcu.dataBlockSize;
+                    read_dest += 2 * DAQ_DCU_BLOCK_SIZE; // cur_dcu.dataBlockSize;
                 }
 
             }
