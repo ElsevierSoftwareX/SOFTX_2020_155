@@ -350,6 +350,8 @@ int main(int argc, char *argv[]) {
             else
             {
                 data_cur = tp_generators[index-1]->generate(transmit_time.sec, transmit_time.nanosec, (char*)data_cur);
+                if (verbose && cycle == 0)
+                    std::cout << "tp " << index << ") " << tp_generators[index-1]->full_channel_name() << std::endl;
             }
             if (data_cur > data_end)
                 throw std::range_error("Generator exceeded its output boundary");

@@ -124,7 +124,8 @@ public:
 
         char* start = const_cast<char*>(&_shmem->dataBlock[0]);
         start += cur_cycle * cycle_stride;
-        memcpy(&_data, start, cycle_stride);
+        size_t copy_size = sizeof(daq_multi_dcu_header_t) + reinterpret_cast<daq_multi_dcu_header_t*>(start)->dataBlockSize;
+        memcpy(&_data, start, copy_size);
 
         std::cerr << "shmem_recv - c " << cur_cycle << " p " << _prev_cycle << std::endl;
 
@@ -289,32 +290,6 @@ void *producer::frame_writer() {
                 }
             }
 
-//            {
-//                size_t offset = 0;
-//                char *_data = &(data_block->dataBlock[0]);
-//                for (int kk = 0; kk < data_block->header.dcuTotalModels; kk++)
-//                {
-//                    if (data_block->header.dcuheader[kk].dcuId != 21)
-//                    {
-//                        offset += data_block->header.dcuheader[kk].dataBlockSize;
-//                        _data += data_block->header.dcuheader[kk].dataBlockSize;
-//                        continue;
-//                    }
-//                    int errors = 0;
-//                    int *int_data = reinterpret_cast<int*>(_data);
-//                    for (int jj = 0; jj < 64; ++jj)
-//                    {
-//                        if (int_data[jj] != static_cast<int>(gps))
-//                            ++errors;
-//                    }
-//                    if (errors > 0)
-//                    {
-//                        std::cerr << "@@@@@@@@@@@@ data is wrong err cnt " << errors << " offsets " << offset << std::endl;
-//                    }
-//                    break;
-//                }
-//            }
-
             bool new_sec = (i % 16) == 0;
             bool is_good = false;
             if (new_sec) {
@@ -380,10 +355,16 @@ void *producer::frame_writer() {
                 if (read_size != cur_dcu.dataBlockSize) {
                     std::cerr << "read_size = " << read_size << " cur dcu size " << cur_dcu.dataBlockSize << std::endl;
                 }
-                assert(read_size == cur_dcu.dataBlockSize);
+                //assert(read_size == cur_dcu.dataBlockSize);
                 memcpy((void *)read_dest,
                        dcu_data_from_zmq[j],
                        cur_dcu.dataBlockSize);
+                // copy test points over
+                int max_tp_size = 2 * DAQ_DCU_BLOCK_SIZE - cur_dcu.dataBlockSize;
+                int tp_size = (cur_dcu.tpBlockSize <= max_tp_size ? cur_dcu.tpBlockSize : max_tp_size);
+                memcpy((void*)(read_dest + cur_dcu.dataBlockSize),
+                       (void*)(((char*)dcu_data_from_zmq[j]) + cur_dcu.dataBlockSize),
+                       tp_size);
 
 //                std::cout << "is zmq dcu number " << zmq_index << std::endl;
 
