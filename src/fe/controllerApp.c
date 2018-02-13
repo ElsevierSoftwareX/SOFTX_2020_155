@@ -128,38 +128,20 @@ unsigned int timeSecDiag = 0;
 /* 1 - error occured on shmem; 2 - RFM; 3 - Dolphin */
 unsigned int ipcErrBits = 0;
 int adcTime;			///< Used in code cycle timing
-int adcHoldTime;		///< Stores time between code cycles
-int adcHoldTimeMax;		///< Stores time between code cycles
-int adcHoldTimeEverMax;		///< Maximum cycle time recorded
-int adcHoldTimeEverMaxWhen;
-int cpuTimeEverMax;		///< Maximum code cycle time recorded
-int cpuTimeEverMaxWhen;
-int startGpsTime;
-int adcHoldTimeMin;
-int adcHoldTimeAvg;
+int adcHoldTime = 0;		///< Stores time between code cycles
+int adcHoldTimeMax = 0;		///< Stores time between code cycles
+int startGpsTime = 0;
+int adcHoldTimeMin = 0xffff;
+int adcHoldTimeAvg = 0;
 int adcHoldTimeAvgPerSec;
 int usrTime;			///< Time spent in user app code
-int usrHoldTime;		///< Max time spent in user app code
+int usrHoldTime = 0;		///< Max time spent in user app code
 int cardCountErr = 0;
 int cycleTime;			///< Current cycle time
 int timeHold = 0;			///< Max code cycle time within 1 sec period
 int timeHoldHold = 0;			///< Max code cycle time within 1 sec period; hold for another sec
 int timeHoldWhen= 0;			///< Cycle number within last second when maximum reached; running
 int timeHoldWhenHold = 0;		///< Cycle number within last second when maximum reached
-
-// The following are for timing histograms written to /proc files
-#if defined(SERVO64K) || defined(SERVO32K)
-unsigned int cycleHist[32];
-unsigned int cycleHistMax[32];
-unsigned int cycleHistWhen[32];
-unsigned int cycleHistWhenHold[32];
-#elif defined(SERVO16K)
-unsigned int cycleHist[64];
-unsigned int cycleHistMax[64];
-unsigned int cycleHistWhen[64];
-unsigned int cycleHistWhenHold[64];
-#endif
-
 
 struct rmIpcStr *daqPtr;
 
@@ -215,12 +197,9 @@ void deallocate_dac_channels(void) {
 ///	- 
 void *fe_start(void *arg)
 {
-  int longestWrite2 = 0;
-  int tempClock[4];
   int ii,jj,kk,ll,mm;			// Dummy loop counter variables
   static int clock1Min = 0;		///  @param clockMin Minute counter (Not Used??)
   static int cpuClock[CPU_TIMER_CNT];	///  @param cpuClock[] Code timing diag variables
-  static int chanHop = 0;		/// @param chanHop Adc channel hopping status
 
   int adcData[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];	/// @param adcData[][]  ADC raw data
   int adcChanErr[MAX_ADC_MODULES];
@@ -249,12 +228,10 @@ void *fe_start(void *arg)
   int onePpsTimeTest[10];		/// @param onePpsTimeTest[] One PPS diagnostic check
 #endif
   int dcuId;				/// @param dcuId DAQ ID number for this process
-  static int missedCycle = 0;		/// @param missedCycle Incremented error counter when too many values in ADC FIFO
   int diagWord = 0;			/// @param diagWord Code diagnostic bit pattern returned to EPICS
   int system = 0;
   int sampleCount = 1;			/// @param sampleCount Number of ADC samples to take per code cycle
-  int sync21pps = 0;			/// @param sync21pps Code startup sync to 1PPS flag
-  int syncSource = SYNC_SRC_NONE;	/// @param syncSource Code startup synchronization source
+  int syncSource = SYNC_SRC_MASTER;	/// @param syncSource Code startup synchronization source
   int mxStat = 0;			/// @param mxStat Net diags when myrinet express is used
   int mxDiag = 0;
   int mxDiagR = 0;
@@ -277,7 +254,6 @@ void *fe_start(void *arg)
 /// **********************************************************************************************\n
 /// Start Initialization Process \n
 /// **********************************************************************************************\n
-  memset (tempClock, 0, sizeof(tempClock));
 
   /// \> Flush L1 cache
   memset (fp, 0, 64*1024);
@@ -285,14 +261,6 @@ void *fe_start(void *arg)
   clflush_cache_range ((void *)fp, 64*1024);
 
   fz_daz(); /// \> Kill the denorms!
-
-// Set memory for cycle time history diagnostics
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
-  memset(cycleHist, 0, sizeof(cycleHist));
-  memset(cycleHistMax, 0, sizeof(cycleHistMax));
-  memset(cycleHistWhen, 0, sizeof(cycleHistWhen));
-  memset(cycleHistWhenHold, 0, sizeof(cycleHistWhenHold));
-#endif
 
   /// \> Init comms with EPICS processor */
   pEpicsComms = (RFM_FE_COMMS *)_epics_shm;
@@ -330,12 +298,6 @@ void *fe_start(void *arg)
   // Clear input masks
   pLocalEpics->epicsInput.burtRestore_mask = 0;
   pLocalEpics->epicsInput.dacDuoSet_mask = 0;
-
-/// \> Init code synchronization source.
-   // SLAVE processes get sync from ADC_MASTER
-   syncSource = SYNC_SRC_MASTER;
-
-printf("Sync source = %d\n",syncSource);
 
 
 /// \> Wait for BURT restore.\n
@@ -516,20 +478,7 @@ udelay(1000);
     }
   }
 
-  // Clear timing diags.
-  adcHoldTime = 0;
-  adcHoldTimeMax = 0;
-  adcHoldTimeEverMax = 0;	
-  adcHoldTimeEverMaxWhen = 0;	
-  cpuTimeEverMax = 0;		
-  cpuTimeEverMaxWhen = 0;	
-  startGpsTime = 0;
-  adcHoldTimeMin = 0xffff;	
-  adcHoldTimeAvg = 0;		
-  usrHoldTime = 0;		
-  missedCycle = 0;
-
-  /// \> If IOP,  Initialize the ADC modules
+  /// \> Initialize the ADC status
   for(jj=0;jj<cdsPciModules.adcCount;jj++)
   {
   	  pLocalEpics->epicsOutput.statAdc[jj] = 1;
@@ -559,8 +508,6 @@ udelay(1000);
         rdtscl(cpuClock[CPU_TIME_CYCLE_END]);
         cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
         printf("Synched %d\n",cycleTime);
-	// Need to set sync21pps so code will not try to sync with 1pps pulse later.
-	sync21pps=1;
 	// Get GPS seconds from MASTER
 	timeSec = ioMemData->gpsSecond;
         pLocalEpics->epicsOutput.timeDiag = timeSec;
@@ -811,12 +758,6 @@ udelay(1000);
           timeHold = 0;
 	  timeHoldWhenHold = timeHoldWhen;
 
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
-	  memcpy(cycleHistMax, cycleHist, sizeof(cycleHist));
-	  memset(cycleHist, 0, sizeof(cycleHist));
-	  memcpy(cycleHistWhenHold, cycleHistWhen, sizeof(cycleHistWhen));
-	  memset(cycleHistWhen, 0, sizeof(cycleHistWhen));
-#endif
 	  if (timeSec % 4 == 0) pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeMin;
 	  else if (timeSec % 4 == 1)
 		pLocalEpics->epicsOutput.adcWaitTime =  adcHoldTimeMax;
@@ -862,42 +803,19 @@ udelay(1000);
 	// here we are rounding up:
 	//   x/y rounded up equals (x + y - 1) / y
 	//
-	{ 
-		static const unsigned int mpc = (MAX_MODULES + (FE_RATE / 16) - 1) / (FE_RATE / 16); // Modules per cycle
-		unsigned int smpc = mpc * subcycle; // Start module counter
-		unsigned int empc = smpc + mpc; // End module counter
-		unsigned int i;
-		for (i = smpc; i < MAX_MODULES && i < empc ; i++) 
-			checkFiltReset(i, dspPtr[0], pDsp[0], &dspCoeff[0], MAX_MODULES, pCoeff[0]);
-	}
+	static const unsigned int mpc = (MAX_MODULES + (FE_RATE / 16) - 1) / (FE_RATE / 16); // Modules per cycle
+	unsigned int smpc = mpc * subcycle; // Start module counter
+	unsigned int empc = smpc + mpc; // End module counter
+	unsigned int i;
+	for (i = smpc; i < MAX_MODULES && i < empc ; i++) 
+		checkFiltReset(i, dspPtr[0], pDsp[0], &dspCoeff[0], MAX_MODULES, pCoeff[0]);
 
 	/// \> Check if code exit is requested
 	if(cycleNum == MAX_MODULES) 
 		vmeDone = stop_working_threads | checkEpicsReset(cycleNum, (struct CDS_EPICS *)pLocalEpics);
 
-	// If synced to 1PPS on startup, continue to check that code
-	// is still in sync with 1PPS.
-	// This is NOT normal aLIGO mode.
-	if(syncSource == SYNC_SRC_1PPS)
-	{
-
-		// Assign chan 32 to onePps 
-		onePps = adcData[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN];
-		if((onePps > ONE_PPS_THRESH) && (onePpsHi == 0))  
-		{
-			onePpsTime = cycleNum;
-			onePpsHi = 1;
-		}
-		if(onePps < ONE_PPS_THRESH) onePpsHi = 0;  
-
-		// Check if front end continues to be in sync with 1pps
-		// If not, set sync error flag
-		if(onePpsTime > 1) pLocalEpics->epicsOutput.timeErr |= TIME_ERR_1PPS;
-	}
-
 /// \> Cycle 10 to number of BIO cards:\n
- /// - ---- If User App, Read Dio cards once per second \n
- /// - ---- IOP does not handle binary I/O module traffic, as it can take too long
+ /// - ---- Read Dio cards once per second \n
 
 	if(cdsPciModules.doCount)
         // if((cycleNum < (HKP_READ_DIO + cdsPciModules.doCount)) && (cycleNum >= HKP_READ_DIO))
@@ -925,7 +843,7 @@ udelay(1000);
 	 		CDIO6464InputInput[ii] = contec6464ReadInputRegister(&cdsPciModules, kk);
 		}
         }
-/// \> If user app, write Dio cards only on change
+/// \> Write Dio cards only on change
         for(kk=0;kk < cdsPciModules.doCount;kk++)
         {
                 ii = cdsPciModules.doInstance[kk];
@@ -1072,17 +990,6 @@ udelay(1000);
 
 	    }
 	  }
-	  // If ADC channels not where they should be, we have no option but to exit
-	  // from the RT code ie loops would be working with wrong input data.
-	  if (chanHop) {
-	  	pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
-	         stop_working_threads = 1;
-	         vmeDone = 1;
-	         printf("Channel Hopping Detected on one or more ADC modules !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-	         printf("Check GDSTP screen ADC status bits to id affected ADC modules\n");
-	         printf("Code is exiting ..............\n");
-	 	 continue;    
-	  }
 	  for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	  {
 	    if(dacOF[jj]) 
@@ -1115,10 +1022,6 @@ udelay(1000);
 
 	/// \> Compute code cycle time diag information.
 	cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
-	if (longestWrite2 < ((tempClock[3]-tempClock[2])/CPURATE)) longestWrite2 = (tempClock[3]-tempClock[2])/CPURATE;
-	if (cycleTime > (1000000/CYCLE_PER_SECOND))  {
-		// printf("cycle %d time %d; adcWait %d; write1 %d; write2 %d; longest write2 %d\n", cycleNum, cycleTime, adcWait, (tempClock[1]-tempClock[0])/CPURATE, (tempClock[3]-tempClock[2])/CPURATE, longestWrite2);
-	}
 	// Hold the max cycle time over the last 1 second
 	if(cycleTime > timeHold) { 
 		timeHold = cycleTime;
@@ -1126,34 +1029,12 @@ udelay(1000);
 	}
 	// Hold the max cycle time since last diag reset
 	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
-// This produces cycle time histogram in /proc file
-	{
-#if defined(SERVO64K) || defined(SERVO32K)
-		static const int nb = 31;
-#elif defined(SERVO16K)
-		static const int nb = 63;
-#endif
-
-		cycleHist[cycleTime<nb?cycleTime:nb]++;
-		cycleHistWhen[cycleTime<nb?cycleTime:nb] = cycleNum;
-	}
-#endif
 	adcHoldTime = (cpuClock[CPU_TIME_CYCLE_START] - adcTime)/CPURATE;
 	// Avoid calculating the max hold time for the first few seconds
 	if (cycleNum != 0 && (startGpsTime+3) < cycle_gps_time) {
 		if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
 		if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
 		adcHoldTimeAvg += adcHoldTime;
-		if (adcHoldTimeMax > adcHoldTimeEverMax)  {
-			adcHoldTimeEverMax = adcHoldTimeMax;
-			adcHoldTimeEverMaxWhen = cycle_gps_time;
-			//printf("Maximum adc hold time %d on cycle %d gps %d\n", adcHoldTimeMax, cycleNum, cycle_gps_time);
-		}
-		if (timeHoldMax > cpuTimeEverMax)  {
-			cpuTimeEverMax = timeHoldMax;
-			cpuTimeEverMaxWhen = cycle_gps_time;
-		}
 	}
 	adcTime = cpuClock[CPU_TIME_CYCLE_START];
 	// Calc the max time of one cycle of the user code
