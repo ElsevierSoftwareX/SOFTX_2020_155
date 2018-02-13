@@ -11,7 +11,7 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-///	@file controller.c
+///	@file controllerIop.c
 ///	@brief Main scheduler program for compiled real-time kernal object. \n
 /// 	@detail More information can be found in the following DCC document:
 ///<	<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">T0900607 CDS RT Sequencer Software</a>
@@ -756,7 +756,7 @@ udelay(1000);
 	  cycle_gps_time = timeSec;
 	}
 #ifdef NO_CPU_SHUTDOWN
-        usleep_range(2,4);
+	if((cycleNum % 2048) == 0) usleep_range(2,4);
 #endif
         for(ll=0;ll<sampleCount;ll++)
         {
