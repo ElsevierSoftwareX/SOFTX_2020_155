@@ -179,9 +179,6 @@ int cpuId = 1;
 	#define MX_OK	3
 #endif
 
-// Whether run on internal timer (when no ADC cards found)
-int run_on_timer = 0;
-
 // Initial diag reset flag
 int initialDiagReset = 1;
 
@@ -597,46 +594,6 @@ udelay(1000);
 #else
   while(!vmeDone){ 	// Run forever until user hits reset
 #endif
-  	if (run_on_timer) {  // NO ADC present, so run on CPU realtime clock
-	  // Pause until next cycle begins
-	  if (cycleNum == 0) {
-	    	//printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
-	  	pLocalEpics->epicsOutput.awgStat = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
-	  }
-	  // This is local CPU timer (no ADCs)
-	  // advance to the next cycle polling CPU cycles and microsleeping
-	  rdtscl(clk);
-	  clk += cpc;
-#ifdef NO_CPU_SHUTDOWN
-	usleep_range(8,12);
-#else
-	  for(;;) {
-	  	rdtscl(clk1);
-		if (clk1 >= clk) break;
-		udelay(1);
-	  }
-#endif
-	    ioMemCntr = (cycleNum % IO_MEMORY_SLOTS);
-	    for(ii=0;ii<IO_MEMORY_SLOT_VALS;ii++)
-	    {
-		ioMemData->iodata[0][ioMemCntr].data[ii] = cycleNum/4;
-		ioMemData->iodata[1][ioMemCntr].data[ii] = cycleNum/4;
-	    }
-	    // Write GPS time and cycle count as indicator to slave that adc data is ready
-	    ioMemData->gpsSecond = timeSec;
-	    ioMemData->iodata[0][ioMemCntr].timeSec = timeSec;;
-	    ioMemData->iodata[1][ioMemCntr].timeSec = timeSec;;
-	    ioMemData->iodata[0][ioMemCntr].cycle = cycleNum;
-	    ioMemData->iodata[1][ioMemCntr].cycle = cycleNum;
-	  rdtscl(cpuClock[CPU_TIME_CYCLE_START]);
-
-         if(cycleNum == 0) {
-
-	  // Increment GPS second on cycle 0
-          timeSec ++;
-          pLocalEpics->epicsOutput.timeDiag = timeSec;
-	  }
-	} else {
 	// **********************************************************************************************************
 	// NORMAL OPERATION -- Wait for ADC data ready
 	// On startup, only want to read one sample such that first cycle
@@ -646,7 +603,7 @@ udelay(1000);
 	// **********************************************************************************************************
 
 /// \> On 1PPS mark \n
-       if(cycleNum == 0)
+        if(cycleNum == 0)
         {
 	  /// - ---- Check awgtpman status.
 	  //printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
@@ -657,25 +614,20 @@ udelay(1000);
 
 	}
 #ifdef NO_CPU_SHUTDOWN
-		    if(vmeDone)usleep_range(2,4);
+        if(vmeDone)usleep_range(2,4);
 #endif
         for(ll=0;ll<sampleCount;ll++)
         {
-
-/// IF USER APP  *************************** \n
 		/// \> SLAVE gets its adc data from MASTER via ipc shared memory\n
 		/// \> For each ADC defined:
-               for(jj=0;jj<cdsPciModules.adcCount;jj++)
+		for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		{
         		mm = cdsPciModules.adcConfig[jj];
-                        kk = 0;
-		    		rdtscl(cpuClock[CPU_TIME_RDY_ADC]);
+	    		rdtscl(cpuClock[CPU_TIME_RDY_ADC]);
 			/// - ---- Wait for proper timestamp in shared memory, indicating data ready.
                         do{
-                                // usleep(1);
 		    		rdtscl(cpuClock[CPU_TIME_ADC_WAIT]);
 				adcWait = (cpuClock[CPU_TIME_ADC_WAIT] - cpuClock[CPU_TIME_RDY_ADC])/CPURATE;
-                                // kk++;
                         }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (adcWait < MAX_ADC_WAIT_SLAVE));
 			timeSec = ioMemData->iodata[mm][ioMemCntr].timeSec;
 			if (cycle_gps_time == 0) {
@@ -704,11 +656,7 @@ udelay(1000);
 #ifdef OVERSAMPLE
 				/// - ---- Downsample ADC data from 64K to rate of user application
 				if (dWordUsed[jj][ii]) {
-#ifdef CORE_BIQUAD
 					dWord[jj][ii] = iir_filter_biquad(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
-#else
-					dWord[jj][ii] = iir_filter(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
-#endif
 				}
 			/// - ---- Check for ADC data over/under range
 			if((adcData[jj][ii] > limit) || (adcData[jj][ii] < -limit))
@@ -720,7 +668,6 @@ udelay(1000);
 				odcStateWord |= ODC_ADC_OVF;
 			  }
 #endif
-                                // No filter  dWord[kk][ll] = adcData[kk][ll];
                         }
                 }
 		/// \> Set counters for next read from ipc memory
@@ -732,7 +679,6 @@ udelay(1000);
 
 	// After first synced ADC read, must set to code to read number samples/cycle
         sampleCount = OVERSAMPLE_TIMES;
-	}
 /// End of ADC Read **************************************************************************************
 
 

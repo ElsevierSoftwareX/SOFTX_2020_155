@@ -9,7 +9,6 @@
 extern void *kmalloc_area[16];
 extern int mbuf_allocate_area(char *name, int size, struct file *file);
 extern void *fe_start(void *arg);
-extern int run_on_timer;
 extern char daqArea[2*DAQ_DCU_SIZE];           // Space allocation for daqLib buffers
 
 
@@ -290,16 +289,6 @@ int init_module (void)
 	// User APP does not access IRIG-B cards
 	cdsPciModules.gps = 0;
 	cdsPciModules.gpsType = 0;
-
-
-	// Code will run on internal timer if no ADC modules are found
-	if (cdsPciModules.adcCount == 0) {
-		printf("No ADC modules found, running on timer\n");
-		run_on_timer = 1;
-        	//munmap(_epics_shm, MMAP_SIZE);
-        	//close(wfd);
-        	//return 0;
-	}
 
 	// Initialize buffer for daqLib.c code
 	daqBuffer = (long)&daqArea[0];
