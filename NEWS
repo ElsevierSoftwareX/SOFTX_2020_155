@@ -1,5 +1,5 @@
 ==================================================================================================
-Changes for 3.4  
+Changes for 3.4 - tagged Feb. 14, 2018 
 ==================================================================================================
 - Bug Fix (1102): Remove use on unitialized array in daqd rcv build
 - Changed method for setting compile options to use Dolphin Gen2 cards and Long Range PCIe.
@@ -18,7 +18,6 @@ Changes for 3.4
 - Added auto generation of safe.snap files for models built for the first time.
 - Enhancement (793): Changed IPC error reporting
 - Added support for Dolphin PCIe network Gen 2 hardware.
-*** NOTE: Following disabled in branch-3.4. *********
 - Add ability to inter-connect PCIe (Dolphin) switches between corner and end stations.
 	- Deletes need for GeFanuc RFM cards. However, option still remains to use them.
 	- Added standalone cdsrfmswitch code into src/pcieswitch directory. 
