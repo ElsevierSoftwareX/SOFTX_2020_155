@@ -470,7 +470,7 @@ usleep(1000);
   printf("*******************************\n");
   printf("*     Running on timer!       *\n");
   printf("*******************************\n");
-  int timeoff = BILLION-(60000000 * cycleOffset);
+  int timeoff = (BILLION-(60000000 * cycleOffset)) % BILLION;
   /// Sync up to the 1Hz boundary
   do {
 	usleep(1);

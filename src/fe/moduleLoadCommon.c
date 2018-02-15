@@ -4,8 +4,10 @@
 int print_io_info(CDS_HARDWARE *cdsp) {
   int ii,jj,kk;
 	printf("THIS IS A TEST \n");
+#ifndef USER_SPACE
 	printf("startup time is %ld\n", current_time());
 	printf("cpu clock %u\n",cpu_khz);
+#endif
 	printf("EPICSM at 0x%x\n", _epics_shm);
 	printf("IPC    at 0x%x\n",_ipc_shm);
 	printf("IOMEM  at 0x%x size 0x%x\n",(_ipc_shm + 0x4000),sizeof(IO_MEM_DATA));

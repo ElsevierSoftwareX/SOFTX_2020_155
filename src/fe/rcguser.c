@@ -17,10 +17,10 @@
 #include <string.h>
 #include <signal.h>
 
+#include "moduleLoadCommon.c"
 
 // These externs and "16" need to go to a header file (mbuf.h)
 extern int fe_start();
-extern int run_on_timer;
 extern char daqArea[2*DAQ_DCU_SIZE];           // Space allocation for daqLib buffers
 extern char *addr;
 
@@ -153,7 +153,6 @@ int main (int argc, char **argv)
 	cdsPciModules.dioCount = 0;
 	cdsPciModules.doCount = 0;
 
-#ifdef ADC_SLAVE
 // If running as a slave process, I/O card information is via ipc shared memory
 	printf("%d PCI cards found\n",ioMemData->totalCards);
 	status = 0;
@@ -328,7 +327,6 @@ int main (int argc, char **argv)
 	// This did not quite work for some reason
 	// Need to find a way to handle skipped DAC cards in slaves
 	//cdsPciModules.dacCount = ioMemData->dacCount;
-#endif
 	printf("%d PCI cards found \n",status);
 	if(status < cards)
 	{
@@ -336,25 +334,14 @@ int main (int argc, char **argv)
 		cardCountErr = 1;
 	}
 
+
 	// Print out all the I/O information
+
+#if 0
         printf("***************************************************************************\n");
-#ifdef ADC_MASTER
-		// Master send module counds to SLAVE via ipc shm
-		ioMemData->totalCards = status;
-		ioMemData->adcCount = cdsPciModules.adcCount;
-		ioMemData->dacCount = cdsPciModules.dacCount;
-		ioMemData->bioCount = cdsPciModules.doCount;
-		// kk will act as ioMem location counter for mapping modules
-		kk = cdsPciModules.adcCount;
-#endif
 	printf("%d ADC cards found\n",cdsPciModules.adcCount);
 	for(ii=0;ii<cdsPciModules.adcCount;ii++)
         {
-#ifdef ADC_MASTER
-		// MASTER maps ADC modules first in ipc shm for SLAVES
-		ioMemData->model[ii] = cdsPciModules.adcType[ii];
-		ioMemData->ipc[ii] = ii;	// ioData memory buffer location for SLAVE to use
-#endif
                 if(cdsPciModules.adcType[ii] == GSC_18AISS6C)
                 {
                         printf("\tADC %d is a GSC_18AISS6C module\n",ii);
@@ -403,15 +390,6 @@ int main (int argc, char **argv)
 			}
                         printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.dacConfig[ii] & 0xfff));
                 }
-#ifdef ADC_MASTER
-		// Pass DAC info to SLAVE processes
-		ioMemData->model[kk] = cdsPciModules.dacType[ii];
-		ioMemData->ipc[kk] = kk;
-		// Following used by MASTER to point to ipc memory for inputting DAC data from SLAVES
-                cdsPciModules.dacConfig[ii]  = kk;
-printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
-		kk ++;
-#endif
 	}
         printf("***************************************************************************\n");
 	printf("%d DIO cards found\n",cdsPciModules.dioCount);
@@ -424,87 +402,29 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	printf("%d Contec PCIe DIO1616 cards found\n",cdsPciModules.cDio1616lCount);
 	printf("%d Contec PCIe DIO6464 cards found\n",cdsPciModules.cDio6464lCount);
 	printf("%d DO cards found\n",cdsPciModules.doCount);
-#ifdef ADC_MASTER
-	// MASTER sends DIO module information to SLAVES
-	// Note that for DIO, SLAVE modules will perform the I/O directly and therefore need to
-	// know the PCIe address of these modules.
-	ioMemData->bioCount = cdsPciModules.doCount;
-	for(ii=0;ii<cdsPciModules.doCount;ii++)
-        {
-		// MASTER needs to find Contec 1616 I/O card to control timing slave.
-		if(cdsPciModules.doType[ii] == CON_1616DIO)
-		{
-			tdsControl[tdsCount] = ii;
-			printf("TDS controller %d is at %d\n",tdsCount,ii);
-			tdsCount ++;
-		}
-		ioMemData->model[kk] = cdsPciModules.doType[ii];
-		// Unlike ADC and DAC, where a memory buffer number is passed, a PCIe address is passed
-		// for DIO cards.
-		ioMemData->ipc[kk] = cdsPciModules.pci_do[ii];
-		kk ++;
-	}
-	printf("Total of %d I/O modules found and mapped\n",kk);
-#endif
         printf("***************************************************************************\n");
+#endif
 // Following section maps Reflected Memory, both VMIC hardware style and Dolphin PCIe network style.
 // Slave units will perform I/O transactions with RFM directly ie MASTER does not do RFM I/O.
 // Master unit only maps the RFM I/O space and passes pointers to SLAVES.
 
-#ifdef ADC_SLAVE
 	// Slave gets RFM module count from MASTER.
 	cdsPciModules.rfmCount = ioMemData->rfmCount;
 	cdsPciModules.dolphinCount = ioMemData->dolphinCount;
 	cdsPciModules.dolphinRead[0] = ioMemData->dolphinRead[0];
 	cdsPciModules.dolphinWrite[0] = ioMemData->dolphinWrite[0];
-#endif
-	printf("%d RFM cards found\n",cdsPciModules.rfmCount);
-#ifdef ADC_MASTER
-	ioMemData->rfmCount = cdsPciModules.rfmCount;
-#endif
 	for(ii=0;ii<cdsPciModules.rfmCount;ii++)
         {
-                 printf("\tRFM %d is a VMIC_%x module with Node ID %d\n", ii, cdsPciModules.rfmType[ii], cdsPciModules.rfmConfig[ii]);
-#ifdef ADC_SLAVE
 		cdsPciModules.pci_rfm[ii] = ioMemData->pci_rfm[ii];
 		cdsPciModules.pci_rfm_dma[ii] = ioMemData->pci_rfm_dma[ii];
-#endif
-		printf("address is 0x%lx\n",cdsPciModules.pci_rfm[ii]);
-#ifdef ADC_MASTER
-		// Master sends RFM memory pointers to SLAVES
-		ioMemData->pci_rfm[ii] = cdsPciModules.pci_rfm[ii];
-		ioMemData->pci_rfm_dma[ii] = cdsPciModules.pci_rfm_dma[ii];
-#endif
 	}
-	// ioMemData->dolphinCount = 0;
-#ifdef DOLPHIN_TEST
-	ioMemData->dolphinCount = cdsPciModules.dolphinCount;
-	ioMemData->dolphinRead[0] = cdsPciModules.dolphinRead[0];
-	ioMemData->dolphinWrite[0] = cdsPciModules.dolphinWrite[0];
-
-#else
-#ifdef ADC_MASTER
-// Clear Dolphin pointers so the slave sees NULLs
-	ioMemData->dolphinCount = 0;
-        ioMemData->dolphinRead[0] = 0;
-        ioMemData->dolphinWrite[0] = 0;
-#endif
-#endif
         printf("***************************************************************************\n");
   	if (cdsPciModules.gps) {
 	printf("IRIG-B card found %d\n",cdsPciModules.gpsType);
         printf("***************************************************************************\n");
   	}
 
-
-	// Code will run on internal timer if no ADC modules are found
-	if (cdsPciModules.adcCount == 0) {
-		printf("No ADC modules found, running on timer\n");
-		run_on_timer = 1;
-        	//munmap(_epics_shm, MMAP_SIZE);
-        	//close(wfd);
-        	//return 0;
-	}
+	print_io_info(&cdsPciModules);
 
 	// Initialize buffer for daqLib.c code
 	printf("Initializing space for daqLib buffers\n");
