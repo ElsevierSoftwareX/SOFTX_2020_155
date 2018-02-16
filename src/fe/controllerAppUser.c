@@ -61,6 +61,23 @@
 
 #define BILLION 1000000000L
 
+// Contec 64 input bits plus 64 output bits (Standard for aLIGO)
+// /// Contec6464 input register values
+unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
+// /// Contec6464 - Last output request sent to module.
+unsigned int CDIO6464LastOutState[MAX_DIO_MODULES]; // Current requested value of the BO bits
+// /// Contec6464 values to be written to the output register
+unsigned int CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
+//
+// // This Contect 16 input / 16 output DIO card is used to control timing slave by IOP
+// /// Contec1616 input register values
+unsigned int CDIO1616InputInput[MAX_DIO_MODULES]; // Binary input bits
+// /// Contec1616 output register values read back from the module
+unsigned int CDIO1616Input[MAX_DIO_MODULES]; // Current value of the BO bits
+// /// Contec1616 values to be written to the output register
+unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
+// /// Holds ID number of Contec1616 DIO card(s) used for timing control.
+
 /// Maintains present cycle count within a one second period.
 int cycleNum = 0;
 unsigned int odcStateWord = 0xffff;
