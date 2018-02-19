@@ -31,12 +31,7 @@ endif
 
 
 
-all : dx_broadcast dx_stream ix_multi_stream ix_rcvr
-
-dx_stream: dx_stream.c 
-	$(CC) $(CFLAGS) $(IPATH) dx_stream.c -c -o dx_stream.o
-	$(CC) $(CFLAGS) -o dx_stream dx_stream.o -L $(API_LIB_PATH) -lsisci
-	sync
+all : ix_multi_stream ix_rcvr
 
 rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -54,12 +49,6 @@ dx_bcLib: dx_bcLib.c
 	$(CC) $(CFLAGS) dx_bcLib.c -c -o dx_bcLib.o 
 	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
 	$(CC) $(FLAGS) -o dx_bcLib  dx_bcLib.o  rfm.o -L $(API_LIB_PATH) -lsisci
-	sync
-
-dx_broadcast: dx_broadcast.c 
-	$(CC) $(CFLAGS) dx_broadcast.c -c -o dx_broadcast.o 
-	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
-	$(CC) $(FLAGS) -o dx_broadcast  dx_broadcast.o  rfm.o -L $(API_LIB_PATH) -lsisci
 	sync
 
 ix_multi_stream: ix_multi_stream.c 
