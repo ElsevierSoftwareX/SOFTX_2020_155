@@ -103,15 +103,6 @@ static struct rmIpcStr *shmIpcPtr[128];
 static char *shmDataPtr[128];
 static struct cdsDaqNetGdsTpNum *shmTpTable[128];
 static const int header_size = sizeof(struct rmIpcStr) + sizeof(struct cdsDaqNetGdsTpNum);
-volatile char *dxIpcPtr;
-volatile char *dxDataPtr;
-volatile char *dxGdsPtr;
-volatile char *dxDataBlk;
-volatile char *drIpcPtr;
-volatile char *drDataPtr;
-volatile char *drGdsPtr;
-volatile char *drDataBlk;
-int *drIntData;
 static const int buf_size = DAQ_DCU_BLOCK_SIZE;
 char modelnames[DAQ_TRANSIT_MAX_DCU][64];
 char *sysname;
@@ -135,6 +126,7 @@ sci_local_segment_t     localSegment;
 sci_remote_segment_t    remoteSegment;
 sci_map_t               localMap;
 sci_map_t               remoteMap;
+sci_sequence_t        sequence   = NULL;
 unsigned int            localAdapterNo = 0;
 unsigned int            remoteNodeId   = 0;
 unsigned int            localNodeId    = 0;
@@ -142,33 +134,14 @@ unsigned int            segmentId;
 unsigned int            segmentSize    = 0x200000;
 unsigned int            offset         = 0;
 unsigned int            client         = 0;
-unsigned int            server         = 0;
+unsigned int            server         = 1;
 unsigned int            *localbufferPtr;
 unsigned int            loops          = 5000;
 int                     rank           = 0;
 int                     nodes          = 0;
 unsigned int 		memcpyFlag     = NO_FLAGS;
-
-/*********************************************************************************/
-/*                                U S A G E                                      */
-/*                                                                               */
-/*********************************************************************************/
-
-void Usage()
-{
-    printf("Usage of reflective:\n");
-    printf("reflective  -client -nodes <nodes>[ -a <adapter no> -size <segment size> ] \n");
-    printf("reflective  -server -rank <rank> [ -a <adapter no> -size <segment size> ] \n\n");
-    printf(" -client            : %s\n", (client) ? "The local node is client" : "The local node is server");
-    printf(" -a <value>         : Local adapter number (default %d)\n", localAdapterNo);
-    printf(" -size <value>      : Segment size   (default %d)\n", segmentSize);
-    printf(" -group <value>     : Reflective group identifier (0..5))\n");
-    printf(" -rank <value>      : Rank of server nodes (1,2,3,4,5,6,7, 8,9)\n");
-    printf(" -nodes <value>     : Number of servers.\n");
-    printf(" -loops <value>     : Loops to execute  (default %d)\n", loops);
-    printf(" -help              : This helpscreen\n");
-    printf("\n");
-}
+volatile unsigned int *readAddr;
+volatile unsigned int *writeAddr;
 
 
 /*********************************************************************************/
@@ -188,34 +161,12 @@ void PrintParameters(void)
     printf("----------------------------\n\n");
 }
 
-int waitServers(int nodes,sci_sequence_t sequence,volatile unsigned int *readAddr,volatile unsigned int *writeAddr)
-{
-int node_offset;
-int value;
-
-        /* Lets wait for the servers to write CMD_READY  */
-        printf("Wait for %d servers ...\n", nodes);
-        
-        for (node_offset=1; node_offset <= nodes;node_offset++){
-            int wait_loops = 0;
-            
-            do {
-                value = (*(readAddr+SYNC_OFFSET+node_offset));
-                wait_loops++;
-            } while (value != CMD_READY); 
-        }
-        printf("Client received CMD_READY from all nodes \n\n",value); 
-            
-        /* Lets write CMD_READY to offset 0 to signal all servers to go on. */
-        *(writeAddr+SYNC_OFFSET) = CMD_READY;  
-        SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
-}
-
-int waitClients(int rank,sci_sequence_t sequence,volatile unsigned int *readAddr,volatile unsigned int *writeAddr)
+int waitSender(int rank,sci_sequence_t sequence,volatile unsigned int *readAddr,volatile unsigned int *writeAddr)
 {
 
         int wait_loops = 0;
 	int value;
+
         
         /* Lets write CMD_READY the to client, offset "myrank" */
         *(writeAddr+SYNC_OFFSET+rank) = CMD_READY;
@@ -240,19 +191,52 @@ int waitClients(int rank,sci_sequence_t sequence,volatile unsigned int *readAddr
 }
 
 
-sci_error_t ix_rcv_reflective_memory()
+// ************************************************************************************* 
+sci_error_t dolphin_init()
 {
-    volatile unsigned int *readAddr;  /* Read from reflective memory */
-    volatile unsigned int *writeAddr; /* Write to reflective memory  */
     unsigned int          value;
     unsigned int          written_value = 0;
-    sci_sequence_t        sequence   = NULL;
     double                average;
-    timer_start_t         timer_start;
     int                   verbose = 1;
     int                   node_offset;
-    volatile unsigned char *myreadAddr;
-    volatile unsigned char *mywriteAddr;
+
+    /* Initialize the SISCI library */
+    SCIInitialize(NO_FLAGS, &error);
+    if (error != SCI_ERR_OK) {
+        fprintf(stderr,"SCIInitialize failed - Error code: 0x%x\n",error);
+        return(-1);
+    }
+
+    /* Open a file descriptor */
+    SCIOpen(&sd,NO_FLAGS,&error);
+    if (error != SCI_ERR_OK) {
+        if (error == SCI_ERR_INCONSISTENT_VERSIONS) {
+            fprintf(stderr,"Version mismatch between SISCI user library and SISCI driver\n");
+        }
+        fprintf(stderr,"SCIOpen failed - Error code 0x%x\n",error);
+        return(-1); 
+    }
+
+    /* Get local nodeId */
+    SCIGetLocalNodeId(localAdapterNo,
+                      &localNodeId,
+                      NO_FLAGS,
+                      &error);
+
+    if (error != SCI_ERR_OK) {
+        fprintf(stderr,"Could not find the local adapter %d\n", localAdapterNo);
+        SCIClose(sd,NO_FLAGS,&error);
+        SCITerminate();
+        return(-1);
+    }
+
+    /*
+     * Set remote nodeId to BROADCAST NODEID
+     */
+    remoteNodeId = DIS_BROADCAST_NODEID_GROUP_ALL;
+
+    /* Print parameters */
+    PrintParameters();
 
     /* 
      * The segmentId paramter is used to set the reflective memory group id 
@@ -286,10 +270,8 @@ sci_error_t ix_rcv_reflective_memory()
 
     /* Map local segment to user space - this is the address to read back data from the reflective memory region */
     readAddr = SCIMapLocalSegment(localSegment,&localMap, offset,segmentSize, NULL,NO_FLAGS,&error);
-    myreadAddr = (unsigned char *)readAddr + MY_DAT_OFFSET;;
-    zbuffer = (daq_multi_dcu_data_t *)myreadAddr;
     if (error == SCI_ERR_OK) {
-        printf("Local segment (id=0x%x) is mapped to user space at 0x%lx\n", segmentId,(unsigned long)myreadAddr); 
+        printf("Local segment (id=0x%x) is mapped to user space at 0x%lx\n", segmentId,(unsigned long)readAddr); 
     } else {
         fprintf(stderr,"SCIMapLocalSegment failed - Error code 0x%x\n",error);
         return error;
@@ -328,7 +310,6 @@ sci_error_t ix_rcv_reflective_memory()
 
     /* Map remote segment to user space */
     writeAddr = SCIMapRemoteSegment(remoteSegment,&remoteMap,offset,segmentSize,NULL,SCI_FLAG_BROADCAST,&error);
-    mywriteAddr = (unsigned char *)writeAddr;
     if (error == SCI_ERR_OK) {
         printf("Remote segment (id=0x%x) is mapped to user space. \n", segmentId);         
     } else {
@@ -344,16 +325,51 @@ sci_error_t ix_rcv_reflective_memory()
     }
 
     /* The reflective memory functionality is operational at this point. */
+    printf(" END OF DOLPHIN INIT ************************************* \n");
+    sleep(1);
+}
+/*********************************************************************************/
+/*                                U S A G E                                      */
+/*                                                                               */
+/*********************************************************************************/
 
-    /* Demonstrate how to use reflective memory */ 
+void Usage()
+{
+    printf("Usage of reflective:\n");
+    printf("reflective  -client -nodes <nodes>[ -a <adapter no> -size <segment size> ] \n");
+    printf("reflective  -server -rank <rank> [ -a <adapter no> -size <segment size> ] \n\n");
+    printf(" -client            : %s\n", (client) ? "The local node is client" : "The local node is server");
+    printf(" -a <value>         : Local adapter number (default %d)\n", localAdapterNo);
+    printf(" -size <value>      : Segment size   (default %d)\n", segmentSize);
+    printf(" -group <value>     : Reflective group identifier (0..5))\n");
+    printf(" -rank <value>      : Rank of server nodes (1,2,3,4,5,6,7, 8,9)\n");
+    printf(" -nodes <value>     : Number of servers.\n");
+    printf(" -loops <value>     : Loops to execute  (default %d)\n", loops);
+    printf(" -help              : This helpscreen\n");
     printf("\n");
+}
+
+
+
+sci_error_t ix_rcv_reflective_memory()
+{
+    
+    unsigned int          value;
+    unsigned int          written_value = 0;
+    double                average;
+    timer_start_t         timer_start;
+    int                   verbose = 1;
+    int                   node_offset;
+
+
+
+    printf("Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
 
     /* Perform a barrier operation. The client acts as master. */
-	waitClients(rank,sequence,readAddr,writeAddr);
+	waitSender(rank,sequence,readAddr,writeAddr);
     
     printf("\n***********************************************************\n\n");
     
-    printf("Starting latency measurements...\n");
     printf("Loops: %d\n", loops);
     
     writeAddr += 256;
@@ -363,16 +379,6 @@ sci_error_t ix_rcv_reflective_memory()
     int ii;
 	int new_cycle = 0;
         int lastCycle = 0;
-unsigned char *dataBuff;
-	dxIpcPtr = (unsigned char *) (mywriteAddr + MY_IPC_OFFSET);
-	dxGdsPtr = (unsigned char *) (mywriteAddr + MY_GDS_OFFSET);
-	dxDataPtr = (unsigned char *) (mywriteAddr + MY_DAT_OFFSET);
-	drIpcPtr = (unsigned char *) (myreadAddr + MY_IPC_OFFSET);
-	drGdsPtr = (unsigned char *) (myreadAddr + MY_GDS_OFFSET);
-	drDataPtr = (unsigned char *) (myreadAddr + MY_DAT_OFFSET);
-	drIntData = (int *)drDataPtr;
-	drIntData += 2;
-printf("My drintdata is at 0x%lx \n",(unsigned long)drIpcPtr);
 
     do {
         
@@ -399,7 +405,7 @@ printf("My drintdata is at 0x%lx \n",(unsigned long)drIpcPtr);
 	    printf("zbuff cycle  = %d\n",zbuffer->header.dcuheader[0].cycle);
             
             if (verbose) {
-                printf("Server received broadcast value %d \n",value); 
+                printf("Received broadcast value %d \n",value); 
             }
             
             written_value++;
@@ -469,6 +475,7 @@ int __CDECL
 main(int argc,char *argv[])
 {
     int counter; 
+    volatile unsigned char *daq_read_addr;
 
     printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
     
@@ -542,69 +549,17 @@ main(int argc,char *argv[])
         }
     }
 
-    if (client == 0 && rank == 0 ){
-        printf("Rank must be set to nonzero value for server\n\n");
-        Usage();
-        return(0);
-    }
+    error = dolphin_init();
+    printf("Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
 
-    if (client == 1 ){
-        printf("Nodes must be set to nonzero value for client\n\n");
+    daq_read_addr = (unsigned char *)readAddr + MY_DAT_OFFSET;
+    zbuffer = (daq_multi_dcu_data_t *)daq_read_addr;
 
-    }
-
-    if (server == 0 && client == 0) {
-        fprintf(stderr,"You must specify a client node or a server node\n");
-        return(-1);
-    }
-
-    if (server == 1 && client == 1) {
-        fprintf(stderr,"Both server node and client node is selected.\n"); 
-        fprintf(stderr,"You must specify either a client or a server node\n");
-        return(-1);
-    }
-
-
-    /* Initialize the SISCI library */
-    SCIInitialize(NO_FLAGS, &error);
-    if (error != SCI_ERR_OK) {
-        fprintf(stderr,"SCIInitialize failed - Error code: 0x%x\n",error);
-        return(-1);
-    }
-
-    /* Open a file descriptor */
-    SCIOpen(&sd,NO_FLAGS,&error);
-    if (error != SCI_ERR_OK) {
-        if (error == SCI_ERR_INCONSISTENT_VERSIONS) {
-            fprintf(stderr,"Version mismatch between SISCI user library and SISCI driver\n");
-        }
-        fprintf(stderr,"SCIOpen failed - Error code 0x%x\n",error);
-        return(-1); 
-    }
-
-    /* Get local nodeId */
-    SCIGetLocalNodeId(localAdapterNo,
-                      &localNodeId,
-                      NO_FLAGS,
-                      &error);
-
-    if (error != SCI_ERR_OK) {
-        fprintf(stderr,"Could not find the local adapter %d\n", localAdapterNo);
-        SCIClose(sd,NO_FLAGS,&error);
-        SCITerminate();
-        return(-1);
-    }
-
-    /*
-     * Set remote nodeId to BROADCAST NODEID
-     */
-    remoteNodeId = DIS_BROADCAST_NODEID_GROUP_ALL;
-
-    /* Print parameters */
-    PrintParameters();
+    printf("Calling recvr \n");
 
     error = ix_rcv_reflective_memory();
 
+    // Close out Dolphing connection and exit
     if (error!= SCI_ERR_OK) {
         fprintf(stderr,"SCIClose failed - Error code: 0x%x\n",error);
         SCITerminate();
