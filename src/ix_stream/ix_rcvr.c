@@ -328,6 +328,72 @@ sci_error_t dolphin_init()
     printf(" END OF DOLPHIN INIT ************************************* \n");
     sleep(1);
 }
+sci_error_t dolphin_closeout()
+{
+    /* Remove the Sequence */
+    SCIRemoveSequence(sequence,NO_FLAGS, &error);
+    if (error != SCI_ERR_OK) {
+        fprintf(stderr,"SCIRemoveSequence failed - Error code 0x%x\n",error);
+        return error;
+    }
+    
+    /* Unmap local segment */
+    SCIUnmapSegment(localMap,NO_FLAGS,&error);
+    
+    if (error == SCI_ERR_OK) {
+        printf("The local segment is unmapped\n"); 
+    } else {
+        fprintf(stderr,"SCIUnmapSegment failed - Error code 0x%x\n",error);
+        return error;
+    }
+    
+    /* Remove local segment */
+    SCIRemoveSegment(localSegment,NO_FLAGS,&error);
+    if (error == SCI_ERR_OK) {
+        printf("The local segment is removed\n"); 
+    } else {
+        fprintf(stderr,"SCIRemoveSegment failed - Error code 0x%x\n",error);
+        return error;
+    } 
+    
+    /* Unmap remote segment */
+    SCIUnmapSegment(remoteMap,NO_FLAGS,&error);
+    if (error == SCI_ERR_OK) {
+        printf("The remote segment is unmapped\n"); 
+    } else {
+        fprintf(stderr,"SCIUnmapSegment failed - Error code 0x%x\n",error);
+        return error;
+    }
+    
+    /* Disconnect segment */
+    SCIDisconnectSegment(remoteSegment,NO_FLAGS,&error);
+    if (error == SCI_ERR_OK) {
+        printf("The segment is disconnected\n"); 
+    } else {
+        fprintf(stderr,"SCIDisconnectSegment failed - Error code 0x%x\n",error);
+        return error;
+    } 
+
+    // Close out Dolphing connection and exit
+    if (error!= SCI_ERR_OK) {
+        fprintf(stderr,"SCIClose failed - Error code: 0x%x\n",error);
+        SCITerminate();
+        return(-1);
+    }
+
+    /* Close the file descriptor */
+    SCIClose(sd,NO_FLAGS,&error);
+    if (error != SCI_ERR_OK) {
+        fprintf(stderr,"SCIClose failed - Error code: 0x%x\n",error);
+        SCITerminate();
+        return(-1);
+    }
+
+    /* Free allocated resources */
+    SCITerminate();
+
+    return SCI_ERR_OK;
+}
 /*********************************************************************************/
 /*                                U S A G E                                      */
 /*                                                                               */
@@ -417,50 +483,6 @@ sci_error_t ix_rcv_reflective_memory()
     printf("\n***********************************************************\n\n");
     
     /* Lets clean up after demonstrating the use of reflective memory  */
-    
-    /* Remove the Sequence */
-    SCIRemoveSequence(sequence,NO_FLAGS, &error);
-    if (error != SCI_ERR_OK) {
-        fprintf(stderr,"SCIRemoveSequence failed - Error code 0x%x\n",error);
-        return error;
-    }
-    
-    /* Unmap local segment */
-    SCIUnmapSegment(localMap,NO_FLAGS,&error);
-    
-    if (error == SCI_ERR_OK) {
-        printf("The local segment is unmapped\n"); 
-    } else {
-        fprintf(stderr,"SCIUnmapSegment failed - Error code 0x%x\n",error);
-        return error;
-    }
-    
-    /* Remove local segment */
-    SCIRemoveSegment(localSegment,NO_FLAGS,&error);
-    if (error == SCI_ERR_OK) {
-        printf("The local segment is removed\n"); 
-    } else {
-        fprintf(stderr,"SCIRemoveSegment failed - Error code 0x%x\n",error);
-        return error;
-    } 
-    
-    /* Unmap remote segment */
-    SCIUnmapSegment(remoteMap,NO_FLAGS,&error);
-    if (error == SCI_ERR_OK) {
-        printf("The remote segment is unmapped\n"); 
-    } else {
-        fprintf(stderr,"SCIUnmapSegment failed - Error code 0x%x\n",error);
-        return error;
-    }
-    
-    /* Disconnect segment */
-    SCIDisconnectSegment(remoteSegment,NO_FLAGS,&error);
-    if (error == SCI_ERR_OK) {
-        printf("The segment is disconnected\n"); 
-    } else {
-        fprintf(stderr,"SCIDisconnectSegment failed - Error code 0x%x\n",error);
-        return error;
-    } 
     
     return SCI_ERR_OK;
 }
@@ -558,24 +580,8 @@ main(int argc,char *argv[])
     printf("Calling recvr \n");
 
     error = ix_rcv_reflective_memory();
-
-    // Close out Dolphing connection and exit
-    if (error!= SCI_ERR_OK) {
-        fprintf(stderr,"SCIClose failed - Error code: 0x%x\n",error);
-        SCITerminate();
-        return(-1);
-    }
-
-    /* Close the file descriptor */
-    SCIClose(sd,NO_FLAGS,&error);
-    if (error != SCI_ERR_OK) {
-        fprintf(stderr,"SCIClose failed - Error code: 0x%x\n",error);
-        SCITerminate();
-        return(-1);
-    }
-
-    /* Free allocated resources */
-    SCITerminate();
+    
+    error = dolphin_closeout();
 
     return SCI_ERR_OK;
 }
