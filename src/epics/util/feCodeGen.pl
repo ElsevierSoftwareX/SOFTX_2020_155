@@ -184,6 +184,14 @@ if (@ARGV > 3) {
 		$location = "kamioka";
 	} elsif ($site =~ /^X/) {
 		$location = "tst";
+	} elsif ($site =~ /^A/) {
+		$location = "anu";
+	} elsif ($site =~ /^I/) {
+		$location = "indigo";
+	} elsif ($site =~ /^U/) {
+		$location = "uwa";
+	} elsif ($site =~ /^W/) {
+		$location = "cardiff";
 	}
 }
 if (@ARGV > 4) {
@@ -208,7 +216,7 @@ if (@ARGV > 4) {
 $skeleton = $ARGV[1];
 
 # Check to verify model name begins with a valid IFO designator.
-if ($skeleton !~ m/^[cghklmsx]\d.*/) {
+if ($skeleton !~ m/^[acghiklmsuwx]\d.*/) {
    die "***ERROR: Model name must begin with <ifo><subsystem>: $skeleton\n";
 }
 

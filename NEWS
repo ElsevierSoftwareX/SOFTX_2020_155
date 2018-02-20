@@ -15,6 +15,7 @@ Changes for 3.5  (NOT YET RELEASED)
 ==================================================================================================
 Changes for 3.4  (NOT YET RELEASED)
 ==================================================================================================
+- Bug Fix (1112): Add support for Indigo,ANU,UWA,Cardiff site/ifo in feCodeGen.pl
 - Bug Fix (1085): Default daqd behavior is to disable md5 checksum file creation
 - Bug Fix (1098): Fix EZ_CA_READ/WRITE calls to work with EPICS Sequencer 2.2
 - Improve lock-up on model shutdown by removing erroneous printkl() in moduleLoad.c (r4486)
