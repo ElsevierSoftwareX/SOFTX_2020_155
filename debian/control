@@ -119,6 +119,7 @@ Depends:
  autoconf,
  epics-seq-dev,
  g++,
+ libncurses5,
  linux-headers-3.2.88-rtcds,
  make,
  pkg-config,
@@ -127,6 +128,7 @@ Depends:
  sudo,
  tcsh,
  ${misc:Depends},
+ ${shlibs:Depends},
 Recommends:
  linux-image-3.2.88-rtcds,
 Description: advLigoRTS Real-Time Code Generator (RCG)
