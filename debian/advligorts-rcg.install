@@ -5,8 +5,9 @@ configure usr/share/advligorts/src/
 configure.in usr/share/advligorts/src/
 doc usr/share/advligorts/src/
 install usr/share/advligorts/src/
-src/fe usr/share/advligorts/src/src/
+src/drv usr/share/advligorts/src/src/
 src/epics usr/share/advligorts/src/src/
+src/fe usr/share/advligorts/src/src/
 src/include usr/share/advligorts/src/src/
 src/epics/util/iniChk.pl usr/bin/
 support/bin/rts_awgtpman_exec usr/bin/
