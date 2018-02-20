@@ -23,13 +23,24 @@ unsigned int            offset         = 0;
 unsigned int            client         = 0;
 unsigned int            server         = 1;
 unsigned int            *localbufferPtr;
-unsigned int            loops          = 5000;
 int                     rank           = 0;
 int                     nodes          = 0;
 unsigned int 		memcpyFlag     = NO_FLAGS;
 volatile unsigned int *readAddr;
 volatile unsigned int *writeAddr;
 
+void PrintParameters(void)
+{
+    printf("Test parameters for %s \n",(client) ?  "client" : "server" );
+    printf("----------------------------\n\n");
+    printf("Local adapter no.     : %d\n",localAdapterNo);
+    printf("Local nodeId.         : %d\n",localNodeId);
+    printf("Segment size          : %d\n",segmentSize);
+    printf("My Rank               : %d\n",rank);
+    printf("RM SegmentId          : %d\n",segmentId);
+    printf("Number of nodes in RM : %d\n",nodes);
+    printf("----------------------------\n\n");
+}
 
 // ************************************************************************************* 
 sci_error_t dolphin_init()

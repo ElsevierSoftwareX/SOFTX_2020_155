@@ -60,12 +60,6 @@
 #include "../include/drv/fb.h"
 #include "../include/daq_core.h"
 
-#if 0
-#define CDS_DAQ_NET_IPC_OFFSET 0x0
-#define CDS_DAQ_NET_GDS_TP_TABLE_OFFSET 0x1000
-#define CDS_DAQ_NET_DATA_OFFSET 0x2000
-#endif
-
 
 #define __CDECL
 
@@ -98,6 +92,7 @@
 #define MY_GDS_OFFSET	(MY_DCU_OFFSET + 0x9000)
 #define MY_DAT_OFFSET	(MY_DCU_OFFSET + 0xa000)
 
+#include "./dolphin_common.c"
 extern void *findSharedMemory(char *);
 
 static struct rmIpcStr *shmIpcPtr[128];
@@ -116,34 +111,7 @@ char *zbuffer;
 int do_verbose = 1;
 int sendLength = 0;
 
-
-/*
- * Remote nodeId:
- *
- * DIS_BROADCAST_NODEID_GROUP_ALL is a general broadcast remote nodeId and 
- * must be used as the remote nodeId in SCIConnectSegment() function
- */
-
-
-sci_error_t             error;
-sci_desc_t              sd;
-sci_local_segment_t     localSegment;
-sci_remote_segment_t    remoteSegment;
-sci_map_t               localMap;
-sci_map_t               remoteMap;
-unsigned int            localAdapterNo = 0;
-unsigned int            remoteNodeId   = 0;
-unsigned int            localNodeId    = 0;
-unsigned int            segmentId;
-unsigned int            segmentSize    = 0x200000;
-unsigned int            offset         = 0;
-unsigned int            client         = 0;
-unsigned int            server         = 0;
-unsigned int            *localbufferPtr;
-unsigned int            loops          = 17;
-int                     rank           = 0;
-int                     nodes          = 0;
-unsigned int 		memcpyFlag     = NO_FLAGS;
+unsigned int            loops          = 170;
 
 /*********************************************************************************/
 /*                                U S A G E                                      */
@@ -215,22 +183,6 @@ int getmodelrate( char *modelname, char *gds_tp_dir) {
 
     return rate;
 }
-/*********************************************************************************/
-/*                   P R I N T   P A R A M E T E R S                             */
-/*                                                                               */
-/*********************************************************************************/
-void PrintParameters(void)
-{
-    printf("Test parameters for %s \n",(client) ?  "client" : "server" );
-    printf("----------------------------\n\n");
-    printf("Local adapter no.     : %d\n",localAdapterNo);
-    printf("Local nodeId.         : %d\n",localNodeId);
-    printf("Segment size          : %d\n",segmentSize);
-    printf("My Rank               : %d\n",rank);
-    printf("RM SegmentId          : %d\n",segmentId);
-    printf("Number of nodes in RM : %d\n",nodes);
-    printf("----------------------------\n\n");
-}
 
 int waitServers(int nodes,sci_sequence_t sequence,volatile unsigned int *readAddr,volatile unsigned int *writeAddr)
 {
@@ -257,8 +209,6 @@ int value;
 
 sci_error_t send_via_reflective_memory(int nsys)
 {
-    volatile unsigned int *readAddr;  /* Read from reflective memory */
-    volatile unsigned int *writeAddr; /* Write to reflective memory  */
     unsigned int          value;
     unsigned int          written_value = 0;
     sci_sequence_t        sequence   = NULL;
@@ -280,107 +230,12 @@ sci_error_t send_via_reflective_memory(int nsys)
     int reftimeNSec;
     int dataTPLength;
 
-    /* 
-     * The segmentId paramter is used to set the reflective memory group id 
-     * when the flag SCI_FLAG_BROADCAST is specified. 
-     *
-     * For Dolphin Express DX, the reflective memory group id is limited to 0-5
-     * For Dolphin Express IX, the reflective memory group id is limited to 0-3
-     *
-     * All nodes within the broadcast group must have the same segmentId to communicate.
-     */
-
-    /* Create local reflective memory segment */    
-    SCICreateSegment(sd,&localSegment,segmentId, segmentSize, NO_CALLBACK, NULL, SCI_FLAG_BROADCAST, &error);
-
-    if (error == SCI_ERR_OK) {
-        printf("Local segment (id=0x%x, size=%d) is created. \n", segmentId, segmentSize);  
-    } else {
-        fprintf(stderr,"SCICreateSegment failed - Error code 0x%x\n",error);
-        return error;
-    }
-
-    /* Prepare the segment */
-    SCIPrepareSegment(localSegment,localAdapterNo, SCI_FLAG_BROADCAST, &error); 
-    
-    if (error == SCI_ERR_OK) {
-        printf("Local segment (id=0x%x, size=%d) is prepared. \n", segmentId, segmentSize);  
-    } else {
-        fprintf(stderr,"SCIPrepareSegment failed - Error code 0x%x\n",error);
-        return error;
-    }
-
-    /* Map local segment to user space - this is the address to read back data from the reflective memory region */
-    readAddr = SCIMapLocalSegment(localSegment,&localMap, offset,segmentSize, NULL,NO_FLAGS,&error);
     myreadAddr = (unsigned char *)readAddr;
-    if (error == SCI_ERR_OK) {
-        printf("Local segment (id=0x%x) is mapped to user space at 0x%lx\n", segmentId,(unsigned long)myreadAddr); 
-    } else {
-        fprintf(stderr,"SCIMapLocalSegment failed - Error code 0x%x\n",error);
-        return error;
-    } 
-
-    /* Set the segment available */
-    SCISetSegmentAvailable(localSegment, localAdapterNo, NO_FLAGS, &error);
-    if (error == SCI_ERR_OK) {
-        printf("Local segment (id=0x%x) is available for remote connections. \n", segmentId); 
-    } else {
-        fprintf(stderr,"SCISetSegmentAvailable failed - Error code 0x%x\n",error);
-        return error;
-    } 
-
-    /* Connect to remote segment */
-    printf("Connect to remote segment .... ");
-
-    do { 
-        SCIConnectSegment(sd,
-                          &remoteSegment,
-                          remoteNodeId,
-                          segmentId,
-                          localAdapterNo,
-                          NO_CALLBACK,
-                          NULL,
-                          SCI_INFINITE_TIMEOUT,
-                          SCI_FLAG_BROADCAST,
-                          &error);
-
-        sleep(1);
-
-    } while (error != SCI_ERR_OK);
-
-    int remoteSize = SCIGetRemoteSegmentSize(remoteSegment);
-    printf("Remote segment (id=0x%x) is connected with size %d.\n", segmentId,remoteSize);
-
-    /* Map remote segment to user space */
-    writeAddr = SCIMapRemoteSegment(remoteSegment,&remoteMap,offset,segmentSize,NULL,SCI_FLAG_BROADCAST,&error);
     mywriteAddr = (unsigned char *)writeAddr;
-    if (error == SCI_ERR_OK) {
-        printf("Remote segment (id=0x%x) is mapped to user space. \n", segmentId);         
-    } else {
-        fprintf(stderr,"SCIMapRemoteSegment failed - Error code 0x%x\n",error);
-        return error;
-    } 
 
-    /* Create a sequence for data error checking*/ 
-    SCICreateMapSequence(remoteMap,&sequence,NO_FLAGS,&error);
-    if (error != SCI_ERR_OK) {
-        fprintf(stderr,"SCICreateMapSequence failed - Error code 0x%x\n",error);
-        return error;
-    }
 
-    /* The reflective memory functionality is operational at this point. */
-
-    /* Demonstrate how to use reflective memory */ 
-    printf("\n");
-
-    /* Perform a barrier operation. The client acts as master. */
+    
 	waitServers(nodes,sequence,readAddr,writeAddr);
-    
-    printf("\n***********************************************************\n\n");
-    
-    printf("Starting latency measurements...\n");
-    printf("Loops: %d\n", loops);
-    
     writeAddr += 256;
     readAddr += 256;
     
@@ -567,51 +422,6 @@ SCIMemCpy(sequence,buffer, remoteMap,MY_DAT_OFFSET,sendLength,memcpyFlag,&error)
     
     printf("\n***********************************************************\n\n");
     
-    /* Lets clean up after demonstrating the use of reflective memory  */
-    
-    /* Remove the Sequence */
-    SCIRemoveSequence(sequence,NO_FLAGS, &error);
-    if (error != SCI_ERR_OK) {
-        fprintf(stderr,"SCIRemoveSequence failed - Error code 0x%x\n",error);
-        return error;
-    }
-    
-    /* Unmap local segment */
-    SCIUnmapSegment(localMap,NO_FLAGS,&error);
-    
-    if (error == SCI_ERR_OK) {
-        printf("The local segment is unmapped\n"); 
-    } else {
-        fprintf(stderr,"SCIUnmapSegment failed - Error code 0x%x\n",error);
-        return error;
-    }
-    
-    /* Remove local segment */
-    SCIRemoveSegment(localSegment,NO_FLAGS,&error);
-    if (error == SCI_ERR_OK) {
-        printf("The local segment is removed\n"); 
-    } else {
-        fprintf(stderr,"SCIRemoveSegment failed - Error code 0x%x\n",error);
-        return error;
-    } 
-    
-    /* Unmap remote segment */
-    SCIUnmapSegment(remoteMap,NO_FLAGS,&error);
-    if (error == SCI_ERR_OK) {
-        printf("The remote segment is unmapped\n"); 
-    } else {
-        fprintf(stderr,"SCIUnmapSegment failed - Error code 0x%x\n",error);
-        return error;
-    }
-    
-    /* Disconnect segment */
-    SCIDisconnectSegment(remoteSegment,NO_FLAGS,&error);
-    if (error == SCI_ERR_OK) {
-        printf("The segment is disconnected\n"); 
-    } else {
-        fprintf(stderr,"SCIDisconnectSegment failed - Error code 0x%x\n",error);
-        return error;
-    } 
     
     return SCI_ERR_OK;
 }
@@ -733,62 +543,14 @@ main(int argc,char *argv[])
 	printf("CPU = %d\n",*drIntData);
 
 
-    /* Initialize the SISCI library */
-    SCIInitialize(NO_FLAGS, &error);
-    if (error != SCI_ERR_OK) {
-        fprintf(stderr,"SCIInitialize failed - Error code: 0x%x\n",error);
-        return(-1);
-    }
+    error = dolphin_init();
+    printf("Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
 
-    /* Open a file descriptor */
-    SCIOpen(&sd,NO_FLAGS,&error);
-    if (error != SCI_ERR_OK) {
-        if (error == SCI_ERR_INCONSISTENT_VERSIONS) {
-            fprintf(stderr,"Version mismatch between SISCI user library and SISCI driver\n");
-        }
-        fprintf(stderr,"SCIOpen failed - Error code 0x%x\n",error);
-        return(-1); 
-    }
 
-    /* Get local nodeId */
-    SCIGetLocalNodeId(localAdapterNo,
-                      &localNodeId,
-                      NO_FLAGS,
-                      &error);
-
-    if (error != SCI_ERR_OK) {
-        fprintf(stderr,"Could not find the local adapter %d\n", localAdapterNo);
-        SCIClose(sd,NO_FLAGS,&error);
-        SCITerminate();
-        return(-1);
-    }
-
-    /*
-     * Set remote nodeId to BROADCAST NODEID
-     */
-    remoteNodeId = DIS_BROADCAST_NODEID_GROUP_ALL;
-
-    /* Print parameters */
-    PrintParameters();
 
     error = send_via_reflective_memory(nsys);
 
-    if (error!= SCI_ERR_OK) {
-        fprintf(stderr,"SCIClose failed - Error code: 0x%x\n",error);
-        SCITerminate();
-        return(-1);
-    }
-
-    /* Close the file descriptor */
-    SCIClose(sd,NO_FLAGS,&error);
-    if (error != SCI_ERR_OK) {
-        fprintf(stderr,"SCIClose failed - Error code: 0x%x\n",error);
-        SCITerminate();
-        return(-1);
-    }
-
-    /* Free allocated resources */
-    SCITerminate();
+    error = dolphin_closeout();
 
     return SCI_ERR_OK;
 }
