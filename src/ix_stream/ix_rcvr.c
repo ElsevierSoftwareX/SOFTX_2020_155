@@ -97,6 +97,7 @@
 #define MY_GDS_OFFSET	(MY_DCU_OFFSET + 0x9000)
 #define MY_DAT_OFFSET	(MY_DCU_OFFSET + 0xa000)
 
+#include "./dolphin_common.c"
 extern void *findSharedMemory(char *);
 
 static struct rmIpcStr *shmIpcPtr[128];
@@ -112,6 +113,7 @@ char *daqbuffer = (char *) &ixDataBlock;
 daq_multi_dcu_data_t *zbuffer;
 
 
+#if 0
 /*
  * Remote nodeId:
  *
@@ -143,6 +145,7 @@ unsigned int 		memcpyFlag     = NO_FLAGS;
 volatile unsigned int *readAddr;
 volatile unsigned int *writeAddr;
 
+#endif
 
 /*********************************************************************************/
 /*                   P R I N T   P A R A M E T E R S                             */
@@ -191,6 +194,7 @@ int waitSender(int rank,sci_sequence_t sequence,volatile unsigned int *readAddr,
 }
 
 
+#if 0
 // ************************************************************************************* 
 sci_error_t dolphin_init()
 {
@@ -394,6 +398,7 @@ sci_error_t dolphin_closeout()
 
     return SCI_ERR_OK;
 }
+#endif
 /*********************************************************************************/
 /*                                U S A G E                                      */
 /*                                                                               */
