@@ -1,3 +1,9 @@
+advligorts (3.4-1) unstable; urgency=medium
+
+  * Final 3.4 tagged release
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Tue, 20 Feb 2018 13:59:39 -0800
+
 advligorts (3.4~rc6-1) unstable; urgency=medium
 
   * new release candidate
