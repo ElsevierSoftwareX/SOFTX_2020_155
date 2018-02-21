@@ -32,19 +32,6 @@
 /*********************************************************************************/
 
 
-#ifdef _WIN32
-#ifndef OS_IS_WINDOWS
-#define OS_IS_WINDOWS       1
-#endif /* !OS_IS_WINDOWS */
-#endif /* _WIN32 */
-
-
-#ifdef OS_IS_WINDOWS
-#include <windows.h>
-#else
-#include <unistd.h>
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -54,6 +41,8 @@
 #include "sisci_demolib.h"
 #include "testlib.h"
 #include <malloc.h>
+#include <signal.h>
+#include <unistd.h>
 
 #include "../drv/crc.c"
 #include "../include/daqmap.h"
@@ -110,6 +99,7 @@ char buffer[1024000];
 char *zbuffer;
 int do_verbose = 1;
 int sendLength = 0;
+static volatile int keepRunning = 1;
 
 unsigned int            loops          = 170;
 
@@ -137,6 +127,10 @@ int sync2zero(struct rmIpcStr *ipcPtr) {
         // Find cycle zero
          for (;ipcPtr->cycle;) usleep(1000);
          return(lastCycle);
+}
+
+void intHandler(int dummy) {
+        keepRunning = 0;
 }
 
 int getmodelrate( char *modelname, char *gds_tp_dir) {
@@ -198,13 +192,16 @@ int value;
             do {
                 value = (*(readAddr+SYNC_OFFSET+node_offset));
                 wait_loops++;
-            } while (value != CMD_READY); 
+            } while (value != CMD_READY && keepRunning); 
         }
         printf("Client received CMD_READY from all nodes \n\n",value); 
             
         /* Lets write CMD_READY to offset 0 to signal all servers to go on. */
         *(writeAddr+SYNC_OFFSET) = CMD_READY;  
         SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
+
+	if(!keepRunning) return 1;
+	else return 0;
 }
 
 sci_error_t send_via_reflective_memory(int nsys)
@@ -214,8 +211,8 @@ sci_error_t send_via_reflective_memory(int nsys)
     sci_sequence_t        sequence   = NULL;
     int                   verbose = 1;
     int                   node_offset;
-    volatile unsigned char *myreadAddr;
-    volatile unsigned char *mywriteAddr;
+    volatile unsigned int *myreadAddr;
+    volatile unsigned int *mywriteAddr;
 
 
     int timeout;
@@ -229,15 +226,18 @@ sci_error_t send_via_reflective_memory(int nsys)
     int reftimeSec;
     int reftimeNSec;
     int dataTPLength;
+    int status;
 
-    myreadAddr = (unsigned char *)readAddr;
-    mywriteAddr = (unsigned char *)writeAddr;
+    myreadAddr = (unsigned int *)readAddr;
+    mywriteAddr = (unsigned int *)writeAddr;
 
 
     
-	waitServers(nodes,sequence,readAddr,writeAddr);
-    writeAddr += 256;
-    readAddr += 256;
+    status = waitServers(nodes,sequence,readAddr,writeAddr);
+    if (status) return SCI_ERR_OK;
+
+    mywriteAddr += 256;
+    myreadAddr += 256;
     
     written_value=1;
     int ii;
@@ -388,14 +388,14 @@ unsigned char *dataBuff;
             }
             
             /* Lets write the value to offset 0 */
-// WRITEDATA
-SCIMemCpy(sequence,buffer, remoteMap,MY_DAT_OFFSET,sendLength,memcpyFlag,&error);
-    if (error != SCI_ERR_OK) {
-        fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
-        return error;
-    }
+	// WRITEDATA
+	SCIMemCpy(sequence,buffer, remoteMap,MY_DAT_OFFSET,sendLength,memcpyFlag,&error);
+	    if (error != SCI_ERR_OK) {
+		fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
+		return error;
+	    }
 
-            *writeAddr = written_value; 
+            *mywriteAddr = written_value; 
             SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
             
 	    printf("Writing cycle %d with size %d \n",lastCycle,ixDataBlock.header.dataBlockSize);
@@ -405,10 +405,11 @@ SCIMemCpy(sequence,buffer, remoteMap,MY_DAT_OFFSET,sendLength,memcpyFlag,&error)
                 int wait_loops = 0;
                 
                 do {
-                    value = (*(readAddr+node_offset));
+                    value = (*(myreadAddr+node_offset));
                     wait_loops++;
                     if ((wait_loops % 10000000)==0){
                         printf("Value = %d (expected = %d) delayed from rank %d - after %u reads\n", value, written_value+1, node_offset, wait_loops);
+			return SCI_ERR_OK;
                     }
                 } while (value != written_value+1); 
             }
@@ -418,7 +419,7 @@ SCIMemCpy(sequence,buffer, remoteMap,MY_DAT_OFFSET,sendLength,memcpyFlag,&error)
             }
             written_value++;
             
-    } while (written_value < loops); /* do this number of loops */
+    } while (keepRunning); /* do this number of loops */
     
     printf("\n***********************************************************\n\n");
     
@@ -542,15 +543,16 @@ main(int argc,char *argv[])
 	drIntData += 2;
 	printf("CPU = %d\n",*drIntData);
 
+    signal(SIGINT,intHandler);
 
     error = dolphin_init();
     printf("Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
 
 
-
-    error = send_via_reflective_memory(nsys);
+    do {
+	    error = send_via_reflective_memory(nsys);
+    } while (error == SCI_ERR_OK && keepRunning == 1);
 
     error = dolphin_closeout();
-
     return SCI_ERR_OK;
 }

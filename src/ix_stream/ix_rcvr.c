@@ -109,6 +109,12 @@ daq_multi_dcu_data_t *zbuffer;
 unsigned int            loops          = 170;
 
 
+int signOff(int rank,sci_sequence_t sequence,volatile unsigned int *readAddr,volatile unsigned int *writeAddr)
+{
+        /* Lets write CMD_READY the to client, offset "myrank" */
+        *(writeAddr+SYNC_OFFSET+rank) = 0;
+        SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
+}
 
 int waitSender(int rank,sci_sequence_t sequence,volatile unsigned int *readAddr,volatile unsigned int *writeAddr)
 {
@@ -137,6 +143,8 @@ int waitSender(int rank,sci_sequence_t sequence,volatile unsigned int *readAddr,
 
         } while (value != CMD_READY);
         printf("Server received CMD_READY\n");
+        *(writeAddr+SYNC_OFFSET+rank) = 0;
+        SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
 }
 
 
@@ -326,6 +334,8 @@ main(int argc,char *argv[])
     printf("Calling recvr \n");
 
     error = ix_rcv_reflective_memory();
+
+    signOff(rank,sequence,readAddr,writeAddr);
     
     error = dolphin_closeout();
 
