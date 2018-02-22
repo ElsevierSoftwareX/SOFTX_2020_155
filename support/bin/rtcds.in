@@ -195,7 +195,7 @@ disable_sys() {
 
 _lsmod() {
     local systems=($(list_host_sys))
-    local rts=(mbuf symmetricom)
+    local rts=(mbuf gpstime)
     local omx=(open_mx)
     local dis=(dis_kosif dis_dx dis_irm)
 
