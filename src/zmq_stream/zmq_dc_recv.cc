@@ -164,6 +164,7 @@ namespace zmq_dc {
                 _mxDataBlockFull[_loop].header.dcuheader[mytotaldcu].dcuId = _mxDataBlockG[ii][_loop].header.dcuheader[jj].dcuId;
                 int cur_dcuid = _mxDataBlockFull[_loop].header.dcuheader[mytotaldcu].dcuId;
                 _mxDataBlockFull[_loop].header.dcuheader[mytotaldcu].fileCrc = _mxDataBlockG[ii][_loop].header.dcuheader[jj].fileCrc;
+                _mxDataBlockFull[_loop].header.dcuheader[mytotaldcu].dataCrc = _mxDataBlockG[ii][_loop].header.dcuheader[jj].dataCrc;
                 _mxDataBlockFull[_loop].header.dcuheader[mytotaldcu].status = _mxDataBlockG[ii][_loop].header.dcuheader[jj].status;
                 _mxDataBlockFull[_loop].header.dcuheader[mytotaldcu].status;
                 if (_mxDataBlockFull[_loop].header.dcuheader[mytotaldcu].status == 0xbad)

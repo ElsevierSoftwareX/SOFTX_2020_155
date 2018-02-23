@@ -74,7 +74,7 @@ struct ToLower {
 /* GM and shared memory communication area */
 
 /* This may still be needed for test points */
-struct rmIpcStr gmDaqIpc[DCU_COUNT];
+//struct rmIpcStr gmDaqIpc[DCU_COUNT];
 /// DMA memory area pointers
 int controller_cycle = 0;
 
@@ -273,8 +273,12 @@ void *producer::frame_writer() {
 
         std::array<int, DCU_COUNT> dcu_to_zmq_lookup;
         std::array<char*,  DCU_COUNT> dcu_data_from_zmq;
+        std::array<unsigned int, DCU_COUNT> dcu_data_crc;
+        std::array<unsigned int, DCU_COUNT> dcu_data_gps;
         std::fill(dcu_to_zmq_lookup.begin(), dcu_to_zmq_lookup.end(), -1);
         std::fill(dcu_data_from_zmq.begin(), dcu_data_from_zmq.end(), nullptr);
+        std::fill(dcu_data_crc.begin(), dcu_data_crc.end(), 0);
+        std::fill(dcu_data_gps.begin(), dcu_data_gps.end(), 0);
         // retreive 1/16s of data from zmq
         daq_dc_data_t* data_block = shmem_receiver.receive_data();
         std::cout << "#" << std::endl;
@@ -321,6 +325,8 @@ void *producer::frame_writer() {
                 unsigned int cur_dcuid = data_block->header.dcuheader[cur_block].dcuId;
                 dcu_to_zmq_lookup[cur_dcuid] = cur_block;
                 dcu_data_from_zmq[cur_dcuid] = cur_dcu_zmq_ptr;
+                dcu_data_crc[cur_dcuid] = data_block->header.dcuheader[cur_block].dataCrc;
+                dcu_data_gps[cur_dcuid] = data_block->header.dcuheader[cur_block].timeSec;
                 cur_dcu_zmq_ptr += data_block->header.dcuheader[cur_block].dataBlockSize +
                                    data_block->header.dcuheader[cur_block].tpBlockSize;
             }
@@ -508,8 +514,8 @@ void *producer::frame_writer() {
                 if (j >= DCU_ID_ADCU_1 && (!IS_TP_DCU(j)) &&
                     daqd.dcuStatus[0][j] == 0) {
 
-                    unsigned int rfm_crc = gmDaqIpc[j].bp[cblk].crc;
-                    unsigned int dcu_gps = gmDaqIpc[j].bp[cblk].timeSec;
+                    unsigned int rfm_crc = dcu_data_crc[j]; //gmDaqIpc[j].bp[cblk].crc;
+                    unsigned int dcu_gps = dcu_data_gps[j]; // gmDaqIpc[j].bp[cblk].timeSec;
 
                     // system_log(5, "dcu %d block %d cycle %d  gps %d symm
                     // %d\n", j, cblk, gmDaqIpc[j].bp[cblk].cycle,  dcu_gps,
@@ -574,7 +580,7 @@ void *producer::frame_writer() {
                 // Do not support Myrinet DCUs on H2
                 if (IS_MYRINET_DCU(j) && ifo == 0) {
 
-                    prop.dcu_data[j].crc = gmDaqIpc[j].bp[cblk].crc;
+                    prop.dcu_data[j].crc = dcu_data_crc[j]; // gmDaqIpc[j].bp[cblk].crc;
 
                     // printf("dcu %d crc=0x%x\n", j, prop.dcu_data[j].crc);
                     // Remove 0x8000 status from propagating to the broadcast
