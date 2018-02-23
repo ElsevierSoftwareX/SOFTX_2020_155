@@ -95,7 +95,7 @@ void output_ini_files(const std::string& ini_dir, const std::string& system_name
 
 unsigned int calculate_ini_crc(const std::string& ini_dir, const std::string& system_name)
 {
-    std::string fname_ini = generate_ini_filename(ini_dir, system_name);
+    std::string fname_ini = generate_ini_filename(ini_dir, cleaned_system_name(system_name));
     std::ifstream is(fname_ini.c_str(), std::ios::binary);
 
     std::vector<char> buffer(64*1024);

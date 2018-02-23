@@ -205,9 +205,16 @@ namespace zmq_dc {
         // printf("\tTotal DCU = %d\tSize = %d\n",mytotaldcu,dc_datablock_size);
         _mxDataBlockFull[_loop].header.dcuTotalModels = mytotaldcu;
 
-        // if (_loop == 0 && _verbose) {
+        if (/* _loop == 0 && */ _verbose) {
             printf("Recieved %d bytes from %d dcuids\n", dc_datablock_size, mytotaldcu);
-        //}
+            for (int jj = 0; jj < mytotaldcu; ++jj) {
+                printf("dcuid: %d config crc: %x data crc: %x\n",
+                       _mxDataBlockFull[_loop].header.dcuheader[jj].dcuId,
+                       _mxDataBlockFull[_loop].header.dcuheader[jj].fileCrc,
+                       _mxDataBlockFull[_loop].header.dcuheader[jj].dataCrc
+                );
+            }
+        }
 
         results.send_length = header_size + dc_datablock_size;
         results.full_data_block = &_mxDataBlockFull[_loop];

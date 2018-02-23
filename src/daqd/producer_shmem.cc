@@ -467,7 +467,7 @@ void *producer::frame_writer() {
                 if (!IS_EXC_DCU(j)) {
                     if (newCrc != daqd.dcuConfigCRC[0][j]) {
                         newStatus |= 0x2000;
-                        std::cout << "config crc mismatch" << std::endl;
+                        std::cout << "config crc mismatch expecting " << std::hex << daqd.dcuConfigCRC[0][j] << " got " << std::hex << newCrc << std::endl;
                     }
                 }
                 if (newStatus != daqd.dcuStatus[0][j]) {

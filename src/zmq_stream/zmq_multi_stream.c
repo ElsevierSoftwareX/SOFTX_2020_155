@@ -400,6 +400,7 @@ main(int argc, char **argv)
 			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.header.dcuheader[ii].dataBlockSize);
             printf("\n\tTPSize = ");
             for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.header.dcuheader[ii].tpBlockSize);
+            printf("\n");
 			}
 
 		// Increment the local DAQ cycle counter
@@ -485,6 +486,16 @@ main(int argc, char **argv)
 
 			// Update heartbeat monitor to DAQ code
 			if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[1];
+			}
+		}
+
+		if (new_cycle == 0 && do_verbose) {
+			for (ii = 0; ii < nsys; ++ii) {
+				printf("dcuid: %d config crc: %x data crc: %x\n",
+					   zmqDataBlock.header.dcuheader[ii].dcuId,
+					   zmqDataBlock.header.dcuheader[ii].fileCrc,
+					   zmqDataBlock.header.dcuheader[ii].dataCrc
+				);
 			}
 		}
 
