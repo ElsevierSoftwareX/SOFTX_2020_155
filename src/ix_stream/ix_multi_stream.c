@@ -52,28 +52,10 @@
 
 #define __CDECL
 
-#define NO_CALLBACK         NULL
-#define NO_FLAGS            0
-#define DATA_TRANSFER_READY 8
-#define CMD_READY           1234
 #define DAQ_RDY_MAX_WAIT        80
 
-/* Use upper 4 KB of segment for synchronization. */
-#define SYNC_OFFSET ((segmentSize) / 4 - 1024)
-
-#define FILTER     0x12345
-#define MATCH_VAL  0xabcdef
-#define DFLT_EID   1
-#define DFLT_LEN   8192
-#define DFLT_END   128
-#define MAX_LEN    (1024*1024*1024) 
-#define DFLT_ITER  1000
-#define NUM_RREQ   16  /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
-#define NUM_SREQ   256  /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
 
 #define DO_HANDSHAKE 0
-#define MATCH_VAL_MAIN (1 << 31)
-#define MATCH_VAL_THREAD 1
 
 // #define MY_DCU_OFFSET	0x1a00000
 #define MY_DCU_OFFSET	0x00000
@@ -87,13 +69,13 @@ extern void *findSharedMemory(char *);
 static struct rmIpcStr *shmIpcPtr[128];
 static char *shmDataPtr[128];
 static struct cdsDaqNetGdsTpNum *shmTpTable[128];
-static const int header_size = sizeof(struct rmIpcStr) + sizeof(struct cdsDaqNetGdsTpNum);
+static const int header_size = sizeof(struct daq_fe_header_t);
 int *drIntData;
 static const int buf_size = DAQ_DCU_BLOCK_SIZE;
 char modelnames[DAQ_TRANSIT_MAX_DCU][64];
 char *sysname;
 int modelrates[DAQ_TRANSIT_MAX_DCU];
-daq_multi_dcu_data_t ixDataBlock;
+daq_fe_data_t ixDataBlock;
 char *daqbuffer = (char *) &ixDataBlock;
 char buffer[1024000];
 char *zbuffer;
@@ -208,7 +190,6 @@ sci_error_t send_via_reflective_memory(int nsys)
 {
     unsigned int          value;
     unsigned int          written_value = 0;
-    sci_sequence_t        sequence   = NULL;
     int                   verbose = 1;
     int                   node_offset;
     volatile unsigned int *myreadAddr;
@@ -276,7 +257,7 @@ unsigned char *dataBuff;
 		usleep((do_wait * 1000));
 
 		// Print diags in verbose mode
-		if(new_cycle == 0 && do_verbose) {
+		if(new_cycle == 0 && !do_verbose) {
 			printf("\nTime = %d-%d size = %d\n",shmIpcPtr[0]->bp[lastCycle].timeSec,shmIpcPtr[0]->bp[lastCycle].timeNSec,sendLength);
 			printf("\tCycle = ");
 			for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock.header.dcuheader[ii].cycle);
@@ -383,7 +364,7 @@ unsigned char *dataBuff;
 		memcpy(buffer,daqbuffer,sendLength);
 		// Send Data
             
-            if (verbose) {
+            if (!verbose) {
                 printf("Send broadcast message (value %d) to %d available nodes ...\n",written_value,nodes);
             }
             
@@ -398,7 +379,7 @@ unsigned char *dataBuff;
             *mywriteAddr = written_value; 
             SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
             
-	    printf("Writing cycle %d with size %d \n",lastCycle,ixDataBlock.header.dataBlockSize);
+	    //printf("Writing cycle %d with size %d \n",lastCycle,sendLength);
             /* Lets wait for the servers to write the written value +1  */
             
             for (node_offset=1; node_offset <= nodes;node_offset++){
@@ -414,7 +395,7 @@ unsigned char *dataBuff;
                 } while (value != written_value+1); 
             }
             
-            if (verbose) {
+            if (!verbose) {
                 printf("Received broadcast ack %d from all nodes \n\n",value); 
             }
             written_value++;

@@ -12,6 +12,8 @@ This code is designed to transmit DAQ data via the Dolphin Networks in 2 fashion
 	Notes:
 		- Code does not yet allow for multiple FEs, as data set to
 		  only one data area.
+
+	Usage: ./ix_multi_stream -n 1 -g 2 -m "x1iopsam
 2) ix_rcvr: 
 	Function: This code receives data from ix_multi_stream. 
 	Notes:
@@ -19,3 +21,8 @@ This code is designed to transmit DAQ data via the Dolphin Networks in 2 fashion
 		  only one data area.
 		- Code does not yet write out a FE data block ie receives data
 		  only.
+
+
+3) ix_rcvr_threads:
+
+./ix_rcvr_threads -rank 1 -group 2 -nodes 1

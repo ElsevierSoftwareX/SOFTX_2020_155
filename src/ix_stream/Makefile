@@ -31,7 +31,7 @@ endif
 
 
 
-all : ix_multi_stream ix_rcvr
+all : ix_multi_stream ix_rcvr ix_rcvr_threads ix_dc_xmit ix_fb_rcv
 
 rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -61,6 +61,24 @@ ix_rcvr: ix_rcvr.c
 	$(CC) $(CFLAGS) ix_rcvr.c -c -o ix_rcvr.o 
 	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
 	$(CC) $(FLAGS) -o ix_rcvr  ix_rcvr.o  rfm.o -L $(API_LIB_PATH) -lsisci
+	sync
+
+ix_rcvr_threads: ix_rcvr_threads.c 
+	$(CC) $(CFLAGS) ix_rcvr_threads.c -c -o ix_rcvr_threads.o 
+	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
+	$(CC) $(FLAGS) -o ix_rcvr_threads  ix_rcvr_threads.o  rfm.o -L $(API_LIB_PATH) -lsisci
+	sync
+
+ix_dc_xmit: ix_dc_xmit.c 
+	$(CC) $(CFLAGS) ix_dc_xmit.c -c -o ix_dc_xmit.o 
+	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
+	$(CC) $(FLAGS) -o ix_dc_xmit  ix_dc_xmit.o  rfm.o -L $(API_LIB_PATH) -lsisci
+	sync
+
+ix_fb_rcv: ix_fb_rcv.c 
+	$(CC) $(CFLAGS) ix_fb_rcv.c -c -o ix_fb_rcv.o 
+	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
+	$(CC) $(FLAGS) -o ix_fb_rcv  ix_fb_rcv.o  rfm.o -L $(API_LIB_PATH) -lsisci
 	sync
 
 daq_master_config: daq_master_config.c

@@ -1,4 +1,11 @@
 
+#define NO_CALLBACK         NULL
+#define NO_FLAGS            0
+#define DATA_TRANSFER_READY 8
+#define CMD_READY           1234
+/* Use upper 4 KB of segment for synchronization. */
+#define SYNC_OFFSET ((segmentSize) / 4 - 1024)
+
 /*
  * Remote nodeId:
  *
@@ -28,6 +35,7 @@ int                     nodes          = 0;
 unsigned int 		memcpyFlag     = NO_FLAGS;
 volatile unsigned int *readAddr;
 volatile unsigned int *writeAddr;
+
 
 void PrintParameters(void)
 {
