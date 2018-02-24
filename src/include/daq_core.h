@@ -68,6 +68,7 @@ typedef struct daq_multi_cycle_header_t {
     unsigned int cycleDataSize;             // stride in bytes of the data
                                             // max data size is assumed to be
                                             // at least maxCycle * cycleDataSize
+    int msgcrc;				   // Data CRC checksum for DC -> FB/NDS
 } daq_multi_cycle_header_t;
 
 // Data structure to support multiple cycles of multiple dcus
