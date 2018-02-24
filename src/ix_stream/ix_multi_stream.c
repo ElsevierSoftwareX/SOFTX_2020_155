@@ -59,7 +59,7 @@
 
 // #define MY_DCU_OFFSET	0x1a00000
 #define MY_DCU_OFFSET	0x00000
-#define MY_IPC_OFFSET	(MY_DCU_OFFSET + 0x8000)
+#define MY_IPC_OFFSET	(MY_DCU_OFFSET + 0x1000)
 #define MY_GDS_OFFSET	(MY_DCU_OFFSET + 0x9000)
 #define MY_DAT_OFFSET	(MY_DCU_OFFSET + 0xa000)
 
@@ -172,14 +172,14 @@ int value;
             int wait_loops = 0;
             
             do {
-                value = (*(readAddr+SYNC_OFFSET+node_offset));
+                value = (*(readAddr+IX_SYNC_OFFSET+node_offset));
                 wait_loops++;
             } while (value != CMD_READY && keepRunning); 
         }
         printf("Client received CMD_READY from all nodes \n\n",value); 
             
         /* Lets write CMD_READY to offset 0 to signal all servers to go on. */
-        *(writeAddr+SYNC_OFFSET) = CMD_READY;  
+        *(writeAddr+IX_SYNC_OFFSET) = CMD_READY;  
         SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
 
 	if(!keepRunning) return 1;

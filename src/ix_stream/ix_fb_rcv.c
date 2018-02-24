@@ -82,6 +82,7 @@ main(int argc,char *argv[])
     daq_multi_dcu_data_t *ixDataBlock;
     int sendLength = 0;
     daq_multi_cycle_header_t *rcvHeader;
+    int myCrc;
 
     printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
     
@@ -167,6 +168,9 @@ main(int argc,char *argv[])
 	    // Copy data from Dolphin to local memory
 	    memcpy(nextData,rcvDataPtr,sendLength);
 
+	    myCrc = crc_ptr((char *)nextData, sendLength, 0);
+	    myCrc = crc_len(sendLength, myCrc);
+
 	    if(new_cycle == 0)
 	    {
 		    printf("New cycle = %d\n", new_cycle);
@@ -179,6 +183,9 @@ main(int argc,char *argv[])
 	    ifo_header->curCycle = rcvHeader->curCycle;
 	    ifo_header->maxCycle = rcvHeader->maxCycle;
 	    ifo_header->cycleDataSize = sendLength;
+	    ifo_header->msgcrc = rcvHeader->msgcrc;
+	    if(ifo_header->msgcrc != myCrc)
+		    printf("Sent = %d and RCV = %d\n",ifo_header->msgcrc,myCrc);
     } while(keepRunning);
 
 

@@ -32,7 +32,7 @@ extern void *findSharedMemorySize(char *,int);
 
 static char *shmDataPtr[128];
 static struct cdsDaqNetGdsTpNum *shmTpTable[128];
-static const int xmitDataOffset = MY_DAT_OFFSET + sizeof(daq_multi_cycle_header_t);
+static const int xmitDataOffset = MY_DAT_OFFSET + sizeof(struct daq_multi_cycle_header_t);
 static const int header_size = sizeof(daq_multi_dcu_header_t);
 char *sysname;
 daq_multi_dcu_data_t *ixDataBlock;
@@ -79,8 +79,10 @@ main(int argc,char *argv[])
     int dcuId[10];
     int ii;
     char *mywriteaddr;
+    int myCrc;
 
     printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
+    printf("my data offset = %d\n",xmitDataOffset);
     
     if (argc<2) {
     	printf("Exiting here \n");
@@ -178,9 +180,12 @@ main(int argc,char *argv[])
 		fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
 		return error;
 	    }
+	    myCrc = crc_ptr((char *)ixDataBlock, sendLength, 0);
+	    myCrc = crc_len(sendLength, myCrc);
 	    xmitHeader->curCycle = ifo_header->curCycle;
 	    xmitHeader->maxCycle = ifo_header->maxCycle;
 	    xmitHeader->cycleDataSize = sendLength;
+	    xmitHeader->msgcrc = myCrc;
             SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
     } while(keepRunning);
 
