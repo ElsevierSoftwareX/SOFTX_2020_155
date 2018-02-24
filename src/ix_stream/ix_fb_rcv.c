@@ -12,25 +12,12 @@
 #include <unistd.h>
 
 #include "../drv/crc.c"
-#include "../include/daqmap.h"
-#include "../include/drv/fb.h"
 #include "../include/daq_core.h"
 
 
 #define __CDECL
 
-#if 0
-#define NO_CALLBACK         NULL
-#define NO_FLAGS            0
-#define DATA_TRANSFER_READY 8
-#define CMD_READY           1234
-#define DAQ_RDY_MAX_WAIT        80
 
-/* Use upper 4 KB of segment for synchronization. */
-#define SYNC_OFFSET ((segmentSize) / 4 - 1024)
-#endif
-
-// #define MY_DCU_OFFSET	0x1a00000
 #define MY_DCU_OFFSET	0x00000
 #define MY_IPC_OFFSET	(MY_DCU_OFFSET + 0x8000)
 #define MY_GDS_OFFSET	(MY_DCU_OFFSET + 0x9000)
@@ -53,9 +40,8 @@ void Usage()
     printf("Usage of ix_multi_stream:\n");
     printf("ix_multi_stream  -n <nodes> -g <group> -m <models> \n");
     printf(" -a <value>     : Local adapter number (default %d)\n", localAdapterNo);
-    printf(" -s <value>     : Segment size   (default %d)\n", segmentSize);
     printf(" -g <value>     : Reflective group identifier (0..5))\n");
-    printf(" -n <value>     : Number of receivers\n");
+    printf(" -v <value>     : Diagnostics level (0..1) \n");
     printf(" -h             : This helpscreen\n");
     printf("\n");
 }
@@ -74,8 +60,6 @@ int __CDECL
 main(int argc,char *argv[])
 {
     int counter; 
-    int nsys = 1;
-    int dcuId[10];
     int ii;
     char *myreadaddr;
     char *rcvDataPtr;
@@ -83,6 +67,7 @@ main(int argc,char *argv[])
     int sendLength = 0;
     daq_multi_cycle_header_t *rcvHeader;
     int myCrc;
+    int do_verbose = 0;
 
     printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
     
@@ -93,37 +78,20 @@ main(int argc,char *argv[])
     }
 
     /* Get the parameters */
-     while ((counter = getopt(argc, argv, "r:n:g:l:s:m:h:a:")) != EOF) 
+     while ((counter = getopt(argc, argv, "g:a:v:")) != EOF) 
       switch(counter) {
-      
-        case 'r':
-            rank = atoi(optarg);
-            break;
-
-        case 'n':
-            nodes = atoi(optarg);
-            break;
 
         case 'g':
             segmentId = atoi(optarg);
             break;
 
-        case 's':
-            segmentSize = atoi(optarg);
-            if (segmentSize < 4096){
-                printf("Min segment size is 4 KB\n");
-                return -1;
-            }
-            break;
-
-        case 'm':
-	    sysname = optarg;
-	    printf ("sysnames = %s\n",sysname);
-            continue;
-
         case 'a':
             localAdapterNo = atoi(optarg);
-            continue;
+            break;
+
+        case 'v':
+            do_verbose = atoi(optarg);
+            break;
 
         case 'h':
     	printf("Exiting here 2 \n");
@@ -142,23 +110,29 @@ main(int argc,char *argv[])
     // Connect to Dolphin
     error = dolphin_init();
     printf("Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
+
+    // Set pointers to receive header and data in Dolphin network memory area
     myreadaddr = (char *)readAddr;
     myreadaddr += MY_DAT_OFFSET;
     rcvHeader = (daq_multi_cycle_header_t *)myreadaddr;
     rcvDataPtr = (char *)myreadaddr + sizeof(daq_multi_cycle_header_t);
 
+    // Catch control C exit
     signal(SIGINT,intHandler);
 
     // Sync to cycle zero
     for (;rcvHeader->curCycle;) usleep(1000);
     printf("Found cycle zero = %d\n",rcvHeader->curCycle);
 
+    // Go into infinite receive loop
     do{
-	    // Wait for cycle count update from FE
+	    // Wait for cycle couont update from FE
+	    // Check every 2 milliseconds
 	    do{
 		usleep(2000);
 		new_cycle = rcvHeader->curCycle;
 	    } while (new_cycle == lastCycle && keepRunning);
+	    // Save cycle number of last received message
 	    lastCycle = new_cycle;
 	    // Set up pointers to copy data to receive shmem
     	    nextData = (char *)ifo_data;
@@ -168,10 +142,22 @@ main(int argc,char *argv[])
 	    // Copy data from Dolphin to local memory
 	    memcpy(nextData,rcvDataPtr,sendLength);
 
+	    // Calculate CRC checksum of received data
 	    myCrc = crc_ptr((char *)nextData, sendLength, 0);
 	    myCrc = crc_len(sendLength, myCrc);
+	
+	    // Write data header info to shared memory
+	    ifo_header->maxCycle = rcvHeader->maxCycle;
+	    ifo_header->cycleDataSize = sendLength;
+	    ifo_header->msgcrc = rcvHeader->msgcrc;
+	    ifo_header->curCycle = rcvHeader->curCycle;
 
-	    if(new_cycle == 0)
+	    // Verify send CRC matches received CRC
+	    if(ifo_header->msgcrc != myCrc)
+		    printf("Sent = %d and RCV = %d\n",ifo_header->msgcrc,myCrc);
+
+	    // Print some diagnostics
+	    if(new_cycle == 0 && do_verbose)
 	    {
 		    printf("New cycle = %d\n", new_cycle);
 		    printf("\t\tNum DCU = %d\n", ixDataBlock->header.dcuTotalModels);
@@ -179,17 +165,10 @@ main(int argc,char *argv[])
 		    printf("\t\tTime = %d\n", ixDataBlock->header.dcuheader[0].timeSec);
 		    printf("\t\tSend Size = %d\n", sendLength);
 	    }
-	
-	    ifo_header->curCycle = rcvHeader->curCycle;
-	    ifo_header->maxCycle = rcvHeader->maxCycle;
-	    ifo_header->cycleDataSize = sendLength;
-	    ifo_header->msgcrc = rcvHeader->msgcrc;
-	    if(ifo_header->msgcrc != myCrc)
-		    printf("Sent = %d and RCV = %d\n",ifo_header->msgcrc,myCrc);
     } while(keepRunning);
 
-
-
+    // Cleanup the Dolphin connections
     error = dolphin_closeout();
+    // Exit
     return SCI_ERR_OK;
 }
