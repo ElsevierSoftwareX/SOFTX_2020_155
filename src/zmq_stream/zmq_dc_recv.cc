@@ -95,7 +95,7 @@ namespace zmq_dc {
         // but might as well keep it stable and not just reference one hard coded value.
         std::vector<pthread_t> thread_id(sname.size());
         for (int ii = 0; ii < sname.size(); ii++) {
-            pthread_create(&thread_id[ii],nullptr, rcvr_thread, reinterpret_cast<void*>(&_thread_info[ii]));
+            pthread_create(&thread_id[ii],NULL, rcvr_thread, reinterpret_cast<void*>(&_thread_info[ii]));
             _data_mask |= (1 << ii);
         }
     }
@@ -229,11 +229,11 @@ namespace zmq_dc {
     {
         std::vector<std::string> sname;
         const char *sysname = endpoints.c_str();
-        char *save_ptr = nullptr;
+        char *save_ptr = NULL;
         sname.emplace_back(strtok_r(const_cast<char*>(sysname), ",", &save_ptr));
         for(;;) {
-            char *s = strtok_r(nullptr, ",", &save_ptr);
-            if (s == nullptr) break;
+            char *s = strtok_r(NULL, ",", &save_ptr);
+            if (s == NULL) break;
             sname.emplace_back(std::string(s));
         }
         return sname;

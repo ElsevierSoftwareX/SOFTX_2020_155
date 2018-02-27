@@ -4,14 +4,19 @@ cmake_minimum_required(VERSION 3.0.0)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}")
 
 include(Cpp11)
+include(Cpp11Atomic)
 include(FindThreads)
 find_package(ZMQ4 REQUIRED)
 
 
-add_library(zmq_dc_recv STATIC zmq_dc_recv.cc)
+add_library(zmq_dc_recv STATIC zmq_dc_recv.cc recv_atomic.h)
 target_requires_cpp11(zmq_dc_recv PUBLIC)
 target_include_directories(zmq_dc_recv PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_link_libraries(zmq_dc_recv PUBLIC zmq4::zmq ${CMAKE_THREAD_LIBS_INIT})
+if (${CXX_HAS_ATOMIC})
+else (${CXX_HAS_ATOMIC})
+    target_compile_definitions(zmq_dc_recv PUBLIC "NO_STD_ATOMIC=1")
+endif (${CXX_HAS_ATOMIC})
 add_library(zmq::dc_recv ALIAS zmq_dc_recv)
 
 
@@ -29,12 +34,12 @@ target_compile_options(zmq_threads PUBLIC -std=gnu99)
 add_executable(zmq_dc zmq_dc.cc)
 target_include_directories(zmq_dc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_link_libraries(zmq_dc PUBLIC zmq_dc_recv zmq4::zmq ${CMAKE_THREAD_LIBS_INIT})
-target_compile_options(zmq_dc PUBLIC "-std=c++11")
+target_compile_options(zmq_dc PUBLIC ${CPP11_FLAG})
 
 add_executable(zmq_recv zmq_recv.cc ../drv/rfm.c ${CMAKE_CURRENT_SOURCE_DIR}/../include/daq_core.h)
 target_include_directories(zmq_recv PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_link_libraries(zmq_recv PUBLIC zmq_dc_recv zmq4::zmq driver::shmem ${CMAKE_THREAD_LIBS_INIT})
-target_compile_options(zmq_dc PUBLIC "-std=c++11")
+target_compile_options(zmq_dc PUBLIC ${CPP11_FLAG})
 
 add_executable(zmq_proxy zmq_proxy.c)
 target_include_directories(zmq_proxy PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
@@ -51,6 +56,8 @@ target_include_directories(zmq_rcv_from_dc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..
 target_link_libraries(zmq_rcv_from_dc PUBLIC zmq4::zmq)
 target_compile_options(zmq_rcv_from_dc PUBLIC -std=gnu99)
 
+if (${CXX_HAS_ATOMIC})
+# don't even try building these on pre c++11 compilers.
 add_executable(zmq_daq_test_data_firehose tests/zmq_firehose_pub.cc tests/zmq_firehose_common.cc)
 target_include_directories(zmq_daq_test_data_firehose PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_include_directories(zmq_daq_test_data_firehose PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
@@ -64,5 +71,7 @@ target_include_directories(zmq_daq_test_data_firehose_recv PRIVATE ${CMAKE_CURRE
 target_link_libraries(zmq_daq_test_data_firehose_recv PUBLIC zmq4::zmq)
 target_requires_cpp11(zmq_daq_test_data_firehose_recv PUBLIC)
 #target_compile_features(zmq_daq_test_data_firehose_recv PUBLIC cxx_defaulted_functions)
+
+endif (${CXX_HAS_ATOMIC})
 
 install(TARGETS zmq_multi_stream zmq_dc DESTINATION bin)

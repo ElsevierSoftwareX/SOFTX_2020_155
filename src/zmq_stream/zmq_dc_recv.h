@@ -4,13 +4,15 @@
 #include <sys/time.h>
 
 #include <algorithm>
-#include <atomic>
+#include <array>
 #include <string>
 #include <vector>
 
 #include <zmq.hpp>
 
 #include "daq_core.h"
+
+#include "recv_atomic.h"
 
 namespace zmq_dc {
     class ZMQDCReceiver;
@@ -61,12 +63,12 @@ namespace zmq_dc {
         static const int header_size = sizeof(daq_multi_dcu_header_t);
 
         zmq::context_t _context;
-        std::array<std::atomic<unsigned int>, 16> _tstatus;
-        //std::atomic<unsigned int> _tstatus[16];
+        std::array< receiver::atomic<unsigned int>, 16 > _tstatus;
+        //receiver::atomic<unsigned int> _tstatus[16];
         std::vector<receiver_thread_info> _thread_info;
         int _data_mask;
-        std::atomic<bool> _run_threads;
-        std::atomic<bool> _start_acq;
+        receiver::atomic<bool> _run_threads;
+        receiver::atomic<bool> _start_acq;
         int _nsys;
 
         /* variables used for the receive data call */
@@ -98,7 +100,7 @@ namespace zmq_dc {
         s_clock ()
         {
             struct timeval tv;
-            gettimeofday (&tv, nullptr);
+            gettimeofday (&tv, NULL);
             return (int64_t) (tv.tv_sec * 1000 + tv.tv_usec / 1000);
         }
     public:

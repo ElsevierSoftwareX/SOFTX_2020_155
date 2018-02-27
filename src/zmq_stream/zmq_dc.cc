@@ -123,7 +123,7 @@ static int64_t
 s_clock (void)
 {
     struct timeval tv;
-    gettimeofday (&tv, nullptr);
+    gettimeofday (&tv, NULL);
     return (int64_t) (tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }
 
@@ -140,8 +140,8 @@ std::vector<std::string> parse_publisher_list(const char *sysname) {
     std::vector<std::string> sname;
     sname.emplace_back(strtok(const_cast<char*>(sysname), " "));
     for(;;) {
-        char *s = strtok(nullptr, " ");
-        if (s == nullptr) break;
+        char *s = strtok(NULL, " ");
+        if (s == NULL) break;
         sname.emplace_back(std::string(s));
     }
     return sname;
@@ -168,7 +168,7 @@ main(int argc, char **argv)
 {
     pthread_t thread_id[DCU_COUNT];
     unsigned int nsys = 1; // The number of mapped shared memories (number of data sources)
-    char *sysname = nullptr;
+    char *sysname = NULL;
     int c;
     bool timing_check = false;
     int timing_offset = 0;
@@ -181,7 +181,7 @@ main(int argc, char **argv)
 
 
     /* set up defaults */
-    sysname = nullptr;
+    sysname = NULL;
     int ii;
 
     // Declare 0MQ message pointers
@@ -216,7 +216,7 @@ main(int argc, char **argv)
                 exit(1);
         }
 
-    if (sysname == nullptr) { usage(); exit(1); }
+    if (sysname == NULL) { usage(); exit(1); }
 
     signal(SIGINT,intHandler);
 
