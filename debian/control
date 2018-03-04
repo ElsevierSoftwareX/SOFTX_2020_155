@@ -120,7 +120,6 @@ Depends:
  epics-seq-dev,
  g++,
  libncurses5,
- linux-headers-3.2.88-rtcds,
  make,
  pkg-config,
  python,
@@ -130,6 +129,7 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Recommends:
+ linux-headers-3.2.88-rtcds,
  linux-image-3.2.88-rtcds,
 Description: advLigoRTS Real-Time Code Generator (RCG)
  Advanced LIGO Real-Time System, Real-time Code Generator.
@@ -143,8 +143,9 @@ Depends:
  advligorts-daqd-standiop,
  advligorts-rcg,
  cds-workstation,
- linux-image-3.2.88-rtcds,
  ${misc:Depends},
+Recommends:
+ linux-image-3.2.88-rtcds,
 Description: advLigoRTS stand-alone "cymac" metapackage
  Advanced LIGO Real-Time System, stand-alone system components.
 

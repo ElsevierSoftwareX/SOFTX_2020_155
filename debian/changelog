@@ -1,3 +1,9 @@
+advligorts (3.4-2) unstable; urgency=medium
+
+  * Move 3.2.88 kernel from Depends to Recommends
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Sun, 04 Mar 2018 15:17:33 -0800
+
 advligorts (3.4-1) unstable; urgency=medium
 
   * Final 3.4 tagged release
