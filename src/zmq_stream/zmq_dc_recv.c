@@ -70,7 +70,8 @@ static int _count_strings(char **strings)
 
 static void _clear_status(zmq_dc_receiver_p rcv)
 {
-    for (int i = 0; i < 16; ++i) {
+    int i = 0;
+	for (i = 0; i < 16; ++i) {
         rcv->tstatus[i] = 0;
     }
 }
@@ -260,7 +261,8 @@ void zmq_dc_receiver_begin_acquiring(zmq_dc_receiver_p rcv)
 
 void zmq_dc_receiver_receive_data(zmq_dc_receiver_p rcv, zmq_data_block* dest)
 {
-
+	int ii = 0;
+	int jj = 0;
     int timeout = 0;
 
     if (!rcv || !dest) return;
@@ -314,12 +316,12 @@ void zmq_dc_receiver_receive_data(zmq_dc_receiver_p rcv, zmq_data_block* dest)
 
     rcv->mxDataBlockFull[rcv->loop].header.dataBlockSize = 0;
     // Loop over all data buffers received from FE computers
-    for (int ii = 0; ii < rcv->nsys; ii++) {
+    for (ii = 0; ii < rcv->nsys; ii++) {
         int cur_sys_dcu_count = rcv->mxDataBlockG[ii][rcv->loop].header.dcuTotalModels;
         // printf("\tModel %d = %d\n",ii,cur_sys_dcu_count);
         char* mbuffer = (char*) &rcv->mxDataBlockG[ii][rcv->loop].dataBlock[0];
 
-        for (int jj = 0; jj < cur_sys_dcu_count; jj++) {
+        for (jj = 0; jj < cur_sys_dcu_count; jj++) {
             // Copy data header information
             rcv->mxDataBlockFull[rcv->loop].header.dcuheader[mytotaldcu].dcuId = rcv->mxDataBlockG[ii][rcv->loop].header.dcuheader[jj].dcuId;
             int cur_dcuid = rcv->mxDataBlockFull[rcv->loop].header.dcuheader[mytotaldcu].dcuId;
@@ -367,7 +369,7 @@ void zmq_dc_receiver_receive_data(zmq_dc_receiver_p rcv, zmq_data_block* dest)
 
     if (/* rcv->loop == 0 && */ rcv->verbose) {
         printf("Recieved %d bytes from %d dcuids\n", dc_datablock_size, mytotaldcu);
-        for (int jj = 0; jj < mytotaldcu; ++jj) {
+        for (jj = 0; jj < mytotaldcu; ++jj) {
             printf("dcuid: %d config crc: %x data crc: %x\n",
                    rcv->mxDataBlockFull[rcv->loop].header.dcuheader[jj].dcuId,
                    rcv->mxDataBlockFull[rcv->loop].header.dcuheader[jj].fileCrc,
