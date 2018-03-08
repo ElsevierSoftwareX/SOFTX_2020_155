@@ -9,14 +9,9 @@ include(FindThreads)
 find_package(ZMQ4 REQUIRED)
 
 
-add_library(zmq_dc_recv STATIC zmq_dc_recv.cc recv_atomic.h)
-target_requires_cpp11(zmq_dc_recv PUBLIC)
+add_library(zmq_dc_recv STATIC zmq_dc_recv.c zmq_dc_recv.h)
 target_include_directories(zmq_dc_recv PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_link_libraries(zmq_dc_recv PUBLIC zmq4::zmq ${CMAKE_THREAD_LIBS_INIT})
-if (${CXX_HAS_ATOMIC})
-else (${CXX_HAS_ATOMIC})
-    target_compile_definitions(zmq_dc_recv PUBLIC "NO_STD_ATOMIC=1")
-endif (${CXX_HAS_ATOMIC})
 add_library(zmq::dc_recv ALIAS zmq_dc_recv)
 
 

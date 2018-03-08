@@ -136,13 +136,13 @@ void intHandler(int dummy) {
 /// Parse a space separated list of names into a vector of strings
 /// \param sysname Space seperated null terminated ascii string
 /// \return std::vector<std::string> of each of the entries in sysname
-std::vector<std::string> parse_publisher_list(const char *sysname) {
-    std::vector<std::string> sname;
+std::vector<char*> parse_publisher_list(const char *sysname) {
+    std::vector<char*> sname;
     sname.emplace_back(strtok(const_cast<char*>(sysname), " "));
     for(;;) {
         char *s = strtok(NULL, " ");
         if (s == NULL) break;
-        sname.emplace_back(std::string(s));
+        sname.emplace_back(s);
     }
     return sname;
 }
@@ -224,7 +224,7 @@ main(int argc, char **argv)
 
     std::cout << "Server name: " << sysname << std::endl;
 
-    std::vector<std::string> sname(parse_publisher_list(sysname));
+    std::vector<char*> sname(parse_publisher_list(sysname));
     nsys = sname.size();
     // hard limits are to keep things inside of a signed 32bit integer type
     // used as a bitfield
@@ -239,7 +239,8 @@ main(int argc, char **argv)
         std::cout << "sys " << ii << " =  " << sname[ii] << "\n";
     }
 
-    zmq_dc::ZMQDCReceiver dc_receiver(sname);
+    sname.push_back(NULL);
+    zmq_dc::ZMQDCReceiver dc_receiver(&sname[0]);
     int dataRdy = dc_receiver.data_mask();
 
     // Create 0MQ socket for DC data transmission
