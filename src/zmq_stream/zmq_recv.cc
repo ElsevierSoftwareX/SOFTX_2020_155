@@ -288,6 +288,9 @@ main(int argc, char **argv)
     do {
         zmq_dc::data_block results = dc_receiver.receive_data();
         unsigned int cur_cycle = results.full_data_block->header.dcuheader[0].cycle;
+		unsigned int num_dcus = results.full_data_block->header.dcuTotalModels;
+		std::cout << "Cycle " << cur_cycle << " dcuids " << num_dcus << " bytes " << results.send_length << std::endl;
+		std::cout << "Cycle data size " << cycle_data_size << " offset " << cur_cycle * cycle_data_size << std::endl;
 
         // write the data out
         std::copy(reinterpret_cast<char*>(results.full_data_block),

@@ -114,6 +114,7 @@ class daq_multi_cycle_data_t(BasicStructure):
                              Field('curCycle', 'I'),
                              Field('maxCycle', 'I'),
                              Field('cycleDataSize', 'I'),
+                             Field('msgcrc', 'I'),
                          ],
                          blob,
                          alias={
