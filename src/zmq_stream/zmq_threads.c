@@ -165,7 +165,7 @@ main(int argc, char **argv)
                 char *s = strtok(0, " ");
                 if (!s) break;
 				// do not overflow our fixed size buffers
-				assert(sname < DCU_COUNT);
+				assert(nsys < DCU_COUNT);
                 sname[nsys] = s;
                 nsys++;
         }
