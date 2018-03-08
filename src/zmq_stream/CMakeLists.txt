@@ -38,6 +38,7 @@ if (${CXX_HAS_ATOMIC})
 else (${CXX_HAS_ATOMIC})
     target_compile_definitions(zmq_recv PUBLIC "NO_STD_ATOMIC=1")
 endif (${CXX_HAS_ATOMIC})
+target_compile_options(zmq_recv PUBLIC ${CPP11_FLAG})
 
 add_executable(zmq_proxy zmq_proxy.c)
 target_include_directories(zmq_proxy PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
