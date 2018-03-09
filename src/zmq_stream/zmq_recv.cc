@@ -271,6 +271,7 @@ main(int argc, char **argv)
     dc_receiver.begin_acquiring();
 
     size_t cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t))/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+	cycle_data_size -= (cycle_data_size % 8);
 
     volatile daq_multi_cycle_data_t* multi_cycle_header = reinterpret_cast<volatile daq_multi_cycle_data_t*>(dest_buffer);
     multi_cycle_header->header.maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
@@ -289,8 +290,10 @@ main(int argc, char **argv)
         zmq_dc::data_block results = dc_receiver.receive_data();
         unsigned int cur_cycle = results.full_data_block->header.dcuheader[0].cycle;
 		unsigned int num_dcus = results.full_data_block->header.dcuTotalModels;
+		if(do_verbose) {
 		std::cout << "Cycle " << cur_cycle << " dcuids " << num_dcus << " bytes " << results.send_length << std::endl;
 		std::cout << "Cycle data size " << cycle_data_size << " offset " << cur_cycle * cycle_data_size << std::endl;
+		}
 
         // write the data out
         std::copy(reinterpret_cast<char*>(results.full_data_block),
