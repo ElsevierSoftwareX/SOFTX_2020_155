@@ -106,6 +106,7 @@ main(int argc,char *argv[])
     int lastCycle = 15;
     int new_cycle = 0;
     char *nextData;
+	int cyclesize = 0;
 
     // Connect to Dolphin
     error = dolphin_init();
@@ -134,9 +135,10 @@ main(int argc,char *argv[])
 	    } while (new_cycle == lastCycle && keepRunning);
 	    // Save cycle number of last received message
 	    lastCycle = new_cycle;
+		cyclesize = rcvHeader->cycleDataSize;
 	    // Set up pointers to copy data to receive shmem
-    	    nextData = (char *)ifo_data;
-	    nextData += DAQ_TRANSIT_DC_DATA_BLOCK_SIZE * new_cycle;
+    	nextData = (char *)ifo_data;
+	    nextData += cyclesize * new_cycle;
 	    ixDataBlock = (daq_multi_dcu_data_t *)nextData;
 	    sendLength = rcvHeader->cycleDataSize;
 	    // Copy data from Dolphin to local memory
@@ -148,13 +150,13 @@ main(int argc,char *argv[])
 	
 	    // Write data header info to shared memory
 	    ifo_header->maxCycle = rcvHeader->maxCycle;
-	    ifo_header->cycleDataSize = sendLength;
+	    ifo_header->cycleDataSize = cyclesize;
 	    ifo_header->msgcrc = rcvHeader->msgcrc;
 	    ifo_header->curCycle = rcvHeader->curCycle;
 
 	    // Verify send CRC matches received CRC
-	    if(ifo_header->msgcrc != myCrc)
-		    printf("Sent = %d and RCV = %d\n",ifo_header->msgcrc,myCrc);
+	    // if(ifo_header->msgcrc != myCrc)
+		  //   printf("Sent = %d and RCV = %d\n",ifo_header->msgcrc,myCrc);
 
 	    // Print some diagnostics
 	    if(new_cycle == 0 && do_verbose)
