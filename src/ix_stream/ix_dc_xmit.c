@@ -126,6 +126,8 @@ main(int argc,char *argv[])
     // Sync to cycle zero in ifo shared memory (FE receive data area)
     for (;ifo_header->curCycle;) usleep(1000);
     printf("Found cycle zero = %d\n",ifo_header->curCycle);
+    printf("Found cycle size = %d\n",ifo_header->cycleDataSize);
+	int cyclesize = ifo_header->cycleDataSize;
 
 
     do{
@@ -139,10 +141,24 @@ main(int argc,char *argv[])
 	    lastCycle = new_cycle;
 	    // Move pointer to proper data cycle in ifo memory
     	    nextData = (char *)ifo_data;
-	    nextData += DAQ_TRANSIT_DC_DATA_BLOCK_SIZE * new_cycle;
+	    nextData += cyclesize * new_cycle;
 	    ixDataBlock = (daq_multi_dcu_data_t *)nextData;
 	    // Set the xmit data length to be header size plus data size
 	    sendLength = header_size + ixDataBlock->header.dataBlockSize;
+
+#if 0
+	    // Print some diagnostics
+	    // if(new_cycle == 0 && do_verbose == 1)
+	    // {
+		    printf("New cycle = %d\n", new_cycle);
+		    printf("\t\tNum DCU = %d\n", ixDataBlock->header.dcuTotalModels);
+		    printf("\t\tNew Size = %d\n", ixDataBlock->header.dataBlockSize);
+		    printf("\t\tTime = %d\n", ixDataBlock->header.dcuheader[0].timeSec);
+		    printf("\t\tSend Size = %d\n", sendLength);
+		    printf("\t\tCycle Size = %d\n", DAQ_TRANSIT_DC_DATA_BLOCK_SIZE);
+	    // }
+		usleep(10000);
+#endif
 	
 	    // WRITEDATA to Dolphin Network
 	    SCIMemCpy(sequence,ixDataBlock, remoteMap,xmitDataOffset,sendLength,memcpyFlag,&error);
@@ -155,22 +171,12 @@ main(int argc,char *argv[])
 	    myCrc = crc_len(sendLength, myCrc);
 	    // Set data header information
 	    xmitHeader->maxCycle = ifo_header->maxCycle;
-	    xmitHeader->cycleDataSize = sendLength;
+	    xmitHeader->cycleDataSize = ifo_header->cycleDataSize;
 	    xmitHeader->msgcrc = myCrc;
 	    // Send cycle last as indication of data ready for receivers
 	    xmitHeader->curCycle = ifo_header->curCycle;
 	    // Have to flush the buffers to make data go onto Dolphin network
             SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
-
-	    // Print some diagnostics
-	    if(new_cycle == 0 && do_verbose == 1)
-	    {
-		    printf("New cycle = %d\n", new_cycle);
-		    printf("\t\tNum DCU = %d\n", ixDataBlock->header.dcuTotalModels);
-		    printf("\t\tNew Size = %d\n", ixDataBlock->header.dataBlockSize);
-		    printf("\t\tTime = %d\n", ixDataBlock->header.dcuheader[0].timeSec);
-		    printf("\t\tSend Size = %d\n", sendLength);
-	    }
     } while(keepRunning);
 
     // Cleanup the Dolphin connections
