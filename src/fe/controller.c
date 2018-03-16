@@ -158,6 +158,7 @@ unsigned int cycleHistWhenHold[64];
 
 
 struct rmIpcStr *daqPtr;
+int dacWatchDog = 0;
 
 int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
 
@@ -383,6 +384,7 @@ void *fe_start(void *arg)
   static int dacTimingErrorPending[MAX_DAC_MODULES];
 
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
+   volatile GSA_20BIT_DAC_REG *dac20bitPtr;  // Pointer to 20bit DAC memory area
   volatile GSC_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
   unsigned int usec = 0;
   unsigned int offset = 0;
