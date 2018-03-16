@@ -43,6 +43,11 @@ int print_io_info(CDS_HARDWARE *cdsp) {
                 {
                         printf("\tDAC %d is a GSC_18AO8 module\n",ii);
                 }
+				if(cdsPciModules.dacType[ii] == GSC_20AO8)
+		        {
+                        printf("\tDAC %d is a GSC_20AO8 module\n",ii);
+			            printf("\t\tFirmware Revision: %d\n",(cdsPciModules.dacConfig[ii] & 0xffff));
+		        }
                 if(cdsp->dacType[ii] == GSC_16AO16)
                 {
                         printf("\tDAC %d is a GSC_16AO16 module\n",ii);
