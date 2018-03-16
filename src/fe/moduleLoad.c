@@ -507,7 +507,8 @@ int init_module (void)
 #ifdef ADC_SLAVE
 	int adcCnt;		/// @param adcCnt Number of ADC cards found by slave model.
 	int dacCnt;		/// @param dacCnt Number of 16bit DAC cards found by slave model.
-        int dac18Cnt;		/// @param dac18Cnt Number of 18bit DAC cards found by slave model.
+    int dac18Cnt;		/// @param dac18Cnt Number of 18bit DAC cards found by slave model.
+    int dac20Cnt;		/// @param dac20Cnt Number of 20bit DAC cards found by slave model.
 	int doCnt;		/// @param doCnt Total number of digital I/O cards found by slave model.
 	int do32Cnt;		/// @param do32Cnt Total number of Contec 32 bit DIO cards found by slave model.
 	int doIIRO16Cnt;	/// @param doIIRO16Cnt Total number of Acces I/O 16 bit relay cards found by slave model.
