@@ -657,8 +657,11 @@ udelay(1000);
                         limit = OVERFLOW_LIMIT_18BIT; // 18 bit limit
                         mask = GSAO_18BIT_MASK;
                         num_outs = GSAO_18BIT_CHAN_COUNT;
-
-
+                }
+				if (cdsPciModules.dacType[jj] == GSC_20AO8) {
+                        limit = OVERFLOW_LIMIT_20BIT; // 20 bit limit
+                        mask = GSAO_20BIT_MASK;
+                        num_outs = GSAO_20BIT_CHAN_COUNT;
                 }
 		/// - -- If user app < 64k rate (typical), need to upsample from code rate to IOP rate
            	for (kk=0; kk < OVERSAMPLE_TIMES; kk++) {

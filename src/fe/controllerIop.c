@@ -163,6 +163,7 @@ unsigned int cycleHistWhenHold[64];
 
 
 struct rmIpcStr *daqPtr;
+int dacWatchDog = 0;
 
 int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
 
@@ -279,6 +280,7 @@ void *fe_start(void *arg)
   static int dacTimingErrorPending[MAX_DAC_MODULES];
 
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
+  volatile GSA_20BIT_DAC_REG *dac20bitPtr;  // Pointer to 20bit DAC memory area
   volatile GSC_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
   unsigned int usec = 0;
   unsigned int offset = 0;
@@ -522,6 +524,8 @@ udelay(1000);
 	// Arm DAC DMA for full data size
 	if(cdsPciModules.dacType[jj] == GSC_16AO16) {
 		status = gsc16ao16DmaSetup(jj);
+	} else if (cdsPciModules.dacType[jj] == GSC_20AO8){
+	         status = gsc20ao8DmaSetup(jj);
 	} else {
 		status = gsc18ao8DmaSetup(jj);
 	}
@@ -566,6 +570,9 @@ udelay(1000);
 			{       
 				dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 				for(ii=0;ii<GSAO_18BIT_PRELOAD;ii++) dac18bitPtr->OUTPUT_BUF = 0;
+			} else if(cdsPciModules.dacType[jj] == GSC_20AO8) {
+		        dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
+		        for(ii=0;ii<GSAO_20BIT_PRELOAD;ii++) dac20bitPtr->OUTPUT_BUF = 0;
 			}else{  
 				dac16bitPtr = dacPtr[jj];
 				printf("writing DAC %d\n",jj);
@@ -593,6 +600,9 @@ udelay(1000);
 			{       
 				dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 				for(ii=0;ii<GSAO_18BIT_PRELOAD;ii++) dac18bitPtr->OUTPUT_BUF = 0;
+			} else if(cdsPciModules.dacType[jj] == GSC_20AO8) {
+                dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
+                for(ii=0;ii<GSAO_20BIT_PRELOAD;ii++) dac20bitPtr->OUTPUT_BUF = 0;
 			}else{  
 				dac16bitPtr = dacPtr[jj];
 				printf("writing DAC %d\n",jj);
@@ -1012,8 +1022,11 @@ udelay(1000);
                         limit = OVERFLOW_LIMIT_18BIT; // 18 bit limit
                         mask = GSAO_18BIT_MASK;
                         num_outs = GSAO_18BIT_CHAN_COUNT;
-
-
+                }
+				if (cdsPciModules.dacType[jj] == GSC_20AO8) {
+                        limit = OVERFLOW_LIMIT_20BIT; // 20 bit limit
+                        mask = GSAO_20BIT_MASK;
+                        num_outs = GSAO_20BIT_CHAN_COUNT;
                 }
 		/// - -- For each DAC channel
                 for (ii=0; ii < num_outs; ii++)
@@ -1081,6 +1094,8 @@ udelay(1000);
                 if(dacWriteEnable > 4) {
                         if(cdsPciModules.dacType[jj] == GSC_16AO16) {
                                 gsc16ao16DmaStart(jj);
+					 	} else if(cdsPciModules.dacType[jj] == GSC_20AO8) {
+					            gsc20ao8DmaStart(jj);
                         } else {
                                 gsc18ao8DmaStart(jj);
                         }
@@ -1467,6 +1482,13 @@ udelay(1000);
 				dac18bitPtr->digital_io_ports = (dacWatchDog | GSAO_18BIT_DIO_RW);
 
 		}
+		if(cdsPciModules.dacType[jj] == GSC_20AO8)
+        {
+            volatile GSA_20BIT_DAC_REG *dac20bitPtr;
+            dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
+            if(iopDacEnable && !dacChanErr[jj]) 
+             	dac20bitPtr->digital_io_ports = (dacWatchDog | GSAO_20BIT_DIO_RW);
+        }
 	}
 /// \> Cycle 500 to 500 + numDacModules, read back watchdog from AI chassis (18 bit DAC only)
 // AI Chassis WD CHECK for 18 bit DAC modules
@@ -1487,6 +1509,16 @@ udelay(1000);
 			    else 
 			    	pLocalEpics->epicsOutput.statDac[jj] |= DAC_WD_BIT;
 
+		}
+		if(cdsPciModules.dacType[jj] == GSC_20AO8)
+        {
+            static int dacWDread = 0;
+            volatile GSA_20BIT_DAC_REG *dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
+            dacWDread = dac20bitPtr->digital_io_ports;
+            if(((dacWDread >> 8) & 1) > 0)
+                 pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_WD_BIT);
+            else
+                 pLocalEpics->epicsOutput.statDac[jj] |= DAC_WD_BIT;
 		}
 	}
 
@@ -1526,6 +1558,21 @@ udelay(1000);
 			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_FULL);
 			}
 
+		}
+		if(cdsPciModules.dacType[jj] == GSC_20AO8)
+        {
+            volatile GSA_20BIT_DAC_REG *dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
+            out_buf_size = dac20bitPtr->OUT_BUF_SIZE;
+            dacOutBufSize[jj] = out_buf_size;
+            if((out_buf_size > 24))
+            {
+                pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
+                if(dacTimingErrorPending[jj]) dacTimingError = 1;
+                dacTimingErrorPending[jj] = 1;
+            } else {
+                pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
+                dacTimingErrorPending[jj] = 0;
+            }
 		}
 		if(cdsPciModules.dacType[jj] == GSC_16AO16)
 		{
