@@ -427,7 +427,7 @@ sub createGdsMedm
 			$medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{black},$ecolors{ltblue},"D$::dacCardNum[$ii]");
 			if($adcMaster == 1)
 			{
-				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$bwidth,$bheight,"$site\:FEC-$dcuid\_DAC_STAT_$ii","0","3",$ecolors{green},$ecolors{red});
+				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$bwidth,$bheight,"$site\:FEC-$dcuid\_DAC_STAT_$ii","0","4",$ecolors{green},$ecolors{red});
 			} else {
 				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$b1width,$bheight,"$site\:FEC-$dcuid\_DAC_STAT_$ii","1","2",$ecolors{green},$ecolors{red});
 			}

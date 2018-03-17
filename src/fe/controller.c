@@ -738,6 +738,7 @@ udelay(1000);
     		gsc16ai64Enable(cdsPciModules.adcCount);
 		/// - ----  Arm DAC outputs
 		gsc18ao8Enable(&cdsPciModules);
+		gsc20ao8Enable(&cdsPciModules);
 		gsc16ao16Enable(&cdsPciModules);
 		// Set synched flag so later code will not check for 1PPS
 		sync21pps = 1;
@@ -1403,8 +1404,8 @@ udelay(1000);
                 if(dacWriteEnable > 4) {
                         if(cdsPciModules.dacType[jj] == GSC_16AO16) {
                                 gsc16ao16DmaStart(jj);
-						} else if(cdsPciModules.dacType[jj] == GSC_20AO8) {
-		                        gsc20ao8DmaStart(jj);
+			} else if(cdsPciModules.dacType[jj] == GSC_20AO8) {
+		                gsc20ao8DmaStart(jj);
                         } else {
                                 gsc18ao8DmaStart(jj);
                         }
