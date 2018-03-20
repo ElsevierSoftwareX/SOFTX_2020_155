@@ -336,7 +336,10 @@ void *producer::frame_writer() {
         for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
             // printf("DCU %d is %d bytes long\n", j, daqd.dcuSize[0][j]);
             if (daqd.dcuSize[0][j] == 0 || dcu_to_zmq_lookup[j] < 0 || dcu_data_from_zmq[j] == nullptr)
+            {
+                daqd.dcuStatus[0][j] = 0xbad;
                 continue; // skip unconfigured DCU nodes
+            }
             std::cout << "dcu " << j << std::endl;
             long read_size = daqd.dcuDAQsize[0][j];
             if (IS_EPICS_DCU(j)) {
