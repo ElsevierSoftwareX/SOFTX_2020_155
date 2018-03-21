@@ -24,20 +24,24 @@
 #include <time.h>
 #include "zmq_daq.h"
 #include "../include/daqmap.h"
+#include "../include/daq_core.h"
 
+
+extern void *findSharedMemorySize(char *,int);
 
 int do_verbose;
-unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
 
-unsigned int tstatus[16];
-int thread_index[DCU_COUNT];
+int thread_index;
+// int thread_index[DCU_COUNT];
 void *daq_context[DCU_COUNT];
 void *daq_subscriber[DCU_COUNT];
-daq_dc_data_t mxDataBlockFull[16];
-daq_multi_dcu_data_t mxDataBlockG[32][16];
+daq_multi_dcu_data_t mxDataBlockSingle[32];
+const int mc_header_size = sizeof(daq_multi_cycle_header_t);
 int stop_working_threads = 0;
 int start_acq = 0;
 static volatile int keepRunning = 1;
+int thread_cycle[32];
+int thread_timestamp[32];
 
 void
 usage()
@@ -45,7 +49,7 @@ usage()
 	fprintf(stderr, "Usage: zmq_multi_rcvr [args] -s server name\n");
 	fprintf(stderr, "-l filename - log file name\n"); 
 	fprintf(stderr, "-s - server name eg x1lsc0, x1susex, etc.\n");
-	fprintf(stderr, "-v - verbose prints cpu_meter test data\n");
+	fprintf(stderr, "-v - verbose prints diag test data\n");
 	fprintf(stderr, "-h - help\n");
 }
 
@@ -61,43 +65,39 @@ void intHandler(int dummy) {
 	keepRunning = 0;
 }
 
+// *************************************************************************
+// Thread for receiving DAQ data via ZMQ
+// *************************************************************************
 void *rcvr_thread(void *arg) {
 	int *mythread = (int *)arg;
 	int mt = *mythread;
 	printf("myarg = %d\n",mt);
 	zmq_msg_t message;
-	int ii;
 	int cycle = 0;
-	int acquire = 0;
-	daq_multi_dcu_data_t mxDataBlock;
+	daq_multi_dcu_data_t *mxDataBlock;
 
 	printf("Starting receive loop for thread %d\n", mt);
+	char *daqbuffer = (char *)&mxDataBlockSingle[mt];
+	mxDataBlock = (daq_multi_dcu_data_t *)daqbuffer;
 	do {
+		// Initialize receiver buffer
 		zmq_msg_init(&message);
 		// Get data when message size > 0
 		int size = zmq_msg_recv(&message,daq_subscriber[mt],0);
 		assert(size >= 0);
 		// Get pointer to message data
 		char *string = (char *)zmq_msg_data(&message);
-		char *daqbuffer = (char *)&mxDataBlock;
 		// Copy data out of 0MQ message buffer to local memory buffer
 		memcpy(daqbuffer,string,size);
 		// Destroy the received message buffer
 		zmq_msg_close(&message);
 
-		//printf("Received block of %d on %d\n", size, mt);
-		for (ii = 0;ii<mxDataBlock.header.dcuTotalModels;ii++) {
-			cycle = mxDataBlock.header.dcuheader[ii].cycle;
-			// Copy data to global buffer
-			char *localbuff = (char *)&mxDataBlockG[mt][cycle];
-			memcpy(localbuff,daqbuffer,size);
-		}
-		// Always start on cycle 0 after told to start by main thread
-		if(cycle == 0 && start_acq) acquire = 1;
-		// Set the cycle data ready bit
-		if(acquire)  {
-			tstatus[cycle] |= (1 << mt);
-		}
+		// Get the message DAQ cycle number
+		cycle = mxDataBlock->header.dcuheader[0].cycle;
+		// Pass cycle and timestamp data back to main process
+		thread_cycle[mt] = cycle;
+		thread_timestamp[mt] = mxDataBlock->header.dcuheader[0].timeSec;
+
 	// Run until told to stop by main thread
 	} while(!stop_working_threads);
 	printf("Stopping thread %d\n",mt);
@@ -106,47 +106,57 @@ void *rcvr_thread(void *arg) {
 
 }
 
+// *************************************************************************
+// Main Process
+// *************************************************************************
 int
 main(int argc, char **argv)
 {
-	pthread_t thread_id[4];
+	pthread_t thread_id[32];
 	unsigned int nsys = 1; // The number of mapped shared memories (number of data sources)
 	char *sysname;
-	char *sname[DCU_COUNT];
+	char *sname[DCU_COUNT];	// Names of FE computers serving DAQ data 
 	int c;
-	int dataRdy = 0;
-	static char *default_pub_iface = "eth2";
-	char *pub_iface = default_pub_iface;
+	int ii;					// Loop counter
 
-	extern char *optarg;
+	extern char *optarg;	// Needed to get arguments to program
 
-	// Create DAQ message area in local memory
-	daq_multi_dcu_data_t mxDataBlock;
-	// Declare pointer to local memory message area
-	printf("size of mxdata = %ld\n",sizeof(mxDataBlock));
-
-
-	/* set up defaults */
-	sysname = NULL;
-	int ii;
+	// Declare shared memory data variables
+	daq_multi_cycle_header_t *ifo_header;
+	char *ifo;
+	char *ifo_data;
+	size_t cycle_data_size;
+	daq_multi_dcu_data_t *ifoDataBlock;
+	char *nextData;
+	int max_data_size = 100;
 
 	// Declare 0MQ message pointers
 	int rc;
 	char loc[40];
 
+	/* set up defaults */
+	sysname = NULL;
 
-	while ((c = getopt(argc, argv, "hd:s:p:l:Vvw:x")) != EOF) switch(c) {
+
+	// Get arguments sent to process
+	while ((c = getopt(argc, argv, "hd:s:m:l:Vvw:x")) != EOF) switch(c) {
 	case 's':
 		sysname = optarg;
 		break;
 	case 'v':
 		do_verbose = 1;
 		break;
-	case 'w':
-		do_wait = atoi(optarg);
-		break;
-	case 'p':
-		pub_iface = optarg;
+	case 'm':
+		max_data_size = atoi(optarg);
+    	if (max_data_size < 20){
+        	printf("Min data block size is 20 MB\n");
+            return -1;
+        }
+        if (max_data_size > 100){
+            printf("Max data block size is 100 MB\n");
+            return -1;
+        }
+        break;
 	case 'h':
 	default:
 		usage();
@@ -155,10 +165,12 @@ main(int argc, char **argv)
 
 	if (sysname == NULL) { usage(); exit(1); }
 
+	// set up to catch Control C
 	signal(SIGINT,intHandler);
 
 	printf("Server name: %s\n", sysname);
 
+	// Parse names of data servers
 	sname[0] = strtok(sysname, " ");
         for(;;) {
                 printf("%s\n", sname[nsys - 1]);
@@ -170,12 +182,22 @@ main(int argc, char **argv)
                 nsys++;
         }
 
+	// Get pointers to local DAQ mbuf
+    ifo = (char *)findSharedMemorySize("ifo",max_data_size);
+    ifo_header = (daq_multi_cycle_header_t *)ifo;
+    ifo_data = (char *)ifo + sizeof(daq_multi_cycle_header_t);
+    cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t))/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+    cycle_data_size -= (cycle_data_size % 8);
+	ifo_header->cycleDataSize = cycle_data_size;
+    ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+
 
 	printf("nsys = %d\n",nsys);
 	for(ii=0;ii<nsys;ii++) {
 		printf("sys %d = %s\n",ii,sname[ii]);
 	}
-		// Make 0MQ socket connection
+
+	// Make 0MQ socket connections
 	for(ii=0;ii<nsys;ii++) {
 		// Make 0MQ socket connection for rcvr threads
 		daq_context[ii] = zmq_ctx_new();
@@ -192,31 +214,12 @@ main(int argc, char **argv)
 		assert (rc == 0);
 		printf(" done\n");
 
-		thread_index[ii] = ii;
+		// Create a thread to receive data from each data server
+		thread_index = ii;
 		pthread_create(&thread_id[ii],NULL,rcvr_thread,(void *)&thread_index);
-		dataRdy |= (1 << ii);
 	}
 
-	// Create 0MQ socket for DC data transmission
-	void *dc_context;
-	void *dc_publisher;
-
-	dc_context = zmq_ctx_new();
-	dc_publisher = zmq_socket(dc_context,ZMQ_PUB);
-    sprintf(loc,"%s%s:%d","tcp://",pub_iface,DAQ_DATA_PORT);
-	rc = zmq_bind (dc_publisher,loc);
-	assert(rc == 0);
-
-	void *de_context;
-	void *de_publisher;
-
-	de_context = zmq_ctx_new();
-	de_publisher = zmq_socket(de_context,ZMQ_PUB);
-	sprintf(loc,"%s%s:%d","tcp://",pub_iface,7777);
-	rc = zmq_bind (de_publisher,loc);
-	assert(rc == 0);
-
-	int loop = 0;
+	int nextCycle = 0;
 	start_acq = 1;
 	int64_t mytime = 0;
 	int64_t mylasttime = 0;
@@ -224,10 +227,7 @@ main(int argc, char **argv)
 	int mytotaldcu = 0;
 	char *zbuffer;
 	int dc_datablock_size = 0;
-	char buffer[DAQ_TRANSIT_DC_DATA_BLOCK_SIZE];
 	static const int header_size = sizeof(daq_multi_dcu_header_t);
-	int sendLength = 0;
-	int msg_size = 0;
 	char dcstatus[2024];
 	char dcs[24];
 	int edcuid[10];
@@ -235,96 +235,109 @@ main(int argc, char **argv)
 	int edbs[10];
 	unsigned long ets = 0;
 	int timeout = 0;
-	int resync = 1;
+	int dataRdy[32];
+	int threads_rdy;
+	int any_rdy = 0;
+
 	do {
-		if(resync) {
-			loop = 0;
-			resync = 0;
-			for(ii=0;ii<16;ii++) tstatus[ii] = 0;
-		}
-		// Wait until received data from at least 1 FE
+		// Reset counters
 		timeout = 0;
+		for(ii=0;ii<nsys;ii++) dataRdy[ii] = 0;
+		threads_rdy = 0;
+		any_rdy = 0;
+		// Wait until received data from at least 1 FE or timeout
 		do {
 			usleep(2000);
+			for(ii=0;ii<nsys;ii++) {
+				if(nextCycle == thread_cycle[ii]) any_rdy = 1;
+			}
 			timeout += 1;
-		}while(tstatus[loop] == 0 && timeout < 50);
-		// If timeout, not getting data from anyone.
-		if(timeout >= 50) resync = 1;
-		if (resync) continue;
+		}while(!any_rdy && timeout < 50);
 
-		// Wait until data received from everyone
+		// Wait until data received from everyone or timeout
 		timeout = 0;
 		do {
-			usleep(1000);
-			timeout += 1;
-		}while(tstatus[loop] != dataRdy && timeout < 5);
-		// If timeout, not getting data from everyone.
-		// TODO: MARK MISSING FE DATA AS BAD
-		 
-		// Clear thread rdy for this cycle
-		tstatus[loop] = 0;
-
-		// Timing diagnostics
-		mytime = s_clock();
-		myptime = mytime - mylasttime;
-		mylasttime = mytime;
-		// printf("Data rday for cycle = %d\t%ld\n",loop,myptime);
-		// Reset total DCU counter
-		mytotaldcu = 0;
-		// Set pointer to start of DC data block
-		zbuffer = (char *)&mxDataBlockFull[loop].dataBlock[0];
-		// Reset total DC data size counter
-		dc_datablock_size = 0;
-		// Loop over all data buffers received from FE computers
-		for(ii=0;ii<nsys;ii++) {
-			int myc = mxDataBlockG[ii][loop].header.dcuTotalModels;
-			// printf("\tModel %d = %d\n",ii,myc);
-			for(int jj=0;jj<myc;jj++) {
-				// Copy data header information
-				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].dcuId = mxDataBlockG[ii][loop].header.dcuheader[jj].dcuId;
-				edcuid[mytotaldcu] = mxDataBlockFull[loop].header.dcuheader[mytotaldcu].dcuId;
-				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].fileCrc = mxDataBlockG[ii][loop].header.dcuheader[jj].fileCrc;
-				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].status = mxDataBlockG[ii][loop].header.dcuheader[jj].status;
-				estatus[mytotaldcu] = mxDataBlockFull[loop].header.dcuheader[mytotaldcu].status;
-				if(mxDataBlockFull[loop].header.dcuheader[mytotaldcu].status == 0xbad)
-					printf("Fault on dcuid %d\n",mxDataBlockFull[loop].header.dcuheader[mytotaldcu].dcuId );
-				else ets = mxDataBlockG[ii][loop].header.dcuheader[jj].timeSec;
-				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].cycle = mxDataBlockG[ii][loop].header.dcuheader[jj].cycle;
-				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].timeSec = mxDataBlockG[ii][loop].header.dcuheader[jj].timeSec;
-				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].timeNSec = mxDataBlockG[ii][loop].header.dcuheader[jj].timeNSec;
-				int mydbs = mxDataBlockG[ii][loop].header.dcuheader[jj].dataBlockSize;
-				edbs[mytotaldcu] = mydbs;
-				// printf("\t\tdcuid = %d\n",mydbs);
-				mxDataBlockFull[loop].header.dcuheader[mytotaldcu].dataBlockSize = mydbs;
-				char *mbuffer = (char *)&mxDataBlockG[ii][loop].dataBlock[0];
-				// Copy data to DC buffer
-				memcpy(zbuffer,mbuffer,mydbs);
-				// Increment DC data buffer pointer for next data set
-				zbuffer += mydbs;
-				dc_datablock_size += mydbs;
-				mytotaldcu ++;
+			usleep(100);
+			for(ii=0;ii<nsys;ii++) {
+				if(nextCycle == thread_cycle[ii] && !dataRdy[ii]) threads_rdy ++;
+				if(nextCycle == thread_cycle[ii]) dataRdy[ii] = 1;
 			}
+			timeout += 1;
+		}while(threads_rdy < nsys && timeout < 50);
+
+		if(any_rdy) {
+			// Timing diagnostics
+			mytime = s_clock();
+			myptime = mytime - mylasttime;
+			mylasttime = mytime;
+			if(do_verbose)printf("Data rday for cycle = %d\t%ld\n",nextCycle,myptime);
+			// Reset total DCU counter
+			mytotaldcu = 0;
+			// Reset total DC data size counter
+			dc_datablock_size = 0;
+			// Get pointer to next data block in shared memory
+			nextData = (char *)ifo_data;
+        	nextData += cycle_data_size * nextCycle;
+        	ifoDataBlock = (daq_multi_dcu_data_t *)nextData;
+			zbuffer = (char *)nextData + header_size;
+
+			// Loop over all data buffers received from FE computers
+			for(ii=0;ii<nsys;ii++) {
+		  		if(dataRdy[ii]) {
+					int myc = mxDataBlockSingle[ii].header.dcuTotalModels;
+					// printf("\tModel %d = %d\n",ii,myc);
+					// For each model, copy over data header information
+					for(int jj=0;jj<myc;jj++) {
+						// Copy data header information
+						ifoDataBlock->header.dcuheader[mytotaldcu].dcuId = mxDataBlockSingle[ii].header.dcuheader[jj].dcuId;
+						ifoDataBlock->header.dcuheader[mytotaldcu].fileCrc = mxDataBlockSingle[ii].header.dcuheader[jj].fileCrc;
+						ifoDataBlock->header.dcuheader[mytotaldcu].status = mxDataBlockSingle[ii].header.dcuheader[jj].status;
+						ifoDataBlock->header.dcuheader[mytotaldcu].dataCrc = mxDataBlockSingle[ii].header.dcuheader[jj].dataCrc;
+						ifoDataBlock->header.dcuheader[mytotaldcu].cycle = mxDataBlockSingle[ii].header.dcuheader[jj].cycle;
+						ifoDataBlock->header.dcuheader[mytotaldcu].timeSec = mxDataBlockSingle[ii].header.dcuheader[jj].timeSec;
+						ifoDataBlock->header.dcuheader[mytotaldcu].timeNSec = mxDataBlockSingle[ii].header.dcuheader[jj].timeNSec;
+						ifoDataBlock->header.dcuheader[mytotaldcu].dataBlockSize = mxDataBlockSingle[ii].header.dcuheader[jj].dataBlockSize;
+						// Get some diags
+						if(ifoDataBlock->header.dcuheader[mytotaldcu].status == 0xbad)
+							printf("Fault on dcuid %d\n",ifoDataBlock->header.dcuheader[mytotaldcu].dcuId );
+						else ets = mxDataBlockSingle[ii].header.dcuheader[jj].timeSec;
+						estatus[mytotaldcu] = ifoDataBlock->header.dcuheader[mytotaldcu].status;
+						edcuid[mytotaldcu] = ifoDataBlock->header.dcuheader[mytotaldcu].dcuId;
+						mytotaldcu ++;
+						// printf("\t\tdcuid = %d\n",mydbs);
+					}
+					// Get the size of the data to transfer
+					int mydbs = mxDataBlockSingle[ii].header.dataBlockSize;
+					edbs[mytotaldcu] = mydbs;
+					// Get pointer to data in receive data block
+					char *mbuffer = (char *)&mxDataBlockSingle[ii].dataBlock[0];
+					// Copy data from receive buffer to shared memory
+					memcpy(zbuffer,mbuffer,mydbs);
+					// Increment shared memory data buffer pointer for next data set
+					zbuffer += mydbs;
+					// Calc total size of data block for this cycle
+					dc_datablock_size += mydbs;
+		  		}
+			}
+			// Write total data block size to shared memory header
+			ifoDataBlock->header.dataBlockSize = dc_datablock_size;
+			// Write total dcu count to shared memory header
+			ifoDataBlock->header.dcuTotalModels = mytotaldcu;
+			// Set multi_cycle head cycle to indicate data ready for this cycle
+			ifo_header->curCycle = nextCycle;
+			if(do_verbose)printf("\tTotal DCU = %d\tSize = %d\n",mytotaldcu,dc_datablock_size);
 		}
-		// printf("\tTotal DCU = %d\tSize = %d\n",mytotaldcu,dc_datablock_size);
-		mxDataBlockFull[loop].header.dcuTotalModels = mytotaldcu;
-		sendLength = header_size + dc_datablock_size;
-		zbuffer = (char *)&mxDataBlockFull[loop];
-		// Copy DC data to 0MQ message block
-		memcpy(buffer,zbuffer,sendLength);
-		// Xmit the DC data block
-		msg_size = zmq_send(dc_publisher,buffer,sendLength,0);
 
 		sprintf(dcstatus,"%ld ",ets);
 		for(ii=0;ii<mytotaldcu;ii++) {
 			sprintf(dcs,"%d %d %d ",edcuid[ii],estatus[ii],edbs[ii]);
 			strcat(dcstatus,dcs);
 		}
-		sendLength = sizeof(dcstatus);
-		msg_size = zmq_send(de_publisher,dcstatus,sendLength,0);
 
-		loop ++;
-		loop %= 16;
-	}while (keepRunning);
+		// Increment cycle count
+		nextCycle ++;
+		nextCycle %= 16;
+	}while (keepRunning);	// End of infinite loop
 
 	printf("stopping threads %d \n",nsys);
 	stop_working_threads = 1;
@@ -337,8 +350,6 @@ main(int argc, char **argv)
 		zmq_close(daq_subscriber[ii]);
 		zmq_ctx_destroy(daq_context[ii]);
 	}
-	zmq_close(dc_publisher);
-	zmq_ctx_destroy(dc_context);
   
 	exit(0);
 }
