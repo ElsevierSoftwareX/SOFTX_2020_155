@@ -672,6 +672,7 @@ int init_module (void)
 	adcCnt = 0;
 	dacCnt = 0;
 	dac18Cnt = 0;
+	dac20Cnt = 0;
 	doCnt = 0;
 	do32Cnt = 0;
 	cdo64Cnt = 0;

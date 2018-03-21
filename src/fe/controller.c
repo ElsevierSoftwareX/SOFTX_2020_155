@@ -1971,25 +1971,26 @@ udelay(1000);
 // Only one write per code cycle to reduce time
        	if (cycleNum >= HKP_DAC_WD_CLK && cycleNum < (HKP_DAC_WD_CLK + cdsPciModules.dacCount)) 
 	{
+		if (cycleNum == HKP_DAC_WD_CLK) dacWatchDog ^= 1;
 		jj = cycleNum - HKP_DAC_WD_CLK;
 		if(cdsPciModules.dacType[jj] == GSC_18AO8)
 		{
 			static int dacWatchDog = 0;
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr;
-			if (cycleNum == HKP_DAC_WD_CLK) dacWatchDog ^= 1;
+			// if (cycleNum == HKP_DAC_WD_CLK) dacWatchDog ^= 1;
 			dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 			if(iopDacEnable && !dacChanErr[jj])
 				dac18bitPtr->digital_io_ports = (dacWatchDog | GSAO_18BIT_DIO_RW);
 
 		}
 		if(cdsPciModules.dacType[jj] == GSC_20AO8)
-        {
-            volatile GSA_20BIT_DAC_REG *dac20bitPtr;
-            dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
-            if(iopDacEnable && !dacChanErr[jj]) {
-                dac20bitPtr->digital_io_ports = (dacWatchDog | GSAO_20BIT_DIO_RW);
-            }
-        }
+		{
+            		volatile GSA_20BIT_DAC_REG *dac20bitPtr;
+            		dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
+            		if(iopDacEnable && !dacChanErr[jj]) {
+                		dac20bitPtr->digital_io_ports = (dacWatchDog | GSAO_20BIT_DIO_RW);
+            		}
+		}
 	}
 /// \> Cycle 500 to 500 + numDacModules, read back watchdog from AI chassis (18 bit DAC only)
 // AI Chassis WD CHECK for 18 bit DAC modules
