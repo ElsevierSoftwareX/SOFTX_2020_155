@@ -2089,7 +2089,6 @@ udelay(1000);
 
 	/// \> Compute code cycle time diag information.
 	cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
-	if(cycleTime > 20) printf("Long cycle = %d at cycle %d\n",cycleTime,cycleNum);
 
 	if (longestWrite2 < ((tempClock[3]-tempClock[2])/CPURATE)) longestWrite2 = (tempClock[3]-tempClock[2])/CPURATE;
 	if (cycleTime > (1000000/CYCLE_PER_SECOND))  {
