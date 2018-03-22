@@ -75,6 +75,8 @@ main(int argc,char *argv[])
     int new_cycle;
     char *nextData;
 
+	FILE *mydiags;
+
     printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
     
     if (argc<2) {
@@ -146,32 +148,41 @@ main(int argc,char *argv[])
 	    // Set the xmit data length to be header size plus data size
 	    sendLength = header_size + ixDataBlock->header.dataBlockSize;
 
-#if 0
-	    // Print some diagnostics
-	    // if(new_cycle == 0 && do_verbose == 1)
-	    // {
-		    printf("New cycle = %d\n", new_cycle);
-		    printf("\t\tNum DCU = %d\n", ixDataBlock->header.dcuTotalModels);
-		    printf("\t\tNew Size = %d\n", ixDataBlock->header.dataBlockSize);
-		    printf("\t\tTime = %d\n", ixDataBlock->header.dcuheader[0].timeSec);
-		    printf("\t\tSend Size = %d\n", sendLength);
-		    printf("\t\tCycle Size = %d\n", DAQ_TRANSIT_DC_DATA_BLOCK_SIZE);
-	    // }
-		usleep(10000);
-#endif
+	    // Print some diagnostics to file
+	    if(new_cycle == 0 && do_verbose > 0)
+	    {
+			mydiags = fopen("./ix_diags.txt","w");
+			if(mydiags) {
+					fprintf(mydiags,"%d %d %d\n", ixDataBlock->header.dcuTotalModels,
+												  (sendLength * 16),
+												  ixDataBlock->header.dcuheader[0].timeSec);
+			}
+			fclose(mydiags);
+	    }
+
+	    // Print some diagnostics to terminal
+	    if(new_cycle == 0 && do_verbose == 2)
+	    {
+					printf("\t\tNum DCU = %d\n", ixDataBlock->header.dcuTotalModels);
+					printf("\t\tNew Size = %d\n", ixDataBlock->header.dataBlockSize);
+					printf("\t\tTime = %d\n", ixDataBlock->header.dcuheader[0].timeSec);
+					printf("\t\tSend Size = %d\n", sendLength);
+					printf("\t\tCycle Size = %d\n", DAQ_TRANSIT_DC_DATA_BLOCK_SIZE);
+		}
 	
 	    // WRITEDATA to Dolphin Network
 	    SCIMemCpy(sequence,ixDataBlock, remoteMap,xmitDataOffset,sendLength,memcpyFlag,&error);
 	    if (error != SCI_ERR_OK) {
-		fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
-		return error;
+			fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
+			return error;
 	    }
 	    // Calculate data CRC checksum
 	    myCrc = crc_ptr((char *)ixDataBlock, sendLength, 0);
 	    myCrc = crc_len(sendLength, myCrc);
+
 	    // Set data header information
 	    xmitHeader->maxCycle = ifo_header->maxCycle;
-	    xmitHeader->cycleDataSize = ifo_header->cycleDataSize;
+	    xmitHeader->cycleDataSize = sendLength;
 	    xmitHeader->msgcrc = myCrc;
 	    // Send cycle last as indication of data ready for receivers
 	    xmitHeader->curCycle = ifo_header->curCycle;
