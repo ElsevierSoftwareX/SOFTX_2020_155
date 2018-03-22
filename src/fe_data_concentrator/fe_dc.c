@@ -40,8 +40,8 @@ extern void *findSharedMemorySize(char *,int);
 
 char modelnames[DAQ_TRANSIT_MAX_DCU][64];
 char *sysname;
-int do_verbose = 1;
-int sendLength = 0;
+int do_verbose = 0;
+// int sendLength = 0;
 static volatile int keepRunning = 1;
 char *ifo;
 char *ifo_data;
@@ -93,8 +93,10 @@ symm_ok() {
 }
 
 // **********************************************************************************************
+// This function uses time from IRIG-B card
+// Abandoned due to interference with IOP model reading same card
 int 
-waitNextCycle(	int cyclereq,				// Cycle to wait for
+waitNextCycle(	unsigned int cyclereq,				// Cycle to wait for
 				int reset,					// Request to reset model ipc shared memory
 				struct rmIpcStr *ipcPtr) 	// Pointer to IOP IPC shared memory
 {
@@ -125,6 +127,52 @@ waitNextCycle(	int cyclereq,				// Cycle to wait for
 		// 	- Zero (0) if synced by GPS time ie IOP not running.
         return(iopRunning);
 }
+// **********************************************************************************************
+int 
+waitNextCycle2(	int nsys,
+				unsigned int cyclereq,				// Cycle to wait for
+				int reset,					// Request to reset model ipc shared memory
+				int dataRdy[],
+				struct rmIpcStr *ipcPtr[]) 	// Pointer to IOP IPC shared memory
+{
+	int iopRunning = 0;
+	int ii;
+	int threads_rdy = 0;
+	int timeout = 0;
+
+		// if reset, want to set IOP cycle to impossible number
+		if(reset) ipcPtr[0]->cycle = 50;
+        // Find cycle 
+		do {
+     		usleep(1000);
+			// Wait until received data from at least 1 FE or timeout
+			do {
+				usleep(2000);
+				if(ipcPtr[0]->cycle == cyclereq) 
+				{
+						iopRunning = 1;
+						dataRdy[0] = 1;
+				}
+			    timeout += 1;
+			}while(!iopRunning && timeout < 50);
+
+            // Wait until data received from everyone or timeout
+            timeout = 0;
+            do {
+             	usleep(100);
+				for(ii=1;ii<nsys;ii++) {
+             		if(ipcPtr[ii]->cycle == cyclereq && !dataRdy[ii]) threads_rdy ++;
+             		if(ipcPtr[ii]->cycle == cyclereq) dataRdy[ii] = 1;
+                }
+                timeout += 1;
+            }while(threads_rdy < nsys && timeout < 20);
+
+		}while(iopRunning == 0 && keepRunning);
+		// Return iopRunning:
+		// 	- One (1) if synced to IOP 
+		// 	- Zero (0) if synced by GPS time ie IOP not running.
+        return(iopRunning);
+}
 
 // **********************************************************************************************
 // Capture SIGHALT from ControlC
@@ -133,8 +181,8 @@ void intHandler(int dummy) {
 }
 
 // **********************************************************************************************
-void print_diags(int nsys, int lastCycle) {
-	int ii;
+void print_diags(int nsys, int lastCycle, int sendLength) {
+	int ii = 0;
 		// Print diags in verbose mode
 		printf("\nTime = %d-%d size = %d\n",shmIpcPtr[0]->bp[lastCycle].timeSec,shmIpcPtr[0]->bp[lastCycle].timeNSec,sendLength);
 		printf("\tCycle = ");
@@ -220,7 +268,8 @@ int getmodelrate( int *rate, int *dcuid, char *modelname, char *gds_tp_dir) {
 int loadMessageBuffer(	int nsys, 
 						int lastCycle,
 						int status,
-						unsigned int localtime
+						unsigned int localtime,
+						int dataRdy[]
 					 )
 {
 	int sendLength = 0;
@@ -241,82 +290,65 @@ int loadMessageBuffer(	int nsys,
 		// Initialize data send length to size of message header
 		sendLength = header_size;
 		// Set number of FE models that have data in this message
-		ixDataBlock->header.dcuTotalModels = nsys;
 		ixDataBlock->header.dataBlockSize = 0;
+		int db = 0;
 		// Loop thru all FE models
 		for (ii=0;ii<nsys;ii++) {
-			reftimeerror = 0;
-			// Set heartbeat monitor for return to DAQ software
-			if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[0];
-			// Set DCU ID in header
-			ixDataBlock->header.dcuheader[ii].dcuId = shmIpcPtr[ii]->dcuId;
-			// Set DAQ .ini file CRC checksum
-			ixDataBlock->header.dcuheader[ii].fileCrc = shmIpcPtr[ii]->crc;
-			// Set 1/16Hz cycle number
-			ixDataBlock->header.dcuheader[ii].cycle = shmIpcPtr[ii]->cycle;
-			if(ii == 0) refcycle = shmIpcPtr[ii]->cycle;
-			// Set GPS seconds
-			ixDataBlock->header.dcuheader[ii].timeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
-			if (ii == 0) reftimeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
-			// Set GPS nanoseconds
-			ixDataBlock->header.dcuheader[ii].timeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
-			if (ii == 0) reftimeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
-			if (ii != 0 && reftimeSec != shmIpcPtr[ii]->bp[lastCycle].timeSec) 
-				reftimeerror = 1;;
-			if (ii != 0 && reftimeNSec != shmIpcPtr[ii]->bp[lastCycle].timeNSec) 
-				reftimeerror |= 2;;
-			if(reftimeerror || status == 0) {
-				ixDataBlock->header.dcuheader[ii].cycle = lastCycle;
-				ixDataBlock->header.dcuheader[ii].timeSec = localtime;
-				ixDataBlock->header.dcuheader[ii].timeNSec = lastCycle;
-				printf("Timing error model %d\n",ii);
-				// Set Status -- Need to update for models not running
-				ixDataBlock->header.dcuheader[ii].status = 0xbad;
-				// Indicate size of data block
-				ixDataBlock->header.dcuheader[ii].dataBlockSize = 0;
-				ixDataBlock->header.dcuheader[ii].tpBlockSize = 0;
-				ixDataBlock->header.dcuheader[ii].tpCount = 0;
-			} else {
-				// Set Status -- Need to update for models not running
+			if(dataRdy[ii]) {
+				// Set heartbeat monitor for return to DAQ software
+				if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[0];
+				// Set DCU ID in header
+				ixDataBlock->header.dcuheader[db].dcuId = shmIpcPtr[ii]->dcuId;
+				// Set DAQ .ini file CRC checksum
+				ixDataBlock->header.dcuheader[db].fileCrc = shmIpcPtr[ii]->crc;
+				// Set 1/16Hz cycle number
+				ixDataBlock->header.dcuheader[db].cycle = shmIpcPtr[ii]->cycle;
+				// Set GPS seconds
+				ixDataBlock->header.dcuheader[db].timeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
+				// Set GPS nanoseconds
+				ixDataBlock->header.dcuheader[db].timeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
+				// Set Status -- as running
 				ixDataBlock->header.dcuheader[ii].status = 2;
 				// Indicate size of data block
-				ixDataBlock->header.dcuheader[ii].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
+				ixDataBlock->header.dcuheader[db].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
 				// Prevent going beyond MAX allowed data size
-				if (ixDataBlock->header.dcuheader[ii].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
-					ixDataBlock->header.dcuheader[ii].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
-                ixDataBlock->header.dcuheader[ii].tpCount = (unsigned int)shmTpTable[ii]->count;
-				ixDataBlock->header.dcuheader[ii].tpBlockSize = sizeof(float) * modelrates[ii] * ixDataBlock->header.dcuheader[ii].tpCount;
+				if (ixDataBlock->header.dcuheader[db].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
+					ixDataBlock->header.dcuheader[db].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
+                ixDataBlock->header.dcuheader[db].tpCount = (unsigned int)shmTpTable[ii]->count;
+				ixDataBlock->header.dcuheader[db].tpBlockSize = sizeof(float) * modelrates[ii] * ixDataBlock->header.dcuheader[ii].tpCount;
 				// Prevent going beyond MAX allowed data size
-				if (ixDataBlock->header.dcuheader[ii].tpBlockSize > DAQ_DCU_BLOCK_SIZE)
-					ixDataBlock->header.dcuheader[ii].tpBlockSize = DAQ_DCU_BLOCK_SIZE;
+				if (ixDataBlock->header.dcuheader[db].tpBlockSize > DAQ_DCU_BLOCK_SIZE)
+					ixDataBlock->header.dcuheader[db].tpBlockSize = DAQ_DCU_BLOCK_SIZE;
 
-				memcpy(&(ixDataBlock->header.dcuheader[ii].tpNum[0]),
+				memcpy(&(ixDataBlock->header.dcuheader[db].tpNum[0]),
 				       &(shmTpTable[ii]->tpNum[0]),
-					   sizeof(int)*ixDataBlock->header.dcuheader[ii].tpCount);
+					   sizeof(int)*ixDataBlock->header.dcuheader[db].tpCount);
 
-			// Set pointer to dcu data in shared memory
-			dataBuff = (char *)(shmDataPtr[ii] + lastCycle * buf_size);
-			// Copy data from shared memory into local buffer
-			dataTPLength = ixDataBlock->header.dcuheader[ii].dataBlockSize + ixDataBlock->header.dcuheader[ii].tpBlockSize;
-			memcpy((void *)zbuffer, dataBuff, dataTPLength);
+				// Set pointer to dcu data in shared memory
+				dataBuff = (char *)(shmDataPtr[ii] + lastCycle * buf_size);
+				// Copy data from shared memory into local buffer
+				dataTPLength = ixDataBlock->header.dcuheader[db].dataBlockSize + ixDataBlock->header.dcuheader[db].tpBlockSize;
+				memcpy((void *)zbuffer, dataBuff, dataTPLength);
 
-			// Calculate CRC on the data and add to header info
-			myCrc = 0;
-			myCrc = crc_ptr((char *)zbuffer, ixDataBlock->header.dcuheader[ii].dataBlockSize, 0);
-			myCrc = crc_len(ixDataBlock->header.dcuheader[ii].dataBlockSize, myCrc);
-			ixDataBlock->header.dcuheader[ii].dataCrc = myCrc;
+				// Calculate CRC on the data and add to header info
+				myCrc = 0;
+				myCrc = crc_ptr((char *)zbuffer, ixDataBlock->header.dcuheader[db].dataBlockSize, 0);
+				myCrc = crc_len(ixDataBlock->header.dcuheader[db].dataBlockSize, myCrc);
+				ixDataBlock->header.dcuheader[db].dataCrc = myCrc;
 
-			// Increment the 0mq data buffer pointer for next FE
-			zbuffer += dataTPLength;
-			// Increment the 0mq message size with size of FE data block
-			sendLength += dataTPLength;
-			// Increment the data block size for the message
-			ixDataBlock->header.dataBlockSize += (unsigned int)dataTPLength;
+				// Increment the 0mq data buffer pointer for next FE
+				zbuffer += dataTPLength;
+				// Increment the 0mq message size with size of FE data block
+				sendLength += dataTPLength;
+				// Increment the data block size for the message
+				ixDataBlock->header.dataBlockSize += (unsigned int)dataTPLength;
 
-			// Update heartbeat monitor to DAQ code
-			if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[1];
+				// Update heartbeat monitor to DAQ code
+				if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[1];
+				db ++;
 			}
 		}
+		ixDataBlock->header.dcuTotalModels = db;
 		return sendLength;
 }
 
@@ -347,15 +379,19 @@ int send_to_local_memory(int nsys)
     int ii,jj;
 	int new_cycle = 0;
     int lastCycle = 0;
-	int nextCycle = 0;
+	unsigned int nextCycle = 0;
 
   	int sync2iop = 1;
 	int status = 0;
+	int dataRdy[10];
+	for(ii=0;ii<10;ii++) dataRdy[ii] = 0;
 
 
     do {
         
-		status = waitNextCycle(nextCycle,sync2iop,shmIpcPtr[0]);
+		for(ii=0;ii<nsys;ii++) dataRdy[ii] = 0;
+		status = waitNextCycle2(nsys,nextCycle,sync2iop,dataRdy,shmIpcPtr);
+		// status = waitNextCycle(nextCycle,sync2iop,shmIpcPtr[0]);
 		if(status) sync2iop = 0;
 		else sync2iop = 1;
 
@@ -367,13 +403,13 @@ int send_to_local_memory(int nsys)
 		// Need to wait for 2K models to reach end of their cycled
 		usleep((do_wait * 1000));
 
-		// Print diags in verbose mode
-		if(nextCycle == 0 && !do_verbose) print_diags(nsys,lastCycle);
 
 		nextData = (char *)ifo_data;
 		nextData += cycle_data_size * nextCycle;
 		ixDataBlock = (daq_multi_dcu_data_t *)nextData;
-		sendLength = loadMessageBuffer(nsys, nextCycle, status,gps_time);
+		int sendLength = loadMessageBuffer(nsys, nextCycle, status,gps_time,dataRdy);
+		// Print diags in verbose mode
+		if(nextCycle == 0 && do_verbose) print_diags(nsys,lastCycle,sendLength);
 		// Write header info
 		ifo_header->curCycle = nextCycle;
         ifo_header->cycleDataSize = cycle_data_size;
@@ -418,7 +454,7 @@ main(int argc,char *argv[])
     }
 
     /* Get the parameters */
-     while ((counter = getopt(argc, argv, "r:n:g:l:s:m:h:a:")) != EOF) 
+     while ((counter = getopt(argc, argv, "r:n:g:l:s:m:h:a:v:")) != EOF) 
       switch(counter) {
       
         case 'm':
@@ -437,6 +473,9 @@ main(int argc,char *argv[])
 	    sysname = optarg;
 	    printf ("sysnames = %s\n",sysname);
             continue;
+        case 'v':
+	    	do_verbose = atoi(optarg);
+			break;
 
         case 'h':
             Usage();
@@ -473,7 +512,7 @@ main(int argc,char *argv[])
 		char shmem_fname[128];
 		sprintf(shmem_fname, "%s_daq", modelnames[ii]);
 	 	void *dcu_addr = findSharedMemory(shmem_fname);
-	 	if (dcu_addr <= 0) {
+	 	if (dcu_addr == NULL) {
 	 		fprintf(stderr, "Can't map shmem\n");
 			exit(-1);
 		} else {

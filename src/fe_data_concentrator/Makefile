@@ -12,7 +12,7 @@ CC=gcc   #cc or gcc
 CFLAGS = -m64 -D_REENTRANT   -g -O2 -m64
 
 
-CFLAGS+= -g
+CFLAGS+= -g -W
 FLAGS= -g
 CFLAGS+= -I../include
 
