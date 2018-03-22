@@ -243,6 +243,7 @@ main(int argc, char **argv)
 		// Reset counters
 		timeout = 0;
 		for(ii=0;ii<nsys;ii++) dataRdy[ii] = 0;
+		for(ii=0;ii<nsys;ii++) thread_cycle[ii] = 50;
 		threads_rdy = 0;
 		any_rdy = 0;
 		// Wait until received data from at least 1 FE or timeout
@@ -270,7 +271,7 @@ main(int argc, char **argv)
 			mytime = s_clock();
 			myptime = mytime - mylasttime;
 			mylasttime = mytime;
-			if(do_verbose)printf("Data rday for cycle = %d\t%ld\n",nextCycle,myptime);
+			if(do_verbose)printf("Data rdy for cycle = %d\t\t%ld\n",nextCycle,myptime);
 			// Reset total DCU counter
 			mytotaldcu = 0;
 			// Reset total DC data size counter
@@ -325,7 +326,7 @@ main(int argc, char **argv)
 			ifoDataBlock->header.dcuTotalModels = mytotaldcu;
 			// Set multi_cycle head cycle to indicate data ready for this cycle
 			ifo_header->curCycle = nextCycle;
-			if(do_verbose)printf("\tTotal DCU = %d\tSize = %d\n",mytotaldcu,dc_datablock_size);
+			if(do_verbose)printf("\tTotal DCU = %d\t\t\tSize = %d\n",mytotaldcu,dc_datablock_size);
 		}
 
 		sprintf(dcstatus,"%ld ",ets);
