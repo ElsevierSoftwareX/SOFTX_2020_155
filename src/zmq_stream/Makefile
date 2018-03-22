@@ -10,9 +10,11 @@ srcdir = .
 
 #include ../common.mk
 
-TARGETS=zmq_multi_stream zmq_multi_rcvr zmq_proxy zmq_proxy_client zmq_threads zmq_rcv_from_dc.c gpstp_test.c
+TARGETS=zmq_multi_stream zmq_multi_rcvr zmq_proxy zmq_proxy_client zmq_threads zmq_rcv_from_dc.c gpstp_test.c zmqms zmq_fe
 
 zmq_multi_stream: zmq_multi_stream.o rfm.o
+zmqms: zmqms.o rfm.o
+zmq_fe: zmq_fe.o rfm.o
 gdstp_test: gdstp_test.o rfm.o
 zmq_multi_rcvr: zmq_multi_rcvr.o
 zmq_threads: zmq_threads.o rfm.o
@@ -32,7 +34,7 @@ LDFLAGS = -L/usr/local/lib -lzmq -lpthread
 
 .PHONY: clean
 clean:
-	rm -r *.o zmq_multi_stream zmq_multi_rcvr
+	rm -r *.o zmq_multi_stream zmq_multi_rcvr zmqms zmq_fe
 
 .PHONY: distclean
 distclean: clean
