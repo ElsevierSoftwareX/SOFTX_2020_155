@@ -68,6 +68,7 @@ main(int argc,char *argv[])
     daq_multi_cycle_header_t *rcvHeader;
     int myCrc;
     int do_verbose = 0;
+	int max_data_size = 100;
 
     printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
     
@@ -103,6 +104,11 @@ main(int argc,char *argv[])
     char *ifo = (char *)findSharedMemorySize("ifo",100);
     daq_multi_cycle_header_t *ifo_header = (daq_multi_cycle_header_t *)ifo;
     char *ifo_data = (char *)ifo + sizeof(daq_multi_cycle_header_t);
+	int cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t))/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+    cycle_data_size -= (cycle_data_size % 8);
+    ifo_header->cycleDataSize = cycle_data_size;
+    ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+
     int lastCycle = 15;
     int new_cycle = 0;
     char *nextData;
@@ -138,7 +144,7 @@ main(int argc,char *argv[])
 		cyclesize = rcvHeader->cycleDataSize;
 	    // Set up pointers to copy data to receive shmem
     	nextData = (char *)ifo_data;
-	    nextData += cyclesize * new_cycle;
+	    nextData += cycle_data_size * new_cycle;
 	    ixDataBlock = (daq_multi_dcu_data_t *)nextData;
 	    sendLength = rcvHeader->cycleDataSize;
 	    // Copy data from Dolphin to local memory
@@ -149,9 +155,6 @@ main(int argc,char *argv[])
 	    myCrc = crc_len(sendLength, myCrc);
 	
 	    // Write data header info to shared memory
-	    ifo_header->maxCycle = rcvHeader->maxCycle;
-	    ifo_header->cycleDataSize = cyclesize;
-	    ifo_header->msgcrc = rcvHeader->msgcrc;
 	    ifo_header->curCycle = rcvHeader->curCycle;
 
 	    // Verify send CRC matches received CRC
@@ -159,7 +162,8 @@ main(int argc,char *argv[])
 		  //   printf("Sent = %d and RCV = %d\n",ifo_header->msgcrc,myCrc);
 
 	    // Print some diagnostics
-	    if(new_cycle == 0 && do_verbose)
+	    // if(new_cycle == 0 && do_verbose)
+	    if(do_verbose)
 	    {
 		    printf("New cycle = %d\n", new_cycle);
 		    printf("\t\tNum DCU = %d\n", ixDataBlock->header.dcuTotalModels);
