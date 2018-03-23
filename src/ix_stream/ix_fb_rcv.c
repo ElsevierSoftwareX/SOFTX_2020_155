@@ -102,12 +102,16 @@ main(int argc,char *argv[])
 
     // Attach to local shared memory
     char *ifo = (char *)findSharedMemorySize("ifo",100);
-    daq_multi_cycle_header_t *ifo_header = (daq_multi_cycle_header_t *)ifo;
-    char *ifo_data = (char *)ifo + sizeof(daq_multi_cycle_header_t);
+    daq_multi_cycle_data_t *ifo_shm = (daq_multi_cycle_data_t *)ifo;
+    // char *ifo_data = (char *)ifo + sizeof(daq_multi_cycle_header_t);
+    char *ifo_data = (char *)&(ifo_shm->dataBlock[0]);
+	max_data_size *= 1024 * 1024;
 	int cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t))/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
     cycle_data_size -= (cycle_data_size % 8);
-    ifo_header->cycleDataSize = cycle_data_size;
-    ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+    ifo_shm->header.cycleDataSize = cycle_data_size;
+    ifo_shm->header.maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+printf("cycle data size = %d\n",cycle_data_size);
+sleep(3);
 
     int lastCycle = 15;
     int new_cycle = 0;
@@ -155,7 +159,7 @@ main(int argc,char *argv[])
 	    myCrc = crc_len(sendLength, myCrc);
 	
 	    // Write data header info to shared memory
-	    ifo_header->curCycle = rcvHeader->curCycle;
+	    ifo_shm->header.curCycle = rcvHeader->curCycle;
 
 	    // Verify send CRC matches received CRC
 	    // if(ifo_header->msgcrc != myCrc)
