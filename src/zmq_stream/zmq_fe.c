@@ -299,9 +299,10 @@ int loadMessageBuffer(	int nsys,
 	int daqStatBit[2];
 	daqStatBit[0] = 1;
 	daqStatBit[1] = 2;
-    int dataTPLength;
+    int dataXferSize;
 	char *dataBuff;
 	int myCrc = 0;
+	int crcLength;
 
 		// Set pointer to 0MQ message data block
 		zbuffer = (char *)&ixDataBlock->dataBlock[0];
@@ -325,6 +326,7 @@ int loadMessageBuffer(	int nsys,
 				ixDataBlock->header.dcuheader[db].timeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
 				// Set GPS nanoseconds
 				ixDataBlock->header.dcuheader[db].timeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
+				crcLength = shmIpcPtr[ii]->bp[lastCycle].crc;
 				// Set Status -- as running
 				ixDataBlock->header.dcuheader[ii].status = 2;
 				// Indicate size of data block
@@ -332,12 +334,11 @@ int loadMessageBuffer(	int nsys,
 				// Prevent going beyond MAX allowed data size
 				if (ixDataBlock->header.dcuheader[db].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
 					ixDataBlock->header.dcuheader[db].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
+				// Calculate TP data size
                 ixDataBlock->header.dcuheader[db].tpCount = (unsigned int)shmTpTable[ii]->count;
 				ixDataBlock->header.dcuheader[db].tpBlockSize = sizeof(float) * modelrates[ii] * ixDataBlock->header.dcuheader[ii].tpCount;
-				// Prevent going beyond MAX allowed data size
-				if (ixDataBlock->header.dcuheader[db].tpBlockSize > DAQ_DCU_BLOCK_SIZE)
-					ixDataBlock->header.dcuheader[db].tpBlockSize = DAQ_DCU_BLOCK_SIZE;
 
+				// Copy GDSTP table to xmission buffer header
 				memcpy(&(ixDataBlock->header.dcuheader[db].tpNum[0]),
 				       &(shmTpTable[ii]->tpNum[0]),
 					   sizeof(int)*ixDataBlock->header.dcuheader[db].tpCount);
@@ -345,21 +346,21 @@ int loadMessageBuffer(	int nsys,
 				// Set pointer to dcu data in shared memory
 				dataBuff = (char *)(shmDataPtr[ii] + lastCycle * buf_size);
 				// Copy data from shared memory into local buffer
-				dataTPLength = ixDataBlock->header.dcuheader[db].dataBlockSize + ixDataBlock->header.dcuheader[db].tpBlockSize;
-				memcpy((void *)zbuffer, dataBuff, dataTPLength);
+				dataXferSize = ixDataBlock->header.dcuheader[db].dataBlockSize;
+				memcpy((void *)zbuffer, dataBuff, dataXferSize);
 
 				// Calculate CRC on the data and add to header info
 				myCrc = 0;
-				myCrc = crc_ptr((char *)zbuffer, ixDataBlock->header.dcuheader[db].dataBlockSize, 0);
-				myCrc = crc_len(ixDataBlock->header.dcuheader[db].dataBlockSize, myCrc);
+				myCrc = crc_ptr((char *)zbuffer, crcLength, 0);
+				myCrc = crc_len(crcLength, myCrc);
 				ixDataBlock->header.dcuheader[db].dataCrc = myCrc;
 
 				// Increment the 0mq data buffer pointer for next FE
-				zbuffer += dataTPLength;
+				zbuffer += dataXferSize;
 				// Increment the 0mq message size with size of FE data block
-				sendLength += dataTPLength;
+				sendLength += dataXferSize;
 				// Increment the data block size for the message
-				ixDataBlock->header.dataBlockSize += (unsigned int)dataTPLength;
+				ixDataBlock->header.dataBlockSize += ixDataBlock->header.dcuheader[db].dataBlockSize;
 
 				// Update heartbeat monitor to DAQ code
 				if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[1];
