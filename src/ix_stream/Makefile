@@ -18,7 +18,7 @@ CFLAGS = -DHAVE_CONFIG_H -I/opt/Dolphin/5.2/src/include/dis -I/opt/Dolphin/5.2/s
 
 #CFLAGS = -I/opt/DIS/include -I/opt/DIS/include/dis 
 
-CFLAGS+= -g
+CFLAGS+= -g -Wall
 FLAGS= -g
 CFLAGS+= -I../include
 
@@ -31,7 +31,7 @@ endif
 
 
 
-all : ix_multi_stream ix_rcvr ix_rcvr_threads ix_dc_xmit ix_fb_rcv
+all : ix_multi_stream ix_rcvr ix_rcvr_threads ix_dc_xmit ix_fb_rcv ix_convert zmq_rcv_ix_xmit
 
 rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -63,6 +63,12 @@ ix_rcvr: ix_rcvr.c
 	$(CC) $(FLAGS) -o ix_rcvr  ix_rcvr.o  rfm.o -L $(API_LIB_PATH) -lsisci
 	sync
 
+ix_convert: ix_convert.c 
+	$(CC) $(CFLAGS) ix_convert.c -c -o ix_convert.o 
+	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
+	$(CC) $(FLAGS) -o ix_convert  ix_convert.o  rfm.o -L $(API_LIB_PATH)
+	sync
+
 ix_rcvr_threads: ix_rcvr_threads.c 
 	$(CC) $(CFLAGS) ix_rcvr_threads.c -c -o ix_rcvr_threads.o 
 	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
@@ -73,6 +79,12 @@ ix_dc_xmit: ix_dc_xmit.c
 	$(CC) $(CFLAGS) ix_dc_xmit.c -c -o ix_dc_xmit.o 
 	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
 	$(CC) $(FLAGS) -o ix_dc_xmit  ix_dc_xmit.o  rfm.o -L $(API_LIB_PATH) -lsisci
+	sync
+
+zmq_rcv_ix_xmit: zmq_rcv_ix_xmit.c 
+	$(CC) $(CFLAGS) zmq_rcv_ix_xmit.c -c -o zmq_rcv_ix_xmit.o 
+	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
+	$(CC) $(FLAGS) -o zmq_rcv_ix_xmit  zmq_rcv_ix_xmit.o  rfm.o -L $(API_LIB_PATH) -lsisci -lzmq -lpthread
 	sync
 
 ix_fb_rcv: ix_fb_rcv.c 

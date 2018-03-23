@@ -52,14 +52,8 @@ void PrintParameters(void)
 }
 
 // ************************************************************************************* 
-sci_error_t dolphin_init()
+sci_error_t dolphin_init(void)
 {
-    unsigned int          value;
-    unsigned int          written_value = 0;
-    double                average;
-    int                   verbose = 1;
-    int                   node_offset;
-
     /* Initialize the SISCI library */
     SCIInitialize(NO_FLAGS, &error);
     if (error != SCI_ERR_OK) {
@@ -187,6 +181,7 @@ sci_error_t dolphin_init()
     /* The reflective memory functionality is operational at this point. */
     printf(" END OF DOLPHIN INIT ************************************* \n");
     sleep(1);
+	return(0);
 }
 sci_error_t dolphin_closeout()
 {
