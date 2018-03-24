@@ -89,6 +89,29 @@ void intHandler(int dummy) {
 	keepRunning = 0;
 }
 
+// **********************************************************************************************
+void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *ixDataBlock,int dbs[]) {
+// **********************************************************************************************
+	int ii = 0;
+		// Print diags in verbose mode
+		printf("\nTime = %d\t size = %d\n",ixDataBlock->header.dcuheader[0].timeSec,sendLength);
+		printf("\tCycle = ");
+		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].cycle);
+		printf("\n\tTimeSec = ");
+		for(ii=0;ii<nsys;ii++) printf("\t%d",ixDataBlock->header.dcuheader[ii].timeSec);
+		printf("\n\tTimeNSec = ");
+		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].timeNSec);
+		printf("\n\tDataSize = ");
+		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].dataBlockSize);
+	   	printf("\n\tTPCount = ");
+	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpCount);
+	   	printf("\n\tTPSize = ");
+	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpBlockSize);
+	   	printf("\n\tXmitSize = ");
+	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",dbs[ii]);
+	   	printf("\n\n ");
+}
+
 // *************************************************************************
 // Thread for receiving DAQ data via ZMQ
 // *************************************************************************
@@ -282,7 +305,7 @@ main(int argc, char **argv)
 	int dataRdy[32];
 	int threads_rdy;
 	int any_rdy = 0;
-	int jj;
+	int jj,kk;
 	int sendLength = 0;
 
 	do {
@@ -318,7 +341,7 @@ main(int argc, char **argv)
 			mytime = s_clock();
 			myptime = mytime - mylasttime;
 			mylasttime = mytime;
-			if(do_verbose)printf("Data rdy for cycle = %d\t\t%ld\n",nextCycle,myptime);
+			// if(do_verbose)printf("Data rdy for cycle = %d\t\t%ld\n",nextCycle,myptime);
 
 			// Reset total DCU counter
 			mytotaldcu = 0;
@@ -340,11 +363,16 @@ main(int argc, char **argv)
 						ifoDataBlock->header.dcuheader[mytotaldcu].dcuId = mxDataBlockSingle[ii].header.dcuheader[jj].dcuId;
 						ifoDataBlock->header.dcuheader[mytotaldcu].fileCrc = mxDataBlockSingle[ii].header.dcuheader[jj].fileCrc;
 						ifoDataBlock->header.dcuheader[mytotaldcu].status = mxDataBlockSingle[ii].header.dcuheader[jj].status;
-						ifoDataBlock->header.dcuheader[mytotaldcu].dataCrc = mxDataBlockSingle[ii].header.dcuheader[jj].dataCrc;
 						ifoDataBlock->header.dcuheader[mytotaldcu].cycle = mxDataBlockSingle[ii].header.dcuheader[jj].cycle;
 						ifoDataBlock->header.dcuheader[mytotaldcu].timeSec = mxDataBlockSingle[ii].header.dcuheader[jj].timeSec;
 						ifoDataBlock->header.dcuheader[mytotaldcu].timeNSec = mxDataBlockSingle[ii].header.dcuheader[jj].timeNSec;
+						ifoDataBlock->header.dcuheader[mytotaldcu].dataCrc = mxDataBlockSingle[ii].header.dcuheader[jj].dataCrc;
 						ifoDataBlock->header.dcuheader[mytotaldcu].dataBlockSize = mxDataBlockSingle[ii].header.dcuheader[jj].dataBlockSize;
+						ifoDataBlock->header.dcuheader[mytotaldcu].tpBlockSize = mxDataBlockSingle[ii].header.dcuheader[jj].tpBlockSize;
+						ifoDataBlock->header.dcuheader[mytotaldcu].tpCount = mxDataBlockSingle[ii].header.dcuheader[jj].tpCount;
+						for(kk=0;kk<DAQ_GDS_MAX_TP_NUM ;kk++)	
+							ifoDataBlock->header.dcuheader[mytotaldcu].tpNum[kk] = mxDataBlockSingle[ii].header.dcuheader[jj].tpNum[kk];
+						edbs[mytotaldcu] = mxDataBlockSingle[ii].header.dcuheader[jj].tpBlockSize + mxDataBlockSingle[ii].header.dcuheader[jj].dataBlockSize;
 						// Get some diags
 						if(ifoDataBlock->header.dcuheader[mytotaldcu].status != 0xbad)
 							ets = mxDataBlockSingle[ii].header.dcuheader[jj].timeSec;
@@ -354,8 +382,7 @@ main(int argc, char **argv)
 						mytotaldcu ++;
 					}
 					// Get the size of the data to transfer
-					int mydbs = mxDataBlockSingle[ii].header.dataBlockSize;
-					edbs[mytotaldcu] = mydbs;
+					int mydbs = mxDataBlockSingle[ii].header.dataBlockSize + mxDataBlockSingle[ii].header.dcuheader[ii].tpBlockSize;
 					// Get pointer to data in receive data block
 					char *mbuffer = (char *)&mxDataBlockSingle[ii].dataBlock[0];
 					// Copy data from receive buffer to shared memory
@@ -372,10 +399,14 @@ main(int argc, char **argv)
 			ifoDataBlock->header.dcuTotalModels = mytotaldcu;
 			// Set multi_cycle head cycle to indicate data ready for this cycle
 			ifo_header->curCycle = nextCycle;
-			if(do_verbose)printf("\tTotal DCU = %d\t\t\tSize = %d\n",mytotaldcu,dc_datablock_size);
 
 			// Calc IX message size
 			sendLength = header_size + ifoDataBlock->header.dataBlockSize; 
+			if(nextCycle == 0 && do_verbose) {
+				printf("Data rdy for cycle = %d\t\tTime Interval = %ld msec\n",nextCycle,myptime);
+				printf("Total DCU = %d\t\t\tBlockSize = %d\n",mytotaldcu,dc_datablock_size);
+				print_diags(mytotaldcu,nextCycle,sendLength,ifoDataBlock,edbs);
+			}
 			// WRITEDATA to Dolphin Network
 	    	SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset,sendLength,memcpyFlag,&error);
         	if (error != SCI_ERR_OK) {
@@ -398,6 +429,7 @@ main(int argc, char **argv)
 			sprintf(dcs,"%d %d %d ",edcuid[ii],estatus[ii],edbs[ii]);
 			strcat(dcstatus,dcs);
 		}
+
 
 		// Increment cycle count
 		nextCycle ++;
