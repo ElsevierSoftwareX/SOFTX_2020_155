@@ -204,7 +204,7 @@ void intHandler(int dummy) {
 }
 
 // **********************************************************************************************
-void print_diags(int nsys, int lastCycle, int sendLength) {
+void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *ixDataBlock) {
 	int ii = 0;
 		// Print diags in verbose mode
 		printf("\nTime = %d-%d size = %d\n",shmIpcPtr[0]->bp[lastCycle].timeSec,shmIpcPtr[0]->bp[lastCycle].timeNSec,sendLength);
@@ -220,6 +220,8 @@ void print_diags(int nsys, int lastCycle, int sendLength) {
 	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpCount);
 	   	printf("\n\tTPSize = ");
 	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpBlockSize);
+	   	printf("\n\tXmitSize = ");
+	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",shmIpcPtr[ii]->dataBlockSize);
 	   	printf("\n\n ");
 }
 
@@ -330,7 +332,8 @@ int loadMessageBuffer(	int nsys,
 				// Set Status -- as running
 				ixDataBlock->header.dcuheader[ii].status = 2;
 				// Indicate size of data block
-				ixDataBlock->header.dcuheader[db].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
+				// ********ixDataBlock->header.dcuheader[db].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
+				ixDataBlock->header.dcuheader[db].dataBlockSize = crcLength;
 				// Prevent going beyond MAX allowed data size
 				if (ixDataBlock->header.dcuheader[db].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
 					ixDataBlock->header.dcuheader[db].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
@@ -346,7 +349,8 @@ int loadMessageBuffer(	int nsys,
 				// Set pointer to dcu data in shared memory
 				dataBuff = (char *)(shmDataPtr[ii] + lastCycle * buf_size);
 				// Copy data from shared memory into local buffer
-				dataXferSize = ixDataBlock->header.dcuheader[db].dataBlockSize;
+				// dataXferSize = ixDataBlock->header.dcuheader[db].dataBlockSize + ixDataBlock->header.dcuheader[db].tpBlockSize;
+				dataXferSize = shmIpcPtr[ii]->dataBlockSize;
 				memcpy((void *)zbuffer, dataBuff, dataXferSize);
 
 				// Calculate CRC on the data and add to header info
@@ -414,7 +418,7 @@ int send_to_local_memory(int nsys, int xmitData)
 		ixDataBlock = (daq_multi_dcu_data_t *)nextData;
 		int sendLength = loadMessageBuffer(nsys, nextCycle, status,dataRdy);
 		// Print diags in verbose mode
-		if(nextCycle == 0 && do_verbose) print_diags(nsys,lastCycle,sendLength);
+		if(nextCycle == 0 && do_verbose) print_diags(nsys,lastCycle,sendLength,ixDataBlock);
 		// Write header info
 		ifo_header->curCycle = nextCycle;
         ifo_header->cycleDataSize = cycle_data_size;
