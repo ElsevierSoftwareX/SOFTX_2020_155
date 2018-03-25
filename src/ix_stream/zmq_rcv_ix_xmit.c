@@ -186,6 +186,7 @@ main(int argc, char **argv)
 
 	/* set up defaults */
 	sysname = NULL;
+	int xmitData = 0;
 
 
 	// Get arguments sent to process
@@ -209,6 +210,7 @@ main(int argc, char **argv)
         break;
 	case 'g':
             segmentId = atoi(optarg);
+			xmitData = 1;
             break;
 	case 'h':
 	default:
@@ -276,14 +278,16 @@ main(int argc, char **argv)
 		pthread_create(&thread_id[ii],NULL,rcvr_thread,(void *)&thread_index);
 	}
 
-	// Connect to Dolphin
-    error = dolphin_init();
-    printf("Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
+	if(xmitData) {
+		// Connect to Dolphin
+    	error = dolphin_init();
+    	printf("Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
 
-    // Set pointer to xmit header in Dolphin xmit data area.
-    mywriteaddr = (char *)writeAddr;
-    mywriteaddr += MY_DAT_OFFSET;
-    xmitHeader = (daq_multi_cycle_header_t *)mywriteaddr;
+    	// Set pointer to xmit header in Dolphin xmit data area.
+    	mywriteaddr = (char *)writeAddr;
+    	mywriteaddr += MY_DAT_OFFSET;
+    	xmitHeader = (daq_multi_cycle_header_t *)mywriteaddr;
+	}
 	//
 
 	int nextCycle = 0;
@@ -407,21 +411,23 @@ main(int argc, char **argv)
 				printf("Total DCU = %d\t\t\tBlockSize = %d\n",mytotaldcu,dc_datablock_size);
 				print_diags(mytotaldcu,nextCycle,sendLength,ifoDataBlock,edbs);
 			}
-			// WRITEDATA to Dolphin Network
-	    	SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset,sendLength,memcpyFlag,&error);
-        	if (error != SCI_ERR_OK) {
-				fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
-		    	return error;
+			if(xmitData) {
+				// WRITEDATA to Dolphin Network
+	    		SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset,sendLength,memcpyFlag,&error);
+        		if (error != SCI_ERR_OK) {
+					fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
+		    		return error;
+				}
+				// Set data header information
+        		xmitHeader->maxCycle = ifo_header->maxCycle;
+        		// xmitHeader->cycleDataSize = ifo_header->cycleDataSize;
+        		xmitHeader->cycleDataSize = sendLength;;
+        		// xmitHeader->msgcrc = myCrc;
+        		// Send cycle last as indication of data ready for receivers
+        		xmitHeader->curCycle = ifo_header->curCycle;
+        		// Have to flush the buffers to make data go onto Dolphin network
+        		SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
 			}
-			// Set data header information
-        	xmitHeader->maxCycle = ifo_header->maxCycle;
-        	// xmitHeader->cycleDataSize = ifo_header->cycleDataSize;
-        	xmitHeader->cycleDataSize = sendLength;;
-        	// xmitHeader->msgcrc = myCrc;
-        	// Send cycle last as indication of data ready for receivers
-        	xmitHeader->curCycle = ifo_header->curCycle;
-        	// Have to flush the buffers to make data go onto Dolphin network
-        	SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
 
 		}
 		sprintf(dcstatus,"%ld ",ets);
@@ -442,9 +448,11 @@ main(int argc, char **argv)
 
 	// Wait for threads to stop
 	sleep(2);
-	printf("closing out ix\n");
-	// Cleanup the Dolphin connections
-	error = dolphin_closeout();
+	if(xmitData) {
+		printf("closing out ix\n");
+		// Cleanup the Dolphin connections
+		error = dolphin_closeout();
+	}
 	printf("closing out zmq\n");
 	// Cleanup the ZMQ connections
 	for(ii=0;ii<nsys;ii++) {
