@@ -1,6 +1,6 @@
 //
-///	@file zmq_multi_rcvr.c
-///	@brief  Test DAQ data receiver using ZeroMQ.
+///	@file zmq_rcv_ix_xmitcc
+///	@brief  DAQ data concentrator code. Receives data via ZMQ and sends via Dolphin IX..
 //
 
 #include <unistd.h>
@@ -22,14 +22,15 @@
 #include <zmq.h>
 #include <assert.h>
 #include <time.h>
-#include "zmq_daq.h"
 #include "../include/daqmap.h"
 #include "../include/daq_core.h"
+
+#define DO_HANDSHAKE 0
 
 
 extern void *findSharedMemorySize(char *,int);
 
-int do_verbose;
+int do_verbose = 0;
 
 int thread_index;
 // int thread_index[DCU_COUNT];
@@ -46,13 +47,17 @@ int thread_timestamp[32];
 void
 usage()
 {
-	fprintf(stderr, "Usage: zmq_multi_rcvr [args] -s server name\n");
+	fprintf(stderr, "Usage: zmq_multi_rcvr [args] -s server names -m shared memory size -g IX channel \n");
 	fprintf(stderr, "-l filename - log file name\n"); 
-	fprintf(stderr, "-s - server name eg x1lsc0, x1susex, etc.\n");
+	fprintf(stderr, "-s - server names eg x1lsc0, x1susex, etc.\n");
 	fprintf(stderr, "-v - verbose prints diag test data\n");
+	fprintf(stderr, "-g - Dolphin IX channel to xmit on\n");
 	fprintf(stderr, "-h - help\n");
 }
 
+// *************************************************************************
+// Timing Diagnostic Routine
+// *************************************************************************
 static int64_t
 s_clock (void)
 {
@@ -61,8 +66,34 @@ struct timeval tv;
     return (int64_t) (tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }
 
+// *************************************************************************
+// Catch Control C to end cod in controlled manner
+// *************************************************************************
 void intHandler(int dummy) {
 	keepRunning = 0;
+}
+
+// **********************************************************************************************
+void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *ixDataBlock,int dbs[]) {
+// **********************************************************************************************
+	int ii = 0;
+		// Print diags in verbose mode
+		printf("\nTime = %d\t size = %d\n",ixDataBlock->header.dcuheader[0].timeSec,sendLength);
+		printf("\tCycle = ");
+		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].cycle);
+		printf("\n\tTimeSec = ");
+		for(ii=0;ii<nsys;ii++) printf("\t%d",ixDataBlock->header.dcuheader[ii].timeSec);
+		printf("\n\tTimeNSec = ");
+		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].timeNSec);
+		printf("\n\tDataSize = ");
+		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].dataBlockSize);
+	   	printf("\n\tTPCount = ");
+	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpCount);
+	   	printf("\n\tTPSize = ");
+	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpBlockSize);
+	   	printf("\n\tXmitSize = ");
+	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",dbs[ii]);
+	   	printf("\n\n ");
 }
 
 // *************************************************************************
@@ -125,7 +156,7 @@ main(int argc, char **argv)
 	daq_multi_cycle_header_t *ifo_header;
 	char *ifo;
 	char *ifo_data;
-	size_t cycle_data_size;
+	int cycle_data_size;
 	daq_multi_dcu_data_t *ifoDataBlock;
 	char *nextData;
 	int max_data_size = 100;
@@ -139,7 +170,7 @@ main(int argc, char **argv)
 
 
 	// Get arguments sent to process
-	while ((c = getopt(argc, argv, "hd:s:m:l:Vvw:x")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "hd:s:m:g:Vvw:x")) != EOF) switch(c) {
 	case 's':
 		sysname = optarg;
 		break;
@@ -186,8 +217,12 @@ main(int argc, char **argv)
     ifo = (char *)findSharedMemorySize("ifo",max_data_size);
     ifo_header = (daq_multi_cycle_header_t *)ifo;
     ifo_data = (char *)ifo + sizeof(daq_multi_cycle_header_t);
-    cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t))/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+	// Following line breaks daqd for some reason
+	// max_data_size *= 1024 * 1024;
+    cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t)) / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
     cycle_data_size -= (cycle_data_size % 8);
+	printf ("cycle data size = %d\t%d\n",cycle_data_size, max_data_size);
+	sleep(3);
 	ifo_header->cycleDataSize = cycle_data_size;
     ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
@@ -238,6 +273,8 @@ main(int argc, char **argv)
 	int dataRdy[32];
 	int threads_rdy;
 	int any_rdy = 0;
+	int jj,kk;
+	int sendLength = 0;
 
 	do {
 		// Reset counters
@@ -246,7 +283,8 @@ main(int argc, char **argv)
 		for(ii=0;ii<nsys;ii++) thread_cycle[ii] = 50;
 		threads_rdy = 0;
 		any_rdy = 0;
-		// Wait until received data from at least 1 FE or timeout
+
+		// Wait up to 100ms until received data from at least 1 FE or timeout
 		do {
 			usleep(2000);
 			for(ii=0;ii<nsys;ii++) {
@@ -255,7 +293,7 @@ main(int argc, char **argv)
 			timeout += 1;
 		}while(!any_rdy && timeout < 50);
 
-		// Wait until data received from everyone or timeout
+		// Wait up to 5ms until data received from everyone or timeout
 		timeout = 0;
 		do {
 			usleep(100);
@@ -271,7 +309,8 @@ main(int argc, char **argv)
 			mytime = s_clock();
 			myptime = mytime - mylasttime;
 			mylasttime = mytime;
-			if(do_verbose)printf("Data rdy for cycle = %d\t\t%ld\n",nextCycle,myptime);
+			// if(do_verbose)printf("Data rdy for cycle = %d\t\t%ld\n",nextCycle,myptime);
+
 			// Reset total DCU counter
 			mytotaldcu = 0;
 			// Reset total DC data size counter
@@ -286,30 +325,32 @@ main(int argc, char **argv)
 			for(ii=0;ii<nsys;ii++) {
 		  		if(dataRdy[ii]) {
 					int myc = mxDataBlockSingle[ii].header.dcuTotalModels;
-					// printf("\tModel %d = %d\n",ii,myc);
 					// For each model, copy over data header information
-					for(int jj=0;jj<myc;jj++) {
+					for(jj=0;jj<myc;jj++) {
 						// Copy data header information
 						ifoDataBlock->header.dcuheader[mytotaldcu].dcuId = mxDataBlockSingle[ii].header.dcuheader[jj].dcuId;
 						ifoDataBlock->header.dcuheader[mytotaldcu].fileCrc = mxDataBlockSingle[ii].header.dcuheader[jj].fileCrc;
 						ifoDataBlock->header.dcuheader[mytotaldcu].status = mxDataBlockSingle[ii].header.dcuheader[jj].status;
-						ifoDataBlock->header.dcuheader[mytotaldcu].dataCrc = mxDataBlockSingle[ii].header.dcuheader[jj].dataCrc;
 						ifoDataBlock->header.dcuheader[mytotaldcu].cycle = mxDataBlockSingle[ii].header.dcuheader[jj].cycle;
 						ifoDataBlock->header.dcuheader[mytotaldcu].timeSec = mxDataBlockSingle[ii].header.dcuheader[jj].timeSec;
 						ifoDataBlock->header.dcuheader[mytotaldcu].timeNSec = mxDataBlockSingle[ii].header.dcuheader[jj].timeNSec;
+						ifoDataBlock->header.dcuheader[mytotaldcu].dataCrc = mxDataBlockSingle[ii].header.dcuheader[jj].dataCrc;
 						ifoDataBlock->header.dcuheader[mytotaldcu].dataBlockSize = mxDataBlockSingle[ii].header.dcuheader[jj].dataBlockSize;
+						ifoDataBlock->header.dcuheader[mytotaldcu].tpBlockSize = mxDataBlockSingle[ii].header.dcuheader[jj].tpBlockSize;
+						ifoDataBlock->header.dcuheader[mytotaldcu].tpCount = mxDataBlockSingle[ii].header.dcuheader[jj].tpCount;
+						for(kk=0;kk<DAQ_GDS_MAX_TP_NUM ;kk++)	
+							ifoDataBlock->header.dcuheader[mytotaldcu].tpNum[kk] = mxDataBlockSingle[ii].header.dcuheader[jj].tpNum[kk];
+						edbs[mytotaldcu] = mxDataBlockSingle[ii].header.dcuheader[jj].tpBlockSize + mxDataBlockSingle[ii].header.dcuheader[jj].dataBlockSize;
 						// Get some diags
-						if(ifoDataBlock->header.dcuheader[mytotaldcu].status == 0xbad)
-							printf("Fault on dcuid %d\n",ifoDataBlock->header.dcuheader[mytotaldcu].dcuId );
-						else ets = mxDataBlockSingle[ii].header.dcuheader[jj].timeSec;
+						if(ifoDataBlock->header.dcuheader[mytotaldcu].status != 0xbad)
+							ets = mxDataBlockSingle[ii].header.dcuheader[jj].timeSec;
 						estatus[mytotaldcu] = ifoDataBlock->header.dcuheader[mytotaldcu].status;
 						edcuid[mytotaldcu] = ifoDataBlock->header.dcuheader[mytotaldcu].dcuId;
+						// Increment total DCU count
 						mytotaldcu ++;
-						// printf("\t\tdcuid = %d\n",mydbs);
 					}
 					// Get the size of the data to transfer
-					int mydbs = mxDataBlockSingle[ii].header.dataBlockSize;
-					edbs[mytotaldcu] = mydbs;
+					int mydbs = mxDataBlockSingle[ii].header.dataBlockSize + mxDataBlockSingle[ii].header.dcuheader[ii].tpBlockSize;
 					// Get pointer to data in receive data block
 					char *mbuffer = (char *)&mxDataBlockSingle[ii].dataBlock[0];
 					// Copy data from receive buffer to shared memory
@@ -326,27 +367,36 @@ main(int argc, char **argv)
 			ifoDataBlock->header.dcuTotalModels = mytotaldcu;
 			// Set multi_cycle head cycle to indicate data ready for this cycle
 			ifo_header->curCycle = nextCycle;
-			if(do_verbose)printf("\tTotal DCU = %d\t\t\tSize = %d\n",mytotaldcu,dc_datablock_size);
-		}
 
+			// Calc IX message size
+			sendLength = header_size + ifoDataBlock->header.dataBlockSize; 
+			if(nextCycle == 0 && do_verbose) {
+				printf("Data rdy for cycle = %d\t\tTime Interval = %ld msec\n",nextCycle,myptime);
+				printf("Total DCU = %d\t\t\tBlockSize = %d\n",mytotaldcu,dc_datablock_size);
+				print_diags(mytotaldcu,nextCycle,sendLength,ifoDataBlock,edbs);
+			}
+
+		}
 		sprintf(dcstatus,"%ld ",ets);
 		for(ii=0;ii<mytotaldcu;ii++) {
 			sprintf(dcs,"%d %d %d ",edcuid[ii],estatus[ii],edbs[ii]);
 			strcat(dcstatus,dcs);
 		}
 
+
 		// Increment cycle count
 		nextCycle ++;
 		nextCycle %= 16;
 	}while (keepRunning);	// End of infinite loop
 
+	// Stop Rcv Threads
 	printf("stopping threads %d \n",nsys);
 	stop_working_threads = 1;
 
 	// Wait for threads to stop
 	sleep(2);
 	printf("closing out zmq\n");
-	// Close out ZMQ connections
+	// Cleanup the ZMQ connections
 	for(ii=0;ii<nsys;ii++) {
 		zmq_close(daq_subscriber[ii]);
 		zmq_ctx_destroy(daq_context[ii]);
