@@ -168,7 +168,7 @@ main(int argc,char *argv[])
 	    lastCycle = new_cycle;
 		cyclesize = rcvHeader->cycleDataSize;
 		// Calculate the correct segment on the source buffer
-        rcvDataPtr = ((char *)myreadaddr + sizeof(daq_multi_cycle_header_t)) + new_cycle*cyclesize;
+        // rcvDataPtr = ((char *)myreadaddr + sizeof(daq_multi_cycle_header_t)) + new_cycle*cyclesize;
 	    // Set up pointers to copy data to receive shmem
     	nextData = (char *)ifo_data;
 	    nextData += cycle_data_size * new_cycle;
