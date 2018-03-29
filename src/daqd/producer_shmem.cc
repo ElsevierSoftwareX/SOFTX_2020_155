@@ -279,7 +279,11 @@ void *producer::frame_writer() {
         std::fill(dcu_data_crc.begin(), dcu_data_crc.end(), 0);
         std::fill(dcu_data_gps.begin(), dcu_data_gps.end(), 0);
         // retreive 1/16s of data from zmq
+
+        stat_recv.sample();
         daq_dc_data_t* data_block = shmem_receiver.receive_data();
+        stat_recv.tick();
+
         std::cout << "#" << std::endl;
         if (data_block->header.dcuTotalModels > 0) {
             gps = data_block->header.dcuheader[0].timeSec;
