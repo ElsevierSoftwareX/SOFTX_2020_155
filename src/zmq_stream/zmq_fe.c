@@ -3,6 +3,10 @@
 ///// @brief  Front End data concentrator
 ////
 //
+#define _GNU_SOURCE
+#define _XOPEN_SOURCE 700
+
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -23,6 +27,7 @@
 #include <zmq.h>
 #include <assert.h>
 #include "zmq_daq.h"
+#include "zmq_transport.h"
 
 
 #define __CDECL
@@ -51,7 +56,8 @@ char *ifo_data;
 size_t cycle_data_size;
 
 // ZMQ defines
-char msg_buffer[0x200000];
+//char msg_buffer[0x200000];
+daq_multi_dcu_data_t msg_buffer;
 void *daq_context;
 void *daq_publisher;
 
@@ -304,14 +310,14 @@ int loadMessageBuffer(	int nsys,
     int dataXferSize;
 	char *dataBuff;
 	int myCrc = 0;
-	int crcLength;
+	int crcLength = 0;
 
 		// Set pointer to 0MQ message data block
 		zbuffer = (char *)&ixDataBlock->dataBlock[0];
 		// Initialize data send length to size of message header
 		sendLength = header_size;
 		// Set number of FE models that have data in this message
-		ixDataBlock->header.dataBlockSize = 0;
+		ixDataBlock->header.fullDataBlockSize = 0;
 		int db = 0;
 		// Loop thru all FE models
 		for (ii=0;ii<nsys;ii++) {
@@ -349,8 +355,8 @@ int loadMessageBuffer(	int nsys,
 				// Set pointer to dcu data in shared memory
 				dataBuff = (char *)(shmDataPtr[ii] + lastCycle * buf_size);
 				// Copy data from shared memory into local buffer
-				// dataXferSize = ixDataBlock->header.dcuheader[db].dataBlockSize + ixDataBlock->header.dcuheader[db].tpBlockSize;
-				dataXferSize = shmIpcPtr[ii]->dataBlockSize;
+				dataXferSize = ixDataBlock->header.dcuheader[db].dataBlockSize + ixDataBlock->header.dcuheader[db].tpBlockSize;
+				//dataXferSize = shmIpcPtr[ii]->dataBlockSize;
 				memcpy((void *)zbuffer, dataBuff, dataXferSize);
 
 				// Calculate CRC on the data and add to header info
@@ -363,8 +369,8 @@ int loadMessageBuffer(	int nsys,
 				zbuffer += dataXferSize;
 				// Increment the 0mq message size with size of FE data block
 				sendLength += dataXferSize;
-				// Increment the data block size for the message
-				ixDataBlock->header.dataBlockSize += ixDataBlock->header.dcuheader[db].dataBlockSize;
+				// Increment the data block size for the message, this includes regular data + TP data
+				ixDataBlock->header.fullDataBlockSize += dataXferSize;
 
 				// Update heartbeat monitor to DAQ code
 				if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[1];
@@ -426,9 +432,10 @@ int send_to_local_memory(int nsys, int xmitData)
 
 		if(xmitData) {
 		// Copy data to 0mq message buffer
-		memcpy(msg_buffer,nextData,sendLength);
+		memcpy((void*)&msg_buffer,nextData,sendLength);
 		// Send Data
-        msg_size = zmq_send(daq_publisher,msg_buffer,sendLength,0);
+        //msg_size = zmq_send(daq_publisher,(void*)&msg_buffer,sendLength,0);
+        zmq_send_daq_multi_dcu_t(&msg_buffer, daq_publisher, 0);
         // printf("Sending data size = %d\n",msg_size);
 		}
 		
@@ -451,20 +458,22 @@ int send_to_local_memory(int nsys, int xmitData)
 int __CDECL
 main(int argc,char *argv[])
 {
-    int counter; 
+    int counter = 0;
     int nsys = 1;
     int dcuId[10];
-    int ii;
+    int ii = 0;
     char *gds_tp_dir = 0;
-	int max_data_size = 64;
+	int max_data_size_mb = 64;
+	int max_data_size = 0;
 	int error = 0;
 	int status = -1;
-	unsigned long gps_frac;
-	int gps_stt;
-	int gps_ok;
-	unsigned long gps_time;
-	char *eport;
+	unsigned long gps_frac = 0;
+	int gps_stt = 0;
+	int gps_ok = 0;
+	unsigned long gps_time = 0;
+	char *eport = 0;
 	int sendViaZmq = 0;
+	char *buffer_name = "ifo";
 
     printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
     
@@ -474,16 +483,19 @@ main(int argc,char *argv[])
     }
 
     /* Get the parameters */
-     while ((counter = getopt(argc, argv, "r:n:e:l:s:m:h:a:v:")) != EOF) 
+     while ((counter = getopt(argc, argv, "b:e:m:h:v:s:g:")) != EOF)
       switch(counter) {
-      
+        case 'b':
+            buffer_name = optarg;
+        break;
+
         case 'm':
-            max_data_size = atoi(optarg);
-            if (max_data_size < 20){
+            max_data_size_mb = atoi(optarg);
+            if (max_data_size_mb < 20){
                 printf("Min data block size is 20 MB\n");
                 return -1;
             }
-            if (max_data_size > 100){
+            if (max_data_size_mb > 100){
                 printf("Max data block size is 100 MB\n");
                 return -1;
             }
@@ -501,11 +513,14 @@ main(int argc,char *argv[])
 	        printf ("eport = %s\n",eport);
 			sendViaZmq = 1;
 	        break;
-
+	    case 'g':
+	    	gds_tp_dir = optarg;
+	    	break;
         case 'h':
             Usage();
             return(0);
     }
+    max_data_size = max_data_size_mb * 1024*1024;
 
 	if (sendViaZmq) printf("Writing DAQ data to local shared memory and sending out on ZMQ\n");
 	else	printf("Writing DAQ data to local shared memory only \n");
@@ -562,7 +577,7 @@ main(int argc,char *argv[])
     }
 
 	// Get pointers to local DAQ mbuf
-	ifo = (char *)findSharedMemorySize("ifo",max_data_size);
+	ifo = (char *)findSharedMemorySize(buffer_name, max_data_size_mb);
     ifo_header = (daq_multi_cycle_header_t *)ifo;
 	ifo_data = (char *)ifo + sizeof(daq_multi_cycle_header_t);
 	cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t))/DAQ_NUM_DATA_BLOCKS_PER_SECOND;

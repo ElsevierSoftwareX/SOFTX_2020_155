@@ -414,7 +414,7 @@ main(int argc, char **argv)
 		sendLength = header_size;
 		// Set number of FE models that have data in this message
 		zmqDataBlock.header.dcuTotalModels = nsys;
-		zmqDataBlock.header.dataBlockSize = 0;
+		zmqDataBlock.header.fullDataBlockSize = 0;
 		// Loop thru all FE models
 		for (ii=0;ii<nsys;ii++) {
 			reftimeerror = 0;
@@ -482,7 +482,7 @@ main(int argc, char **argv)
 			// Increment the 0mq message size with size of FE data block
 			sendLength += dataTPLength;
 			// Increment the data block size for the message
-			zmqDataBlock.header.dataBlockSize += (unsigned int)dataTPLength;
+			zmqDataBlock.header.fullDataBlockSize += (unsigned int)dataTPLength;
 
 			// Update heartbeat monitor to DAQ code
 			if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[1];

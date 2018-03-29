@@ -314,7 +314,7 @@ void zmq_dc_receiver_receive_data(zmq_dc_receiver_p rcv, zmq_data_block* dest)
     // Reset total DC data size counter
     int dc_datablock_size = 0;
 
-    rcv->mxDataBlockFull[rcv->loop].header.dataBlockSize = 0;
+    rcv->mxDataBlockFull[rcv->loop].header.fullDataBlockSize = 0;
     // Loop over all data buffers received from FE computers
     for (ii = 0; ii < rcv->nsys; ii++) {
         int cur_sys_dcu_count = rcv->mxDataBlockG[ii][rcv->loop].header.dcuTotalModels;
@@ -359,7 +359,7 @@ void zmq_dc_receiver_receive_data(zmq_dc_receiver_p rcv, zmq_data_block* dest)
             // increment mbuffer by the source tp size not the used tp size
             mbuffer += mydbs + mytpbs;
             // increment the count of bytes sent
-            rcv->mxDataBlockFull[rcv->loop].header.dataBlockSize += (unsigned int)(mydbs + used_tpbs);
+            rcv->mxDataBlockFull[rcv->loop].header.fullDataBlockSize += (unsigned int)(mydbs + used_tpbs);
             mytotaldcu++;
         }
     }

@@ -2,6 +2,8 @@
 ///	@file zmq_rcv_ix_xmitcc
 ///	@brief  DAQ data concentrator code. Receives data via ZMQ and sends via Dolphin IX..
 //
+#define _GNU_SOURCE
+#define _XOPEN_SOURCE 700
 
 #include <unistd.h>
 #include <ctype.h>
@@ -24,11 +26,12 @@
 #include <time.h>
 #include "../include/daqmap.h"
 #include "../include/daq_core.h"
+#include "drv/shmem.h"
+#include "zmq_transport.h"
+
 
 #define DO_HANDSHAKE 0
 
-
-extern void *findSharedMemorySize(char *,int);
 
 int do_verbose = 0;
 
@@ -36,6 +39,7 @@ int thread_index;
 // int thread_index[DCU_COUNT];
 void *daq_context[DCU_COUNT];
 void *daq_subscriber[DCU_COUNT];
+char *sname[DCU_COUNT];	// Names of FE computers serving DAQ data
 daq_multi_dcu_data_t mxDataBlockSingle[32];
 const int mc_header_size = sizeof(daq_multi_cycle_header_t);
 int stop_working_threads = 0;
@@ -103,25 +107,28 @@ void *rcvr_thread(void *arg) {
 	int *mythread = (int *)arg;
 	int mt = *mythread;
 	printf("myarg = %d\n",mt);
-	zmq_msg_t message;
 	int cycle = 0;
 	daq_multi_dcu_data_t *mxDataBlock;
+	char loc[256];
+
+	void *zctx = 0;
+	void *zsocket = 0;
+	int rc = 0;
+
+	zctx = zmq_ctx_new();
+	zsocket = zmq_socket(zctx, ZMQ_SUB);
+
+	rc = zmq_setsockopt(zsocket, ZMQ_SUBSCRIBE, "", 0);
+	assert(rc == 0);
+	sprintf(loc,"%s%s%s%d","tcp://",sname[mt],":",DAQ_DATA_PORT);
+	zmq_connect(zsocket, loc);
+	assert(rc == 0);
 
 	printf("Starting receive loop for thread %d\n", mt);
 	char *daqbuffer = (char *)&mxDataBlockSingle[mt];
 	mxDataBlock = (daq_multi_dcu_data_t *)daqbuffer;
 	do {
-		// Initialize receiver buffer
-		zmq_msg_init(&message);
-		// Get data when message size > 0
-		int size = zmq_msg_recv(&message,daq_subscriber[mt],0);
-		assert(size >= 0);
-		// Get pointer to message data
-		char *string = (char *)zmq_msg_data(&message);
-		// Copy data out of 0MQ message buffer to local memory buffer
-		memcpy(daqbuffer,string,size);
-		// Destroy the received message buffer
-		zmq_msg_close(&message);
+		zmq_recv_daq_multi_dcu_t((daq_multi_dcu_data_t*)daqbuffer, zsocket);
 
 		// Get the message DAQ cycle number
 		cycle = mxDataBlock->header.dcuheader[0].cycle;
@@ -133,6 +140,9 @@ void *rcvr_thread(void *arg) {
 	} while(!stop_working_threads);
 	printf("Stopping thread %d\n",mt);
 	usleep(200000);
+
+	zmq_close(zsocket);
+	zmq_ctx_destroy(zctx);
 	return(0);
 
 }
@@ -146,7 +156,7 @@ main(int argc, char **argv)
 	pthread_t thread_id[32];
 	unsigned int nsys = 1; // The number of mapped shared memories (number of data sources)
 	char *sysname;
-	char *sname[DCU_COUNT];	// Names of FE computers serving DAQ data 
+	char *buffer_name = "ifo";
 	int c;
 	int ii;					// Loop counter
 
@@ -159,7 +169,8 @@ main(int argc, char **argv)
 	int cycle_data_size;
 	daq_multi_dcu_data_t *ifoDataBlock;
 	char *nextData;
-	int max_data_size = 100;
+	int max_data_size_mb = 100;
+	int max_data_size = 0;
 
 	// Declare 0MQ message pointers
 	int rc;
@@ -170,7 +181,7 @@ main(int argc, char **argv)
 
 
 	// Get arguments sent to process
-	while ((c = getopt(argc, argv, "hd:s:m:g:Vvw:x")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "hs:m:v:b:")) != EOF) switch(c) {
 	case 's':
 		sysname = optarg;
 		break;
@@ -178,21 +189,25 @@ main(int argc, char **argv)
 		do_verbose = 1;
 		break;
 	case 'm':
-		max_data_size = atoi(optarg);
-    	if (max_data_size < 20){
+		max_data_size_mb = atoi(optarg);
+    	if (max_data_size_mb < 20){
         	printf("Min data block size is 20 MB\n");
             return -1;
         }
-        if (max_data_size > 100){
+        if (max_data_size_mb > 100){
             printf("Max data block size is 100 MB\n");
             return -1;
         }
         break;
+	case 'b':
+		buffer_name = optarg;
+		break;
 	case 'h':
 	default:
 		usage();
 		exit(1);
 	}
+	max_data_size = max_data_size_mb * 1024*1024;
 
 	if (sysname == NULL) { usage(); exit(1); }
 
@@ -214,14 +229,14 @@ main(int argc, char **argv)
         }
 
 	// Get pointers to local DAQ mbuf
-    ifo = (char *)findSharedMemorySize("ifo",max_data_size);
+    ifo = (char *)findSharedMemorySize(buffer_name,max_data_size_mb);
     ifo_header = (daq_multi_cycle_header_t *)ifo;
     ifo_data = (char *)ifo + sizeof(daq_multi_cycle_header_t);
 	// Following line breaks daqd for some reason
-	// max_data_size *= 1024 * 1024;
+	// max_data_size_mb *= 1024 * 1024;
     cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t)) / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
     cycle_data_size -= (cycle_data_size % 8);
-	printf ("cycle data size = %d\t%d\n",cycle_data_size, max_data_size);
+	printf ("cycle data size = %d\t%d\n",cycle_data_size, max_data_size_mb);
 	sleep(3);
 	ifo_header->cycleDataSize = cycle_data_size;
     ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
@@ -234,20 +249,20 @@ main(int argc, char **argv)
 
 	// Make 0MQ socket connections
 	for(ii=0;ii<nsys;ii++) {
-		// Make 0MQ socket connection for rcvr threads
-		daq_context[ii] = zmq_ctx_new();
-		daq_subscriber[ii] = zmq_socket (daq_context[ii],ZMQ_SUB);
-
-		// Subscribe to all data from the server
-		rc = zmq_setsockopt(daq_subscriber[ii],ZMQ_SUBSCRIBE,"",0);
-		assert (rc == 0);
-
-		// connect to the publisher
-		sprintf(loc,"%s%s%s%d","tcp://",sname[ii],":",DAQ_DATA_PORT);
-		printf("sys connection %d = %s ...",ii,loc);
-		rc = zmq_connect (daq_subscriber[ii], loc);
-		assert (rc == 0);
-		printf(" done\n");
+//		// Make 0MQ socket connection for rcvr threads
+//		daq_context[ii] = zmq_ctx_new();
+//		daq_subscriber[ii] = zmq_socket (daq_context[ii],ZMQ_SUB);
+//
+//		// Subscribe to all data from the server
+//		rc = zmq_setsockopt(daq_subscriber[ii],ZMQ_SUBSCRIBE,"",0);
+//		assert (rc == 0);
+//
+//		// connect to the publisher
+//		sprintf(loc,"%s%s%s%d","tcp://",sname[ii],":",DAQ_DATA_PORT);
+//		printf("sys connection %d = %s ...",ii,loc);
+//		rc = zmq_connect (daq_subscriber[ii], loc);
+//		assert (rc == 0);
+//		printf(" done\n");
 
 		// Create a thread to receive data from each data server
 		thread_index = ii;
@@ -259,6 +274,10 @@ main(int argc, char **argv)
 	int64_t mytime = 0;
 	int64_t mylasttime = 0;
 	int64_t myptime = 0;
+	int64_t min_cycle_time = 1 << 30;
+	int64_t max_cycle_time = 0;
+	int64_t mean_cycle_time = 0;
+	int64_t n_cycle_time = 0;
 	int mytotaldcu = 0;
 	char *zbuffer;
 	int dc_datablock_size = 0;
@@ -309,6 +328,14 @@ main(int argc, char **argv)
 			mytime = s_clock();
 			myptime = mytime - mylasttime;
 			mylasttime = mytime;
+			if (myptime < min_cycle_time) {
+				min_cycle_time = myptime;
+			}
+			if (myptime > max_cycle_time) {
+				max_cycle_time = myptime;
+			}
+			mean_cycle_time += myptime;
+			++n_cycle_time;
 			// if(do_verbose)printf("Data rdy for cycle = %d\t\t%ld\n",nextCycle,myptime);
 
 			// Reset total DCU counter
@@ -350,7 +377,7 @@ main(int argc, char **argv)
 						mytotaldcu ++;
 					}
 					// Get the size of the data to transfer
-					int mydbs = mxDataBlockSingle[ii].header.dataBlockSize + mxDataBlockSingle[ii].header.dcuheader[ii].tpBlockSize;
+					int mydbs = mxDataBlockSingle[ii].header.fullDataBlockSize;
 					// Get pointer to data in receive data block
 					char *mbuffer = (char *)&mxDataBlockSingle[ii].dataBlock[0];
 					// Copy data from receive buffer to shared memory
@@ -362,18 +389,24 @@ main(int argc, char **argv)
 		  		}
 			}
 			// Write total data block size to shared memory header
-			ifoDataBlock->header.dataBlockSize = dc_datablock_size;
+			ifoDataBlock->header.fullDataBlockSize = dc_datablock_size;
 			// Write total dcu count to shared memory header
 			ifoDataBlock->header.dcuTotalModels = mytotaldcu;
 			// Set multi_cycle head cycle to indicate data ready for this cycle
 			ifo_header->curCycle = nextCycle;
 
 			// Calc IX message size
-			sendLength = header_size + ifoDataBlock->header.dataBlockSize; 
+			sendLength = header_size + ifoDataBlock->header.fullDataBlockSize;
 			if(nextCycle == 0 && do_verbose) {
 				printf("Data rdy for cycle = %d\t\tTime Interval = %ld msec\n",nextCycle,myptime);
+				mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time/n_cycle_time : 1<<31);
+				printf("Min/Max/Mean cylce time %ld/%ld/%ld msec over %ld cycles\n", min_cycle_time, max_cycle_time, mean_cycle_time, n_cycle_time);
 				printf("Total DCU = %d\t\t\tBlockSize = %d\n",mytotaldcu,dc_datablock_size);
 				print_diags(mytotaldcu,nextCycle,sendLength,ifoDataBlock,edbs);
+				n_cycle_time = 0;
+				min_cycle_time = 1 << 30;
+				max_cycle_time = 0;
+				mean_cycle_time = 0;
 			}
 
 		}
@@ -398,8 +431,8 @@ main(int argc, char **argv)
 	printf("closing out zmq\n");
 	// Cleanup the ZMQ connections
 	for(ii=0;ii<nsys;ii++) {
-		zmq_close(daq_subscriber[ii]);
-		zmq_ctx_destroy(daq_context[ii]);
+		if (daq_subscriber[ii]) (daq_subscriber[ii]);
+		if (daq_context[ii]) zmq_ctx_destroy(daq_context[ii]);
 	}
   
 	exit(0);

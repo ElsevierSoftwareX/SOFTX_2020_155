@@ -42,15 +42,15 @@ typedef struct daq_msg_header_t {
     unsigned int timeSec;        // GPS seconds
     unsigned int timeNSec;    // GPS nanoseconds
     unsigned int dataCrc;        // Data CRC checksum
-    unsigned int dataBlockSize;    // Size of data block for this message
+    unsigned int dataBlockSize;    // Size of data block for this message (regular data only, does not include TP data)
     unsigned int tpBlockSize;   // Size of the tp block for this message
     unsigned int tpCount;        // Number of TP chans in this data set
-    unsigned int tpNum[DAQ_GDS_MAX_TP_NUM];    // GDS TP TABLE
+    unsigned int tpNum[DAQ_GDS_MAX_TP_NUM];    // GDS TP TABLE.  MUST be the last field!
 } daq_msg_header_t;
 
 typedef struct daq_multi_dcu_header_t {
     int dcuTotalModels;                                 // Number of models
-    int dataBlockSize;                                  // Number of bytes actually used in the data block
+    int fullDataBlockSize;                              // Number of bytes used in the data block (including TP data)
     daq_msg_header_t dcuheader[DAQ_TRANSIT_MAX_DCU];
 } daq_multi_dcu_header_t;
 

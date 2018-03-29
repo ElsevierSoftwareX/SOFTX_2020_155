@@ -50,7 +50,6 @@ using namespace std;
 #include "drv/cdsHardware.h"
 
 #include <sys/ioctl.h>
-#include "../drv/rfm.c"
 
 #include "epics_pvs.hh"
 
@@ -124,7 +123,7 @@ public:
 
         char* start = const_cast<char*>(&_shmem->dataBlock[0]);
         start += cur_cycle * cycle_stride;
-        size_t copy_size = sizeof(daq_multi_dcu_header_t) + reinterpret_cast<daq_multi_dcu_header_t*>(start)->dataBlockSize;
+        size_t copy_size = sizeof(daq_multi_dcu_header_t) + reinterpret_cast<daq_multi_dcu_header_t*>(start)->fullDataBlockSize;
         memcpy(&_data, start, copy_size);
 
         std::cerr << "shmem_recv - c " << cur_cycle << " p " << _prev_cycle << std::endl;

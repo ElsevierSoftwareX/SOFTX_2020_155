@@ -9,11 +9,17 @@ include(FindThreads)
 find_package(ZMQ4 REQUIRED)
 
 
+add_library(zmq_transport STATIC zmq_transport.c)
+target_include_directories(zmq_transport PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+target_link_libraries(zmq_transport PRIVATE zmq4::zmq)
+
 add_library(zmq_dc_recv STATIC zmq_dc_recv.c zmq_dc_recv.h)
 target_include_directories(zmq_dc_recv PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_link_libraries(zmq_dc_recv PUBLIC zmq4::zmq ${CMAKE_THREAD_LIBS_INIT})
 add_library(zmq::dc_recv ALIAS zmq_dc_recv)
 
+add_executable(zmq_fe zmq_fe.c)
+target_link_libraries(zmq_fe PUBLIC driver::shmem zmq_transport zmq4::zmq)
 
 add_executable(zmq_multi_stream zmq_multi_stream.c ../drv/rfm.c ${CMAKE_CURRENT_SOURCE_DIR}/../include/daq_core.h)
 target_include_directories(zmq_multi_stream PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
@@ -23,7 +29,7 @@ target_compile_options(zmq_multi_stream PUBLIC -std=gnu99)
 
 add_executable(zmq_threads zmq_threads.c)
 target_include_directories(zmq_threads PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
-target_link_libraries(zmq_threads PUBLIC zmq4::zmq ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(zmq_threads PUBLIC driver::shmem zmq_transport zmq4::zmq ${CMAKE_THREAD_LIBS_INIT})
 target_compile_options(zmq_threads PUBLIC -std=gnu99)
 
 add_executable(zmq_dc zmq_dc.cc)

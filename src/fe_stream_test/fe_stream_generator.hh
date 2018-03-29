@@ -176,6 +176,36 @@ namespace Generators {
     };
 
     template <typename T>
+    class GPSMod100kSecWithOffset: public SimChannelGenerator
+    {
+        int offset_;
+    public:
+        GPSMod100kSecWithOffset(const SimChannel& ch, int offset):
+                SimChannelGenerator(ch), offset_(offset) {}
+
+        std::string generator_name() const { return "gpssmd100koff1p"; }
+
+        std::string other_params() const
+        {
+            std::ostringstream os;
+            os << "--" << offset_;
+            return os.str();
+        }
+
+        char* generate(int gps_sec, int gps_nano, char* out)
+        {
+            int rate = data_rate() / 16;
+            T *out_ = reinterpret_cast<T*>(out);
+            for (int i = 0; i < rate; ++i)
+            {
+                *out_ = static_cast<T>((gps_sec%100000) + offset_);
+                ++out_;
+            }
+            return reinterpret_cast<char*>(out_);
+        }
+    };
+
+    template <typename T>
     class StaticValue: public SimChannelGenerator
     {
         T value_;

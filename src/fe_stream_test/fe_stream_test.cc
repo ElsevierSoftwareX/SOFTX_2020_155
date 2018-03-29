@@ -237,7 +237,8 @@ int main(int argc, char *argv[]) {
 
         std::ostringstream ss;
         ss << system_name << "-TP" << i;
-        tp_generators.push_back(GeneratorPtr(new Generators::GPSSecondWithOffset<float>(SimChannel(ss.str(), 4, data_rate, chnum, dcuid), (i + dcuid)%21)));
+        // TP need truncated
+        tp_generators.push_back(GeneratorPtr(new Generators::GPSMod100kSecWithOffset<float>(SimChannel(ss.str(), 4, data_rate, chnum, dcuid), (i + dcuid)%21)));
     }
     GeneratorPtr null_tp = GeneratorPtr(new Generators::StaticValue<float>(SimChannel("null_tp_value", 4, data_rate, 0x7fffffff), 0.0));
 
