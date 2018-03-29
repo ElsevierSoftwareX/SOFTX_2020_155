@@ -62,9 +62,10 @@ ix_dc_xmit: ix_dc_xmit.c
 	sync
 
 zmq_rcv_ix_xmit: zmq_rcv_ix_xmit.c 
-	$(CC) $(CFLAGS) zmq_rcv_ix_xmit.c -c -o zmq_rcv_ix_xmit.o 
-	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
-	$(CC) $(FLAGS) -o zmq_rcv_ix_xmit  zmq_rcv_ix_xmit.o  rfm.o -L $(API_LIB_PATH) -lsisci -lzmq -lpthread
+	$(CC) $(CFLAGS) -I../zmq_stream zmq_rcv_ix_xmit.c -c -o zmq_rcv_ix_xmit.o
+	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o
+	$(CC) $(CFLAGS) ../zmq_stream/zmq_transport.c -c -o zmq_transport.o
+	$(CC) $(FLAGS) -o zmq_rcv_ix_xmit  zmq_rcv_ix_xmit.o  rfm.o zmq_transport.o -L $(API_LIB_PATH) -lsisci -lzmq -lpthread
 	sync
 
 ix_fb_rcv: ix_fb_rcv.c 

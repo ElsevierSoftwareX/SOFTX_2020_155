@@ -35,7 +35,7 @@
 
 int do_verbose = 0;
 
-int thread_index;
+int thread_index[DCU_COUNT];
 // int thread_index[DCU_COUNT];
 void *daq_context[DCU_COUNT];
 void *daq_subscriber[DCU_COUNT];
@@ -265,8 +265,8 @@ main(int argc, char **argv)
 //		printf(" done\n");
 
 		// Create a thread to receive data from each data server
-		thread_index = ii;
-		pthread_create(&thread_id[ii],NULL,rcvr_thread,(void *)&thread_index);
+		thread_index[ii] = ii;
+		pthread_create(&thread_id[ii],NULL,rcvr_thread,(void *)&thread_index[ii]);
 	}
 
 	int nextCycle = 0;

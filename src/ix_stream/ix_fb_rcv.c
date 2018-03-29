@@ -68,7 +68,11 @@ main(int argc,char *argv[])
     daq_multi_cycle_header_t *rcvHeader;
     int myCrc;
     int do_verbose = 0;
-	int max_data_size = 100;
+	int max_data_size_mb = 100;
+	int max_data_size = 0;
+	char *dest_mbuf_name = "ifo";
+	char *src_mbuf_name = 0;
+	int read_from_dolphin = 1;
 
     printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
     
@@ -79,8 +83,20 @@ main(int argc,char *argv[])
     }
 
     /* Get the parameters */
-     while ((counter = getopt(argc, argv, "g:a:v:")) != EOF) 
+     while ((counter = getopt(argc, argv, "m:g:a:v:b:B:")) != EOF)
       switch(counter) {
+        case 'b':
+            dest_mbuf_name = optarg;
+            break;
+
+        case 'B':
+            src_mbuf_name = optarg;
+            read_from_dolphin = 0;
+            break;
+
+        case 'm':
+            max_data_size_mb = atoi(optarg);
+            break;
 
         case 'g':
             segmentId = atoi(optarg);
@@ -99,32 +115,37 @@ main(int argc,char *argv[])
             Usage();
             return(0);
     }
+    max_data_size = max_data_size_mb * 1024*1024;
 
     // Attach to local shared memory
-    char *ifo = (char *)findSharedMemorySize("ifo",100);
+    char *ifo = (char *)findSharedMemorySize(dest_mbuf_name, max_data_size_mb);
     daq_multi_cycle_data_t *ifo_shm = (daq_multi_cycle_data_t *)ifo;
     // char *ifo_data = (char *)ifo + sizeof(daq_multi_cycle_header_t);
     char *ifo_data = (char *)&(ifo_shm->dataBlock[0]);
-	max_data_size *= 1024 * 1024;
 	int cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t))/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
     cycle_data_size -= (cycle_data_size % 8);
     ifo_shm->header.cycleDataSize = cycle_data_size;
     ifo_shm->header.maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-printf("cycle data size = %d\n",cycle_data_size);
-sleep(3);
+    printf("cycle data size = %d\n",cycle_data_size);
+    sleep(3);
 
     int lastCycle = 15;
     int new_cycle = 0;
     char *nextData;
 	int cyclesize = 0;
 
-    // Connect to Dolphin
-    error = dolphin_init();
-    printf("Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
+	if (read_from_dolphin) {
+        // Connect to Dolphin
+        error = dolphin_init();
+        printf("Read = 0x%lx \n Write = 0x%lx \n", (long) readAddr, (long) writeAddr);
 
-    // Set pointers to receive header and data in Dolphin network memory area
-    myreadaddr = (char *)readAddr;
-    myreadaddr += MY_DAT_OFFSET;
+        // Set pointers to receive header and data in Dolphin network memory area
+        myreadaddr = (char *) readAddr;
+        myreadaddr += MY_DAT_OFFSET;
+    } else {
+	    // connect to the src mbuf
+        myreadaddr = (char*)findSharedMemorySize(src_mbuf_name, max_data_size_mb);
+	}
     rcvHeader = (daq_multi_cycle_header_t *)myreadaddr;
     rcvDataPtr = (char *)myreadaddr + sizeof(daq_multi_cycle_header_t);
 
@@ -146,6 +167,8 @@ sleep(3);
 	    // Save cycle number of last received message
 	    lastCycle = new_cycle;
 		cyclesize = rcvHeader->cycleDataSize;
+		// Calculate the correct segment on the source buffer
+        rcvDataPtr = ((char *)myreadaddr + sizeof(daq_multi_cycle_header_t)) + new_cycle*cyclesize;
 	    // Set up pointers to copy data to receive shmem
     	nextData = (char *)ifo_data;
 	    nextData += cycle_data_size * new_cycle;
@@ -167,18 +190,21 @@ sleep(3);
 
 	    // Print some diagnostics
 	    // if(new_cycle == 0 && do_verbose)
-	    if(do_verbose)
+	    if(new_cycle == 0 && do_verbose)
 	    {
 		    printf("New cycle = %d\n", new_cycle);
 		    printf("\t\tNum DCU = %d\n", ixDataBlock->header.dcuTotalModels);
-		    printf("\t\tNew Size = %d\n", ixDataBlock->header.dataBlockSize);
+		    printf("\t\tNew Size = %d\n", ixDataBlock->header.fullDataBlockSize);
 		    printf("\t\tTime = %d\n", ixDataBlock->header.dcuheader[0].timeSec);
 		    printf("\t\tSend Size = %d\n", sendLength);
 	    }
     } while(keepRunning);
 
-    // Cleanup the Dolphin connections
-    error = dolphin_closeout();
+    if (read_from_dolphin) {
+        // Cleanup the Dolphin connections
+        error = dolphin_closeout();
+    }
+
     // Exit
     return SCI_ERR_OK;
 }

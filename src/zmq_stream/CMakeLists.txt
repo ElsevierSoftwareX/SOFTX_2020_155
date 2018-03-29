@@ -11,6 +11,7 @@ find_package(ZMQ4 REQUIRED)
 
 add_library(zmq_transport STATIC zmq_transport.c)
 target_include_directories(zmq_transport PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+target_include_directories(zmq_transport PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(zmq_transport PRIVATE zmq4::zmq)
 
 add_library(zmq_dc_recv STATIC zmq_dc_recv.c zmq_dc_recv.h)
