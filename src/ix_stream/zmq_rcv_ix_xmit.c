@@ -310,6 +310,10 @@ main(int argc, char **argv)
 	int64_t mytime = 0;
 	int64_t mylasttime = 0;
 	int64_t myptime = 0;
+	int64_t min_cycle_time = 1 << 30;
+	int64_t max_cycle_time = 0;
+	int64_t mean_cycle_time = 0;
+	int64_t n_cycle_time = 0;
 	int mytotaldcu = 0;
 	char *zbuffer;
 	int dc_datablock_size = 0;
@@ -360,6 +364,14 @@ main(int argc, char **argv)
 			mytime = s_clock();
 			myptime = mytime - mylasttime;
 			mylasttime = mytime;
+			if (myptime < min_cycle_time) {
+				min_cycle_time = myptime;
+			}
+			if (myptime > max_cycle_time) {
+				max_cycle_time = myptime;
+			}
+			mean_cycle_time += myptime;
+			++n_cycle_time;
 			// if(do_verbose)printf("Data rdy for cycle = %d\t\t%ld\n",nextCycle,myptime);
 
 			// Reset total DCU counter
@@ -423,8 +435,14 @@ main(int argc, char **argv)
 			sendLength = header_size + ifoDataBlock->header.fullDataBlockSize;
 			if(nextCycle == 0 && do_verbose) {
 				printf("Data rdy for cycle = %d\t\tTime Interval = %ld msec\n",nextCycle,myptime);
+				mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time/n_cycle_time : 1<<31);
+				printf("Min/Max/Mean cylce time %ld/%ld/%ld msec over %ld cycles\n", min_cycle_time, max_cycle_time, mean_cycle_time, n_cycle_time);
 				printf("Total DCU = %d\t\t\tBlockSize = %d\n",mytotaldcu,dc_datablock_size);
 				print_diags(mytotaldcu,nextCycle,sendLength,ifoDataBlock,edbs);
+				n_cycle_time = 0;
+				min_cycle_time = 1 << 30;
+				max_cycle_time = 0;
+				mean_cycle_time = 0;
 			}
 			if(xmitData) {
 				// WRITEDATA to Dolphin Network
@@ -471,8 +489,8 @@ main(int argc, char **argv)
 	printf("closing out zmq\n");
 	// Cleanup the ZMQ connections
 	for(ii=0;ii<nsys;ii++) {
-		zmq_close(daq_subscriber[ii]);
-		zmq_ctx_destroy(daq_context[ii]);
+		if (daq_subscriber[ii]) (daq_subscriber[ii]);
+		if (daq_context[ii]) zmq_ctx_destroy(daq_context[ii]);
 	}
   
 	exit(0);
