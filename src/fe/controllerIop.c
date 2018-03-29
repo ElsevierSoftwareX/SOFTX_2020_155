@@ -1475,7 +1475,6 @@ udelay(1000);
 		jj = cycleNum - HKP_DAC_WD_CLK;
 		if(cdsPciModules.dacType[jj] == GSC_18AO8)
 		{
-			static int dacWatchDog = 0;
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr;
 			dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 			if(iopDacEnable && !dacChanErr[jj])
