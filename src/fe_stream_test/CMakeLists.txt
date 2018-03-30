@@ -10,7 +10,8 @@ add_executable(fe_stream_test
         )
 target_link_libraries(fe_stream_test
         PRIVATE
-        fe_stream_generator)
+        fe_stream_generator
+        clock_gettime)
 
 if (${libNDS2Client_FOUND})
 
