@@ -29,9 +29,17 @@
 #include "drv/shmem.h"
 #include "zmq_transport.h"
 
-
 #define DO_HANDSHAKE 0
 
+typedef struct SimplePV {
+	char *name;
+	volatile int *data;
+
+	int alarm_high;
+	int alarm_low;
+	int warn_high;
+	int warn_low;
+} SimplePV;
 
 int do_verbose = 0;
 
@@ -56,6 +64,8 @@ usage()
 	fprintf(stderr, "-s - server names eg x1lsc0, x1susex, etc.\n");
 	fprintf(stderr, "-v - verbose prints diag test data\n");
 	fprintf(stderr, "-g - Dolphin IX channel to xmit on\n");
+	fprintf(stderr, "-p - Debug pv prefix, requires -P as well\n");
+	fprintf(stderr, "-P - Path to a named pipe to send PV debug information to\n");
 	fprintf(stderr, "-h - help\n");
 }
 
@@ -75,6 +85,102 @@ struct timeval tv;
 // *************************************************************************
 void intHandler(int dummy) {
 	keepRunning = 0;
+}
+
+void sigpipeHandler(int dummy)
+{}
+
+void write_all(int fd, char *buffer, size_t count)
+{
+	int attempts = 0;
+	ssize_t cur = 0;
+
+	if (fd < 0 || !buffer || count < 0)
+	{
+		return;
+	}
+	while (count && attempts < 5) {
+		cur = write(fd, buffer, count);
+		if (cur == 0)
+		{
+			return;
+		}
+		else if (cur < 0) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
+			{
+				++attempts;
+			}
+			else
+			{
+				return;
+			}
+		}
+		else
+		{
+			count -= cur;
+			buffer += cur;
+		}
+	}
+}
+
+// write out a list of pv updates to the given file.
+// The data is written out as a json text blob prefixed by a binary length (sizeof size_t host byte order)
+// if there is a failure, nothing happens
+// it is safe to call with a negative fd
+void send_pv_update(int fd, const char *prefix, SimplePV *pvs, int pv_count)
+{
+	char buffer[10000];
+	char *dest = 0;
+	size_t max = 0;
+	size_t remaining = 0;
+	size_t size = 0;
+	size_t count = 0;
+	int i = 0;
+
+	if (fd < 0 || !pvs || pv_count < 1) {
+		return;
+	}
+	max = sizeof(buffer) - sizeof(size) - 4;
+	remaining = max;
+	dest = buffer + sizeof(size) + 4;
+
+	for (i = 0; i < 4; ++i) {
+		buffer[i] = 0xff;
+	}
+
+	count = snprintf(dest, remaining, "{ \"prefix\": \"%s\", \"pvs\": [ ", (prefix ? prefix: ""));
+	if (count >= remaining) {
+		return;
+	}
+	remaining -= count;
+	dest += count;
+	size += count;
+	for (i = 0; i < pv_count; ++i)
+	{
+		count = snprintf(dest, remaining, "%s{ \"name\": \"%s\", \"value\": %d, \"alarm_high\": %d, "
+									"\"alarm_low\": %d, \"warn_high\": %d, \"warn_low\": %d }",
+						 (i ? ", " : ""),
+						 pvs[i].name, *pvs[i].data,
+						 pvs[i].alarm_high, pvs[i].alarm_low,
+						 pvs[i].warn_high, pvs[i].warn_low
+		);
+		if (count >= remaining) {
+			return;
+		}
+		remaining -= count;
+		dest += count;
+		size += count;
+	}
+	count = snprintf(dest, remaining, " ] }");
+	if (count >= remaining) {
+		return;
+	}
+	remaining -= count;
+	dest += count;
+	size += count;
+
+	memcpy(buffer + 4, &size, sizeof(size));
+	write_all(fd, buffer, size + sizeof(size) + 4);
 }
 
 // **********************************************************************************************
@@ -157,6 +263,9 @@ main(int argc, char **argv)
 	unsigned int nsys = 1; // The number of mapped shared memories (number of data sources)
 	char *sysname;
 	char *buffer_name = "ifo";
+	char *pv_prefix = 0;
+	char *pv_debug_pipe_name = 0;
+	int pv_debug_pipe = -1;
 	int c;
 	int ii;					// Loop counter
 
@@ -181,7 +290,7 @@ main(int argc, char **argv)
 
 
 	// Get arguments sent to process
-	while ((c = getopt(argc, argv, "hs:m:v:b:")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "hs:m:v:b:p:P:")) != EOF) switch(c) {
 	case 's':
 		sysname = optarg;
 		break;
@@ -202,6 +311,12 @@ main(int argc, char **argv)
 	case 'b':
 		buffer_name = optarg;
 		break;
+	case 'p':
+		pv_prefix = optarg;
+		break;
+    case 'P':
+        pv_debug_pipe_name = optarg;
+        break;
 	case 'h':
 	default:
 		usage();
@@ -212,7 +327,9 @@ main(int argc, char **argv)
 	if (sysname == NULL) { usage(); exit(1); }
 
 	// set up to catch Control C
-	signal(SIGINT,intHandler);
+	signal(SIGINT, intHandler);
+	// setup to ignore sig pipe
+	signal(SIGPIPE, sigpipeHandler);
 
 	printf("Server name: %s\n", sysname);
 
@@ -274,10 +391,12 @@ main(int argc, char **argv)
 	int64_t mytime = 0;
 	int64_t mylasttime = 0;
 	int64_t myptime = 0;
-	int64_t min_cycle_time = 1 << 30;
-	int64_t max_cycle_time = 0;
-	int64_t mean_cycle_time = 0;
-	int64_t n_cycle_time = 0;
+	volatile int min_cycle_time = 1 << 30;
+	volatile int max_cycle_time = 0;
+	volatile int mean_cycle_time = 0;
+	volatile int pv_dcu_count = 0;
+	volatile int pv_total_datablock_size = 0;
+	int n_cycle_time = 0;
 	int mytotaldcu = 0;
 	char *zbuffer;
 	int dc_datablock_size = 0;
@@ -294,6 +413,63 @@ main(int argc, char **argv)
 	int any_rdy = 0;
 	int jj,kk;
 	int sendLength = 0;
+	void *epics_handle = 0;
+
+    SimplePV pvs[] = {
+            {
+                    "RECV_MIN_MS",
+                    &min_cycle_time,
+
+                    80,
+                    45,
+                    70,
+                    54,
+            },
+            {
+                    "RECV_MAX_MS",
+                    &max_cycle_time,
+
+                    80,
+                    45,
+                    70,
+                    54,
+            },
+            {
+                    "RECV_MEAN_MS",
+                    &mean_cycle_time,
+
+                    80,
+                    45,
+                    70,
+                    54,
+            },
+			{
+					"DCU_COUNT",
+					&pv_dcu_count,
+
+					120,
+					115,
+					0,
+					0,
+			},
+			{
+					"DATA_SIZE",
+					&pv_total_datablock_size,
+
+					100*1024*1024,
+					90*1024*1024,
+					1*1024*1024,
+					0,
+			}
+    };
+    if (pv_debug_pipe_name)
+    {
+        pv_debug_pipe = open(pv_debug_pipe_name, O_NONBLOCK | O_RDWR, 0);
+        if (pv_debug_pipe < 0) {
+            fprintf(stderr, "Unable to open %s for writting (pv status)\n", pv_debug_pipe_name);
+            exit(1);
+        }
+    }
 
 	do {
 		// Reset counters
@@ -397,12 +573,21 @@ main(int argc, char **argv)
 
 			// Calc IX message size
 			sendLength = header_size + ifoDataBlock->header.fullDataBlockSize;
-			if(nextCycle == 0 && do_verbose) {
-				printf("Data rdy for cycle = %d\t\tTime Interval = %ld msec\n",nextCycle,myptime);
-				mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time/n_cycle_time : 1<<31);
-				printf("Min/Max/Mean cylce time %ld/%ld/%ld msec over %ld cycles\n", min_cycle_time, max_cycle_time, mean_cycle_time, n_cycle_time);
-				printf("Total DCU = %d\t\t\tBlockSize = %d\n",mytotaldcu,dc_datablock_size);
-				print_diags(mytotaldcu,nextCycle,sendLength,ifoDataBlock,edbs);
+			if(nextCycle == 0)
+			{
+				pv_dcu_count = mytotaldcu;
+				pv_total_datablock_size = dc_datablock_size;
+                mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time/n_cycle_time : 1<<31);
+                send_pv_update(pv_debug_pipe, pv_prefix, pvs, sizeof(pvs)/sizeof(pvs[0]));
+
+                if (do_verbose)
+                {
+                    printf("Data rdy for cycle = %d\t\tTime Interval = %ld msec\n", nextCycle, myptime);
+                    printf("Min/Max/Mean cylce time %d/%d/%d msec over %d cycles\n", min_cycle_time, max_cycle_time,
+                           mean_cycle_time, n_cycle_time);
+                    printf("Total DCU = %d\t\t\tBlockSize = %d\n", mytotaldcu, dc_datablock_size);
+                    print_diags(mytotaldcu, nextCycle, sendLength, ifoDataBlock, edbs);
+                }
 				n_cycle_time = 0;
 				min_cycle_time = 1 << 30;
 				max_cycle_time = 0;
@@ -433,6 +618,9 @@ main(int argc, char **argv)
 	for(ii=0;ii<nsys;ii++) {
 		if (daq_subscriber[ii]) (daq_subscriber[ii]);
 		if (daq_context[ii]) zmq_ctx_destroy(daq_context[ii]);
+	}
+	if (pv_debug_pipe) {
+		close(pv_debug_pipe);
 	}
   
 	exit(0);
