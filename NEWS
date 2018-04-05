@@ -1,4 +1,11 @@
 ==================================================================================================
+Changes for 3.4.2  
+==================================================================================================
+- Changed FE code compilation optimization level from 1 to 2. This is attempt to fix issue with
+  IOP timing glitches on newer, 10 core computers.
+- Increased the number of IPC per transmission type from 512 to 1024. This was done due to IPC
+  counts on PCIe network approaching 500 at the sites.
+==================================================================================================
 Changes for 3.4.1  
 ==================================================================================================
 - Bug Fix: Support for 20bit DAC was not included in 3.4. This release reinstates that support.
