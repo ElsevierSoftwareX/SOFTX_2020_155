@@ -10,9 +10,9 @@
 ///
 
 ///	Defines max number of IPC allowed per network type
-#define MAX_IPC		512
+#define MAX_IPC		1024
 ///	Defines max number of IPC allowed on a RFM network if using DMA 
-#define MAX_IPC_RFM	512
+#define MAX_IPC_RFM	1024
 /// The number of data blocks buffered per IPC channel
 #define IPC_BLOCKS 	64
 #define PCIE_SEG_SIZE	16

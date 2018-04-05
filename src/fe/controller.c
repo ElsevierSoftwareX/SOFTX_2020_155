@@ -1975,9 +1975,7 @@ udelay(1000);
 		jj = cycleNum - HKP_DAC_WD_CLK;
 		if(cdsPciModules.dacType[jj] == GSC_18AO8)
 		{
-			// static int dacWatchDog = 0;
 			volatile GSA_18BIT_DAC_REG *dac18bitPtr;
-			// if (cycleNum == HKP_DAC_WD_CLK) dacWatchDog ^= 1;
 			dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 			if(iopDacEnable && !dacChanErr[jj])
 				dac18bitPtr->digital_io_ports = (dacWatchDog | GSAO_18BIT_DIO_RW);
