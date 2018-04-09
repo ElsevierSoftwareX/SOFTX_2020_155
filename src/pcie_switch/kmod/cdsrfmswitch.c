@@ -476,12 +476,20 @@ void finish_dolphin(int dolphinCount) {
 // Routine to disconnect code from Dolphin NICs when existing.
 // ************************************************************************
 int ii;
+int err;
+  
+  printk("Disconnecting Dolphin Cards\n");
   for(ii=0;ii<dolphinCount;ii++) {
-	  sci_unmap_segment(&client_map_handle[ii], ii);
-	  sci_disconnect_segment(&remote_segment_handle[ii], ii);
-	  sci_unexport_segment(segment[ii], ii, 0);
-	  sci_remove_segment(&segment[ii], ii);
-	  sci_cancel_session_cb(ii, 0);
+	  err = sci_unmap_segment(&client_map_handle[ii], 0);
+	  printk("Card %d unmap = 0x%x\n",ii,err);
+	  err = sci_disconnect_segment(&remote_segment_handle[ii], 0);
+	  printk("Card %d disconnect = 0x%x\n",ii,err);
+	  err = sci_unexport_segment(segment[ii], ii, 0);
+	  printk("Card %d unexport = 0x%x\n",ii,err);
+	  err = sci_remove_segment(&segment[ii], 0);
+	  printk("Card %d remove = 0x%x\n",ii,err);
+	  err = sci_cancel_session_cb(ii, 0);
+	  printk("Card %d cancel session = 0x%x\n\n",ii,err);
   }
 }
 
