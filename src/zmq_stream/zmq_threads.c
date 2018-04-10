@@ -396,6 +396,10 @@ main(int argc, char **argv)
 	volatile int mean_cycle_time = 0;
 	volatile int pv_dcu_count = 0;
 	volatile int pv_total_datablock_size = 0;
+	volatile int endpoint_min_count = 1 << 30;
+	volatile int endpoint_max_count = 0;
+	volatile int endpoint_mean_count = 0;
+	int cur_endpoint_ready_count;
 	int n_cycle_time = 0;
 	int mytotaldcu = 0;
 	char *zbuffer;
@@ -448,8 +452,8 @@ main(int argc, char **argv)
 					&pv_dcu_count,
 
 					120,
-					115,
 					0,
+					115,
 					0,
 			},
 			{
@@ -457,10 +461,38 @@ main(int argc, char **argv)
 					&pv_total_datablock_size,
 
 					100*1024*1024,
+                    0,
 					90*1024*1024,
-					1*1024*1024,
-					0,
-			}
+                    1*1024*1024,
+			},
+            {
+                    "ENDPOINT_MIN_COUNT",
+                    &endpoint_min_count,
+
+                    32,
+                    0,
+                    30,
+                    1,
+            },
+            {
+                    "ENDPOINT_MAX_COUNT",
+                    &endpoint_max_count,
+
+                    32,
+                    0,
+                    30,
+                    1,
+            },
+            {
+                    "ENDPOINT_MEAN_COUNT",
+                    &endpoint_mean_count,
+
+                    32,
+                    0,
+                    30,
+                    1,
+            }
+
     };
     if (pv_debug_pipe_name)
     {
@@ -524,9 +556,11 @@ main(int argc, char **argv)
         	ifoDataBlock = (daq_multi_dcu_data_t *)nextData;
 			zbuffer = (char *)nextData + header_size;
 
+			cur_endpoint_ready_count = 0;
 			// Loop over all data buffers received from FE computers
 			for(ii=0;ii<nsys;ii++) {
 		  		if(dataRdy[ii]) {
+		  		    ++cur_endpoint_ready_count;
 					int myc = mxDataBlockSingle[ii].header.dcuTotalModels;
 					// For each model, copy over data header information
 					for(jj=0;jj<myc;jj++) {
@@ -564,6 +598,13 @@ main(int argc, char **argv)
 					dc_datablock_size += mydbs;
 		  		}
 			}
+			if (cur_endpoint_ready_count < endpoint_min_count) {
+			    endpoint_min_count = cur_endpoint_ready_count;
+			}
+			if (cur_endpoint_ready_count > endpoint_max_count) {
+			    endpoint_max_count = cur_endpoint_ready_count;
+			}
+			endpoint_mean_count += cur_endpoint_ready_count;
 			// Write total data block size to shared memory header
 			ifoDataBlock->header.fullDataBlockSize = dc_datablock_size;
 			// Write total dcu count to shared memory header
@@ -578,6 +619,7 @@ main(int argc, char **argv)
 				pv_dcu_count = mytotaldcu;
 				pv_total_datablock_size = dc_datablock_size;
                 mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time/n_cycle_time : 1<<31);
+                endpoint_mean_count = (n_cycle_time > 0 ? endpoint_mean_count/n_cycle_time :  1<<31);
                 send_pv_update(pv_debug_pipe, pv_prefix, pvs, sizeof(pvs)/sizeof(pvs[0]));
 
                 if (do_verbose)
