@@ -4,6 +4,8 @@
 #include "dc_utils.h"
 #include "daq_core.h"
 
+#include <zmq.h>
+
 int dc_generate_connection_string(char *dest, const char *src, size_t dest_len)
 {
     static const char *proto_sep = "://";
@@ -28,7 +30,7 @@ int dc_generate_connection_string(char *dest, const char *src, size_t dest_len)
         strncpy(tmp_proto, src, length);
         tmp_proto[length] = 0;
         proto = tmp_proto;
-        name_start = cur + strlen(tmp_proto);
+        name_start = cur + strlen(proto_sep);
     }
     port_start = strstr(name_start, port_sep);
     if (port_start) {
@@ -58,5 +60,26 @@ int dc_generate_connection_string(char *dest, const char *src, size_t dest_len)
         port = DAQ_DATA_PORT;
     }
     snprintf(dest, dest_len, "%s://%s:%d", proto, tmp_name, port);
+    return 1;
+}
+
+int dc_set_zmq_options(void *z_socket)
+{
+    char *env = 0;
+    int i_value = 0;
+
+    if (!z_socket) {
+        return 0;
+    }
+    env = getenv("ZMQ_MULTICAST_MAXTPDU");
+    if (env) {
+        i_value = atoi(env);
+        zmq_setsockopt(z_socket, ZMQ_MULTICAST_MAXTPDU, &i_value, sizeof(int));
+    }
+    env = getenv("ZMQ_RATE");
+    if (env) {
+        i_value = atoi(env);
+        zmq_setsockopt(z_socket, ZMQ_RATE, &i_value, sizeof(int));
+    }
     return 1;
 }

@@ -232,6 +232,7 @@ void *rcvr_thread(void *arg) {
 		exit(1);
 	}
 	printf("Connecting to '%s'\n", loc);
+    dc_set_zmq_options(zsocket);
 	rc = zmq_connect(zsocket, loc);
 	assert(rc == 0);
 

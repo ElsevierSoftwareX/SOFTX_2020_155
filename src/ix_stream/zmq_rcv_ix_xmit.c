@@ -141,8 +141,10 @@ void *rcvr_thread(void *arg) {
     	fprintf(stderr, "Unable to create connection string for '%s'\n", sname[mt]);
     	exit(1);
     }
+	dc_set_zmq_options(zsocket);
     rc = zmq_connect(zsocket, loc);
     assert(rc == 0);
+
 
 	printf("Starting receive loop for thread %d\n", mt);
 	char *daqbuffer = (char *)&mxDataBlockSingle[mt];

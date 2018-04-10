@@ -97,7 +97,13 @@ void zmq_make_connection(char *eport)
 		fprintf(stderr, "Unable to generate connection string for '%s'\n", eport);
 		exit(1);
 	}
+    dc_set_zmq_options(daq_publisher);
+	printf("Binding to '%s'\n", loc);
     rc = zmq_bind (daq_publisher, loc);
+    if (rc < 0) {
+    	fprintf(stderr, "Errno = %d: %s\n", errno, strerror(errno));
+
+    }
     assert (rc == 0);
    	printf("sending data on %s\n",loc);
 }

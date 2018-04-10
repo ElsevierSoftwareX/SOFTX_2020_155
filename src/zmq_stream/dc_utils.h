@@ -18,6 +18,8 @@ extern "C" {
  */
 extern int dc_generate_connection_string(char *dest, const char *src, size_t dest_len);
 
+extern int dc_set_zmq_options(void *z_socket);
+
 #ifdef __cplusplus
 }
 #endif
