@@ -28,6 +28,7 @@
 #include "../include/daq_core.h"
 #include "drv/shmem.h"
 #include "zmq_transport.h"
+#include "dc_utils.h"
 
 #define DO_HANDSHAKE 0
 
@@ -226,8 +227,12 @@ void *rcvr_thread(void *arg) {
 
 	rc = zmq_setsockopt(zsocket, ZMQ_SUBSCRIBE, "", 0);
 	assert(rc == 0);
-	sprintf(loc,"%s%s%s%d","tcp://",sname[mt],":",DAQ_DATA_PORT);
-	zmq_connect(zsocket, loc);
+	if (!dc_generate_connection_string(loc, sname[mt], sizeof(loc))) {
+		fprintf(stderr, "Unable to parse endpoint name '%s'\n", sname[mt]);
+		exit(1);
+	}
+	printf("Connecting to '%s'\n", loc);
+	rc = zmq_connect(zsocket, loc);
 	assert(rc == 0);
 
 	printf("Starting receive loop for thread %d\n", mt);

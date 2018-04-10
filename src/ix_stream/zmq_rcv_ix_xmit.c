@@ -24,6 +24,7 @@
 #include <time.h>
 #include "../include/daqmap.h"
 #include "../include/daq_core.h"
+#include "dc_utils.h"
 
 #include "sisci_types.h"
 #include "sisci_api.h"
@@ -136,8 +137,11 @@ void *rcvr_thread(void *arg) {
 
     rc = zmq_setsockopt(zsocket, ZMQ_SUBSCRIBE, "", 0);
     assert(rc == 0);
-    sprintf(loc,"%s%s%s%d","tcp://",sname[mt],":",DAQ_DATA_PORT);
-    zmq_connect(zsocket, loc);
+    if (!dc_generate_connection_string(loc, sname[mt], sizeof(loc))) {
+    	fprintf(stderr, "Unable to create connection string for '%s'\n", sname[mt]);
+    	exit(1);
+    }
+    rc = zmq_connect(zsocket, loc);
     assert(rc == 0);
 
 	printf("Starting receive loop for thread %d\n", mt);

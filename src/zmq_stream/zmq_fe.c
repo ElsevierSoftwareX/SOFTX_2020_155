@@ -28,6 +28,7 @@
 #include <assert.h>
 #include "zmq_daq.h"
 #include "zmq_transport.h"
+#include "dc_utils.h"
 
 
 #define __CDECL
@@ -84,14 +85,18 @@ void Usage()
 
 void zmq_make_connection(char *eport)
 {
-  char loc[20];
+  char loc[200];
   int rc;
 	
 	// Set up the data publisher socket
 	daq_context = zmq_ctx_new();
     daq_publisher = zmq_socket (daq_context,ZMQ_PUB);
     // sprintf(loc,"%s%d","tcp://*:",DAQ_DATA_PORT);
-    sprintf(loc,"%s%s%s%d","tcp://",eport,":",DAQ_DATA_PORT);
+	//sprintf(loc,"%s%s%s%d","tcp://",eport,":",DAQ_DATA_PORT);
+	if (!dc_generate_connection_string(loc, eport, sizeof(loc))) {
+		fprintf(stderr, "Unable to generate connection string for '%s'\n", eport);
+		exit(1);
+	}
     rc = zmq_bind (daq_publisher, loc);
     assert (rc == 0);
    	printf("sending data on %s\n",loc);
