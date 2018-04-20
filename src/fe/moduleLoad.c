@@ -125,6 +125,8 @@ procfile_status_read(char *buffer,
 		for (i = 0; i < cdsPciModules.dacCount; i++) {
 			if (cdsPciModules.dacType[i] == GSC_18AO8) {
 				sprintf(b, "DAC #%d 18-bit buf_size=%d\n", i, dacOutBufSize[i]);
+			} else if (cdsPciModules.dacType[i] == GSC_20AO8) {
+                sprintf(b, "DAC #%d 20-bit buf_size=%d\n", i, dacOutBufSize[i]);
 			} else {
 				sprintf(b, "DAC #%d 16-bit fifo_status=%d (%s)\n", i, dacOutBufSize[i],
 					dacOutBufSize[i] & 8? "full":
@@ -505,7 +507,8 @@ int init_module (void)
 #ifdef ADC_SLAVE
 	int adcCnt;		/// @param adcCnt Number of ADC cards found by slave model.
 	int dacCnt;		/// @param dacCnt Number of 16bit DAC cards found by slave model.
-        int dac18Cnt;		/// @param dac18Cnt Number of 18bit DAC cards found by slave model.
+    int dac18Cnt;		/// @param dac18Cnt Number of 18bit DAC cards found by slave model.
+    int dac20Cnt;		/// @param dac20Cnt Number of 20bit DAC cards found by slave model.
 	int doCnt;		/// @param doCnt Total number of digital I/O cards found by slave model.
 	int do32Cnt;		/// @param do32Cnt Total number of Contec 32 bit DIO cards found by slave model.
 	int doIIRO16Cnt;	/// @param doIIRO16Cnt Total number of Acces I/O 16 bit relay cards found by slave model.
@@ -669,6 +672,7 @@ int init_module (void)
 	adcCnt = 0;
 	dacCnt = 0;
 	dac18Cnt = 0;
+	dac20Cnt = 0;
 	doCnt = 0;
 	do32Cnt = 0;
 	cdo64Cnt = 0;
@@ -732,6 +736,19 @@ int init_module (void)
 					status ++;
 				}
 				break;
+			case GSC_20AO8:
+	            if(cdsPciModules.cards_used[jj].type == GSC_20AO8  &&
+	                   (cdsPciModules.cards_used[jj].instance == dac20Cnt))
+	            {
+	                printf("Found DAC at %d %d\n",jj,ioMemData->ipc[ii]);
+	                kk = cdsPciModules.dacCount;
+	                cdsPciModules.dacType[kk] = GSC_20AO8;
+	                cdsPciModules.dacConfig[kk] = ioMemData->ipc[ii];
+	                cdsPciModules.pci_dac[kk] = (long)(ioMemData->iodata[ii]);
+	                cdsPciModules.dacCount ++;
+	                status ++;
+	            }
+                break;
 			case CON_6464DIO:
 				if((cdsPciModules.cards_used[jj].type == CON_6464DIO) && 
 					(cdsPciModules.cards_used[jj].instance == doCnt))
@@ -823,6 +840,7 @@ int init_module (void)
 		if(ioMemData->model[ii] == GSC_16AI64SSA) adcCnt ++;
 		if(ioMemData->model[ii] == GSC_16AO16) dacCnt ++;
 		if(ioMemData->model[ii] == GSC_18AO8) dac18Cnt ++;
+		if(ioMemData->model[ii] == GSC_20AO8) dac20Cnt ++;
 		if(ioMemData->model[ii] == CON_6464DIO) doCnt ++;
 		if(ioMemData->model[ii] == CON_32DO) do32Cnt ++;
 		if(ioMemData->model[ii] == ACS_16DIO) doIIRO16Cnt ++;
@@ -883,11 +901,17 @@ int init_module (void)
 	printf("%d DAC cards found\n",cdsPciModules.dacCount);
 	for(ii=0;ii<cdsPciModules.dacCount;ii++)
         {
-                if(cdsPciModules.dacType[ii] == GSC_18AO8)
-		{
-                        printf("\tDAC %d is a GSC_18AO8 module\n",ii);
-		}
-                if(cdsPciModules.dacType[ii] == GSC_16AO16)
+            if(cdsPciModules.dacType[ii] == GSC_18AO8)
+			{
+                 printf("\tDAC %d is a GSC_18AO8 module\n",ii);
+	             printf("\t\tFirmware Revision: %d\n",(cdsPciModules.dacConfig[ii] & 0xffff));
+			}
+         	if(cdsPciModules.dacType[ii] == GSC_20AO8)
+		    {
+		         printf("\tDAC %d is a GSC_20AO8 module\n",ii);
+	             printf("\t\tFirmware Revision: %d\n",(cdsPciModules.dacConfig[ii] & 0xffff));
+         	}
+            if(cdsPciModules.dacType[ii] == GSC_16AO16)
                 {
                         printf("\tDAC %d is a GSC_16AO16 module\n",ii);
                         if((cdsPciModules.dacConfig[ii] & 0x10000) == 0x10000) jj = 8;
@@ -895,21 +919,21 @@ int init_module (void)
                         if((cdsPciModules.dacConfig[ii] & 0x30000) == 0x30000) jj = 16;
                         printf("\t\tChannels = %d \n",jj);
                         if((cdsPciModules.dacConfig[ii] & 0xC0000) == 0x0000)
-			{
+						{
                         	printf("\t\tFilters = None\n");
-			}
+						}
                         if((cdsPciModules.dacConfig[ii] & 0xC0000) == 0x40000)
-			{
+						{			
                         	printf("\t\tFilters = 10kHz\n");
-			}
+						}
                         if((cdsPciModules.dacConfig[ii] & 0xC0000) == 0x80000)
-			{
+						{
                         	printf("\t\tFilters = 100kHz\n");
-			}
+						}
                         if((cdsPciModules.dacConfig[ii] & 0x100000) == 0x100000)
-			{
+						{
                         	printf("\t\tOutput Type = Differential\n");
-			}
+						}
                         printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.dacConfig[ii] & 0xfff));
                 }
 #ifdef ADC_MASTER
