@@ -1308,7 +1308,7 @@ trender_c::trend_worker ()
 
 int 
 trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames_per_file,
-			int ptrend_buffer_blocks, int pminute_trend_buffer_blocks)
+			int ptrend_buffer_blocks)
 {
   if (this -> tb) {
     *yyout << "trend is already running" << endl;
@@ -1321,7 +1321,7 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
   frames_per_file = pframes_per_file;
   minute_frames_per_file = pminute_frames_per_file;
   trend_buffer_blocks = ptrend_buffer_blocks;
-  minute_trend_buffer_blocks = pminute_trend_buffer_blocks;
+  minute_trend_buffer_blocks = SECPERMIN;
 
   // error message buffer
   char errmsgbuf[80];

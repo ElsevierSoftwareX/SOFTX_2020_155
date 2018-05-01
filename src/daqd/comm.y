@@ -2129,7 +2129,7 @@ CommandLine: /* Nothing */
 	   sem_wait (&daqd.trender.trender_sem);
 	   sem_post (&daqd.trender.trender_sem);
 	}
-	| START TREND OptionalIntnum OptionalIntnum {
+	| START TREND OptionalIntnum {
 		AUTH_CHECK(((my_lexer *)lexer));
 		ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
 
@@ -2139,7 +2139,7 @@ CommandLine: /* Nothing */
 		else if (! daqd.trender.num_channels)
 		  *yyout << "there are no trend channels configured" << endl;
 		else {
-		  if (!daqd.trender.start_trend (yyout, 1, 1, $3? $3: 60, $4? $4: 60)) {
+		  if (!daqd.trender.start_trend (yyout, 1, 1, $3? $3: 60)) {
 		    system_log(1, "trender started");
 		  }
 		}

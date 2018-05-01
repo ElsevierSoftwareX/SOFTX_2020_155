@@ -165,7 +165,7 @@ public:
 
   int block_size; ///< circ buffer data block size (sum of the sizes of the configured channels)
 
-  int start_trend (ostream *, int, int, int, int);
+  int start_trend (ostream *, int, int, int);
   sem_t trender_sem;
   int start_trend_saver (ostream *);
   int start_minute_trend_saver (ostream *);
