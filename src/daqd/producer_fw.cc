@@ -51,6 +51,7 @@ using namespace std;
 
 #include "raii.hh"
 #include "work_queue.hh"
+#include "checksum_crc32.hh"
 
 extern daqd_c daqd;
 extern int shutdown_server();
@@ -309,6 +310,7 @@ void *producer::frame_writer() {
         for (;;) {
             int old_seq = seq;
             int length = NDS->receive(bufptr, buflen, &seq, &gps, &gps_n);
+            std::cout << "fw received buffer for " << gps << ":" << gps_n << std::endl;
             cur_buffer->length = length;
             // DEBUG1(printf("%d %d %d %d\n", length, seq, gps, gps_n));
             // Strangely we receiver duplicate blocks on solaris for some reason
@@ -392,6 +394,9 @@ void *producer::frame_writer_crc() {
     // Set thread parameters
     daqd_c::set_thread_priority("Producer crc", "dqprodcrc",
                                 PROD_CRC_THREAD_PRIORITY, PROD_CRC_CPUAFFINITY);
+
+    checksum_crc32 crc_obj;
+
     pthread_mutex_lock(&prod_crc_mutex);
     pthread_cond_signal(&prod_crc_cond);
     pthread_mutex_unlock(&prod_crc_mutex);
@@ -455,19 +460,21 @@ void *producer::frame_writer_crc() {
                         unsigned char *cp =
                             move_buf + data_offs; // Start of data
                         unsigned int bytes = dcu_size; // DCU data size
-                        unsigned int crc = 0;
-                        // Calculate DCU data CRC
-                        while (bytes--) {
-                            crc = (crc << 8) ^
-                                  crctab[((crc >> 24) ^ *(cp++)) & 0xFF];
-                        }
-                        bytes = dcu_size;
-                        while (bytes > 0) {
-                            crc = (crc << 8) ^
-                                  crctab[((crc >> 24) ^ bytes) & 0xFF];
-                            bytes >>= 8;
-                        }
-                        crc = ~crc & 0xFFFFFFFF;
+                                crc_obj.add(cp, bytes);
+//                        unsigned int crc = 0;
+//                        // Calculate DCU data CRC
+//                        while (bytes--) {
+//                            crc = (crc << 8) ^
+//                                  crctab[((crc >> 24) ^ *(cp++)) & 0xFF];
+//                        }
+//                        bytes = dcu_size;
+//                        while (bytes > 0) {
+//                            crc = (crc << 8) ^
+//                                  crctab[((crc >> 24) ^ bytes) & 0xFF];
+//                            bytes >>= 8;
+//                        }
+//                        crc = ~crc & 0xFFFFFFFF;
+                        unsigned int crc = crc_obj.result();
                         if (crc != dcu_crc) {
                             // Detected data corruption !!!
                             daqd.dcuStatus[ifo][dcu_number] |= 0x1000;
@@ -475,6 +482,7 @@ void *producer::frame_writer_crc() {
                                 "ifo=%d dcu=%d calc_crc=0x%x data_crc=0x%x\n",
                                 ifo, dcu_number, crc, dcu_crc));
                         }
+                        crc_obj.reset();
                     }
                 }
                 data_offs += dcu_size;

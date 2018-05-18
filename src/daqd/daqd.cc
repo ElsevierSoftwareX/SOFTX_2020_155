@@ -1019,11 +1019,13 @@ daqd_c::framer (int science)
 	    if (!skip_done) { // do it only first time
 		while (prop -> prop.gps % (frames_per_file*blocks_per_frame)) {
 			b1 -> unlock (cnum);
-	  		nb = b1 -> get (cnum);
-	    		prop =  b1 -> block_prop (nb);
-		}
+            nb = b1 -> get (cnum);
+            prop =  b1 -> block_prop (nb);
+            std::cout << "Waiting for the end of the previous frame, currently at " << prop->prop.gps << std::endl;
+        }
 		skip_done = true;
 	    }
+          std::cout << "framewritter at " << prop->prop.gps % (frames_per_file*blocks_per_frame) << "/" << (frames_per_file*blocks_per_frame) << std::endl;
 
 	    buf =  b1 -> block_ptr (nb);
 	    if (!prop -> bytes)
@@ -1135,6 +1137,7 @@ daqd_c::framer (int science)
 	  }
           b1 -> unlock (cnum);
 	}
+    std::cout << "collected all data for a frame file" << std::endl;
 
       /* finish CRC calculation for the fast data */
 #if EPICS_EDCU == 1
@@ -1161,6 +1164,7 @@ daqd_c::framer (int science)
       //frame -> SetULeapS(leap_seconds);
 
       DEBUG(1, cerr << "adding frame @ " << gps << " to " << (science ? "science" : "full") << " frame queue" << endl);
+      cout << "adding frame @ " << gps << " to " << (science ? "science" : "full") << " frame queue" << endl;
 
       cur_buf->gps = gps;
       cur_buf->gps_n = gps_n;

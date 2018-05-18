@@ -70,6 +70,7 @@ set (DAQD_COMMON_SRC
         filesys.cc
         epics_pvs.cc
         producer_fw.cc
+		checksum_crc32.cc
         net_writer.cc
         trend.cc
         circ.cc
