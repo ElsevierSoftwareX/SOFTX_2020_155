@@ -43,6 +43,8 @@ public:
       *  \return Final checksum.
       */
     uint32_t result(void) const;
+
+    static void initialize_static_tables();
 private:
     uint32_t _value;
     uint32_t _length;

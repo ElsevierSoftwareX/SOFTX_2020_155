@@ -1,6 +1,8 @@
 FIND_PROGRAM(UNAME_PROG uname)
 FIND_PROGRAM(DATE_PROG date)
 
+add_subdirectory(component_tests)
+
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 # These sources are common to all daqd variants
