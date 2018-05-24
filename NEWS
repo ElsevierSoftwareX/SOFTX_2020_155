@@ -1,4 +1,10 @@
 ==================================================================================================
+Changes for 3.4.3  
+==================================================================================================
+- Added TIME_MASTER option for IOP models.	
+	- IOP will send GPS time and cycle via PCIe network to sync other computers.
+- Added CDS time synchronized version of long range switch code (cdsrfmrouter.c).
+==================================================================================================
 Changes for 3.4.2  
 ==================================================================================================
 - Increased the number of IPC per transmission type from 512 to 1024. This was done due to IPC

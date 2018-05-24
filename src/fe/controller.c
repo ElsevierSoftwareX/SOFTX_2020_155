@@ -87,6 +87,10 @@ int printk(const char *fmt, ...) {
 #include "dolphin.c"
 #endif
 
+#ifdef TIME_MASTER
+TIMING_SIGNAL *pcieTimer;
+#endif
+
 // Contec 64 input bits plus 64 output bits (Standard for aLIGO)
 /// Contec6464 input register values
 unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
@@ -473,6 +477,11 @@ void *fe_start(void *arg)
 #endif
 
 printf("Sync source = %d\n",syncSource);
+
+#ifdef TIME_MASTER
+pcieTimer = (TIMING_SIGNAL *) ((volatile char *)(cdsPciModules.dolphinWrite[0]) + IPC_PCIE_TIME_OFFSET);
+printf("I am a TIMING MASTER **************\n");
+#endif
 
 
 /// \> Wait for BURT restore.\n
@@ -1014,6 +1023,10 @@ udelay(1000);
 			// }
 			/// - ---- Allow 1sec for data to be ready (should never take that long).
                     }while((*packedData == DUMMY_ADC_VAL) && (adcWait < MAX_ADC_WAIT));
+#ifdef TIME_MASTER
+		    pcieTimer->gps_time = timeSec;
+		    pcieTimer->cycle = cycleNum;
+#endif
 
 			/// - ---- Added ADC timing diagnostics to verify timing consistent and all rdy together.
 		    if(jj==0)
