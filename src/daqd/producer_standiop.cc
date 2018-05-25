@@ -72,7 +72,6 @@ struct ToLower {
 
 int controller_cycle = 0;
 
-#define SHMEM_DAQ 1
 ///	@file daqmap.h
 ///	@brief File contains defs and structures used in DAQ and GDS/TP
 /// routines. \n
@@ -124,6 +123,8 @@ struct cdsDaqNetGdsTpNum *gdsTpNum[2][DCU_COUNT];
 void *gm_receiver_thread(void *this_p) {
 
     int fd;
+    // error message buffer
+    char errmsgbuf[80];
 
     // Open and map all "Myrinet" DCUs
     for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
@@ -136,8 +137,9 @@ void *gm_receiver_thread(void *this_p) {
             dcu_addr[j] =
                 (volatile unsigned char *)findSharedMemory((char *)s.c_str());
             if (dcu_addr[j] == 0) {
-                system_log(1, "Couldn't mmap `%s'; errno=%d\n", s.c_str(),
-                           errno);
+                strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+                system_log(1, "Couldn't mmap `%s'; err = %s\n", s.c_str(),
+                           errmsgbuf);
                 exit(1);
             }
             system_log(1, "Opened %s\n", s.c_str());
@@ -193,6 +195,9 @@ void *producer::frame_writer() {
     circ_buffer_block_prop_t prop;
     unsigned long prev_gps, prev_frac;
     unsigned long gps, frac;
+
+    // error message buffer
+    char errmsgbuf[80];
     unsigned long stat_cycles = 0;
     stats stat_full, stat_recv, stat_crc, stat_transfer;
 
@@ -213,9 +218,6 @@ void *producer::frame_writer() {
 
     if (!daqd.no_myrinet) {
 
-        unsigned int max_endpoints = 1;
-        static const unsigned int nics_available = 1;
-        max_endpoints &= 0xff;
 
         {
             pthread_t gm_tid;
@@ -230,27 +232,14 @@ void *producer::frame_writer() {
                 rcvr_stats.push_back(s);
             }
 
-            /* Create array to hold mx thread card+endpoint data
-             We will pass a point to the individual array element.
-             This is to avoid a race condition where the
-             gm_receiver_thread gets interleaved values
-             Keith Thorne   2015-07-10 */
-            int bp_aray[MX_MAX_BOARDS][MX_MAX_ENDPOINTS];
-            for (int bnum = 0; bnum < nics_available; bnum++) { // Start
-                for (int j = 0; j < max_endpoints; j++) {
-                    int bp = j;
-                    bp = bp + (bnum * 256);
-                    /* calculate address within array */
-                    bp_aray[bnum][j] = bp;
-                    void *bpPtr = (int *)(bp_aray + bnum) + j;
-                    if (my_err_no = pthread_create(&gm_tid, &attr,
-                                                   gm_receiver_thread, bpPtr)) {
-                        pthread_attr_destroy(&attr);
-                        system_log(1, "pthread_create() err=%d", my_err_no);
-                        exit(1);
-                    }
-                }
-            }
+            // GM, USE_BROADCAST have a single thread
+            if (my_err_no =
+                    pthread_create(&gm_tid, &attr, gm_receiver_thread, 0)) {
+                strerror_r(my_err_no, errmsgbuf, sizeof(errmsgbuf));
+                pthread_attr_destroy(&attr);
+                system_log(1, "pthread_create() err=%s", errmsgbuf);
+                exit(1);
+            } 
             pthread_attr_destroy(&attr);
         }
 
@@ -355,19 +344,7 @@ void *producer::frame_writer() {
                                 dcuStatus[ifo][j] = DAQ_STATE_RUN;
                         }
 
-                        if (_debug) {
-                            // dcuCycleStatus shows
-                            // how many matches of
-                            // cycle number we got
-                            printf("dcuid=%d; "
-                                   "dcuCycleStatus=%d;"
-                                   " dcuStatCycle=%"
-                                   "d\n",
-                                   j, dcuCycleStatus[ifo][j],
-                                   dcuStatCycle[ifo][j]);
-                        }
-                        /* Check if DCU running and in
-                         * sync */
+                        /* Check if DCU running and in sync */
                         if ((dcuCycleStatus[ifo][j] > 3 || j < 5) &&
                             dcuStatCycle[ifo][j] > 4) {
                             dcuStatus[ifo][j] = DAQ_STATE_RUN;
@@ -375,25 +352,18 @@ void *producer::frame_writer() {
 
                         if (/* (lastStatus == DAQ_STATE_RUN) && */ (
                             dcuStatus[ifo][j] != DAQ_STATE_RUN)) {
-                            if (_debug > 0)
-                                printf("Lost %s "
-                                       "(ifo %d; "
-                                       "dcu %d); "
-                                       "status %d "
-                                       "%d\n",
-                                       daqd.dcuName[j], ifo, j,
-                                       dcuCycleStatus[ifo][j],
-                                       dcuStatCycle[ifo][j]);
+                            DEBUG(4, cerr << "Lost " << daqd.dcuName[j]
+                                          << "(ifo " << ifo << "; dcu " << j
+                                          << "); status "
+                                          << dcuCycleStatus[ifo][j]
+                                          << dcuStatCycle[ifo][j] << endl);
                             ipc->status = DAQ_STATE_FAULT;
                         }
 
                         if ((dcuStatus[ifo][j] ==
                              DAQ_STATE_RUN) /* && (lastStatus != DAQ_STATE_RUN) */) {
-                            if (_debug > 0)
-                                printf("New %s "
-                                       "(dcu "
-                                       "%d)\n",
-                                       daqd.dcuName[j], j);
+                            DEBUG(4, cerr << "New " << daqd.dcuName[j]
+                                          << " (dcu " << j << ")" << endl);
                             ipc->status = DAQ_STATE_RUN;
                         }
 
