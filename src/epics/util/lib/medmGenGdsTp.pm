@@ -187,6 +187,9 @@ sub createGdsMedm
 	# Add Sync Source label
 	$xpos = 125; $ypos = 108; $width = 50; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"Sync Source",$ecolors{black});
+	# Add PCIe Net Sync Monitor
+	$xpos = 125; $ypos = 125; $width = 50; $height = 16;
+	$medmdata .= ("CDS::medmGen::medmGenTextDyn") -> ($xpos,$ypos,$width,$height,"PCIeNet",$ecolors{green},"A&1","$site\:FEC-$dcuid\_TIME_ERR");
 	# Add 1PPS Sync Monitor
 	$xpos = 125; $ypos = 125; $width = 50; $height = 16;
 	$medmdata .= ("CDS::medmGen::medmGenTextDyn") -> ($xpos,$ypos,$width,$height,"1PPS",$ecolors{green},"A&2","$site\:FEC-$dcuid\_TIME_ERR");
