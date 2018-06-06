@@ -357,13 +357,8 @@ for ($ii = 0; $ii < $partCnt; $ii++) {
 }
 
 #//		- Process all IPC parts in one go. Requires <em>lib/IPCx.pm</em>, with call to procIpc. \n
-if ($virtualiop < 2) {
-  require "lib/IPCx.pm";
-   ("CDS::IPCx::procIpc") -> ($partCnt);
-} else {
-  require "lib/IPCmonitor.pm";
-  ("CDS::IPCmonitor::procIpc") -> ($partCnt);
-}
+require "lib/IPCx.pm";
+("CDS::IPCx::procIpc") -> ($partCnt);
 
 
 #//		- Check that all subsystem INPUT parts are connected; else exit w/error. \n
@@ -1580,17 +1575,6 @@ END
 	      }
 	   }
 	}
-	if($virtualiop > 1 && $adcMaster > 0) {
-                $ipcxCnt = 64;
-        }
-        if($virtualiop > 1 && $adcMaster <= 0 ) {
-        #if($virtualiop > 1) {
-		(my $ret, my $dum, my $dum2, my $dum3, $::ipcxCnt)   = (CDS::Util::findDefine("src/include/commData3.h", "PCIE_SEG_SIZE"));
-		print "IPCDEFINE = $ret	$dum	$dum2 	$ipcxCnt	\n";
-        }
-	if($virtualiop > 1) {
-		("CDS::IPCmonitor::printFrontEndVars") -> ($ipcxCnt);
-	}
 
 	#//		- Variable definitions.
 	printVariables();
@@ -1634,9 +1618,6 @@ END
 			print OUT "\L$xpartName[$ii] = (double)$partInputs[$ii];\n";
 		}
 	}
-	if($virtualiop > 1) {
-		print OUT ("CDS::IPCmonitor::frontEndInitCode") -> ($ipcxCnt);
-	}
 	print OUT "\} else \{\n";
 	print OUT "// Enabling DAC outs for those who don't have DAC KILL WD \n";
 	print OUT "dacFault = 1;\n";
@@ -1646,18 +1627,8 @@ END
 	#
 	#//			- All IPCx data receives are to occur first in the processing loop
 	#
-	if ($ipcxCnt > 0 && $virtualiop < 2) {
+	if ($ipcxCnt > 0) {
 	   print OUT "\ncommData3Receive(myIpcCount, ipcInfo, timeSec , cycle);\n\n";
-	}
-	if ($ipcxCnt > 0 && $virtualiop > 1 && $adcMaster < 1) {  # PCIE SWITCH CODE
-		my $segment = int($virtualiop - 2) % 10;
-		print OUT "\ncommData3ReceiveSwitch(myIpcCount, ipcInfo, timeSec , cycle, 0, $segment, pLocalEpics->epicsOutput.gdsMon);\n\n";
-		print OUT "\ncommData3ReceiveSwitch(myIpcCount, ipcInfo, timeSec , cycle, 1, $segment, pLocalEpics->epicsOutput.gdsMon);\n\n";
-	}
-	if ($ipcxCnt > 0 && $virtualiop > 1 && $adcMaster == 1) {  # PCIE SWITCH CODE
-		my $segment = int($virtualiop - 2) % 10;
-		print OUT "\ncommData3ReceiveIop(myIpcCount, ipcInfo, timeSec , cycle, 0, $segment, pLocalEpics->epicsOutput.gdsMon);\n\n";
-		print OUT "\ncommData3ReceiveIop(myIpcCount, ipcInfo, timeSec , cycle, 1, $segment, pLocalEpics->epicsOutput.gdsMon);\n\n";
 	}
 	# END IPCx PART CODE
 
@@ -1758,14 +1729,9 @@ print OUT "$feTailCode";
 # The actual sending of IPCx data is to occur
 # as the last step of the processing loop
 #
-if ($ipcxCnt > 0 && $virtualiop < 2) {
+if ($ipcxCnt > 0) {
    print OUT "      if(!cycle && pLocalEpics->epicsInput.ipcDiagReset) pLocalEpics->epicsInput.ipcDiagReset = 0;\n";
    print OUT "\n    commData3Send(myIpcCount, ipcInfo, timeSec, cycle);\n\n";
-}
-if ($ipcxCnt > 0 && $virtualiop > 1 && $adcMaster != 1) {
-	my $segment = int($virtualiop - 2) % 10;
-	print OUT "\n	pLocalEpics->epicsOutput.gdsMon[20] = commData2Copy12(myIpcCount, ipcInfo, 0, 1, $segment, cycle) / 1000;\n\n";
-	print OUT "\n	pLocalEpics->epicsOutput.gdsMon[21] = commData2Copy12(myIpcCount, ipcInfo, 1, 0, $segment, cycle) / 1000;\n\n";
 }
 # END IPCx PART CODE
 
@@ -1786,8 +1752,8 @@ print "\tPart number is $remoteGpsPart\n";
 if($virtualiop == 1) {
 print OUT "#include \"$rcg_src_dir/src/fe/controllerVirtual.c\"\n";
 } elsif($virtualiop > 1) {
-#This is a Dolphin switch
-print OUT "#include \"$rcg_src_dir/src/fe/controllerSwitch.c\"\n";
+#This is a PCIe timing slave IOP
+print OUT "#include \"$rcg_src_dir/src/fe/controllerTS.c\"\n";
 } else {
 print OUT "#include \"$rcg_src_dir/src/fe/controller.c\"\n";
 }
@@ -2107,9 +2073,7 @@ system ("sort $adcFile -k 1,1n -k 2,2n > $adcFileSorted");
 
 # ******************************************************************************************
 #//		- GENERATE IPC SCREENS
-   if($virtualiop < 2 ) {
 	("CDS::IPCx::createIpcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ipcxCnt);
-   }
 # ******************************************************************************************
 #//		- GENERATE GDS_TP SCREEN
 if($daq2dc == 0) {
@@ -2569,9 +2533,6 @@ if ($pciNet > 0) {
 	  print OUTM "DISDIR = /opt/srcdis\n";
 	  print OUTM "EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
 	} 
-}
-if($virtualiop > 1) {
-  print OUTM "EXTRA_CFLAGS += -DDOLPHIN_SWITCH=1\n";
 }
 if ($specificCpu > -1) {
   print OUTM "#Comment out to run on first available CPU\n";
