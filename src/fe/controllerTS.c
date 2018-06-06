@@ -196,10 +196,22 @@ int initialDiagReset = 1;
 inline waitPcieTimingSignal(TIMING_SIGNAL *timePtr,int cycle) {
 int loop = 0;
 
-do{
+    do{
 	udelay(1);
 	loop ++;
-}while(timePtr->cycle != cycle && loop < 6);
+    }while(timePtr->cycle != cycle && loop < 16);
+}
+inline sync2master(TIMING_SIGNAL *timePtr) {
+  int loop = 0;
+  int cycle = 65535;
+
+    do{
+	udelay(5);
+	loop ++;
+    }while(timePtr->cycle != cycle && loop < 1000000);
+    if(loop >= 1000000) printf("Failed to sync to PCIE %ld\n",timePtr->gps_time);
+    else printf("synched at %ld cycle %d\n",timePtr->gps_time,timePtr->cycle);
+
 }
 
 //***********************************************************************
@@ -530,9 +542,11 @@ udelay(1000);
 	syncSource = SYNC_SRC_IRIG_B;
 	pLocalEpics->epicsOutput.timeErr = syncSource;
 
-	pcieTimer = (TIMING_SIGNAL *) ((volatile char *)(cdsPciModules.dolphinWrite[0]) + IPC_PCIE_TIME_OFFSET);
+	pcieTimer = (TIMING_SIGNAL *) ((volatile char *)(cdsPciModules.dolphinRead[0]) + IPC_PCIE_TIME_OFFSET);
 	printf("I am a PCIe Network TIMING SLAVE **************\n");
-	waitPcieTimingSignal(pcieTimer,0);
+	printf("Address is 0x%lx \n",(long)pcieTimer);
+  	sync2master(pcieTimer);
+	timeSec = pcieTimer->gps_time;
 
 
 
@@ -555,16 +569,9 @@ udelay(1000);
   // Calculate how many CPU cycles per code cycle
   cpc = cpu_khz * 1000;
   cpc /= CYCLE_PER_SECOND;
-#ifdef NO_CPU_SHUTDOWN
-	usleep_range(2,4);
-#endif
 
 
-#ifdef NO_CPU_SHUTDOWN
-  while(!kthread_should_stop()){
-#else
   while(!vmeDone){ 	// Run forever until user hits reset
-#endif
 	// **********************************************************************************************************
 	// NORMAL OPERATION -- Wait for ADC data ready
 	// On startup, only want to read one sample such that first cycle
@@ -599,10 +606,11 @@ udelay(1000);
 	/// increased to appropriate number of 65536 s/sec to match desired
 	/// code rate eg 32 samples each time thru before proceeding to match 2048 system.
 		// Read ADC data
+    /// - ---- Wait new cycle count from PCIe network before proceeding
+	waitPcieTimingSignal(pcieTimer,cycleNum);
+	timeSec = pcieTimer->gps_time;
         for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		{
-		    /// - ---- Wait new cycle count from PCIe network before proceeding
-			if(jj == 0) waitPcieTimingSignal(pcieTimer,77770);
 
 		    packedData = (int *)cdsPciModules.pci_adc[jj];
 
