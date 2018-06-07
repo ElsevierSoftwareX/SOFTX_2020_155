@@ -1,0 +1,6831 @@
+
+file {
+	name="/opt/rtcds/tst/x1/medm/X1CDS-PCIE_SWITCH.adl"
+	version=030107
+}
+display {
+	object {
+		x=97
+		y=165
+		width=1100
+		height=200
+	}
+	clr=3
+	bclr=26
+	cmap=""
+	gridSpacing=5
+	gridOn=0
+	snapToGrid=0
+}
+"color map" {
+	ncolors=65
+	colors {
+		ffffff,
+		ececec,
+		dadada,
+		c8c8c8,
+		bbbbbb,
+		aeaeae,
+		9e9e9e,
+		919191,
+		858585,
+		787878,
+		696969,
+		5a5a5a,
+		464646,
+		2d2d2d,
+		000000,
+		00d800,
+		1ebb00,
+		339900,
+		2d7f00,
+		216c00,
+		fd0000,
+		de1309,
+		be190b,
+		a01207,
+		820400,
+		5893ff,
+		597ee1,
+		4b6ec7,
+		3a5eab,
+		27548d,
+		fbf34a,
+		f9da3c,
+		eeb62b,
+		e19015,
+		cd6100,
+		ffb0ff,
+		d67fe2,
+		ae4ebc,
+		8b1a96,
+		610a75,
+		a4aaff,
+		8793e2,
+		6a73c1,
+		4d52a4,
+		343386,
+		c7bb6d,
+		b79d5c,
+		a47e3c,
+		7d5627,
+		58340f,
+		99ffff,
+		73dfff,
+		4ea5f9,
+		2a63e4,
+		0a00b8,
+		ebf1b5,
+		d4db9d,
+		bbc187,
+		a6a462,
+		8b8239,
+		73ff6b,
+		52da3b,
+		3cb420,
+		289315,
+		1a7309,
+	}
+}
+rectangle {
+	object {
+		x=91
+		y=16
+		width=925
+		height=169
+	}
+	"basic attribute" {
+		clr=29
+	}
+}
+rectangle {
+	object {
+		x=617
+		y=47
+		width=250
+		height=25
+	}
+	"basic attribute" {
+		clr=3
+	}
+}
+rectangle {
+	object {
+		x=233
+		y=73
+		width=250
+		height=76
+	}
+	"basic attribute" {
+		clr=27
+	}
+}
+rectangle {
+	object {
+		x=1015
+		y=6
+		width=10
+		height=179
+	}
+	"basic attribute" {
+		clr=7
+	}
+}
+rectangle {
+	object {
+		x=91
+		y=20
+		width=925
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+}
+rectangle {
+	object {
+		x=80
+		y=6
+		width=945
+		height=10
+	}
+	"basic attribute" {
+		clr=12
+	}
+}
+rectangle {
+	object {
+		x=80
+		y=16
+		width=10
+		height=179
+	}
+	"basic attribute" {
+		clr=12
+	}
+}
+polygon {
+	object {
+		x=78
+		y=183
+		width=12
+		height=13
+	}
+	"basic attribute" {
+		clr=7
+		width=1
+	}
+	points {
+		(78,196)
+		(90,196)
+		(87,183)
+		(78,196)
+	}
+}
+polyline {
+	object {
+		x=82
+		y=7
+		width=9
+		height=9
+	}
+	"basic attribute" {
+		clr=7
+		width=1
+	}
+	points {
+		(82,7)
+		(90,15)
+	}
+}
+rectangle {
+	object {
+		x=91
+		y=185
+		width=935
+		height=10
+	}
+	"basic attribute" {
+		clr=7
+	}
+}
+polygon {
+	object {
+		x=1013
+		y=5
+		width=12
+		height=13
+	}
+	"basic attribute" {
+		clr=7
+		width=1
+	}
+	points {
+		(1013,18)
+		(1025,18)
+		(1022,5)
+		(1013,18)
+	}
+}
+"text update" {
+	object {
+		x=862
+		y=23
+		width=120
+		height=15
+	}
+	monitor {
+		chan="X1:CDS-RFM_LRS_TIME"
+		clr=0
+		bclr=14
+	}
+	clrmod="alarm"
+	align="horiz. centered"
+	limits {
+	}
+}
+text {
+	object {
+		x=515
+		y=23
+		width=63
+		height=13
+	}
+	"basic attribute" {
+		clr=0
+	}
+	textix="Long Range PCIe Switch"
+	align="horiz. centered"
+}
+rectangle {
+	object {
+		x=233
+		y=47
+		width=250
+		height=25
+	}
+	"basic attribute" {
+		clr=3
+	}
+}
+rectangle {
+	object {
+		x=239
+		y=49
+		width=238
+		height=20
+	}
+	"basic attribute" {
+		clr=12
+	}
+}
+text {
+	object {
+		x=327
+		y=53
+		width=63
+		height=13
+	}
+	"basic attribute" {
+		clr=0
+	}
+	textix="RFM 0"
+	align="horiz. centered"
+}
+rectangle {
+	object {
+		x=619
+		y=73
+		width=250
+		height=76
+	}
+	"basic attribute" {
+		clr=27
+	}
+}
+rectangle {
+	object {
+		x=623
+		y=49
+		width=238
+		height=20
+	}
+	"basic attribute" {
+		clr=12
+	}
+}
+text {
+	object {
+		x=712
+		y=53
+		width=63
+		height=13
+	}
+	"basic attribute" {
+		clr=0
+	}
+	textix="RFM 1"
+	align="horiz. centered"
+}
+byte {
+	object {
+		x=644
+		y=53
+		width=40
+		height=12
+	}
+	monitor {
+		chan="X1:CDS-RFM_LRS_STATUS"
+		clr=60
+		bclr=20
+	}
+	sbit=2
+	ebit=3
+}
+rectangle {
+	object {
+		x=629
+		y=54
+		width=11
+		height=10
+	}
+	"basic attribute" {
+		clr=50
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(a&1)"
+		chan="X1:CDS-RFM_LRS_TIME"
+	}
+}
+byte {
+	object {
+		x=260
+		y=54
+		width=40
+		height=12
+	}
+	monitor {
+		chan="X1:CDS-RFM_LRS_STATUS"
+		clr=60
+		bclr=20
+	}
+	sbit=0
+	ebit=1
+}
+rectangle {
+	object {
+		x=245
+		y=55
+		width=11
+		height=10
+	}
+	"basic attribute" {
+		clr=50
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="(a&1)"
+		chan="X1:CDS-RFM_LRS_TIME"
+	}
+}
+rectangle {
+	object {
+		x=112
+		y=168
+		width=98
+		height=13
+	}
+	"basic attribute" {
+		clr=12
+	}
+}
+text {
+	object {
+		x=130
+		y=168
+		width=62
+		height=13
+	}
+	"basic attribute" {
+		clr=0
+	}
+	textix="DOLPHIN NIC #1"
+	align="horiz. centered"
+}
+composite {
+	object {
+		x=891
+		y=168
+		width=98
+		height=13
+	}
+	"composite name"=""
+	children {
+		rectangle {
+			object {
+				x=891
+				y=168
+				width=98
+				height=13
+			}
+			"basic attribute" {
+				clr=12
+			}
+		}
+		text {
+			object {
+				x=909
+				y=168
+				width=62
+				height=13
+			}
+			"basic attribute" {
+				clr=0
+			}
+			textix="DOLPHIN NIC #2"
+			align="horiz. centered"
+		}
+	}
+}
+rectangle {
+	object {
+		x=502
+		y=168
+		width=98
+		height=13
+	}
+	"basic attribute" {
+		clr=12
+	}
+}
+text {
+	object {
+		x=520
+		y=168
+		width=62
+		height=13
+	}
+	"basic attribute" {
+		clr=0
+	}
+	textix="DOLPHIN NIC #0"
+	align="horiz. centered"
+}
+polygon {
+	object {
+		x=490
+		y=88
+		width=17
+		height=11
+	}
+	"basic attribute" {
+		clr=50
+	}
+	points {
+		(507,88)
+		(490,91)
+		(507,99)
+		(507,88)
+	}
+}
+rectangle {
+	object {
+		x=521
+		y=116
+		width=5
+		height=44
+	}
+	"basic attribute" {
+		clr=60
+	}
+}
+rectangle {
+	object {
+		x=490
+		y=116
+		width=32
+		height=4
+	}
+	"basic attribute" {
+		clr=60
+	}
+}
+rectangle {
+	object {
+		x=573
+		y=140
+		width=5
+		height=15
+	}
+	"basic attribute" {
+		clr=60
+	}
+}
+rectangle {
+	object {
+		x=573
+		y=136
+		width=25
+		height=4
+	}
+	"basic attribute" {
+		clr=60
+	}
+}
+rectangle {
+	object {
+		x=496
+		y=92
+		width=43
+		height=4
+	}
+	"basic attribute" {
+		clr=50
+	}
+}
+rectangle {
+	object {
+		x=535
+		y=92
+		width=5
+		height=61
+	}
+	"basic attribute" {
+		clr=50
+	}
+}
+polygon {
+	object {
+		x=518
+		y=151
+		width=11
+		height=17
+	}
+	"basic attribute" {
+		clr=60
+	}
+	points {
+		(518,151)
+		(521,168)
+		(529,151)
+		(518,151)
+	}
+}
+rectangle {
+	object {
+		x=559
+		y=92
+		width=43
+		height=4
+	}
+	"basic attribute" {
+		clr=50
+	}
+}
+rectangle {
+	object {
+		x=558
+		y=92
+		width=5
+		height=61
+	}
+	"basic attribute" {
+		clr=50
+	}
+}
+polygon {
+	object {
+		x=570
+		y=151
+		width=11
+		height=17
+	}
+	"basic attribute" {
+		clr=60
+	}
+	points {
+		(581,151)
+		(574,168)
+		(570,151)
+		(581,151)
+	}
+}
+rectangle {
+	object {
+		x=885
+		y=92
+		width=78
+		height=4
+	}
+	"basic attribute" {
+		clr=50
+	}
+}
+rectangle {
+	object {
+		x=962
+		y=92
+		width=5
+		height=65
+	}
+	"basic attribute" {
+		clr=50
+	}
+}
+polygon {
+	object {
+		x=960
+		y=151
+		width=11
+		height=17
+	}
+	"basic attribute" {
+		clr=50
+	}
+	points {
+		(960,151)
+		(963,168)
+		(971,151)
+		(960,151)
+	}
+}
+rectangle {
+	object {
+		x=943
+		y=140
+		width=5
+		height=20
+	}
+	"basic attribute" {
+		clr=60
+	}
+}
+rectangle {
+	object {
+		x=883
+		y=140
+		width=60
+		height=4
+	}
+	"basic attribute" {
+		clr=60
+	}
+}
+polygon {
+	object {
+		x=876
+		y=137
+		width=17
+		height=11
+	}
+	"basic attribute" {
+		clr=60
+	}
+	points {
+		(893,137)
+		(876,140)
+		(893,148)
+		(893,137)
+	}
+}
+"text update" {
+	object {
+		x=900
+		y=88
+		width=30
+		height=15
+	}
+	monitor {
+		chan="X1:CDS-RFM_LRS_CS2EY_CHCNT"
+		clr=0
+		bclr=29
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=900
+		y=138
+		width=30
+		height=15
+	}
+	monitor {
+		chan="X1:CDS-RFM_LRS_EY2CS_CHCNT"
+		clr=0
+		bclr=29
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+rectangle {
+	object {
+		x=137
+		y=92
+		width=80
+		height=4
+	}
+	"basic attribute" {
+		clr=50
+	}
+}
+rectangle {
+	object {
+		x=135
+		y=92
+		width=5
+		height=63
+	}
+	"basic attribute" {
+		clr=50
+	}
+}
+polygon {
+	object {
+		x=132
+		y=151
+		width=11
+		height=17
+	}
+	"basic attribute" {
+		clr=50
+	}
+	points {
+		(143,151)
+		(136,168)
+		(132,151)
+		(143,151)
+	}
+}
+rectangle {
+	object {
+		x=156
+		y=116
+		width=5
+		height=41
+	}
+	"basic attribute" {
+		clr=60
+	}
+}
+rectangle {
+	object {
+		x=160
+		y=116
+		width=52
+		height=4
+	}
+	"basic attribute" {
+		clr=60
+	}
+}
+polygon {
+	object {
+		x=205
+		y=113
+		width=17
+		height=11
+	}
+	"basic attribute" {
+		clr=60
+	}
+	points {
+		(205,113)
+		(222,116)
+		(205,124)
+		(205,113)
+	}
+}
+"text update" {
+	object {
+		x=170
+		y=110
+		width=30
+		height=15
+	}
+	monitor {
+		chan="X1:CDS-RFM_LRS_EX2CS_CHCNT"
+		clr=0
+		bclr=29
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+"text update" {
+	object {
+		x=170
+		y=86
+		width=30
+		height=15
+	}
+	monitor {
+		chan="X1:CDS-RFM_LRS_CS2EX_CHCNT"
+		clr=0
+		bclr=29
+	}
+	align="horiz. centered"
+	limits {
+	}
+}
+polygon {
+	object {
+		x=589
+		y=90
+		width=17
+		height=10
+	}
+	"basic attribute" {
+		clr=50
+	}
+	points {
+		(589,90)
+		(606,92)
+		(589,100)
+		(589,90)
+	}
+}
+rectangle {
+	object {
+		x=229
+		y=73
+		width=258
+		height=80
+	}
+	"basic attribute" {
+		clr=0
+		fill="outline"
+		width=2
+	}
+}
+rectangle {
+	object {
+		x=615
+		y=73
+		width=258
+		height=80
+	}
+	"basic attribute" {
+		clr=0
+		fill="outline"
+		width=2
+	}
+}
+composite {
+	object {
+		x=258
+		y=83
+		width=8
+		height=10
+	}
+	"composite name"=""
+	children {
+		rectangle {
+			object {
+				x=258
+				y=83
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & 2"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=258
+				y=83
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=258
+				y=83
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & 2"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+			}
+		}
+	}
+}
+rectangle {
+	object {
+		x=271
+		y=83
+		width=8
+		height=10
+	}
+	"basic attribute" {
+		clr=60
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A & 4"
+		chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+	}
+}
+rectangle {
+	object {
+		x=271
+		y=83
+		width=8
+		height=10
+	}
+	"basic attribute" {
+		clr=29
+	}
+}
+rectangle {
+	object {
+		x=271
+		y=83
+		width=8
+		height=10
+	}
+	"basic attribute" {
+		clr=50
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A & 4"
+		chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+	}
+}
+composite {
+	object {
+		x=284
+		y=83
+		width=8
+		height=10
+	}
+	"composite name"=""
+	children {
+		rectangle {
+			object {
+				x=284
+				y=83
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & 8"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=284
+				y=83
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=284
+				y=83
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & 8"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+			}
+		}
+	}
+}
+rectangle {
+	object {
+		x=245
+		y=83
+		width=8
+		height=10
+	}
+	"basic attribute" {
+		clr=29
+	}
+}
+rectangle {
+	object {
+		x=245
+		y=83
+		width=8
+		height=10
+	}
+	"basic attribute" {
+		clr=50
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A & 1"
+		chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+	}
+}
+rectangle {
+	object {
+		x=245
+		y=83
+		width=8
+		height=10
+	}
+	"basic attribute" {
+		clr=60
+	}
+	"dynamic attribute" {
+		vis="calc"
+		calc="A & 1"
+		chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+	}
+}
+composite {
+	object {
+		x=245
+		y=98
+		width=47
+		height=10
+	}
+	"composite name"=""
+	children {
+		rectangle {
+			object {
+				x=284
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^19)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=271
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^18)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=258
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^17)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=245
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=245
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^16)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=284
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=284
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^19)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=271
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=271
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^18)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=258
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=258
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^17)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=245
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^16)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=245
+		y=113
+		width=47
+		height=10
+	}
+	"composite name"=""
+	children {
+		rectangle {
+			object {
+				x=271
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^2)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=271
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=271
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^2)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=284
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=284
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^3)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=258
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=258
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^1)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=245
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=245
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^0)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=245
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^0)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=284
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^3)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=258
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^1)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=245
+		y=128
+		width=47
+		height=10
+	}
+	"composite name"=""
+	children {
+		rectangle {
+			object {
+				x=284
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^19)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=271
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^18)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=258
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^17)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=245
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^16)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=284
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=284
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^19)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=271
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=271
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^18)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=258
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=258
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^17)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=245
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=245
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^16)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=422
+		y=83
+		width=47
+		height=55
+	}
+	"composite name"=""
+	children {
+		composite {
+			object {
+				x=422
+				y=83
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=461
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^15)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=448
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^14)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=435
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^13)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=422
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=422
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^12)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=461
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=461
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^15)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=448
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=448
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^14)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=435
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=435
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^13)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=422
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^12)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=422
+				y=98
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=461
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^31)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=448
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^30)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=435
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^29)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=422
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=422
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^28)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=461
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=461
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^31)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=448
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=448
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^30)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=435
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=435
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^29)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=422
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^28)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=422
+				y=113
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=461
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^15)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=448
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^14)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=435
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^13)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=422
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^12)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=461
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=461
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^15)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=448
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=448
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^14)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=435
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=435
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^13)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=422
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=422
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^12)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=422
+				y=128
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=461
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^31)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=448
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^30)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=435
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^29)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=422
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^28)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=448
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=448
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^30)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=461
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=461
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^31)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=435
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=435
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^29)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=422
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=422
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^28)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=365
+		y=83
+		width=47
+		height=55
+	}
+	"composite name"=""
+	children {
+		composite {
+			object {
+				x=365
+				y=83
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=404
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=404
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^11)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=391
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=391
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^10)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=378
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=378
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^9)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=365
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^8)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=404
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^11)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=391
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^10)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=378
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^9)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=365
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=365
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^8)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=365
+				y=98
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=404
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^27)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=391
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^26)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=378
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^25)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=365
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=365
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^24)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=404
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=404
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^27)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=391
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=391
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^26)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=378
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=378
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^25)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=365
+						y=98
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^24)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=365
+				y=113
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=391
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^10)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=391
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=391
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^10)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=404
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^11)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=378
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^9)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=365
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^8)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=404
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=404
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^11)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=378
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=378
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^9)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=365
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=365
+						y=113
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^8)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+			}
+		}
+		rectangle {
+			object {
+				x=404
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=404
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^27)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=391
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=391
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^26)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=404
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^27)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=391
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^26)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=378
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^25)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=365
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^24)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=378
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=378
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^25)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=365
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=365
+				y=128
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^24)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=302
+		y=83
+		width=47
+		height=55
+	}
+	"composite name"=""
+	children {
+		composite {
+			object {
+				x=302
+				y=83
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=341
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=341
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 128"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=328
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=328
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 64"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=315
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=315
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 32"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=302
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 16"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=315
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 32"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=328
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 64"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=341
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 128"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=302
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=302
+						y=83
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 16"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+					}
+				}
+			}
+		}
+		rectangle {
+			object {
+				x=341
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^23)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=328
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^22)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=315
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^21)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=302
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=302
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^20)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=341
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=341
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^23)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=328
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=328
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^22)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=315
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=315
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^21)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=302
+				y=98
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^20)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE1"
+			}
+		}
+		rectangle {
+			object {
+				x=328
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=328
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^6)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=341
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^7)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=328
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^6)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=315
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^5)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=302
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=60
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^4)"
+				chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=341
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=341
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^7)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=315
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=315
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^5)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		rectangle {
+			object {
+				x=302
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=29
+			}
+		}
+		rectangle {
+			object {
+				x=302
+				y=113
+				width=8
+				height=10
+			}
+			"basic attribute" {
+				clr=50
+			}
+			"dynamic attribute" {
+				vis="calc"
+				calc="A & (2^4)"
+				chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+			}
+		}
+		composite {
+			object {
+				x=302
+				y=128
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=341
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^23)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=328
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^22)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=315
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^21)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=302
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^20)"
+						chan="X1:CDS-RFM_LRS_EX2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=328
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=328
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^22)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=341
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=341
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^23)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=315
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=315
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^21)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=302
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=302
+						y=128
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^20)"
+						chan="X1:CDS-RFM_LRS_CS2EX_ACTIVE2"
+					}
+				}
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=632
+		y=81
+		width=47
+		height=55
+	}
+	"composite name"=""
+	children {
+		composite {
+			object {
+				x=645
+				y=81
+				width=8
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=645
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 2"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=645
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=645
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 2"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=658
+				y=81
+				width=8
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=658
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 4"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=658
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=658
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 4"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=671
+				y=81
+				width=8
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=671
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 8"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=671
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=671
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 8"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=632
+				y=81
+				width=8
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=632
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=632
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 1"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				composite {
+					object {
+						x=632
+						y=81
+						width=8
+						height=10
+					}
+					"composite name"=""
+					children {
+						rectangle {
+							object {
+								x=632
+								y=81
+								width=8
+								height=10
+							}
+							"basic attribute" {
+								clr=60
+							}
+							"dynamic attribute" {
+								vis="calc"
+								calc="A & 1"
+								chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+							}
+						}
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=632
+				y=96
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=671
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^19)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=658
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^18)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=645
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^17)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=632
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=632
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^16)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=671
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=671
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^19)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=658
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=658
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^18)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=645
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=645
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^17)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=632
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^16)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=632
+				y=111
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=658
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^2)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=658
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=658
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^2)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=671
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=671
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^3)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=645
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=645
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^1)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=632
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=632
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^0)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=632
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^0)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=671
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^3)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=645
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^1)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=632
+				y=126
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=671
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^19)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=658
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^18)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=645
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^17)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=632
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^16)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=671
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=671
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^19)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=658
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=658
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^18)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=645
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=645
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^17)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=632
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=632
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^16)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=689
+		y=81
+		width=47
+		height=55
+	}
+	"composite name"=""
+	children {
+		composite {
+			object {
+				x=689
+				y=81
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=728
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=728
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 128"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=715
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=715
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 64"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=702
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=702
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 32"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=689
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 16"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=702
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 32"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=715
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 64"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=728
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 128"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=689
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=689
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & 16"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=689
+				y=96
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=728
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^23)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=715
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^22)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=702
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^21)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=689
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=689
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^20)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=728
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=728
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^23)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=715
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=715
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^22)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=702
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=702
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^21)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=689
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^20)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=689
+				y=111
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=715
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=715
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^6)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=728
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^7)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=715
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^6)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=702
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^5)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=689
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^4)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=728
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=728
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^7)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=702
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=702
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^5)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=689
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=689
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^4)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=689
+				y=126
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=728
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^23)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=715
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^22)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=702
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^21)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=689
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^20)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=715
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=715
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^22)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=728
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=728
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^23)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=702
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=702
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^21)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=689
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=689
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^20)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=751
+		y=81
+		width=47
+		height=55
+	}
+	"composite name"=""
+	children {
+		composite {
+			object {
+				x=751
+				y=81
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=790
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=790
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^11)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=777
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=777
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^10)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=764
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=764
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^9)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=751
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^8)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=790
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^11)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=777
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^10)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=764
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^9)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=751
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=751
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^8)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=751
+				y=96
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=790
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^27)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=777
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^26)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=764
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^25)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=751
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=751
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^24)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=790
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=790
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^27)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=777
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=777
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^26)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=764
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=764
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^25)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=751
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^24)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=751
+				y=111
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=777
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^10)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=777
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=777
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^10)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=790
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^11)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=764
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^9)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=751
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^8)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=790
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=790
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^11)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=764
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=764
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^9)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=751
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=751
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^8)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=751
+				y=126
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=790
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=790
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^27)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=777
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=777
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^26)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=790
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^27)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=777
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^26)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=764
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^25)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=751
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^24)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=764
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=764
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^25)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=751
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=751
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^24)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+			}
+		}
+	}
+}
+composite {
+	object {
+		x=808
+		y=81
+		width=47
+		height=55
+	}
+	"composite name"=""
+	children {
+		composite {
+			object {
+				x=808
+				y=81
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=847
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^15)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=834
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^14)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=821
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^13)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=808
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=808
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^12)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=847
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=847
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^15)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=834
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=834
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^14)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=821
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=821
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^13)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=808
+						y=81
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^12)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=808
+				y=96
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=847
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^31)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=834
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^30)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=821
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^29)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=808
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=808
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^28)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=847
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=847
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^31)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=834
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=834
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^30)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=821
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=821
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^29)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE1"
+					}
+				}
+				rectangle {
+					object {
+						x=808
+						y=96
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^28)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE1"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=808
+				y=111
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=847
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^15)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=834
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^14)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=821
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^13)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=808
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^12)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=847
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=847
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^15)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=834
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=834
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^14)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=821
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=821
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^13)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=808
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=808
+						y=111
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^12)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+			}
+		}
+		composite {
+			object {
+				x=808
+				y=126
+				width=47
+				height=10
+			}
+			"composite name"=""
+			children {
+				rectangle {
+					object {
+						x=847
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^31)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=834
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^30)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=821
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^29)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=808
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=60
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^28)"
+						chan="X1:CDS-RFM_LRS_EY2CS_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=834
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=834
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^30)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=847
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=847
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^31)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=821
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=821
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^29)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+				rectangle {
+					object {
+						x=808
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=29
+					}
+				}
+				rectangle {
+					object {
+						x=808
+						y=126
+						width=8
+						height=10
+					}
+					"basic attribute" {
+						clr=50
+					}
+					"dynamic attribute" {
+						vis="calc"
+						calc="A & (2^28)"
+						chan="X1:CDS-RFM_LRS_CS2EY_ACTIVE2"
+					}
+				}
+			}
+		}
+	}
+}
