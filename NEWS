@@ -1,6 +1,7 @@
 ==================================================================================================
 Changes for 3.5  (NOT YET RELEASED)
 ==================================================================================================
+- When using daqd_shmem, must set a parameter "GDS_BROADCAST" = "1" to enable gds broadcast.
 - daqLibZmq.c developed to send out GDS TP data via separate shared memory area for use with 
   new ZMQ DAQ transmission software.
   - This code is inserted if USE_ZMQ file exists in release/src/include directory. If not, then

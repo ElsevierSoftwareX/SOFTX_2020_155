@@ -701,7 +701,11 @@ daqd_c::framer_io(int science)
    const int STATE_NORMAL = 0;
    const int STATE_WRITING = 1;
    const int STATE_BROADCAST = 2;
+   bool shmem_bcast_frame = true;
 
+#ifdef DAQD_BUILD_SHMEM
+   shmem_bcast_frame = parameters().get<int>("GDS_BROADCAST", 0) == 1;
+#endif
    framer_work_queue *_work_queue = 0;
    if (science) {
        daqd_c::set_thread_priority("Science frame saver IO","dqscifrio",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_IO_CPUAFFINITY);
@@ -831,37 +835,39 @@ daqd_c::framer_io(int science)
                }
 
   #ifndef NO_BROADCAST
-               // We are compiled to be a DMT broadcaster
-               //
-               fd = open(cur_buf->tmpf, O_RDONLY);
-               if (fd == -1) {
-                   system_log(1, "failed to open file; errno %d", errno);
-                   exit(1);
-               }
-               struct stat sb;
-               if (fstat(fd, &sb) == -1) {
-                   system_log(1, "failed to fstat file; errno %d", errno);
-                   exit(1);
-               }
-               void *addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-               if (addr == MAP_FAILED) {
-                   system_log(1, "failed to fstat file; errno %d", errno);
-                   exit(1);
-               }
+               if (shmem_bcast_frame) {
+                   // We are compiled to be a DMT broadcaster
+                   //
+                   fd = open(cur_buf->tmpf, O_RDONLY);
+                   if (fd == -1) {
+                       system_log(1, "failed to open file; errno %d", errno);
+                       exit(1);
+                   }
+                   struct stat sb;
+                   if (fstat(fd, &sb) == -1) {
+                       system_log(1, "failed to fstat file; errno %d", errno);
+                       exit(1);
+                   }
+                   void *addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+                   if (addr == MAP_FAILED) {
+                       system_log(1, "failed to fstat file; errno %d", errno);
+                       exit(1);
+                   }
 
-               net_writer_c *nw = (net_writer_c *)net_writers.first();
-               assert(nw);
-               assert(nw->broadcast);
+                   net_writer_c *nw = (net_writer_c *) net_writers.first();
+                   assert(nw);
+                   assert(nw->broadcast);
 
-               PV::set_pv(epics_state_var, STATE_BROADCAST);
-               if (nw->send_to_client ((char *) addr, sb.st_size, cur_buf->gps, b1 -> block_period ())) {
-                   system_log(1, "failed to broadcast data frame");
-                   exit(1);
+                   PV::set_pv(epics_state_var, STATE_BROADCAST);
+                   if (nw->send_to_client((char *) addr, sb.st_size, cur_buf->gps, b1->block_period())) {
+                       system_log(1, "failed to broadcast data frame");
+                       exit(1);
+                   }
+                   PV::set_pv(epics_state_var, STATE_NORMAL);
+                   munmap(addr, sb.st_size);
+                   close(fd);
+                   unlink(cur_buf->tmpf);
                }
-               PV::set_pv(epics_state_var, STATE_NORMAL);
-               munmap(addr, sb.st_size);
-               close(fd);
-               unlink(cur_buf->tmpf);
   #endif
            } /*catch (...) {
         system_log(1, "failed to write full frame out");
