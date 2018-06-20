@@ -75,10 +75,14 @@ unsigned long  window_stop[16] =  {135000,197500,260000,322500,395000,447500,510
 
 void Usage()
 {
-    printf("Usage of ix_multi_stream:\n");
-    printf("fe_dc  -s <models> -m <memory size> \n");
+    printf("Usage of zmq_fe:\n");
+    printf("zmq_fe  -s <models> <OPTIONS>\n");
+    printf(" -b <buffer>    : Name of the mbuf to concentrate the data to locally (defaults to ifo)\n");
     printf(" -s <value>     : Name of FE control models\n");
     printf(" -m <value>     : Local memory buffer size in megabytes\n");
+    printf(" -v 1           : Enable verbose output\n");
+    printf(" -e <interface> : Name of the interface to broadcast data through\n");
+    printf(" -d <directory> : Path to the gds tp dir used to lookup model rates\n");
     printf(" -h             : This helpscreen\n");
     printf("\n");
 }
@@ -494,7 +498,7 @@ main(int argc,char *argv[])
     }
 
     /* Get the parameters */
-     while ((counter = getopt(argc, argv, "b:e:m:h:v:s:g:")) != EOF)
+     while ((counter = getopt(argc, argv, "b:e:m:h:v:s:d:")) != EOF)
       switch(counter) {
         case 'b':
             buffer_name = optarg;
@@ -524,7 +528,7 @@ main(int argc,char *argv[])
 	        printf ("eport = %s\n",eport);
 			sendViaZmq = 1;
 	        break;
-	    case 'g':
+	    case 'd':
 	    	gds_tp_dir = optarg;
 	    	break;
         case 'h':
