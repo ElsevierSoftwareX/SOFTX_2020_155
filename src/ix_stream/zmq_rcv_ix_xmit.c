@@ -63,6 +63,7 @@ int start_acq = 0;
 static volatile int keepRunning = 1;
 int thread_cycle[32];
 int thread_timestamp[32];
+int rcv_errors = 0;
 
 void
 usage()
@@ -98,22 +99,20 @@ void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *
 // **********************************************************************************************
 	int ii = 0;
 		// Print diags in verbose mode
-		printf("\nTime = %d\t size = %d\n",ixDataBlock->header.dcuheader[0].timeSec,sendLength);
-		printf("\tCycle = ");
-		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].cycle);
-		printf("\n\tTimeSec = ");
-		for(ii=0;ii<nsys;ii++) printf("\t%d",ixDataBlock->header.dcuheader[ii].timeSec);
-		printf("\n\tTimeNSec = ");
-		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].timeNSec);
-		printf("\n\tDataSize = ");
-		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].dataBlockSize);
-	   	printf("\n\tTPCount = ");
-	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpCount);
-	   	printf("\n\tTPSize = ");
-	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpBlockSize);
-	   	printf("\n\tXmitSize = ");
-	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",dbs[ii]);
-	   	printf("\n\n ");
+		printf("Receive errors = %d\n",rcv_errors);
+		printf("Time = %d\t size = %d\n",ixDataBlock->header.dcuheader[0].timeSec,sendLength);
+		printf("DCU ID\tCycle \t TimeSec\tTimeNSec\tDataSize\tTPCount\tTPSize\tXmitSize\n");
+		for(ii=0;ii<nsys;ii++) {
+			printf("%d",ixDataBlock->header.dcuheader[ii].dcuId);
+			printf("\t%d",ixDataBlock->header.dcuheader[ii].cycle);
+			printf("\t%d",ixDataBlock->header.dcuheader[ii].timeSec);
+			printf("\t%d",ixDataBlock->header.dcuheader[ii].timeNSec);
+			printf("\t\t%d",ixDataBlock->header.dcuheader[ii].dataBlockSize);
+	   		printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpCount);
+	   		printf("\t%d",ixDataBlock->header.dcuheader[ii].tpBlockSize);
+	   		printf("\t%d",dbs[ii]);
+	   		printf("\n ");
+		}
 }
 
 // *************************************************************************
@@ -279,21 +278,6 @@ main(int argc, char **argv)
 
 	// Make 0MQ socket connections
 	for(ii=0;ii<nsys;ii++) {
-//		// Make 0MQ socket connection for rcvr threads
-//		daq_context[ii] = zmq_ctx_new();
-//		daq_subscriber[ii] = zmq_socket (daq_context[ii],ZMQ_SUB);
-//
-//		// Subscribe to all data from the server
-//		rc = zmq_setsockopt(daq_subscriber[ii],ZMQ_SUBSCRIBE,"",0);
-//		assert (rc == 0);
-//
-//		// connect to the publisher
-//		sprintf(loc,"%s%s%s%d","tcp://",sname[ii],":",DAQ_DATA_PORT);
-//		printf("sys connection %d = %s ...",ii,loc);
-//		rc = zmq_connect (daq_subscriber[ii], loc);
-//		assert (rc == 0);
-//		printf(" done\n");
-
 		// Create a thread to receive data from each data server
 		thread_index[ii] = ii;
 		pthread_create(&thread_id[ii],NULL,rcvr_thread,(void *)&thread_index[ii]);
@@ -301,13 +285,13 @@ main(int argc, char **argv)
 
 	if(xmitData) {
 		// Connect to Dolphin
-    	error = dolphin_init();
-    	printf("Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
+		error = dolphin_init();
+		printf("Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
 
-    	// Set pointer to xmit header in Dolphin xmit data area.
-    	mywriteaddr = (char *)writeAddr;
-    	mywriteaddr += MY_DAT_OFFSET;
-    	xmitHeader = (daq_multi_cycle_header_t *)mywriteaddr;
+		// Set pointer to xmit header in Dolphin xmit data area.
+		mywriteaddr = (char *)writeAddr;
+		mywriteaddr += MY_DAT_OFFSET;
+		xmitHeader = (daq_multi_cycle_header_t *)mywriteaddr;
 	}
 	//
 
@@ -363,7 +347,8 @@ main(int argc, char **argv)
 				if(nextCycle == thread_cycle[ii]) dataRdy[ii] = 1;
 			}
 			timeout += 1;
-		}while(threads_rdy < nsys && timeout < 50);
+		}while(threads_rdy < nsys && timeout < 100);
+		if(timeout >= 100) rcv_errors += (nsys - threads_rdy);
 
 		if(any_rdy) {
 			// Timing diagnostics
@@ -440,7 +425,7 @@ main(int argc, char **argv)
 			// Calc IX message size
 			sendLength = header_size + ifoDataBlock->header.fullDataBlockSize;
 			if(nextCycle == 0 && do_verbose) {
-				printf("Data rdy for cycle = %d\t\tTime Interval = %ld msec\n",nextCycle,myptime);
+				printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec\n",nextCycle,myptime);
 				mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time/n_cycle_time : 1<<31);
 				printf("Min/Max/Mean cylce time %ld/%ld/%ld msec over %ld cycles\n", min_cycle_time, max_cycle_time, mean_cycle_time, n_cycle_time);
 				printf("Total DCU = %d\t\t\tBlockSize = %d\n",mytotaldcu,dc_datablock_size);
@@ -495,7 +480,7 @@ main(int argc, char **argv)
 	printf("closing out zmq\n");
 	// Cleanup the ZMQ connections
 	for(ii=0;ii<nsys;ii++) {
-		if (daq_subscriber[ii]) (daq_subscriber[ii]);
+		if (daq_subscriber[ii]) zmq_close(daq_subscriber[ii]);
 		if (daq_context[ii]) zmq_ctx_destroy(daq_context[ii]);
 	}
   
