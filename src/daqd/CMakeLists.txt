@@ -1,7 +1,15 @@
 FIND_PROGRAM(UNAME_PROG uname)
 FIND_PROGRAM(DATE_PROG date)
 
+INCLUDE(Cpp11)
+INCLUDE(CheckCXXSourceCompiles)
+
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+
+set(__daqd_tmp_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+set(CMAKE_REQUIRED_FLAGS ${CPP11_FLAG})
+check_cxx_source_compiles("int main() { char* tmp = nullptr; return 0; }" DAQD_CAN_BUILD_DAQD_SHMEM)
+set(CMAKE_REQUIRED_FLAGS ${__daqd_tmp_CMAKE_REQUIRED_FLAGS})
 
 # These sources are common to all daqd variants
 set(MAIN_DAQD_SRC
@@ -350,7 +358,7 @@ target_link_libraries(daqd_mxsymm PUBLIC
 install(TARGETS daqd_mxsymm daqd_dc_mx DESTINATION bin)
 endif(${MX_FOUND})
 
-if (${DEV_BUILD})
+if (${DAQD_CAN_BUILD_DAQD_SHMEM})
 ##########
 ## generic daq with shmem (new standiop)
 ####
@@ -503,7 +511,7 @@ target_link_libraries(daqd_shmem PUBLIC
 #		zmq
 #		zmq::dc_recv
 #		)
-endif(${DEV_BUILD})
+endif(${DAQD_CAN_BUILD_DAQD_SHMEM})
 
 ###########
 # daqd_rcv A receiver daqd
