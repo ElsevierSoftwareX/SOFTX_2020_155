@@ -149,6 +149,17 @@ class daqd_c {
     second_trend_frame
  };
 
+ /// dcu_mov_address is a list of start points in a move buffer for each possible dcu
+ /// it is provided as a helper for producer type systems which need to deal with
+ /// an internal move buffer.
+ struct dcu_move_address {
+     dcu_move_address()
+     {
+         memset(&start[0], 0, sizeof(char*)*DCU_COUNT);
+     }
+     unsigned char *start[DCU_COUNT];
+ };
+
  private:
     typedef std::pair<std::string, std::string> _string_pair;
     typedef std::pair<std::string, std::string> _checksum_pair;
@@ -392,7 +403,10 @@ class daqd_c {
 
   parameter_set &parameters() { return _params; }
 
-  void initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, struct put_dpvec *vmic_pv);
+  // Initialize a move buffer and the scatter gather map
+  // NOTE: move_addr can be used to capture the start of the DCU DQ data area.  But due to the
+  // many ways to build daqd this is only guaranteeded to work on the DAQD_SHMEM build of daqd.
+  void initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, struct put_dpvec *vmic_pv, dcu_move_address *move_addr = 0);
 
   sem_t frame_saver_sem;
   sem_t science_frame_saver_sem;

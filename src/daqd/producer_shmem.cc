@@ -160,8 +160,12 @@ void *producer::frame_writer() {
         new struct put_dpvec[MAX_CHANNELS]);
     struct put_dpvec *vmic_pv = _vmic_pv.get();
 
+    // use the offsets calculated by initialize_vmpic
+    // for the start of the dcu's
+    daqd_c::dcu_move_address dcu_move_addresses;
+
     // FIXME: move_buf could leak on errors (but we would probably die anyways.
-    daqd.initialize_vmpic(&move_buf, &vmic_pv_len, vmic_pv);
+    daqd.initialize_vmpic(&move_buf, &vmic_pv_len, vmic_pv, &dcu_move_addresses);
     raii::array_ptr<unsigned char> _move_buf(move_buf);
 
     // Allocate local test point tables
@@ -344,6 +348,7 @@ void *producer::frame_writer() {
                 continue; // skip unconfigured DCU nodes
             }
             std::cout << "dcu " << j << std::endl;
+            read_dest = dcu_move_addresses.start[j];
             long read_size = daqd.dcuDAQsize[0][j];
             if (IS_EPICS_DCU(j)) {
 

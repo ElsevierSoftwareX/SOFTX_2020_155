@@ -1457,11 +1457,16 @@ daqd_c::start_frame_saver (ostream *yyout, int science)
   return 0;
 }
 
-void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_dpvec *vmic_pv)
+// Note: move_addr is currently only guaranteed to be properly filled out on the DAQD_SHMEM build
+void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_dpvec *vmic_pv, dcu_move_address *move_addr)
 {
     int vmic_pv_len = 0;
     unsigned char *move_buf = 0;
+    dcu_move_address dummy_move_address;
 
+    if (!move_addr) {
+        move_addr = & dummy_move_address;
+    }
     locker mon(this);
 
     int s = daqd.block_size / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
@@ -1580,6 +1585,11 @@ void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_
     vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + channels [i].rm_offset;
     vmic_pv [vmic_pv_len].dest_vec_idx = channels [i].offset;
     vmic_pv [vmic_pv_len].dest_status_idx = status_ptr + 17 * sizeof(int) * i;
+
+    if (!move_addr->start[cur_dcu]) {
+        move_addr->start[cur_dcu] = vmic_pv [vmic_pv_len].src_pvec_addr;
+    }
+
 #if EPICS_EDCU == 1
     if (IS_EPICS_DCU(channels [i].dcu_id)) {
       vmic_pv [vmic_pv_len].src_status_addr = edcu1.channel_status + i;
