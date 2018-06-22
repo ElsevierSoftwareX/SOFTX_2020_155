@@ -81,5 +81,20 @@ int dc_set_zmq_options(void *z_socket)
         i_value = atoi(env);
         zmq_setsockopt(z_socket, ZMQ_RATE, &i_value, sizeof(int));
     }
+    env = getenv("ZMQ_RECONNECT_IVL");
+    if (env) {
+        i_value = atoi(env);
+        zmq_setsockopt(z_socket, ZMQ_RECONNECT_IVL, &i_value, sizeof(int));
+    }
+    env = getenv("ZMQ_HANDSHAKE_IVL");
+    if (env) {
+        i_value = atoi(env);
+        zmq_setsockopt(z_socket, ZMQ_HANDSHAKE_IVL, &i_value, sizeof(int));
+    }
+    env = getenv("ZMQ_CONNECT_TIMEOUT");
+    if (env) {
+        i_value = atoi(env);
+        zmq_setsockopt(z_socket, ZMQ_CONNECT_TIMEOUT, &i_value, sizeof(int));
+    }
     return 1;
 }
