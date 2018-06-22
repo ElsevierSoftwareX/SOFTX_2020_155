@@ -1314,13 +1314,17 @@ trender_c::trend_worker ()
 
 int 
 trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames_per_file,
-			int ptrend_buffer_blocks)
+			int ptrend_buffer_blocks, int pminute_trend_buffer_blocks)
 {
   if (this -> tb) {
     *yyout << "trend is already running" << endl;
     return 1;
   }
 
+  if (pminute_trend_buffer_blocks != SECPERMIN) {
+      *yyout << "Minute trend buffer blocks must be " << SECPERMIN << " aborting process." << endl;
+      exit(1);
+  }
   /*
      Set trender operational parameters.
   */
