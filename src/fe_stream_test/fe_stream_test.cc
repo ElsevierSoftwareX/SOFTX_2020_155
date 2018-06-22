@@ -128,6 +128,7 @@ void usage()
     cout << "-i directory to put the ini and test point.par files in" << endl;
     cout << "-S allow the use of the system clock" << endl;
     cout << "-t test point list - a space separated set of test point numbers" << endl;
+    cout << "-f - write a set of .ini/.par mark data as bad, do not generate data" << endl;
 }
 
 std::string get_shmem_sysname(const std::string &system_name) {
@@ -161,10 +162,11 @@ int main(int argc, char *argv[]) {
     int dcuid;
     bool verbose = false;
     bool system_clock_ok = false;
+    bool failed_node = false;
 
     {
         int c;
-        while ((c = getopt(argc, argv, "d:hs:r:i:vSt:")) != -1)
+        while ((c = getopt(argc, argv, "d:hs:r:i:vSt:f")) != -1)
         {
             switch (c)
             {
@@ -193,6 +195,9 @@ int main(int argc, char *argv[]) {
                         tp_table.reserve(tp_strings.size());
                         std::transform(tp_strings.begin(), tp_strings.end(), std::back_inserter(tp_table), str_to_int);
                     }
+                    break;
+                case 'f':
+                    failed_node = true;
                     break;
                 default:
                     usage();
@@ -313,6 +318,16 @@ int main(int argc, char *argv[]) {
     transmit_time.nanosec = 0;
 
     int cycle = 0;
+
+    if (failed_node)
+    {
+        // stay around just to keep the mbuf open
+//        while(true)
+//        {
+//            sleep(1);
+//        }
+        return 0;
+    }
 
     while (true)
     {
