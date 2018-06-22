@@ -126,7 +126,7 @@ public:
         size_t copy_size = sizeof(daq_multi_dcu_header_t) + reinterpret_cast<daq_multi_dcu_header_t*>(start)->fullDataBlockSize;
         memcpy(&_data, start, copy_size);
 
-        std::cerr << "shmem_recv - c " << cur_cycle << " p " << _prev_cycle << std::endl;
+        //std::cerr << "shmem_recv - c " << cur_cycle << " p " << _prev_cycle << std::endl;
 
         _prev_cycle = cur_cycle;
         return &_data;
@@ -288,7 +288,6 @@ void *producer::frame_writer() {
         daq_dc_data_t* data_block = shmem_receiver.receive_data();
         stat_recv.tick();
 
-        std::cout << "#" << std::endl;
         if (data_block->header.dcuTotalModels > 0) {
             gps = data_block->header.dcuheader[0].timeSec;
             frac = data_block->header.dcuheader[0].timeNSec;
@@ -347,7 +346,6 @@ void *producer::frame_writer() {
                 daqd.dcuStatus[0][j] = 0xbad;
                 continue; // skip unconfigured DCU nodes
             }
-            std::cout << "dcu " << j << std::endl;
             read_dest = dcu_move_addresses.start[j];
             long read_size = daqd.dcuDAQsize[0][j];
             if (IS_EPICS_DCU(j)) {
@@ -359,7 +357,6 @@ void *producer::frame_writer() {
 
                 read_dest += read_size;
             } else if (IS_MYRINET_DCU(j)) {
-                std::cout << "is a myrinet dcu" << std::endl;
                 dcu_cycle = i % DAQ_NUM_DATA_BLOCKS;
 
                 // dcu_cycle = gmDaqIpc[j].cycle;
@@ -405,7 +402,6 @@ void *producer::frame_writer() {
 
                 // Calculate DCU status, if needed
                 if (daqd.dcu_status_check & (1 << ifo)) {
-                    std::cout << "need status check" << std::endl;
                     if (cblk1 % 16 == 0) {
                         /* DCU checking mask (Which DCUs to check for SYNC
                          * fault) */
@@ -427,10 +423,6 @@ void *producer::frame_writer() {
                                       << dcuCycleStatus[ifo][j]
                                       << " dcuStatCycle="
                                       << dcuStatCycle[ifo][j] << endl);
-                        std::cout << "dcuid=" << j << " dcuCycleStatus="
-                             << dcuCycleStatus[ifo][j]
-                             << " dcuStatCycle="
-                             << dcuStatCycle[ifo][j] << endl;
 
                         /* Check if DCU running and in sync */
                         if ((dcuCycleStatus[ifo][j] > 3 || j < 5) &&
@@ -475,16 +467,17 @@ void *producer::frame_writer() {
 
                 // Update DCU status
                 int newStatus = cur_dcu.status != DAQ_STATE_RUN ? 0xbad : 0;
-                std::cout << "newStatus = " << (hex) << newStatus << " cur_dcu.status = " << (dec) << cur_dcu.status;
-                std::cout << " gps = " << cur_dcu.timeSec << " gps_n = " << cur_dcu.timeNSec << std::endl;
-
+                DEBUG(4,
+                    std::cout << "newStatus = " << (hex) << newStatus << " cur_dcu.status = " << (dec) << cur_dcu.status;
+                    std::cout << " gps = " << cur_dcu.timeSec << " gps_n = " << cur_dcu.timeNSec << std::endl;
+                );
                 int newCrc = cur_dcu.fileCrc;
 
                 // printf("%x\n", *((int *)read_dest));
                 if (!IS_EXC_DCU(j)) {
                     if (newCrc != daqd.dcuConfigCRC[0][j]) {
                         newStatus |= 0x2000;
-                        std::cout << "config crc mismatch expecting " << std::hex << daqd.dcuConfigCRC[0][j] << " got " << std::hex << newCrc << std::endl;
+                        DEBUG(4, std::cout << "config crc mismatch expecting " << std::hex << daqd.dcuConfigCRC[0][j] << " got " << std::hex << newCrc << std::endl;);
                     }
                 }
                 if (newStatus != daqd.dcuStatus[0][j]) {
@@ -499,7 +492,6 @@ void *producer::frame_writer() {
                 daqd.dcuStatus[0][j] = newStatus;
 
                 daqd.dcuCycle[0][j] = cur_dcu.cycle;
-                std::cout << "status and cycle are " << (hex) << newStatus << (dec) << " " << cur_dcu.cycle << std::endl;
 
                 /* Check DCU data checksum */
                 unsigned long crc = 0;
@@ -557,7 +549,7 @@ void *producer::frame_writer() {
                            because of the CRC mismatch */
                         daqd.dcuStatus[0][j] |= 0x1000;
                     } else {
-                        system_log(6, " MATCH dcu %d (%s); crc[%d]=%x; "
+                        system_log(10, " MATCH dcu %d (%s); crc[%d]=%x; "
                                       "computed crc=%lx\n",
                                    j, daqd.dcuName[j], cblk, rfm_crc, crc);
                     }
@@ -644,7 +636,7 @@ void *producer::frame_writer() {
 // printf("before put %d %d %d\n", prop.gps, prop.gps_n, frac);
         prop.leap_seconds = daqd.gps_leap_seconds(prop.gps);
 
-        std::cout << "about to call put16th_dpscattered with " << vmic_pv_len << " entries. prop.gps = " << prop.gps << " prop.gps_n = " << prop.gps_n << "\n";
+        //std::cout << "about to call put16th_dpscattered with " << vmic_pv_len << " entries. prop.gps = " << prop.gps << " prop.gps_n = " << prop.gps_n << "\n";
         //for (int ii = 0; ii < vmic_pv_len; ++ii)
         //    std::cout << " " << *vmic_pv[ii].src_status_addr;
         //std::cout << std::endl;
@@ -656,18 +648,18 @@ void *producer::frame_writer() {
 
         {
             circ_buffer_block_t* block_p = daqd.b1->block_prop(nbi);
-            std::cout << "block_p->prop.gps = " << block_p->prop.gps << " block_p->prop.gps_n = " << block_p->prop.gps_n << std::endl;
+            //std::cout << "block_p->prop.gps = " << block_p->prop.gps << " block_p->prop.gps_n = " << block_p->prop.gps_n << std::endl;
             //if (block_p->prop.gps != prop.gps) {
             //    std::cout << "\n\nblock_p->prop.gps (" << block_p->prop.gps << ") != prop.gps (" << prop.gps << ")\n" << std::endl;
             //}
             //assert(block_p->prop.gps == prop.gps);
         }
 
-
+        DEBUG(4,
         std::cout << "put16th_dpscattered returned " << nbi << std::endl;
         std::cout << "drops: " << daqd.b1->drops() <<  " blocks: " << daqd.b1->blocks() << " puts: " << daqd.b1->num_puts()
                   << " consumers: " << daqd.b1->get_cons_num() << std::endl;
-
+        );
         //  printf("%d %d\n", prop.gps, prop.gps_n);
         // DEBUG1(cerr << "producer " << i << endl);
 
