@@ -50,6 +50,26 @@ void intHandler(int dummy) {
         keepRunning = 0;
 }
 
+// **********************************************************************************************
+void print_diags2(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *ixDataBlock) {
+// **********************************************************************************************
+int ii = 0;
+    // Print diags in verbose mode
+	printf("\nTime = %d\t size = %d\n",ixDataBlock->header.dcuheader[0].timeSec,sendLength);
+	printf("Num DCU = %d\tMB per second = %d\n",nsys,(sendLength * 16 / 1000000));
+        for(ii=0;ii<nsys;ii++) {
+		printf("\t%d",ixDataBlock->header.dcuheader[ii].dcuId);
+                printf("\t%d",ixDataBlock->header.dcuheader[ii].timeSec);
+                printf("\t%d",ixDataBlock->header.dcuheader[ii].cycle);
+                printf("\t%d",ixDataBlock->header.dcuheader[ii].dataBlockSize);
+                printf("\t%d",ixDataBlock->header.dcuheader[ii].tpCount);
+                printf("\t%d",ixDataBlock->header.dcuheader[ii].tpBlockSize);
+                printf("\n");
+        }
+        printf("\n\n ");
+}
+
+
 
 /*********************************************************************************/
 /*                                M A I N                                        */
@@ -131,6 +151,7 @@ main(int argc,char *argv[])
 
     int lastCycle = 15;
     int new_cycle = 0;
+    int nsys = 0;
     char *nextData;
 	int cyclesize = 0;
 
@@ -190,14 +211,9 @@ main(int argc,char *argv[])
 
 	    // Print some diagnostics
 	    // if(new_cycle == 0 && do_verbose)
+	    nsys = ixDataBlock->header.dcuTotalModels;
 	    if(new_cycle == 0 && do_verbose)
-	    {
-		    printf("New cycle = %d\n", new_cycle);
-		    printf("\t\tNum DCU = %d\n", ixDataBlock->header.dcuTotalModels);
-		    printf("\t\tNew Size = %d\n", ixDataBlock->header.fullDataBlockSize);
-		    printf("\t\tTime = %d\n", ixDataBlock->header.dcuheader[0].timeSec);
-		    printf("\t\tSend Size = %d\n", sendLength);
-	    }
+		print_diags2(nsys, new_cycle, sendLength, ixDataBlock); 
     } while(keepRunning);
 
     if (read_from_dolphin) {

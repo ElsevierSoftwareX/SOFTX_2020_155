@@ -26,7 +26,7 @@ unsigned int            localAdapterNo = 0;
 unsigned int            remoteNodeId   = 0;
 unsigned int            localNodeId    = 0;
 unsigned int            segmentId;
-unsigned int            segmentSize    = 0x200000;
+unsigned int            segmentSize    = 0x400000;
 unsigned int            offset         = 0;
 unsigned int            client         = 0;
 unsigned int            server         = 1;
