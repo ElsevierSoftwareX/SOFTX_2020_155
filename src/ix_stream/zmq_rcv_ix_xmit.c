@@ -33,6 +33,7 @@
 #include "testlib.h"
 
 #include "zmq_transport.h"
+#include "simple_pv.h"
 
 #define __CDECL
 
@@ -73,6 +74,8 @@ usage()
 	fprintf(stderr, "-s - server names eg x1lsc0, x1susex, etc.\n");
 	fprintf(stderr, "-v - verbose prints diag test data\n");
 	fprintf(stderr, "-g - Dolphin IX channel to xmit on\n");
+	fprintf(stderr, "-p - Debug pv prefix, requires -P as well\n");
+	fprintf(stderr, "-P - Path to a named pipe to send PV debug information to\n");
 	fprintf(stderr, "-h - help\n");
 }
 
@@ -93,6 +96,9 @@ struct timeval tv;
 void intHandler(int dummy) {
 	keepRunning = 0;
 }
+
+void sigpipeHandler(int dummy)
+{}
 
 // **********************************************************************************************
 void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *ixDataBlock,int dbs[]) {
@@ -183,6 +189,11 @@ main(int argc, char **argv)
 
 	extern char *optarg;	// Needed to get arguments to program
 
+	// PV/debug information
+	char *pv_prefix = 0;
+	char *pv_debug_pipe_name = 0;
+	int pv_debug_pipe = -1;
+
 	// Declare shared memory data variables
 	daq_multi_cycle_header_t *ifo_header;
 	char *ifo;
@@ -206,7 +217,7 @@ main(int argc, char **argv)
 
 
 	// Get arguments sent to process
-	while ((c = getopt(argc, argv, "b:hd:s:m:g:Vvw:x")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "b:hs:m:g:vp:P:")) != EOF) switch(c) {
 	case 's':
 		sysname = optarg;
 		break;
@@ -231,6 +242,12 @@ main(int argc, char **argv)
     case 'b':
         buffer_name = optarg;
         break;
+	case 'p':
+		pv_prefix = optarg;
+		break;
+	case 'P':
+		pv_debug_pipe_name = optarg;
+		break;
     case 'h':
 	default:
 		usage();
@@ -242,6 +259,8 @@ main(int argc, char **argv)
 
 	// set up to catch Control C
 	signal(SIGINT,intHandler);
+	// setup to ignore sig pipe
+	signal(SIGPIPE, sigpipeHandler);
 
 	printf("Server name: %s\n", sysname);
 
@@ -300,9 +319,6 @@ main(int argc, char **argv)
 	int64_t mytime = 0;
 	int64_t mylasttime = 0;
 	int64_t myptime = 0;
-	int64_t min_cycle_time = 1 << 30;
-	int64_t max_cycle_time = 0;
-	int64_t mean_cycle_time = 0;
 	int64_t n_cycle_time = 0;
 	int mytotaldcu = 0;
 	char *zbuffer;
@@ -320,6 +336,100 @@ main(int argc, char **argv)
 	int any_rdy = 0;
 	int jj,kk;
 	int sendLength = 0;
+
+	int min_cycle_time = 1 << 30;
+	int max_cycle_time = 0;
+	int mean_cycle_time = 0;
+	int pv_dcu_count = 0;
+	int pv_total_datablock_size = 0;
+	int endpoint_min_count = 1 << 30;
+	int endpoint_max_count = 0;
+	int endpoint_mean_count = 0;
+	int cur_endpoint_ready_count;
+
+	SimplePV pvs[] = {
+			{
+					"RECV_MIN_MS",
+					&min_cycle_time,
+
+					80,
+					45,
+					70,
+					54,
+			},
+			{
+					"RECV_MAX_MS",
+					&max_cycle_time,
+
+					80,
+					45,
+					70,
+					54,
+			},
+			{
+					"RECV_MEAN_MS",
+					&mean_cycle_time,
+
+					80,
+					45,
+					70,
+					54,
+			},
+			{
+					"DCU_COUNT",
+					&pv_dcu_count,
+
+					120,
+					0,
+					115,
+					0,
+			},
+			{
+					"DATA_SIZE",
+					&pv_total_datablock_size,
+
+					100*1024*1024,
+					0,
+					90*1024*1024,
+					1*1024*1024,
+			},
+			{
+					"ENDPOINT_MIN_COUNT",
+					&endpoint_min_count,
+
+					32,
+					0,
+					30,
+					1,
+			},
+			{
+					"ENDPOINT_MAX_COUNT",
+					&endpoint_max_count,
+
+					32,
+					0,
+					30,
+					1,
+			},
+			{
+					"ENDPOINT_MEAN_COUNT",
+					&endpoint_mean_count,
+
+					32,
+					0,
+					30,
+					1,
+			}
+
+	};
+	if (pv_debug_pipe_name)
+	{
+		pv_debug_pipe = open(pv_debug_pipe_name, O_NONBLOCK | O_RDWR, 0);
+		if (pv_debug_pipe < 0) {
+			fprintf(stderr, "Unable to open %s for writting (pv status)\n", pv_debug_pipe_name);
+			exit(1);
+		}
+	}
 
 	do {
 		// Reset counters
@@ -375,9 +485,11 @@ main(int argc, char **argv)
         	ifoDataBlock = (daq_multi_dcu_data_t *)nextData;
 			zbuffer = (char *)nextData + header_size;
 
+			cur_endpoint_ready_count = 0;
 			// Loop over all data buffers received from FE computers
 			for(ii=0;ii<nsys;ii++) {
 		  		if(dataRdy[ii]) {
+		  			++cur_endpoint_ready_count;
 					int myc = mxDataBlockSingle[ii].header.dcuTotalModels;
 					// For each model, copy over data header information
 					for(jj=0;jj<myc;jj++) {
@@ -415,6 +527,13 @@ main(int argc, char **argv)
 					dc_datablock_size += mydbs;
 		  		}
 			}
+			if (cur_endpoint_ready_count < endpoint_min_count) {
+				endpoint_min_count = cur_endpoint_ready_count;
+			}
+			if (cur_endpoint_ready_count > endpoint_max_count) {
+				endpoint_max_count = cur_endpoint_ready_count;
+			}
+			endpoint_mean_count += cur_endpoint_ready_count;
 			// Write total data block size to shared memory header
 			ifoDataBlock->header.fullDataBlockSize = dc_datablock_size;
 			// Write total dcu count to shared memory header
@@ -424,12 +543,20 @@ main(int argc, char **argv)
 
 			// Calc IX message size
 			sendLength = header_size + ifoDataBlock->header.fullDataBlockSize;
-			if(nextCycle == 0 && do_verbose) {
-				printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec\n",nextCycle,myptime);
-				mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time/n_cycle_time : 1<<31);
-				printf("Min/Max/Mean cylce time %ld/%ld/%ld msec over %ld cycles\n", min_cycle_time, max_cycle_time, mean_cycle_time, n_cycle_time);
-				printf("Total DCU = %d\t\t\tBlockSize = %d\n",mytotaldcu,dc_datablock_size);
-				print_diags(mytotaldcu,nextCycle,sendLength,ifoDataBlock,edbs);
+			if(nextCycle == 0) {
+				pv_dcu_count = mytotaldcu;
+				pv_total_datablock_size = dc_datablock_size;
+				mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time / n_cycle_time : 1 << 31);
+				endpoint_mean_count = (n_cycle_time > 0 ? endpoint_mean_count/n_cycle_time :  1<<31);
+				send_pv_update(pv_debug_pipe, pv_prefix, pvs, sizeof(pvs)/sizeof(pvs[0]));
+
+				if (do_verbose) {
+					printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec\n", nextCycle, myptime);
+					printf("Min/Max/Mean cylce time %ld/%ld/%ld msec over %ld cycles\n", min_cycle_time, max_cycle_time,
+						   mean_cycle_time, n_cycle_time);
+					printf("Total DCU = %d\t\t\tBlockSize = %d\n", mytotaldcu, dc_datablock_size);
+					print_diags(mytotaldcu, nextCycle, sendLength, ifoDataBlock, edbs);
+				}
 				n_cycle_time = 0;
 				min_cycle_time = 1 << 30;
 				max_cycle_time = 0;

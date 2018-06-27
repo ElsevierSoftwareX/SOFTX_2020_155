@@ -29,18 +29,9 @@
 #include "drv/shmem.h"
 #include "zmq_transport.h"
 #include "dc_utils.h"
+#include "simple_pv.h"
 
 #define DO_HANDSHAKE 0
-
-typedef struct SimplePV {
-	char *name;
-	volatile int *data;
-
-	int alarm_high;
-	int alarm_low;
-	int warn_high;
-	int warn_low;
-} SimplePV;
 
 int do_verbose = 0;
 
@@ -64,7 +55,6 @@ usage()
 	fprintf(stderr, "-l filename - log file name\n"); 
 	fprintf(stderr, "-s - server names eg x1lsc0, x1susex, etc.\n");
 	fprintf(stderr, "-v - verbose prints diag test data\n");
-	fprintf(stderr, "-g - Dolphin IX channel to xmit on\n");
 	fprintf(stderr, "-p - Debug pv prefix, requires -P as well\n");
 	fprintf(stderr, "-P - Path to a named pipe to send PV debug information to\n");
 	fprintf(stderr, "-h - help\n");
@@ -90,99 +80,6 @@ void intHandler(int dummy) {
 
 void sigpipeHandler(int dummy)
 {}
-
-void write_all(int fd, char *buffer, size_t count)
-{
-	int attempts = 0;
-	ssize_t cur = 0;
-
-	if (fd < 0 || !buffer || count < 0)
-	{
-		return;
-	}
-	while (count && attempts < 5) {
-		cur = write(fd, buffer, count);
-		if (cur == 0)
-		{
-			return;
-		}
-		else if (cur < 0) {
-			if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
-			{
-				++attempts;
-			}
-			else
-			{
-				return;
-			}
-		}
-		else
-		{
-			count -= cur;
-			buffer += cur;
-		}
-	}
-}
-
-// write out a list of pv updates to the given file.
-// The data is written out as a json text blob prefixed by a binary length (sizeof size_t host byte order)
-// if there is a failure, nothing happens
-// it is safe to call with a negative fd
-void send_pv_update(int fd, const char *prefix, SimplePV *pvs, int pv_count)
-{
-	char buffer[10000];
-	char *dest = 0;
-	size_t max = 0;
-	size_t remaining = 0;
-	size_t size = 0;
-	size_t count = 0;
-	int i = 0;
-
-	if (fd < 0 || !pvs || pv_count < 1) {
-		return;
-	}
-	max = sizeof(buffer) - sizeof(size) - 4;
-	remaining = max;
-	dest = buffer + sizeof(size) + 4;
-
-	for (i = 0; i < 4; ++i) {
-		buffer[i] = 0xff;
-	}
-
-	count = snprintf(dest, remaining, "{ \"prefix\": \"%s\", \"pvs\": [ ", (prefix ? prefix: ""));
-	if (count >= remaining) {
-		return;
-	}
-	remaining -= count;
-	dest += count;
-	size += count;
-	for (i = 0; i < pv_count; ++i)
-	{
-		count = snprintf(dest, remaining, "%s{ \"name\": \"%s\", \"value\": %d, \"alarm_high\": %d, "
-									"\"alarm_low\": %d, \"warn_high\": %d, \"warn_low\": %d }",
-						 (i ? ", " : ""),
-						 pvs[i].name, *pvs[i].data,
-						 pvs[i].alarm_high, pvs[i].alarm_low,
-						 pvs[i].warn_high, pvs[i].warn_low
-		);
-		if (count >= remaining) {
-			return;
-		}
-		remaining -= count;
-		dest += count;
-		size += count;
-	}
-	count = snprintf(dest, remaining, " ] }");
-	if (count >= remaining) {
-		return;
-	}
-	remaining -= count;
-	dest += count;
-	size += count;
-
-	memcpy(buffer + 4, &size, sizeof(size));
-	write_all(fd, buffer, size + sizeof(size) + 4);
-}
 
 // **********************************************************************************************
 void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *ixDataBlock,int dbs[]) {
@@ -397,14 +294,14 @@ main(int argc, char **argv)
 	int64_t mytime = 0;
 	int64_t mylasttime = 0;
 	int64_t myptime = 0;
-	volatile int min_cycle_time = 1 << 30;
-	volatile int max_cycle_time = 0;
-	volatile int mean_cycle_time = 0;
-	volatile int pv_dcu_count = 0;
-	volatile int pv_total_datablock_size = 0;
-	volatile int endpoint_min_count = 1 << 30;
-	volatile int endpoint_max_count = 0;
-	volatile int endpoint_mean_count = 0;
+	int min_cycle_time = 1 << 30;
+	int max_cycle_time = 0;
+	int mean_cycle_time = 0;
+	int pv_dcu_count = 0;
+	int pv_total_datablock_size = 0;
+	int endpoint_min_count = 1 << 30;
+	int endpoint_max_count = 0;
+	int endpoint_mean_count = 0;
 	int cur_endpoint_ready_count;
 	int n_cycle_time = 0;
 	int mytotaldcu = 0;

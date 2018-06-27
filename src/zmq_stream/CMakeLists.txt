@@ -8,6 +8,10 @@ include(Cpp11Atomic)
 include(FindThreads)
 find_package(ZMQ4 REQUIRED)
 
+add_library(simple_pv STATIC simple_pv.c)
+target_include_directories(simple_pv PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(zmq::simple_pv ALIAS simple_pv)
+
 add_library(zmq_transport STATIC zmq_transport.c)
 target_include_directories(zmq_transport PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_include_directories(zmq_transport PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -29,7 +33,12 @@ target_compile_options(zmq_multi_stream PUBLIC -std=gnu99)
 
 add_executable(zmq_threads zmq_threads.c dc_utils.c)
 target_include_directories(zmq_threads PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
-target_link_libraries(zmq_threads PUBLIC driver::shmem zmq_transport zmq4::zmq ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(zmq_threads PUBLIC
+        driver::shmem
+        zmq_transport
+        zmq4::zmq
+        zmq::simple_pv
+        ${CMAKE_THREAD_LIBS_INIT})
 target_compile_options(zmq_threads PUBLIC -std=gnu99)
 
 add_executable(zmq_dc zmq_dc.cc)
