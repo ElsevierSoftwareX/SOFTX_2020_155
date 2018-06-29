@@ -69,13 +69,14 @@ int rcv_errors = 0;
 void
 usage()
 {
-	fprintf(stderr, "Usage: zmq_multi_rcvr [args] -s server names -m shared memory size -g IX channel \n");
+	fprintf(stderr, "Usage: zmq_rcv_ix_xmit [args] -s server names -m shared memory size -g IX channel \n");
 	fprintf(stderr, "-l filename - log file name\n"); 
 	fprintf(stderr, "-s - server names eg x1lsc0, x1susex, etc.\n");
 	fprintf(stderr, "-v - verbose prints diag test data\n");
 	fprintf(stderr, "-g - Dolphin IX channel to xmit on\n");
 	fprintf(stderr, "-p - Debug pv prefix, requires -P as well\n");
 	fprintf(stderr, "-P - Path to a named pipe to send PV debug information to\n");
+	fprintf(stderr, "-d - Max delay in milli seconds to wait for a FE to send data, defaults to 10\n");
 	fprintf(stderr, "-h - help\n");
 }
 
@@ -121,6 +122,33 @@ void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *
 		}
 }
 
+// *****
+// monitoring thread callback
+// *****
+void *rcvr_thread_mon(void *ctx)
+{
+    int rc;
+
+    void *s = zmq_socket(ctx, ZMQ_PAIR);
+    rc = zmq_connect(s, "inproc://monitor.req");
+    while (1)
+    {
+        zmq_msg_t msg;
+        zmq_msg_init(&msg);
+        rc = zmq_recvmsg(s, &msg, 0);
+        if (rc == -1) break;
+        unsigned short *event = (unsigned short*)zmq_msg_data(&msg);
+        unsigned int *value = (unsigned int*)(event+1);
+        fprintf(stderr, "%d) %d\n", (int)*event, *value);
+        if (zmq_msg_more(&msg)) {
+            zmq_msg_init(&msg);
+            zmq_msg_recv(&msg, s, 0);
+        }
+    }
+    zmq_close(s);
+    return NULL;
+}
+
 // *************************************************************************
 // Thread for receiving DAQ data via ZMQ
 // *************************************************************************
@@ -136,9 +164,15 @@ void *rcvr_thread(void *arg) {
     void *zctx = 0;
     void *zsocket = 0;
     int rc = 0;
+    pthread_t mon_th_id;
+
 
     zctx = zmq_ctx_new();
     zsocket = zmq_socket(zctx, ZMQ_SUB);
+
+    zmq_socket_monitor(zsocket, "inproc://monitor.req", ZMQ_EVENT_ALL);
+
+    pthread_create(&mon_th_id, NULL, rcvr_thread_mon, zctx);
 
     rc = zmq_setsockopt(zsocket, ZMQ_SUBSCRIBE, "", 0);
     assert(rc == 0);
@@ -151,7 +185,7 @@ void *rcvr_thread(void *arg) {
     assert(rc == 0);
 
 
-	printf("Starting receive loop for thread %d\n", mt);
+	printf("Starting receive loop for thread %d %s\n", mt, loc);
 	char *daqbuffer = (char *)&mxDataBlockSingle[mt];
 	mxDataBlock = (daq_multi_dcu_data_t *)daqbuffer;
 	do {
@@ -186,6 +220,8 @@ main(int argc, char **argv)
 	char *buffer_name = "ifo";
 	int c;
 	int ii;					// Loop counter
+	int delay_ms = 10;
+	int delay_cycles = 0;
 
 	extern char *optarg;	// Needed to get arguments to program
 
@@ -217,7 +253,7 @@ main(int argc, char **argv)
 
 
 	// Get arguments sent to process
-	while ((c = getopt(argc, argv, "b:hs:m:g:vp:P:")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "b:hs:m:g:vp:P:d:")) != EOF) switch(c) {
 	case 's':
 		sysname = optarg;
 		break;
@@ -248,12 +284,20 @@ main(int argc, char **argv)
 	case 'P':
 		pv_debug_pipe_name = optarg;
 		break;
+	case 'd':
+		delay_ms = atoi(optarg);
+		if (delay_ms < 5 || delay_ms > 40) {
+			printf("The delay factor must be between 5ms and 40ms\n");
+			return -1;
+		}
+		break;
     case 'h':
 	default:
 		usage();
 		exit(1);
 	}
 	max_data_size = max_data_size_mb * 1024*1024;
+	delay_cycles = delay_ms * 10;
 
 	if (sysname == NULL) { usage(); exit(1); }
 
@@ -448,7 +492,7 @@ main(int argc, char **argv)
 			timeout += 1;
 		}while(!any_rdy && timeout < 50);
 
-		// Wait up to 5ms until data received from everyone or timeout
+		// Wait up to delay_ms ms in 1/10ms intervals until data received from everyone or timeout
 		timeout = 0;
 		do {
 			usleep(100);
@@ -457,7 +501,7 @@ main(int argc, char **argv)
 				if(nextCycle == thread_cycle[ii]) dataRdy[ii] = 1;
 			}
 			timeout += 1;
-		}while(threads_rdy < nsys && timeout < 100);
+		}while(threads_rdy < nsys && timeout < delay_cycles);
 		if(timeout >= 100) rcv_errors += (nsys - threads_rdy);
 
 		if(any_rdy) {
@@ -473,7 +517,7 @@ main(int argc, char **argv)
 			}
 			mean_cycle_time += myptime;
 			++n_cycle_time;
-			// if(do_verbose)printf("Data rdy for cycle = %d\t\t%ld\n",nextCycle,myptime);
+			if(do_verbose)printf("Data rdy for cycle = %d\t\t%ld\n",nextCycle,myptime);
 
 			// Reset total DCU counter
 			mytotaldcu = 0;

@@ -13,6 +13,9 @@ Changes for 3.5  (NOT YET RELEASED)
 	- controllerIopUser.c and controllerAppUser.c, which are user space equivalents.
 - Removed /proc entries from all FE code. This should alleviate issue with change to /proc
   in later Linux kernels.
+- daqd does not allow non-minute minute trends.
+- zmq_rcv_ix_xmit allows a configurable time window in which it will wait for all FE computers to
+  send data.
 ==================================================================================================
 Changes for 3.4  (NOT YET RELEASED)
 ==================================================================================================
