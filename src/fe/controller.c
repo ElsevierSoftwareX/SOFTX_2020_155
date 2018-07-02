@@ -1166,9 +1166,11 @@ udelay(1000);
 		   	pLocalEpics->epicsInput.bumpAdcRd = 0;
 		   }
 #endif
+		
 		   /// - ---- Reset ADC DMA Start Flag \n
 		   /// - --------- This allows ADC to dump next data set whenever it is ready
-		   gsc16ai64DmaEnable(jj);
+		   // This has been moved to after call to feCode.
+		   // gsc16ai64DmaEnable(jj);
             }
 
 
@@ -1304,6 +1306,11 @@ udelay(1000);
         rdtscl(cpuClock[CPU_TIME_USR_START]);
  	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
         rdtscl(cpuClock[CPU_TIME_USR_END]);
+#ifdef ADC_MASTER
+	// Rearm ADC Demand DMA
+        for(jj=0;jj<cdsPciModules.adcCount;jj++)
+		gsc16ai64DmaEnable(jj);
+#endif
 
   	odcStateWord = 0;
 /// WRITE DAC OUTPUTS ***************************************** \n
