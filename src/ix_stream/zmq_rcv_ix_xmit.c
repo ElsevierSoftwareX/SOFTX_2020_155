@@ -390,10 +390,15 @@ main(int argc, char **argv)
 	int endpoint_max_count = 0;
 	int endpoint_mean_count = 0;
 	int cur_endpoint_ready_count;
+	char endpoints_missed_buffer[256];
+	int endpoints_missed_remaining;
+	int missed_flag = 0;
+	int missed_nsys[32];
 
 	SimplePV pvs[] = {
 			{
 					"RECV_MIN_MS",
+                    SIMPLE_PV_INT,
 					&min_cycle_time,
 
 					80,
@@ -403,6 +408,7 @@ main(int argc, char **argv)
 			},
 			{
 					"RECV_MAX_MS",
+                    SIMPLE_PV_INT,
 					&max_cycle_time,
 
 					80,
@@ -412,6 +418,7 @@ main(int argc, char **argv)
 			},
 			{
 					"RECV_MEAN_MS",
+                    SIMPLE_PV_INT,
 					&mean_cycle_time,
 
 					80,
@@ -421,6 +428,7 @@ main(int argc, char **argv)
 			},
 			{
 					"DCU_COUNT",
+                    SIMPLE_PV_INT,
 					&pv_dcu_count,
 
 					120,
@@ -430,6 +438,7 @@ main(int argc, char **argv)
 			},
 			{
 					"DATA_SIZE",
+                    SIMPLE_PV_INT,
 					&pv_total_datablock_size,
 
 					100*1024*1024,
@@ -439,6 +448,7 @@ main(int argc, char **argv)
 			},
 			{
 					"ENDPOINT_MIN_COUNT",
+                    SIMPLE_PV_INT,
 					&endpoint_min_count,
 
 					32,
@@ -448,6 +458,7 @@ main(int argc, char **argv)
 			},
 			{
 					"ENDPOINT_MAX_COUNT",
+                    SIMPLE_PV_INT,
 					&endpoint_max_count,
 
 					32,
@@ -457,13 +468,21 @@ main(int argc, char **argv)
 			},
 			{
 					"ENDPOINT_MEAN_COUNT",
+                    SIMPLE_PV_INT,
 					&endpoint_mean_count,
 
 					32,
 					0,
 					30,
 					1,
-			}
+			},
+            {
+                "ENDPOINTS_MISSED",
+                        SIMPLE_PV_STRING,
+                        endpoints_missed_buffer,
+
+                        0, 0, 0, 0,
+            },
 
 	};
 	if (pv_debug_pipe_name)
@@ -475,6 +494,8 @@ main(int argc, char **argv)
 		}
 	}
 
+	missed_flag = 1;
+	memset(&missed_nsys[0], 0, sizeof(missed_nsys));
 	do {
 		// Reset counters
 		timeout = 0;
@@ -530,6 +551,8 @@ main(int argc, char **argv)
 			zbuffer = (char *)nextData + header_size;
 
 			cur_endpoint_ready_count = 0;
+			endpoints_missed_remaining = sizeof(endpoints_missed_buffer);
+			endpoints_missed_buffer[0] = '\0';
 			// Loop over all data buffers received from FE computers
 			for(ii=0;ii<nsys;ii++) {
 		  		if(dataRdy[ii]) {
@@ -569,6 +592,8 @@ main(int argc, char **argv)
 					zbuffer += mydbs;
 					// Calc total size of data block for this cycle
 					dc_datablock_size += mydbs;
+		  		} else {
+		  			missed_nsys[ii] |= missed_flag;
 		  		}
 			}
 			if (cur_endpoint_ready_count < endpoint_min_count) {
@@ -592,6 +617,20 @@ main(int argc, char **argv)
 				pv_total_datablock_size = dc_datablock_size;
 				mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time / n_cycle_time : 1 << 31);
 				endpoint_mean_count = (n_cycle_time > 0 ? endpoint_mean_count/n_cycle_time :  1<<31);
+
+				endpoints_missed_remaining = sizeof(endpoints_missed_buffer)-1;
+				endpoints_missed_buffer[0] = '\0';
+				for (ii = 0; ii < sizeof(missed_nsys)/sizeof(missed_nsys[0]) && endpoints_missed_remaining > 0; ++ii) {
+					if (missed_nsys[ii]) {
+						char tmp[80];
+						int count = snprintf(tmp, sizeof(tmp), "%s(%x) ", sname[ii], missed_nsys[ii]);
+						if (count < sizeof(tmp)) {
+							strncat(endpoints_missed_buffer, tmp, count);
+							endpoints_missed_remaining -= count;
+						}
+					}
+					missed_nsys[ii] = 0;
+				}
 				send_pv_update(pv_debug_pipe, pv_prefix, pvs, sizeof(pvs)/sizeof(pvs[0]));
 
 				if (do_verbose) {
@@ -605,6 +644,10 @@ main(int argc, char **argv)
 				min_cycle_time = 1 << 30;
 				max_cycle_time = 0;
 				mean_cycle_time = 0;
+
+				missed_flag = 1;
+			} else {
+				missed_flag <<= 1;
 			}
 			if(xmitData) {
 				// WRITEDATA to Dolphin Network

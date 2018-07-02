@@ -325,6 +325,7 @@ main(int argc, char **argv)
     SimplePV pvs[] = {
             {
                     "RECV_MIN_MS",
+                    SIMPLE_PV_INT,
                     &min_cycle_time,
 
                     80,
@@ -334,6 +335,7 @@ main(int argc, char **argv)
             },
             {
                     "RECV_MAX_MS",
+					SIMPLE_PV_INT,
                     &max_cycle_time,
 
                     80,
@@ -343,6 +345,7 @@ main(int argc, char **argv)
             },
             {
                     "RECV_MEAN_MS",
+					SIMPLE_PV_INT,
                     &mean_cycle_time,
 
                     80,
@@ -352,6 +355,7 @@ main(int argc, char **argv)
             },
 			{
 					"DCU_COUNT",
+					SIMPLE_PV_INT,
 					&pv_dcu_count,
 
 					120,
@@ -361,6 +365,7 @@ main(int argc, char **argv)
 			},
 			{
 					"DATA_SIZE",
+					SIMPLE_PV_INT,
 					&pv_total_datablock_size,
 
 					100*1024*1024,
@@ -370,6 +375,7 @@ main(int argc, char **argv)
 			},
             {
                     "ENDPOINT_MIN_COUNT",
+					SIMPLE_PV_INT,
                     &endpoint_min_count,
 
                     32,
@@ -379,6 +385,7 @@ main(int argc, char **argv)
             },
             {
                     "ENDPOINT_MAX_COUNT",
+					SIMPLE_PV_INT,
                     &endpoint_max_count,
 
                     32,
@@ -388,6 +395,7 @@ main(int argc, char **argv)
             },
             {
                     "ENDPOINT_MEAN_COUNT",
+					SIMPLE_PV_INT,
                     &endpoint_mean_count,
 
                     32,

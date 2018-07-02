@@ -72,13 +72,32 @@ void send_pv_update(int fd, const char *prefix, SimplePV *pvs, int pv_count)
     size += count;
     for (i = 0; i < pv_count; ++i)
     {
-        count = snprintf(dest, remaining, "%s{ \"name\": \"%s\", \"value\": %d, \"alarm_high\": %d, "
-                                          "\"alarm_low\": %d, \"warn_high\": %d, \"warn_low\": %d }",
-                         (i ? ", " : ""),
-                         pvs[i].name, *pvs[i].data,
-                         pvs[i].alarm_high, pvs[i].alarm_low,
-                         pvs[i].warn_high, pvs[i].warn_low
-        );
+        count = 0;
+        if (pvs[i].pv_type == SIMPLE_PV_INT) {
+            count = snprintf(dest, remaining, "%s{ \"name\": \"%s\", \"value\": %d, \"alarm_high\": %d, \"pv_type\": 0,"
+                                              "\"alarm_low\": %d, \"warn_high\": %d, \"warn_low\": %d }",
+                             (i ? ", " : ""),
+                             pvs[i].name, *((int*)pvs[i].data),
+                             pvs[i].alarm_high, pvs[i].alarm_low,
+                             pvs[i].warn_high, pvs[i].warn_low
+            );
+        } else if (pvs[i].pv_type == SIMPLE_PV_STRING) {
+            char tmp[80];
+            strncpy(tmp, pvs[i].data, sizeof(tmp));
+            tmp[sizeof(tmp)-1]='\0';
+            char *cur_tmp = tmp;
+            while (*cur_tmp) {
+                char ch = *cur_tmp;
+                if (ch == '"' || ch == '\\') {
+                    *cur_tmp = ' ';
+                }
+                ++cur_tmp;
+            }
+            count = snprintf(dest, remaining, "%s{ \"name\": \"%s\", \"value\": \"%s\", \"pv_type\": 1 }",
+                             (i ? ", " : ""),
+                             pvs[i].name, tmp
+            );
+        }
         if (count >= remaining) {
             return;
         }

@@ -93,14 +93,22 @@ class State(object):
         for pv in msg['pvs']:
             # {u'name': u'RECV_MIN_MS', u'warn_high': 70, u'value': 56, u'alarm_high': 80, u'alarm_low': 45, u'warn_low': 54}
             pv_name = pv['name']
-            entry = {
-                'hihi': pv['alarm_high'],
-                'hihi': pv['alarm_high'],
-                'high': pv['warn_high'],
-                'lolo': pv['alarm_low'],
-                'low': pv['warn_low'],
-                'value': pv['value'],
-            }
+            if pv['pv_type'] == 0:
+                entry = {
+                    'hihi': pv['alarm_high'],
+                    'hihi': pv['alarm_high'],
+                    'high': pv['warn_high'],
+                    'lolo': pv['alarm_low'],
+                    'low': pv['warn_low'],
+                    'value': pv['value'],
+                }
+            elif pv['pv_type'] == 1:
+                entry = {
+                    'value': pv['value'],
+                    'type': 'string',
+                }
+            else:
+                continue
             db[pv_name] = entry
         self.epics = { 'srv': SimpleServer(), 'db': db, 'prefix': prefix }
         self.epics['srv'].createPV(prefix, self.epics['db'])

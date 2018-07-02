@@ -5,10 +5,15 @@
 extern "C" {
 #endif
 
+#define SIMPLE_PV_INT 0
+#define SIMPLE_PV_STRING 1
+
 typedef struct SimplePV {
     char *name;
-    int *data;
+    int pv_type;        /// SIMPLE_PV_INT or SIMPLE_PV_STRING
+    void *data;
 
+    // These values are only used for an int pv
     int alarm_high;
     int alarm_low;
     int warn_high;
