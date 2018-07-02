@@ -97,7 +97,7 @@ void zmq_make_connection(char *eport)
     daq_publisher = zmq_socket (daq_context,ZMQ_PUB);
     // sprintf(loc,"%s%d","tcp://*:",DAQ_DATA_PORT);
 	//sprintf(loc,"%s%s%s%d","tcp://",eport,":",DAQ_DATA_PORT);
-	if (!dc_generate_connection_string(loc, eport, sizeof(loc))) {
+	if (!dc_generate_connection_string(loc, eport, sizeof(loc), 0)) {
 		fprintf(stderr, "Unable to generate connection string for '%s'\n", eport);
 		exit(1);
 	}

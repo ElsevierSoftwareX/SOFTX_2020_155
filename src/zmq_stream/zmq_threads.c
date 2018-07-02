@@ -124,7 +124,7 @@ void *rcvr_thread(void *arg) {
 
 	rc = zmq_setsockopt(zsocket, ZMQ_SUBSCRIBE, "", 0);
 	assert(rc == 0);
-	if (!dc_generate_connection_string(loc, sname[mt], sizeof(loc))) {
+	if (!dc_generate_connection_string(loc, sname[mt], sizeof(loc), 0)) {
 		fprintf(stderr, "Unable to parse endpoint name '%s'\n", sname[mt]);
 		exit(1);
 	}

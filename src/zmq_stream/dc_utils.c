@@ -6,7 +6,7 @@
 
 #include <zmq.h>
 
-int dc_generate_connection_string(char *dest, const char *src, size_t dest_len)
+int dc_generate_connection_string(char *dest, const char *src, size_t dest_len, const char* src_iface)
 {
     static const char *proto_sep = "://";
     static const char *port_sep = ":";
@@ -59,7 +59,8 @@ int dc_generate_connection_string(char *dest, const char *src, size_t dest_len)
     if (port == 0) {
         port = DAQ_DATA_PORT;
     }
-    snprintf(dest, dest_len, "%s://%s:%d", proto, tmp_name, port);
+
+    snprintf(dest, dest_len, "%s://%s%s%s:%d", proto, (src_iface? src_iface : ""), (src_iface? ":0;" : ""), tmp_name, port);
     return 1;
 }
 
