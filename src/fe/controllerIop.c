@@ -778,7 +778,7 @@ udelay(1000);
 	/// increased to appropriate number of 65536 s/sec to match desired
 	/// code rate eg 32 samples each time thru before proceeding to match 2048 system.
 		// Read ADC data
-               for(jj=0;jj<cdsPciModules.adcCount;jj++)
+        for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		{
 		    /// - ---- ADC DATA RDY is detected when last channel in memory no longer contains the
 		    /// dummy variable written during initialization and reset after the read.
@@ -935,10 +935,7 @@ udelay(1000);
 		   	pLocalEpics->epicsInput.bumpAdcRd = 0;
 		   }
 #endif
-		   /// - ---- Reset ADC DMA Start Flag \n
-		   /// - --------- This allows ADC to dump next data set whenever it is ready
-		   gsc16ai64DmaEnable(jj);
-            }
+		}
 
 
 		  // Try synching to 1PPS on ADC[0][31] if not using IRIG-B or TDS
@@ -980,9 +977,14 @@ udelay(1000);
 
 /// \> Call the front end specific application  ******************\n
 /// - -- This is where the user application produced by RCG gets called and executed. \n\n
-        rdtscl(cpuClock[CPU_TIME_USR_START]);
+	rdtscl(cpuClock[CPU_TIME_USR_START]);
  	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
-        rdtscl(cpuClock[CPU_TIME_USR_END]);
+    rdtscl(cpuClock[CPU_TIME_USR_END]);
+
+   	/// - ---- Reset ADC DMA Start Flag \n
+   	/// - --------- This allows ADC to dump next data set whenever it is ready
+	for(jj=0;jj<cdsPciModules.adcCount;jj++)
+   		gsc16ai64DmaEnable(jj);
 
   	odcStateWord = 0;
 /// WRITE DAC OUTPUTS ***************************************** \n
