@@ -1,11 +1,16 @@
 ==================================================================================================
 Changes for 3.4.3  
 ==================================================================================================
+- Changed PCIe real-time network configuration from single Dolphin channel to 2 Dolphin channels
+  to avoid end station local traffic being sent back to long range PCIe network switch:
+	- Local traffic (PCIE IPC) via channel 0
+	- Long range traffic (RFM0/RFM1) via channel 1
 - Bug Fix: Move rearming of ADC Demand DMA in IOP models from as ADC data is read in to after
   call to feCode(), IOP model code. Found that there was bus contention issues if IOP model was
   sending PCIe IPC at 65K.
 - Added TIME_MASTER option for IOP models.	
 	- IOP will send GPS time and cycle via PCIe network to sync other computers.
+- Added support for IOP that has no IOC ie synchronized by TIME_MASTER via PCIe network.
 - Added CDS time synchronized version of long range switch code (cdsrfmrouter.c).
 ==================================================================================================
 Changes for 3.4.2  

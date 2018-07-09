@@ -1435,10 +1435,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUTH "\#define TARGET_DAC18_COUNT $dac18Cnt\n";
 		print OUTH "\#define TARGET_DAC20_COUNT $dac20Cnt\n";
 	} else {
-		if($virtualiop) {
-			print OUTH "\#define TARGET_ADC_COUNT 0\n";
+		if($adcMaster > 0 && virtualiop < 1) {
+		print OUTH "\#define TARGET_ADC_COUNT 1\n";
 		} else {
-			print OUTH "\#define TARGET_ADC_COUNT 1\n";
+		print OUTH "\#define TARGET_ADC_COUNT 0\n";
 		}
 		print OUTH "\#define TARGET_DAC16_COUNT 0\n";
 		print OUTH "\#define TARGET_DAC18_COUNT 0\n";

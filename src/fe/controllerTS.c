@@ -520,7 +520,8 @@ udelay(1000);
 	  // Write a dummy 0 to first ADC channel location
 	  // This location should never be zero when the ADC writes data as it should always
 	  // have an upper bit set indicating channel 0.
-      for(ii=0;ii<64;ii++) {
+      // for(ii=0;ii<64;ii++) {
+	  for(ii=0;ii<(65536*32);ii++) {
 	  	*packedData = 0x0;
 		packedData ++;
 	  }

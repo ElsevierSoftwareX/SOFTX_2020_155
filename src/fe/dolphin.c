@@ -59,8 +59,8 @@ init_dolphin(int modules) {
   cdsPciModules.dolphinCount = 0;
   for(ii=0;ii<modules;ii++) {
   err = sci_create_segment(NO_BINDING,
+		       0,
 		       ii,
-		       1,
 		       DIS_BROADCAST,
 		       IPC_TOTAL_ALLOC_SIZE,
 		       create_segment_callback,
@@ -69,24 +69,24 @@ init_dolphin(int modules) {
   printk("DIS segment alloc status %d\n", err);
   if (err) return -1;
 
-  err = sci_set_local_segment_available(segment[ii], ii);
+  err = sci_set_local_segment_available(segment[ii], 0);
   printk("DIS segment making available status %d\n", err);
   if (err) {
-    sci_remove_segment(&segment[ii], ii);
+    sci_remove_segment(&segment[ii], 0);
     return -1;
   }
   
-  err = sci_export_segment(segment[ii], ii, DIS_BROADCAST);
+  err = sci_export_segment(segment[ii], 0, DIS_BROADCAST);
   printk("DIS segment export status %d\n", err);
   if (err) {
-    sci_remove_segment(&segment[ii], ii);
+    sci_remove_segment(&segment[ii], 0);
     return -1;
   }
   
   read_addr = sci_local_kernel_virtual_address(segment[ii]);
   if (read_addr == 0) {
     printk("DIS sci_local_kernel_virtual_address returned 0\n");
-    sci_remove_segment(&segment[ii], ii);
+    sci_remove_segment(&segment[ii], 0);
     return -1;
   } else {
     printk("Dolphin memory read at 0x%p\n", read_addr);
@@ -97,16 +97,16 @@ init_dolphin(int modules) {
   
   err = sci_connect_segment(NO_BINDING,
 			    4, // DIS_BROADCAST_NODEID_GROUP_ALL
-			    ii,
 			    0,
-			    1, 
+			    0,
+			    ii, 
 			    DIS_BROADCAST,
 			    connect_callback, 
 			    0,
 			    &remote_segment_handle[ii]);
   printk("DIS connect segment status %d\n", err);
   if (err) {
-    sci_remove_segment(&segment[ii], ii);
+    sci_remove_segment(&segment[ii], 0);
     return -1;
   }
 
@@ -115,24 +115,24 @@ init_dolphin(int modules) {
   udelay(MAX_UDELAY);
   err = sci_map_segment(remote_segment_handle[ii],
 			DIS_BROADCAST,
-			ii,
+			0,
 			IPC_TOTAL_ALLOC_SIZE,
 			&client_map_handle[ii]);
   printk("DIS segment mapping status %d\n", err);
   if (err) {
-    sci_disconnect_segment(&remote_segment_handle[ii], ii);
-    sci_remove_segment(&segment[ii], ii);
+    sci_disconnect_segment(&remote_segment_handle[ii], 0);
+    sci_remove_segment(&segment[ii], 0);
     return -1;
   }
   
   addr = sci_kernel_virtual_address_of_mapping(client_map_handle[ii]);
   if (addr == 0) {
     printk ("Got zero pointer from sci_kernel_virtual_address_of_mapping\n");
-    sci_disconnect_segment(&remote_segment_handle[ii], ii);
-    sci_remove_segment(&segment[ii], ii);
+    sci_disconnect_segment(&remote_segment_handle[ii], 0);
+    sci_remove_segment(&segment[ii], 0);
     return -1;
   } else {
-    printk ("Dolphin memory at 0x%p\n", addr);
+    printk ("Dolphin memory write at 0x%p\n", addr);
     cdsPciModules.dolphinWrite[ii] = (volatile unsigned long *)addr;
   }
 
@@ -147,10 +147,10 @@ void
 finish_dolphin(void) {
 int ii;
   for(ii=0;ii<cdsPciModules.dolphinCount;ii++) {
-  sci_unmap_segment(&client_map_handle[ii], ii);
-  sci_disconnect_segment(&remote_segment_handle[ii], ii);
-  sci_unexport_segment(segment[ii], ii, 0);
-  sci_remove_segment(&segment[ii], ii);
+  sci_unmap_segment(&client_map_handle[ii], 0);
+  sci_disconnect_segment(&remote_segment_handle[ii], 0);
+  sci_unexport_segment(segment[ii], 0, 0);
+  sci_remove_segment(&segment[ii], 0);
   sci_cancel_session_cb(ii, 0);
 }
 }
