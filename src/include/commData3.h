@@ -10,13 +10,17 @@
 ///
 
 ///	Defines max number of IPC allowed per network type
-#define MAX_IPC		512
+#define MAX_IPC		1024
 ///	Defines max number of IPC allowed on a RFM network if using DMA 
-#define MAX_IPC_RFM	512
+#define MAX_IPC_RFM	1024
 /// The number of data blocks buffered per IPC channel
 #define IPC_BLOCKS 	64
 #define PCIE_SEG_SIZE	16
 
+typedef struct TIMING_SIGNAL {
+	unsigned long gps_time;
+	unsigned long cycle;
+} TIMING_SIGNAL;
 
 ///	Struct for a single IPC xmission
 typedef struct CDS_IPC_XMIT {
@@ -90,6 +94,7 @@ typedef struct CDS_DOLPHIN_INFO {
 #define IRFM1		3
 #define IPC_BUFFER_SIZE		sizeof(struct CDS_IPC_COMMS)
 #define IPC_BASE_OFFSET		0x80000
+#define IPC_PCIE_TIME_OFFSET	0x80
 #define IPC_PCIE_BASE_OFFSET	0x100
 #define IPC_TOTAL_ALLOC_SIZE	(IPC_PCIE_BASE_OFFSET + (3 * sizeof(CDS_IPC_COMMS)))
 #define RFM0_OFFSET		((1 * sizeof(CDS_IPC_COMMS)))
