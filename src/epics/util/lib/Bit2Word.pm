@@ -75,7 +75,7 @@ sub frontEndCode {
         for (0 .. $::partInCnt[$i]-2) {
            $calcExp .= "\t$::fromExp[$_],\n";
         }
-        $calcExp .= "\t$::fromExp[$partInCnt[$i]-1]\n";
+        $calcExp .= "\t$::fromExp[$::partInCnt[$i]-1]\n";
         $calcExp .= "};\n";
         $calcExp .= "\L$::xpartName[$i] = 0;\n";
         $calcExp .= "for (ii = 0; ii < $::partInCnt[$i]; ii++)\n{\n";
