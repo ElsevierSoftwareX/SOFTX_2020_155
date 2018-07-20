@@ -129,6 +129,7 @@ void usage()
     cout << "-S allow the use of the system clock" << endl;
     cout << "-t test point list - a space separated set of test point numbers" << endl;
     cout << "-f - write a set of .ini/.par mark data as bad, do not generate data" << endl;
+    cout << "-D delay - delay writting data for the specified number of ms" << endl;
 }
 
 std::string get_shmem_sysname(const std::string &system_name) {
@@ -163,13 +164,17 @@ int main(int argc, char *argv[]) {
     bool verbose = false;
     bool system_clock_ok = false;
     bool failed_node = false;
+    int delay_multiplier = 0;
 
     {
         int c;
-        while ((c = getopt(argc, argv, "d:hs:r:i:vSt:f")) != -1)
+        while ((c = getopt(argc, argv, "D:d:hs:r:i:vSt:f")) != -1)
         {
             switch (c)
             {
+                case 'D':
+                    delay_multiplier = std::atoi(optarg);
+                    break;
                 case 'd':
                     dcuid = std::atoi(optarg);
                     break;
@@ -340,6 +345,7 @@ int main(int argc, char *argv[]) {
             usleep(1);
             now = clock.now();
         }
+    	usleep(delay_multiplier * 1000);
 
         if (verbose && cycle == 0)
         {

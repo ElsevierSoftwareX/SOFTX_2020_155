@@ -226,9 +226,14 @@ void intHandler(int dummy) {
 
 // **********************************************************************************************
 void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *ixDataBlock) {
-	int ii = 0;
+		int ii = 0;
+		unsigned long sym_gps_sec = 0;
+		unsigned long sym_gps_nsec = 0;
+
+		sym_gps_sec = symm_gps_time(&sym_gps_nsec, 0);
 		// Print diags in verbose mode
 		printf("\nTime = %d-%d size = %d\n",shmIpcPtr[0]->bp[lastCycle].timeSec,shmIpcPtr[0]->bp[lastCycle].timeNSec,sendLength);
+		printf("Sym gps = %d-%d (time received)\n", (int)sym_gps_sec, (int)sym_gps_nsec);
 		printf("\tCycle = ");
 		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].cycle);
 		printf("\n\tTimeSec = ");
@@ -491,6 +496,13 @@ main(int argc,char *argv[])
 	char *buffer_name = "ifo";
 
     printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
+   
+    printf("argc = %d\n", argc);
+    for (ii = 0; ii < argc; ++ii)
+    {
+    	printf("argv[%d] = %s\n", ii, argv[ii]);
+    }
+    ii = 0;
     
     if (argc<3) {
         Usage();

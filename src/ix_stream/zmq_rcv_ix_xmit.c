@@ -50,10 +50,15 @@
 extern void *findSharedMemorySize(char *,int);
 
 int do_verbose = 0;
+int debug_zmq = 0;
 
 struct thread_info {
     int index;
     char *src_iface;
+};
+struct thread_mon_info {
+    int index;
+    void *ctx;
 };
 struct thread_info thread_index[DCU_COUNT];
 void *daq_context[DCU_COUNT];
@@ -82,6 +87,7 @@ usage()
 	fprintf(stderr, "-P - Path to a named pipe to send PV debug information to\n");
 	fprintf(stderr, "-d - Max delay in milli seconds to wait for a FE to send data, defaults to 10\n");
 	fprintf(stderr, "-L ifaces - local interfaces to listen on [used for load balancing], eg \"eth0 eth1\"\n");
+    fprintf(stderr, "-z - output zmq debug information (state changes)\n");
 	fprintf(stderr, "-h - help\n");
 }
 
@@ -127,14 +133,63 @@ void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *
 		}
 }
 
+const char *pevent_zmq(int event, char *buffer, size_t max_size)
+{
+    if (!buffer || max_size < 1) {
+        return "";
+    }
+    switch (event) {
+        default:
+            snprintf(buffer, max_size, "%d", event);
+            break;
+        case ZMQ_EVENT_CONNECTED:
+            strncpy(buffer, "CONNECTED", max_size);   
+            break;
+        case ZMQ_EVENT_CONNECT_DELAYED:
+            strncpy(buffer, "CONNECT_DELAYED", max_size);
+            break;
+        case ZMQ_EVENT_CONNECT_RETRIED:
+            strncpy(buffer, "CONNECT_RETRIED", max_size);
+            break;
+        case ZMQ_EVENT_LISTENING:
+            strncpy(buffer, "LISTENING", max_size);
+            break;
+        case ZMQ_EVENT_BIND_FAILED:
+            strncpy(buffer, "BIND_FAILED", max_size);
+            break;
+        case ZMQ_EVENT_ACCEPTED:
+            strncpy(buffer, "ACCEPTED", max_size);
+            break;
+        case ZMQ_EVENT_ACCEPT_FAILED:
+            strncpy(buffer, "ACCEPT_FAILED", max_size);
+            break;
+        case ZMQ_EVENT_CLOSED:
+            strncpy(buffer, "CLOSED", max_size);
+            break;
+        case ZMQ_EVENT_CLOSE_FAILED:
+            strncpy(buffer, "CLOSE_FAILED", max_size);
+            break;
+        case ZMQ_EVENT_DISCONNECTED:
+            strncpy(buffer, "DISCONNECTED", max_size);
+            break;
+        case ZMQ_EVENT_MONITOR_STOPPED:
+            strncpy(buffer, "MONITOR_STOPPED", max_size);
+            break;
+    }
+    buffer[max_size-1] = '\0';
+    return buffer;
+}
+
 // *****
 // monitoring thread callback
 // *****
-void *rcvr_thread_mon(void *ctx)
+void *rcvr_thread_mon(void *args)
 {
     int rc;
-
-    void *s = zmq_socket(ctx, ZMQ_PAIR);
+    char msg_buf[100];
+    struct thread_mon_info *info = (struct thread_mon_info*)args;
+    
+    void *s = zmq_socket(info->ctx, ZMQ_PAIR);
     rc = zmq_connect(s, "inproc://monitor.req");
     while (1)
     {
@@ -144,13 +199,14 @@ void *rcvr_thread_mon(void *ctx)
         if (rc == -1) break;
         unsigned short *event = (unsigned short*)zmq_msg_data(&msg);
         unsigned int *value = (unsigned int*)(event+1);
-        fprintf(stderr, "%d) %d\n", (int)*event, *value);
+        fprintf(stderr, "%s) %d - %s\n", pevent_zmq(*event, msg_buf, sizeof(msg_buf)), *value, sname[info->index]);
         if (zmq_msg_more(&msg)) {
             zmq_msg_init(&msg);
             zmq_msg_recv(&msg, s, 0);
         }
     }
     zmq_close(s);
+    free(args);
     return NULL;
 }
 
@@ -158,6 +214,7 @@ void *rcvr_thread_mon(void *ctx)
 // Thread for receiving DAQ data via ZMQ
 // *************************************************************************
 void *rcvr_thread(void *arg) {
+    struct thread_mon_info* mon_info = 0;
 	struct thread_info* my_info = (struct thread_info*)arg;
 	int mt = my_info->index;
 	printf("myarg = %d on iface %s\n", mt, (my_info->src_iface ? my_info->src_iface : "default interface"));
@@ -175,9 +232,17 @@ void *rcvr_thread(void *arg) {
     zctx = zmq_ctx_new();
     zsocket = zmq_socket(zctx, ZMQ_SUB);
 
-    zmq_socket_monitor(zsocket, "inproc://monitor.req", ZMQ_EVENT_ALL);
-
-    pthread_create(&mon_th_id, NULL, rcvr_thread_mon, zctx);
+    if (debug_zmq) {
+        zmq_socket_monitor(zsocket, "inproc://monitor.req", ZMQ_EVENT_ALL);
+        mon_info = calloc(1, sizeof(struct thread_mon_info));
+        if (!mon_info) {
+            fprintf(stderr, "Unable to initialize monitoring thread for %s\n", sname[mt]);
+        } else {
+            mon_info->index = mt;
+            mon_info->ctx = zctx;
+            pthread_create(&mon_th_id, NULL, rcvr_thread_mon, mon_info);
+        }
+    }
 
     rc = zmq_setsockopt(zsocket, ZMQ_SUBSCRIBE, "", 0);
     assert(rc == 0);
@@ -260,13 +325,16 @@ main(int argc, char **argv)
 
 
 	// Get arguments sent to process
-	while ((c = getopt(argc, argv, "b:hs:m:g:vp:P:d:L:")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "b:hs:m:g:vp:P:d:L:z")) != EOF) switch(c) {
 	case 's':
 		sysname = optarg;
 		break;
 	case 'v':
 		do_verbose = 1;
 		break;
+    case 'z':
+        debug_zmq = 1;
+        break;
 	case 'm':
 		max_data_size_mb = atoi(optarg);
     	if (max_data_size_mb < 20){
@@ -581,6 +649,9 @@ main(int argc, char **argv)
 			// Loop over all data buffers received from FE computers
 			for(ii=0;ii<nsys;ii++) {
 		  		if(dataRdy[ii]) {
+                    if (do_verbose && nextCycle == 0) {
+                        fprintf(stderr, "+++%s\n", sname[ii]);
+                    }
 		  			++cur_endpoint_ready_count;
 					int myc = mxDataBlockSingle[ii].header.dcuTotalModels;
 					// For each model, copy over data header information
@@ -619,6 +690,9 @@ main(int argc, char **argv)
 					dc_datablock_size += mydbs;
 		  		} else {
 		  			missed_nsys[ii] |= missed_flag;
+                    if (do_verbose && nextCycle == 0) {
+                        fprintf(stderr, "---%s\n", sname[ii]);
+                    } 
 		  		}
 			}
 			if (cur_endpoint_ready_count < endpoint_min_count) {
