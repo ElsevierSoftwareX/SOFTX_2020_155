@@ -541,11 +541,12 @@ int init_module (void)
 #endif
 
 #ifdef DOLPHIN_TEST
-	status = init_dolphin(1);
+	status = init_dolphin(2);
 	if (status != 0) {
 		return -1;
 	}
 #endif
+return -1;
 
 	// Create /proc filesystem tree
 	proc_dir_entry = proc_mkdir(SYSTEM_NAME_STRING_LOWER, NULL);
@@ -987,9 +988,14 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 #ifdef ADC_SLAVE
 	// Slave gets RFM module count from MASTER.
 	cdsPciModules.rfmCount = ioMemData->rfmCount;
+	// dolphinCount is number of Dolphin segments
 	cdsPciModules.dolphinCount = ioMemData->dolphinCount;
+	// dolphin read/write 0 is for local PCIe network traffic
 	cdsPciModules.dolphinRead[0] = ioMemData->dolphinRead[0];
 	cdsPciModules.dolphinWrite[0] = ioMemData->dolphinWrite[0];
+	// dolphin read/write 1 is for long range PCIe (RFM) network traffic
+	cdsPciModules.dolphinRead[1] = ioMemData->dolphinRead[1];
+	cdsPciModules.dolphinWrite[1] = ioMemData->dolphinWrite[1];
 #endif
 	printf("%d RFM cards found\n",cdsPciModules.rfmCount);
 #ifdef ADC_MASTER
@@ -1011,9 +1017,14 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	}
 	// ioMemData->dolphinCount = 0;
 #ifdef DOLPHIN_TEST
+	// dolphinCount is number of segments
 	ioMemData->dolphinCount = cdsPciModules.dolphinCount;
+	// dolphin read/write 0 is for local PCIe network traffic
 	ioMemData->dolphinRead[0] = cdsPciModules.dolphinRead[0];
 	ioMemData->dolphinWrite[0] = cdsPciModules.dolphinWrite[0];
+	// dolphin read/write 1 is for long range PCIe (RFM) traffic
+	ioMemData->dolphinRead[1] = cdsPciModules.dolphinRead[1];
+	ioMemData->dolphinWrite[1] = cdsPciModules.dolphinWrite[1];
 
 #else
 #ifdef ADC_MASTER
@@ -1021,6 +1032,8 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	ioMemData->dolphinCount = 0;
         ioMemData->dolphinRead[0] = 0;
         ioMemData->dolphinWrite[0] = 0;
+        ioMemData->dolphinRead[1] = 0;
+        ioMemData->dolphinWrite[1] = 0;
 #endif
 #endif
         printf("***************************************************************************\n");

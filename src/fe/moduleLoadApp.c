@@ -59,14 +59,6 @@ int init_module (void)
 
 	need_to_load_IOP_first = 0;
 
-#ifdef DOLPHIN_TEST
-	status = init_dolphin(1);
-	if (status != 0) {
-		return -1;
-	}
-#endif
-
-
 	jj = 0;
 
 
@@ -278,11 +270,16 @@ int init_module (void)
 
 	// Slave gets RFM module count from MASTER.
 	cdsPciModules.rfmCount = ioMemData->rfmCount;
+	// dolphinCount is number of segments
 	cdsPciModules.dolphinCount = ioMemData->dolphinCount;
+	// dolphin read/write 0 is for local PCIe network traffic
 	cdsPciModules.dolphinRead[0] = ioMemData->dolphinRead[0];
 	cdsPciModules.dolphinWrite[0] = ioMemData->dolphinWrite[0];
+	// dolphin read/write 1 is for long range PCIe (RFM) traffic
+	cdsPciModules.dolphinRead[1] = ioMemData->dolphinRead[1];
+	cdsPciModules.dolphinWrite[1] = ioMemData->dolphinWrite[1];
 	for(ii=0;ii<cdsPciModules.rfmCount;ii++)
-        {
+	{
 		cdsPciModules.pci_rfm[ii] = ioMemData->pci_rfm[ii];
 		cdsPciModules.pci_rfm_dma[ii] = ioMemData->pci_rfm_dma[ii];
 	}
@@ -303,9 +300,6 @@ int init_module (void)
 	// If EPICS not running, EXIT
 	if (cnt == 10) {
 		// Cleanup
-#ifdef DOLPHIN_TEST
-		finish_dolphin();
-#endif
 		return -1;
 	}
 
@@ -351,10 +345,6 @@ void cleanup_module (void) {
 #endif
         stop_working_threads = 1;
         msleep(1000);
-
-#ifdef DOLPHIN_TEST
-	finish_dolphin();
-#endif
 
 #ifndef NO_CPU_SHUTDOWN
 

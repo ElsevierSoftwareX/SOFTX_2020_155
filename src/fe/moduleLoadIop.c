@@ -53,7 +53,7 @@ int init_module (void)
 
 
 #ifdef DOLPHIN_TEST
-	status = init_dolphin(1);
+	status = init_dolphin(2);
 	if (status != 0) {
 		return -1;
 	}
@@ -160,17 +160,23 @@ int init_module (void)
 		ioMemData->pci_rfm[ii] = cdsPciModules.pci_rfm[ii];
 		ioMemData->pci_rfm_dma[ii] = cdsPciModules.pci_rfm_dma[ii];
 	}
-	// ioMemData->dolphinCount = 0;
 #ifdef DOLPHIN_TEST
+	// dolphinCount is number of segments
 	ioMemData->dolphinCount = cdsPciModules.dolphinCount;
+	// dolphin read/write 0 is for local PCIe network traffic
 	ioMemData->dolphinRead[0] = cdsPciModules.dolphinRead[0];
 	ioMemData->dolphinWrite[0] = cdsPciModules.dolphinWrite[0];
+	// dolphin read/write 1 is for long range PCIe (RFM) traffic
+	ioMemData->dolphinRead[1] = cdsPciModules.dolphinRead[1];
+	ioMemData->dolphinWrite[1] = cdsPciModules.dolphinWrite[1];
 
 #else
 // Clear Dolphin pointers so the slave sees NULLs
 	ioMemData->dolphinCount = 0;
         ioMemData->dolphinRead[0] = 0;
         ioMemData->dolphinWrite[0] = 0;
+        ioMemData->dolphinRead[1] = 0;
+        ioMemData->dolphinWrite[1] = 0;
 #endif
 
 	// Print out all the I/O information
