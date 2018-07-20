@@ -46,6 +46,8 @@
 
 #include "./dolphin_common.c"
 
+#define MIN_DELAY_MS 5
+#define MAX_DELAY_MS 40
 
 extern void *findSharedMemorySize(char *,int);
 
@@ -66,6 +68,7 @@ void *daq_subscriber[DCU_COUNT];
 char *sname[DCU_COUNT];	// Names of FE computers serving DAQ data
 char *local_iface[32];
 daq_multi_dcu_data_t mxDataBlockSingle[32];
+int64_t dataRecvTime[32];
 const int mc_header_size = sizeof(daq_multi_cycle_header_t);
 int stop_working_threads = 0;
 int start_acq = 0;
@@ -266,6 +269,7 @@ void *rcvr_thread(void *arg) {
 		// Pass cycle and timestamp data back to main process
 		thread_cycle[mt] = cycle;
 		thread_timestamp[mt] = mxDataBlock->header.dcuheader[0].timeSec;
+        dataRecvTime[mt] = s_clock();
 
 	// Run until told to stop by main thread
 	} while(!stop_working_threads);
@@ -361,7 +365,7 @@ main(int argc, char **argv)
 		break;
 	case 'd':
 		delay_ms = atoi(optarg);
-		if (delay_ms < 5 || delay_ms > 40) {
+		if (delay_ms < MIN_DELAY_MS || delay_ms > MAX_DELAY_MS) {
 			printf("The delay factor must be between 5ms and 40ms\n");
 			return -1;
 		}
@@ -487,8 +491,102 @@ main(int argc, char **argv)
 	int endpoints_missed_remaining;
 	int missed_flag = 0;
 	int missed_nsys[32];
-
+    int64_t recv_time[32];
+    int64_t min_recv_time = 0;
+    int64_t cur_ref_time = 0;
+    int recv_buckets[(MAX_DELAY_MS/5)+2];
+    int entry_binned = 0;
 	SimplePV pvs[] = {
+            {
+                    "RECV_BIN_MISS",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[0],
+                    1,
+                    -1,
+                    1,
+                    -1,
+            },
+            {       
+                    "RECV_BIN_0",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[1],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,                                                                                  
+            },
+            {       
+                    "RECV_BIN_1",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[2],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
+            {       
+                    "RECV_BIN_2",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[3],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
+            {       
+                    "RECV_BIN_3",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[4],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
+            {
+                    "RECV_BIN_4",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[5],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
+            {       
+                    "RECV_BIN_5",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[6],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
+            {       
+                    "RECV_BIN_6",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[7],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
+            {      
+                    "RECV_BIN_7",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[8],
+                    nsys,
+                    -1,
+                    nsys,
+                    -1,
+            },
+            {
+                    "RECV_BIN_8",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[9],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
 			{
 					"RECV_MIN_MS",
                     SIMPLE_PV_INT,
@@ -589,6 +687,7 @@ main(int argc, char **argv)
 
 	missed_flag = 1;
 	memset(&missed_nsys[0], 0, sizeof(missed_nsys));
+    memset(recv_buckets, 0, sizeof(recv_buckets));
 	do {
 		// Reset counters
 		timeout = 0;
@@ -646,9 +745,15 @@ main(int argc, char **argv)
 			cur_endpoint_ready_count = 0;
 			endpoints_missed_remaining = sizeof(endpoints_missed_buffer);
 			endpoints_missed_buffer[0] = '\0';
+            min_recv_time = 0x7fffffffffffffff;
 			// Loop over all data buffers received from FE computers
 			for(ii=0;ii<nsys;ii++) {
-		  		if(dataRdy[ii]) {
+		  		recv_time[ii] = -1;
+                if(dataRdy[ii]) {
+                    recv_time[ii] = dataRecvTime[ii];
+                    if (recv_time[ii] < min_recv_time) {
+                        min_recv_time = recv_time[ii];
+                    }
                     if (do_verbose && nextCycle == 0) {
                         fprintf(stderr, "+++%s\n", sname[ii]);
                     }
@@ -711,7 +816,26 @@ main(int argc, char **argv)
 
 			// Calc IX message size
 			sendLength = header_size + ifoDataBlock->header.fullDataBlockSize;
-			if(nextCycle == 0) {
+            if (nextCycle == 0) {
+                memset(recv_buckets, 0, sizeof(recv_buckets));
+            }
+            for (ii = 0; ii < nsys; ++ii) {
+                cur_ref_time = 0;
+                recv_time[ii] -= min_recv_time;
+                entry_binned = 0;
+                for (jj = 0; jj < sizeof(recv_buckets)/sizeof(recv_buckets[0]); ++jj) {
+                    if (recv_time[ii] < cur_ref_time) {
+                        ++recv_buckets[jj];
+                        entry_binned = 1;
+                        break;
+                    }
+                    cur_ref_time += 5;
+                }
+                if (!entry_binned) {
+                    ++recv_buckets[sizeof(recv_buckets)/sizeof(recv_buckets[0])-1];
+                }
+            }
+            if (nextCycle == 0) {
 				pv_dcu_count = mytotaldcu;
 				pv_total_datablock_size = dc_datablock_size;
 				mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time / n_cycle_time : 1 << 31);
@@ -743,6 +867,10 @@ main(int argc, char **argv)
 				min_cycle_time = 1 << 30;
 				max_cycle_time = 0;
 				mean_cycle_time = 0;
+
+                endpoint_min_count = nsys;
+                endpoint_max_count = 0;
+                endpoint_mean_count = 0;
 
 				missed_flag = 1;
 			} else {
