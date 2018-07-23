@@ -83,6 +83,8 @@ void Usage()
     printf(" -v 1           : Enable verbose output\n");
     printf(" -e <interface> : Name of the interface to broadcast data through\n");
     printf(" -d <directory> : Path to the gds tp dir used to lookup model rates\n");
+    printf(" -D <value>     : Add a delay in ms to sending the data.  Used to spread the load\n");
+    printf("                : when working with multiple sending systems.  Defaults to 0.");
     printf(" -h             : This helpscreen\n");
     printf("\n");
 }
@@ -402,7 +404,7 @@ int loadMessageBuffer(	int nsys,
 }
 
 // **********************************************************************************************
-int send_to_local_memory(int nsys, int xmitData)
+int send_to_local_memory(int nsys, int xmitData, int send_delay_ms)
 {
     int do_wait = 1;
     int daqStatBit[2];
@@ -455,6 +457,7 @@ int send_to_local_memory(int nsys, int xmitData)
 		memcpy((void*)&msg_buffer,nextData,sendLength);
 		// Send Data
         //msg_size = zmq_send(daq_publisher,(void*)&msg_buffer,sendLength,0);
+        usleep(send_delay_ms * 1000);
         zmq_send_daq_multi_dcu_t(&msg_buffer, daq_publisher, 0);
         // printf("Sending data size = %d\n",msg_size);
 		}
@@ -494,6 +497,7 @@ main(int argc,char *argv[])
 	char *eport = 0;
 	int sendViaZmq = 0;
 	char *buffer_name = "ifo";
+	int send_delay_ms = 0;
 
     printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
    
@@ -510,7 +514,7 @@ main(int argc,char *argv[])
     }
 
     /* Get the parameters */
-     while ((counter = getopt(argc, argv, "b:e:m:h:v:s:d:")) != EOF)
+     while ((counter = getopt(argc, argv, "b:e:m:h:v:s:d:D:")) != EOF)
       switch(counter) {
         case 'b':
             buffer_name = optarg;
@@ -546,6 +550,9 @@ main(int argc,char *argv[])
         case 'h':
             Usage();
             return(0);
+        case 'D':
+            send_delay_ms = atoi(optarg);
+            break;
     }
     max_data_size = max_data_size_mb * 1024*1024;
 
@@ -617,7 +624,7 @@ main(int argc,char *argv[])
 
 	// Enter infinite loop of reading control model data and writing to local shared memory
     do {
-	    error = send_to_local_memory(nsys,sendViaZmq);
+	    error = send_to_local_memory(nsys, sendViaZmq, send_delay_ms);
     } while (error == 0 && keepRunning == 1);
 	if(sendViaZmq) {
 		printf("Closing out ZMQ and exiting\n");
