@@ -39,10 +39,6 @@
 
 #define DO_HANDSHAKE 0
 
-#define MY_DCU_OFFSET   0x00000
-#define MY_IPC_OFFSET   (MY_DCU_OFFSET + 0x8000)
-#define MY_GDS_OFFSET   (MY_DCU_OFFSET + 0x9000)
-#define MY_DAT_OFFSET   (MY_DCU_OFFSET + 0xa000)
 
 #include "./dolphin_common.c"
 
@@ -221,7 +217,6 @@ void *rcvr_thread(void *arg) {
 	struct thread_info* my_info = (struct thread_info*)arg;
 	int mt = my_info->index;
 	printf("myarg = %d on iface %s\n", mt, (my_info->src_iface ? my_info->src_iface : "default interface"));
-	zmq_msg_t message;
 	int cycle = 0;
 	daq_multi_dcu_data_t *mxDataBlock;
     char loc[256];
@@ -316,12 +311,9 @@ main(int argc, char **argv)
 	int max_data_size_mb = 100;
 	int max_data_size = 0;
 	char *mywriteaddr;
-	daq_multi_cycle_header_t *xmitHeader;
-	static const int xmitDataOffset = MY_DAT_OFFSET + sizeof(struct daq_multi_cycle_header_t);
-
-	// Declare 0MQ message pointers
-	int rc;
-	char loc[40];
+	daq_multi_cycle_header_t *xmitHeader[IX_BLOCK_COUNT];
+	static int xmitDataOffset[IX_BLOCK_COUNT];
+	int xmitBlockNum = 0;
 
 	/* set up defaults */
 	sysname = NULL;
@@ -450,8 +442,11 @@ main(int argc, char **argv)
 
 		// Set pointer to xmit header in Dolphin xmit data area.
 		mywriteaddr = (char *)writeAddr;
-		mywriteaddr += MY_DAT_OFFSET;
-		xmitHeader = (daq_multi_cycle_header_t *)mywriteaddr;
+		for(ii=0;ii<IX_BLOCK_COUNT;ii++) {
+			xmitHeader[ii] = (daq_multi_cycle_header_t *)mywriteaddr;
+			mywriteaddr += IX_BLOCK_SIZE;
+			xmitDataOffset[ii] = IX_BLOCK_SIZE * ii + sizeof(struct daq_multi_cycle_header_t);
+		}
 	}
 	//
 
@@ -813,6 +808,7 @@ main(int argc, char **argv)
 			ifoDataBlock->header.dcuTotalModels = mytotaldcu;
 			// Set multi_cycle head cycle to indicate data ready for this cycle
 			ifo_header->curCycle = nextCycle;
+			xmitBlockNum = nextCycle % IX_BLOCK_COUNT;
 
 			// Calc IX message size
 			sendLength = header_size + ifoDataBlock->header.fullDataBlockSize;
@@ -878,18 +874,18 @@ main(int argc, char **argv)
 			}
 			if(xmitData) {
 				// WRITEDATA to Dolphin Network
-	    		SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset,sendLength,memcpyFlag,&error);
+	    		SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset[xmitBlockNum],sendLength,memcpyFlag,&error);
         		if (error != SCI_ERR_OK) {
 					fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
 		    		return error;
 				}
 				// Set data header information
-        		xmitHeader->maxCycle = ifo_header->maxCycle;
+        		xmitHeader[xmitBlockNum]->maxCycle = ifo_header->maxCycle;
         		// xmitHeader->cycleDataSize = ifo_header->cycleDataSize;
-        		xmitHeader->cycleDataSize = sendLength;;
+        		xmitHeader[xmitBlockNum]->cycleDataSize = sendLength;;
         		// xmitHeader->msgcrc = myCrc;
         		// Send cycle last as indication of data ready for receivers
-        		xmitHeader->curCycle = ifo_header->curCycle;
+        		xmitHeader[xmitBlockNum]->curCycle = ifo_header->curCycle;
         		// Have to flush the buffers to make data go onto Dolphin network
         		SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
 			}

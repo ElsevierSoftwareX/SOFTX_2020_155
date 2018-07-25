@@ -3,9 +3,8 @@
 #define NO_FLAGS            0
 #define DATA_TRANSFER_READY 8
 #define CMD_READY           1234
-/* Use upper 4 KB of segment for synchronization. */
-// #define SYNC_OFFSET ((segmentSize) / 4 - 1024)
-#define IX_SYNC_OFFSET 0x1000
+#define IX_BLOCK_SIZE		0x800000
+#define IX_BLOCK_COUNT		4
 
 /*
  * Remote nodeId:
@@ -26,7 +25,7 @@ unsigned int            localAdapterNo = 0;
 unsigned int            remoteNodeId   = 0;
 unsigned int            localNodeId    = 0;
 unsigned int            segmentId;
-unsigned int            segmentSize    = 0x400000;
+unsigned int            segmentSize    = 0x2000000;
 unsigned int            offset         = 0;
 unsigned int            client         = 0;
 unsigned int            server         = 1;
