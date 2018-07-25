@@ -82,10 +82,10 @@ main(int argc,char *argv[])
     int counter; 
     int ii;
     char *myreadaddr;
-    char *rcvDataPtr;
+    char *rcvDataPtr[IX_BLOCK_COUNT];
     daq_multi_dcu_data_t *ixDataBlock;
     int sendLength = 0;
-    daq_multi_cycle_header_t *rcvHeader;
+    daq_multi_cycle_header_t *rcvHeader[IX_BLOCK_COUNT];
     int myCrc;
     int do_verbose = 0;
 	int max_data_size_mb = 100;
@@ -150,32 +150,27 @@ main(int argc,char *argv[])
     sleep(3);
 
     int lastCycle = 15;
+	int nextCycle = 0;
+	int rcvBlockNum = 0;
     int new_cycle = 0;
     int nsys = 0;
     char *nextData;
 	int cyclesize = 0;
 
-	if (read_from_dolphin) {
-        // Connect to Dolphin
-        error = dolphin_init();
-        printf("Read = 0x%lx \n Write = 0x%lx \n", (long) readAddr, (long) writeAddr);
+	// Connect to Dolphin
+	error = dolphin_init();
+	printf("Read = 0x%lx \n Write = 0x%lx \n", (long) readAddr, (long) writeAddr);
 
-        // Set pointers to receive header and data in Dolphin network memory area
-        myreadaddr = (char *) readAddr;
-        myreadaddr += MY_DAT_OFFSET;
-    } else {
-	    // connect to the src mbuf
-        myreadaddr = (char*)findSharedMemorySize(src_mbuf_name, max_data_size_mb);
+	// Set pointers to receive header and data in Dolphin network memory area
+	myreadaddr = (char *) readAddr;
+	for(ii=0;ii<IX_BLOCK_COUNT;ii++) {
+		rcvHeader[ii] = (daq_multi_cycle_header_t *)myreadaddr;
+		rcvDataPtr[ii] = (char *)myreadaddr + sizeof(struct daq_multi_cycle_header_t);
+		myreadaddr += IX_BLOCK_SIZE;
 	}
-    rcvHeader = (daq_multi_cycle_header_t *)myreadaddr;
-    rcvDataPtr = (char *)myreadaddr + sizeof(daq_multi_cycle_header_t);
 
     // Catch control C exit
     signal(SIGINT,intHandler);
-
-    // Sync to cycle zero
-    for (;rcvHeader->curCycle;) usleep(1000);
-    printf("Found cycle zero = %d\n",rcvHeader->curCycle);
 
     // Go into infinite receive loop
     do{
@@ -183,27 +178,27 @@ main(int argc,char *argv[])
 	    // Check every 2 milliseconds
 	    do{
 		usleep(2000);
-		new_cycle = rcvHeader->curCycle;
-	    } while (new_cycle == lastCycle && keepRunning);
+		new_cycle = rcvHeader[rcvBlockNum]->curCycle;
+	    } while (new_cycle != nextCycle && keepRunning);
 	    // Save cycle number of last received message
 	    lastCycle = new_cycle;
-		cyclesize = rcvHeader->cycleDataSize;
+		cyclesize = rcvHeader[rcvBlockNum]->cycleDataSize;
 		// Calculate the correct segment on the source buffer
         // rcvDataPtr = ((char *)myreadaddr + sizeof(daq_multi_cycle_header_t)) + new_cycle*cyclesize;
 	    // Set up pointers to copy data to receive shmem
     	nextData = (char *)ifo_data;
 	    nextData += cycle_data_size * new_cycle;
 	    ixDataBlock = (daq_multi_dcu_data_t *)nextData;
-	    sendLength = rcvHeader->cycleDataSize;
+	    sendLength = rcvHeader[rcvBlockNum]->cycleDataSize;
 	    // Copy data from Dolphin to local memory
-	    memcpy(nextData,rcvDataPtr,sendLength);
+	    memcpy(nextData,rcvDataPtr[rcvBlockNum],sendLength);
 
 	    // Calculate CRC checksum of received data
 	    myCrc = crc_ptr((char *)nextData, sendLength, 0);
 	    myCrc = crc_len(sendLength, myCrc);
 	
 	    // Write data header info to shared memory
-	    ifo_shm->header.curCycle = rcvHeader->curCycle;
+	    ifo_shm->header.curCycle = rcvHeader[rcvBlockNum]->curCycle;
 
 	    // Verify send CRC matches received CRC
 	    // if(ifo_header->msgcrc != myCrc)
@@ -212,8 +207,11 @@ main(int argc,char *argv[])
 	    // Print some diagnostics
 	    // if(new_cycle == 0 && do_verbose)
 	    nsys = ixDataBlock->header.dcuTotalModels;
+		nextCycle = (new_cycle + 1) % 16;
+		rcvBlockNum = (rcvBlockNum + 1) % IX_BLOCK_COUNT;
+
 	    if(new_cycle == 0 && do_verbose)
-		print_diags2(nsys, new_cycle, sendLength, ixDataBlock); 
+			print_diags2(nsys, new_cycle, sendLength, ixDataBlock); 
     } while(keepRunning);
 
     if (read_from_dolphin) {
