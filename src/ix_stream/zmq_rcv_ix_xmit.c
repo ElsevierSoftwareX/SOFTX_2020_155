@@ -458,6 +458,7 @@ main(int argc, char **argv)
 	int64_t n_cycle_time = 0;
 	int mytotaldcu = 0;
 	char *zbuffer;
+	size_t zbuffer_remaining = 0;
 	int dc_datablock_size = 0;
 	static const int header_size = sizeof(daq_multi_dcu_header_t);
 	char dcstatus[2024];
@@ -736,6 +737,7 @@ main(int argc, char **argv)
         	nextData += cycle_data_size * nextCycle;
         	ifoDataBlock = (daq_multi_dcu_data_t *)nextData;
 			zbuffer = (char *)nextData + header_size;
+			zbuffer_remaining = cycle_data_size - header_size;
 
 			cur_endpoint_ready_count = 0;
 			endpoints_missed_remaining = sizeof(endpoints_missed_buffer);
@@ -782,6 +784,12 @@ main(int argc, char **argv)
 					int mydbs = mxDataBlockSingle[ii].header.fullDataBlockSize;
 					// Get pointer to data in receive data block
 					char *mbuffer = (char *)&mxDataBlockSingle[ii].dataBlock[0];
+					if (mydbs > zbuffer_remaining)
+                    {
+					    fprintf(stderr, "Buffer overflow found.  Attempting to write %d bytes to zbuffer which has %d bytes remainging\n",
+                                (int)mydbs, (int)zbuffer_remaining);
+					    abort();
+                    }
 					// Copy data from receive buffer to shared memory
 					memcpy(zbuffer,mbuffer,mydbs);
 					// Increment shared memory data buffer pointer for next data set
@@ -873,6 +881,12 @@ main(int argc, char **argv)
 				missed_flag <<= 1;
 			}
 			if(xmitData) {
+			    if (sendLength > IX_BLOCK_SIZE)
+                {
+			        fprintf(stderr, "Buffer overflow.  Sending %d bytes into a dolphin block that holds %d\n",
+                            (int)sendLength, (int)IX_BLOCK_SIZE);
+			        abort();
+                }
 				// WRITEDATA to Dolphin Network
 	    		SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset[xmitBlockNum],sendLength,memcpyFlag,&error);
         		if (error != SCI_ERR_OK) {
