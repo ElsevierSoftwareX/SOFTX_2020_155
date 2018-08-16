@@ -462,9 +462,11 @@ main(int argc, char **argv)
 	char *zbuffer;
 	size_t zbuffer_remaining = 0;
 	int dc_datablock_size = 0;
+    int datablock_size_running = 0;
+    int datablock_size_mb_s = 0;
 	static const int header_size = sizeof(daq_multi_dcu_header_t);
-	char dcstatus[2024];
-	char dcs[24];
+	char dcstatus[4096];
+	char dcs[48];
 	int edcuid[10];
 	int estatus[10];
 	int edbs[10];
@@ -677,6 +679,16 @@ main(int argc, char **argv)
 
             },
             {
+                    "DATA_BLOCK_SIZE_MB_PER_S",
+                    SIMPLE_PV_INT,
+                    &datablock_size_mb_s,
+
+                    DAQ_TRANSIT_MAX_DC_BYTE_SEC/(1024*1024),
+                    0,
+                    (DAQ_TRANSIT_MAX_DC_BYTE_SEC/(1024*1024))*9/10,
+                    1,
+            },
+            {
                 "ENDPOINTS_MISSED",
                         SIMPLE_PV_STRING,
                         endpoints_missed_buffer,
@@ -852,7 +864,9 @@ main(int argc, char **argv)
                     ++recv_buckets[sizeof(recv_buckets)/sizeof(recv_buckets[0])-1];
                 }
             }
+            datablock_size_running += dc_datablock_size;
             if (nextCycle == 0) {
+                datablock_size_mb_s = datablock_size_running / (1024*1024);
 				pv_dcu_count = mytotaldcu;
 				pv_total_datablock_size = dc_datablock_size;
 				mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time / n_cycle_time : 1 << 31);
@@ -890,6 +904,7 @@ main(int argc, char **argv)
                 endpoint_mean_count = 0;
 
 				missed_flag = 1;
+                datablock_size_running = 0;
 			} else {
 				missed_flag <<= 1;
 			}
@@ -904,6 +919,11 @@ main(int argc, char **argv)
 	    		SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset[xmitBlockNum],sendLength,memcpyFlag,&error);
         		if (error != SCI_ERR_OK) {
 					fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
+                    fprintf(stderr,"For reference the expected error codes are:\n");
+                    fprintf(stderr,"SCI_ERR_OUT_OF_RANGE = 0x%x\n", SCI_ERR_OUT_OF_RANGE);
+                    fprintf(stderr,"SCI_ERR_SIZE_ALIGNMENT = 0x%x\n", SCI_ERR_SIZE_ALIGNMENT);
+                    fprintf(stderr,"SCI_ERR_OFFSET_ALIGNMENT = 0x%x\n", SCI_ERR_OFFSET_ALIGNMENT);
+                    fprintf(stderr,"SCI_ERR_TRANSFER_FAILED = 0x%x\n", SCI_ERR_TRANSFER_FAILED);
 		    		return error;
 				}
 				// Set data header information
