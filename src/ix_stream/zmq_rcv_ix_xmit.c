@@ -45,6 +45,8 @@
 #define MIN_DELAY_MS 5
 #define MAX_DELAY_MS 40
 
+#define MAX_FE_COMPUTERS 64
+
 extern void *findSharedMemorySize(char *,int);
 
 int do_verbose = 0;
@@ -62,15 +64,15 @@ struct thread_info thread_index[DCU_COUNT];
 void *daq_context[DCU_COUNT];
 void *daq_subscriber[DCU_COUNT];
 char *sname[DCU_COUNT];	// Names of FE computers serving DAQ data
-char *local_iface[32];
-daq_multi_dcu_data_t mxDataBlockSingle[32];
-int64_t dataRecvTime[32];
+char *local_iface[MAX_FE_COMPUTERS];
+daq_multi_dcu_data_t mxDataBlockSingle[MAX_FE_COMPUTERS];
+int64_t dataRecvTime[MAX_FE_COMPUTERS];
 const int mc_header_size = sizeof(daq_multi_cycle_header_t);
 int stop_working_threads = 0;
 int start_acq = 0;
 static volatile int keepRunning = 1;
-int thread_cycle[32];
-int thread_timestamp[32];
+int thread_cycle[MAX_FE_COMPUTERS];
+int thread_timestamp[MAX_FE_COMPUTERS];
 int rcv_errors = 0;
 
 void
@@ -283,7 +285,7 @@ void *rcvr_thread(void *arg) {
 int
 main(int argc, char **argv)
 {
-	pthread_t thread_id[32];
+	pthread_t thread_id[MAX_FE_COMPUTERS];
 	unsigned int nsys = 1; // The number of mapped shared memories (number of data sources)
 	char *sysname;
 	char *buffer_name = "ifo";
@@ -402,7 +404,7 @@ main(int argc, char **argv)
             printf("local interface %s\n", local_iface[niface-1]);
             char *s = strtok(0, " ");
             if (!s) break;
-            assert(niface < 32);
+            assert(niface < MAX_FE_COMPUTERS);
             local_iface[niface] = s;
             niface++;
         }
@@ -468,7 +470,7 @@ main(int argc, char **argv)
 	int edbs[10];
 	unsigned long ets = 0;
 	int timeout = 0;
-	int dataRdy[32];
+	int dataRdy[MAX_FE_COMPUTERS];
 	int threads_rdy;
 	int any_rdy = 0;
 	int jj,kk;
@@ -486,8 +488,8 @@ main(int argc, char **argv)
 	char endpoints_missed_buffer[256];
 	int endpoints_missed_remaining;
 	int missed_flag = 0;
-	int missed_nsys[32];
-    int64_t recv_time[32];
+	int missed_nsys[MAX_FE_COMPUTERS];
+    int64_t recv_time[MAX_FE_COMPUTERS];
     int64_t min_recv_time = 0;
     int64_t cur_ref_time = 0;
     int recv_buckets[(MAX_DELAY_MS/5)+2];
@@ -638,9 +640,9 @@ main(int argc, char **argv)
                     SIMPLE_PV_INT,
 					&endpoint_min_count,
 
-					32,
+					MAX_FE_COMPUTERS,
 					0,
-					30,
+					MAX_FE_COMPUTERS-2,
 					1,
 			},
 			{
@@ -648,9 +650,9 @@ main(int argc, char **argv)
                     SIMPLE_PV_INT,
 					&endpoint_max_count,
 
-					32,
+					MAX_FE_COMPUTERS,
 					0,
-					30,
+					MAX_FE_COMPUTERS-2,
 					1,
 			},
 			{
@@ -658,11 +660,22 @@ main(int argc, char **argv)
                     SIMPLE_PV_INT,
 					&endpoint_mean_count,
 
-					32,
+					MAX_FE_COMPUTERS,
 					0,
-					30,
+					MAX_FE_COMPUTERS-2,
 					1,
 			},
+            {
+                    "DATA_BLOCK_SIZE",
+                    SIMPLE_PV_INT,
+                    &dc_datablock_size,
+
+                    DAQ_DCU_BLOCK_SIZE,
+                    0,
+                    (DAQ_DCU_BLOCK_SIZE*9)/10,
+                    1*1024*1024,
+
+            },
             {
                 "ENDPOINTS_MISSED",
                         SIMPLE_PV_STRING,
