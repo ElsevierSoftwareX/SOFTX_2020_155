@@ -2142,6 +2142,10 @@ if($daq2dc == 0) {
 	my $scriptArgs = "-s $location -i $lsite -m $skeleton -d $dcuId &"; 
 	("CDS::medmGenGdsTp2dc::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dacType);
 }
+	require "lib/medmGenStatus.pm";
+	("CDS::medmGenStatus::createStatusMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs);
+
+
 # ******************************************************************************************
 #//		- GENERATE ADC SCREENS
 # Open the diags2.txt file, which contains list of ADC connections.
