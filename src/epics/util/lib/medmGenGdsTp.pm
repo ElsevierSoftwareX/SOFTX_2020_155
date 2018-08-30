@@ -46,30 +46,6 @@ sub createGdsMedm
 	# Put blue rectangle banner at bottom of screen
 	$xpos = 0; $ypos = 327; $width = 800; $height = 22;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{blue},"","","");
-	# Add build info label
-	$xpos = 44; $ypos = 331; $width = 45; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"MODEL BUILD INFO",$ecolors{white});
-	# Add RCG VERSION label
-	$xpos = 144; $ypos = 331; $width = 45; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"RCG #",$ecolors{white});
-	# Add RCG Number
-	$xpos = 189; $ypos = 331; $width = 35; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_RCG_VERSION",$ecolors{white},$ecolors{blue},"static");
-	$xpos = 235; $ypos = 331; $width = 12; $height = 17; $vis = "calc"; $calc = "(a<1)";
-        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{warning},$vis,$calc,"$site\:FEC-$dcuid\_RCG_VERSION");
-	# Add SVN label
-	$xpos = 275; $ypos = 331; $width = 45; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"SVN #",$ecolors{white});
-	# Add SVN Number
-	$xpos = 318; $ypos = 331; $width = 35; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_BUILD_SVN",$ecolors{white},$ecolors{blue},"static");
-	# Add build date label
-	$xpos = 369; $ypos = 331; $width = 45; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DATE:",$ecolors{white});
-	# Add build date
-	$xpos = 415; $ypos = 331; $width = 150; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_BUILD_DATE",$ecolors{white},$ecolors{blue},"static");
-
 
 	# Add Display Name
 	$xpos = 270; $ypos = 4; $width = 200; $height = 15;
@@ -220,24 +196,6 @@ sub createGdsMedm
 	$xpos = 125; $ypos = 125; $width = 50; $height = 16;
 	$medmdata .= ("CDS::medmGen::medmGenTextDyn") -> ($xpos,$ypos,$width,$height,"NO SYNC",$ecolors{red},"(A&255) == 0","$site\:FEC-$dcuid\_TIME_ERR");
 
-	# Add gps start time label
-	$xpos = 18; $ypos = 173; $width = 50; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"GPS START",$ecolors{black});
-	# Add GPS Start Time Monitor
-	$xpos = 75; $ypos = 173; $width = 100; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_START_GPS",$ecolors{white},$ecolors{black},"alarm");
-	# Add uptime label
-	$xpos = 18; $ypos = 194; $width = 50; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"UPTIME",$ecolors{black});
-	# Add up Time Monitors
-	$xpos = 75; $ypos = 194; $width = 30; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_UPTIME_DAY",$ecolors{white},$ecolors{black},"alarm");
-	$xpos = 111; $ypos = 194; $width = 30; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_UPTIME_HOUR",$ecolors{white},$ecolors{black},"alarm");
-	$xpos = 146; $ypos = 194; $width = 30; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_UPTIME_MINUTE",$ecolors{white},$ecolors{black},"alarm");
-
-
 	# Add cycle/user time label
 	$xpos = 18; $ypos = 215; $width = 50; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"CYC/USR",$ecolors{black});
@@ -300,6 +258,9 @@ sub createGdsMedm
 	$mdlNamelc = lc($mdlName);
 	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_IPC_STATUS.adl";
         $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"RT NET STAT");
+	$xpos = 210; $ypos = 141; $width = 85; $height = 18;
+	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_FE_STATS.adl";
+        $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"FE PROC STAT");
 	# Add IPC Status Monitor
 	$xpos = 310; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "(a&1)";
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{red},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
