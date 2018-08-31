@@ -1023,14 +1023,14 @@ udelay(1000);
 			// }
 			/// - ---- Allow 1sec for data to be ready (should never take that long).
                     }while((*packedData == DUMMY_ADC_VAL) && (adcWait < MAX_ADC_WAIT));
-#ifdef TIME_MASTER
-		    pcieTimer->gps_time = timeSec;
-		    pcieTimer->cycle = cycleNum;
-#endif
 
 			/// - ---- Added ADC timing diagnostics to verify timing consistent and all rdy together.
 		    if(jj==0)
 			    adcRdTime[jj] = (cpuClock[CPU_TIME_ADC_WAIT] - cpuClock[CPU_TIME_CYCLE_START]) / CPURATE;
+#ifdef TIME_MASTER
+		    	pcieTimer->gps_time = timeSec;
+		    	pcieTimer->cycle = cycleNum;
+#endif
 		    else
 			    adcRdTime[jj] = adcWait;
 	
