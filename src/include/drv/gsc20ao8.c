@@ -132,7 +132,7 @@ int gsc20ao8Enable(CDS_HARDWARE *pHardware)
         volatile GSA_20BIT_DAC_REG *dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[ii]);
         dac20bitPtr->OUTPUT_CONFIG |= GSAO_20BIT_EXT_CLOCK_SRC;
         dac20bitPtr->BUF_OUTPUT_OPS |= GSAO_20BIT_ENABLE_CLOCK;
-        printk("Triggered 20-bit DAC\n");
+        // printk("Triggered 20-bit DAC\n");
       }
    }
 

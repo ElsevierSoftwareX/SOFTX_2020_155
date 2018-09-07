@@ -577,7 +577,7 @@ if((daqSlot >= DAQ_XFER_CYCLE_FMD) && (daqSlot < dataInfo.numEpicsFiltXfers))
       //  - -- Check for reconfig request at start of each second
       if((pInfo->reconfig == 1) && (daqBlockNum == 0))
       {
-	    printf("New daq config\n");
+	    // printf("New daq config\n");
 	    pInfo->reconfig = 0;
 	    // Configure EPICS data channels
 	    xferInfo.crcLength = daqConfig(&dataInfo,pInfo,pEpics);
@@ -827,7 +827,7 @@ int mydatatype;
     // if((status < 1) || (status > DCU_MAX_CHANNELS))
     if(status > DCU_MAX_CHANNELS)
     {   
-	printf("Invalid num daq chans = %d\n",status);
+	// printf("Invalid num daq chans = %d\n",status);
 	return(-1);
     }
 
@@ -859,7 +859,7 @@ int mydatatype;
 
     ii = (sizeof(CDS_EPICS_OUT) / 4);
     jj = dataInfo->numEpicsInts - ii;
-    printf("Have %d CDS epics integer and %d USR epics integer channels\n",ii,jj);
+    // printf("Have %d CDS epics integer and %d USR epics integer channels\n",ii,jj);
     ii *= 4;
     jj *= 4;
 
@@ -868,11 +868,11 @@ int mydatatype;
     /// - ---- If either doesn't end on 8 byte boundary, then a 4 byte hole will appear
     /// before the double type data in shared memory.
     if(ii % 8) {
-        printf("Have int mem hole after CDS %d %d \n",ii,jj);
+        // printf("Have int mem hole after CDS %d %d \n",ii,jj);
         dataInfo->epicsdblDataOffset += 4;
     }
     if(jj % 8) {
-        printf("Have int mem hole after user %d %d \n",ii,jj);
+        // printf("Have int mem hole after user %d %d \n",ii,jj);
         dataInfo->epicsdblDataOffset += 4;
     }
     if ((ii%8) &&(jj>0)) { 
@@ -883,7 +883,7 @@ int mydatatype;
         dataInfo->cpyIntSize[1] = jj;        
 	dataInfo->cpyepics2times = 1;
         // dataInfo->epicsdblDataOffset += 4;
-        printf("Have mem holes after CDS  %d %d \nNeed to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo->cpyIntSize[0],dataInfo->cpyIntSize[1]);
+        // printf("Have mem holes after CDS  %d %d \nNeed to cpy ints twice - size 1 = %d size 2 = %d \n",ii,jj,dataInfo->cpyIntSize[0],dataInfo->cpyIntSize[1]);
     }
 
     /// \> Set the pointer to start of EPICS double type data in shared memory. \n
@@ -891,13 +891,13 @@ int mydatatype;
     pEpicsDblData = (pEpicsIntData + epicsIntXferSize + dataInfo->epicsdblDataOffset);
 
     // Send EPICS data diags to dmesg
-    printf("DAQ EPICS INT DATA is at 0x%lx with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
-    printf("DAQ EPICS FLT DATA is at 0x%lx\n",(long)pEpicsDblData);
-    printf("DAQ EPICS: Int = %d  Flt = %d Filters = %d Total = %d Fast = %d\n",dataInfo->numEpicsInts,dataInfo->numEpicsFloats,dataInfo->numEpicsFilts, dataInfo->numEpicsTotal, dataInfo->numChans);
-    printf("DAQ EPICS: Number of Filter Module Xfers = %d last = %d\n",dataInfo->numEpicsFiltXfers,dataInfo->numEpicsFiltsLast);
+    // printf("DAQ EPICS INT DATA is at 0x%lx with size %d\n",(long)pEpicsIntData,epicsIntXferSize);
+    // printf("DAQ EPICS FLT DATA is at 0x%lx\n",(long)pEpicsDblData);
+    // printf("DAQ EPICS: Int = %d  Flt = %d Filters = %d Total = %d Fast = %d\n",dataInfo->numEpicsInts,dataInfo->numEpicsFloats,dataInfo->numEpicsFilts, dataInfo->numEpicsTotal, dataInfo->numChans);
+    // printf("DAQ EPICS: Number of Filter Module Xfers = %d last = %d\n",dataInfo->numEpicsFiltXfers,dataInfo->numEpicsFiltsLast);
     /// \> Initialize CRC length with EPICS data size.
     dataLength = 4 * dataInfo->numEpicsTotal;
-    printf("crc length epics = %d\n",dataLength);
+    // printf("crc length epics = %d\n",dataLength);
 
     /// \>  Get the DAQ configuration information for all fast DAQ channels and calc a crc checksum length
     for(ii=0;ii<dataInfo->numChans;ii++)
@@ -907,7 +907,7 @@ int mydatatype;
       dataInfo->tp[ii].dataRate = pInfo->tp[ii].dataRate;
       mydatatype = dataInfo->tp[ii].dataType;
       dataLength += DAQ_DATA_TYPE_SIZE(mydatatype) * dataInfo->tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS;
-      if(mydatatype == 5) printf("Found double %d\n",DAQ_DATA_TYPE_SIZE(mydatatype));
+      // if(mydatatype == 5) printf("Found double %d\n",DAQ_DATA_TYPE_SIZE(mydatatype));
     }
     /// \> Set DAQ bytes/sec global, which is output to EPICS by controller.c
     curDaqBlockSize = dataLength * DAQ_NUM_DATA_BLOCKS_PER_SECOND;
@@ -946,7 +946,7 @@ int mydatatype;
     pDxi->totalSize = pDxi->crcLength;
     pDxi->totalSizeNet = pDxi->crcLength;
 
-    printf (" xfer sizes = %d %d %d %d \n",sysRate,pDxi->xferSize1,pDxi->totalSize,pDxi->crcLength);
+    // printf (" xfer sizes = %d %d %d %d \n",sysRate,pDxi->xferSize1,pDxi->totalSize,pDxi->crcLength);
     
 #if 0
     /// \> Maintain 8 byte data boundaries for writing data, particularly important
@@ -968,7 +968,7 @@ for(ii=0;ii<dataInfo->numChans;ii++)
     {
       if ((dataInfo->tp[ii].dataRate / DAQ_NUM_DATA_BLOCKS) > sysRate) {
         /* Channel data rate is greater than system rate */
-        printf("Channels %d has bad data rate %d\n", ii, dataInfo->tp[ii].dataRate);
+        // printf("Channels %d has bad data rate %d\n", ii, dataInfo->tp[ii].dataRate);
         return(-1);
       } else {
       /// - ---- Load decimation factor
@@ -1029,7 +1029,7 @@ for(ii=0;ii<dataInfo->numChans;ii++)
       }
       else
       {
-        printf("Invalid chan num found %d = %d\n",ii,dataInfo->tp[ii].tpnum);
+        // printf("Invalid chan num found %d = %d\n",ii,dataInfo->tp[ii].tpnum);
         return(-1);
       }
       // printf("Table %d Offset = %d  Type = %d\n",ii,localTable[ii].offset,dataInfo->tp[ii].dataType);

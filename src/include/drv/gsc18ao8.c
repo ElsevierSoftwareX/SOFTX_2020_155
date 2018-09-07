@@ -113,7 +113,7 @@ int gsc18ao8Enable(CDS_HARDWARE *pHardware)
         volatile GSA_18BIT_DAC_REG *dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[ii]);
         dac18bitPtr->OUTPUT_CONFIG |= GSAO_18BIT_EXT_CLOCK_SRC;
         dac18bitPtr->BUF_OUTPUT_OPS |= GSAO_18BIT_ENABLE_CLOCK;
-        printk("Triggered 18-bit DAC\n");
+        // printk("Triggered 18-bit DAC\n");
       }
    }
 
