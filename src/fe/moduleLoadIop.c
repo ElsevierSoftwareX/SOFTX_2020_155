@@ -25,7 +25,7 @@ extern void msleep(unsigned int);
 #include "moduleLoadCommon.c"
 
 /// Startup function for initialization of kernel module.
-int init_module (void)
+int rt_iop_init (void)
 {
  	int status;
 	int ii,jj,kk;		/// @param ii,jj,kk default loop counters
@@ -45,7 +45,7 @@ int init_module (void)
 
 #ifndef NO_CPU_SHUTDOWN
 	// See if our CPU core is free
-        if (is_cpu_taken_by_rcg_model(CPUID)) {
+    if (is_cpu_taken_by_rcg_model(CPUID)) {
 		printk(KERN_ALERT "Error: CPU %d already taken\n", CPUID);
 		return -1;
 	}
@@ -63,34 +63,39 @@ int init_module (void)
 
 
 // Allocate EPICS memory area
-        ret =  mbuf_allocate_area(SYSTEM_NAME_STRING_LOWER, 64*1024*1024, 0);
-        if (ret < 0) {
-                printf("mbuf_allocate_area() failed; ret = %d\n", ret);
-                return -1;
-        }
-        _epics_shm = (unsigned char *)(kmalloc_area[ret]);
-// Allocate IPC memory area
-        ret =  mbuf_allocate_area("ipc", 4*1024*1024, 0);
-        if (ret < 0) {
-                printf("mbuf_allocate_area(ipc) failed; ret = %d\n", ret);
-                return -1;
-        }
-        _ipc_shm = (unsigned char *)(kmalloc_area[ret]);
+	ret =  mbuf_allocate_area(SYSTEM_NAME_STRING_LOWER, 64*1024*1024, 0);
+    if (ret < 0) {
+		printk("mbuf_allocate_area() failed; ret = %d\n", ret);
+        return -1;
+    }
+    _epics_shm = (unsigned char *)(kmalloc_area[ret]);
+	// Set pointer to EPICS area
+    pLocalEpics = (CDS_EPICS *)&((RFM_FE_COMMS *)_epics_shm)->epicsSpace;
+    pLocalEpics->epicsOutput.fe_status = 0;
+
+	// Allocate IPC memory area
+	ret =  mbuf_allocate_area("ipc", 4*1024*1024, 0);
+    if (ret < 0) {
+		printk("mbuf_allocate_area(ipc) failed; ret = %d\n", ret);
+        return -1;
+	}
+    _ipc_shm = (unsigned char *)(kmalloc_area[ret]);
 
 // Assign pointer to IOP/USER app comms space
   	ioMemData = (IO_MEM_DATA *)(_ipc_shm+ 0x4000);
 
 
 // Allocate DAQ memory area
-        sprintf(fname, "%s_daq", SYSTEM_NAME_STRING_LOWER);
-        ret =  mbuf_allocate_area(fname, 64*1024*1024, 0);
-        if (ret < 0) {
-                printf("mbuf_allocate_area() failed; ret = %d\n", ret);
-                return -1;
-        }
-        _daq_shm = (unsigned char *)(kmalloc_area[ret]);
+	sprintf(fname, "%s_daq", SYSTEM_NAME_STRING_LOWER);
+    ret =  mbuf_allocate_area(fname, 64*1024*1024, 0);
+    if (ret < 0) {
+		printk("mbuf_allocate_area() failed; ret = %d\n", ret);
+        return -1;
+	}
+    _daq_shm = (unsigned char *)(kmalloc_area[ret]);
  	daqPtr = (struct rmIpcStr *) _daq_shm;
 
+    pLocalEpics->epicsOutput.fe_status = 1;
 	// Find and initialize all PCI I/O modules **************************************************
 	// Following I/O card info is from feCode
 	cards = sizeof(cards_used)/sizeof(cards_used[0]);
@@ -105,7 +110,7 @@ int init_module (void)
 	status = mapPciModules(&cdsPciModules);
 	if(status < cards)
 	{
-		printf(" ERROR **** Did not find correct number of cards! Expected %d and Found %d\n",cards,status);
+		printk(" ERROR **** Did not find correct number of cards! Expected %d and Found %d\n",cards,status);
 		cardCountErr = 1;
 	}
 
@@ -117,13 +122,13 @@ int init_module (void)
 	// kk will act as ioMem location counter for mapping modules
 	kk = cdsPciModules.adcCount;
 	for(ii=0;ii<cdsPciModules.adcCount;ii++)
-        {
+	{
 		// MASTER maps ADC modules first in ipc shm for SLAVES
 		ioMemData->model[ii] = cdsPciModules.adcType[ii];
 		ioMemData->ipc[ii] = ii;	// ioData memory buffer location for SLAVE to use
-        }
+    }
 	for(ii=0;ii<cdsPciModules.dacCount;ii++)
-        {
+    {
 		// Pass DAC info to SLAVE processes
 		ioMemData->model[kk] = cdsPciModules.dacType[ii];
 		ioMemData->ipc[kk] = kk;
@@ -186,11 +191,10 @@ int init_module (void)
 	if (cdsPciModules.adcCount == 0) run_on_timer = 1;
 
 	// Initialize buffer for daqLib.c code
-	// printf("Initializing space for daqLib buffers\n");
 	daqBuffer = (long)&daqArea[0];
  
-// Set pointer to EPICS area
-        pLocalEpics = (CDS_EPICS *)&((RFM_FE_COMMS *)_epics_shm)->epicsSpace;
+    pLocalEpics->epicsOutput.fe_status = 2;
+printk("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRestore);
 	// Ensure EPICS running else exit
 	for (cnt = 0;  cnt < 10 && pLocalEpics->epicsInput.burtRestore == 0; cnt++) {
         	msleep(1000);
@@ -202,13 +206,14 @@ int init_module (void)
 #endif
 		return -1;
 	}
+	printk("BURT Restore Complete\n");
 
         pLocalEpics->epicsInput.vmeReset = 0;
 
 #ifdef NO_CPU_SHUTDOWN
         sthread = kthread_create(fe_start, 0, "fe_start/%d", CPUID);
         if (IS_ERR(sthread)){
-                printf("Failed to kthread_create()\n");
+                printk("Failed to kthread_create()\n");
                 return -1;
         }
         kthread_bind(sthread, CPUID);
@@ -217,19 +222,18 @@ int init_module (void)
 
 
 #ifndef NO_CPU_SHUTDOWN
+    pLocalEpics->epicsOutput.fe_status = 3;
+	printk("Locking CPU core %d\n", CPUID);
 	// The code runs on the disabled CPU
-        set_fe_code_idle(fe_start, CPUID);
-        msleep(100);
-
+    set_fe_code_idle(fe_start, CPUID);
+    msleep(100);
 	cpu_down(CPUID);
 
 #endif
         return 0;
 }
 
-void cleanup_module (void) {
-	int i;
-	int ret;
+void rt_iop_cleanup(void) {
 	extern int __cpuinit cpu_up(unsigned int cpu);
 
 #ifndef NO_CPU_SHUTDOWN
@@ -237,9 +241,10 @@ void cleanup_module (void) {
         set_fe_code_idle(0, CPUID);
 #endif
 
-	printk("Setting stop_working_threads to 1\n");
+	// printk("Setting stop_working_threads to 1\n");
 	// Stop the code and wait
 #ifdef NO_CPU_SHUTDOWN
+	int ret;
 	ret = kthread_stop(sthread);
 #endif
         stop_working_threads = 1;
@@ -257,12 +262,15 @@ void cleanup_module (void) {
         msleep(1000);
 	// Bring the CPU back up
         cpu_up(CPUID);
-        //msleep(1000);
+        msleep(1000);
 	printk("Brought the CPU back up\n");
 #endif
 	printk("Just before returning from cleanup_module for " SYSTEM_NAME_STRING_LOWER "\n");
 
 }
+
+module_init(rt_iop_init);
+module_exit(rt_iop_cleanup);
 
 MODULE_DESCRIPTION("Control system");
 MODULE_AUTHOR("LIGO");

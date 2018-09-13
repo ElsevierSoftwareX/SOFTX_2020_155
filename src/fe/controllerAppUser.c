@@ -41,6 +41,7 @@
 #include "fm10Gen.h"		// CDS filter module defs and C code
 #include "feComms.h"		// Lvea control RFM network defs.
 #include "daqmap.h"		// DAQ network layout
+#include "cds_types.h"
 #include "controller.h"
 
 #ifndef NO_DAQ
@@ -184,14 +185,11 @@ int fe_start()
   static int clock1Min = 0;		///  @param clockMin Minute counter (Not Used??)
   struct timespec tp;
   static struct timespec cpuClock[CPU_TIMER_CNT];	///  @param cpuClock[] Code timing diag variables
+int dacOF[MAX_DAC_MODULES]; 
 
-  int adcData[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];	/// @param adcData[][]  ADC raw data
-  int adcChanErr[MAX_ADC_MODULES];
-  int adcWait = 0;
-  int adcOF[MAX_ADC_MODULES];		/// @param adcOF[]  ADC overrange counters
+  adcInfo_t adcInfo;
+  dacInfo_t dacInfo;
 
-  // int dacChanErr[MAX_DAC_MODULES];
-  int dacOF[MAX_DAC_MODULES];		/// @param dacOF[]  DAC overrange counters
   static int dacWriteEnable = 0;	/// @param dacWriteEnable  No DAC outputs until >4 times through code
   					///< Code runs longer for first few cycles on startup as it settles in,
 					///< so this helps prevent long cycles during that time.
@@ -286,20 +284,6 @@ int fe_start()
   pLocalEpics->epicsInput.dacDuoSet_mask = 0;
   memset(proc_futures, 0, sizeof(proc_futures));
 
-
-/// \> Wait for BURT restore.\n
-/// - ---- Code will exit if BURT flag not set by EPICS sequencer.
-  // Do not proceed until EPICS has had a BURT restore *******************************
-  printf("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRestore);
-  cnt = 0;
-  do{
-	usleep(80000);
-  	printf("Waiting for EPICS BURT %d\n", cnt++);
-  }while(!pLocalEpics->epicsInput.burtRestore);
-
-  printf("BURT Restore Complete\n");
-
-// BURT has completed *******************************************************************
 
 /// < Read in all Filter Module EPICS coeff settings
     for(ii=0;ii<MAX_MODULES;ii++)
@@ -512,11 +496,11 @@ usleep(1000);
                         do{
                                 // usleep(1);
 		    		clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_ADC_WAIT]);
-				adcWait = BILLION * (cpuClock[CPU_TIME_ADC_WAIT].tv_sec - cpuClock[CPU_TIME_RDY_ADC].tv_sec) + 
+				adcInfo.adcWait = BILLION * (cpuClock[CPU_TIME_ADC_WAIT].tv_sec - cpuClock[CPU_TIME_RDY_ADC].tv_sec) + 
 	    	               			     cpuClock[CPU_TIME_ADC_WAIT].tv_nsec - cpuClock[CPU_TIME_RDY_ADC].tv_nsec;
-				adcWait /= 1000;
+				adcInfo.adcWait /= 1000;
                                 // kk++;
-                        }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (adcWait < MAX_ADC_WAIT_SLAVE));
+                        }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (adcInfo.adcWait < MAX_ADC_WAIT_SLAVE));
 			timeSec = ioMemData->iodata[mm][ioMemCntr].timeSec;
 			if (cycle_gps_time == 0) {
 				startGpsTime = timeSec;
@@ -525,7 +509,7 @@ usleep(1000);
 			cycle_gps_time = timeSec;
 
 			/// - --------- If data not ready in time, set error, release DAC channel reservation and exit the code.
-                        if(adcWait >= MAX_ADC_WAIT_SLAVE)
+                        if(adcInfo.adcWait >= MAX_ADC_WAIT_SLAVE)
                         {
                                 printf ("ADC TIMEOUT %d %d %d %d\n",mm,ioMemData->iodata[mm][ioMemCntr].cycle, ioMemCntr,ioClock);
 	  			pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
@@ -536,23 +520,23 @@ usleep(1000);
                         for(ii=0;ii<MAX_ADC_CHN_PER_MOD;ii++)
                         {
 				/// - ---- Read data from shared memory.
-                                adcData[jj][ii] = ioMemData->iodata[mm][ioMemCntr].data[ii];
+                                adcInfo.adcData[jj][ii] = ioMemData->iodata[mm][ioMemCntr].data[ii];
 #ifdef FLIP_SIGNALS
-                                adcData[jj][ii] *= -1;
+                                adcInfo.adcData[jj][ii] *= -1;
 #endif
-                                dWord[jj][ii] = adcData[jj][ii];
+                                dWord[jj][ii] = adcInfo.adcData[jj][ii];
 #ifdef OVERSAMPLE
 				/// - ---- Downsample ADC data from 64K to rate of user application
 				if (dWordUsed[jj][ii]) {
 					dWord[jj][ii] = iir_filter_biquad(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
 				}
 			/// - ---- Check for ADC data over/under range
-			if((adcData[jj][ii] > limit) || (adcData[jj][ii] < -limit))
+			if((adcInfo.adcData[jj][ii] > limit) || (adcInfo.adcData[jj][ii] < -limit))
 			  {
-				overflowAdc[jj][ii] ++;
+				adcInfo.overflowAdc[jj][ii] ++;
 				pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] ++;
 				overflowAcc ++;
-				adcOF[jj] = 1;
+				adcInfo.adcOF[jj] = 1;
 				odcStateWord |= ODC_ADC_OVF;
 			  }
 #endif
@@ -651,7 +635,7 @@ usleep(1000);
                         /// - --------- If overflow, clip at DAC limits and report errors
                         if(dac_out > limit || dac_out < -limit)
                         {
-                                overflowDac[jj][ii] ++;
+                                dacInfo.overflowDac[jj][ii] ++;
 				pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] ++;
                                 overflowAcc ++;
                                 dacOF[jj] = 1;
@@ -662,7 +646,7 @@ usleep(1000);
 			/// - ---- If DAQKILL tripped, set output to zero.
                         if(!iopDacEnable) dac_out = 0;
 			/// - ---- Load last values to EPICS channels for monitoring on GDS_TP screen.
-                        dacOutEpics[jj][ii] = dac_out;
+                        dacInfo.dacOutEpics[jj][ii] = dac_out;
 
                         /// - ---- Load DAC testpoints
                         floatDacOut[16*jj + ii] = dac_out;
@@ -796,8 +780,8 @@ usleep(1000);
                 if (pLocalEpics->epicsInput.overflowReset) {
                    for (ii = 0; ii < 16; ii++) {
                       for (jj = 0; jj < cdsPciModules.adcCount; jj++) {
-                         overflowAdc[jj][ii] = 0;
-                         overflowAdc[jj][ii + 16] = 0;
+                         adcInfo.overflowAdc[jj][ii] = 0;
+                         adcInfo.overflowAdc[jj][ii + 16] = 0;
 			pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
 			pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii + 16] = 0;
                       }
@@ -828,7 +812,7 @@ usleep(1000);
 	      {
 	    	for(ii=0;ii<MAX_DAC_CHN_PER_MOD;ii++)
 	    	{
-			pLocalEpics->epicsOutput.dacValue[jj][ii] = dacOutEpics[jj][ii];
+			pLocalEpics->epicsOutput.dacValue[jj][ii] = dacInfo.dacOutEpics[jj][ii];
 		}
 	      }
 	}
@@ -840,29 +824,29 @@ usleep(1000);
 	  for(jj=0;jj<cdsPciModules.adcCount;jj++)
 	  {
 	    // SET/CLR Channel Hopping Error
-	    if(adcChanErr[jj]) 
+	    if(adcInfo.adcChanErr[jj]) 
 	    {
 	    	pLocalEpics->epicsOutput.statAdc[jj] &= ~(2);
 		feStatus |= FE_ERROR_ADC;;
 	    }
  	    else pLocalEpics->epicsOutput.statAdc[jj] |= 2;
-	    adcChanErr[jj] = 0;
+	    adcInfo.adcChanErr[jj] = 0;
 	    // SET/CLR Overflow Error
-	    if(adcOF[jj]) 
+	    if(adcInfo.adcOF[jj]) 
 	    {
 	    	pLocalEpics->epicsOutput.statAdc[jj] &= ~(4);
 		feStatus |= FE_ERROR_OVERFLOW;;
 	    }
  	    else pLocalEpics->epicsOutput.statAdc[jj] |= 4;
-	    adcOF[jj] = 0;
+	    adcInfo.adcOF[jj] = 0;
 	    for(ii=0;ii<32;ii++)
 	    {
 
                 if (pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] > OVERFLOW_CNTR_LIMIT) {
 		   pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
                 }
-		pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
-		overflowAdc[jj][ii] = 0;
+		pLocalEpics->epicsOutput.overflowAdc[jj][ii] = adcInfo.overflowAdc[jj][ii];
+		adcInfo.overflowAdc[jj][ii] = 0;
 
 	    }
 	  }
@@ -887,8 +871,8 @@ usleep(1000);
                 if (pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] > OVERFLOW_CNTR_LIMIT) {
 		   pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] = 0;
                 }
-		pLocalEpics->epicsOutput.overflowDac[jj][ii] = overflowDac[jj][ii];
-		overflowDac[jj][ii] = 0;
+		pLocalEpics->epicsOutput.overflowDac[jj][ii] = dacInfo.overflowDac[jj][ii];
+		dacInfo.overflowDac[jj][ii] = 0;
 
 	    }
 	  }

@@ -22,7 +22,7 @@ struct task_struct *sthread;
 #include "moduleLoadCommon.c"
 
 /// Startup function for initialization of kernel module.
-int init_module (void)
+int rt_fe_init (void)
 {
  	int status;
 	int ii,jj,kk;		/// @param ii,jj,kk default loop counters
@@ -61,18 +61,17 @@ int init_module (void)
 
 	jj = 0;
 
-
 // Allocate EPICS shmem area
         ret =  mbuf_allocate_area(SYSTEM_NAME_STRING_LOWER, 64*1024*1024, 0);
         if (ret < 0) {
-                printf("mbuf_allocate_area() failed; ret = %d\n", ret);
+                printk("mbuf_allocate_area() failed; ret = %d\n", ret);
                 return -1;
         }
         _epics_shm = (unsigned char *)(kmalloc_area[ret]);
 // Allocate IPC shmem area
         ret =  mbuf_allocate_area("ipc", 4*1024*1024, 0);
         if (ret < 0) {
-                printf("mbuf_allocate_area(ipc) failed; ret = %d\n", ret);
+                printk("mbuf_allocate_area(ipc) failed; ret = %d\n", ret);
                 return -1;
         }
         _ipc_shm = (unsigned char *)(kmalloc_area[ret]);
@@ -84,7 +83,7 @@ int init_module (void)
         sprintf(fname, "%s_daq", SYSTEM_NAME_STRING_LOWER);
         ret =  mbuf_allocate_area(fname, 64*1024*1024, 0);
         if (ret < 0) {
-                printf("mbuf_allocate_area() failed; ret = %d\n", ret);
+                printk("mbuf_allocate_area() failed; ret = %d\n", ret);
                 return -1;
         }
         _daq_shm = (unsigned char *)(kmalloc_area[ret]);
@@ -248,7 +247,7 @@ int init_module (void)
 	// If no ADC cards were found, then SLAVE cannot run
 	if(!cdsPciModules.adcCount)
 	{
-		printf("No ADC cards found - exiting\n");
+		printk("No ADC cards found - exiting\n");
 		return -1;
 	}
 	// This did not quite work for some reason
@@ -256,7 +255,7 @@ int init_module (void)
 	//cdsPciModules.dacCount = ioMemData->dacCount;
 	if(status < cards)
 	{
-		printf(" ERROR **** Did not find correct number of cards! Expected %d and Found %d\n",cards,status);
+		printk(" ERROR **** Did not find correct number of cards! Expected %d and Found %d\n",cards,status);
 		cardCountErr = 1;
 	}
 
@@ -293,12 +292,14 @@ int init_module (void)
 
 	// Set Pointer to EPICS data
         pLocalEpics = (CDS_EPICS *)&((RFM_FE_COMMS *)_epics_shm)->epicsSpace;
+		pLocalEpics->epicsOutput.fe_status = WAIT_BURT;
 	// Ensure EPICS is running
 	for (cnt = 0;  cnt < 10 && pLocalEpics->epicsInput.burtRestore == 0; cnt++) {
         	msleep(1000);
 	}
 	// If EPICS not running, EXIT
 	if (cnt == 10) {
+		pLocalEpics->epicsOutput.fe_status = BURT_RESTORE_ERROR;
 		// Cleanup
 		return -1;
 	}
@@ -308,13 +309,14 @@ int init_module (void)
 #ifdef NO_CPU_SHUTDOWN
         sthread = kthread_create(fe_start, 0, "fe_start/%d", CPUID);
         if (IS_ERR(sthread)){
-                printf("Failed to kthread_create()\n");
+                printk("Failed to kthread_create()\n");
                 return -1;
         }
         kthread_bind(sthread, CPUID);
         wake_up_process(sthread);
 #endif
 
+		pLocalEpics->epicsOutput.fe_status = LOCKING_CORE;
 
 #ifndef NO_CPU_SHUTDOWN
         set_fe_code_idle(fe_start, CPUID);
@@ -327,7 +329,7 @@ int init_module (void)
         return 0;
 }
 
-void cleanup_module (void) {
+void rt_fe_cleanup (void) {
 	int i;
 	int ret;
 	extern int __cpuinit cpu_up(unsigned int cpu);
@@ -361,6 +363,8 @@ void cleanup_module (void) {
 
 }
 
+module_init(rt_fe_init);
+module_exit(rt_fe_cleanup);
 MODULE_DESCRIPTION("Control system");
 MODULE_AUTHOR("LIGO");
 MODULE_LICENSE("Dual BSD/GPL");

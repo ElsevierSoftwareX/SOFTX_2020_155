@@ -337,73 +337,7 @@ int main (int argc, char **argv)
 
 	// Print out all the I/O information
 
-#if 0
-        printf("***************************************************************************\n");
-	printf("%d ADC cards found\n",cdsPciModules.adcCount);
-	for(ii=0;ii<cdsPciModules.adcCount;ii++)
-        {
-                if(cdsPciModules.adcType[ii] == GSC_18AISS6C)
-                {
-                        printf("\tADC %d is a GSC_18AISS6C module\n",ii);
-                        printf("\t\tChannels = 6 \n");
-                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.adcConfig[ii] & 0xfff));
-                }
-                if(cdsPciModules.adcType[ii] == GSC_16AI64SSA)
-                {
-                        printf("\tADC %d is a GSC_16AI64SSA module\n",ii);
-                        if((cdsPciModules.adcConfig[ii] & 0x10000) > 0) jj = 32;
-                        else jj = 64;
-                        printf("\t\tChannels = %d \n",jj);
-                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.adcConfig[ii] & 0xfff));
-                }
-        }
-        printf("***************************************************************************\n");
-	printf("%d DAC cards found\n",cdsPciModules.dacCount);
-	for(ii=0;ii<cdsPciModules.dacCount;ii++)
-        {
-                if(cdsPciModules.dacType[ii] == GSC_18AO8)
-		{
-                        printf("\tDAC %d is a GSC_18AO8 module\n",ii);
-		}
-                if(cdsPciModules.dacType[ii] == GSC_16AO16)
-                {
-                        printf("\tDAC %d is a GSC_16AO16 module\n",ii);
-                        if((cdsPciModules.dacConfig[ii] & 0x10000) == 0x10000) jj = 8;
-                        if((cdsPciModules.dacConfig[ii] & 0x20000) == 0x20000) jj = 12;
-                        if((cdsPciModules.dacConfig[ii] & 0x30000) == 0x30000) jj = 16;
-                        printf("\t\tChannels = %d \n",jj);
-                        if((cdsPciModules.dacConfig[ii] & 0xC0000) == 0x0000)
-			{
-                        	printf("\t\tFilters = None\n");
-			}
-                        if((cdsPciModules.dacConfig[ii] & 0xC0000) == 0x40000)
-			{
-                        	printf("\t\tFilters = 10kHz\n");
-			}
-                        if((cdsPciModules.dacConfig[ii] & 0xC0000) == 0x80000)
-			{
-                        	printf("\t\tFilters = 100kHz\n");
-			}
-                        if((cdsPciModules.dacConfig[ii] & 0x100000) == 0x100000)
-			{
-                        	printf("\t\tOutput Type = Differential\n");
-			}
-                        printf("\t\tFirmware Rev = %d \n\n",(cdsPciModules.dacConfig[ii] & 0xfff));
-                }
-	}
-        printf("***************************************************************************\n");
-	printf("%d DIO cards found\n",cdsPciModules.dioCount);
-        printf("***************************************************************************\n");
-	printf("%d IIRO-8 Isolated DIO cards found\n",cdsPciModules.iiroDioCount);
-        printf("***************************************************************************\n");
-	printf("%d IIRO-16 Isolated DIO cards found\n",cdsPciModules.iiroDio1Count);
-        printf("***************************************************************************\n");
-	printf("%d Contec 32ch PCIe DO cards found\n",cdsPciModules.cDo32lCount);
-	printf("%d Contec PCIe DIO1616 cards found\n",cdsPciModules.cDio1616lCount);
-	printf("%d Contec PCIe DIO6464 cards found\n",cdsPciModules.cDio6464lCount);
-	printf("%d DO cards found\n",cdsPciModules.doCount);
-        printf("***************************************************************************\n");
-#endif
+
 // Following section maps Reflected Memory, both VMIC hardware style and Dolphin PCIe network style.
 // Slave units will perform I/O transactions with RFM directly ie MASTER does not do RFM I/O.
 // Master unit only maps the RFM I/O space and passes pointers to SLAVES.

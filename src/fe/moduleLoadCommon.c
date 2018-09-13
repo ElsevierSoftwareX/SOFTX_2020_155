@@ -1,8 +1,9 @@
 ///     @file moduleLoadCommon.c
 ///     @brief File contains common routines for moduleLoadIop.c and moduleLoadApp.c.`
 
-int print_io_info(CDS_HARDWARE *cdsp) {
+void print_io_info(CDS_HARDWARE *cdsp) {
   int ii,jj,kk;
+  jj = 0;
 	printf("THIS IS A TEST \n");
 #ifndef USER_SPACE
 	printf("startup time is %ld\n", current_time());
