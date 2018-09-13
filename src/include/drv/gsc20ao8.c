@@ -57,18 +57,19 @@ int gsc20ao8Init(CDS_HARDWARE *pHardware, struct pci_dev *dacdev)
           do{
 		udelay(1000);
 		timer -= 1;
-          }while(dac20bitPtr->BCR & GSAO_20BIT_RESET != 0 &&
-	  	 timer > 0 &&
-		 dac20bitPtr->PRIMARY_STATUS == 1);
-	  printk("DAC PSR after init = 0x%x and timer = %d\n",dac20bitPtr->PRIMARY_STATUS,timer);
+          }while((dac20bitPtr->BCR & GSAO_20BIT_RESET) != 0 &&
+	  	 	timer > 0 &&
+		 	dac20bitPtr->PRIMARY_STATUS == 1);
+
+	  // printk("DAC PSR after init = 0x%x and timer = %d\n",dac20bitPtr->PRIMARY_STATUS,timer);
 
           /// Enable 2s complement by clearing offset binary bit
           dac20bitPtr->BCR &= ~GSAO_20BIT_OFFSET_BINARY;
 	  // Set simultaneous outputs
           dac20bitPtr->BCR |= GSAO_20BIT_SIMULT_OUT;
 	  // Send some info to dmesg
-          printk("DAC BCR after init = 0x%x\n",dac20bitPtr->BCR);
-          printk("DAC OUTPUT CONFIG = 0x%x\n",dac20bitPtr->OUTPUT_CONFIG);
+          // printk("DAC BCR after init = 0x%x\n",dac20bitPtr->BCR);
+          // printk("DAC OUTPUT CONFIG = 0x%x\n",dac20bitPtr->OUTPUT_CONFIG);
 
           /// Enable 10 volt output range
 	  dac20bitPtr->OUTPUT_CONFIG |= GSAO_20BIT_10VOLT_RANGE;

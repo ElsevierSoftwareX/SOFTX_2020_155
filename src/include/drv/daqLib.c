@@ -407,13 +407,13 @@ if(daqSlot == DAQ_XFER_CYCLE_INT)
 
       if(dataInfo.cpyepics2times)
 	{
-	      memcpy(pWriteBuffer,pEpicsIntData,dataInfo.cpyIntSize[0]);
-	      pEpicsInt = pWriteBuffer;
+	      memcpy((void *)pWriteBuffer,pEpicsIntData,dataInfo.cpyIntSize[0]);
+	      pEpicsInt = (char *)pWriteBuffer;
 	      pEpicsInt += dataInfo.cpyIntSize[0];
 	      pEpicsInt1 = pEpicsIntData + dataInfo.cpyIntSize[0] + 4;
 	      memcpy(pEpicsInt,pEpicsInt1,dataInfo.cpyIntSize[1]);
 	} else {
-	      memcpy(pWriteBuffer,pEpicsIntData,dataInfo.cpyIntSize[0]);
+	      memcpy((void *)pWriteBuffer,pEpicsIntData,dataInfo.cpyIntSize[0]);
 	}
 
 }

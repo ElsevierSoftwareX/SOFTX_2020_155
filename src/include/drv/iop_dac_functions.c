@@ -187,3 +187,90 @@ inline int iop_dac_write()
 	return status;
 
 }
+
+
+inline int check_dac_buffers (int cycleNum)
+{
+	volatile GSA_18BIT_DAC_REG *dac18bitPtr;
+	volatile GSA_20BIT_DAC_REG *dac20bitPtr;
+	int out_buf_size = 0;
+	int jj = 0;
+	int status = 0;
+
+		jj = cycleNum - HKP_DAC_FIFO_CHK;
+		if(cdsPciModules.dacType[jj] == GSC_18AO8)
+		{
+			dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
+			out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
+			dacOutBufSize[jj] = out_buf_size;
+			if(!dacTimingError) {
+				if((out_buf_size < 8) || (out_buf_size > 24))
+				{
+				    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
+				    if(dacTimingErrorPending[jj]) dacTimingError = 1;
+				    dacTimingErrorPending[jj] = 1;
+				} else {
+				    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
+				    dacTimingErrorPending[jj] = 0;
+				}
+			}
+			if(out_buf_size < 4) {
+			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_EMPTY;
+			} else { 
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_EMPTY);
+			}
+			if(out_buf_size > 32) {
+			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_FULL;
+			} else { 
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_FULL);
+			}
+
+		}
+		if(cdsPciModules.dacType[jj] == GSC_20AO8)
+        {
+            dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
+            out_buf_size = dac20bitPtr->OUT_BUF_SIZE;
+            dacOutBufSize[jj] = out_buf_size;
+            if((out_buf_size > 24))
+            {
+                pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
+                if(dacTimingErrorPending[jj]) dacTimingError = 1;
+                dacTimingErrorPending[jj] = 1;
+            } else {
+                pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
+                dacTimingErrorPending[jj] = 0;
+            }
+		}
+		if(cdsPciModules.dacType[jj] == GSC_16AO16)
+		{
+			status = gsc16ao16CheckDacBuffer(jj);
+			dacOutBufSize[jj] = status;
+			if(!dacTimingError) {
+				if(status != 2)
+				{
+				    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
+				    if(dacTimingErrorPending[jj]) dacTimingError = 1;
+				    dacTimingErrorPending[jj] = 1;
+				} else {
+				    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_BIT;
+				    dacTimingErrorPending[jj] = 0;
+				}
+			}
+			if(status & 1) {
+			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_EMPTY;
+			} else { 
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_EMPTY);
+			}
+			if(status & 8) {
+			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_FULL;
+			} else { 
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_FULL);
+			}
+			if(status & 4) {
+			    pLocalEpics->epicsOutput.statDac[jj] |= DAC_FIFO_HI_QTR;
+			} else { 
+			    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_HI_QTR);
+			}
+		}
+		return 0;
+}
