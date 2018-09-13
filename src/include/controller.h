@@ -37,6 +37,22 @@
 #define CPU_TIME_ADC_WAIT	9
 
 
+// fe_state defs
+#define DAC_INIT_ERROR		-6
+#define BURT_RESTORE_ERROR	-5
+#define CHAN_HOP_ERROR		-4
+#define RUN_ON_TIMER		-3
+#define DAQ_INIT_ERROR		-2
+#define FILT_INIT_ERROR		-1
+#define LOADING				0
+#define FIND_MODULES		1
+#define WAIT_BURT			2
+#define LOCKING_CORE		3
+#define INIT_ADC_MODS		4
+#define INIT_DAC_MODS		5
+#define INIT_SYNC			6
+#define NORMAL_RUN			7
+
 // Define standard values based on code rep rate **************************************
 #ifdef SERVO256K
         #define CYCLE_PER_MINUTE        (2*7864320)
@@ -243,11 +259,6 @@ VME_COEF *pCoeff[NUM_SYSTEMS];                                  // Ptr to SFM co
 double dWord[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];             // ADC read values
 /// List of ADC channels used by this app. Used to determine if downsampling required.
 unsigned int dWordUsed[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];   // ADC chans used by app code
-/// Arrary of ADC overflow counters.
-int overflowAdc[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];          // ADC overflow diagnostics
-int adcRdTime[MAX_ADC_MODULES];
-int adcRdTimeMax[MAX_ADC_MODULES];
-int adcRdTimeErr[MAX_ADC_MODULES];
 
 // DAC Variables
 /// Enables writing of DAC values; Used with DACKILL parts..
@@ -352,19 +363,6 @@ double dDacHistory[(MAX_DAC_MODULES * 16)][MAX_HISTRY];
 #define OVERSAMPLE_TIMES 1
 
 #endif
-
-typedef struct duotone_diag_t {
-  float adc[IOP_IO_RATE];            // Duotone timing diagnostic variables
-  float dac[IOP_IO_RATE];
-  float timeDac;
-  float timeAdc;
-  float totalAdc;
-  float meanAdc;
-  float totalDac;
-  float meanDac;
-  int dacDuoEnable;
-}duotone_diag_t;
-
 // /proc epics channel interface
 struct proc_epics {
 	char *name;
@@ -387,4 +385,5 @@ struct proc_futures {
 	double val;		// New value
 	unsigned int idx;	// index (positive for matrix only)
 } proc_futures[MAX_PROC_FUTURES];
+
 
