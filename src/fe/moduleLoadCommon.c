@@ -9,10 +9,10 @@ void print_io_info(CDS_HARDWARE *cdsp) {
 	printf("startup time is %ld\n", current_time());
 	printf("cpu clock %u\n",cpu_khz);
 #endif
-	printf("EPICSM at 0x%x\n", _epics_shm);
-	printf("IPC    at 0x%x\n",_ipc_shm);
-	printf("IOMEM  at 0x%x size 0x%x\n",(_ipc_shm + 0x4000),sizeof(IO_MEM_DATA));
-	printf("DAQSM at 0x%x\n",_daq_shm);
+	printf("EPICSM at 0x%lx\n", (unsigned long)_epics_shm);
+	printf("IPC    at 0x%lx\n",(unsigned long)_ipc_shm);
+	printf("IOMEM  at 0x%lx size 0x%lx\n",((unsigned long)_ipc_shm + 0x4000),sizeof(IO_MEM_DATA));
+	printf("DAQSM at 0x%lx\n",(unsigned long)_daq_shm);
 	printf("configured to use %d cards\n", cdsp->cards);
 	kk = 0;
 	printf("***************************************************************************\n");
