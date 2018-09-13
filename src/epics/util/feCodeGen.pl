@@ -1350,6 +1350,9 @@ for($ii=0;$ii<32;$ii++)
 }
 print OUTH "\tint startgpstime;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_START_GPS epicsOutput.startgpstime int ao 0\n";
+print OUTH "\tint fe_status;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_FE_STATUS epicsOutput.fe_status int ao 0\n";
+
 print EPICS "DUMMY FEC\_$dcuId\_UPTIME_DAY int ao 0\n";
 print EPICS "DUMMY FEC\_$dcuId\_UPTIME_HOUR int ao 0\n";
 print EPICS "DUMMY FEC\_$dcuId\_UPTIME_MINUTE int ao 0\n";
@@ -1615,8 +1618,9 @@ END
 	#//				FILT_MOD *dsp_ptr, COEF *dspCoeff, CDS_EPICS *pLocalEpics,int feInit)</em>
 	print OUT <<END;
 
-int feCode(int cycle, double dWord[][32],     /* ADC inputs */
-              double dacOut[][16],    /* DAC outputs */
+int feCode(int cycle, 
+			  double dWord[][32],
+			  double dacOut[][16],
               FILT_MOD *dsp_ptr,      /* Filter Mod variables */
               COEF *dspCoeff,         /* Filter Mod coeffs */
               CDS_EPICS *pLocalEpics, /* EPICS variables */
@@ -2453,7 +2457,7 @@ open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 print OUTM "# CPU-Shutdown Real Time Linux\n";
 print OUTM "KBUILD_EXTRA_SYMBOLS=$rcg_src_dir/src/drv/ExtraSymbols.symvers\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
-print OUTM "EXTRA_CFLAGS += -O3 -w -I../../include\n";
+print OUTM "EXTRA_CFLAGS += -O -w -I../../include\n";
 print OUTM "EXTRA_CFLAGS += -I/opt/gm/include\n";
 print OUTM "EXTRA_CFLAGS += -I/opt/mx/include\n";
 

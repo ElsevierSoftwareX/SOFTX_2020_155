@@ -98,6 +98,9 @@ assign msg2 to "{ifo}:FEC-{sysnum}_MSG2";
 string msgDAQ;
 assign msgDAQ to "{ifo}:FEC-{sysnum}_MSGDAQ";
 
+string msgFESTAT;
+assign msgFESTAT to "{ifo}:FEC-{sysnum}_MSG_FESTAT";
+
 string svnString;
 assign svnString to "{ifo}:FEC-{sysnum}_BUILD_SVN";
 
@@ -529,6 +532,7 @@ state monScreen{
 %% int rtruns = 0;
 %% int myTimeout;
 %% int uptime;
+%% int festat;
 
 %% rtruns = 1;
 %%    stateWord = pEpics->epicsOutput.stateWord
@@ -570,6 +574,25 @@ state monScreen{
    pvPut(uptime_day);
    pvPut(uptime_hour);
    pvPut(uptime_minute);
+
+   festat = pEpics->epicsOutput.fe_status;
+   %% if(festat == -6) strcpy(msgFESTAT,"DAC Init Failed - exiting");
+   %% if(festat == -5) strcpy(msgFESTAT,"BURT Restore Failed - exiting");
+   %% if(festat == -4) strcpy(msgFESTAT,"Channel Hopping detected - exiting");
+   %% if(festat == -3) strcpy(msgFESTAT,"Running on Timer");
+   %% if(festat == -2) strcpy(msgFESTAT,"DAQ init failed - exiting");
+   %% if(festat == -1) strcpy(msgFESTAT,"Failed to init filter coeffs - exiting");
+   %% if(festat == 0) strcpy(msgFESTAT,"Loading");
+   %% if(festat == 1) strcpy(msgFESTAT,"Module Load initializing PCIE cards");
+   %% if(festat == 2) strcpy(msgFESTAT,"Waiting for BURT restore");
+   %% if(festat == 3) strcpy(msgFESTAT,"Locking Core");
+   %% if(festat == 4) strcpy(msgFESTAT,"Initializing ADC modules");
+   %% if(festat == 5) strcpy(msgFESTAT,"Initializing DAC modules");
+   %% if(festat == 6) strcpy(msgFESTAT,"Waiting to Sync");
+   %% if(festat == 7) strcpy(msgFESTAT,"  ");
+   %% if(festat == 8) strcpy(msgFESTAT,"In state 8");
+   %% if(festat == 9) strcpy(msgFESTAT,"In state 9");
+   pvPut(msgFESTAT);
 
 %% pthread_mutex_lock (&seq_lock);
 

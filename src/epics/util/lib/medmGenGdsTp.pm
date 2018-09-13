@@ -144,8 +144,14 @@ sub createGdsMedm
 
 	# ************* Create Main Status Banner *********************************************************************
 	# ADD Blinking FE running indicator
-	$xpos = 19; $ypos = 69; $width = 12; $height = 17; $vis = "calc"; $calc = "(a&1)";
+	$xpos = 19; $ypos = 330; $width = 12; $height = 17; $vis = "calc"; $calc = "(a&1)";
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{ltblue},$vis,$calc,"$site\:FEC-$dcuid\_TIME_DIAG");
+	# ADD FE status indicator
+	$xpos = 35; $ypos = 330; $width = 90; $height = 18;
+	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_FE_STATS.adl";
+        $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"FE PROC INFO");
+	$xpos = 140; $ypos = 330; $width = 240; $height = 17;
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_MSG_FESTAT",$ecolors{white},$ecolors{blue},"static");
 	# Add timing label
 	$xpos = 63; $ypos = 72; $width = 45; $height = 15; 
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"TIMING STATUS",$ecolors{white});
@@ -258,9 +264,6 @@ sub createGdsMedm
 	$mdlNamelc = lc($mdlName);
 	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_IPC_STATUS.adl";
         $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"RT NET STAT");
-	$xpos = 210; $ypos = 141; $width = 85; $height = 18;
-	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_FE_STATS.adl";
-        $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"FE PROC STAT");
 	# Add IPC Status Monitor
 	$xpos = 310; $ypos = 118; $width = 10; $height = 15; $vis = "calc"; $calc = "(a&1)";
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{red},$vis,$calc,"$site\:FEC-$dcuid\_IPC_STAT");
