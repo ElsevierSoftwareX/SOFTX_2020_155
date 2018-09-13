@@ -79,17 +79,12 @@ static int daqXmitBlockNum;	/* 1-16, tracks shmem DAQ block to write to.	*/
 static int excBlockNum;		/* 1-16, tracks EXC block to read from.	*/
 static int excDataSize;
 static DAQ_XFER_INFO xferInfo;
-static int xferDone;
-static char *pDaqBuffer[DAQ_NUM_SWING_BUFFERS];	/* Pointers to local swing buffers.	*/
 static DAQ_LKUP_TABLE localTable[DCU_MAX_CHANNELS];
 static DAQ_LKUP_TABLE excTable[DCU_MAX_CHANNELS];
 static volatile char *pWriteBuffer;	/* Ptr to swing buff to write data	*/
 static int phase;		/* 0-1, switches swing buffers.		*/
 static int daqSlot;		/* 0-sysRate, data slot to write data	*/
 static int excSlot;		/* 0-sysRate, slot to read exc data	*/
-char *bufPtr;			/* Ptr to data for crc calculation.	*/
-static unsigned int crcTest;	/* Continuous calc of CRC.		*/
-static unsigned int crcSend;	/* CRC sent to FB.			*/
 static DAQ_INFO_BLOCK dataInfo; /* Local DAQ config info buffer.	*/
 static int tpStart;		/* Marks address of first TP data	*/
 static volatile GDS_CNTRL_BLOCK *gdsPtr;  /* Ptr to shm to pass TP info to DAQ */
@@ -113,7 +108,6 @@ int slot;
 int num_tps;
 unsigned int tpnum[DAQ_GDS_MAX_TP_ALLOWED];		// Current TP nums
 unsigned int excnum[DAQ_GDS_MAX_TP_ALLOWED];	// Current EXC nums
-double mydouble;
 
 #ifdef CORE_BIQUAD
 // BIQUAD Decimation filter coefficient definitions.
@@ -310,25 +304,6 @@ static double dHistory[DCU_MAX_CHANNELS][MAX_HISTRY];
   {
     /// \> Calc data offset into current write swing buffer 
     daqSlot = (daqSlot + 1) % sysRate;
-
-#if 0
-    /// \> At start of 1/16 sec. data block, reset the xfer sizes and done bit */
-    if(daqSlot == 0)
-    {
-	xferInfo.xferLength = xferInfo.crcLength;
-	xferInfo.xferSize = xferInfo.xferSize1;
-	xferDone = 0;
-    }
-
-    /// \> If size of data remaining to be sent is less than calc xfer size, reduce xfer size
-    ///   to that of data remaining and mark that data xfer is complete for this 1/16 sec block 
-    if((xferInfo.xferLength < xferInfo.xferSize1) && (!xferDone))
-    {
-	xferInfo.xferSize = xferInfo.xferLength;
-	if(xferInfo.xferSize <= 0)  xferDone = 1;
-
-    }
-#endif
 
 
     /// \> Write data into local swing buffer 
