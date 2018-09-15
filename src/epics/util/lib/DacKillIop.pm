@@ -258,7 +258,7 @@ sub frontEndCode {
 	 if($::dkTimesCalled == $::dacKillCnt) {
 		for ($ii=0;$ii<12;$ii++) {
 			if($::dacKillDko[$ii] ne "x") {
-				$DKERR .= "dacInfo.dacChanErr[$ii] = $::dacKillDko[$ii]; \n";
+				$DKERR .= "dacChanErr[$ii] = $::dacKillDko[$ii]; \n";
 			}
 		}
 	 }
