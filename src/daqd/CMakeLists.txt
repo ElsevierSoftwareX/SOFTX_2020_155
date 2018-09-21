@@ -4,6 +4,8 @@ FIND_PROGRAM(DATE_PROG date)
 INCLUDE(Cpp11)
 INCLUDE(CheckCXXSourceCompiles)
 
+add_subdirectory(component_tests)
+
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 set(__daqd_tmp_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
@@ -79,6 +81,7 @@ set (DAQD_COMMON_SRC
         filesys.cc
         epics_pvs.cc
         producer_fw.cc
+		checksum_crc32.cc
         net_writer.cc
         trend.cc
         circ.cc

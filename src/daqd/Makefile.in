@@ -69,8 +69,8 @@ MYRINET_LDFLAGS=-L/opt/gm/lib -L/opt/gm/lib64 -lgm
 
 MX_SRCS=mx_rcvr.cc
 MX_OBJS=mx_rcvr.o
-MX_FLAGS=-I/home2/jonathan.hanks/installed/open-mx/include
-MX_LDFLAGS=-L/home2/jonathan.hanks/installed/open-mx/lib -lmyriexpress
+MX_FLAGS=-I/opt/mx/include
+MX_LDFLAGS=-L/opt/mx/lib -lmyriexpress
 OMX_FLAGS=-I/opt/open-mx/include
 OMX_LDFLAGS=-L/opt/open-mx/lib -lopen-mx
 

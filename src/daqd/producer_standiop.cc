@@ -124,6 +124,8 @@ struct cdsDaqNetGdsTpNum *gdsTpNum[2][DCU_COUNT];
 void *gm_receiver_thread(void *this_p) {
 
     int fd;
+    // error message buffer
+    char errmsgbuf[80];
 
     // Open and map all "Myrinet" DCUs
     for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
@@ -136,8 +138,9 @@ void *gm_receiver_thread(void *this_p) {
             dcu_addr[j] =
                 (volatile unsigned char *)findSharedMemory((char *)s.c_str());
             if (dcu_addr[j] == 0) {
-                system_log(1, "Couldn't mmap `%s'; errno=%d\n", s.c_str(),
-                           errno);
+                strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
+                system_log(1, "Couldn't mmap `%s'; err = %s\n", s.c_str(),
+                           errmsgbuf);
                 exit(1);
             }
             system_log(1, "Opened %s\n", s.c_str());
@@ -193,6 +196,9 @@ void *producer::frame_writer() {
     circ_buffer_block_prop_t prop;
     unsigned long prev_gps, prev_frac;
     unsigned long gps, frac;
+
+    // error message buffer
+    char errmsgbuf[80];
     unsigned long stat_cycles = 0;
     stats stat_full, stat_recv, stat_crc, stat_transfer;
 
