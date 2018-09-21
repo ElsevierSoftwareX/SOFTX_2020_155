@@ -77,7 +77,7 @@ sub frontEndCode {
         if ($op eq "square") { 
 	return <<SQEND;
 // MATH FUNCTION - SQUARE
-\L$::xpartName[$i] = $::fromExp[0] * $::fromExp[0];
+\L$::xpartName[$i] \E= $::fromExp[0] * $::fromExp[0];
 SQEND
         }
 
@@ -85,7 +85,7 @@ SQEND
 	return <<SQRTEND;
 // MATH FUNCTION - SQUARE ROOT
 if ($::fromExp[0] > 0.0) {
-	\L$::xpartName[$i] = lsqrt($::fromExp[0]);
+	\L$::xpartName[$i] \E= lsqrt($::fromExp[0]);
 }
 else {
 	\L$::xpartName[$i] = 0.0;
@@ -97,7 +97,7 @@ SQRTEND
 	return <<RECEND;
 // MATH FUNCTION - RECIPROCAL
 if ($::fromExp[0] != 0.0) {
-	\L$::xpartName[$i] = 1.0/$::fromExp[0];
+	\L$::xpartName[$i] \E= 1.0/$::fromExp[0];
 }
 else {
 	\L$::xpartName[$i] = 0.0;
@@ -109,7 +109,7 @@ RECEND
 	return <<MODEND;
 // MATH FUNCTION - MODULO
 if ((int) $::fromExp[1] != 0) {
-	\L$::xpartName[$i] = (double) ((int)$::fromExp[0] % (int)$::fromExp[1]);
+	\L$::xpartName[$i] \E= (double) ((int)$::fromExp[0] % (int)$::fromExp[1]);
 }
 else {
 	\L$::xpartName[$i] = 0.0;
@@ -120,7 +120,7 @@ MODEND
         if ($op eq "log10") { 
 return <<LOGEND;
 // MATH FUNCTION - LOG10
-	\L$::xpartName[$i] = llog10($::fromExp[0]);
+	\L$::xpartName[$i] \E= llog10($::fromExp[0]);
 LOGEND
         }
 }

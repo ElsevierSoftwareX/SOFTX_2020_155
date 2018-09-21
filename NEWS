@@ -1,4 +1,9 @@
 ==================================================================================================
+Changes for 3.4.4
+==================================================================================================
+- Bug Fix for MATH.pm: Improper case of pLocalEpics when EPICS part used as input to math
+  functions. This fix was also applied recently for 3.2.4 release.
+==================================================================================================
 Changes for 3.4.3  
 ==================================================================================================
 - Changed PCIe real-time network configuration from single Dolphin channel to 2 Dolphin channels
