@@ -35,16 +35,9 @@
 
 /* does this even work? */
 
-typedef int daqd_atomic_int;
-typedef unsigned int daqd_atomic_uint;
-typedef bool daqd_atomic_bool;
-
-     template <class T>
-     void daqd_store_val(T& dest, T val) { dest = val; }
-
-     template <class T>
-     void daqd_fetch_add(T& dest, int val) { dest += val; }
-
+typedef volatile int daqd_atomic_int;
+typedef volatile unsigned int daqd_atomic_uint;
+typedef volatile bool daqd_atomic_bool;
 
 #endif /* DAQD_CPP11 */
 

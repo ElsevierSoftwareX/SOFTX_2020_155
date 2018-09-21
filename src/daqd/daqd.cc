@@ -701,7 +701,11 @@ daqd_c::framer_io(int science)
    const int STATE_NORMAL = 0;
    const int STATE_WRITING = 1;
    const int STATE_BROADCAST = 2;
+   bool shmem_bcast_frame = true;
 
+#ifdef DAQD_BUILD_SHMEM
+   shmem_bcast_frame = parameters().get<int>("GDS_BROADCAST", 0) == 1;
+#endif
    framer_work_queue *_work_queue = 0;
    if (science) {
        daqd_c::set_thread_priority("Science frame saver IO","dqscifrio",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_IO_CPUAFFINITY);
@@ -831,37 +835,39 @@ daqd_c::framer_io(int science)
                }
 
   #ifndef NO_BROADCAST
-               // We are compiled to be a DMT broadcaster
-               //
-               fd = open(cur_buf->tmpf, O_RDONLY);
-               if (fd == -1) {
-                   system_log(1, "failed to open file; errno %d", errno);
-                   exit(1);
-               }
-               struct stat sb;
-               if (fstat(fd, &sb) == -1) {
-                   system_log(1, "failed to fstat file; errno %d", errno);
-                   exit(1);
-               }
-               void *addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-               if (addr == MAP_FAILED) {
-                   system_log(1, "failed to fstat file; errno %d", errno);
-                   exit(1);
-               }
+               if (shmem_bcast_frame) {
+                   // We are compiled to be a DMT broadcaster
+                   //
+                   fd = open(cur_buf->tmpf, O_RDONLY);
+                   if (fd == -1) {
+                       system_log(1, "failed to open file; errno %d", errno);
+                       exit(1);
+                   }
+                   struct stat sb;
+                   if (fstat(fd, &sb) == -1) {
+                       system_log(1, "failed to fstat file; errno %d", errno);
+                       exit(1);
+                   }
+                   void *addr = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+                   if (addr == MAP_FAILED) {
+                       system_log(1, "failed to fstat file; errno %d", errno);
+                       exit(1);
+                   }
 
-               net_writer_c *nw = (net_writer_c *)net_writers.first();
-               assert(nw);
-               assert(nw->broadcast);
+                   net_writer_c *nw = (net_writer_c *) net_writers.first();
+                   assert(nw);
+                   assert(nw->broadcast);
 
-               PV::set_pv(epics_state_var, STATE_BROADCAST);
-               if (nw->send_to_client ((char *) addr, sb.st_size, cur_buf->gps, b1 -> block_period ())) {
-                   system_log(1, "failed to broadcast data frame");
-                   exit(1);
+                   PV::set_pv(epics_state_var, STATE_BROADCAST);
+                   if (nw->send_to_client((char *) addr, sb.st_size, cur_buf->gps, b1->block_period())) {
+                       system_log(1, "failed to broadcast data frame");
+                       exit(1);
+                   }
+                   PV::set_pv(epics_state_var, STATE_NORMAL);
+                   munmap(addr, sb.st_size);
+                   close(fd);
+                   unlink(cur_buf->tmpf);
                }
-               PV::set_pv(epics_state_var, STATE_NORMAL);
-               munmap(addr, sb.st_size);
-               close(fd);
-               unlink(cur_buf->tmpf);
   #endif
            } /*catch (...) {
         system_log(1, "failed to write full frame out");
@@ -1019,13 +1025,11 @@ daqd_c::framer (int science)
 	    if (!skip_done) { // do it only first time
 		while (prop -> prop.gps % (frames_per_file*blocks_per_frame)) {
 			b1 -> unlock (cnum);
-            nb = b1 -> get (cnum);
-            prop =  b1 -> block_prop (nb);
-            std::cout << "Waiting for the end of the previous frame, currently at " << prop->prop.gps << std::endl;
-        }
+	  		nb = b1 -> get (cnum);
+	    		prop =  b1 -> block_prop (nb);
+		}
 		skip_done = true;
 	    }
-          std::cout << "framewritter at " << prop->prop.gps % (frames_per_file*blocks_per_frame) << "/" << (frames_per_file*blocks_per_frame) << std::endl;
 
 	    buf =  b1 -> block_ptr (nb);
 	    if (!prop -> bytes)
@@ -1137,7 +1141,6 @@ daqd_c::framer (int science)
 	  }
           b1 -> unlock (cnum);
 	}
-    std::cout << "collected all data for a frame file" << std::endl;
 
       /* finish CRC calculation for the fast data */
 #if EPICS_EDCU == 1
@@ -1164,7 +1167,6 @@ daqd_c::framer (int science)
       //frame -> SetULeapS(leap_seconds);
 
       DEBUG(1, cerr << "adding frame @ " << gps << " to " << (science ? "science" : "full") << " frame queue" << endl);
-      cout << "adding frame @ " << gps << " to " << (science ? "science" : "full") << " frame queue" << endl;
 
       cur_buf->gps = gps;
       cur_buf->gps_n = gps_n;
@@ -1455,11 +1457,16 @@ daqd_c::start_frame_saver (ostream *yyout, int science)
   return 0;
 }
 
-void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_dpvec *vmic_pv)
+// Note: move_addr is currently only guaranteed to be properly filled out on the DAQD_SHMEM build
+void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_dpvec *vmic_pv, dcu_move_address *move_addr)
 {
     int vmic_pv_len = 0;
     unsigned char *move_buf = 0;
+    dcu_move_address dummy_move_address;
 
+    if (!move_addr) {
+        move_addr = & dummy_move_address;
+    }
     locker mon(this);
 
     int s = daqd.block_size / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
@@ -1578,6 +1585,11 @@ void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_
     vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + channels [i].rm_offset;
     vmic_pv [vmic_pv_len].dest_vec_idx = channels [i].offset;
     vmic_pv [vmic_pv_len].dest_status_idx = status_ptr + 17 * sizeof(int) * i;
+
+    if (!move_addr->start[cur_dcu]) {
+        move_addr->start[cur_dcu] = vmic_pv [vmic_pv_len].src_pvec_addr;
+    }
+
 #if EPICS_EDCU == 1
     if (IS_EPICS_DCU(channels [i].dcu_id)) {
       vmic_pv [vmic_pv_len].src_status_addr = edcu1.channel_status + i;

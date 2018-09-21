@@ -35,13 +35,14 @@ unsigned int wait_delay = 1; // Wait before acknowledging sends with mx_wait() f
 extern void *findSharedMemory(char *);
 static volatile int keepRunning = 1;
 
-static struct rmIpcStr *shmIpcPtr[DAQ_ZMQ_MAX_DCU ];
-static char *shmDataPtr[DAQ_ZMQ_MAX_DCU ];
-static struct cdsDaqNetGdsTpNum *shmTpTable[DAQ_ZMQ_MAX_DCU ];
+static struct rmIpcStr *shmIpcPtr[DAQ_TRANSIT_MAX_DCU ];
+static char *shmDataPtr[DAQ_TRANSIT_MAX_DCU ];
+static struct cdsDaqNetGdsTpNum *shmTpTable[DAQ_TRANSIT_MAX_DCU ];
 static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
 // static const int header_size = sizeof(struct rmIpcStr) + sizeof(struct cdsDaqNetGdsTpNum);
-static const int header_size = DAQ_ZMQ_HEADER_SIZE;
-char modelnames[DAQ_ZMQ_MAX_DCU][64];
+static const int header_size = sizeof(daq_multi_dcu_header_t);
+char modelnames[DAQ_TRANSIT_MAX_DCU][64];
+int modelrates[DAQ_TRANSIT_MAX_DCU];
 
 
 void intHandler(int dummy) {
@@ -59,13 +60,59 @@ usage()
 	fprintf(stderr, "-v - verbose\n");
 	fprintf(stderr, "-w - wait a given number of milliseconds before starting a cycle\n");
 	fprintf(stderr, "-W - number of milliseconds before starting a cycle\n");
+	fprintf(stderr, "-g directory containing testpoints.par file defaults to /opt/rtcds/<SITE>/<IFO>/target/gds/param");
 	fprintf(stderr, "-h - help\n");
+}
+
+int getmodelrate( char *modelname, char *gds_tp_dir) {
+    int rate = 0;
+    char gdsfile[128];
+    int ii = 0;
+    FILE *f = 0;
+    char *token = 0;
+    char *search = "=";
+    char line[80];
+	char *s = 0;
+	char *s1 = 0;
+
+	if (gds_tp_dir) {
+		sprintf(gdsfile, "%s/tpchn_%s.par", gds_tp_dir, modelname);
+	} else {
+		/// Need to get IFO and SITE info from environment variables.
+		s = getenv("IFO");
+		for (ii = 0; s[ii] != '\0'; ii++) {
+			if (isupper(s[ii])) s[ii] = (char) tolower(s[ii]);
+		}
+		s1 = getenv("SITE");
+		for (ii = 0; s1[ii] != '\0'; ii++) {
+			if (isupper(s1[ii])) s1[ii] = (char) tolower(s1[ii]);
+		}
+		sprintf(gdsfile, "/opt/rtcds/%s/%s/target/gds/param/tpchn_%s.par", s1, s, modelname);
+	}
+    f = fopen(gdsfile, "rt");
+    if (!f) return 0;
+    while(fgets(line,80,f) != NULL) {
+        line[strcspn(line, "\n")] = 0;
+        if (strstr(line, "datarate") != NULL) {
+            token = strtok(line, search);
+            token = strtok(NULL, search);
+            if (!token) continue;
+            while (*token && *token == ' ') {
+                ++token;
+            }
+            rate = atoi(token);
+            break;
+        }
+    }
+    fclose(f);
+
+    return rate;
 }
 
 // Auto determine control models for this FE computer
 // Get Hostname
 // Read testpoint.par file for computer and model info
-int getmodelnames( int dcuid[]) {
+int getmodelnames( int dcuid[], char *gds_tp_dir) {
 	FILE *fr;
 	int modelcount = 0;
 	char myname[64];
@@ -82,24 +129,29 @@ int getmodelnames( int dcuid[]) {
 	char *token;
 	char *search = "=";
 	int inmatch = 0;
+    int rate = 0;
 
 	// Get computer name
 	gethostname(myname,sizeof(myname));
 	printf("My computer name is %s\n",myname);
 
 
-	   /// Need to get IFO and SITE info from environment variables.
-	   char *s = getenv("IFO");
-	   for(ii=0;s[ii] != '\0';ii++) {
-	           if(isupper(s[ii])) s[ii] = tolower(s[ii]);
-	   }
-	   char *s1 = getenv("SITE");
-	   for(ii=0;s1[ii] != '\0';ii++) {
-	           if(isupper(s1[ii])) s1[ii] = tolower(s1[ii]);
-	   }
+	if (gds_tp_dir) {
+		sprintf(gdsfile, "%s/testpoint", gds_tp_dir);
+	} else {
+		/// Need to get IFO and SITE info from environment variables.
+		char *s = getenv("IFO");
+		for (ii = 0; s[ii] != '\0'; ii++) {
+			if (isupper(s[ii])) s[ii] = tolower(s[ii]);
+		}
+		char *s1 = getenv("SITE");
+		for (ii = 0; s1[ii] != '\0'; ii++) {
+			if (isupper(s1[ii])) s1[ii] = tolower(s1[ii]);
+		}
 
-	// Create testpoint.par file name
-	sprintf(gdsfile,"%s%s%s%s%s","/opt/rtcds/",s1,"/",s,"/target/gds/param/testpoint.par");
+		// Create testpoint.par file name
+		sprintf(gdsfile, "%s%s%s%s%s", "/opt/rtcds/", s1, "/", s, "/target/gds/param/testpoint.par");
+	}
 	// Open and read testpoint.par file
 	fr = fopen(gdsfile,"r");
 	if(fr == NULL) return (-1);
@@ -119,7 +171,7 @@ int getmodelnames( int dcuid[]) {
 			   }
 			   tmp[j]=0;
 			   // calc the dcuid
-			   mydcuid = strtol(tmp, &tmp, 10);
+			   mydcuid = strtol(tmp, (char **)&tmp, 10);
 			} 
 		}
 		// If line contains hostname, then get the computer name
@@ -185,6 +237,7 @@ main(int argc, char **argv)
 
 	int new_cycle;
 	int sendLength = 0;
+	int dataTPLength = 0;
 	int daqStatBit[2];
 	daqStatBit[0] = 1;
 	daqStatBit[1] = 2;
@@ -199,9 +252,15 @@ main(int argc, char **argv)
 	int reftimeerror = 0;
 	int refcycle = 0;
 	int timeout = 0;
+	char *gds_tp_dir = 0;
 
 
-	while ((c = getopt(argc, argv, "hd:e:s:Vvw:x")) != EOF) switch(c) {
+    for (ii = 0; ii < DAQ_TRANSIT_MAX_DCU; ++ii) {
+        modelnames[ii][0] = '\0';
+        modelrates[ii] = 0;
+    }
+
+	while ((c = getopt(argc, argv, "hd:e:s:Vvw:xg:")) != EOF) switch(c) {
 	case 's':
 		sysname = optarg;
 		printf ("sysnames = %s\n",sysname);
@@ -218,6 +277,9 @@ main(int argc, char **argv)
 		break;
 	case 'w':
 		do_wait = atoi(optarg);
+		break;
+	case 'g':
+		gds_tp_dir = optarg;
 		break;
 	case 'h':
 	default:
@@ -239,20 +301,30 @@ main(int argc, char **argv)
 	                nsys++;
 	        }
 	} else {
-		nsys = getmodelnames(dcuId); 
+		nsys = getmodelnames(dcuId, gds_tp_dir);
 	}
+    for (ii = 0; ii < nsys; ii++) {
+        modelrates[ii] = getmodelrate(modelnames[ii], gds_tp_dir);
+        if (modelrates[ii] == 0) {
+            fprintf(stderr, "Unable to determine the rate of %s\n", modelnames[ii]);
+            exit(1);
+        }
+    }
 	   printf ("** Total number of systems is %d\n",nsys);
 	   for(ii=0;ii<nsys;ii++) {
 	    	printf ("\t%s\t%d\n",modelnames[ii],dcuId[ii]);
 		// Set data xmit header
-		zmqDataBlock.zmqheader[ii].dcuId = dcuId[ii];;
-		zmqDataBlock.zmqheader[ii].fileCrc = 0;
-		zmqDataBlock.zmqheader[ii].status = 0xbad;
-		zmqDataBlock.zmqheader[ii].cycle = 0;
-		zmqDataBlock.zmqheader[ii].timeSec = 0;
-		zmqDataBlock.zmqheader[ii].timeNSec = 0;
-		zmqDataBlock.zmqheader[ii].dataCrc = 0;
-		zmqDataBlock.zmqheader[ii].dataBlockSize = 0;
+		zmqDataBlock.header.dcuheader[ii].dcuId = dcuId[ii];;
+		zmqDataBlock.header.dcuheader[ii].fileCrc = 0;
+		zmqDataBlock.header.dcuheader[ii].status = 0xbad;
+		zmqDataBlock.header.dcuheader[ii].cycle = 0;
+		zmqDataBlock.header.dcuheader[ii].timeSec = 0;
+		zmqDataBlock.header.dcuheader[ii].timeNSec = 0;
+		zmqDataBlock.header.dcuheader[ii].dataCrc = 0;
+		zmqDataBlock.header.dcuheader[ii].dataBlockSize = 0;
+        zmqDataBlock.header.dcuheader[ii].tpBlockSize = 0;
+        zmqDataBlock.header.dcuheader[ii].tpCount = 0;
+        memset(zmqDataBlock.header.dcuheader[ii].tpNum, 0, sizeof(zmqDataBlock.header.dcuheader[ii].tpNum));
 	   }
 
 	// Setup to catch control C
@@ -268,7 +340,7 @@ main(int argc, char **argv)
                         exit(1);
                 } 
                 shmIpcPtr[i] = (struct rmIpcStr *)((char *)dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
-                shmDataPtr[i] = (char *)((char *)dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
+                shmDataPtr[i] = ((char *)dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
                 shmTpTable[i] = (struct cdsDaqNetGdsTpNum *)((char *)dcu_addr + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
         }
 
@@ -319,13 +391,16 @@ main(int argc, char **argv)
 		if(new_cycle == 0 && do_verbose) {
 			printf("\nTime = %d-%d with size = %d\n",shmIpcPtr[0]->bp[lastCycle].timeSec,shmIpcPtr[0]->bp[lastCycle].timeNSec,msg_size);
 			printf("\tCycle = ");
-			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.zmqheader[ii].cycle);
+			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.header.dcuheader[ii].cycle);
 			printf("\n\tTimeSec = ");
-			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.zmqheader[ii].timeSec);
+			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.header.dcuheader[ii].timeSec);
 			printf("\n\tTimeNSec = ");
-			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.zmqheader[ii].timeNSec);
+			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.header.dcuheader[ii].timeNSec);
 			printf("\n\tDataSize = ");
-			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.zmqheader[ii].dataBlockSize);
+			for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.header.dcuheader[ii].dataBlockSize);
+            printf("\n\tTPSize = ");
+            for(ii=0;ii<nsys;ii++) printf("\t%d",zmqDataBlock.header.dcuheader[ii].tpBlockSize);
+            printf("\n");
 			}
 
 		// Increment the local DAQ cycle counter
@@ -334,67 +409,96 @@ main(int argc, char **argv)
 
 		
 		// Set pointer to 0MQ message data block
-		zbuffer = (char *)&zmqDataBlock.zmqDataBlock[0];
+		zbuffer = (char *)&zmqDataBlock.dataBlock[0];
 		// Initialize data send length to size of message header
 		sendLength = header_size;
 		// Set number of FE models that have data in this message
-		zmqDataBlock.dcuTotalModels = nsys;
+		zmqDataBlock.header.dcuTotalModels = nsys;
+		zmqDataBlock.header.fullDataBlockSize = 0;
 		// Loop thru all FE models
 		for (ii=0;ii<nsys;ii++) {
 			reftimeerror = 0;
 			// Set heartbeat monitor for return to DAQ software
-			if (lastCycle == 0) shmIpcPtr[ii]->status ^= daqStatBit[0];
+			if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[0];
 			// Set DCU ID in header
-			zmqDataBlock.zmqheader[ii].dcuId = shmIpcPtr[ii]->dcuId;
+			zmqDataBlock.header.dcuheader[ii].dcuId = shmIpcPtr[ii]->dcuId;
 			// Set DAQ .ini file CRC checksum
-			zmqDataBlock.zmqheader[ii].fileCrc = shmIpcPtr[ii]->crc;
+			zmqDataBlock.header.dcuheader[ii].fileCrc = shmIpcPtr[ii]->crc;
 			// Set 1/16Hz cycle number
-			zmqDataBlock.zmqheader[ii].cycle = shmIpcPtr[ii]->cycle;
+			zmqDataBlock.header.dcuheader[ii].cycle = shmIpcPtr[ii]->cycle;
 			if(ii == 0) refcycle = shmIpcPtr[ii]->cycle;
 			// Set GPS seconds
-			zmqDataBlock.zmqheader[ii].timeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
+			zmqDataBlock.header.dcuheader[ii].timeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
 			if (ii == 0) reftimeSec = shmIpcPtr[ii]->bp[lastCycle].timeSec;
 			// Set GPS nanoseconds
-			zmqDataBlock.zmqheader[ii].timeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
+			zmqDataBlock.header.dcuheader[ii].timeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
 			if (ii == 0) reftimeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
 			if (ii != 0 && reftimeSec != shmIpcPtr[ii]->bp[lastCycle].timeSec) 
 				reftimeerror = 1;;
 			if (ii != 0 && reftimeNSec != shmIpcPtr[ii]->bp[lastCycle].timeNSec) 
 				reftimeerror |= 2;;
 			if(reftimeerror) {
-				zmqDataBlock.zmqheader[ii].cycle = refcycle;
+				zmqDataBlock.header.dcuheader[ii].cycle = refcycle;
 				// printf("Timing error model %d\n",ii);
 				// Set Status -- Need to update for models not running
-				zmqDataBlock.zmqheader[ii].status = 0xbad;
+				zmqDataBlock.header.dcuheader[ii].status = 0xbad;
 				// Indicate size of data block
-				zmqDataBlock.zmqheader[ii].dataBlockSize = 0;
+				zmqDataBlock.header.dcuheader[ii].dataBlockSize = 0;
+                zmqDataBlock.header.dcuheader[ii].tpBlockSize = 0;
+                zmqDataBlock.header.dcuheader[ii].tpCount = 0;
 			} else {
 				// Set Status -- Need to update for models not running
-				zmqDataBlock.zmqheader[ii].status = 0;
+				zmqDataBlock.header.dcuheader[ii].status = 2;
 				// Indicate size of data block
-				zmqDataBlock.zmqheader[ii].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
+				zmqDataBlock.header.dcuheader[ii].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
 				// Prevent going beyond MAX allowed data size
-				if (zmqDataBlock.zmqheader[ii].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
-					zmqDataBlock.zmqheader[ii].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
+				if (zmqDataBlock.header.dcuheader[ii].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
+					zmqDataBlock.header.dcuheader[ii].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
+
+                zmqDataBlock.header.dcuheader[ii].tpCount = (unsigned int)shmTpTable[ii]->count;
+				zmqDataBlock.header.dcuheader[ii].tpBlockSize = sizeof(float) * modelrates[ii] * zmqDataBlock.header.dcuheader[ii].tpCount;
+				// Prevent going beyond MAX allowed data size
+				if (zmqDataBlock.header.dcuheader[ii].tpBlockSize > DAQ_DCU_BLOCK_SIZE)
+					zmqDataBlock.header.dcuheader[ii].tpBlockSize = DAQ_DCU_BLOCK_SIZE;
+
+				memcpy(&(zmqDataBlock.header.dcuheader[ii].tpNum[0]),
+				       &(shmTpTable[ii]->tpNum[0]),
+					   sizeof(int)*zmqDataBlock.header.dcuheader[ii].tpCount);
 
 			// Set pointer to dcu data in shared memory
 			dataBuff = (char *)(shmDataPtr[ii] + lastCycle * buf_size);
 			// Copy data from shared memory into local buffer
-			memcpy((void *)zbuffer,dataBuff,zmqDataBlock.zmqheader[ii].dataBlockSize);
-			// Increment the 0mq data buffer pointer for next FE
-			zbuffer += zmqDataBlock.zmqheader[ii].dataBlockSize;
-			// Increment the 0mq message size with size of FE data block
-			sendLength += zmqDataBlock.zmqheader[ii].dataBlockSize;
+			dataTPLength = zmqDataBlock.header.dcuheader[ii].dataBlockSize + zmqDataBlock.header.dcuheader[ii].tpBlockSize;
+			memcpy((void *)zbuffer, dataBuff, dataTPLength);
+
 
 			// Calculate CRC on the data and add to header info
-			myCrc = crc_ptr((char *)&zmqDataBlock.zmqDataBlock[0],shmIpcPtr[ii]->bp[lastCycle].crc,0); // .crc is crcLength
-			myCrc = crc_len(shmIpcPtr[ii]->bp[lastCycle].crc,myCrc);
-			zmqDataBlock.zmqheader[ii].dataCrc = myCrc;
+			myCrc = crc_ptr((char *)zbuffer, zmqDataBlock.header.dcuheader[ii].dataBlockSize, 0); // .crc is crcLength
+			myCrc = crc_len(zmqDataBlock.header.dcuheader[ii].dataBlockSize, myCrc);
+			zmqDataBlock.header.dcuheader[ii].dataCrc = myCrc;
+
+			// Increment the 0mq data buffer pointer for next FE
+			zbuffer += dataTPLength;
+			// Increment the 0mq message size with size of FE data block
+			sendLength += dataTPLength;
+			// Increment the data block size for the message
+			zmqDataBlock.header.fullDataBlockSize += (unsigned int)dataTPLength;
 
 			// Update heartbeat monitor to DAQ code
-			if (lastCycle == 0) shmIpcPtr[ii]->status ^= daqStatBit[1];
+			if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[1];
 			}
 		}
+
+		if (new_cycle == 0 && do_verbose) {
+			for (ii = 0; ii < nsys; ++ii) {
+				printf("dcuid: %d config crc: %x data crc: %x\n",
+					   zmqDataBlock.header.dcuheader[ii].dcuId,
+					   zmqDataBlock.header.dcuheader[ii].fileCrc,
+					   zmqDataBlock.header.dcuheader[ii].dataCrc
+				);
+			}
+		}
+
 		// Copy data to 0mq message buffer
 		memcpy(buffer,daqbuffer,sendLength);
 		// Send Data

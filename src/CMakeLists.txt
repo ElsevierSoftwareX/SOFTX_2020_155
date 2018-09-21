@@ -4,6 +4,7 @@ add_subdirectory(dv)
 add_subdirectory(nds)
 add_subdirectory(mx_stream)
 add_subdirectory(run_number)
+add_subdirectory(drv)
 
 if (${LibZMQ_FOUND})
     add_subdirectory(zmq_stream)

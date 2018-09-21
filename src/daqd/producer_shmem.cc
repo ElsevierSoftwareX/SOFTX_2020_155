@@ -28,6 +28,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <array>
 #include <cctype>      // old <ctype.h>
 #include <sys/prctl.h>
 
@@ -49,14 +50,15 @@ using namespace std;
 #include "drv/cdsHardware.h"
 
 #include <sys/ioctl.h>
-#include "../drv/rfm.c"
 
-#if EPICS_EDCU == 1
 #include "epics_pvs.hh"
-#endif
+
 
 #include "raii.hh"
 #include "conv.hh"
+#include "circ.h"
+#include "drv/shmem.h"
+#include "daq_core.h"
 
 extern daqd_c daqd;
 extern int shutdown_server();
@@ -70,21 +72,70 @@ struct ToLower {
 
 /* GM and shared memory communication area */
 
-struct rmIpcStr gmDaqIpc[DCU_COUNT];
+/* This may still be needed for test points */
+//struct rmIpcStr gmDaqIpc[DCU_COUNT];
 /// DMA memory area pointers
-void *directed_receive_buffer[DCU_COUNT];
 int controller_cycle = 0;
 
 /// Pointer to GDS TP tables
 struct cdsDaqNetGdsTpNum *gdsTpNum[2][DCU_COUNT];
 
-/// Data receiving thread
-void *gm_receiver_thread(void *this_p) {
 
-    void receiver_mx(int);
-    int this_eid = *static_cast<int *>(this_p);
-    receiver_mx(this_eid);
-}
+
+class ShMemReceiver {
+    volatile daq_multi_cycle_data_t* _shmem;
+
+    daq_dc_data_t _data;
+    unsigned int _prev_cycle;
+
+    void wait()
+    {
+        usleep(1000);
+    }
+public:
+    ShMemReceiver() = delete;
+    ShMemReceiver(ShMemReceiver& other) = delete;
+    ShMemReceiver(const std::string &endpoint, size_t shmem_size) :
+            _shmem(static_cast<volatile daq_multi_cycle_data_t*>(shmem_open_segment(endpoint.c_str(), shmem_size))),
+            _prev_cycle(0xffffffff)
+    {
+    }
+
+    daq_dc_data_t* receive_data()
+    {
+        std::atomic<unsigned int>* cycle_ptr = reinterpret_cast<std::atomic<unsigned int>*>(
+                const_cast<unsigned int*>(&(_shmem->header.curCycle))
+        );
+        if (_prev_cycle == 0xffffffff)
+        {
+            _prev_cycle = *cycle_ptr;
+        }
+        unsigned int cur_cycle = *cycle_ptr;
+        while (cur_cycle == _prev_cycle)
+        {
+            wait();
+            cur_cycle = *cycle_ptr;
+        }
+        unsigned int cycle_stride = _shmem->header.cycleDataSize;
+        // figure out offset to the right block
+        // figure out how much data is actually there
+        // memcpy into _data
+
+        char* start = const_cast<char*>(&_shmem->dataBlock[0]);
+        start += cur_cycle * cycle_stride;
+        size_t copy_size = sizeof(daq_multi_dcu_header_t) + reinterpret_cast<daq_multi_dcu_header_t*>(start)->fullDataBlockSize;
+        memcpy(&_data, start, copy_size);
+
+        //std::cerr << "shmem_recv - c " << cur_cycle << " p " << _prev_cycle << std::endl;
+
+        _prev_cycle = cur_cycle;
+        return &_data;
+    }
+
+
+};
+
+
 
 /// The main data movement thread (the producer)
 void *producer::frame_writer() {
@@ -109,95 +160,48 @@ void *producer::frame_writer() {
         new struct put_dpvec[MAX_CHANNELS]);
     struct put_dpvec *vmic_pv = _vmic_pv.get();
 
+    // use the offsets calculated by initialize_vmpic
+    // for the start of the dcu's
+    daqd_c::dcu_move_address dcu_move_addresses;
+
     // FIXME: move_buf could leak on errors (but we would probably die anyways.
-    daqd.initialize_vmpic(&move_buf, &vmic_pv_len, vmic_pv);
+    daqd.initialize_vmpic(&move_buf, &vmic_pv_len, vmic_pv, &dcu_move_addresses);
     raii::array_ptr<unsigned char> _move_buf(move_buf);
 
-    if (!daqd.no_myrinet) {
+    // Allocate local test point tables
+    static struct cdsDaqNetGdsTpNum gds_tp_table[2][DCU_COUNT];
 
-        unsigned int max_endpoints = open_mx();
-        unsigned int nics_available = max_endpoints >> 8;
-        max_endpoints &= 0xff;
+    for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
+        for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
+            if (daqd.dcuSize[ifo][j] == 0)
+                continue; // skip unconfigured DCU nodes
+            if (IS_MYRINET_DCU(j)) {
+                gdsTpNum[ifo][j] = gds_tp_table[ifo] + j;
 
-        // Allocate receive buffers for each configured DCU
-        for (int i = 5; i < DCU_COUNT; i++) {
-            if (0 == daqd.dcuSize[0][i])
-                continue;
-
-            directed_receive_buffer[i] =
-                malloc(2 * DAQ_DCU_BLOCK_SIZE * DAQ_NUM_DATA_BLOCKS);
-            if (directed_receive_buffer[i] == 0) {
-                system_log(1, "[MX recv] Couldn't allocate recv buffer\n");
-                exit(1);
+            } else {
+                gdsTpNum[ifo][j] = 0;
             }
         }
-
-        // Allocate local test point tables
-        static struct cdsDaqNetGdsTpNum gds_tp_table[2][DCU_COUNT];
-
-        for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
-            for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
-                if (daqd.dcuSize[ifo][j] == 0)
-                    continue; // skip unconfigured DCU nodes
-                if (IS_MYRINET_DCU(j)) {
-                    gdsTpNum[ifo][j] = gds_tp_table[ifo] + j;
-
-                } else {
-                    gdsTpNum[ifo][j] = 0;
-                }
-            }
-        }
-
-        {
-            pthread_t gm_tid;
-            pthread_attr_t attr;
-            pthread_attr_init(&attr);
-            pthread_attr_setstacksize(&attr, daqd.thread_stack_size);
-            pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-            int my_err_no;
-
-            for (int j = 0; j < DCU_COUNT; j++) {
-                class stats s;
-                rcvr_stats.push_back(s);
-            }
-
-            /* Create array to hold mx thread card+endpoint data
-             We will pass a point to the individual array element.
-             This is to avoid a race condition where the
-             gm_receiver_thread gets interleaved values
-             Keith Thorne   2015-07-10 */
-            int bp_aray[MX_MAX_BOARDS][MX_MAX_ENDPOINTS];
-            for (int bnum = 0; bnum < nics_available; bnum++) { // Start
-                for (int j = 0; j < max_endpoints; j++) {
-                    int bp = j;
-                    bp = bp + (bnum * 256);
-                    /* calculate address within array */
-                    bp_aray[bnum][j] = bp;
-                    void *bpPtr = (int *)(bp_aray + bnum) + j;
-                    if (my_err_no = pthread_create(&gm_tid, &attr,
-                                                   gm_receiver_thread, bpPtr)) {
-                        pthread_attr_destroy(&attr);
-                        strerror_r(my_err_no, errmsgbuf, sizeof(errmsgbuf));
-                        system_log(1, "pthread_create() err=%s", errmsgbuf);
-                        exit(1);
-                    }
-                }
-            }
-
-            pthread_attr_destroy(&attr);
-        }
-
-        sleep(1);
     }
 
+    for (int j = 0; j < DCU_COUNT; j++) {
+        class stats s;
+        rcvr_stats.push_back(s);
+    }
+
+    ShMemReceiver shmem_receiver(daqd.parameters().get("shmem_input", ""),
+                                 daqd.parameters().get<size_t>("shmem_size", 21041152));
+
+
+    sleep(1);
+
     stat_full.sample();
-// TODO make IP addresses configurable from daqdrc
 
     // No waiting here if compiled as broadcasts receiver
 
     int cycle_delay = daqd.cycle_delay;
     // Wait until a second boundary
-    {
+    /*{
         if ((daqd.dcu_status_check & 4) == 0) {
 
             if (daqd.symm_ok() == 0) {
@@ -227,7 +231,33 @@ void *producer::frame_writer() {
                    prev_gps, frac, f);
             controller_cycle = 1;
         }
+    }*/
+
+    // Wait until a second ends, so that the next data sould
+    // come in on cycle 0
+    // use the data as the clock here
+    int sync_tries = 0;
+    while (true) {
+        const int max_sync_tries = 10 * DATA_BLOCKS;
+
+        daq_dc_data_t* block = shmem_receiver.receive_data();
+        ++sync_tries;
+        if (block->header.dcuTotalModels == 0)
+            continue;
+        gps = block->header.dcuheader[0].timeSec;
+        frac = block->header.dcuheader[0].timeNSec;
+        std::cerr << block->header.dcuheader[0].timeNSec << std::endl;
+        // as of 8 Nov 2017 zmq_multi_stream sends the gps nanoseconds as a cycle number
+        if (frac == DATA_BLOCKS-1 || frac >= 937500000)
+            break;
+        if (sync_tries > max_sync_tries) {
+            std::cerr << "Unable to sync up to front ends after " << sync_tries << " attempts" << std::endl;
+            exit(1);
+        }
     }
+    prev_gps = gps;
+    prev_frac = frac;
+
 
     PV::set_pv(PV::PV_UPTIME_SECONDS, 0);
     PV::set_pv(PV::PV_GPS, 0);
@@ -244,11 +274,79 @@ void *producer::frame_writer() {
 
         // DEBUG(6, printf("Timing %d gps=%d frac=%d\n", i, gps, frac));
 
+        std::array<int, DCU_COUNT> dcu_to_zmq_lookup;
+        std::array<char*,  DCU_COUNT> dcu_data_from_zmq;
+        std::array<unsigned int, DCU_COUNT> dcu_data_crc;
+        std::array<unsigned int, DCU_COUNT> dcu_data_gps;
+        std::fill(dcu_to_zmq_lookup.begin(), dcu_to_zmq_lookup.end(), -1);
+        std::fill(dcu_data_from_zmq.begin(), dcu_data_from_zmq.end(), nullptr);
+        std::fill(dcu_data_crc.begin(), dcu_data_crc.end(), 0);
+        std::fill(dcu_data_gps.begin(), dcu_data_gps.end(), 0);
+        // retreive 1/16s of data from zmq
+
+        stat_recv.sample();
+        daq_dc_data_t* data_block = shmem_receiver.receive_data();
+        stat_recv.tick();
+
+        if (data_block->header.dcuTotalModels > 0) {
+            gps = data_block->header.dcuheader[0].timeSec;
+            frac = data_block->header.dcuheader[0].timeNSec;
+
+            {
+                for (int i = 0; i < data_block->header.dcuTotalModels; ++i)
+                {
+                    if (data_block->header.dcuheader[i].dataBlockSize == 0)
+                        std::cerr << "block " << i << " has 0 bytes" << std::endl;
+                }
+            }
+
+            bool new_sec = (i % 16) == 0;
+            bool is_good = false;
+            if (new_sec) {
+                is_good = (gps == prev_gps + 1 && frac == 0);
+                for (int i = 0; i < data_block->header.dcuTotalModels; ++i)
+                {
+                    int dcuid = data_block->header.dcuheader[i].dcuId;
+                    gds_tp_table[0][dcuid].count = data_block->header.dcuheader[i].tpCount;
+                    std::copy(&data_block->header.dcuheader[i].tpNum[0],
+                              &data_block->header.dcuheader[i].tpNum[256],
+                              &gds_tp_table[0][dcuid].tpNum[0]);
+                }
+            } else {
+                const unsigned int step = 1000000000/16;
+                is_good = (gps == prev_gps && ((frac == prev_frac + 1) || (frac == prev_frac + step)));
+            }
+            if (!is_good) {
+                std::cerr << "###################################\n\n\nGlitch in receive\n"
+                          << "prev " << prev_gps << ":" << prev_frac << "    cur " << gps << ":" << frac << std::endl;
+            }
+        }
+
+        // map out the order of the dcuids in the zmq data, this could change
+        // with each data block
+        {
+            int total_zmq_models = data_block->header.dcuTotalModels;
+            char *cur_dcu_zmq_ptr = data_block->dataBlock;
+            for (int cur_block = 0; cur_block < total_zmq_models; ++cur_block) {
+                unsigned int cur_dcuid = data_block->header.dcuheader[cur_block].dcuId;
+                dcu_to_zmq_lookup[cur_dcuid] = cur_block;
+                dcu_data_from_zmq[cur_dcuid] = cur_dcu_zmq_ptr;
+                dcu_data_crc[cur_dcuid] = data_block->header.dcuheader[cur_block].dataCrc;
+                dcu_data_gps[cur_dcuid] = data_block->header.dcuheader[cur_block].timeSec;
+                cur_dcu_zmq_ptr += data_block->header.dcuheader[cur_block].dataBlockSize +
+                                   data_block->header.dcuheader[cur_block].tpBlockSize;
+            }
+        }
+
         read_dest = move_buf;
         for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
             // printf("DCU %d is %d bytes long\n", j, daqd.dcuSize[0][j]);
-            if (daqd.dcuSize[0][j] == 0)
+            if (daqd.dcuSize[0][j] == 0 || dcu_to_zmq_lookup[j] < 0 || dcu_data_from_zmq[j] == nullptr)
+            {
+                daqd.dcuStatus[0][j] = 0xbad;
                 continue; // skip unconfigured DCU nodes
+            }
+            read_dest = dcu_move_addresses.start[j];
             long read_size = daqd.dcuDAQsize[0][j];
             if (IS_EPICS_DCU(j)) {
 
@@ -265,14 +363,39 @@ void *producer::frame_writer() {
                 // printf("cycl=%d ctrl=%d dcu=%d\n", gmDaqIpc[j].cycle,
                 // controller_cycle, j);
                 // Get the data from myrinet
+                // Get the data from the buffers returned by the zmq receiver
+                int zmq_index = dcu_to_zmq_lookup[j];
+                daq_msg_header_t& cur_dcu = data_block->header.dcuheader[zmq_index];
+                if (read_size != cur_dcu.dataBlockSize) {
+                    std::cerr << "read_size = " << read_size << " cur dcu size " << cur_dcu.dataBlockSize << std::endl;
+                }
+                //assert(read_size == cur_dcu.dataBlockSize);
                 memcpy((void *)read_dest,
-                       ((char *)directed_receive_buffer[j]) +
-                           dcu_cycle * 2 * DAQ_DCU_BLOCK_SIZE,
-                       2 * DAQ_DCU_BLOCK_SIZE);
+                       dcu_data_from_zmq[j],
+                       cur_dcu.dataBlockSize);
+                // copy test points over
+                int max_tp_size = 2 * DAQ_DCU_BLOCK_SIZE - cur_dcu.dataBlockSize;
+                int tp_size = (cur_dcu.tpBlockSize <= max_tp_size ? cur_dcu.tpBlockSize : max_tp_size);
+                memcpy((void*)(read_dest + cur_dcu.dataBlockSize),
+                       (void*)(((char*)dcu_data_from_zmq[j]) + cur_dcu.dataBlockSize),
+                       tp_size);
+                int tp_off = reinterpret_cast<char*>(move_buf) - reinterpret_cast<char*>(read_dest) + cur_dcu.dataBlockSize;
 
-                volatile struct rmIpcStr *ipc;
+//                std::cout << "is zmq dcu number " << zmq_index << std::endl;
 
-                ipc = &gmDaqIpc[j];
+//                if (j == 21)
+//                {
+//                    int block_time = static_cast<int>(data_block->header.dcuheader[zmq_index].timeSec);
+//                    int data_error = 0;
+//                    for (int k = 0; k < 64; ++k)
+//                    {
+//                        if (((int*)read_dest)[k] != block_time)
+//                            data_error++;
+//                    }
+//                    if (data_error > 0) {
+//                        std::cerr << "!!!!!!!!!!!! invalid data found in test " << data_error << " times at " << block_time << std::endl;
+//                    }
+//                }
 
                 int cblk1 = (i + 1) % DAQ_NUM_DATA_BLOCKS;
                 static const int ifo = 0; // For now
@@ -314,23 +437,28 @@ void *producer::frame_writer() {
                                           << "); status "
                                           << dcuCycleStatus[ifo][j]
                                           << dcuStatCycle[ifo][j] << endl);
-                            ipc->status = DAQ_STATE_FAULT;
+                            std::cout << "Lost " << daqd.dcuName[j]
+                                 << "(ifo " << ifo << "; dcu " << j
+                                 << "); status "
+                                 << dcuCycleStatus[ifo][j]
+                                 << dcuStatCycle[ifo][j] << endl;
+                            cur_dcu.status = DAQ_STATE_FAULT;
                         }
 
                         if ((dcuStatus[ifo][j] ==
                              DAQ_STATE_RUN) /* && (lastStatus != DAQ_STATE_RUN) */) {
                             DEBUG(4, cerr << "New " << daqd.dcuName[j]
                                           << " (dcu " << j << ")" << endl);
-                            ipc->status = DAQ_STATE_RUN;
+                            cur_dcu.status = DAQ_STATE_RUN;
                         }
 
                         dcuCycleStatus[ifo][j] = 0;
                         dcuStatCycle[ifo][j] = 0;
-                        ipc->status = ipc->status;
+                        cur_dcu.status = cur_dcu.status;
                     }
 
                     {
-                        int intCycle = ipc->cycle % DAQ_NUM_DATA_BLOCKS;
+                        int intCycle = cur_dcu.cycle % DAQ_NUM_DATA_BLOCKS;
                         if (intCycle != dcuLastCycle[ifo][j])
                             dcuStatCycle[ifo][j]++;
                         dcuLastCycle[ifo][j] = intCycle;
@@ -338,14 +466,19 @@ void *producer::frame_writer() {
                 }
 
                 // Update DCU status
-                int newStatus = ipc->status != DAQ_STATE_RUN ? 0xbad : 0;
-
-                int newCrc = gmDaqIpc[j].crc;
+                int newStatus = cur_dcu.status != DAQ_STATE_RUN ? 0xbad : 0;
+                DEBUG(4,
+                    std::cout << "newStatus = " << (hex) << newStatus << " cur_dcu.status = " << (dec) << cur_dcu.status;
+                    std::cout << " gps = " << cur_dcu.timeSec << " gps_n = " << cur_dcu.timeNSec << std::endl;
+                );
+                int newCrc = cur_dcu.fileCrc;
 
                 // printf("%x\n", *((int *)read_dest));
                 if (!IS_EXC_DCU(j)) {
-                    if (newCrc != daqd.dcuConfigCRC[0][j])
+                    if (newCrc != daqd.dcuConfigCRC[0][j]) {
                         newStatus |= 0x2000;
+                        DEBUG(4, std::cout << "config crc mismatch expecting " << std::hex << daqd.dcuConfigCRC[0][j] << " got " << std::hex << newCrc << std::endl;);
+                    }
                 }
                 if (newStatus != daqd.dcuStatus[0][j]) {
                     // system_log(1, "DCU %d IFO %d (%s) %s", j, 0,
@@ -358,7 +491,7 @@ void *producer::frame_writer() {
                 }
                 daqd.dcuStatus[0][j] = newStatus;
 
-                daqd.dcuCycle[0][j] = gmDaqIpc[j].cycle;
+                daqd.dcuCycle[0][j] = cur_dcu.cycle;
 
                 /* Check DCU data checksum */
                 unsigned long crc = 0;
@@ -384,15 +517,15 @@ void *producer::frame_writer() {
                 if (j >= DCU_ID_ADCU_1 && (!IS_TP_DCU(j)) &&
                     daqd.dcuStatus[0][j] == 0) {
 
-                    unsigned int rfm_crc = gmDaqIpc[j].bp[cblk].crc;
-                    unsigned int dcu_gps = gmDaqIpc[j].bp[cblk].timeSec;
+                    unsigned int rfm_crc = dcu_data_crc[j]; //gmDaqIpc[j].bp[cblk].crc;
+                    unsigned int dcu_gps = dcu_data_gps[j]; // gmDaqIpc[j].bp[cblk].timeSec;
 
                     // system_log(5, "dcu %d block %d cycle %d  gps %d symm
                     // %d\n", j, cblk, gmDaqIpc[j].bp[cblk].cycle,  dcu_gps,
                     // gps);
                     unsigned long mygps = gps;
-                    if (cblk > (15 - cycle_delay))
-                        mygps--;
+                    //if (cblk > (15 - cycle_delay))
+                    //    mygps--;
 
                     if (daqd.edcuFileStatus[j]) {
                         daqd.dcuStatus[0][j] |= 0x8000;
@@ -416,7 +549,7 @@ void *producer::frame_writer() {
                            because of the CRC mismatch */
                         daqd.dcuStatus[0][j] |= 0x1000;
                     } else {
-                        system_log(6, " MATCH dcu %d (%s); crc[%d]=%x; "
+                        system_log(10, " MATCH dcu %d (%s); crc[%d]=%x; "
                                       "computed crc=%lx\n",
                                    j, daqd.dcuName[j], cblk, rfm_crc, crc);
                     }
@@ -424,9 +557,12 @@ void *producer::frame_writer() {
                         daqd.dcuCrcErrCnt[0][j]++;
                         daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
                     }
+                    // FIXME: is this right? Why 2* DAQ_DCU_BLOCK_SIZE?
+                    read_dest += 2 * DAQ_DCU_BLOCK_SIZE;
+                } else {
+                    read_dest += 2 * DAQ_DCU_BLOCK_SIZE; // cur_dcu.dataBlockSize;
                 }
 
-                read_dest += 2 * DAQ_DCU_BLOCK_SIZE;
             }
         }
 
@@ -447,7 +583,7 @@ void *producer::frame_writer() {
                 // Do not support Myrinet DCUs on H2
                 if (IS_MYRINET_DCU(j) && ifo == 0) {
 
-                    prop.dcu_data[j].crc = gmDaqIpc[j].bp[cblk].crc;
+                    prop.dcu_data[j].crc = dcu_data_crc[j]; // gmDaqIpc[j].bp[cblk].crc;
 
                     // printf("dcu %d crc=0x%x\n", j, prop.dcu_data[j].crc);
                     // Remove 0x8000 status from propagating to the broadcast
@@ -493,17 +629,37 @@ void *producer::frame_writer() {
         // prop.gps = time(0) - 315964819 + 33;
 
         prop.gps = gps;
-        if (cblk > (15 - cycle_delay))
-            prop.gps--;
+        //if (cblk > (15 - cycle_delay))
+        //    prop.gps--;
 
         prop.gps_n = 1000000000 / 16 * (i % 16);
 // printf("before put %d %d %d\n", prop.gps, prop.gps_n, frac);
         prop.leap_seconds = daqd.gps_leap_seconds(prop.gps);
 
+        //std::cout << "about to call put16th_dpscattered with " << vmic_pv_len << " entries. prop.gps = " << prop.gps << " prop.gps_n = " << prop.gps_n << "\n";
+        //for (int ii = 0; ii < vmic_pv_len; ++ii)
+        //    std::cout << " " << *vmic_pv[ii].src_status_addr;
+        //std::cout << std::endl;
+
+
         stat_transfer.sample();
         int nbi = daqd.b1->put16th_dpscattered(vmic_pv, vmic_pv_len, &prop);
         stat_transfer.tick();
 
+        {
+            circ_buffer_block_t* block_p = daqd.b1->block_prop(nbi);
+            //std::cout << "block_p->prop.gps = " << block_p->prop.gps << " block_p->prop.gps_n = " << block_p->prop.gps_n << std::endl;
+            //if (block_p->prop.gps != prop.gps) {
+            //    std::cout << "\n\nblock_p->prop.gps (" << block_p->prop.gps << ") != prop.gps (" << prop.gps << ")\n" << std::endl;
+            //}
+            //assert(block_p->prop.gps == prop.gps);
+        }
+
+        DEBUG(4,
+        std::cout << "put16th_dpscattered returned " << nbi << std::endl;
+        std::cout << "drops: " << daqd.b1->drops() <<  " blocks: " << daqd.b1->blocks() << " puts: " << daqd.b1->num_puts()
+                  << " consumers: " << daqd.b1->get_cons_num() << std::endl;
+        );
         //  printf("%d %d\n", prop.gps, prop.gps_n);
         // DEBUG1(cerr << "producer " << i << endl);
 
@@ -569,7 +725,7 @@ void *producer::frame_writer() {
 
         // printf("gps=%d  prev_gps=%d bfrac=%d prev_frac=%d\n", gps, prev_gps,
         // frac, prev_frac);
-        const int polls_per_sec = 320; // 320 polls gives 1 millisecond stddev
+        /*const int polls_per_sec = 320; // 320 polls gives 1 millisecond stddev
                                        // of cycle time (AEI Nov 2012)
         for (int ntries = 0;; ntries++) {
             struct timespec tspec = {
@@ -616,7 +772,7 @@ void *producer::frame_writer() {
 
                 exit(1);
             }
-        }
+        }*/
         // printf("gps=%d prev_gps=%d ifrac=%d prev_frac=%d\n", gps,  prev_gps,
         // frac, prev_frac);
         controller_cycle++;

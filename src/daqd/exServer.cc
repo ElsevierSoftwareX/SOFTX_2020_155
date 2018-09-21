@@ -71,11 +71,6 @@ pvInfo exServer::pvList[] = {
     pvInfo (1, "PRDCR_TIME_RECV_MEAN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_TIME_RECV_MEAN_MS),
     pvInfo (1, "PRDCR_TIME_RECV_MIN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_TIME_RECV_MIN_MS),
     pvInfo (1, "PRDCR_TIME_RECV_MAX_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_TIME_RECV_MAX_MS),
-
-    pvInfo (1, "PRDCR_DBG_CRC_TIME_FULL_MEAN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_DBG_CRC_TIME_FULL_MEAN_MS),
-    pvInfo (1, "PRDCR_DBG_CRC_TIME_FULL_MIN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_DBG_CRC_TIME_FULL_MIN_MS),
-    pvInfo (1, "PRDCR_DBG_CRC_TIME_FULL_MAX_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_DBG_CRC_TIME_FULL_MAX_MS),
-
     pvInfo (1, "PRDCR_CRC_TIME_FULL_MEAN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_CRC_TIME_FULL_MEAN_MS),
     pvInfo (1, "PRDCR_CRC_TIME_FULL_MIN_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_CRC_TIME_FULL_MIN_MS),
     pvInfo (1, "PRDCR_CRC_TIME_FULL_MAX_MS", 0xffffffff, 0, excasIoSync, 1, pvValue+PV::PV_PRDCR_CRC_TIME_FULL_MAX_MS),

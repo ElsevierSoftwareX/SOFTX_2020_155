@@ -310,7 +310,6 @@ void *producer::frame_writer() {
         for (;;) {
             int old_seq = seq;
             int length = NDS->receive(bufptr, buflen, &seq, &gps, &gps_n);
-            std::cout << "fw received buffer for " << gps << ":" << gps_n << std::endl;
             cur_buffer->length = length;
             // DEBUG1(printf("%d %d %d %d\n", length, seq, gps, gps_n));
             // Strangely we receiver duplicate blocks on solaris for some reason

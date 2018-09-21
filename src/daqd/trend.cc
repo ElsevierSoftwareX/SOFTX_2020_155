@@ -286,14 +286,17 @@ trender_c::minute_framer ()
   system_log(1, "Done creating ADC structures");
 
   sem_post (&minute_frame_saver_sem);
-  
+
+  std::vector<trend_block_t> cur_blk_(num_channels);
+
   PV::set_pv(PV::PV_MTREND_FW_STATE, STATE_NORMAL);
   long frame_cntr;
   for (frame_cntr = 0;; frame_cntr++)
     {
       int eof_flag = 0;
       circ_buffer_block_prop_t file_prop;
-      trend_block_t cur_blk [num_channels];
+      //trend_block_t cur_blk [num_channels];
+      trend_block_t* cur_blk = cur_blk_.data();
 
       // Accumulate frame adc data
       for (int i = 0; i < frame_length_blocks; i++)
@@ -723,13 +726,16 @@ trender_c::framer ()
 
   sem_post (&frame_saver_sem);
 
+  std::vector<trend_block_t> cur_blk_(num_channels);
+
   PV::set_pv(PV::PV_STREND_FW_STATE, STATE_NORMAL);
   long frame_cntr;
   for (frame_cntr = 0;; frame_cntr++)
     {
       int eof_flag = 0;
       circ_buffer_block_prop_t file_prop;
-      trend_block_t cur_blk [num_channels];
+      trend_block_t *cur_blk = cur_blk_.data();
+      //trend_block_t cur_blk [num_channels];
 
       // Accumulate frame adc data
       for (int i = 0; i < frame_length_blocks; i++)
@@ -1315,13 +1321,17 @@ trender_c::start_trend (ostream *yyout, int pframes_per_file, int pminute_frames
     return 1;
   }
 
+  if (pminute_trend_buffer_blocks != SECPERMIN) {
+      *yyout << "Minute trend buffer blocks must be " << SECPERMIN << " aborting process." << endl;
+      exit(1);
+  }
   /*
      Set trender operational parameters.
   */
   frames_per_file = pframes_per_file;
   minute_frames_per_file = pminute_frames_per_file;
   trend_buffer_blocks = ptrend_buffer_blocks;
-  minute_trend_buffer_blocks = pminute_trend_buffer_blocks;
+  minute_trend_buffer_blocks = SECPERMIN;
 
   // error message buffer
   char errmsgbuf[80];

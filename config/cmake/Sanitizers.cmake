@@ -18,7 +18,7 @@ foreach (ENABLE_SANITIZER ${ENABLE_SANITIZERS})
 
     if (${ENABLE_SANITIZER} STREQUAL "address")
         if (${SANITIZER_ASAN_AVAILABLE})
-            add_compile_options("-fsanitize=address -O -g")
+            add_compile_options(-fsanitize=address -O -g)
             link_libraries("asan")
             message("Enabling asan")
         else(${SANITIZER_ASAN_AVAILABLE})

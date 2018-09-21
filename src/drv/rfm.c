@@ -91,3 +91,38 @@ findRfmCard(unsigned int bn)
     }
     return (void *)addr;
 }
+volatile void *
+findSharedMemorySize(char *sys_name, int size)
+{
+	char *s;
+        int fd;
+	char sys[128];
+	char fname[128];
+	strcpy(sys, sys_name);
+	for(s = sys; *s; s++) *s=tolower(*s);
+
+	sprintf(fname, "/rtl_mem_%s", sys);
+
+	int ss = size*1024*1024;
+	printf("Making mbuff area %s with size %d\n",sys,ss);
+
+       if ((fd = open ("/dev/mbuf", O_RDWR | O_SYNC)) < 0) {
+		fprintf(stderr, "Couldn't open /dev/mbuf read/write\n");
+                return 0;
+       }
+       struct mbuf_request_struct req;
+       req.size = ss;
+       strcpy(req.name, sys);
+       ioctl (fd, IOCTL_MBUF_ALLOCATE, &req);
+       ioctl (fd, IOCTL_MBUF_INFO, &req);
+	
+        addr = (volatile unsigned char *)mmap(0, ss, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        if (addr == MAP_FAILED) {
+                printf("return was %d\n",errno);
+                perror("mmap");
+                _exit(-1);
+        }
+	printf(" %s mmapped address is 0x%lx\n", sys,(long)addr);
+        return addr;
+}
+

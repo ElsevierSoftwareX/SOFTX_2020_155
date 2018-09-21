@@ -10,19 +10,24 @@ srcdir = .
 
 #include ../common.mk
 
-TARGETS=zmq_multi_stream zmq_multi_rcvr zmq_proxy zmq_proxy_client zmq_threads zmq_rcv_from_dc.c gpstp_test.c
+TARGETS=zmq_multi_stream zmq_multi_rcvr zmq_proxy zmq_proxy_client zmq_threads zmq_rcv_from_dc.c gpstp_test.c zmqms zmq_fe
 
 zmq_multi_stream: zmq_multi_stream.o rfm.o
+zmqms: zmqms.o rfm.o
+zmq_fe: zmq_fe.o rfm.o zmq_transport.o dc_util.o
 gdstp_test: gdstp_test.o rfm.o
 zmq_multi_rcvr: zmq_multi_rcvr.o
-zmq_threads: zmq_threads.o
+zmq_threads: zmq_threads.o rfm.o zmq_transport.o dc_util.o
 zmq_rcv_from_dc: zmq_rcv_from_dc.o
 zmq_proxy: zmq_proxy.o
 zmq_proxy_client: zmq_proxy_client.o
 rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+zmq_transport.o: ../zmq_stream/zmq_transport.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-CFLAGS = -I${prefix}/include -I.
+
+CFLAGS = -I${prefix}/include -I. -I../include
 CFLAGS += -Wall -g -O2 -std=gnu99 -lpthread
 CFLAGS += $(OPTIM_CFLAGS)
 
@@ -32,7 +37,7 @@ LDFLAGS = -L/usr/local/lib -lzmq -lpthread
 
 .PHONY: clean
 clean:
-	rm -r *.o zmq_multi_stream zmq_multi_rcvr
+	rm -r *.o zmq_multi_stream zmq_multi_rcvr zmqms zmq_fe
 
 .PHONY: distclean
 distclean: clean
