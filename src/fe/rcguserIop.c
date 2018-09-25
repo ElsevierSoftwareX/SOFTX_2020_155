@@ -148,15 +148,6 @@ int main (int argc, char **argv)
 	printf("DAQSM at 0x%lx\n",_daq_shm);
  	daqPtr = (struct rmIpcStr *) _daq_shm;
 
-// Open new GDS TP data shared memory in support of ZMQ
-        sprintf(shm_name, "%s_gds", sysname);
-	findSharedMemory(shm_name);
-	_gds_shm = (char *)addr;
-        if (_gds_shm < 0) {
-                printf("mbuf_allocate_area() failed; ret = %d\n", _gds_shm);
-                return -1;
-        }
-	printf("GDSSM at 0x%lx\n",_gds_shm);
 
 // Open new IO shared memory in support of no hardware I/O
         sprintf(shm_name, "%s_io_space", sysname);

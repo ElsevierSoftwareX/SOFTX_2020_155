@@ -153,6 +153,7 @@ unsigned int getGpsTimeProc() {
 	mytime = atoi(line);
 	printf("GPS TIME is %d\n",mytime);
 	fclose(timef);
+	mytime -= 1;
 	return (mytime);
 }
   void initAdcModules(adcInfo_t *adcinfo) {
@@ -827,7 +828,7 @@ printf("cycle time = %d\n",cycleTime);
 /// \> Cycle 21, Update ADC/DAC status to EPICS.
         if(cycleNum == HKP_ADC_DAC_STAT_UPDATES)
         {
-	  pLocalEpics->epicsOutput.ovAccum = adcInfo.overflowAdc;
+	  pLocalEpics->epicsOutput.ovAccum = overflowAcc;
 	  for(jj=0;jj<cdsPciModules.adcCount;jj++)
 	  {
 	    // SET/CLR Channel Hopping Error
