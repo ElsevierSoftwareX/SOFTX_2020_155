@@ -1799,7 +1799,7 @@ int writeEpicsDb(int numchans,		///< Number of channels to write
 	long status;
 	int ii;
 
-	chNotFound = 0;
+	// chNotFound = 0;
 	switch (command)
 	{
 		case SDF_LOAD_DB_ONLY:
@@ -1817,6 +1817,8 @@ int writeEpicsDb(int numchans,		///< Number of channels to write
 					}
 				}
 				else {				// Write errors to chan not found table.
+				printf("CNF for %s = %d\n",myTable[ii].chname,status);
+				#if 0
 					if(chNotFound < SDF_ERR_TSIZE) {
 						sprintf(unknownChans[chNotFound].chname,"%s",myTable[ii].chname);
 						sprintf(unknownChans[chNotFound].liveset,"%s"," ");
@@ -1826,6 +1828,7 @@ int writeEpicsDb(int numchans,		///< Number of channels to write
 						unknownChans[chNotFound].chFlag = 0;
 					}
 					chNotFound ++;
+				#endif
 				}
 			}
 			break;
@@ -1929,6 +1932,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 		strcpy(s4,"x");
 		bzero(s3,sizeof(s3));
 		strncpy(ifo,pref,3);
+		chNotFound = 0;
 		while(fgets(line,sizeof line,cdf) != NULL)
 		{
 			isalarm = 0;
@@ -2040,7 +2044,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 						}
 					}
 				   }
-				   // if(!fmatch) printf("NEW channel not found %s\n",cdTableP[chNumP].chname);
+				   // if(!fmatch) printf("NEW channel not found %s %d\n",cdTableP[chNumP].chname,chNumP);
 				}
 				// The following loads info into the filter module table if a FM switch
 				fmIndex = -1;
@@ -2059,7 +2063,20 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 						}
 					}
 				}
-				chNumP ++;
+				if(fmatch) {
+					chNumP ++;
+				} else {
+					// printf("CNF for %s \n",cdTableP[chNumP].chname);
+					if(chNotFound < SDF_ERR_TSIZE) {
+						sprintf(unknownChans[chNotFound].chname,"%s",cdTableP[chNumP].chname);
+						sprintf(unknownChans[chNotFound].liveset,"%s"," ");
+						unknownChans[chNotFound].liveval = 0.0;
+						sprintf(unknownChans[chNotFound].timeset,"%s"," ");
+						sprintf(unknownChans[chNotFound].diff,"%s"," ");
+						unknownChans[chNotFound].chFlag = 0;
+					}
+					chNotFound ++;
+				}
 				if(chNumP >= SDF_MAX_CHANS)
 				{
 					fclose(cdf);
@@ -2069,7 +2086,7 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 					lderror = 4;
 					return(lderror);
 				}
-		   	}
+		   	} 
 		}
 		fclose(cdf);
 		fclose(adf);
