@@ -2069,7 +2069,12 @@ int readConfig( char *pref,		///< EPICS channel prefix from EPICS environment.
 					// printf("CNF for %s \n",cdTableP[chNumP].chname);
 					if(chNotFound < SDF_ERR_TSIZE) {
 						sprintf(unknownChans[chNotFound].chname,"%s",cdTableP[chNumP].chname);
-						sprintf(unknownChans[chNotFound].liveset,"%s"," ");
+						status = GET_ADDRESS(cdTableP[chNumP].chname,&paddr);
+						if(!status) { 
+							sprintf(unknownChans[chNotFound].liveset,"%s","RO Channel ");
+						} else {
+							sprintf(unknownChans[chNotFound].liveset,"%s","  ");
+						}
 						unknownChans[chNotFound].liveval = 0.0;
 						sprintf(unknownChans[chNotFound].timeset,"%s"," ");
 						sprintf(unknownChans[chNotFound].diff,"%s"," ");
