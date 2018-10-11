@@ -10,17 +10,16 @@ add_executable(fe_stream_test
         )
 target_link_libraries(fe_stream_test
         PRIVATE
-        fe_stream_generator
-        clock_gettime)
+        fe_stream_generator)
 
 if (${libNDS2Client_FOUND})
 
-    add_executable(fe_stream_check
-            fe_stream_check.cc
-            )
-    target_link_libraries(fe_stream_check
-            PRIVATE
-            fe_stream_generator
-            nds2client::cxx)
+#    add_executable(fe_stream_check
+#            fe_stream_check.cc
+#            )
+#    target_link_libraries(fe_stream_check
+#            PRIVATE
+#            fe_stream_generator
+#            nds2client::cxx)
 
 endif (${libNDS2Client_FOUND})
