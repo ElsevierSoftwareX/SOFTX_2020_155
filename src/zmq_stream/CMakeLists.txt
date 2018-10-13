@@ -23,7 +23,7 @@ target_link_libraries(zmq_dc_recv PUBLIC zmq4::zmq ${CMAKE_THREAD_LIBS_INIT})
 add_library(zmq::dc_recv ALIAS zmq_dc_recv)
 
 add_executable(zmq_fe zmq_fe.c dc_utils.c)
-target_link_libraries(zmq_fe PUBLIC driver::shmem zmq_transport zmq4::zmq)
+target_link_libraries(zmq_fe PUBLIC driver::shmem zmq_transport zmq4::zmq zmq::simple_pv)
 
 add_executable(zmq_multi_stream zmq_multi_stream.c ../drv/rfm.c ${CMAKE_CURRENT_SOURCE_DIR}/../include/daq_core.h)
 target_include_directories(zmq_multi_stream PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)

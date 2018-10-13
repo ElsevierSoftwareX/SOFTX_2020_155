@@ -14,7 +14,7 @@ TARGETS=zmq_multi_stream zmq_multi_rcvr zmq_proxy zmq_proxy_client zmq_threads z
 
 zmq_multi_stream: zmq_multi_stream.o rfm.o
 zmqms: zmqms.o rfm.o
-zmq_fe: zmq_fe.o rfm.o zmq_transport.o dc_util.o
+zmq_fe: zmq_fe.o rfm.o zmq_transport.o dc_util.o simple_pv.o
 gdstp_test: gdstp_test.o rfm.o
 zmq_multi_rcvr: zmq_multi_rcvr.o
 zmq_threads: zmq_threads.o rfm.o zmq_transport.o dc_util.o

@@ -60,6 +60,118 @@ struct thread_mon_info {
     int index;
     void *ctx;
 };
+
+typedef struct mask_t {
+	int data[DCU_COUNT];
+} mask_t;
+
+static inline void mask_clear(mask_t* mask)
+{
+	memset(mask->data, 0, sizeof(mask->data));
+}
+
+static inline void mask_set_entry(mask_t* mask, int index)
+{
+	const unsigned int MAX_INDEX = sizeof(mask->data)/sizeof(mask->data[0]);
+	if (((unsigned int)index) < MAX_INDEX)
+	{
+		mask->data[index] = 1;
+	}
+}
+
+static inline int mask_diffs(mask_t* input1, mask_t* input2, mask_t* dest)
+{
+	const int MAX_INDEX = sizeof(input1->data)/sizeof(input1->data[0]);
+	int diffs = 0;
+	int i = 0;
+	for(; i < MAX_INDEX; ++i)
+	{
+		diffs += (dest->data[i] = (input1->data[i] != input2->data[i]));
+	}
+	return diffs;
+}
+
+static inline int mask_differs(mask_t* input1, mask_t* input2)
+{
+	const int MAX_INDEX = sizeof(input1->data)/sizeof(input1->data[0]);
+	int i = 0;
+	for (; i < MAX_INDEX; ++i)
+	{
+		if (input1->data[i] != input2->data[i])
+		{
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static inline void mask_dump(mask_t* mask, const char* description)
+{
+	printf("%s\n", description);
+	const int MAX_INDEX = sizeof(mask->data)/sizeof(mask->data[0]);
+	int i = 0;
+	for (; i < MAX_INDEX; ++i)
+	{
+		if (mask->data[i])
+		{
+			printf("(%d) ", i);
+		}
+	}
+	printf("\n");
+}
+
+static inline void mask_copy(mask_t* dest, const mask_t* src)
+{
+	memcpy(dest, src, sizeof(*dest));
+}
+
+static void dump_dcu_mask_diff(mask_t* prev, mask_t* cur, int dcu_endpoint_lookup[DCU_COUNT])
+{
+	const int MAX_INDEX = sizeof(cur->data)/sizeof(cur->data[0]);
+	if (!mask_differs(prev, cur))
+	{
+		return;
+	}
+	printf("\nDCU state change:\n");
+	int i = 0;
+	for (i = 0; i < MAX_INDEX; ++i)
+	{
+		if (prev->data[i] < cur->data[i])
+		{
+			printf("(+%d)e%d ", i, dcu_endpoint_lookup[i]);
+		}
+		else if (prev->data[i] > cur->data[i])
+		{
+			printf("(-%d)e%d ", i, dcu_endpoint_lookup[i]);
+		}
+	}
+}
+
+static void dump_endpoint_mask_diff(mask_t* prev, mask_t* cur)
+{
+	const int MAX_INDEX = sizeof(cur->data)/sizeof(cur->data[0]);
+	if (!mask_differs(prev, cur))
+	{
+		return;
+	}
+	printf("\nEndpoint state change:\n");
+	int i = 0;
+	for (i = 0; i < MAX_INDEX; ++i)
+	{
+		if (prev->data[i] < cur->data[i])
+		{
+			printf("(+%d) ", i);
+		}
+		else if (prev->data[i] > cur->data[i])
+		{
+			printf("(-%d) ", i);
+		}
+	}
+	printf("\n");
+}
+
+
+
 struct thread_info thread_index[DCU_COUNT];
 void *daq_context[DCU_COUNT];
 void *daq_subscriber[DCU_COUNT];
@@ -496,6 +608,20 @@ main(int argc, char **argv)
     int64_t cur_ref_time = 0;
     int recv_buckets[(MAX_DELAY_MS/5)+2];
     int entry_binned = 0;
+
+    mask_t dcu_received_mask;
+    mask_t dcu_received_prev_mask;
+    mask_t endpoint_received_mask;
+    mask_t endpoint_received_prev_mask;
+
+    int dcu_endpoint_lookup[DCU_COUNT];
+    memset(dcu_endpoint_lookup, 0, sizeof(dcu_endpoint_lookup));
+
+    mask_clear(&dcu_received_mask);
+    mask_clear(&dcu_received_prev_mask);
+    mask_clear(&endpoint_received_mask);
+    mask_clear(&endpoint_received_prev_mask);
+
 	SimplePV pvs[] = {
             {
                     "RECV_BIN_MISS",
@@ -717,6 +843,12 @@ main(int argc, char **argv)
 		threads_rdy = 0;
 		any_rdy = 0;
 
+		// reset masks
+		mask_copy(&dcu_received_prev_mask, &dcu_received_mask);
+		mask_copy(&endpoint_received_prev_mask, &endpoint_received_mask);
+		mask_clear(&dcu_received_mask);
+		mask_clear(&endpoint_received_mask);
+
 		// Wait up to 100ms until received data from at least 1 FE or timeout
 		do {
 			usleep(2000);
@@ -772,6 +904,8 @@ main(int argc, char **argv)
 			for(ii=0;ii<nsys;ii++) {
 		  		recv_time[ii] = -1;
                 if(dataRdy[ii]) {
+                	mask_set_entry(&endpoint_received_mask, ii);
+
                     recv_time[ii] = dataRecvTime[ii];
                     if (recv_time[ii] < min_recv_time) {
                         min_recv_time = recv_time[ii];
@@ -794,6 +928,10 @@ main(int argc, char **argv)
 						ifoDataBlock->header.dcuheader[mytotaldcu].dataBlockSize = mxDataBlockSingle[ii].header.dcuheader[jj].dataBlockSize;
 						ifoDataBlock->header.dcuheader[mytotaldcu].tpBlockSize = mxDataBlockSingle[ii].header.dcuheader[jj].tpBlockSize;
 						ifoDataBlock->header.dcuheader[mytotaldcu].tpCount = mxDataBlockSingle[ii].header.dcuheader[jj].tpCount;
+
+						mask_set_entry(&dcu_received_mask, ifoDataBlock->header.dcuheader[mytotaldcu].dcuId);
+						dcu_endpoint_lookup[ifoDataBlock->header.dcuheader[mytotaldcu].dcuId] = ii;
+
 						for(kk=0;kk<DAQ_GDS_MAX_TP_NUM ;kk++)	
 							ifoDataBlock->header.dcuheader[mytotaldcu].tpNum[kk] = mxDataBlockSingle[ii].header.dcuheader[jj].tpNum[kk];
 						edbs[mytotaldcu] = mxDataBlockSingle[ii].header.dcuheader[jj].tpBlockSize + mxDataBlockSingle[ii].header.dcuheader[jj].dataBlockSize;
@@ -944,7 +1082,8 @@ main(int argc, char **argv)
 			strcat(dcstatus,dcs);
 		}
 
-
+		dump_dcu_mask_diff(&dcu_received_prev_mask, &dcu_received_mask, dcu_endpoint_lookup);
+		dump_endpoint_mask_diff(&endpoint_received_prev_mask, &endpoint_received_mask);
 		// Increment cycle count
 		nextCycle ++;
 		nextCycle %= 16;
