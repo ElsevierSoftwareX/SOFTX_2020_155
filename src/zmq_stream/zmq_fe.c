@@ -188,6 +188,8 @@ waitNextCycle2(	int nsys,
 	int ii;
 	int threads_rdy = 0;
 	int timeout = 0;
+    unsigned int expected_time_sec = 0;
+    unsigned int local_model_time_sec = 0;
 
 		// if reset, want to set IOP cycle to impossible number
 		if(reset) ipcPtr[0]->cycle = 50;
@@ -203,15 +205,18 @@ waitNextCycle2(	int nsys,
 						dataRdy[0] = 1;
 				}
 			    timeout += 1;
-			}while(!iopRunning && timeout < 500);
+			} while(!iopRunning && timeout < 500);
+
+			expected_time_sec = ipcPtr[0]->bp[cyclereq].timeSec;
 
             // Wait until data received from everyone or timeout
             timeout = 0;
             do {
              	usleep(100);
 				for(ii=1;ii<nsys;ii++) {
-             		if(ipcPtr[ii]->cycle == cyclereq && !dataRdy[ii]) threads_rdy ++;
-             		if(ipcPtr[ii]->cycle == cyclereq) dataRdy[ii] = 1;
+				    local_model_time_sec = ipcPtr[ii]->bp[cyclereq].timeSec;
+             		if(ipcPtr[ii]->cycle == cyclereq && local_model_time_sec == expected_time_sec && !dataRdy[ii]) threads_rdy ++;
+             		if(ipcPtr[ii]->cycle == cyclereq && local_model_time_sec == expected_time_sec) dataRdy[ii] = 1;
                 }
                 timeout += 1;
             }while(threads_rdy < nsys && timeout < 20);
