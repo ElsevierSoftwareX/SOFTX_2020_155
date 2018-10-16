@@ -32,6 +32,8 @@
 #include "simple_pv.h"
 
 
+#define MAX_NSYS 24
+
 #define __CDECL
 
 static struct rmIpcStr *shmIpcPtr[128];
@@ -323,7 +325,8 @@ int loadMessageBuffer(	int nsys,
 						int lastCycle,
 						int status,
 						int dataRdy[],
-						int *nsys_ready
+						int *nsys_ready,
+						int *nsys_ready_mask
 					 )
 {
 	int sendLength = 0;
@@ -335,7 +338,10 @@ int loadMessageBuffer(	int nsys,
 	char *dataBuff;
 	int myCrc = 0;
 	int crcLength = 0;
+	int cur_mask = 1;
 
+		*nsys_ready = 0;
+		*nsys_ready_mask = 0;
 		// Set pointer to 0MQ message data block
 		zbuffer = (char *)&ixDataBlock->dataBlock[0];
 		// Initialize data send length to size of message header
@@ -347,6 +353,7 @@ int loadMessageBuffer(	int nsys,
 		for (ii=0;ii<nsys;ii++) {
 			if(dataRdy[ii]) {
 				++(*nsys_ready);
+				*nsys_ready_mask = (*nsys_ready_mask) | cur_mask;
 				// Set heartbeat monitor for return to DAQ software
 				if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[0];
 				// Set DCU ID in header
@@ -401,6 +408,7 @@ int loadMessageBuffer(	int nsys,
 				if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[1];
 				db ++;
 			}
+			cur_mask <<= 1;
 		}
 		ixDataBlock->header.dcuTotalModels = db;
 		return sendLength;
@@ -422,12 +430,13 @@ int send_to_local_memory(int nsys, int xmitData, int send_delay_ms, int pv_debug
 
   	int sync2iop = 1;
 	int status = 0;
-	int dataRdy[10];
+	int dataRdy[MAX_NSYS];
 	//int msg_size;
 	int sendLength = 0;
 	int time_delta = 0;
 	int expected_nsys = nsys;
 	int actual_nsys = 0;
+	int actual_nsys_mask = 0;
 
 
 	SimplePV pvs[] = {
@@ -467,10 +476,19 @@ int send_to_local_memory(int nsys, int xmitData, int send_delay_ms, int pv_debug
 			60,
 			1,
 		},
+		{
+			"FE_SYS_READY_MASK",
+			SIMPLE_PV_INT,
+				(void*)&actual_nsys_mask,
+				0x7fffffff,
+				0,
+				0x7fffffff,
+				0,
+		},
 	};
 
 
-	for(ii=0;ii<10;ii++) dataRdy[ii] = 0;
+	for(ii=0;ii<MAX_NSYS;ii++) dataRdy[ii] = 0;
 
 
 	long cur_gps=0, cur_nano=0;
@@ -498,7 +516,8 @@ int send_to_local_memory(int nsys, int xmitData, int send_delay_ms, int pv_debug
 		nextData += cycle_data_size * nextCycle;
 		ixDataBlock = (daq_multi_dcu_data_t *)nextData;
 		actual_nsys = 0;
-		sendLength = loadMessageBuffer(nsys, nextCycle, status, dataRdy, &actual_nsys);
+		actual_nsys_mask = 0;
+		sendLength = loadMessageBuffer(nsys, nextCycle, status, dataRdy, &actual_nsys, &actual_nsys_mask);
 		// Print diags in verbose mode
 		if(nextCycle == 0 && do_verbose) print_diags(nsys,lastCycle,sendLength,ixDataBlock);
 		// Write header info
@@ -544,7 +563,7 @@ main(int argc,char *argv[])
 {
     int counter = 0;
     int nsys = 1;
-    int dcuId[10];
+    int dcuId[MAX_NSYS];
     int ii = 0;
     char *gds_tp_dir = 0;
 	int max_data_size_mb = 64;
@@ -644,6 +663,11 @@ main(int argc,char *argv[])
         for(;;) {
         	char *s = strtok(0, " ");
 	        if (!s) break;
+	        if (nsys == (MAX_NSYS - 1))
+			{
+	        	fprintf(stderr, "Too many system names passed, max is %d\n", MAX_NSYS);
+	        	exit(1);
+			}
 	        sprintf(modelnames[nsys],"%s",s);
 	        dcuId[nsys] = 0;
 	        nsys++;
