@@ -1787,6 +1787,8 @@ if($virtualiop == 1) {
 print OUT "#include \"$rcg_src_dir/src/fe/controllerVirtual.c\"\n";
 } elsif ($virtualiop == 2) {
 print OUT "#include \"$rcg_src_dir/src/fe/controllerTS.c\"\n";
+} elsif ($virtualiop == 3) {
+print OUT "#include \"$rcg_src_dir/src/fe/controllerLR.c\"\n";
 } else {
   if($adcMaster == 1) {
   	print OUT "#include \"$rcg_src_dir/src/fe/controllerIop.c\"\n";
@@ -2428,7 +2430,7 @@ sub createEpicsMakefile {
 	  print OUTME "EXTRA_CFLAGS += -DUSE_SYSTEM_TIME=1\n";
 	}
 	print OUTME "\n";
-	print OUTME "LIBFLAGS += -lezca\n";
+	#print OUTME "LIBFLAGS += -lezca\n";
 	if($systemName eq "sei" || $useFIRs)
 	{
 	print OUTME "EXTRA_CFLAGS += -DFIR_FILTERS\n";

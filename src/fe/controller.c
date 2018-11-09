@@ -1835,6 +1835,7 @@ udelay(1000);
 	if(cycleNum == HKP_DIAG_UPDATES)	
         {
 	  pLocalEpics->epicsOutput.userTime = usrHoldTime;
+	  if(!iop_rfm_valid) ipcErrBits |= 256;
 	  pLocalEpics->epicsOutput.ipcStat = ipcErrBits;
 	  if(ipcErrBits & 0xf) feStatus |= FE_ERROR_IPC;
 	  // Create FB status word for return to EPICS

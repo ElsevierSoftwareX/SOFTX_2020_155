@@ -39,94 +39,120 @@ inline int iop_dac_init(int errorPend[])
 
 inline int iop_dac_preload(volatile GSC_DAC_REG *dacReg[])
 {
-	volatile GSA_18BIT_DAC_REG *dac18Ptr;
-	volatile GSA_20BIT_DAC_REG *dac20Ptr;
-	volatile GSC_DAC_REG *dac16Ptr;
-	int ii,jj;
+volatile GSA_18BIT_DAC_REG *dac18Ptr;
+volatile GSA_20BIT_DAC_REG *dac20Ptr;
+volatile GSC_DAC_REG *dac16Ptr;
+int ii,jj;
 
-		for(jj=0;jj<cdsPciModules.dacCount;jj++)
-		{       
-			if(cdsPciModules.dacType[jj] == GSC_18AO8)
-			{       
-				dac18Ptr = (volatile GSA_18BIT_DAC_REG *)(dacReg[jj]);
-				for(ii=0;ii<GSAO_18BIT_PRELOAD;ii++) dac18Ptr->OUTPUT_BUF = 0;
-			} else if(cdsPciModules.dacType[jj] == GSC_20AO8) {
-		        dac20Ptr = (volatile GSA_20BIT_DAC_REG *)(dacReg[jj]);
-		        for(ii=0;ii<GSAO_20BIT_PRELOAD;ii++) dac20Ptr->OUTPUT_BUF = 0;
-			}else{  
-				dac16Ptr = dacReg[jj];
-				for(ii=0;ii<GSAO_16BIT_PRELOAD;ii++) dac16Ptr->ODB = 0;
-			}       
-		}       
-		return 0;
+    for(jj=0;jj<cdsPciModules.dacCount;jj++)
+    {       
+        if(cdsPciModules.dacType[jj] == GSC_18AO8)
+        {       
+            dac18Ptr = (volatile GSA_18BIT_DAC_REG *)(dacReg[jj]);
+            for(ii=0;ii<GSAO_18BIT_PRELOAD;ii++) dac18Ptr->OUTPUT_BUF = 0;
+        } else if(cdsPciModules.dacType[jj] == GSC_20AO8) {
+            dac20Ptr = (volatile GSA_20BIT_DAC_REG *)(dacReg[jj]);
+            for(ii=0;ii<GSAO_20BIT_PRELOAD;ii++) dac20Ptr->OUTPUT_BUF = 0;
+        }else{  
+            dac16Ptr = dacReg[jj];
+            for(ii=0;ii<GSAO_16BIT_PRELOAD;ii++) dac16Ptr->ODB = 0;
+	}       
+    }       
+    return 0;
 }
 
+inline int iop_dac_recover(int loops, volatile GSC_DAC_REG *dacReg[])
+{
+    volatile GSA_18BIT_DAC_REG *dac18Ptr;
+    volatile GSA_20BIT_DAC_REG *dac20Ptr;
+    volatile GSC_DAC_REG *dac16Ptr;
+    int ii,jj,kk;
+    for(kk=0;kk<loops;kk++)
+    {
+      for(jj=0;jj<cdsPciModules.dacCount;jj++)
+      {       
+        if(cdsPciModules.dacType[jj] == GSC_18AO8)
+        {       
+            dac18Ptr = (volatile GSA_18BIT_DAC_REG *)(dacReg[jj]);
+            for(ii=0;ii<GSAO_18BIT_CHAN_COUNT;ii++) dac18Ptr->OUTPUT_BUF = dacOutEpics[jj][ii];
+        } else if(cdsPciModules.dacType[jj] == GSC_20AO8) {
+            dac20Ptr = (volatile GSA_20BIT_DAC_REG *)(dacReg[jj]);
+            for(ii=0;ii<GSAO_20BIT_CHAN_COUNT;ii++) dac20Ptr->OUTPUT_BUF = dacOutEpics[jj][ii];
+        }else{  
+            dac16Ptr = dacReg[jj];
+            for(ii=0;ii<GSAO_16BIT_CHAN_COUNT;ii++) dac16Ptr->ODB = dacOutEpics[jj][ii];
+	}       
+      }       
+    }       
+
+    return 0;
+}
 
 inline int iop_dac_write()
 {
-	unsigned int *pDacData; 
-	int ii,jj,mm;
-	int limit;     
-	int mask;          
-	int num_outs;
-	int status = 0;
+unsigned int *pDacData; 
+int ii,jj,mm;
+int limit;     
+int mask;          
+int num_outs;
+int status = 0;
 
 /// START OF IOP DAC WRITE ***************************************** \n
-        /// \> If DAC FIFO error, always output zero to DAC modules. \n
-        /// - -- Code will require restart to clear.
-        // COMMENT OUT NEX LINE FOR TEST STAND w/bad DAC cards. 
-#ifndef DAC_WD_OVERRIDE
-	/// \> Loop thru all DAC modules
-	for(jj=0;jj<cdsPciModules.dacCount;jj++)
+    /// \> If DAC FIFO error, always output zero to DAC modules. \n
+    /// - -- Code will require restart to clear.
+    // COMMENT OUT NEX LINE FOR TEST STAND w/bad DAC cards. 
+    /// \> Loop thru all DAC modules
+  if(dacWriteEnable > 4) {
+    for(jj=0;jj<cdsPciModules.dacCount;jj++)
     {
-		/// - -- Point to DAC memory buffer
+        /// - -- Point to DAC memory buffer
        	pDacData = (unsigned int *)(cdsPciModules.pci_dac[jj]);
        	/// - -- locate the proper DAC memory block
        	mm = cdsPciModules.dacConfig[jj];
        	/// - -- Determine if memory block has been set with the correct cycle count by Slave app.
-		if(ioMemData->iodata[mm][ioMemCntrDac].cycle == ioClockDac)
-		{
-			dacEnable |= pBits[jj];
-		}else {
-			dacEnable &= ~(pBits[jj]);
-			dacChanErr[jj] += 1;
-		}
-		/// - -- Set overflow limits, data mask, and chan count based on DAC type
+        if(ioMemData->iodata[mm][ioMemCntrDac].cycle == ioClockDac)
+        {
+            dacEnable |= pBits[jj];
+        }else {
+            dacEnable &= ~(pBits[jj]);
+            dacChanErr[jj] += 1;
+        }
+        /// - -- Set overflow limits, data mask, and chan count based on DAC type
         limit = OVERFLOW_LIMIT_16BIT;
         mask = GSAO_16BIT_MASK;
         num_outs = GSAO_16BIT_CHAN_COUNT;
         if (cdsPciModules.dacType[jj] == GSC_18AO8) {
-       		limit = OVERFLOW_LIMIT_18BIT; // 18 bit limit
+      	    limit = OVERFLOW_LIMIT_18BIT; // 18 bit limit
             mask = GSAO_18BIT_MASK;
             num_outs = GSAO_18BIT_CHAN_COUNT;
-		}
-		if (cdsPciModules.dacType[jj] == GSC_20AO8) {
-       		limit = OVERFLOW_LIMIT_20BIT; // 20 bit limit
+        }
+        if (cdsPciModules.dacType[jj] == GSC_20AO8) {
+            limit = OVERFLOW_LIMIT_20BIT; // 20 bit limit
             mask = GSAO_20BIT_MASK;
             num_outs = GSAO_20BIT_CHAN_COUNT;
-		}
-		/// - -- For each DAC channel
+        }
+        /// - -- For each DAC channel
         for (ii=0; ii < num_outs; ii++)
         {
 #ifdef FLIP_SIGNALS
-       		dacOut[jj][ii] *= -1;
+            dacOut[jj][ii] *= -1;
 #endif
-			/// - ---- Read DAC output value from shared memory and reset memory to zero
+        /// - ---- Read DAC output value from shared memory and reset memory to zero
             if((!dacChanErr[jj]) && (iopDacEnable)) {
-           		dac_out = ioMemData->iodata[mm][ioMemCntrDac].data[ii];
+                dac_out = ioMemData->iodata[mm][ioMemCntrDac].data[ii];
                 /// - --------- Zero out data in case user app dies by next cycle
                 /// when two or more apps share same DAC module.
                 ioMemData->iodata[mm][ioMemCntrDac].data[ii] = 0;
-    		} else {
-				dac_out = 0;
-				status = 1;
-			}
+            } else {
+                dac_out = 0;
+                status = 1;
+            }
             /// - ----  Write out ADC duotone signal to first DAC, last channel, 
 			/// if DAC duotone is enabled.
-			if((dt_diag.dacDuoEnable) && (ii==(num_outs-1)) && (jj == 0))
+            if((dt_diag.dacDuoEnable) && (ii==(num_outs-1)) && (jj == 0))
             {
-           		dac_out = adcinfo.adcData[0][ADC_DUOTONE_CHAN];
-      		}
+                dac_out = adcinfo.adcData[0][ADC_DUOTONE_CHAN];
+            }
 // Code below is only for use in DAQ test system.
 #ifdef DIAG_TEST
                         if((ii==0) && (jj == 0))
@@ -140,51 +166,51 @@ inline int iop_dac_write()
                                 else dac_out = 0;
                         }
 #endif
-                        /// - ---- Check output values are within range of DAC \n
-                        /// - --------- If overflow, clip at DAC limits and report errors
-			if(dac_out > limit || dac_out < -limit)
+            /// - ---- Check output values are within range of DAC \n
+            /// - --------- If overflow, clip at DAC limits and report errors
+            if(dac_out > limit || dac_out < -limit)
             {
-           		dacinfo.overflowDac[jj][ii] ++;
-				pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] ++;
+                dacinfo.overflowDac[jj][ii] ++;
+                pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] ++;
                 overflowAcc ++;
                 dacOF[jj] = 1;
-				odcStateWord |= ODC_DAC_OVF;;
-				if(dac_out > limit) dac_out = limit;
-				else dac_out = -limit;
-        	}
-           	/// - ---- If DAQKILL tripped, set output to zero.
+                odcStateWord |= ODC_DAC_OVF;;
+		if(dac_out > limit) dac_out = limit;
+		else dac_out = -limit;
+            }
+            /// - ---- If DAQKILL tripped, set output to zero.
             if(!iopDacEnable) dac_out = 0;
-       		/// - ---- Load last values to EPICS channels for monitoring on GDS_TP screen.
-           		dacOutEpics[jj][ii] = dac_out;
+       	    /// - ---- Load last values to EPICS channels for monitoring on GDS_TP screen.
+            dacOutEpics[jj][ii] = dac_out;
 
-                /// - ---- Load DAC testpoints
-                floatDacOut[16*jj + ii] = dac_out;
+            /// - ---- Load DAC testpoints
+            floatDacOut[16*jj + ii] = dac_out;
 
-                /// - ---- Write to DAC local memory area, for later xmit to DAC module
-                *pDacData =  (unsigned int)(dac_out & mask);
-                pDacData ++;
-			}
-            /// - -- Mark cycle count as having been used -1 \n
-            /// - --------- Forces slaves to mark this cycle or will not be used again by Master
-            ioMemData->iodata[mm][ioMemCntrDac].cycle = -1;
-            /// - -- DMA Write data to DAC module
-            if(dacWriteEnable > 4) {
-           		if(cdsPciModules.dacType[jj] == GSC_16AO16) {
-                                gsc16ao16DmaStart(jj);
-			 	} else if(cdsPciModules.dacType[jj] == GSC_20AO8) {
-					            gsc20ao8DmaStart(jj);
-                } else {
-                                gsc18ao8DmaStart(jj);
-                }
-        	}
-	}
+            /// - ---- Write to DAC local memory area, for later xmit to DAC module
+            *pDacData =  (unsigned int)(dac_out & mask);
+            pDacData ++;
+        }
+        /// - -- Mark cycle count as having been used -1 \n
+        /// - --------- Forces slaves to mark this cycle or will not be used again by Master
+        ioMemData->iodata[mm][ioMemCntrDac].cycle = -1;
+        /// - -- DMA Write data to DAC module
+        if(dacWriteEnable > 4) {
+            if(cdsPciModules.dacType[jj] == GSC_16AO16) {
+                gsc16ao16DmaStart(jj);
+        } else if(cdsPciModules.dacType[jj] == GSC_20AO8) {
+            gsc20ao8DmaStart(jj);
+        } else {
+            gsc18ao8DmaStart(jj);
+        }
+        }
+    }
+  }
     /// \> Increment DAC memory block pointers for next cycle
     ioClockDac = (ioClockDac + 1) % IOP_IO_RATE;
     ioMemCntrDac = (ioMemCntrDac + 1) % IO_MEMORY_SLOTS;
     if(dacWriteEnable < 10) dacWriteEnable ++;
 /// END OF IOP DAC WRITE *************************************************
-#endif
-	return status;
+    return status;
 
 }
 

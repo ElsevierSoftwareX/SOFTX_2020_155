@@ -57,7 +57,7 @@ inline float duotime(int count, float meanVal, float data[])
   sumY = 0;
   sumXX = 0;
   sumXY= 0;
-  xInc = 1000000/CYCLE_PER_SECOND;
+  xInc = 1000000/IOP_IO_RATE;
 
 
   for(ii=0;ii<count;ii++)

@@ -211,6 +211,25 @@ int gsc16ai64DmaSetup(int modNum)
   return(1);
 }
 
+// *****************************************************************************
+/// \brief This routine sets up the ADC DMA registers once on code initialization.
+///	@param[in] modNum The ID number of the ADC module to read.
+// *****************************************************************************
+int gsc16ai64DmaSetup32(int modNum)
+{
+  /// Set DMA mode such that completion does not cause interrupt on bus.
+  adcDma[modNum]->DMA0_MODE = GSAI_DMA_MODE_NO_INTR;
+  /// Load PCI address (remapped local memory) to which data is to be delivered.
+  adcDma[modNum]->DMA0_PCI_ADD = (int)adc_dma_handle[modNum];
+  /// Set the PCI address of board where data will be transferred from.
+  adcDma[modNum]->DMA0_LOC_ADD = GSAI_DMA_LOCAL_ADDR;
+  /// Set the number of bytes to be transferred.
+  adcDma[modNum]->DMA0_BTC = 0x100;
+  /// Set the DMA direction ie ADC to computer memory.
+  adcDma[modNum]->DMA0_DESC = GSAI_DMA_TO_PCI;
+  return(1);
+}
+
 
 // *****************************************************************************
 /// \brief This routine starts an ADC DMA operation. It must first be setup by 

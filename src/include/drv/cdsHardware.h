@@ -64,7 +64,7 @@ typedef struct CDS_REMOTE_NODES {
 } CDS_REMOTE_NODES;
 
 
-#define IO_MEMORY_SLOTS		64
+#define IO_MEMORY_SLOTS		2048
 #define IO_MEMORY_SLOT_VALS	32
 #define MAX_IO_MODULES		24
 #define OVERFLOW_LIMIT_16BIT	32760
@@ -73,15 +73,19 @@ typedef struct CDS_REMOTE_NODES {
 #define OVERFLOW_CNTR_LIMIT	0x1000000
 #define MAX_ADC_WAIT		1000000		// Max time (usec) to wait for ADC data transfer in iop app
 #define MAX_ADC_WAIT_CARD_0	23		// Max time (usec) to wait for 1st ADC card data ready
+#define MAX_ADC_WAIT_C0_32K	36		// Max time (usec) to wait for 1st ADC card data ready on 32K IOP
 #define MAX_ADC_WAIT_CARD_S	5 		// Max time (usec) to wait for remaining ADC card data ready
 #define MAX_ADC_WAIT_ERR_SEC	3 		// Max number of times ADC time > WAIT per sec before alarm set.
-#define MAX_ADC_WAIT_SLAVE	1000		// Max time (usec) to wait for ADC data transfer in slave app
+#define MAX_ADC_WAIT_SLAVE	100000		// Max time (usec) to wait for ADC data transfer in slave app
+#define MAX_ADC_WAIT_CYCLE	17
 #define DUMMY_ADC_VAL		0xf000000	// Dummy value for test last ADC channel has arrived
 #define ADC_1ST_CHAN_MARKER	0xf0000		// Only first ADC channel should have upper bits set as first chan marker.
 #define IOP_IO_RATE		65536
 #define ADC_DUOTONE_BRD		0
 #define ADC_DUOTONE_CHAN	31
 #define DAC_DUOTONE_CHAN	30
+#define ADC_BUS_DELAY		1
+#define ADC_SHORT_CYCLE		2
 
 typedef struct MEM_DATA_BLOCK{
 	int timeSec;

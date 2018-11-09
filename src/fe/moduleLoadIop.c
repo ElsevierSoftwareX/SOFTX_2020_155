@@ -74,7 +74,7 @@ int rt_iop_init (void)
     pLocalEpics->epicsOutput.fe_status = 0;
 
 	// Allocate IPC memory area
-	ret =  mbuf_allocate_area("ipc", 4*1024*1024, 0);
+	ret =  mbuf_allocate_area("ipc", 16*1024*1024, 0);
     if (ret < 0) {
 		printk("mbuf_allocate_area(ipc) failed; ret = %d\n", ret);
         return -1;
