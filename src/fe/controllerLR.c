@@ -691,17 +691,17 @@ udelay(1000);
 
 /// \> Update duotone diag information
 	dtc = (dtcycle % IO_MEMORY_SLOTS);
-        dt_diag.adc[(dtcycle + DT_SAMPLE_OFFSET) % 65536] = 
+        dt_diag.adc[(dtcycle + DT_SAMPLE_OFFSET) % IOP_IO_RATE] = 
 	    ioMemData->iodata[ADC_DUOTONE_BRD][dtc].data[ADC_DUOTONE_CHAN];
         dt_diag.totalAdc += 
 	    ioMemData->iodata[ADC_DUOTONE_BRD][dtc].data[ADC_DUOTONE_CHAN];
-	dtcycle = (dtcycle + 1) % 65536;
+	dtcycle = (dtcycle + 1) % IOP_IO_RATE;
 	dtc = (dtcycle % IO_MEMORY_SLOTS);
-        dt_diag.adc[(dtcycle + DT_SAMPLE_OFFSET) % 65536] = 
+        dt_diag.adc[(dtcycle + DT_SAMPLE_OFFSET) % IOP_IO_RATE] = 
 	    ioMemData->iodata[ADC_DUOTONE_BRD][dtc].data[ADC_DUOTONE_CHAN];
         dt_diag.totalAdc += 
 	    ioMemData->iodata[ADC_DUOTONE_BRD][dtc].data[ADC_DUOTONE_CHAN];
-	dtcycle = (dtcycle + 1) % 65536;
+	dtcycle = (dtcycle + 1) % IOP_IO_RATE;
 
 // *****************************************************************
 /// \> Cycle 16, perform duotone diag calcs.

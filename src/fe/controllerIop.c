@@ -127,6 +127,7 @@ int tdsCount = 0;
 
 /// Maintains present cycle count within a one second period.
 int cycleNum = 0;
+int adcCycleNum = 0;
 unsigned int odcStateWord = 0xffff;
 /// Value of readback from DAC FIFO size registers; used in diags for FIFO overflow/underflow.
 int out_buf_size = 0; // test checking DAC buffer size
