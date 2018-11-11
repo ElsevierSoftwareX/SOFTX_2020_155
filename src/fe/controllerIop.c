@@ -834,117 +834,115 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // *****************************************************************
 #ifndef NO_DAQ
 		
-	// Call daqLib
-	pLocalEpics->epicsOutput.daqByteCnt = 
-		daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
-	// Send the current DAQ block size to the awgtpman for TP number checking
-  	pEpicsComms->padSpace.feDaqBlockSize = curDaqBlockSize;
-  	pLocalEpics->epicsOutput.tpCnt = tpPtr->count & 0xff;
-	feStatus |= (FE_ERROR_EXC_SET & tpPtr->count);
-	if (FE_ERROR_EXC_SET & tpPtr->count) odcStateWord |= ODC_EXC_SET;
-	else odcStateWord &= ~(ODC_EXC_SET);
-	if(pLocalEpics->epicsOutput.daqByteCnt > DAQ_DCU_RATE_WARNING) 
-		feStatus |= FE_ERROR_DAQ;
+    // Call daqLib
+    pLocalEpics->epicsOutput.daqByteCnt = 
+    daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
+    // Send the current DAQ block size to the awgtpman for TP number checking
+    pEpicsComms->padSpace.feDaqBlockSize = curDaqBlockSize;
+    pLocalEpics->epicsOutput.tpCnt = tpPtr->count & 0xff;
+    feStatus |= (FE_ERROR_EXC_SET & tpPtr->count);
+    if (FE_ERROR_EXC_SET & tpPtr->count) odcStateWord |= ODC_EXC_SET;
+    else odcStateWord &= ~(ODC_EXC_SET);
+    if(pLocalEpics->epicsOutput.daqByteCnt > DAQ_DCU_RATE_WARNING) 
+      feStatus |= FE_ERROR_DAQ;
 #endif
 // *****************************************************************
 
 /// \> Cycle 19, write updated diag info to EPICS
-	if(cycleNum == HKP_DIAG_UPDATES)	
+    if(cycleNum == HKP_DIAG_UPDATES)	
     {
-	  	pLocalEpics->epicsOutput.userTime = timeinfo.usrHoldTime;
-	  	pLocalEpics->epicsOutput.ipcStat = ipcErrBits;
-	  	if(ipcErrBits & 0xf) feStatus |= FE_ERROR_IPC;
-	  	// Create FB status word for return to EPICS
-	  	mxStat = 0;
-	  	mxDiagR = daqPtr->reqAck;
-	  	if((mxDiag & 1) != (mxDiagR & 1)) mxStat = 1;
-	  	if((mxDiag & 2) != (mxDiagR & 2)) mxStat += 2;
+      pLocalEpics->epicsOutput.userTime = timeinfo.usrHoldTime;
+      pLocalEpics->epicsOutput.ipcStat = ipcErrBits;
+      if(ipcErrBits & 0xf) feStatus |= FE_ERROR_IPC;
+      // Create FB status word for return to EPICS
+      mxStat = 0;
+      mxDiagR = daqPtr->reqAck;
+      if((mxDiag & 1) != (mxDiagR & 1)) mxStat = 1;
+      if((mxDiag & 2) != (mxDiagR & 2)) mxStat += 2;
 #ifdef DUAL_DAQ_DC
-	  	if((mxDiag & 4) != (mxDiagR & 4)) mxStat += 4;
-	  	if((mxDiag & 8) != (mxDiagR & 8)) mxStat += 8;
+      if((mxDiag & 4) != (mxDiagR & 4)) mxStat += 4;
+      if((mxDiag & 8) != (mxDiagR & 8)) mxStat += 8;
 #endif
-	  	pLocalEpics->epicsOutput.fbNetStat = mxStat;
-  	  	mxDiag = mxDiagR;
-	  	if(mxStat != MX_OK)
-			feStatus |= FE_ERROR_DAQ;;
-	  	timeinfo.usrHoldTime = 0;
-  	  	if(pLocalEpics->epicsInput.overflowReset)
-	  	{
-       		if (pLocalEpics->epicsInput.overflowReset) {
-           		for (ii = 0; ii < 16; ii++) {
-               		for (jj = 0; jj < cdsPciModules.adcCount; jj++) {
-              			adcinfo.overflowAdc[jj][ii] = 0;
-                        adcinfo.overflowAdc[jj][ii + 16] = 0;
-						pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
-						pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii + 16] = 0;
-           		}
-                	for (jj = 0; jj < cdsPciModules.dacCount; jj++) {
-                        pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] = 0;
-                	}
-        		}
-  			}
-	  	}
-  	  	if((pLocalEpics->epicsInput.overflowReset) || (overflowAcc > OVERFLOW_CNTR_LIMIT))
-	  	{
-			pLocalEpics->epicsInput.overflowReset = 0;
-			pLocalEpics->epicsOutput.ovAccum = 0;
-			overflowAcc = 0;
-	  	}
-	}
+      pLocalEpics->epicsOutput.fbNetStat = mxStat;
+      mxDiag = mxDiagR;
+      if(mxStat != MX_OK) feStatus |= FE_ERROR_DAQ;;
+      timeinfo.usrHoldTime = 0;
+      if(pLocalEpics->epicsInput.overflowReset)
+      {
+        if (pLocalEpics->epicsInput.overflowReset) {
+          for (ii = 0; ii < 16; ii++) {
+            for (jj = 0; jj < cdsPciModules.adcCount; jj++) {
+              adcinfo.overflowAdc[jj][ii] = 0;
+              adcinfo.overflowAdc[jj][ii + 16] = 0;
+              pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
+              pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii + 16] = 0;
+            }
+            for (jj = 0; jj < cdsPciModules.dacCount; jj++) {
+              pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] = 0;
+            }
+          }
+        }
+      }
+      if((pLocalEpics->epicsInput.overflowReset) || (overflowAcc > OVERFLOW_CNTR_LIMIT))
+      {
+        pLocalEpics->epicsInput.overflowReset = 0;
+        pLocalEpics->epicsOutput.ovAccum = 0;
+        overflowAcc = 0;
+      }
+    }
 
 /// \> Cycle 20, Update latest DAC output values to EPICS
     if(subcycle == HKP_DAC_EPICS_UPDATES)
-	{
-		// Send DAC output values at 16Hzfb
-	    for(jj=0;jj<cdsPciModules.dacCount;jj++)
-	    {
-	    	for(ii=0;ii<MAX_DAC_CHN_PER_MOD;ii++)
-	    	{
-				pLocalEpics->epicsOutput.dacValue[jj][ii] = dacOutEpics[jj][ii];
-			}
-	    }
-	}
+    {
+      // Send DAC output values at 16Hzfb
+      for(jj=0;jj<cdsPciModules.dacCount;jj++)
+      {
+        for(ii=0;ii<MAX_DAC_CHN_PER_MOD;ii++)
+        {
+          pLocalEpics->epicsOutput.dacValue[jj][ii] = dacOutEpics[jj][ii];
+        }	
+      }
+    }
 
 // *****************************************************************
 /// \> Cycle 21, Update ADC/DAC status to EPICS.
 // *****************************************************************
-	if(cycleNum == HKP_ADC_DAC_STAT_UPDATES)
+    if(cycleNum == HKP_ADC_DAC_STAT_UPDATES)
     {
-
-		pLocalEpics->epicsOutput.ovAccum = overflowAcc;
-		feStatus |= adc_status_update(&adcinfo);
-		feStatus |= dac_status_update(&dacinfo); 
-	    // If ADC channels not where they should be, we have no option but to exit
-	  	// from the RT code ie loops would be working with wrong input data.
-	  	if (adcinfo.chanHop) {
-	  		pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
-	        stop_working_threads = 1;
-	        vmeDone = 1;
-  			pLocalEpics->epicsOutput.fe_status = CHAN_HOP_ERROR;
-	 	 	continue;    
-	  	}
-	}
+      pLocalEpics->epicsOutput.ovAccum = overflowAcc;
+      feStatus |= adc_status_update(&adcinfo);
+      feStatus |= dac_status_update(&dacinfo); 
+      // If ADC channels not where they should be, we have no option but to exit
+      // from the RT code ie loops would be working with wrong input data.
+      if (adcinfo.chanHop) {
+        pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
+        stop_working_threads = 1;
+        vmeDone = 1;
+        pLocalEpics->epicsOutput.fe_status = CHAN_HOP_ERROR;
+        continue;    
+      }
+    }
 
 // *****************************************************************
 /// \> Cycle 300, If IOP and RFM cards, check own data diagnostics
 // *****************************************************************
-	// Deal with the own-data bits on the VMIC 5565 rfm cards
-	if (cdsPciModules.rfmCount > 0) {
-        if (cycleNum >= HKP_RFM_CHK_CYCLE && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount)) {
-			int mod = cycleNum - HKP_RFM_CHK_CYCLE;
-			status = vmic5565CheckOwnDataRcv(mod);
-			if(!status) ipcErrBits |= 4 + (mod * 4);
-		}
-		if (cycleNum >= (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount) && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount*2)) {
-			int mod = cycleNum - HKP_RFM_CHK_CYCLE - cdsPciModules.rfmCount;
-			vmic5565ResetOwnDataLight(mod);
-		}
-		if (cycleNum >= (HKP_RFM_CHK_CYCLE + 2*cdsPciModules.rfmCount) && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount*3)) {
-			int mod = cycleNum - HKP_RFM_CHK_CYCLE - cdsPciModules.rfmCount*2;
-				// Write data out to the RFM to trigger the light
-	  		((volatile long *)(cdsPciModules.pci_rfm[mod]))[2] = 0;
-		}
-	}
+    // Deal with the own-data bits on the VMIC 5565 rfm cards
+    if (cdsPciModules.rfmCount > 0) {
+      if (cycleNum >= HKP_RFM_CHK_CYCLE && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount)) {
+        int mod = cycleNum - HKP_RFM_CHK_CYCLE;
+        status = vmic5565CheckOwnDataRcv(mod);
+        if(!status) ipcErrBits |= 4 + (mod * 4);
+      }
+      if (cycleNum >= (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount) && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount*2)) {
+        int mod = cycleNum - HKP_RFM_CHK_CYCLE - cdsPciModules.rfmCount;
+        vmic5565ResetOwnDataLight(mod);
+      }
+      if (cycleNum >= (HKP_RFM_CHK_CYCLE + 2*cdsPciModules.rfmCount) && cycleNum < (HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount*3)) {
+        int mod = cycleNum - HKP_RFM_CHK_CYCLE - cdsPciModules.rfmCount*2;
+        // Write data out to the RFM to trigger the light
+        ((volatile long *)(cdsPciModules.pci_rfm[mod]))[2] = 0;
+      }
+    }
 
 // *****************************************************************
 /// \> Cycle 400 to 400 + numDacModules, write DAC heartbeat to AI chassis (only for 18 bit DAC modules)
@@ -953,25 +951,24 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // Only one write per code cycle to reduce time
 // *****************************************************************
     if (cycleNum >= HKP_DAC_WD_CLK && cycleNum < (HKP_DAC_WD_CLK + cdsPciModules.dacCount)) 
-	{
-		if (cycleNum == HKP_DAC_WD_CLK) dacWatchDog ^= 1;
-		jj = cycleNum - HKP_DAC_WD_CLK;
-		if(cdsPciModules.dacType[jj] == GSC_18AO8)
-		{
-			volatile GSA_18BIT_DAC_REG *dac18bitPtr;
-			dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
-			if(iopDacEnable && !dacChanErr[jj])
-				dac18bitPtr->digital_io_ports = (dacWatchDog | GSAO_18BIT_DIO_RW);
-
-		}
-		if(cdsPciModules.dacType[jj] == GSC_20AO8)
-		{
-		    volatile GSA_20BIT_DAC_REG *dac20bitPtr;
-		    dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
-		    if(iopDacEnable && !dacChanErr[jj]) 
-			dac20bitPtr->digital_io_ports = (dacWatchDog | GSAO_20BIT_DIO_RW);
-		}
-	}
+    {
+      if (cycleNum == HKP_DAC_WD_CLK) dacWatchDog ^= 1;
+      jj = cycleNum - HKP_DAC_WD_CLK;
+      if(cdsPciModules.dacType[jj] == GSC_18AO8)
+      {
+        volatile GSA_18BIT_DAC_REG *dac18bitPtr;
+        dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
+        if(iopDacEnable && !dacChanErr[jj])
+          dac18bitPtr->digital_io_ports = (dacWatchDog | GSAO_18BIT_DIO_RW);
+      }
+      if(cdsPciModules.dacType[jj] == GSC_20AO8)
+      {
+        volatile GSA_20BIT_DAC_REG *dac20bitPtr;
+        dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
+        if(iopDacEnable && !dacChanErr[jj]) 
+          dac20bitPtr->digital_io_ports = (dacWatchDog | GSAO_20BIT_DIO_RW);
+      }
+    }
 
 // *****************************************************************
 /// \> Cycle 500 to 500 + numDacModules, read back watchdog from AI chassis (18 bit DAC only)
@@ -980,32 +977,31 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // Only one read per code cycle to reduce time
 // *****************************************************************
     if (cycleNum >= HKP_DAC_WD_CHK && cycleNum < (HKP_DAC_WD_CHK + cdsPciModules.dacCount)) 
-	{
-		jj = cycleNum - HKP_DAC_WD_CHK;
-		if(cdsPciModules.dacType[jj] == GSC_18AO8)
-		{
-			static int dacWDread = 0;
-			volatile GSA_18BIT_DAC_REG *dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
-			dacWDread = dac18bitPtr->digital_io_ports;
-			if(((dacWDread >> 8) & 1) > 0)
-			    {
-			    	pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_WD_BIT);
-			    }
-			    else 
-			    	pLocalEpics->epicsOutput.statDac[jj] |= DAC_WD_BIT;
-
-		}
-		if(cdsPciModules.dacType[jj] == GSC_20AO8)
+    {
+      jj = cycleNum - HKP_DAC_WD_CHK;
+      if(cdsPciModules.dacType[jj] == GSC_18AO8)
+      {
+        static int dacWDread = 0;
+        volatile GSA_18BIT_DAC_REG *dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
+        dacWDread = dac18bitPtr->digital_io_ports;
+        if(((dacWDread >> 8) & 1) > 0)
         {
-            static int dacWDread = 0;
-            volatile GSA_20BIT_DAC_REG *dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
-            dacWDread = dac20bitPtr->digital_io_ports;
-            if(((dacWDread >> 8) & 1) > 0)
-                 pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_WD_BIT);
-            else
-                 pLocalEpics->epicsOutput.statDac[jj] |= DAC_WD_BIT;
-		}
-	}
+          pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_WD_BIT);
+        }
+        else 
+          pLocalEpics->epicsOutput.statDac[jj] |= DAC_WD_BIT;
+      }
+      if(cdsPciModules.dacType[jj] == GSC_20AO8)
+      {
+        static int dacWDread = 0;
+        volatile GSA_20BIT_DAC_REG *dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
+        dacWDread = dac20bitPtr->digital_io_ports;
+        if(((dacWDread >> 8) & 1) > 0)
+          pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_WD_BIT);
+        else
+          pLocalEpics->epicsOutput.statDac[jj] |= DAC_WD_BIT;
+      }
+    }
 
 // *****************************************************************
 /// \> Cycle 600 to 600 + numDacModules, Check DAC FIFO Sizes to determine if DAC modules are synched to code 
@@ -1015,76 +1011,76 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // This code runs once per second.
 // *****************************************************************
 #ifndef NO_DAC_PRELOAD
-   	if (cycleNum >= HKP_DAC_FIFO_CHK && cycleNum < (HKP_DAC_FIFO_CHK + cdsPciModules.dacCount)) 
-	{
-		status = check_dac_buffers(cycleNum);
-	}
-	if (dacTimingError) feStatus |= FE_ERROR_DAC;
+   if (cycleNum >= HKP_DAC_FIFO_CHK && cycleNum < (HKP_DAC_FIFO_CHK + cdsPciModules.dacCount)) 
+   {
+      status = check_dac_buffers(cycleNum);
+   }
+   if (dacTimingError) feStatus |= FE_ERROR_DAC;
 
 #endif
 
 // *****************************************************************
 // Update end of cycle information
 // *****************************************************************
-	// Capture end of cycle time.
+    // Capture end of cycle time.
     rdtscl(cpuClock[CPU_TIME_CYCLE_END]);
 
-	/// \> Compute code cycle time diag information.
-	timeinfo.cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
-	// Hold the max cycle time over the last 1 second
-	if(timeinfo.cycleTime > timeinfo.timeHold) { 
-		timeinfo.timeHold = timeinfo.cycleTime;
-		timeinfo.timeHoldWhen = cycleNum;
-	}
-	// Hold the max cycle time since last diag reset
-	if(timeinfo.cycleTime > timeinfo.timeHoldMax) timeinfo.timeHoldMax = timeinfo.cycleTime;
-	adcinfo.adcHoldTime = (cpuClock[CPU_TIME_CYCLE_START] - adcinfo.adcTime)/CPURATE;
-	// Avoid calculating the max hold time for the first few seconds
-	if (cycleNum != 0 && (timeinfo.startGpsTime+3) < cycle_gps_time) {
-		if(adcinfo.adcHoldTime > adcinfo.adcHoldTimeMax) 
-			adcinfo.adcHoldTimeMax = adcinfo.adcHoldTime;
-		if(adcinfo.adcHoldTime < adcinfo.adcHoldTimeMin) 
-			adcinfo.adcHoldTimeMin = adcinfo.adcHoldTime;
-		adcinfo.adcHoldTimeAvg += adcinfo.adcHoldTime;
-		if (adcinfo.adcHoldTimeMax > adcinfo.adcHoldTimeEverMax)  {
-			adcinfo.adcHoldTimeEverMax = adcinfo.adcHoldTimeMax;
-			adcinfo.adcHoldTimeEverMaxWhen = cycle_gps_time;
-		}
-		if (timeinfo.timeHoldMax > timeinfo.cpuTimeEverMax)  {
-			timeinfo.cpuTimeEverMax = timeinfo.timeHoldMax;
-			timeinfo.cpuTimeEverMaxWhen = cycle_gps_time;
-		}
-	}
-	adcinfo.adcTime = cpuClock[CPU_TIME_CYCLE_START];
-	// Calc the max time of one cycle of the user code
-	// For IOP, more interested in time to get thru ADC read code and send to slave apps
-	timeinfo.usrTime = (cpuClock[CPU_TIME_USR_START] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
-	if(timeinfo.usrTime > timeinfo.usrHoldTime) timeinfo.usrHoldTime = timeinfo.usrTime;
+    /// \> Compute code cycle time diag information.
+    timeinfo.cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
+    // Hold the max cycle time over the last 1 second
+    if(timeinfo.cycleTime > timeinfo.timeHold) { 
+      timeinfo.timeHold = timeinfo.cycleTime;
+      timeinfo.timeHoldWhen = cycleNum;
+    }
+    // Hold the max cycle time since last diag reset
+    if(timeinfo.cycleTime > timeinfo.timeHoldMax) timeinfo.timeHoldMax = timeinfo.cycleTime;
+    adcinfo.adcHoldTime = (cpuClock[CPU_TIME_CYCLE_START] - adcinfo.adcTime)/CPURATE;
+    // Avoid calculating the max hold time for the first few seconds
+    if (cycleNum != 0 && (timeinfo.startGpsTime+3) < cycle_gps_time) {
+      if(adcinfo.adcHoldTime > adcinfo.adcHoldTimeMax) 
+        adcinfo.adcHoldTimeMax = adcinfo.adcHoldTime;
+      if(adcinfo.adcHoldTime < adcinfo.adcHoldTimeMin) 
+        adcinfo.adcHoldTimeMin = adcinfo.adcHoldTime;
+      adcinfo.adcHoldTimeAvg += adcinfo.adcHoldTime;
+      if (adcinfo.adcHoldTimeMax > adcinfo.adcHoldTimeEverMax)  {
+        adcinfo.adcHoldTimeEverMax = adcinfo.adcHoldTimeMax;
+        adcinfo.adcHoldTimeEverMaxWhen = cycle_gps_time;
+      }
+      if (timeinfo.timeHoldMax > timeinfo.cpuTimeEverMax)  {
+        timeinfo.cpuTimeEverMax = timeinfo.timeHoldMax;
+        timeinfo.cpuTimeEverMaxWhen = cycle_gps_time;
+      }
+    }
+    adcinfo.adcTime = cpuClock[CPU_TIME_CYCLE_START];
+    // Calc the max time of one cycle of the user code
+    // For IOP, more interested in time to get thru ADC read code and send to slave apps
+    timeinfo.usrTime = (cpuClock[CPU_TIME_USR_START] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
+    if(timeinfo.usrTime > timeinfo.usrHoldTime) timeinfo.usrHoldTime = timeinfo.usrTime;
 
     /// \> Update internal cycle counters
     cycleNum += 1;
 #ifdef DIAG_TEST
     if(pLocalEpics->epicsInput.bumpCycle != 0) {
-	  	cycleNum += pLocalEpics->epicsInput.bumpCycle;
-		pLocalEpics->epicsInput.bumpCycle = 0;
-  	}
+      cycleNum += pLocalEpics->epicsInput.bumpCycle;
+      pLocalEpics->epicsInput.bumpCycle = 0;
+    }
 #endif
-	cycleNum %= CYCLE_PER_SECOND;
-  	clock1Min += 1;
-  	clock1Min %= CYCLE_PER_MINUTE;
+    cycleNum %= CYCLE_PER_SECOND;
+    clock1Min += 1;
+    clock1Min %= CYCLE_PER_MINUTE;
     if(subcycle == DAQ_CYCLE_CHANGE) 
-  	{
-		daqCycle = (daqCycle + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-		if(!(daqCycle % 2)) pLocalEpics->epicsOutput.epicsSync = daqCycle;
-  	}
+    {
+      daqCycle = (daqCycle + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+      if(!(daqCycle % 2)) pLocalEpics->epicsOutput.epicsSync = daqCycle;
+    }
     if(subcycle == END_OF_DAQ_BLOCK) /*we have reached the 16Hz second barrier*/
     {
-    	/* Reset the data cycle counter */
-        subcycle = 0;
-	} else {
-		/* Increment the internal cycle counter */
-		subcycle ++;                                                
-	}
+      /* Reset the data cycle counter */
+      subcycle = 0;
+    } else {
+      /* Increment the internal cycle counter */
+      subcycle ++;                                                
+    }
 
 /// \> If not exit request, then continue INFINITE LOOP  *******
   }
