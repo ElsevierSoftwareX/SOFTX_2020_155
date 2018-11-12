@@ -8,12 +8,43 @@ use Exporter;
 #// \n
 
 sub partType {
-        my ($node, $i) = @_;
-        my $expr = ${$node->{FIELDS}}{"Expr"};
+    my ($node, $i) = @_;
+    my $expr = ${$node->{FIELDS}}{"Expr"};
+	my $expr2 = "";
 	if (!length($expr)) {
 		$expr = $::defFcnExpr;
  	}
-        $::functionExpr[$i] = $expr;
+    $::functionExpr[$i] = $expr;
+    $expr =~ s/u\((\d+)\)/u$1/g;
+	print "EXP $expr \n";
+	my $offset = 0;
+	my $el = length($expr);
+	if($expr =~ m/\^/) {
+		my $lp = index($expr,"^",$offset) - 1;
+		my $chk = rindex($expr,")",$lp);
+		if($lp == $chk) {
+			my $stc = rindex($expr,"(",$lp);
+			my $sl = $lp - $stc + 1;
+			my $newexp = substr $expr, $stc,$sl;
+			my $ne1 = substr $expr, 0,$stc;
+			my $es = $lp + 3;
+			my $exp = $lp + 2;
+			my $mult = int(substr $expr, $exp,1);
+			my $ne2 = substr $expr,$es;
+			$expr2 = $ne1;
+			$expr2 .= "("; 
+			$expr2 .= $newexp; 
+			$expr2 .= "*"; 
+			$expr2 .= $newexp; 
+			$expr2 .= ")"; 
+			$expr2 .= $ne2; 
+		}
+		$::functionExpr[$i] = $expr2;
+	}
+	if ($::functionExpr[$i] =~ m/\^/) {
+		die "\nRCG Compile Error ******\nPart $::xpartName[$i] \nFcn does not support exponents \n $::functionExpr[$i] \n$expr\n";
+	}
+
 	return Fcn;
 }
 
@@ -124,6 +155,7 @@ sub frontEndCode {
                    (?{$trigExp .= "sincos\($deg2rad\(u$2\), &lsin$::trigOut, &lcos$::trigOut\);\n";})
                   /l$1$::trigOut/gx;
         $expr =~ s/u(\d+)/$muxName\[$1\]/g;
+        $expr =~ s/u\((\d+)\)/$muxName\[$1\]/g;
         $trigExp =~ s/u(\d+)/$muxName\[$1\]/g;
         $expr =~ s/fabs/lfabs/g;
         $expr =~ s/log10/llog10/g;
