@@ -29,6 +29,7 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
+		$::xpartName[$i] =~ s/\\n/_/g;
 	print ::OUT "double \L$::xpartName[$i] = 0.0;\n";
 }
 

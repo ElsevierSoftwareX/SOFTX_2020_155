@@ -29,6 +29,7 @@ sub printEpics {
 # Current part number is passed as first argument
 sub printFrontEndVars  {
         my ($i) = @_;
+		$::xpartName[$i] =~ s/\\n/_/g;
 	print ::OUT "int \L$::xpartName[$i];\n";
 	print "ANDPART int \L$::xpartName[$i];\n";
 }
