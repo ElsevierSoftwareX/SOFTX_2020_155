@@ -92,7 +92,7 @@ findRfmCard(unsigned int bn)
     return (void *)addr;
 }
 volatile void *
-findSharedMemorySize(char *sys_name, int size)
+efindSharedMemorySize(const char *sys_name, int size)
 {
 	char *s;
         int fd;

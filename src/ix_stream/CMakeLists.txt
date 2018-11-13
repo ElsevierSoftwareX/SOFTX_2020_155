@@ -11,4 +11,32 @@ target_link_libraries(zmq_rcv_ix_xmit PUBLIC
         zmq4::zmq
         zmq::simple_pv
         ${CMAKE_THREAD_LIBS_INIT})
+
+add_executable(zmq_rcv_ix_xmit_delay zmq_rcv_ix_xmit_delay.cc dolphin_common.cc ../zmq_stream/dc_utils.c)
+# target_compile_options(zmq_rcv_ix_xmit_cxx PUBLIC -fsanitize=address)
+# target_compile_options(zmq_rcv_ix_xmit_cxx PUBLIC -fsanitize=thread -no-pie)
+target_link_libraries(zmq_rcv_ix_xmit_delay PUBLIC
+        # asan
+        # tsan
+        zmq_transport
+        driver::shmem
+        dolphin::sisci
+        zmq4::zmq
+        zmq::simple_pv
+        ${CMAKE_THREAD_LIBS_INIT}
+        # -no-pie
+        )
+
 endif (${LibZMQ_FOUND})
+
+if (${MX_FOUND})
+
+add_executable(mx_rcv mx_rcv.cc)
+target_link_libraries(mx_rcv PUBLIC dolphin_common.cc
+    driver::shmem
+    dolphin::sisci
+    zmq::simple_pv
+    ${CMAKE_THREAD_LIBS_INIT}
+)
+
+endif (${MX_FOUND})
