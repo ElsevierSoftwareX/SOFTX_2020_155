@@ -5,18 +5,17 @@
 extern "C" {
 #endif
 
+#include "daq_core_defs.h"
+
 /*
  * This file defines the core structures and definitions needed for the
  * general network agnostic movement of data between the FE and the daqd.
  */
 
-#define DAQ_NUM_DATA_BLOCKS     16
-#define DAQ_NUM_DATA_BLOCKS_PER_SECOND  16
 #define CDS_DAQ_NET_IPC_OFFSET 0x0
 #define CDS_DAQ_NET_GDS_TP_TABLE_OFFSET 0x1000
 #define CDS_DAQ_NET_DATA_OFFSET 0x2000
-#define DAQ_DCU_SIZE            0x400000
-#define DAQ_DCU_BLOCK_SIZE      (DAQ_DCU_SIZE/DAQ_NUM_DATA_BLOCKS)
+
 #define DAQ_GDS_MAX_TP_NUM           0x100
 #define MMAP_SIZE 1024*1024*64-5000
 
