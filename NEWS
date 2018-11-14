@@ -16,6 +16,11 @@ Changes for 3.5  (NOT YET RELEASED)
 - daqd does not allow non-minute minute trends.
 - zmq_rcv_ix_xmit allows a configurable time window in which it will wait for all FE computers to
   send data.
+- Bug fix for Fcn, Relational Operator, AND parts: Not removing spaces in arguments.
+- Added controllerLR.c.  This is code to run an IOP at 32K, as required by PEM Mid IOC over long fiber.  This in invoked by:
+	- Set rate=32K in IOP model Parameter Block
+	- Set virtualIOP=3 in IOP model Parameter Block
+	- NOTE: Presently, this only reads ADC modules ie not DAC writes, as it was implemented for PEM DAQ channel.s
 ==================================================================================================
 Changes for 3.4.3
 ==================================================================================================
