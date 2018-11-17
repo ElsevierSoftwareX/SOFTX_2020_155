@@ -154,11 +154,38 @@ void receive_map_copy_row(int cycle, receive_map_entry_t dest[MXR_MAX_DCU])
 #define DFLT_END 128
 #define MAX_LEN (1024 * 1024 * 1024)
 #define DFLT_ITER 1000
-#define NUM_RREQ 128 /* 256 */
+#define NUM_RREQ 64
 #define NUM_SREQ 4 /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
 
 #define MATCH_VAL_MAIN (1 << 31)
 #define MATCH_VAL_THREAD 1
+
+/* A simple class used to ensure that when an endpoint is opened it is also closed. */
+class managed_endpoint {
+public:
+    managed_endpoint(uint32_t board_num, uint32_t endpoint_id, uint32_t filter): endpoint_()
+    {
+        mx_return_t ret = mx_open_endpoint(board_num, endpoint_id, filter, NULL, 0, &endpoint_);
+        if (ret != MX_SUCCESS)
+        {
+            std::cerr << "Failed to open board " << board_num << " endpoint " << endpoint_id << " error " << mx_strerror(ret) << "\n";
+            exit(1);
+        }
+    }
+    ~managed_endpoint()
+    {
+        mx_close_endpoint(endpoint_);
+    }
+    mx_endpoint_t get()
+    {
+        return endpoint_;
+    }
+private:
+    managed_endpoint(const managed_endpoint& other);
+    managed_endpoint& operator=(const managed_endpoint& other);
+
+    mx_endpoint_t endpoint_;
+};
 
 /**
  * A simple class used to ensure that mx_irecv is called again.  This is
@@ -167,20 +194,22 @@ void receive_map_copy_row(int cycle, receive_map_entry_t dest[MXR_MAX_DCU])
  */
 class setup_mx_irecv {
 public:
-    setup_mx_irecv(mx_endpoint_t& ep, mx_segment_t* seg, mx_request_t* req):
-        ep_(ep), seg_(seg), req_(req)
+    setup_mx_irecv(mx_endpoint_t ep, mx_segment_t* seg, mx_request_t* req, int* ctx):
+        ep_(ep), seg_(seg), req_(req), ctx_(ctx)
     {}
     ~setup_mx_irecv()
     {
-        mx_irecv(ep_, seg_, 1, MATCH_VAL_MAIN, MX_MATCH_MASK_NONE, 0, req_);
+        mx_return_t ret = mx_irecv(ep_, seg_, 1, MATCH_VAL_MAIN, MX_MATCH_MASK_NONE, ctx_, req_);
+        std::cout << "mx_irecv returned " << (ret == MX_SUCCESS ? "SUCCESS" : mx_strerror(ret)) << "\n";
     }
 private:
     setup_mx_irecv(const setup_mx_irecv& other);
     setup_mx_irecv& operator=(const setup_mx_irecv& other);
 
-    mx_endpoint_t &ep_;
+    mx_endpoint_t ep_;
     mx_segment_t* seg_;
     mx_request_t* req_;
+    int *ctx_;
 };
 
 static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
@@ -189,35 +218,33 @@ void receiver_mx(int neid) {
     mx_status_t stat;
     mx_segment_t seg;
     uint32_t result;
-    struct timeval start_time, end_time;
     std::vector<daqMXdata> buffer(NUM_RREQ);            // mx receive buffers
     int myErrorStat = 0;
     int copySize;
     // float *testData;
     uint32_t match_val = MATCH_VAL_MAIN;
+    int context_ids[NUM_RREQ];                          // a series of integers to provide index to the requests
     mx_request_t req[NUM_RREQ];
-    mx_endpoint_t ep[MX_MAX_BOARDS * MX_MAX_ENDPOINTS]; // does this need to be an array?  we only use one entry!
 
     uint32_t board_num = (neid >> 8);
     uint32_t ep_num = neid & 0xff;
 
+    int messages_received = 0;
+
     const int daqMXdata_len = sizeof(daqMXdata);
 
     std::cout << "about to open board " << board_num << " ep " << ep_num << " neid " << neid << "\n";
-    mx_return_t ret =
-        mx_open_endpoint(board_num, ep_num, FILTER, NULL, 0, &ep[neid]);
-    if (ret != MX_SUCCESS) {
-        fprintf(stderr, "Failed to open board %d endpoint %d error %s\n",
-                board_num, ep_num, mx_strerror(ret));
-        exit(1);
-    }
+    managed_endpoint endpoint(board_num, ep_num, FILTER);
 
     /* pre-post our receives */
     for (int cur_req = 0; cur_req < NUM_RREQ; cur_req++) {
         seg.segment_ptr = &buffer[cur_req];
         seg.segment_length = sizeof(daqMXdata);
-        mx_endpoint_t ep1 = ep[neid];
-        mx_return_t ret = mx_irecv(ep1, &seg, 1, match_val, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
+
+        context_ids[cur_req] = cur_req;
+
+        mx_return_t ret = mx_irecv(endpoint.get(), &seg, 1, match_val, MX_MATCH_MASK_NONE,
+                reinterpret_cast<void*>(&context_ids[cur_req]), &req[cur_req]);
         if (ret != MX_SUCCESS)
         {
             std::cerr << "mx_irecv return an error: " << mx_strerror(ret) << "\n";
@@ -228,125 +255,134 @@ void receiver_mx(int neid) {
     }
 
     mx_set_error_handler(MX_ERRORS_RETURN);
-    gettimeofday(&start_time, NULL);
 
     std::cout << neid << " registered buffers and beginning wait loop\n";
 
-    do {
-        for (int count = 0; count < NUM_RREQ; count++) {
-            /* Wait for the receive to complete */
-            int cur_req = count & (NUM_RREQ - 1);
-
-        // 	mx_test_or_wait(blocking, ep, &sreq, MX_INFINITE, &stat,
-        // &result);
-        again:
-            mx_return_t ret =
-                mx_wait(ep[neid], &req[cur_req], MX_INFINITE, &stat, &result);
-            myErrorStat = 0;
-            if (ret != MX_SUCCESS) {
-                fprintf(stderr, "mx_cancel() eid=%03x failed with status %s\n",
-                        neid, mx_strerror(ret));
-                exit(1); // Not clear what to do in this case; this indicates
-                // shortage of memory or resources
-            }
-            std::cout << "(" << neid << ")mx_wait result = " << result << "\n";
-            if (result == 0) { // Request incomplete
-                goto again;    // Restart incomplete request
-            } else {           // Request is complete
-                if (stat.code !=
-                    MX_STATUS_SUCCESS) { // Request completed, but bad code
-                    fprintf(stderr, "mx_wait failed in rcvr eid=%03x, reqn=%d; "
-                                    "wait did not complete; status code is "
-                                    "%s\n",
-                            neid, count, mx_strstatus(stat.code));
-                    // mx_return_t ret = mx_cancel(ep[neid], &req[cur_req],
-                    // &result);
-                    mx_endpoint_addr_t ep_addr;
-                    ret = mx_get_endpoint_addr(ep[neid], &ep_addr);
-                    if (ret != MX_SUCCESS) {
-                        fprintf(stderr, "mx_get_endpoint_addr() eid=%03x "
-                                        "failed with status %s\n",
-                                neid, mx_strerror(ret));
-                    } else {
-                        ret = mx_disconnect(ep[neid], ep_addr);
-                        if (ret != MX_SUCCESS) {
-                            fprintf(stderr, "mx_disconnect() eid=%03x failed "
-                                            "with status %s\n",
-                                    neid, mx_strerror(ret));
-                        } else {
-                            fprintf(stderr, "disconnected from the sender on "
-                                            "endpoint %03x\n",
-                                    neid);
-                        }
-                    }
-                    myErrorStat = 1;
-                }
-            }
-            // Fall through if the request is complete and the code is sucess
-            //
-
-            copySize = stat.xfer_length;
-            daqMXdata& cur_data = buffer[cur_req];
-            seg.segment_ptr = &cur_data;
-            seg.segment_length = daqMXdata_len;
-
-            std::cout << neid << " received a message\n" << std::endl;
-
-            // this will always call mx_irecv to re-start this request at the end of the loop
-            setup_mx_irecv register_with_mx(ep[neid], &seg, &req[cur_req]);
-
-            if (!myErrorStat) {
-                // printf("received one\n");
-                int dcu_id = cur_data.mxIpcData.dcuId;
-
-                // Skip bad inputs
-                if (dcu_id < 0 || dcu_id > (MXR_MAX_DCU - 1))
-                {
-                    continue; // Bad DCU ID
-                }
-                // daqd should skip dcus it doesn't know
-                // about, we cannot
-                // if (daqd.dcuSize[0][dcu_id] == 0) {
-                //     mx_irecv(ep[neid], &seg, 1, match_val,
-                //     MX_MATCH_MASK_NONE,
-                //              0, &req[cur_req]);
-                //     continue; // Unconfigured DCU
-                // }
-
-                int64_t gps_sec = 0;
-                int cycle = cur_data.mxIpcData.cycle;
-                int len = cur_data.mxIpcData.dataBlockSize;
-
-                single_dcu_block& cur_dest = mxr_data[dcu_id][cycle];
-                {
-                    lock_guard<single_dcu_block> l_(cur_dest);
-
-                    char *dataSource = (char *)cur_data.mxDataBlock;
-                    char *dataDest = cur_dest.data;
-
-                    // Move the block data into the buffer
-                    memcpy(dataDest, dataSource, /* len */ DAQ_DCU_BLOCK_SIZE );
-
-                    cur_dest.header.dcuId = static_cast<unsigned int>(dcu_id);
-                    cur_dest.header.fileCrc = cur_data.mxIpcData.crc;
-                    cur_dest.header.status = 2;
-                    cur_dest.header.cycle = static_cast<unsigned int>(cycle);
-                    gps_sec = cur_dest.header.timeSec = cur_data.mxIpcData.bp[cycle].timeSec;
-                    cur_dest.header.timeNSec = cur_data.mxIpcData.bp[cycle].timeNSec;
-                    cur_dest.header.dataCrc = cur_data.mxIpcData.bp[cycle].crc;
-                    cur_dest.header.dataBlockSize = cur_data.mxIpcData.dataBlockSize;
-                    cur_dest.header.tpBlockSize = DAQ_DCU_BLOCK_SIZE - cur_data.mxIpcData.dataBlockSize;
-                    cur_dest.header.tpCount = static_cast<unsigned int>(cur_data.mxTpTable.count);
-                    std::copy(cur_data.mxTpTable.tpNum, cur_data.mxTpTable.tpNum + cur_dest.header.tpCount, cur_dest.header.tpNum);
-                }
-                // do this in a scope where the lock on the data segment is not held, so we are never holding two locks
-                mark_dcu_received(dcu_id, gps_sec, cycle);
-            }
-            // daqd.producer1.rcvr_stats[neid].tick();
+    while (!threads_should_stop.is_set())
+    {
+        mx_request_t current_request;
+        result = 0;
+        mx_return_t ret = mx_peek(endpoint.get(), 10, &current_request, &result);
+        if (ret != MX_SUCCESS)
+        {
+            std::cerr << "mx_peek on " << neid << " failed: " << mx_strerror(ret) << "\n";
+            exit(1);
         }
-    } while (!threads_should_stop.is_set());
-    gettimeofday(&end_time, NULL);
-    fprintf(stderr, "mx_wait failed in rcvr after do loop\n");
+        // timeout, try again, checking to see if we should abort
+        if (!result)
+        {
+            continue;
+        }
+        // get the context for the request, id the index into buffer ... (request number)
+        int *current_context = NULL;
+        mx_context(&current_request, reinterpret_cast<void**>(&current_context));
+
+        if (current_request != req[*current_context])
+        {
+            std::cout << "The request is different" << std::endl;
+        }
+
+        ret = mx_test(endpoint.get(), &current_request, &stat, &result);
+        if (ret != MX_SUCCESS)
+        {
+            std::cerr << "mx_test failed on " << neid << " which was unexpected: " << mx_strerror(ret) << "\n";
+            exit(1);
+        }
+        if (result == 0)    // request not ready
+        {
+            continue;   // should never happen as we did a mx_peek
+        }
+        /* from this point on we MUST restart a read on this buffer */
+        daqMXdata& cur_data = buffer[*current_context];
+        seg.segment_ptr = &cur_data;
+        seg.segment_length = daqMXdata_len;
+
+        ++messages_received;
+        std::cout << neid << " received a message, #" << messages_received << "  ctx# " << *current_context << "\n" << std::endl;
+
+        // this will always call mx_irecv to re-start this request at the end of the loop
+        setup_mx_irecv register_with_mx(endpoint.get(), &seg, &current_request, current_context);
+
+        if (stat.code != MX_STATUS_SUCCESS)
+        {
+            // Request completed, but bad code
+            fprintf(stderr, "mx_wait failed in rcvr eid=%03x; "
+                            "wait did not complete; status code is "
+                            "%s\n",
+                    neid, mx_strstatus(stat.code));
+            // mx_return_t ret = mx_cancel(ep[neid], &req[cur_req],
+            // &result);
+            mx_endpoint_addr_t ep_addr;
+            ret = mx_get_endpoint_addr(endpoint.get(), &ep_addr);
+            if (ret != MX_SUCCESS) {
+                fprintf(stderr, "mx_get_endpoint_addr() eid=%03x "
+                                "failed with status %s\n",
+                        neid, mx_strerror(ret));
+            } else {
+                ret = mx_disconnect(endpoint.get(), ep_addr);
+                if (ret != MX_SUCCESS) {
+                    fprintf(stderr, "mx_disconnect() eid=%03x failed "
+                                    "with status %s\n",
+                            neid, mx_strerror(ret));
+                } else {
+                    fprintf(stderr, "disconnected from the sender on "
+                                    "endpoint %03x\n",
+                            neid);
+                }
+            }
+            continue;
+        }
+
+        // printf("received one\n");
+        int dcu_id = cur_data.mxIpcData.dcuId;
+
+        // Skip bad inputs
+        if (dcu_id < 0 || dcu_id > (MXR_MAX_DCU - 1))
+        {
+            continue; // Bad DCU ID
+        }
+        // daqd should skip dcus it doesn't know
+        // about, we cannot
+        // if (daqd.dcuSize[0][dcu_id] == 0) {
+        //     mx_irecv(ep[neid], &seg, 1, match_val,
+        //     MX_MATCH_MASK_NONE,
+        //              0, &req[cur_req]);
+        //     continue; // Unconfigured DCU
+        // }
+
+        int64_t gps_sec = 0;
+        int cycle = cur_data.mxIpcData.cycle;
+        int len = cur_data.mxIpcData.dataBlockSize;
+
+        single_dcu_block& cur_dest = mxr_data[dcu_id][cycle];
+        {
+            lock_guard<single_dcu_block> l_(cur_dest);
+
+            char *dataSource = (char *)cur_data.mxDataBlock;
+            char *dataDest = cur_dest.data;
+
+            // Move the block data into the buffer
+            memcpy(dataDest, dataSource, /* len */ DAQ_DCU_BLOCK_SIZE );
+
+            cur_dest.header.dcuId = static_cast<unsigned int>(dcu_id);
+            cur_dest.header.fileCrc = cur_data.mxIpcData.crc;
+            cur_dest.header.status = 2;
+            cur_dest.header.cycle = static_cast<unsigned int>(cycle);
+            gps_sec = cur_dest.header.timeSec = cur_data.mxIpcData.bp[cycle].timeSec;
+            cur_dest.header.timeNSec = cur_data.mxIpcData.bp[cycle].timeNSec;
+            cur_dest.header.dataCrc = cur_data.mxIpcData.bp[cycle].crc;
+            cur_dest.header.dataBlockSize = cur_data.mxIpcData.dataBlockSize;
+            cur_dest.header.tpBlockSize = DAQ_DCU_BLOCK_SIZE - cur_data.mxIpcData.dataBlockSize;
+            cur_dest.header.tpCount = static_cast<unsigned int>(cur_data.mxTpTable.count);
+            std::copy(cur_data.mxTpTable.tpNum, cur_data.mxTpTable.tpNum + cur_dest.header.tpCount, cur_dest.header.tpNum);
+        }
+        // do this in a scope where the lock on the data segment is not held, so we are never holding two locks
+        mark_dcu_received(dcu_id, gps_sec, cycle);
+
+        // daqd.producer1.rcvr_stats[neid].tick();
+
+    }
+    std::cout << "mx_receiver " << neid << " completed\n";
     // exit(1);
 }
 
