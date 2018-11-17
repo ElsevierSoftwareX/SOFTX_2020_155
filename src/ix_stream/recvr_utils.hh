@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <pthread.h>
 
+#include <algorithm>
 #include <stdexcept>
 
 class spin_lock {
@@ -211,7 +212,100 @@ private:
     int val_;
 };
 
+/**
+ * A simple array of flags, with a fixed length known at compile time.
+ * @tparam MAX_LEN The number of flags to use.
+ */
+template <unsigned int MAX_LEN>
+class flag_mask
+{
+public:
+    typedef unsigned int index_type;
 
+    flag_mask(): data_()
+    {
+        clear();
+    }
+    flag_mask(const flag_mask& other): data_(other.data_) {}
+    flag_mask& operator=(const flag_mask& other)
+    {
+        std::copy(other.cbegin(), other.cend(), begin());
+        return *this;
+    }
+
+    /// \brief clear all flags
+    void clear()
+    {
+        std::fill(begin(), end(), false);
+    }
+    /// \brief set the given flag, bounds are checked
+    void set(int index)
+    {
+        if (static_cast<index_type>(index) < MAX_LEN)
+        {
+            data_[index] = true;
+        }
+    }
+    /// \brief retreive the requested flag, bounds are checked
+    bool get(int index) const
+    {
+        return (static_cast<index_type>(index) < MAX_LEN ? data_[index] : false);
+    }
+    /// \brief return true if the flags match between *this and other
+    bool operator==(const flag_mask& other) const
+    {
+        for (index_type i = 0; i < MAX_LEN; ++i)
+        {
+            if (data_[i] != other.data_[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    /// \brief return false if the flags match between *this and other
+    bool operator!=(const flag_mask& other) const
+    {
+        return !(*this == other);
+    }
+
+    /// \brief compare two masks, and call a callback function for each difference
+    template<typename F>
+    friend void foreach_difference(const flag_mask& mask1, const flag_mask& mask2, F& f)
+    {
+        for (index_type i = 0; i < MAX_LEN; ++i)
+        {
+            if (mask1.data_[i] != mask2.data_[i])
+            {
+                f(mask1.data_[i], mask2.data_[i], i);
+            }
+        }
+    }
+private:
+    const bool *cbegin() const
+    {
+        return data_;
+    }
+    const bool *cend() const
+    {
+        return data_ + MAX_LEN;
+    }
+    bool *begin()
+    {
+        return data_;
+    }
+    bool *end()
+    {
+        return data_ + MAX_LEN;
+    }
+    bool data_[MAX_LEN];
+};
+
+/**
+ * A structure to record when a FE or DCU has sent data.
+ * Designed for use in scoreboards that track the current
+ * progress of data arrival/transfer.
+ */
 typedef struct receive_map_entry_t {
     int64_t gps_sec_and_cycle;
     int64_t s_clock;

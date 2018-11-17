@@ -15,7 +15,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <string>
 #include <vector>
+#include <iostream>
 
 #include "mx_extensions.h"
 #include "myriexpress.h"
@@ -26,6 +28,36 @@
 
 const int MXR_MAX_DCU = 128;
 const int MAX_RECEIVE_BUFFERS = 16;     // number of 16Hz cycles we are buffering
+
+const char* DEFAULT_BUFFER_NAME = "ifo";
+const unsigned int DEFAULT_MAX_DATA_SIZE_MB = 100;
+
+extern "C" {
+extern volatile void *findSharedMemorySize(const char *, int);
+}
+
+typedef flag_mask<MXR_MAX_DCU> dcu_mask_t;
+
+/**
+ * Program options
+ */
+struct options_t {
+    std::string buffer_name;
+    unsigned int max_data_size_mb;
+    bool abort;
+
+    options_t():
+    buffer_name(DEFAULT_BUFFER_NAME),
+    max_data_size_mb(DEFAULT_MAX_DATA_SIZE_MB),
+    abort(false)
+    {}
+};
+
+struct local_mx_info {
+    uint32_t nics_available;
+    uint32_t max_endpoints;
+    uint32_t max_requests;
+};
 
 /**
  * Diagnostic, return the system time in ms
@@ -122,7 +154,7 @@ void receive_map_copy_row(int cycle, receive_map_entry_t dest[MXR_MAX_DCU])
 #define DFLT_END 128
 #define MAX_LEN (1024 * 1024 * 1024)
 #define DFLT_ITER 1000
-#define NUM_RREQ 256
+#define NUM_RREQ 128 /* 256 */
 #define NUM_SREQ 4 /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
 
 #define MATCH_VAL_MAIN (1 << 31)
@@ -171,6 +203,7 @@ void receiver_mx(int neid) {
 
     const int daqMXdata_len = sizeof(daqMXdata);
 
+    std::cout << "about to open board " << board_num << " ep " << ep_num << " neid " << neid << "\n";
     mx_return_t ret =
         mx_open_endpoint(board_num, ep_num, FILTER, NULL, 0, &ep[neid]);
     if (ret != MX_SUCCESS) {
@@ -184,11 +217,20 @@ void receiver_mx(int neid) {
         seg.segment_ptr = &buffer[cur_req];
         seg.segment_length = sizeof(daqMXdata);
         mx_endpoint_t ep1 = ep[neid];
-        mx_irecv(ep1, &seg, 1, match_val, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
+        mx_return_t ret = mx_irecv(ep1, &seg, 1, match_val, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
+        if (ret != MX_SUCCESS)
+        {
+            std::cerr << "mx_irecv return an error: " << mx_strerror(ret) << "\n";
+        }
+        if (board_num != 0) {
+            //std::cout << ".(" << neid << " " << cur_req << ")" << std::flush;
+        }
     }
 
     mx_set_error_handler(MX_ERRORS_RETURN);
     gettimeofday(&start_time, NULL);
+
+    std::cout << neid << " registered buffers and beginning wait loop\n";
 
     do {
         for (int count = 0; count < NUM_RREQ; count++) {
@@ -207,6 +249,7 @@ void receiver_mx(int neid) {
                 exit(1); // Not clear what to do in this case; this indicates
                 // shortage of memory or resources
             }
+            std::cout << "(" << neid << ")mx_wait result = " << result << "\n";
             if (result == 0) { // Request incomplete
                 goto again;    // Restart incomplete request
             } else {           // Request is complete
@@ -246,6 +289,8 @@ void receiver_mx(int neid) {
             daqMXdata& cur_data = buffer[cur_req];
             seg.segment_ptr = &cur_data;
             seg.segment_length = daqMXdata_len;
+
+            std::cout << neid << " received a message\n" << std::endl;
 
             // this will always call mx_irecv to re-start this request at the end of the loop
             setup_mx_irecv register_with_mx(ep[neid], &seg, &req[cur_req]);
@@ -307,16 +352,17 @@ void receiver_mx(int neid) {
 
 void *receiver_thread(void *args)
 {
+    std::cout << "calling receiver_mx with " << *reinterpret_cast<int*>(args) << "\n";
     receiver_mx(*reinterpret_cast<int*>(args));
     return NULL;
 }
 
 
-int mx_ep_opened = 0;
-
 /// Initialize MX library.
 /// Returns the maximum number of end-points supoprted in the system.
-unsigned int open_mx(void) {
+local_mx_info open_mx() {
+    static int mx_ep_opened = 0;
+    static local_mx_info info;
     uint16_t my_eid;
     uint32_t board_id;
     uint32_t filter;
@@ -325,55 +371,65 @@ unsigned int open_mx(void) {
     extern char *optarg;
     mx_return_t ret;
     int fd;
-    static uint32_t max_endpoints = 0;
-    static uint32_t nics_available = 0;
 
     if (mx_ep_opened)
-        return max_endpoints | (nics_available << 8);
+        return info;
 
     printf("%ld\n", sizeof(struct daqMXdata));
 
     // So that openmx is not aborting on connection loss
-    char omx_env_setting[] = "OMX_ERRORS_ARE_FATAL=0";
-    char mx_env_setting[] = "MX_ERRORS_ARE_FATAL=0";
+    char omx_env_setting[] = "OMX_ERRORS_ARE_FATAL=1";
+    char mx_env_setting[] = "MX_ERRORS_ARE_FATAL=1";
     putenv(omx_env_setting);
     putenv(mx_env_setting);
 
-    mx_init();
+    ret = mx_init();
+    if (ret != MX_SUCCESS)
+    {
+        fprintf(stderr, "mx_init failed: %s\n", mx_strerror(ret));
+        exit(1);
+    }
 
     /* set up defaults */
     sysname = NULL;
     filter = FILTER;
-    ret = mx_get_info(0, MX_MAX_NATIVE_ENDPOINTS, 0, 0, &max_endpoints,
-                      sizeof(max_endpoints));
+    ret = mx_get_info(0, MX_MAX_NATIVE_ENDPOINTS, 0, 0, &info.max_endpoints,
+                      sizeof(info.max_endpoints));
     if (ret != MX_SUCCESS) {
         fprintf(stderr, "Failed to do mx_get_info: %s\n", mx_strerror(ret));
         exit(1);
     }
-    fprintf(stderr, "MX has %d maximum end-points configured\n", max_endpoints);
-    ret = mx_get_info(0, MX_NIC_COUNT, 0, 0, &nics_available,
-                      sizeof(nics_available));
+    fprintf(stderr, "MX has %d maximum end-points configured\n", info.max_endpoints);
+    ret = mx_get_info(0, MX_NIC_COUNT, 0, 0, &info.nics_available,
+                      sizeof(info.nics_available));
     if (ret != MX_SUCCESS) {
         fprintf(stderr, "Failed to do mx_get_info: %s\n", mx_strerror(ret));
         exit(1);
     }
-    fprintf(stderr, "%d MX NICs available\n", nics_available);
+    fprintf(stderr, "%d MX NICs available\n", info.nics_available);
     /// make sure these don't exceed array allocations
-    if (max_endpoints > MX_MAX_ENDPOINTS) {
+    if (info.max_endpoints > MX_MAX_ENDPOINTS) {
         fprintf(stderr,
                 "ERROR: max end-points of %d exceeds array limit of %d\n",
-                max_endpoints, MX_MAX_ENDPOINTS);
+                info.max_endpoints, MX_MAX_ENDPOINTS);
         exit(1);
     }
-    if (nics_available > MX_MAX_BOARDS) {
+    if (info.nics_available > MX_MAX_BOARDS) {
         fprintf(stderr,
                 "ERROR: available nics of %d exceeds array limit of %d\n",
-                nics_available, MX_MAX_BOARDS);
+                info.nics_available, MX_MAX_BOARDS);
         exit(1);
     }
+    ret = mx_get_info(0, MX_NATIVE_REQUESTS, 0, 0, &info.max_requests,sizeof(info.max_requests));
+    if (ret != MX_SUCCESS)
+    {
+        fprintf(stderr, "Failed to do mx_get_info: %s\n", mx_strerror(ret));
+        exit(1);
+    }
+    fprintf(stderr, "MX supports %d native requests\n", info.max_requests);
 
     mx_ep_opened = 1;
-    return max_endpoints | (nics_available << 8);
+    return info;
 }
 
 void close_mx() { mx_finalize(); }
@@ -403,18 +459,23 @@ int64_t wait_for_first_system(const int next_cycle, const int64_t prev_sec_and_c
                 keep_waiting = false;
                 break;
             }
-            if (keep_waiting)
-            {
-                usleep(1000);
-                ++wait_count;
-            }
+        }
+        if (keep_waiting)
+        {
+            usleep(1000);
+            ++wait_count;
+        }
+        if (exit_main_loop.is_set())
+        {
+            return 0;
         }
     } while (keep_waiting);
 
     return result;
 }
 
-void consentrate_data(const int64_t expected_sec_and_cycle, daq_multi_dcu_data_t* dest)
+void consentrate_data(const int64_t expected_sec_and_cycle, volatile daq_multi_dcu_data_t *dest, unsigned int dest_size,
+                      dcu_mask_t &receive_mask)
 {
     receive_map_entry_t cur_row[MXR_MAX_DCU];
 
@@ -422,8 +483,8 @@ void consentrate_data(const int64_t expected_sec_and_cycle, daq_multi_dcu_data_t
     int cycle_index = cycle_to_buffer_index(cur_cycle);
 
     receive_map_copy_row(cur_cycle, cur_row);
-    char* dest_data = dest->dataBlock;
-    int remaining = DAQ_TRANSIT_FE_DATA_BLOCK_SIZE;
+    volatile char* dest_data = dest->dataBlock;
+    unsigned int remaining = dest_size - sizeof(daq_multi_dcu_header_t);
     for (int ii = 0; ii < MXR_MAX_DCU; ++ii)
     {
         if (cur_row[ii].gps_sec_and_cycle == expected_sec_and_cycle)
@@ -432,21 +493,50 @@ void consentrate_data(const int64_t expected_sec_and_cycle, daq_multi_dcu_data_t
             single_dcu_block& cur_block = mxr_data[ii][cycle_index];
             lock_guard<single_dcu_block> l_(cur_block);
             {
-                dest->header.dcuheader[ii] = cur_block.header;
+                //dest->header.dcuheader[ii] = cur_block.header;
+                memcpy((void*)&(dest->header.dcuheader[ii]), &(cur_block.header), sizeof(cur_block.header));
                 data_size = cur_block.header.dataBlockSize + cur_block.header.tpBlockSize;
                 if (data_size > remaining)
                 {
                     data_size = remaining;
                 }
-                memcpy(dest_data, dest->dataBlock, data_size);
+                //std::copy(cur_block.data, cur_block.data + data_size, dest_data);
+                memcpy((char*)dest_data, cur_block.data, static_cast<size_t>(data_size));
             }
             dest->header.fullDataBlockSize += data_size;
             dest_data += data_size;
             remaining -= data_size;
             dest->header.dcuTotalModels++;
+            receive_mask.set(ii);
         }
     }
 
+}
+
+void dcu_mask_difference_printer(const bool prev_flag, const bool cur_flag, unsigned int index)
+{
+    std::cout << (prev_flag ? "(-" : "(+") << index << ") ";
+};
+
+void dump_dcu_mask_diffs(const dcu_mask_t& prev, const dcu_mask_t& cur)
+{
+    if (prev == cur)
+    {
+        return;
+    }
+
+    std::cout << "\nDCU state change:\n";
+    foreach_difference(prev, cur, dcu_mask_difference_printer);
+    std::cout << "\n";
+}
+
+void show_help(char *prog)
+{
+    std::cout << "Usage " << prog << " options\n\nWhere options are:\n";
+    std::cout << "\t-h - Show this help\n";
+    std::cout << "\t-b <name> - Set the output mbuf name - defaults to " << DEFAULT_BUFFER_NAME << "\n";
+    std::cout << "\t-m <size> - Set the output mbuf size in MB [20-100] - defaults to " << DEFAULT_MAX_DATA_SIZE_MB << "\n";
+    std::cout << std::endl;
 }
 
 // *************************************************************************
@@ -459,28 +549,85 @@ void intHandler(int dummy) {
 void sigpipeHandler(int dummy)
 {}
 
+
+options_t parse_options(int argc, char *const *argv) {
+    options_t opts;
+    int arg = 0;
+    while ((arg = getopt(argc, argv, "b:m:h")) != EOF)
+    {
+        switch (arg) {
+            case 'b':
+                opts.buffer_name = optarg;
+                break;
+            case 'm':
+                opts.max_data_size_mb = static_cast<unsigned int>(atoi(optarg));
+                if (opts.max_data_size_mb < 20)
+                {
+                    std::cerr << "Min data block size is 20 MB\n";
+                    opts.abort = true;
+                }
+                else if (opts.max_data_size_mb > 100)
+                {
+                    std::cerr << "Max data block size is 100 MB\n";
+                    opts.abort = true;
+                }
+                break;
+            case 'h':
+            default:
+                show_help(argv[0]);
+                opts.abort = true;
+        }
+    }
+    return opts;
+}
+
 int main(int argc, char *argv[]) {
+
+    int max_data_size = 0;
+    volatile daq_multi_cycle_header_t* ifo_header = NULL;
+    volatile char* ifo_data = NULL;
+
+    options_t opts = parse_options(argc, argv);
+    if (opts.abort)
+    {
+        exit(1);
+    }
+    max_data_size = opts.max_data_size_mb * 1024*1024;
+
+    ifo_header = reinterpret_cast<volatile daq_multi_cycle_header_t *>(findSharedMemorySize(opts.buffer_name.c_str(), opts.max_data_size_mb));
+    ifo_data = (volatile char*)ifo_header + sizeof(daq_multi_cycle_header_t);
+    unsigned int cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t)) / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+    cycle_data_size -= (cycle_data_size % 8);
+    std::cout << "cycle data size = " << cycle_data_size << "\t" << opts.max_data_size_mb << "\n";
+    ifo_header->cycleDataSize = cycle_data_size;
+    ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS;
+    ifo_header->curCycle = DAQ_NUM_DATA_BLOCKS + 1;
 
     // set up to catch Control C
     signal(SIGINT,intHandler);
     // setup to ignore sig pipe
     signal(SIGPIPE, sigpipeHandler);
 
-    unsigned int max_endpoints = open_mx();
-    unsigned int nics_available = max_endpoints >> 8;
-    max_endpoints &= 0xff;
+    local_mx_info mx_info = open_mx();
 
     int bp_aray[MX_MAX_BOARDS][MX_MAX_ENDPOINTS];
     pthread_t gm_tid[MX_MAX_BOARDS][MX_MAX_ENDPOINTS];
 
-    for (int bnum = 0; bnum < nics_available; bnum++) { // Start
-        for (int j = 0; j < max_endpoints; j++) {
+    std::cout << "&bp_aray[0][0] = " << &bp_aray[0][0] << "\n";
+    std::cout << "&bp_aray[1][0] = " << &bp_aray[1][0] << "\n";
+
+    for (int bnum = 0; bnum < mx_info.nics_available; bnum++) { // Start
+        for (int j = 0; j < mx_info.max_endpoints; j++) {
             int bp = j;
             bp = bp + (bnum * 256);
             /* calculate address within array */
             bp_aray[bnum][j] = bp;
-            void *bpPtr = (int *)(bp_aray + bnum) + j;
+            //void *bpPtr = (int *)(bp_aray + bnum) + j;
+            void *bpPtr = (void *)(&bp_aray[bnum][j]);
             int my_err_no = 0;
+
+            std::cout << "setup for board " << bnum << " ep " << j << " *bpPtr = " << *(int*)bpPtr << " bpPtr = " << bpPtr << "\n";
+
             my_err_no =
                     pthread_create(&gm_tid[bnum][j], NULL, receiver_thread, bpPtr);
             if (my_err_no)
@@ -494,23 +641,37 @@ int main(int argc, char *argv[]) {
     }
     int next_cycle = 0;
     int64_t prev_sec_and_cycle = 0;
+    dcu_mask_t receive_mask;
+    dcu_mask_t prev_receive_mask;
+
+    std::cout << "Threads created, entering main loop\n";
+
     do
     {
-        daq_multi_dcu_data_t concentrated_data;
-
         int64_t cur_sec_and_cycle = wait_for_first_system(next_cycle, prev_sec_and_cycle);
 
-        if (prev_sec_and_cycle > 0)
+        if (cur_sec_and_cycle != 0)
         {
-            consentrate_data(prev_sec_and_cycle, &concentrated_data);
-            // send data out
+            if (prev_sec_and_cycle > 0)
+            {
+                receive_mask.clear();
+
+                int64_t sending_cycle = extract_cycle(prev_sec_and_cycle);
+                volatile daq_multi_dcu_data_t *ifoDataBlock = reinterpret_cast<volatile daq_multi_dcu_data_t *>(
+                        ifo_data + (cycle_data_size * sending_cycle));
+                consentrate_data(prev_sec_and_cycle, ifoDataBlock, cycle_data_size, receive_mask);
+                ifo_header->curCycle = static_cast<unsigned int>(sending_cycle);
+
+                dump_dcu_mask_diffs(prev_receive_mask, receive_mask);
+                prev_receive_mask = receive_mask;
+            }
+            prev_sec_and_cycle = cur_sec_and_cycle;
+            ++next_cycle;
+            next_cycle %= 16;
         }
-        prev_sec_and_cycle = cur_sec_and_cycle;
-        ++next_cycle;
-        next_cycle %= 16;
     } while (!exit_main_loop.is_set());
 
-    printf("stopping threads\n");
+    std::cout << "stopping threads\n";
     threads_should_stop.set();
     sleep(2);
     close_mx();
