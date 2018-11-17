@@ -35,7 +35,7 @@
 
 #include <stdarg.h>
 
-#include "debug_array.hh"
+#include "recvr_utils.hh"
 
 #define __CDECL
 
@@ -52,35 +52,6 @@ void shift_left_one_and_fill(C& cont, const typename C::value_type fill_value)
 	std::copy(cont.begin() + 1, cont.end(), cont.begin());
 	cont.back() = fill_value;
 }
-
-template <typename T>
-class lock_guard;
-
-/***
- * A simple lock guard specialized for pthread spinlocks.
- * Use this to ensure locks are always released.
- *
- * @note Creation of the object is lock acquisition
- * Destruction of the object is lock release
- */
-template<>
-class lock_guard<pthread_spinlock_t>
-{
-public:
-    explicit lock_guard(pthread_spinlock_t& sp): sp_(sp)
-    {
-        pthread_spin_lock(&sp_);
-    }
-    ~lock_guard()
-    {
-        pthread_spin_unlock(&sp_);
-    }
-private:
-    lock_guard(const lock_guard& other);
-    lock_guard& operator=(const lock_guard& other);
-
-    pthread_spinlock_t& sp_;
-};
 
 #define MIN_DELAY_MS 5
 #define MAX_DELAY_MS 40
@@ -111,11 +82,6 @@ typedef struct mask_t {
 	int data[DCU_COUNT];
 } mask_t;
 
-typedef struct receive_map_entry_t {
-    int64_t gps_sec_and_cycle;
-    int64_t s_clock;
-} receive_map_entry_t;
-
 /// \brief structure to hold when data has been received
 typedef struct receive_map_t
 {
@@ -124,25 +90,6 @@ typedef struct receive_map_t
 
 pthread_spinlock_t receive_map_lock;
 receive_map_t receive_map;
-
-/// \brief given a gps second + a cycle count merge them into one value
-static inline int64_t calc_gps_sec_and_cycle(int64_t gps_sec, int64_t cycle)
-{
-	return (gps_sec << 4) | (0x0f & cycle);
-}
-
-// helper to extract seconds counts out of a combined gps sec + cycle value
-static inline int64_t extract_gps(int64_t gps_sec_and_cycle)
-{
-	return gps_sec_and_cycle >> 4;
-}
-
-// helper to extract cycle counts out of a combined gps sec + cycle value
-static inline int64_t extract_cycle(int64_t gps_sec_and_cycle)
-{
-	return gps_sec_and_cycle & 0x0f;
-}
-
 
 static inline void mask_clear(mask_t* mask)
 {

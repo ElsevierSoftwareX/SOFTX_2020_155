@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,39 +15,101 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <vector>
+
 #include "mx_extensions.h"
 #include "myriexpress.h"
 
 #include "../include/daqmap.h"
 #include "daq_core.h"
+#include "recvr_utils.hh"
 
 const int MXR_MAX_DCU = 128;
 const int MAX_RECEIVE_BUFFERS = 16;     // number of 16Hz cycles we are buffering
 
+/**
+ * Diagnostic, return the system time in ms
+ */
+static int64_t
+s_clock (void)
+{
+    struct timeval tv;
+    gettimeofday (&tv, NULL);
+    return (int64_t) (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+}
+
+/**
+ * daqMXdata, the format the data arrives in
+ */
+struct daqMXdata {
+    struct rmIpcStr mxIpcData;
+    cdsDaqNetGdsTpNum mxTpTable;
+    char mxDataBlock[DAQ_DCU_BLOCK_SIZE];
+};
+
+/**
+ * single_dcu_block the format we keep the data in.
+ * We also maintain a lock that should be used when accessing
+ * this data.
+ */
 struct single_dcu_block {
     daq_msg_header_t header;
-    char data[DAQ_DCU_BLOCK_SIZE*2];
-    pthread_spinlock_t lock;
+    char data[DAQ_DCU_BLOCK_SIZE];
+    spin_lock lock_;
 
-    single_dcu_block(): header(), data(), lock()
+    single_dcu_block(): header(), data(), lock_()
     {
-        pthread_spin_init(&lock, PTHREAD_PROCESS_PRIVATE);
     }
-    ~single_dcu_block()
+
+    void lock()
     {
-        pthread_spin_destroy(&lock);
+        lock_.lock();
+    }
+    void unlock()
+    {
+        lock_.unlock();
     }
 private:
     single_dcu_block(const single_dcu_block& other);
     single_dcu_block& operator=(const single_dcu_block& other);
 };
 
-single_dcu_block mxr_data[MXR_MAX_DCU][MAX_RECEIVE_BUFFERS];  // place holder for data
+debug_array_2d<single_dcu_block, MXR_MAX_DCU, MAX_RECEIVE_BUFFERS> mxr_data;
+debug_array_2d<receive_map_entry_t, MAX_RECEIVE_BUFFERS, MXR_MAX_DCU> receive_map;
+spin_lock receive_map_locks[MAX_RECEIVE_BUFFERS];
 
-extern struct rmIpcStr gmDaqIpc[DCU_COUNT];
-extern void *directed_receive_buffer[DCU_COUNT];
+atomic_flag threads_should_stop;
+atomic_flag exit_main_loop;
 
-extern struct cdsDaqNetGdsTpNum *gdsTpNum[2][DCU_COUNT];
+int cycle_to_buffer_index(int cycle)
+{
+    return cycle % MAX_RECEIVE_BUFFERS;
+}
+
+void mark_dcu_received(int dcuid, int64_t gps_sec, int cycle)
+{
+    if (dcuid < 0 || dcuid >= MXR_MAX_DCU)
+    {
+        return;
+    }
+    receive_map_entry_t new_entry;
+    new_entry.s_clock = s_clock();
+    new_entry.gps_sec_and_cycle = calc_gps_sec_and_cycle(gps_sec, cycle);
+    int index = cycle_to_buffer_index(cycle);
+    {
+        lock_guard<spin_lock> l_(receive_map_locks[index]);
+        receive_map[index][dcuid] = new_entry;
+    }
+}
+
+void receive_map_copy_row(int cycle, receive_map_entry_t dest[MXR_MAX_DCU])
+{
+    int index = cycle_to_buffer_index(cycle);
+    {
+        lock_guard<spin_lock> l_(receive_map_locks[index]);
+        std::copy(&(receive_map[index][0]), &(receive_map[index][MXR_MAX_DCU-1]), dest);
+    }
+}
 
 /// Define max boards, endpoints for mx_rcvr
 #define MX_MAX_BOARDS 4
@@ -65,10 +128,27 @@ extern struct cdsDaqNetGdsTpNum *gdsTpNum[2][DCU_COUNT];
 #define MATCH_VAL_MAIN (1 << 31)
 #define MATCH_VAL_THREAD 1
 
-struct daqMXdata {
-    struct rmIpcStr mxIpcData;
-    cdsDaqNetGdsTpNum mxTpTable;
-    char mxDataBlock[DAQ_DCU_BLOCK_SIZE];
+/**
+ * A simple class used to ensure that mx_irecv is called again.  This is
+ * designed for the re-registration of the wait buffer.  No error checking is done.
+ * When the object goes out of scope it will call mx_irecv.
+ */
+class setup_mx_irecv {
+public:
+    setup_mx_irecv(mx_endpoint_t& ep, mx_segment_t* seg, mx_request_t* req):
+        ep_(ep), seg_(seg), req_(req)
+    {}
+    ~setup_mx_irecv()
+    {
+        mx_irecv(ep_, seg_, 1, MATCH_VAL_MAIN, MX_MATCH_MASK_NONE, 0, req_);
+    }
+private:
+    setup_mx_irecv(const setup_mx_irecv& other);
+    setup_mx_irecv& operator=(const setup_mx_irecv& other);
+
+    mx_endpoint_t &ep_;
+    mx_segment_t* seg_;
+    mx_request_t* req_;
 };
 
 static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
@@ -78,16 +158,18 @@ void receiver_mx(int neid) {
     mx_segment_t seg;
     uint32_t result;
     struct timeval start_time, end_time;
-    char *buffer;
+    std::vector<daqMXdata> buffer(NUM_RREQ);            // mx receive buffers
     int myErrorStat = 0;
     int copySize;
     // float *testData;
     uint32_t match_val = MATCH_VAL_MAIN;
     mx_request_t req[NUM_RREQ];
-    mx_endpoint_t ep[MX_MAX_BOARDS * MX_MAX_ENDPOINTS];
+    mx_endpoint_t ep[MX_MAX_BOARDS * MX_MAX_ENDPOINTS]; // does this need to be an array?  we only use one entry!
 
     uint32_t board_num = (neid >> 8);
     uint32_t ep_num = neid & 0xff;
+
+    const int daqMXdata_len = sizeof(daqMXdata);
 
     mx_return_t ret =
         mx_open_endpoint(board_num, ep_num, FILTER, NULL, 0, &ep[neid]);
@@ -97,25 +179,17 @@ void receiver_mx(int neid) {
         exit(1);
     }
 
-    // Allocate NUM_RREQ MX packet receive buffers
-    int len = sizeof(struct daqMXdata);
-    buffer = (char *)malloc(len * NUM_RREQ);
-    if (buffer == NULL) {
-        fprintf(stderr, "Can't allocate buffers here\n");
-        exit(1);
-    }
-
     /* pre-post our receives */
     for (int cur_req = 0; cur_req < NUM_RREQ; cur_req++) {
-        seg.segment_ptr = &buffer[cur_req * len];
-        seg.segment_length = len;
+        seg.segment_ptr = &buffer[cur_req];
+        seg.segment_length = sizeof(daqMXdata);
         mx_endpoint_t ep1 = ep[neid];
         mx_irecv(ep1, &seg, 1, match_val, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
     }
 
     mx_set_error_handler(MX_ERRORS_RETURN);
     gettimeofday(&start_time, NULL);
-    int kk = 0;
+
     do {
         for (int count = 0; count < NUM_RREQ; count++) {
             /* Wait for the receive to complete */
@@ -169,74 +243,65 @@ void receiver_mx(int neid) {
             //
 
             copySize = stat.xfer_length;
-            // seg.segment_ptr = buffer[cur_req];
-            seg.segment_ptr = &buffer[cur_req * len];
-            seg.segment_length = len;
+            daqMXdata& cur_data = buffer[cur_req];
+            seg.segment_ptr = &cur_data;
+            seg.segment_length = daqMXdata_len;
+
+            // this will always call mx_irecv to re-start this request at the end of the loop
+            setup_mx_irecv register_with_mx(ep[neid], &seg, &req[cur_req]);
 
             if (!myErrorStat) {
                 // printf("received one\n");
-                struct daqMXdata *dataPtr = (struct daqMXdata *)seg.segment_ptr;
-                int dcu_id = dataPtr->mxIpcData.dcuId;
+                int dcu_id = cur_data.mxIpcData.dcuId;
 
                 // Skip bad inputs
-                //                if (dcu_id < 0 || dcu_id > (DCU_COUNT - 1)) {
-                //                    mx_irecv(ep[neid], &seg, 1, match_val,
-                //                    MX_MATCH_MASK_NONE,
-                //                             0, &req[cur_req]);
-                //                    continue; // Bad DCU ID
-                //                }
-                //                // daqd should skip dcus it doesn't know
-                //                about, we cannot
-                //                if (daqd.dcuSize[0][dcu_id] == 0) {
-                //                    mx_irecv(ep[neid], &seg, 1, match_val,
-                //                    MX_MATCH_MASK_NONE,
-                //                             0, &req[cur_req]);
-                //                    continue; // Unconfigured DCU
-                //                }
+                if (dcu_id < 0 || dcu_id > (MXR_MAX_DCU - 1))
+                {
+                    continue; // Bad DCU ID
+                }
+                // daqd should skip dcus it doesn't know
+                // about, we cannot
+                // if (daqd.dcuSize[0][dcu_id] == 0) {
+                //     mx_irecv(ep[neid], &seg, 1, match_val,
+                //     MX_MATCH_MASK_NONE,
+                //              0, &req[cur_req]);
+                //     continue; // Unconfigured DCU
+                // }
 
-                int cycle = dataPtr->mxIpcData.cycle;
-                int len = dataPtr->mxIpcData.dataBlockSize;
+                int64_t gps_sec = 0;
+                int cycle = cur_data.mxIpcData.cycle;
+                int len = cur_data.mxIpcData.dataBlockSize;
 
-                char *dataSource = (char *)dataPtr->mxDataBlock;
-                char *dataDest =
-                    (char *)((char *)(directed_receive_buffer[dcu_id]) +
-                             buf_size * cycle);
+                single_dcu_block& cur_dest = mxr_data[dcu_id][cycle];
+                {
+                    lock_guard<single_dcu_block> l_(cur_dest);
 
-#ifndef USE_MAIN
-                // Move the block data into the buffer
-                memcpy(dataDest, dataSource, len);
-#endif
+                    char *dataSource = (char *)cur_data.mxDataBlock;
+                    char *dataDest = cur_dest.data;
 
-                // Assign IPC data
-                gmDaqIpc[dcu_id].crc = dataPtr->mxIpcData.crc;
-                gmDaqIpc[dcu_id].dcuId = dataPtr->mxIpcData.dcuId;
-                gmDaqIpc[dcu_id].bp[cycle].timeSec =
-                    dataPtr->mxIpcData.bp[cycle].timeSec;
-                gmDaqIpc[dcu_id].bp[cycle].crc =
-                    dataPtr->mxIpcData.bp[cycle].crc;
-                gmDaqIpc[dcu_id].bp[cycle].cycle =
-                    dataPtr->mxIpcData.bp[cycle].cycle;
-                gmDaqIpc[dcu_id].dataBlockSize =
-                    dataPtr->mxIpcData.dataBlockSize;
+                    // Move the block data into the buffer
+                    memcpy(dataDest, dataSource, /* len */ DAQ_DCU_BLOCK_SIZE );
 
-                //                system_log(6, "dcu %d gps %d %d %d\n", dcu_id,
-                //                           dataPtr->mxIpcData.bp[cycle].timeSec,
-                //                           cycle,
-                //                           dataPtr->mxIpcData.bp[cycle].timeNSec);
-
-                // Assign test points table
-                *gdsTpNum[0][dcu_id] = dataPtr->mxTpTable;
-
-                gmDaqIpc[dcu_id].cycle = cycle;
+                    cur_dest.header.dcuId = static_cast<unsigned int>(dcu_id);
+                    cur_dest.header.fileCrc = cur_data.mxIpcData.crc;
+                    cur_dest.header.status = 2;
+                    cur_dest.header.cycle = static_cast<unsigned int>(cycle);
+                    gps_sec = cur_dest.header.timeSec = cur_data.mxIpcData.bp[cycle].timeSec;
+                    cur_dest.header.timeNSec = cur_data.mxIpcData.bp[cycle].timeNSec;
+                    cur_dest.header.dataCrc = cur_data.mxIpcData.bp[cycle].crc;
+                    cur_dest.header.dataBlockSize = cur_data.mxIpcData.dataBlockSize;
+                    cur_dest.header.tpBlockSize = DAQ_DCU_BLOCK_SIZE - cur_data.mxIpcData.dataBlockSize;
+                    cur_dest.header.tpCount = static_cast<unsigned int>(cur_data.mxTpTable.count);
+                    std::copy(cur_data.mxTpTable.tpNum, cur_data.mxTpTable.tpNum + cur_dest.header.tpCount, cur_dest.header.tpNum);
+                }
+                // do this in a scope where the lock on the data segment is not held, so we are never holding two locks
+                mark_dcu_received(dcu_id, gps_sec, cycle);
             }
             // daqd.producer1.rcvr_stats[neid].tick();
-            mx_irecv(ep[neid], &seg, 1, match_val, MX_MATCH_MASK_NONE, 0,
-                     &req[cur_req]);
         }
-    } while (true);
+    } while (!threads_should_stop.is_set());
     gettimeofday(&end_time, NULL);
     fprintf(stderr, "mx_wait failed in rcvr after do loop\n");
-    free(buffer);
     // exit(1);
 }
 
@@ -313,28 +378,94 @@ unsigned int open_mx(void) {
 
 void close_mx() { mx_finalize(); }
 
-struct rmIpcStr gmDaqIpc[DCU_COUNT];
-struct cdsDaqNetGdsTpNum gdsTpNumSpace[2][DCU_COUNT];
-struct cdsDaqNetGdsTpNum *gdsTpNum[2][DCU_COUNT];
-void *directed_receive_buffer[DCU_COUNT];
+int64_t wait_for_first_system(const int next_cycle, const int64_t prev_sec_and_cycle)
+{
+    int wait_count = 0;
+    int64_t expected_sec_and_cycle = prev_sec_and_cycle;
+    int64_t result = 0;
+    receive_map_entry_t cur_row[MXR_MAX_DCU];
 
+    if (prev_sec_and_cycle == 0)
+    {
+        expected_sec_and_cycle = 0;
+    }
+    bool keep_waiting = true;
+    do
+    {
+        receive_map_copy_row(next_cycle, cur_row);
+        for (int ii = 0; ii < MXR_MAX_DCU; ++ii)
+        {
+            if (cur_row[ii].gps_sec_and_cycle >= expected_sec_and_cycle
+                && cur_row[ii].gps_sec_and_cycle != 0
+                && extract_cycle(cur_row[ii].gps_sec_and_cycle) == next_cycle)
+            {
+                result = cur_row[ii].gps_sec_and_cycle;
+                keep_waiting = false;
+                break;
+            }
+            if (keep_waiting)
+            {
+                usleep(1000);
+                ++wait_count;
+            }
+        }
+    } while (keep_waiting);
 
-int main(int argc, char *argv[]) {
-    for (int i = 0; i < 2; i++)
-        for (int j = 0; j < DCU_COUNT; j++)
-            gdsTpNum[i][j] = &gdsTpNumSpace[i][j];
+    return result;
+}
 
-    // Allocate receive buffers for each configured DCU
-    for (int i = 9; i < DCU_COUNT; i++) {
-        // if (0 == daqd.dcuSize[0][i]) continue;
+void consentrate_data(const int64_t expected_sec_and_cycle, daq_multi_dcu_data_t* dest)
+{
+    receive_map_entry_t cur_row[MXR_MAX_DCU];
 
-        directed_receive_buffer[i] =
-            malloc(2 * DAQ_DCU_BLOCK_SIZE * DAQ_NUM_DATA_BLOCKS);
-        if (directed_receive_buffer[i] == 0) {
-            // system_log(1, "[MX recv] Couldn't allocate recv buffer\n");
-            exit(1);
+    int cur_cycle = static_cast<int>(extract_cycle(expected_sec_and_cycle));
+    int cycle_index = cycle_to_buffer_index(cur_cycle);
+
+    receive_map_copy_row(cur_cycle, cur_row);
+    char* dest_data = dest->dataBlock;
+    int remaining = DAQ_TRANSIT_FE_DATA_BLOCK_SIZE;
+    for (int ii = 0; ii < MXR_MAX_DCU; ++ii)
+    {
+        if (cur_row[ii].gps_sec_and_cycle == expected_sec_and_cycle)
+        {
+            int data_size = 0;
+            single_dcu_block& cur_block = mxr_data[ii][cycle_index];
+            lock_guard<single_dcu_block> l_(cur_block);
+            {
+                dest->header.dcuheader[ii] = cur_block.header;
+                data_size = cur_block.header.dataBlockSize + cur_block.header.tpBlockSize;
+                if (data_size > remaining)
+                {
+                    data_size = remaining;
+                }
+                memcpy(dest_data, dest->dataBlock, data_size);
+            }
+            dest->header.fullDataBlockSize += data_size;
+            dest_data += data_size;
+            remaining -= data_size;
+            dest->header.dcuTotalModels++;
         }
     }
+
+}
+
+// *************************************************************************
+// Catch Control C to end cod in controlled manner
+// *************************************************************************
+void intHandler(int dummy) {
+    exit_main_loop.set();
+}
+
+void sigpipeHandler(int dummy)
+{}
+
+int main(int argc, char *argv[]) {
+
+    // set up to catch Control C
+    signal(SIGINT,intHandler);
+    // setup to ignore sig pipe
+    signal(SIGPIPE, sigpipeHandler);
+
     unsigned int max_endpoints = open_mx();
     unsigned int nics_available = max_endpoints >> 8;
     max_endpoints &= 0xff;
@@ -361,8 +492,27 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-    // concentrate the data
-    // think really hard here
+    int next_cycle = 0;
+    int64_t prev_sec_and_cycle = 0;
+    do
+    {
+        daq_multi_dcu_data_t concentrated_data;
+
+        int64_t cur_sec_and_cycle = wait_for_first_system(next_cycle, prev_sec_and_cycle);
+
+        if (prev_sec_and_cycle > 0)
+        {
+            consentrate_data(prev_sec_and_cycle, &concentrated_data);
+            // send data out
+        }
+        prev_sec_and_cycle = cur_sec_and_cycle;
+        ++next_cycle;
+        next_cycle %= 16;
+    } while (!exit_main_loop.is_set());
+
+    printf("stopping threads\n");
+    threads_should_stop.set();
+    sleep(2);
     close_mx();
     return 0;
 }
