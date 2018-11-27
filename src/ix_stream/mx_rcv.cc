@@ -106,16 +106,19 @@ private:
     single_dcu_block& operator=(const single_dcu_block& other);
 };
 
-debug_array_2d<single_dcu_block, MXR_MAX_DCU, MAX_RECEIVE_BUFFERS> mxr_data;
-debug_array_2d<receive_map_entry_t, MAX_RECEIVE_BUFFERS, MXR_MAX_DCU> receive_map;
+typedef strong_type<int, 0> buffer_index_t;
+typedef strong_type<int, 1> dcu_index_t;
+
+debug_array_2d<single_dcu_block, MXR_MAX_DCU, MAX_RECEIVE_BUFFERS, dcu_index_t, buffer_index_t> mxr_data;
+debug_array_2d<receive_map_entry_t, MAX_RECEIVE_BUFFERS, MXR_MAX_DCU, buffer_index_t, dcu_index_t> receive_map;
 spin_lock receive_map_locks[MAX_RECEIVE_BUFFERS];
 
 atomic_flag threads_should_stop;
 atomic_flag exit_main_loop;
 
-int cycle_to_buffer_index(int cycle)
+buffer_index_t cycle_to_buffer_index(int cycle)
 {
-    return cycle % MAX_RECEIVE_BUFFERS;
+    return buffer_index_t(cycle % MAX_RECEIVE_BUFFERS);
 }
 
 void mark_dcu_received(int dcuid, int64_t gps_sec, int cycle)
@@ -127,18 +130,18 @@ void mark_dcu_received(int dcuid, int64_t gps_sec, int cycle)
     receive_map_entry_t new_entry;
     new_entry.s_clock = s_clock();
     new_entry.gps_sec_and_cycle = calc_gps_sec_and_cycle(gps_sec, cycle);
-    int index = cycle_to_buffer_index(cycle);
+    buffer_index_t index = cycle_to_buffer_index(cycle);
     {
-        lock_guard<spin_lock> l_(receive_map_locks[index]);
-        receive_map[index][dcuid] = new_entry;
+        lock_guard<spin_lock> l_(receive_map_locks[get_value(index)]);
+        receive_map[index][dcu_index_t(dcuid)] = new_entry;
     }
 }
 
 void receive_map_copy_row(int cycle, receive_map_entry_t dest[MXR_MAX_DCU])
 {
-    int index = cycle_to_buffer_index(cycle);
+    buffer_index_t index = cycle_to_buffer_index(cycle);
     {
-        lock_guard<spin_lock> l_(receive_map_locks[index]);
+        lock_guard<spin_lock> l_(receive_map_locks[get_value(index)]);
         std::copy(&(receive_map[index][0]), &(receive_map[index][MXR_MAX_DCU-1]), dest);
     }
 }
@@ -256,9 +259,10 @@ void handle_received_message(const daqMXdata& cur_data)
 
     int64_t gps_sec = 0;
     int cycle = cur_data.mxIpcData.cycle;
+    buffer_index_t cycle_index = cycle_to_buffer_index(cycle);
     int len = cur_data.mxIpcData.dataBlockSize;
 
-    single_dcu_block& cur_dest = mxr_data[dcu_id][cycle];
+    single_dcu_block& cur_dest = mxr_data[dcu_index_t(dcu_id)][cycle_index];
     {
         lock_guard<single_dcu_block> l_(cur_dest);
 
@@ -342,8 +346,8 @@ void receiver_mx(int neid) {
             seg.segment_length = daqMXdata_len;
 
             ++messages_received;
-            std::cout << neid << " received a message, #" << messages_received << "\n" << std::endl;
-
+            //std::cout << neid << " received a message, #" << messages_received << "\n" << std::endl;
+            //std::cout << "." << std::flush;
             if (stat.code == MX_STATUS_SUCCESS)
             {
                 handle_received_message(cur_data);
@@ -491,21 +495,27 @@ void consentrate_data(const int64_t expected_sec_and_cycle, volatile daq_multi_d
     receive_map_entry_t cur_row[MXR_MAX_DCU];
 
     int cur_cycle = static_cast<int>(extract_cycle(expected_sec_and_cycle));
-    int cycle_index = cycle_to_buffer_index(cur_cycle);
+    buffer_index_t cycle_index = cycle_to_buffer_index(cur_cycle);
+
+    volatile char* dest_data = &(dest->dataBlock[0]);
+    dest->header.fullDataBlockSize = 0;
+    dest->header.dcuTotalModels = 0;
+    unsigned int remaining = dest_size - sizeof(daq_multi_dcu_header_t);
 
     receive_map_copy_row(cur_cycle, cur_row);
-    volatile char* dest_data = dest->dataBlock;
-    unsigned int remaining = dest_size - sizeof(daq_multi_dcu_header_t);
+
+    int model_index = 0;
+
     for (int ii = 0; ii < MXR_MAX_DCU; ++ii)
     {
         if (cur_row[ii].gps_sec_and_cycle == expected_sec_and_cycle)
         {
             int data_size = 0;
-            single_dcu_block& cur_block = mxr_data[ii][cycle_index];
+            single_dcu_block& cur_block = mxr_data[dcu_index_t(ii)][cycle_index];
             lock_guard<single_dcu_block> l_(cur_block);
             {
-                //dest->header.dcuheader[ii] = cur_block.header;
-                memcpy((void*)&(dest->header.dcuheader[ii]), &(cur_block.header), sizeof(cur_block.header));
+                //dest->header.dcuheader[model_index] = cur_block.header;
+                memcpy((void*)&(dest->header.dcuheader[model_index]), &(cur_block.header), sizeof(cur_block.header));
                 data_size = cur_block.header.dataBlockSize + cur_block.header.tpBlockSize;
                 if (data_size > remaining)
                 {
@@ -517,10 +527,11 @@ void consentrate_data(const int64_t expected_sec_and_cycle, volatile daq_multi_d
             dest->header.fullDataBlockSize += data_size;
             dest_data += data_size;
             remaining -= data_size;
-            dest->header.dcuTotalModels++;
+            ++model_index;
             receive_mask.set(ii);
         }
     }
+    dest->header.dcuTotalModels = model_index;
 
 }
 

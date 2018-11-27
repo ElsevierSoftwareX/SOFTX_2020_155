@@ -83,48 +83,84 @@ private:
 
 
 /**
+ * A strong typedef, provided to give stronger/compiler differentiation
+ * between multiple distinct types that share the same underlying basic type
+ * \tparam T The basic type of the object
+ * \tparam TAG A tag value to distinguish different strong types, not otherwise used
+ */
+template <typename T, size_t TAG=0>
+class strong_type {
+public:
+    typedef T value_type;
+
+    explicit strong_type(T val): data_(val) {}
+
+    T get() const
+    {
+        return data_;
+    }
+private:
+    T data_;
+};
+
+template <typename T>
+typename T::value_type get_value(T& has_get)
+{
+    return has_get.get();
+}
+
+size_t get_value(size_t val)
+{
+    return val;
+}
+
+/**
  * A simple wrapper around a 2d array that can do bounds checking.
  * @tparam T Base type
  * @tparam N size of the 1st dimension
  * @tparam M size of the 2nd dimension
  */
-template <typename T, size_t N, size_t M>
+template <typename T, size_t N, size_t M, typename Nindex_t = size_t, typename Mindex_t = size_t>
 class debug_array_2d {
 public:
     class span {
     public:
         friend class debug_array_2d;
-        T& at(size_t index)
+        T& at(Mindex_t index)
         {
-            if (index < 0 || index >= M)
+            size_t index_ = static_cast<size_t>(get_value(index));
+            if (index_ < 0 || index_ >= M)
             {
                 throw std::out_of_range("Out of range access");
             }
-            return data_[index];
+            return data_[index_];
         }
-        T& at(size_t index) const
+        T& at(Mindex_t index) const
         {
-            if (index < 0 || index >= M)
+            size_t index_ = static_cast<size_t>(get_value(index));
+            if (index_ < 0 || index_ >= M)
             {
                 throw std::out_of_range("Out of range access");
             }
-            return data_[index];
+            return data_[index_];
         }
-        T& operator[](size_t index)
+        T& operator[](Mindex_t index)
         {
-            if (index < 0 || index >= M)
+            size_t index_ = static_cast<size_t>(get_value(index));
+            if (index_ < 0 || index_ >= M)
             {
                 throw std::out_of_range("Out of range access");
             }
-            return data_[index];
+            return data_[index_];
         }
-        const T& operator[](size_t index) const
+        const T& operator[](Mindex_t index) const
         {
-            if (index < 0 || index >= M)
+            size_t index_ = static_cast<size_t>(get_value(index));
+            if (index_ < 0 || index_ >= M)
             {
                 throw std::out_of_range("Out of range access");
             }
-            return data_[index];
+            return data_[index_];
         }
         T* operator*() const
         {
@@ -148,33 +184,37 @@ public:
     {
     }
 
-    span at(size_t index)
+    span at(Nindex_t index)
     {
-        if (index < 0 || index >= N){
+        size_t index_ = static_cast<size_t>(get_value(index));
+        if (index_ < 0 || index_ >= N){
             throw std::out_of_range("Bad index");
         }
-        return span(data_[index]);
+        return span(data_[index_]);
     }
-    const span at(size_t index) const
+    const span at(Nindex_t index) const
     {
-        if (index < 0 || index >= N){
+        size_t index_ = static_cast<size_t>(get_value(index));
+        if (index_ < 0 || index_ >= N){
             throw std::out_of_range("Bad index");
         }
-        return span(data_[index]);
+        return span(data_[index_]);
     }
-    span operator[](size_t index)
+    span operator[](Nindex_t index)
     {
-        if (index < 0 || index >= N){
+        size_t index_ = static_cast<size_t>(get_value(index));
+        if (index_ < 0 || index_ >= N){
             throw std::out_of_range("Bad index");
         }
-        return span(data_[index]);
+        return span(data_[index_]);
     }
-    const span operator[](size_t index) const
+    const span operator[](Nindex_t index) const
     {
-        if (index < 0 || index >= N){
+        size_t index_ = static_cast<size_t>(get_value(index));
+        if (index_ < 0 || index_ >= N){
             throw std::out_of_range("Bad index");
         }
-        return span(data_[index]);
+        return span(data_[index_]);
     }
     T* operator*() const
     {
