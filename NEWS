@@ -3,6 +3,10 @@ Changes for 3.4.4
 ==================================================================================================
 - Bug Fix for MATH.pm: Improper case of pLocalEpics when EPICS part used as input to math
   functions. This fix was also applied recently for 3.2.4 release.
+- Bug fix for AND, RelationalOperator and Fcn. These would not compile if spaces in function 
+  description.
+- Added Nan checking in cdsrfmswitch ie if time or data was Nan on receive side, do not forward
+  the data.
 ==================================================================================================
 Changes for 3.4.3  
 ==================================================================================================
