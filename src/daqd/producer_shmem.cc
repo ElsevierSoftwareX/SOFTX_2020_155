@@ -279,7 +279,7 @@ void *producer::frame_writer() {
         std::array<unsigned int, DCU_COUNT> dcu_data_crc;
         std::array<unsigned int, DCU_COUNT> dcu_data_gps;
         std::fill(dcu_to_zmq_lookup.begin(), dcu_to_zmq_lookup.end(), -1);
-        std::fill(dcu_data_from_zmq.begin(), dcu_data_from_zmq.end(), (void*)0);
+        std::fill(dcu_data_from_zmq.begin(), dcu_data_from_zmq.end(), (char*)0);
         std::fill(dcu_data_crc.begin(), dcu_data_crc.end(), 0);
         std::fill(dcu_data_gps.begin(), dcu_data_gps.end(), 0);
         // retreive 1/16s of data from zmq

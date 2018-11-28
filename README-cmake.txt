@@ -11,6 +11,8 @@ At this time the RCG and real time modules are not being converted to cmake.
 
 Building daqd via cmake.  You will need cmake >= 3.0.  The build has been tested with cmake 3.0.2, 3.7.2, 3.9.2.
 
+0. Make sure your PKG_CONFIG_PATH is set right, most packages are discovered
+via pkg-config
 1. create a build directory
 2. change directory to the build directory
 3. Make sure that there are package config files available for framecpp & EPICS
@@ -40,7 +42,7 @@ mx_stream
 run_number_server
 the zmq_stream components
 zmq_fe
-zmq_rcv_ix_xmit
+zmq_rcv_ix_xmit_delay
 
 
 If you need to install a copy of cmake you can retrieve the source from kitware.
@@ -103,7 +105,7 @@ ZMQ/Dolphin IX transport
 The transport layer to be used with daqd_shmem is in flux.  Currently the following components are used:
 
 zmq_fe on the FE computers
-zmq_rcv_ix_xmit on the data concentrator
+zmq_rcv_ix_xmit_delay on the data concentrator
 ix_fb_recv on the daqd machines
 
 We also have a rebuild of the mx_streamer to work with the daqd_shmem system.  This is NOT ready yet.
