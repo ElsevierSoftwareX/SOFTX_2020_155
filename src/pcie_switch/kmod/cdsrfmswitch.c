@@ -4,6 +4,7 @@
 #include <linux/kthread.h>       /* Needed for KERN_INFO */
 #include <genif.h>
 #include "../../include/commData3.h"
+#include "./cds_isnan.h"
 #include <asm/cacheflush.h>
 #include <asm/uaccess.h>
 #include <asm/delay.h>
@@ -183,13 +184,17 @@ inline int copyIpcData (int indx, int netFrom, int netTo)
 					xfers ++;
 					// Copy data and time stamp to next Dolphin switch
 					tmp = pIpcDataRead[netFrom]->dBlock[jj][ii].data;
-					pIpcDataWrite[netTo]->dBlock[jj][ii].data = tmp;
-					pIpcDataWrite[netTo]->dBlock[jj][ii].timestamp = syncWord;
-					syncArray[netFrom][jj][ii] = syncWord;
-					// Setup locations and flag for cache flushing at end of xfers
-					cblock = jj;
-					dblock = ii;
-					ttcache += 1;
+					if(!cds_isnan(tmp) && !cds_isnan(syncWord)) {
+						pIpcDataWrite[netTo]->dBlock[jj][ii].data = tmp;
+						pIpcDataWrite[netTo]->dBlock[jj][ii].timestamp = syncWord;
+						syncArray[netFrom][jj][ii] = syncWord;
+						// Setup locations and flag for cache flushing at end of xfers
+						cblock = jj;
+						dblock = ii;
+						ttcache += 1;
+					} else {
+					    printk("Detected NaN in switch data \n");
+					}
 				}
 			}
 		}
