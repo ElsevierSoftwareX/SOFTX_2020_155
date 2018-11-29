@@ -496,8 +496,8 @@ int send_to_local_memory(int nsys, int xmitData, int send_delay_ms, int pv_debug
 	for(ii=0;ii<MAX_NSYS;ii++) dataRdy[ii] = 0;
 
 
-	long cur_gps=0, cur_nano=0;
-	long seg_gps=0, seg_nano=0;
+	//long cur_gps=0, cur_nano=0;
+	// seg_gps=0, seg_nano=0;
 	int dummy = 0;
 
     do {
@@ -539,12 +539,12 @@ int send_to_local_memory(int nsys, int xmitData, int send_delay_ms, int pv_debug
 			zmq_send_daq_multi_dcu_t(&msg_buffer, daq_publisher, 0);
 			// printf("Sending data size = %d\n",msg_size);
 		}
-		seg_gps = ixDataBlock->header.dcuheader[0].timeSec;
-		seg_nano = ixDataBlock->header.dcuheader[0].timeNSec * 62500000;
-		cur_gps = (long)symm_gps_time((unsigned long*)&cur_nano, &dummy);
+		//seg_gps = ixDataBlock->header.dcuheader[0].timeSec;
+		//seg_nano = ixDataBlock->header.dcuheader[0].timeNSec * 62500000;
+		//cur_gps = (long)symm_gps_time((unsigned long*)&cur_nano, &dummy);
 
 		
-		time_delta = (cur_gps - seg_gps)*1000 + (cur_nano - seg_nano)/1000000;
+		//time_delta = (cur_gps - seg_gps)*1000 + (cur_nano - seg_nano)/1000000;
 		/* fprintf(stderr, "cgps %d:%d seg_gps %d:%d delta_ms: %d\n", cur_gps, cur_nano, seg_gps, seg_nano, time_delta); */
 
 		send_pv_update(pv_debug_pipe, pv_prefix, pvs, sizeof(pvs)/sizeof(pvs[0]));
