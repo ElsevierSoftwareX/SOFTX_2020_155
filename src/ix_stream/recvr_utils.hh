@@ -147,19 +147,19 @@ public:
         T& operator[](Mindex_t index)
         {
             size_t index_ = static_cast<size_t>(get_value(index));
-            if (index_ < 0 || index_ >= M)
-            {
-                throw std::out_of_range("Out of range access");
-            }
+            //if (index_ < 0 || index_ >= M)
+            //{
+            //    throw std::out_of_range("Out of range access");
+            //}
             return data_[index_];
         }
         const T& operator[](Mindex_t index) const
         {
             size_t index_ = static_cast<size_t>(get_value(index));
-            if (index_ < 0 || index_ >= M)
-            {
-                throw std::out_of_range("Out of range access");
-            }
+            //if (index_ < 0 || index_ >= M)
+            //{
+            //    throw std::out_of_range("Out of range access");
+            //}
             return data_[index_];
         }
         T* operator*() const
@@ -203,17 +203,17 @@ public:
     span operator[](Nindex_t index)
     {
         size_t index_ = static_cast<size_t>(get_value(index));
-        if (index_ < 0 || index_ >= N){
-            throw std::out_of_range("Bad index");
-        }
+        //if (index_ < 0 || index_ >= N){
+        //    throw std::out_of_range("Bad index");
+        //}
         return span(data_[index_]);
     }
     const span operator[](Nindex_t index) const
     {
         size_t index_ = static_cast<size_t>(get_value(index));
-        if (index_ < 0 || index_ >= N){
-            throw std::out_of_range("Bad index");
-        }
+        //if (index_ < 0 || index_ >= N){
+        //    throw std::out_of_range("Bad index");
+        //}
         return span(data_[index_]);
     }
     T* operator*() const

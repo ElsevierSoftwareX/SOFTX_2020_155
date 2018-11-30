@@ -15,9 +15,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
-#include <iostream>
 
 #include "mx_extensions.h"
 #include "myriexpress.h"
@@ -43,11 +44,13 @@ typedef flag_mask<MXR_MAX_DCU> dcu_mask_t;
  */
 struct options_t {
     std::string buffer_name;
+    std::string receive_map_dump_fname;
     unsigned int max_data_size_mb;
     bool abort;
 
     options_t():
     buffer_name(DEFAULT_BUFFER_NAME),
+    receive_map_dump_fname(),
     max_data_size_mb(DEFAULT_MAX_DATA_SIZE_MB),
     abort(false)
     {}
@@ -106,11 +109,30 @@ private:
     single_dcu_block& operator=(const single_dcu_block& other);
 };
 
+/**
+ * Simple structure used to get a mapping of which dcus did not report
+ * in the current cycle that did in the previous
+ */
+struct missing_map_t {
+    missing_map_t(): missing_map(), differences(0)
+    {
+        std::fill(&missing_map[0], &missing_map[0] + MXR_MAX_DCU, false);
+    }
+    void operator()(const bool old_entry, const bool new_entry, int i)
+    {
+        missing_map[i] = old_entry;
+        differences += (old_entry ? 1 : 0);
+    }
+    bool missing_map[MXR_MAX_DCU];
+    int differences;
+};
+
 typedef strong_type<int, 0> buffer_index_t;
 typedef strong_type<int, 1> dcu_index_t;
+typedef debug_array_2d<receive_map_entry_t, MAX_RECEIVE_BUFFERS, MXR_MAX_DCU, buffer_index_t, dcu_index_t> receive_map_t;
 
 debug_array_2d<single_dcu_block, MXR_MAX_DCU, MAX_RECEIVE_BUFFERS, dcu_index_t, buffer_index_t> mxr_data;
-debug_array_2d<receive_map_entry_t, MAX_RECEIVE_BUFFERS, MXR_MAX_DCU, buffer_index_t, dcu_index_t> receive_map;
+receive_map_t receive_map;
 spin_lock receive_map_locks[MAX_RECEIVE_BUFFERS];
 
 atomic_flag threads_should_stop;
@@ -132,7 +154,8 @@ void mark_dcu_received(int dcuid, int64_t gps_sec, int cycle)
     new_entry.gps_sec_and_cycle = calc_gps_sec_and_cycle(gps_sec, cycle);
     buffer_index_t index = cycle_to_buffer_index(cycle);
     {
-        lock_guard<spin_lock> l_(receive_map_locks[get_value(index)]);
+        //lock_guard<spin_lock> l_(receive_map_locks[get_value(index)]);
+        lock_guard<spin_lock> l_(receive_map_locks[0]);
         receive_map[index][dcu_index_t(dcuid)] = new_entry;
     }
 }
@@ -141,9 +164,81 @@ void receive_map_copy_row(int cycle, receive_map_entry_t dest[MXR_MAX_DCU])
 {
     buffer_index_t index = cycle_to_buffer_index(cycle);
     {
-        lock_guard<spin_lock> l_(receive_map_locks[get_value(index)]);
+        //lock_guard<spin_lock> l_(receive_map_locks[get_value(index)]);
+        lock_guard<spin_lock> l_(receive_map_locks[0]);
         std::copy(&(receive_map[index][0]), &(receive_map[index][MXR_MAX_DCU-1]), dest);
     }
+}
+
+void receive_map_copy(receive_map_t& dest)
+{
+    lock_guard<spin_lock> l_(receive_map_locks[0]);
+    dest = receive_map;
+}
+
+class scoreboard_manager {
+public:
+    scoreboard_manager(receive_map_t& scoreboard_snapshot, dcu_mask_t& mask):scoreboard_snapshot_(scoreboard_snapshot), mask_(mask) {}
+    void get_scoreboard_row(int cycle, receive_map_entry_t dest[MXR_MAX_DCU])
+    {
+        buffer_index_t cycle_index = cycle_to_buffer_index(cycle);
+        receive_map_copy(scoreboard_snapshot_);
+        std::copy(&(scoreboard_snapshot_[cycle_index][0]), &(scoreboard_snapshot_[cycle_index][MXR_MAX_DCU - 1]), dest);
+    }
+    void mark_received(int dcu)
+    {
+        mask_.set(dcu);
+    }
+private:
+    scoreboard_manager(const scoreboard_manager& other);
+    scoreboard_manager& operator=(const scoreboard_manager& other);
+
+    receive_map_t& scoreboard_snapshot_;
+    dcu_mask_t& mask_;
+};
+
+void dump_scoreboard(std::ostream& os, receive_map_t& local_map, missing_map_t& missing_map, int64_t sec_and_cycle)
+{
+    // figure out which columns have entries
+    int64_t column_has_data[MXR_MAX_DCU];
+    std::fill(&column_has_data[0], &column_has_data[0] + MXR_MAX_DCU, 0);
+    {
+        for (int i = 0; i < MAX_RECEIVE_BUFFERS; ++i)
+        {
+            buffer_index_t index = cycle_to_buffer_index(i);
+            for (int j = 0; j < MXR_MAX_DCU; ++j)
+            {
+                column_has_data[j] |= local_map[index][dcu_index_t(j)].gps_sec_and_cycle;
+            }
+        }
+    }
+    os << "-----------------------------\n";
+    os << "- " << sec_and_cycle << " (" << extract_gps(sec_and_cycle);
+    os << ":" << extract_cycle(sec_and_cycle) <<")\n";
+    os << "-----------------------------\n";
+
+    buffer_index_t cur_cycle = cycle_to_buffer_index(static_cast<int>(extract_cycle(sec_and_cycle)));
+
+    for (int i = 0; i < MAX_RECEIVE_BUFFERS; ++i)
+    {
+        buffer_index_t cycle_index = cycle_to_buffer_index(i);
+        os << i << ") ";
+        for (int j = 0; j < MXR_MAX_DCU; ++j)
+        {
+            if (column_has_data[j] == 0)
+            {
+                continue;
+            }
+            receive_map_entry_t& cur_entry = local_map[cycle_index][dcu_index_t(j)];
+            os << "| " << j << "] ";
+            os << (cur_cycle.get() == cycle_index.get() && missing_map.missing_map[j] ? "*" : " ");
+            os << extract_gps(cur_entry.gps_sec_and_cycle) << ":" << extract_cycle(cur_entry.gps_sec_and_cycle);
+            os << " (" << cur_entry.s_clock << ") ";
+        }
+        os << "|\n";
+    }
+    os << "-----------------------------\n";
+    os << std::endl;
 }
 
 /// Define max boards, endpoints for mx_rcvr
@@ -157,7 +252,7 @@ void receive_map_copy_row(int cycle, receive_map_entry_t dest[MXR_MAX_DCU])
 #define DFLT_END 128
 #define MAX_LEN (1024 * 1024 * 1024)
 #define DFLT_ITER 1000
-#define NUM_RREQ 64
+#define NUM_RREQ 256
 #define NUM_SREQ 4 /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
 
 #define MATCH_VAL_MAIN (1 << 31)
@@ -258,9 +353,14 @@ void handle_received_message(const daqMXdata& cur_data)
     // }
 
     int64_t gps_sec = 0;
-    int cycle = cur_data.mxIpcData.cycle;
+    int cycle = static_cast<int>(cur_data.mxIpcData.cycle);
     buffer_index_t cycle_index = cycle_to_buffer_index(cycle);
     int len = cur_data.mxIpcData.dataBlockSize;
+
+    if (dcu_id == 7)
+    {
+        std::cout << "> " << cur_data.mxIpcData.bp[cycle].timeSec << ":" << cycle << "(" << cycle_index.get() << ") => ";
+    }
 
     single_dcu_block& cur_dest = mxr_data[dcu_index_t(dcu_id)][cycle_index];
     {
@@ -286,6 +386,10 @@ void handle_received_message(const daqMXdata& cur_data)
     }
     // do this in a scope where the lock on the data segment is not held, so we are never holding two locks
     mark_dcu_received(dcu_id, gps_sec, cycle);
+    if (dcu_id == 7)
+    {
+        std::cout << gps_sec << ":" << cycle << "   - crc - " << cur_data.mxIpcData.bp[cycle].crc << "\n";
+    }
 }
 
 void receiver_mx(int neid) {
@@ -356,6 +460,7 @@ void receiver_mx(int neid) {
             {
                 handle_bad_message(neid, endpoint.get(), stat);
             }
+            memset(&req[cur_req], 0, sizeof(req[cur_req]));
             mx_irecv(endpoint.get(), &seg, 1, match_val, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
         }
         // daqd.producer1.rcvr_stats[neid].tick();
@@ -490,7 +595,7 @@ int64_t wait_for_first_system(const int next_cycle, const int64_t prev_sec_and_c
 }
 
 void consentrate_data(const int64_t expected_sec_and_cycle, volatile daq_multi_dcu_data_t *dest, unsigned int dest_size,
-                      dcu_mask_t &receive_mask)
+                      scoreboard_manager& manager)
 {
     receive_map_entry_t cur_row[MXR_MAX_DCU];
 
@@ -502,7 +607,10 @@ void consentrate_data(const int64_t expected_sec_and_cycle, volatile daq_multi_d
     dest->header.dcuTotalModels = 0;
     unsigned int remaining = dest_size - sizeof(daq_multi_dcu_header_t);
 
-    receive_map_copy_row(cur_cycle, cur_row);
+    //receive_map_copy_row(cur_cycle, cur_row);
+    //receive_map_copy( local_map );
+    //std::copy(&(local_map[cycle_index][0]), &(local_map[cycle_index][MXR_MAX_DCU - 1]), cur_row);
+    manager.get_scoreboard_row(cur_cycle, cur_row);
 
     int model_index = 0;
 
@@ -528,7 +636,7 @@ void consentrate_data(const int64_t expected_sec_and_cycle, volatile daq_multi_d
             dest_data += data_size;
             remaining -= data_size;
             ++model_index;
-            receive_mask.set(ii);
+            manager.mark_received(ii);
         }
     }
     dest->header.dcuTotalModels = model_index;
@@ -558,6 +666,7 @@ void show_help(char *prog)
     std::cout << "\t-h - Show this help\n";
     std::cout << "\t-b <name> - Set the output mbuf name - defaults to " << DEFAULT_BUFFER_NAME << "\n";
     std::cout << "\t-m <size> - Set the output mbuf size in MB [20-100] - defaults to " << DEFAULT_MAX_DATA_SIZE_MB << "\n";
+    std::cout << "\t-X <path> - Debug dump of the receive timing map to the given path when a dcu is missed.\n";
     std::cout << std::endl;
 }
 
@@ -575,7 +684,7 @@ void sigpipeHandler(int dummy)
 options_t parse_options(int argc, char *const *argv) {
     options_t opts;
     int arg = 0;
-    while ((arg = getopt(argc, argv, "b:m:h")) != EOF)
+    while ((arg = getopt(argc, argv, "b:m:hX:")) != EOF)
     {
         switch (arg) {
             case 'b':
@@ -594,6 +703,9 @@ options_t parse_options(int argc, char *const *argv) {
                     opts.abort = true;
                 }
                 break;
+            case 'X':
+                opts.receive_map_dump_fname = optarg;
+                break;
             case 'h':
             default:
                 show_help(argv[0]);
@@ -608,6 +720,7 @@ int main(int argc, char *argv[]) {
     int max_data_size = 0;
     volatile daq_multi_cycle_header_t* ifo_header = NULL;
     volatile char* ifo_data = NULL;
+    std::fstream scoreboard_dump_stream;
 
     options_t opts = parse_options(argc, argv);
     if (opts.abort)
@@ -615,6 +728,17 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
     max_data_size = opts.max_data_size_mb * 1024*1024;
+    if (!opts.receive_map_dump_fname.empty())
+    {
+        scoreboard_dump_stream.open(opts.receive_map_dump_fname.c_str(), std::ios::out | std::ios::trunc);
+        scoreboard_dump_stream << "Opening dump stream for output" << std::endl;
+        std::cout << "Opening dump stream for output '" << opts.receive_map_dump_fname << "'" << std::endl;
+        if (!scoreboard_dump_stream.is_open())
+        {
+            std::cerr << "Unable to open debug stream" << std::endl;
+            exit(1);
+        }
+    }
 
     ifo_header = reinterpret_cast<volatile daq_multi_cycle_header_t *>(findSharedMemorySize(opts.buffer_name.c_str(), opts.max_data_size_mb));
     ifo_data = (volatile char*)ifo_header + sizeof(daq_multi_cycle_header_t);
@@ -665,11 +789,14 @@ int main(int argc, char *argv[]) {
     int64_t prev_sec_and_cycle = 0;
     dcu_mask_t receive_mask;
     dcu_mask_t prev_receive_mask;
+    receive_map_t local_map;
 
     std::cout << "Threads created, entering main loop\n";
+    int dump_scoreboard_for_cycles = 0;
 
     do
     {
+        scoreboard_manager scoreboard(local_map, receive_mask);
         int64_t cur_sec_and_cycle = wait_for_first_system(next_cycle, prev_sec_and_cycle);
 
         if (cur_sec_and_cycle != 0)
@@ -681,11 +808,28 @@ int main(int argc, char *argv[]) {
                 int64_t sending_cycle = extract_cycle(prev_sec_and_cycle);
                 volatile daq_multi_dcu_data_t *ifoDataBlock = reinterpret_cast<volatile daq_multi_dcu_data_t *>(
                         ifo_data + (cycle_data_size * sending_cycle));
-                consentrate_data(prev_sec_and_cycle, ifoDataBlock, cycle_data_size, receive_mask);
+                consentrate_data(prev_sec_and_cycle, ifoDataBlock, cycle_data_size, scoreboard);
                 ifo_header->curCycle = static_cast<unsigned int>(sending_cycle);
+
+                missing_map_t missing_map;
+                foreach_difference(prev_receive_mask, receive_mask, missing_map);
+                if (missing_map.differences > 0)
+                {
+                    dump_scoreboard_for_cycles = 3;
+                }
 
                 dump_dcu_mask_diffs(prev_receive_mask, receive_mask);
                 prev_receive_mask = receive_mask;
+
+                if (dump_scoreboard_for_cycles > 0 && !opts.receive_map_dump_fname.empty())
+                {
+                    --dump_scoreboard_for_cycles;
+                    dump_scoreboard(scoreboard_dump_stream, local_map, missing_map, prev_sec_and_cycle);
+                    if (dump_scoreboard_for_cycles == 1)
+                    {
+                        exit_main_loop.set();
+                    }
+                }
             }
             prev_sec_and_cycle = cur_sec_and_cycle;
             ++next_cycle;
