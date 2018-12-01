@@ -81,6 +81,51 @@ private:
     pthread_spinlock_t& sp_;
 };
 
+/**
+ * A simple scope based smart pointer.  This is a replacement for auto_ptr
+ * to be used when unique_ptr is not available (gcc 4.4.3).
+ * Use this instead of auto_ptr to avoid deprication noticies on new compilers.
+ * @tparam T
+ */
+template <typename T>
+class scoped_ptr {
+public:
+    scoped_ptr(): p_((T*)0) {}
+    scoped_ptr(T* p): p_(p) {}
+    ~scoped_ptr()
+    {
+        reset((T*)0);
+    }
+    void reset(T* new_p)
+    {
+        if (p_ && p_ != new_p)
+        {
+            delete p_;
+        }
+        p_ = new_p;
+    }
+    T& operator->()
+    {
+        return *p_;
+    }
+    const T& operator->() const
+    {
+        return *p_;
+    }
+    T* get()
+    {
+        return p_;
+    }
+    const T* get() const
+    {
+        return p_;
+    }
+private:
+    scoped_ptr(const scoped_ptr& other);
+    scoped_ptr& operator=(const scoped_ptr& other);
+
+    T* p_;
+};
 
 /**
  * A strong typedef, provided to give stronger/compiler differentiation
@@ -103,12 +148,23 @@ private:
     T data_;
 };
 
+/**
+ * Return the result of T.get() from any type T that has a get call.  Used to 'unbox' the strong types
+ * @tparam T A type with a get method and a value_type typedef
+ * @param has_get Instance of T
+ * @return The value of has_get.get()
+ */
 template <typename T>
 typename T::value_type get_value(T& has_get)
 {
     return has_get.get();
 }
 
+/**
+ * Overload of get_value to allow integer types to be used with get_value
+ * @param val
+ * @return returns val
+ */
 size_t get_value(size_t val)
 {
     return val;

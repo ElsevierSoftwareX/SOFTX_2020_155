@@ -17,8 +17,11 @@
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <vector>
+
+#include "dolphin_common.hh"
 
 #include "mx_extensions.h"
 #include "myriexpress.h"
@@ -46,13 +49,17 @@ struct options_t {
     std::string buffer_name;
     std::string receive_map_dump_fname;
     unsigned int max_data_size_mb;
+    unsigned int dolphin_group;
     bool abort;
+    bool xmit_data;
 
     options_t():
     buffer_name(DEFAULT_BUFFER_NAME),
     receive_map_dump_fname(),
     max_data_size_mb(DEFAULT_MAX_DATA_SIZE_MB),
-    abort(false)
+    dolphin_group(-1),
+    abort(false),
+    xmit_data(false)
     {}
 };
 
@@ -666,6 +673,7 @@ void show_help(char *prog)
     std::cout << "\t-h - Show this help\n";
     std::cout << "\t-b <name> - Set the output mbuf name - defaults to " << DEFAULT_BUFFER_NAME << "\n";
     std::cout << "\t-m <size> - Set the output mbuf size in MB [20-100] - defaults to " << DEFAULT_MAX_DATA_SIZE_MB << "\n";
+    std::cout << "\t-g <num>  - Set the dolphin group number to transmit data on.\n";
     std::cout << "\t-X <path> - Debug dump of the receive timing map to the given path when a dcu is missed.\n";
     std::cout << std::endl;
 }
@@ -684,7 +692,7 @@ void sigpipeHandler(int dummy)
 options_t parse_options(int argc, char *const *argv) {
     options_t opts;
     int arg = 0;
-    while ((arg = getopt(argc, argv, "b:m:hX:")) != EOF)
+    while ((arg = getopt(argc, argv, "b:g:hm:X:")) != EOF)
     {
         switch (arg) {
             case 'b':
@@ -702,6 +710,10 @@ options_t parse_options(int argc, char *const *argv) {
                     std::cerr << "Max data block size is 100 MB\n";
                     opts.abort = true;
                 }
+                break;
+            case 'g':
+                    opts.dolphin_group = static_cast<unsigned int>(atoi(optarg));
+                    opts.xmit_data = true;
                 break;
             case 'X':
                 opts.receive_map_dump_fname = optarg;
@@ -721,6 +733,11 @@ int main(int argc, char *argv[]) {
     volatile daq_multi_cycle_header_t* ifo_header = NULL;
     volatile char* ifo_data = NULL;
     std::fstream scoreboard_dump_stream;
+    scoped_ptr<simple_dolphin> dolphin;
+
+    daq_multi_cycle_header_t *xmitHeader[IX_BLOCK_COUNT];
+    static int xmitDataOffset[IX_BLOCK_COUNT];
+    int xmitBlockNum = 0;
 
     options_t opts = parse_options(argc, argv);
     if (opts.abort)
@@ -748,6 +765,20 @@ int main(int argc, char *argv[]) {
     ifo_header->cycleDataSize = cycle_data_size;
     ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS;
     ifo_header->curCycle = DAQ_NUM_DATA_BLOCKS + 1;
+
+    if (opts.xmit_data)
+    {
+        segmentId = opts.dolphin_group;
+        dolphin.reset(new simple_dolphin());
+
+        char* cur_write_address = (char*)writeAddr;
+        for (int ii = 0; ii < IX_BLOCK_COUNT; ++ii)
+        {
+            xmitHeader[ii] = (daq_multi_cycle_header_t*)cur_write_address;
+            cur_write_address += IX_BLOCK_SIZE;
+            xmitDataOffset[ii] = IX_BLOCK_SIZE * ii + sizeof(struct daq_multi_cycle_header_t);
+        }
+    }
 
     // set up to catch Control C
     signal(SIGINT,intHandler);
@@ -810,6 +841,17 @@ int main(int argc, char *argv[]) {
                         ifo_data + (cycle_data_size * sending_cycle));
                 consentrate_data(prev_sec_and_cycle, ifoDataBlock, cycle_data_size, scoreboard);
                 ifo_header->curCycle = static_cast<unsigned int>(sending_cycle);
+
+                if (opts.xmit_data)
+                {
+                    sci_error_t err = SCI_ERR_OK;
+                    xmitBlockNum = ifo_header->curCycle % IX_BLOCK_COUNT;
+                    SCIMemCpy(sequence, (void*)ifoDataBlock, remoteMap, xmitDataOffset[xmitBlockNum], cycle_data_size, memcpyFlag, &err);
+                    xmitHeader[xmitBlockNum]->maxCycle = ifo_header->maxCycle;
+                    xmitHeader[xmitBlockNum]->cycleDataSize = cycle_data_size;
+                    xmitHeader[xmitBlockNum]->curCycle = ifo_header->curCycle;
+                    SCIFlush(sequence, SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
+                }
 
                 missing_map_t missing_map;
                 foreach_difference(prev_receive_mask, receive_mask, missing_map);
