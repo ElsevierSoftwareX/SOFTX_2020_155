@@ -16,8 +16,14 @@ via pkg-config
 1. create a build directory
 2. change directory to the build directory
 3. Make sure that there are package config files available for framecpp & EPICS
-4. cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo <path to advLigoRTS>/
+4. cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBOOST_ROOT=<path to boost*> <path to advLigoRTS>/
 5. make -j 8
+
+* Note on Boost.
+FrameCPP 2.6+ uses the boost libraries shared_ptr.  To install boost see (https://www.boost.org/doc/libs/1_69_0/more/getting_started/unix-variants.html)
+You may need to pass a parameter to cmake -DBOOST_ROOT=<boost install prefix> to help cmake find boost.
+This is not required for FrameCPP < 2.6.
+
 
 You can make specific targets in cmake.  One useful command is 'make help' from the build directory.  This lists all the targets that are available. Another method is to go to the appropariate location
 in the build directory and do a local make there, it will not rebuild the world.
@@ -90,6 +96,7 @@ libxpm-dev
 libxt-dev
 grace
 pcaspy
+libboost-all-dev    (Required for FrameCPP >= 2.6.0)
 
 You will also need to install
 MX/Open-MX

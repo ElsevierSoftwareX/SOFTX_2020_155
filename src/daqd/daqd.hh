@@ -101,25 +101,30 @@ using namespace std;
 
 // as of ldas_tools 2.5, the LDAS_VERSION is no longer provided. Instead use FRAMECPP_VERSION_NUMBER
 #if USE_LDAS_VERSION
-#if LDAS_VERSION_NUMBER >= 200000
-typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+ #if LDAS_VERSION_NUMBER >= 200000
+ typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+ #else
+ typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+ #endif
 #else
-typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
-#endif
-#else
-#if USE_FRAMECPP_VERSION
-// create ASCII FRAMECPP_VERSION if missing
-#if !defined(FRAMECPP_VERSION)
-#define FRAMECPP_VERSION "2.5.1"
-#endif
-#if FRAMECPP_VERSION_NUMBER >= 200000
-typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
-#else
-typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
-#endif
-#else
-typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
-#endif
+ #if USE_FRAMECPP_VERSION
+ // create ASCII FRAMECPP_VERSION if missing
+   #if !defined(FRAMECPP_VERSION)
+   #define FRAMECPP_VERSION "2.5.1"
+   #endif
+   #if FRAMECPP_VERSION_NUMBER >= 206000
+   #include <boost/shared_ptr.hpp>
+   typedef boost::shared_ptr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+   #else
+     #if FRAMECPP_VERSION_NUMBER >= 200000
+     typedef LDASTools::AL::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+     #else
+     typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+     #endif
+   #endif
+ #else
+ typedef General::SharedPtr<FrameCPP::Version::FrameH> ldas_frame_h_type;
+ #endif
 #endif
 
 namespace FrameCPP {
