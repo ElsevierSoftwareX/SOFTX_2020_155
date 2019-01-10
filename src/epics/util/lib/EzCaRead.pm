@@ -19,7 +19,7 @@ sub printHeaderStruct {
 	$temp =~ s/\-/\_/g;
 	$temp =~ s/\:/\_/g;
         print ::OUTH "\tdouble $temp;\n";
-	$temp .= "_ERR";
+	$temp .= "_CONN";
         print ::OUTH "\tdouble $temp;\n";
 }
 
@@ -69,7 +69,7 @@ sub fromExp {
 	if ($fromPort == 0) {
         	return "pLocalEpics->" . $::systemName . "\." . $temp;
         } else {;
-		$temp .= "_ERR";
+		$temp .= "_CONN";
         	return "pLocalEpics->" . $::systemName . "\." . $temp;
         }
 }
