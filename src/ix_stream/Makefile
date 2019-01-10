@@ -9,7 +9,7 @@
 # 
 #
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/DIS/lib64
-export DOLPHIN_PATH=/opt/Dolphin/5.2
+export DOLPHIN_PATH=/opt/Dolphin/5.4.2/DIS
 # export DOLPHIN_PATH=/opt/Dolphin/DIS
 
 CC=gcc   #cc or gcc

@@ -589,13 +589,6 @@ main(int argc,char *argv[])
 	char *pv_debug_pipe_name = 0;
 	int pv_debug_pipe = -1;
 
-    printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
-   
-    printf("argc = %d\n", argc);
-    for (ii = 0; ii < argc; ++ii)
-    {
-    	printf("argv[%d] = %s\n", ii, argv[ii]);
-    }
     ii = 0;
     
     if (argc<3) {
@@ -604,7 +597,7 @@ main(int argc,char *argv[])
     }
 
     /* Get the parameters */
-     while ((counter = getopt(argc, argv, "b:e:m:h:v:s:d:D:p:P:")) != EOF)
+     while ((counter = getopt(argc, argv, "b:e:m:l:h:v:s:d:D:p:P:")) != EOF)
       switch(counter) {
         case 'b':
             buffer_name = optarg;
@@ -613,30 +606,34 @@ main(int argc,char *argv[])
         case 'm':
             max_data_size_mb = atoi(optarg);
             if (max_data_size_mb < 20){
-                printf("Min data block size is 20 MB\n");
                 return -1;
             }
             if (max_data_size_mb > 100){
-                printf("Max data block size is 100 MB\n");
                 return -1;
             }
             break;
 
         case 's':
 	    sysname = optarg;
-	    printf ("sysnames = %s\n",sysname);
             continue;
         case 'v':
 	    	do_verbose = atoi(optarg);
 			break;
 		case 'e':
 	        eport = optarg;
-	        printf ("eport = %s\n",eport);
 			sendViaZmq = 1;
 	        break;
-	    case 'd':
+  	case 'd':
 	    	gds_tp_dir = optarg;
 	    	break;
+ 	case 'l':
+        	if (0 == freopen(optarg, "w", stdout)) {
+			perror ("freopen");
+			exit (1);
+		}
+		setvbuf(stdout, NULL, _IOLBF, 0);
+		stderr = stdout;
+		break;
         case 'h':
             Usage();
             return(0);
