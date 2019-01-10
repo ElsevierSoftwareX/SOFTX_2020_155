@@ -19,7 +19,7 @@ sub printHeaderStruct {
 	$temp =~ s/\-/\_/g;
 	$temp =~ s/\:/\_/g;
         print ::OUTH "\tdouble $temp;\n";
-	$temp .= "_ERR";
+	$temp .= "_CONN";
         print ::OUTH "\tdouble $temp;\n";
 }
 

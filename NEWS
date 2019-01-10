@@ -22,6 +22,10 @@ Changes for 3.5  (NOT YET RELEASED)
 	- Set virtualIOP=3 in IOP model Parameter Block
 	- NOTE: Presently, this only reads ADC modules ie not DAC writes, as it was implemented for PEM DAQ channel.s
 ==================================================================================================
+Changes for 3.4.5
+==================================================================================================
+- Bug Fix (1133) - Fix cdsEzCaRead/Write implementation 
+==================================================================================================
 Changes for 3.4.3
 ==================================================================================================
 - Changed PCIe real-time network configuration from single Dolphin channel to 2 Dolphin channels
