@@ -52,7 +52,7 @@ class RCG_PART(object):
 		self.outpartport =[]
 		self.outportused = []
 
-rcgparts = [ RCG_PART() for i in range(5000)]
+rcgparts = [ RCG_PART() for i in range(6000)]
 partCnt = 0
 ininputs = 0
 inoutputs = 0
