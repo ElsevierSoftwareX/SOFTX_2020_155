@@ -598,11 +598,10 @@ while (<IN>) {
         $vupdate .= "  evar_$v_name_conn = 1;\n";
         $vupdate .= "  if (pvPutComplete(evar_$v_name)) {\n";
         $vupdate .= "    evar_$v_name = fpvalidate(pEpics->${v_var});\n";
-        $vupdate .= "    pvPut(evar_$v_name,ASYNC,5.0);\n";
+        $vupdate .= "    pvPut(evar_$v_name);\n";
         $vupdate .= "  }\n";
         $vupdate .= "} else {\n";
         $vupdate .= "  evar_$v_name_conn = 0;\n";
-        $vupdate .= "  pvPutCancel(evar_$v_name);\n";
         $vupdate .= "}\n";
         print "FOUND EZCAWRITE\n";
     } elsif (substr($_,0,10) eq "EZ_CA_READ") {
