@@ -113,6 +113,7 @@ SET (GDS_HDR
         )
 
 set(GDS_CC_HDR
+        gdsstringcc.hh
         gmutex.hh
         testchn.hh
         testpointmgr.hh)
@@ -217,6 +218,7 @@ add_library(gds_cc OBJECT
     ${GDS_CC_SRC}
     )
 target_compile_definitions(gds_cc PRIVATE -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size})
+target_include_directories(gds_cc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/gds_includes)
 add_dependencies(gds_cc _gds_rpc_gen_hdrs)
 
 

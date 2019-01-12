@@ -50,6 +50,11 @@
 #define MMAP_SIZE 1024*1024*64-5000
 
 
+enum ProtocolVersion {
+	PROTOCOL_ONE = 0,
+	PROTOCOL_TWO = 1,
+};
+
 int do_verbose;
 int num_threads;
 volatile int threads_running;
@@ -145,7 +150,8 @@ sender(	mx_endpoint_t ep,
 	int64_t his_nic_id,
 	uint16_t his_eid,
 	int len,
-	uint32_t match_val, uint16_t my_dcu)
+	uint32_t match_val, uint16_t my_dcu,
+	enum ProtocolVersion protocol_ver)
 {
 
 int cur_req;
@@ -159,6 +165,7 @@ int myErrorSignal;
 mx_endpoint_addr_t dest;
 uint32_t filter = FILTER;
 //struct timeval start_time;
+unsigned int dq_block_size = 0;
 char *dataBuff;
 int sendLength = 0;
 unsigned int myCrc = 0;
@@ -246,11 +253,17 @@ do {
 		  mxDataBlock.mxIpcData.bp[lastCycle].timeNSec = shmIpcPtr[i]->bp[lastCycle].timeNSec;
 		  mxDataBlock.mxIpcData.bp[lastCycle].cycle = shmIpcPtr[i]->bp[lastCycle].cycle;
 
-		  /// Copy data from shmem to xmit buffer
+		  dq_block_size = shmIpcPtr[i]->bp[lastCycle].crc;
+		  if (protocol_ver == PROTOCOL_TWO)
+		  {
+		  	mxDataBlock.mxIpcData.channelCount = dq_block_size;
+		  }
+
+		  /// Copy data from shmem to xmit buffer, this includes both DQ and TP data
 		  dataBuff = (char *)(shmDataPtr[i] + lastCycle * buf_size);
 		  memcpy((void *)&mxDataBlock.mxDataBlock[0],dataBuff,mxDataBlock.mxIpcData.dataBlockSize);
 		  /// Calculate CRC checksum on data
-		  myCrc = crc_ptr((char *)&mxDataBlock.mxDataBlock[0],shmIpcPtr[i]->bp[lastCycle].crc,0);
+		  myCrc = crc_ptr((char *)&mxDataBlock.mxDataBlock[0],dq_block_size,0);
 		  myCrc = crc_len(shmIpcPtr[i]->bp[lastCycle].crc,myCrc);
 		  mxDataBlock.mxIpcData.bp[lastCycle].crc = myCrc;
 
@@ -353,6 +366,7 @@ main(int argc, char **argv)
 	int do_bothways;
 	extern char *optarg;
 	mx_return_t ret;
+	enum ProtocolVersion protocol_ver;
 
 #if DEBUG
 	extern int mx_debug_mask;
@@ -373,9 +387,9 @@ main(int argc, char **argv)
 	len = DFLT_LEN;
 	do_bothways = 0;
 	num_threads = 1;
+	protocol_ver = PROTOCOL_ONE;
 
-
-	while ((c = getopt(argc, argv, "hd:e:f:n:b:r:s:l:W:Vvw:x")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "hd:e:f:n:b:r:s:l:W:Vvw:x2")) != EOF) switch(c) {
 	case 'd':
 		rem_host = optarg;
 		break;
@@ -419,6 +433,9 @@ main(int argc, char **argv)
 		fprintf(stderr, "bi-directional mode only supported with threadsafe mx lib\n");
 		exit(1);
 #endif
+		break;
+	case '2':
+		protocol_ver = PROTOCOL_TWO;
 		break;
 	case 'h':
 	default:
@@ -477,7 +494,7 @@ main(int argc, char **argv)
 	fprintf(stderr, "send len = %d\n",len);
 	fflush(stderr);
 
-	sender(ep,his_nic_id, his_eid, len,MATCH_VAL_MAIN,my_eid); 
+	sender(ep,his_nic_id, his_eid, len,MATCH_VAL_MAIN,my_eid, protocol_ver);
   
 	mx_close_endpoint(ep);
 	mx_finalize();

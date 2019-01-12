@@ -335,6 +335,15 @@ void handle_bad_message(int neid, mx_endpoint_t endpoint, const mx_status_t& sta
     }
 }
 
+unsigned int get_DQ_block_size(const struct rmIpcStr& ipc)
+{
+    /* we overload the channelCount to be DQ block size,
+     * it is not intuitive, so hide it in a function with
+     * a better name.
+     */
+    return ipc.channelCount;
+}
+
 /**
  * Copy and convert the daqMXdata structure from a message into
  * the global dcu data store.
@@ -362,7 +371,7 @@ void handle_received_message(const daqMXdata& cur_data)
     int64_t gps_sec = 0;
     int cycle = static_cast<int>(cur_data.mxIpcData.cycle);
     buffer_index_t cycle_index = cycle_to_buffer_index(cycle);
-    int len = cur_data.mxIpcData.dataBlockSize;
+    unsigned int len = cur_data.mxIpcData.dataBlockSize;
 
     if (dcu_id == 7)
     {
@@ -377,7 +386,7 @@ void handle_received_message(const daqMXdata& cur_data)
         char *dataDest = cur_dest.data;
 
         // Move the block data into the buffer
-        memcpy(dataDest, dataSource, /* len */ DAQ_DCU_BLOCK_SIZE );
+        memcpy(dataDest, dataSource, len);
 
         cur_dest.header.dcuId = static_cast<unsigned int>(dcu_id);
         cur_dest.header.fileCrc = cur_data.mxIpcData.crc;
@@ -386,8 +395,8 @@ void handle_received_message(const daqMXdata& cur_data)
         gps_sec = cur_dest.header.timeSec = cur_data.mxIpcData.bp[cycle].timeSec;
         cur_dest.header.timeNSec = cur_data.mxIpcData.bp[cycle].timeNSec;
         cur_dest.header.dataCrc = cur_data.mxIpcData.bp[cycle].crc;
-        cur_dest.header.dataBlockSize = cur_data.mxIpcData.dataBlockSize;
-        cur_dest.header.tpBlockSize = DAQ_DCU_BLOCK_SIZE - cur_data.mxIpcData.dataBlockSize;
+        cur_dest.header.dataBlockSize = get_DQ_block_size(cur_data.mxIpcData);
+        cur_dest.header.tpBlockSize = len - get_DQ_block_size(cur_data.mxIpcData);
         cur_dest.header.tpCount = static_cast<unsigned int>(cur_data.mxTpTable.count);
         std::copy(cur_data.mxTpTable.tpNum, cur_data.mxTpTable.tpNum + cur_dest.header.tpCount, cur_dest.header.tpNum);
     }
@@ -627,8 +636,8 @@ void consentrate_data(const int64_t expected_sec_and_cycle, volatile daq_multi_d
         {
             int data_size = 0;
             single_dcu_block& cur_block = mxr_data[dcu_index_t(ii)][cycle_index];
-            lock_guard<single_dcu_block> l_(cur_block);
             {
+                lock_guard<single_dcu_block> l_(cur_block);
                 //dest->header.dcuheader[model_index] = cur_block.header;
                 memcpy((void*)&(dest->header.dcuheader[model_index]), &(cur_block.header), sizeof(cur_block.header));
                 data_size = cur_block.header.dataBlockSize + cur_block.header.tpBlockSize;
