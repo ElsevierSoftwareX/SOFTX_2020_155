@@ -40,6 +40,11 @@ extern "C" {
 extern volatile void *findSharedMemorySize(const char *, int);
 }
 
+enum DEBUG_FLAG {
+    DEBUG_FALSE = 0,
+    DEBUG_TRUE,
+};
+
 typedef flag_mask<MXR_MAX_DCU> dcu_mask_t;
 
 /**
@@ -349,7 +354,7 @@ unsigned int get_DQ_block_size(const struct rmIpcStr& ipc)
  * the global dcu data store.
  * @param cur_data
  */
-void handle_received_message(const daqMXdata& cur_data)
+void handle_received_message(const daqMXdata& cur_data, enum DEBUG_FLAG do_debug)
 {
     // printf("received one\n");
     int dcu_id = cur_data.mxIpcData.dcuId;
@@ -373,7 +378,7 @@ void handle_received_message(const daqMXdata& cur_data)
     buffer_index_t cycle_index = cycle_to_buffer_index(cycle);
     unsigned int len = cur_data.mxIpcData.dataBlockSize;
 
-    if (dcu_id == 7)
+    if (do_debug == DEBUG_TRUE && dcu_id == 7)
     {
         std::cout << "> " << cur_data.mxIpcData.bp[cycle].timeSec << ":" << cycle << "(" << cycle_index.get() << ") => ";
     }
@@ -402,13 +407,13 @@ void handle_received_message(const daqMXdata& cur_data)
     }
     // do this in a scope where the lock on the data segment is not held, so we are never holding two locks
     mark_dcu_received(dcu_id, gps_sec, cycle);
-    if (dcu_id == 7)
+    if (do_debug == DEBUG_TRUE && dcu_id == 7)
     {
         std::cout << gps_sec << ":" << cycle << "   - crc - " << cur_data.mxIpcData.bp[cycle].crc << "\n";
     }
 }
 
-void receiver_mx(int neid) {
+void receiver_mx(int neid, enum DEBUG_FLAG do_debug) {
     mx_status_t stat;
     mx_segment_t seg;
     uint32_t result;
@@ -470,7 +475,7 @@ void receiver_mx(int neid) {
             //std::cout << "." << std::flush;
             if (stat.code == MX_STATUS_SUCCESS)
             {
-                handle_received_message(cur_data);
+                handle_received_message(cur_data, do_debug);
             }
             else
             {
@@ -489,7 +494,7 @@ void receiver_mx(int neid) {
 void *receiver_thread(void *args)
 {
     std::cout << "calling receiver_mx with " << *reinterpret_cast<int*>(args) << "\n";
-    receiver_mx(*reinterpret_cast<int*>(args));
+    receiver_mx(*reinterpret_cast<int*>(args), DEBUG_FALSE);
     return NULL;
 }
 
