@@ -280,7 +280,7 @@ void *rcvr_thread(void *arg) {
 	printf("waiting for someone to connect\n");
 	// len = sizeof(struct daqMXdata);
 	// len *= NUM_RREQ;
-	len = 0x500000;
+	len = 0xa00000;
 	printf("buffer length = %d\n",len);
 	buffer = (char *)malloc(len);
 	if (buffer == NULL) {
