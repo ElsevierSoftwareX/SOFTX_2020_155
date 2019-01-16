@@ -61,6 +61,13 @@ ix_dc_xmit: ix_dc_xmit.c
 	$(CC) $(FLAGS) -o ix_dc_xmit  ix_dc_xmit.o  rfm.o -L $(API_LIB_PATH) -lsisci
 	sync
 
+mx2ix: mx2ix.c 
+	$(CC) $(CFLAGS) -I../zmq_stream -I/opt/open-mx/include mx2ix.c -c -o mx2ix.o
+	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
+	$(CC) $(CFLAGS) -I../zmq_stream ../zmq_stream/simple_pv.c -c -o simple_pv.o
+	$(CC) $(FLAGS) -o mx2ix  mx2ix.o  rfm.o simple_pv.o -L $(API_LIB_PATH) -L/opt/open-mx/lib -lsisci -lmyriexpress -lpthread
+	sync
+
 zmq_rcv_ix_xmit: zmq_rcv_ix_xmit.c 
 	$(CC) $(CFLAGS) -I../zmq_stream zmq_rcv_ix_xmit.c -c -o zmq_rcv_ix_xmit.o
 	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o
@@ -79,6 +86,9 @@ ix_fb_rcv: ix_fb_rcv.c
 datarate: datarate.c
 	$(CC) $(CFLAGS) datarate.c -c -o datarate.o
 	$(CC) $(FLAGS) -o datarate  datarate.o  rfm.o  param.o crc.o
+
+CPPFLAGS = -I../common -I$(top_srcdir)/common -I$(top_srcdir)/common/bsd -DNO_RTL  -D_XOPEN_SOURCE -D_BSD_SOURCE
+LDFLAGS = -L/opt/open-mx/lib -lmyriexpress -lpthread  -g
 
 clean: 
 	rm -f  *.o $(APP)
