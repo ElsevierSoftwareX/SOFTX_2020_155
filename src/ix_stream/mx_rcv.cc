@@ -871,7 +871,7 @@ int main(int argc, char *argv[]) {
                 foreach_difference(prev_receive_mask, receive_mask, missing_map);
                 if (missing_map.differences > 0)
                 {
-                    dump_scoreboard_for_cycles = 3;
+                    dump_scoreboard_for_cycles = 5;
                 }
 
                 dump_dcu_mask_diffs(prev_receive_mask, receive_mask);
@@ -881,10 +881,10 @@ int main(int argc, char *argv[]) {
                 {
                     --dump_scoreboard_for_cycles;
                     dump_scoreboard(scoreboard_dump_stream, local_map, missing_map, prev_sec_and_cycle);
-                    if (dump_scoreboard_for_cycles == 1)
-                    {
-                        exit_main_loop.set();
-                    }
+//                    if (dump_scoreboard_for_cycles == 1)
+//                    {
+//                        //exit_main_loop.set();
+//                    }
                 }
             }
             prev_sec_and_cycle = cur_sec_and_cycle;
