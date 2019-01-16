@@ -58,7 +58,7 @@ LEX=flex -+
 YACC=@YACC@ -o y.tab.c
 YFLAGS=-d
 
-SRCS= archive.cc profiler.cc gds.cc filesys.cc epics_pvs.cc comm_impl.cc @PRODUCER_CC@ trend.cc  net_writer.cc daqd.cc circ.cc comm.y comm-lex.l framesend.cc gdsmutex.cc edcu.cc @EPICS_SRCS@ @MYRINET_SRCS@ @MX_SRCS@ framerecv.cc listener.cc
+SRCS= archive.cc comm_impl.cc profiler.cc gds.cc filesys.cc epics_pvs.cc comm_impl.cc @PRODUCER_CC@ trend.cc  net_writer.cc daqd.cc circ.cc comm.y comm-lex.l framesend.cc gdsmutex.cc edcu.cc @EPICS_SRCS@ @MYRINET_SRCS@ @MX_SRCS@ framerecv.cc listener.cc
 
 EPICS_SRCS=epicsServer.cc exServer.cc exPV.cc exScalarPV.cc exVectorPV.cc exChannel.cc
 EPICS_OBJS=epicsServer.o exServer.o exPV.o exScalarPV.o exVectorPV.o exChannel.o
@@ -176,8 +176,8 @@ exScalarPV.o: exScalarPV.cc
 exVectorPV.o: exVectorPV.cc
 	$(CXX) -c ${CCFLAGS} ${EPICSFLAGS}  -D_REENTRANT $<
 
-daqd.out: archive.o $(RUN_NUMBER_OBJECTS) $(GDSOBJECTS) profiler.o filesys.o epics_pvs.o @PRODUCER_O@ trend.o net_writer.o comm.o daqd.o circ.o $(BROADCASTOBJECTS) edcu.o @EPICS_OBJS@ @MYRINET_OBJS@ @MX_OBJS@ framerecv.o comm-lex.o listener.o
-	$(CXX) $(DEBUGFLAGS) -o daqd.out archive.o $(RUN_NUMBER_OBJECTS) $(GDSOBJECTS) profiler.o filesys.o epics_pvs.o @PRODUCER_O@ trend.o net_writer.o daqd.o circ.o ./comm.o  $(BROADCASTOBJECTS) edcu.o framerecv.o comm-lex.o listener.o  @EPICS_OBJS@ @MYRINET_OBJS@ @MX_OBJS@ $(SCRAMLIBFLAGS) $(GDSLIBFLAGS) $(EPICSLIBFLAGS) $(LDASLIBFLAGS) @MYRINET_LDFLAGS@ @MX_LDFLAGS@ -lpthread $(LIBS) $(RUN_NUMBER_LIBS) @LDFLAGS@
+daqd.out: archive.o comm_impl.o $(RUN_NUMBER_OBJECTS) $(GDSOBJECTS) profiler.o filesys.o epics_pvs.o @PRODUCER_O@ trend.o net_writer.o comm.o daqd.o circ.o $(BROADCASTOBJECTS) edcu.o @EPICS_OBJS@ @MYRINET_OBJS@ @MX_OBJS@ framerecv.o comm-lex.o listener.o
+	$(CXX) $(DEBUGFLAGS) -o daqd.out archive.o comm_impl.o $(RUN_NUMBER_OBJECTS) $(GDSOBJECTS) profiler.o filesys.o epics_pvs.o @PRODUCER_O@ trend.o net_writer.o daqd.o circ.o ./comm.o  $(BROADCASTOBJECTS) edcu.o framerecv.o comm-lex.o listener.o  @EPICS_OBJS@ @MYRINET_OBJS@ @MX_OBJS@ $(SCRAMLIBFLAGS) $(GDSLIBFLAGS) $(EPICSLIBFLAGS) $(LDASLIBFLAGS) @MYRINET_LDFLAGS@ @MX_LDFLAGS@ -lpthread $(LIBS) $(RUN_NUMBER_LIBS) @LDFLAGS@
 
 daqcn: daqcn.o daqc_access.o
 	$(CC) $(DEBUGFLAGS) -o daqcn daqcn.o daqc_access.o -lpthread $(LIBS)
