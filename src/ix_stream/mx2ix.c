@@ -245,22 +245,18 @@ void *rcvr_thread_mon(void *args)
 // Thread for receiving DAQ data via ZMQ
 // *************************************************************************
 void *rcvr_thread(void *arg) {
-    struct thread_mon_info* mon_info = 0;
 	struct thread_info* my_info = (struct thread_info*)arg;
 	int mt = my_info->index;
 	uint32_t mv = my_info->match_val;
 	uint32_t filt = my_info->filter;
 	int cycle = 0;
 	daq_multi_dcu_data_t *mxDataBlock;
-    char loc[256];
 	mx_return_t ret;
 	int count, len, cur_req;
 	mx_status_t stat;
 	mx_request_t req[NUM_RREQ];
 	mx_segment_t seg;
 	uint32_t result;
-	struct timeval start_time, end_time;
-	struct daqMXdata *dataPtr;
 	char *buffer;
 	uint32_t board_id;
     uint32_t filter;
@@ -356,7 +352,6 @@ main(int argc, char **argv)
 	int ii;					// Loop counter
 	int delay_ms = 10;
 	int delay_cycles = 0;
-	unsigned int niface = 0; // The number of local interfaces to split receives across.
     char *local_iface_names = 0;
 
 	extern char *optarg;	// Needed to get arguments to program
@@ -928,7 +923,7 @@ main(int argc, char **argv)
 
 				if (do_verbose) {
 					printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec\n", nextCycle, myptime);
-					printf("Min/Max/Mean cylce time %ld/%ld/%ld msec over %ld cycles\n", min_cycle_time, max_cycle_time,
+					printf("Min/Max/Mean cylce time %d/%d/%d msec over %ld cycles\n", min_cycle_time, max_cycle_time,
 						   mean_cycle_time, n_cycle_time);
 					printf("Total DCU = %d\t\t\tBlockSize = %d\n", mytotaldcu, dc_datablock_size);
 					print_diags(mytotaldcu, nextCycle, sendLength, ifoDataBlock, edbs);

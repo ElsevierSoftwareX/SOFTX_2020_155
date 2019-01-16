@@ -434,7 +434,6 @@ int send_to_local_memory(int nsys,
   	int sync2iop = 1;
 	int status = 0;
 	int dataRdy[10];
-	int msg_size;
 
 	int cur_req;
 	mx_status_t stat;
@@ -549,13 +548,11 @@ main(int argc,char *argv[])
 	int gps_stt = 0;
 	int gps_ok = 0;
 	unsigned long gps_time = 0;
-	char *eport = 0;
 	int sendViaZmq = 0;
 	char *buffer_name = "ifo";
 	int send_delay_ms = 0;
 
 	mx_endpoint_t ep;
-    uint64_t nic_id;
     uint16_t my_eid;
     uint64_t his_nic_id;
     uint32_t board_id;
@@ -565,7 +562,6 @@ main(int argc,char *argv[])
     char *sysname;
     int len;
     int iter;
-    int c;
     int do_wait;
     int do_bothways;
     extern char *optarg;
