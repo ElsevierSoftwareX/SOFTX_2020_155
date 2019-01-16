@@ -553,6 +553,7 @@ options_t parse_options(int argc, char *const *argv) {
                 break;
             case 't':
                 opts.trail_cycle_ms = atoi(optarg);
+                break;
             case 'h':
             default:
                 opts.abort = true;
