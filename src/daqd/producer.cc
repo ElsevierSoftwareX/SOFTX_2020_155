@@ -652,15 +652,15 @@ int cycle_delay = daqd.cycle_delay;
         fprintf(stderr, "#@#@#@#@#@ 0x4000 on %d\n", j);
 	  }
 #if defined(USE_MX)
-	  if (dcu_gps > 0 && (dcu_gps != mygps || gmDaqIpc[j].cycle != cblk))
-      {
-	    fprintf(stderr, "#@#@#@#@#@ Timing glitch found (%d).  expected %d:%d got %d:%d\n",
-	            j, (int)mygps, (int)cblk, (int)dcu_gps, (int)gmDaqIpc[j].cycle);
-        if (abort_on_glitch)
-        {
-            exit(1);
-        }
-      }
+//	  if (dcu_gps > 0 && (dcu_gps != mygps || gmDaqIpc[j].cycle != cblk))
+//      {
+//	    fprintf(stderr, "#@#@#@#@#@ Timing glitch found (%d).  expected %d:%d got %d:%d\n",
+//	            j, (int)mygps, (int)cblk, (int)dcu_gps, (int)gmDaqIpc[j].cycle);
+//        if (abort_on_glitch)
+//        {
+//            exit(1);
+//        }
+//      }
 #endif
 
 	  if (rfm_crc != crc) {
