@@ -41,4 +41,16 @@ target_link_libraries(mx_rcv PUBLIC
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
+add_executable(mx_rcv_simple mx_rcv_simple.cc dolphin_common.cc)
+target_compile_options(mx_rcv_simple PRIVATE -O)
+target_link_libraries(mx_rcv_simple PUBLIC
+    driver::shmem
+    dolphin::sisci
+    zmq::simple_pv
+    mx::myriexpress
+    rt
+    ${CMAKE_THREAD_LIBS_INIT}
+)
+
+
 endif (${MX_FOUND})
