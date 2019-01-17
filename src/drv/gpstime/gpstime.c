@@ -129,8 +129,6 @@ static int symmetricom_ioctl(struct inode *inode, struct file *filp, unsigned in
     unsigned long req[3];
     unsigned long res = 0;
 
-    printk("gpstime iotcl called cmd = %d", (int)cmd);
-
     switch(cmd){
         case IOCTL_SYMMETRICOM_STATUS:
             res = get_cur_time(req);
