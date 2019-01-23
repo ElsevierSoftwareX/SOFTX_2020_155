@@ -849,14 +849,14 @@ main(int argc, char **argv)
 		    return error;
 		}
 		// Set data header information
-        	// xmitHeader[xmitBlockNum]->maxCycle = ifo_header->maxCycle;
+        	xmitHeader[xmitBlockNum]->maxCycle = ifo_header->maxCycle;
         		// xmitHeader->cycleDataSize = ifo_header->cycleDataSize;
-        	// xmitHeader[xmitBlockNum]->cycleDataSize = sendLength;;
+        	xmitHeader[xmitBlockNum]->cycleDataSize = sendLength;;
         		// xmitHeader->msgcrc = myCrc;
         	// Send cycle last as indication of data ready for receivers
-        	// xmitHeader[xmitBlockNum]->curCycle = ifo_header->curCycle;
+        	xmitHeader[xmitBlockNum]->curCycle = ifo_header->curCycle;
         	// Have to flush the buffers to make data go onto Dolphin network
-        	// SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
+        	SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
 	}
 
 		printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec len %d %d\n", nextCycle, myptime,sendLength,IX_BLOCK_SIZE);
@@ -878,14 +878,14 @@ main(int argc, char **argv)
 	stop_working_threads = 1;
 
 	// Wait for threads to stop
-	sleep(2);
+	sleep(5);
+	printf("closing out zmq\n");
+	mx_finalize();
 	if(xmitData) {
 		printf("closing out ix\n");
 		// Cleanup the Dolphin connections
 		error = dolphin_closeout();
 	}
-	printf("closing out zmq\n");
-	mx_finalize();
   
 	exit(0);
 }
