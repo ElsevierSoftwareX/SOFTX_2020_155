@@ -84,8 +84,8 @@ char *ifo_data;
 size_t cycle_data_size;
 
 // ZMQ defines
-//char msg_buffer[0x200000];
-daq_multi_dcu_data_t msg_buffer;
+char msg_buffer[0x200000];
+// daq_multi_dcu_data_t msg_buffer;
 void *daq_context;
 void *daq_publisher;
 
@@ -333,8 +333,8 @@ int loadMessageBuffer(	int nsys,
 	int sendLength = 0;
 	int ii;
 	int daqStatBit[2];
-	daqStatBit[0] = 1;
-	daqStatBit[1] = 2;
+	daqStatBit[0] = 4;
+	daqStatBit[1] = 8;
     int dataXferSize;
 	char *dataBuff;
 	int myCrc = 0;
@@ -484,6 +484,7 @@ int send_to_local_memory(int nsys,
 		ixDataBlock = (daq_multi_dcu_data_t *)nextData;
 		int sendLength = loadMessageBuffer(nsys, nextCycle, status,dataRdy);
 		// Print diags in verbose mode
+		do_verbose = 0;
 		if(nextCycle == 0 && do_verbose) print_diags(nsys,lastCycle,sendLength,ixDataBlock);
 		// Write header info
 		ifo_header->curCycle = nextCycle;

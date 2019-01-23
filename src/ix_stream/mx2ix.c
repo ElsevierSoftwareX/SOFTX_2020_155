@@ -83,6 +83,7 @@ struct thread_info {
     int index;
     uint32_t match_val;
     uint32_t filter;
+    uint32_t bid;
 };
 struct thread_mon_info {
     int index;
@@ -149,6 +150,7 @@ void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *
 		printf("Receive errors = %d\n",rcv_errors);
 		printf("Time = %d\t size = %d\n",ixDataBlock->header.dcuheader[0].timeSec,sendLength);
 		printf("DCU ID\tCycle \t TimeSec\tTimeNSec\tDataSize\tTPCount\tTPSize\tXmitSize\n");
+		#if 0
 		for(ii=0;ii<nsys;ii++) {
 			printf("%d",ixDataBlock->header.dcuheader[ii].dcuId);
 			printf("\t%d",ixDataBlock->header.dcuheader[ii].cycle);
@@ -160,6 +162,7 @@ void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *
 	   		printf("\t%d",dbs[ii]);
 	   		printf("\n ");
 		}
+		#endif
 }
 
 #if 0
@@ -249,6 +252,7 @@ void *rcvr_thread(void *arg) {
 	int mt = my_info->index;
 	uint32_t mv = my_info->match_val;
 	uint32_t filt = my_info->filter;
+	uint32_t board_id = my_info->bid;
 	int cycle = 0;
 	daq_multi_dcu_data_t *mxDataBlock;
 	mx_return_t ret;
@@ -258,7 +262,6 @@ void *rcvr_thread(void *arg) {
 	mx_segment_t seg;
 	uint32_t result;
 	char *buffer;
-	uint32_t board_id;
     uint32_t filter;
 	mx_endpoint_t ep;
 	int myErrorStat = 0;
@@ -269,7 +272,7 @@ void *rcvr_thread(void *arg) {
 
 
 	printf("Starting receive loop for thread %d \n", mt);
-	mt = 0;
+// 	mt = 0;
 
 	ret = mx_open_endpoint(board_id, mt, filter, NULL, 0, &ep);
 	if (ret != MX_SUCCESS) {
@@ -277,7 +280,7 @@ void *rcvr_thread(void *arg) {
 		return(0);
 	}
 
-	printf("waiting for someone to connect\n");
+	printf("waiting for someone to connect on CH %d\n",mt);
 	// len = sizeof(struct daqMXdata);
 	// len *= NUM_RREQ;
 	len = 0xa00000;
@@ -324,6 +327,8 @@ void *rcvr_thread(void *arg) {
 		thread_cycle[mt] = cycle;
 		thread_timestamp[mt] = mxDataBlock->header.dcuheader[0].timeSec;
         dataRecvTime[mt] = s_clock();
+		int mydbs = mxDataBlock->header.fullDataBlockSize;
+		// printf("Thread %d cycle %d size %d size %d\n",mt,cycle,copySize,mydbs);
 		mx_irecv(ep, &seg, 1, mv, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
 		}
 
@@ -374,6 +379,8 @@ main(int argc, char **argv)
 	daq_multi_cycle_header_t *xmitHeader[IX_BLOCK_COUNT];
 	static int xmitDataOffset[IX_BLOCK_COUNT];
 	int xmitBlockNum = 0;
+    	uint32_t mybid = 0;
+	
 
 	/* set up defaults */
 	sysname = NULL;
@@ -384,12 +391,15 @@ main(int argc, char **argv)
 
 
 	// Get arguments sent to process
-	while ((c = getopt(argc, argv, "b:hs:m:g:vp:P:d:L:z")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "b:hs:m:g:vp:P:n:d:L:z")) != EOF) switch(c) {
 	case 's':
 		nsys = atoi(optarg);
 		break;
+	case 'n':
+		mybid = atoi(optarg);
+		break;
 	case 'v':
-		do_verbose = 1;
+		do_verbose = 0;
 		break;
     case 'z':
         debug_zmq = 1;
@@ -460,6 +470,7 @@ main(int argc, char **argv)
 
 
 	printf("nsys = %d\n",nsys);
+	// do_verbose = 1;
 
 	// Make 0MQ socket connections
 	for(ii=0;ii<nsys;ii++) {
@@ -467,6 +478,7 @@ main(int argc, char **argv)
 		thread_index[ii].index = ii;
 		thread_index[ii].match_val = MATCH_VAL_MAIN;
 		thread_index[ii].filter = FILTER;
+		thread_index[ii].bid = mybid;
 		pthread_create(&thread_id[ii],NULL,rcvr_thread,(void *)&thread_index[ii]);
 
 	}
@@ -513,8 +525,11 @@ main(int argc, char **argv)
 	int sendLength = 0;
 
 	int min_cycle_time = 1 << 30;
+	int pv_min_cycle_time = 0;
 	int max_cycle_time = 0;
+	int pv_max_cycle_time = 0;
 	int mean_cycle_time = 0;
+	int pv_mean_cycle_time = 0;
 	int pv_dcu_count = 0;
 	int pv_total_datablock_size = 0;
 	int endpoint_min_count = 1 << 30;
@@ -531,100 +546,10 @@ main(int argc, char **argv)
     int recv_buckets[(MAX_DELAY_MS/5)+2];
     int entry_binned = 0;
 	SimplePV pvs[] = {
-            {
-                    "RECV_BIN_MISS",
-                    SIMPLE_PV_INT,
-                    &recv_buckets[0],
-                    1,
-                    -1,
-                    1,
-                    -1,
-            },
-            {       
-                    "RECV_BIN_0",
-                    SIMPLE_PV_INT,
-                    &recv_buckets[1],
-                    1 << 30,
-                    -1,
-                    1 << 30,
-                    -1,                                                                                  
-            },
-            {       
-                    "RECV_BIN_1",
-                    SIMPLE_PV_INT,
-                    &recv_buckets[2],
-                    1 << 30,
-                    -1,
-                    1 << 30,
-                    -1,
-            },
-            {       
-                    "RECV_BIN_2",
-                    SIMPLE_PV_INT,
-                    &recv_buckets[3],
-                    1 << 30,
-                    -1,
-                    1 << 30,
-                    -1,
-            },
-            {       
-                    "RECV_BIN_3",
-                    SIMPLE_PV_INT,
-                    &recv_buckets[4],
-                    1 << 30,
-                    -1,
-                    1 << 30,
-                    -1,
-            },
-            {
-                    "RECV_BIN_4",
-                    SIMPLE_PV_INT,
-                    &recv_buckets[5],
-                    1 << 30,
-                    -1,
-                    1 << 30,
-                    -1,
-            },
-            {       
-                    "RECV_BIN_5",
-                    SIMPLE_PV_INT,
-                    &recv_buckets[6],
-                    1 << 30,
-                    -1,
-                    1 << 30,
-                    -1,
-            },
-            {       
-                    "RECV_BIN_6",
-                    SIMPLE_PV_INT,
-                    &recv_buckets[7],
-                    1 << 30,
-                    -1,
-                    1 << 30,
-                    -1,
-            },
-            {      
-                    "RECV_BIN_7",
-                    SIMPLE_PV_INT,
-                    &recv_buckets[8],
-                    nsys,
-                    -1,
-                    nsys,
-                    -1,
-            },
-            {
-                    "RECV_BIN_8",
-                    SIMPLE_PV_INT,
-                    &recv_buckets[9],
-                    1 << 30,
-                    -1,
-                    1 << 30,
-                    -1,
-            },
 			{
 					"RECV_MIN_MS",
                     SIMPLE_PV_INT,
-					&min_cycle_time,
+					&pv_min_cycle_time,
 
 					80,
 					45,
@@ -634,7 +559,7 @@ main(int argc, char **argv)
 			{
 					"RECV_MAX_MS",
                     SIMPLE_PV_INT,
-					&max_cycle_time,
+					&pv_max_cycle_time,
 
 					80,
 					45,
@@ -644,7 +569,7 @@ main(int argc, char **argv)
 			{
 					"RECV_MEAN_MS",
                     SIMPLE_PV_INT,
-					&mean_cycle_time,
+					&pv_mean_cycle_time,
 
 					80,
 					45,
@@ -671,47 +596,6 @@ main(int argc, char **argv)
 					90*1024*1024,
 					1*1024*1024,
 			},
-			{
-					"ENDPOINT_MIN_COUNT",
-                    SIMPLE_PV_INT,
-					&endpoint_min_count,
-
-					MAX_FE_COMPUTERS,
-					0,
-					MAX_FE_COMPUTERS-2,
-					1,
-			},
-			{
-					"ENDPOINT_MAX_COUNT",
-                    SIMPLE_PV_INT,
-					&endpoint_max_count,
-
-					MAX_FE_COMPUTERS,
-					0,
-					MAX_FE_COMPUTERS-2,
-					1,
-			},
-			{
-					"ENDPOINT_MEAN_COUNT",
-                    SIMPLE_PV_INT,
-					&endpoint_mean_count,
-
-					MAX_FE_COMPUTERS,
-					0,
-					MAX_FE_COMPUTERS-2,
-					1,
-			},
-            {
-                    "DATA_BLOCK_SIZE",
-                    SIMPLE_PV_INT,
-                    &dc_datablock_size,
-
-                    DAQ_DCU_BLOCK_SIZE,
-                    0,
-                    (DAQ_DCU_BLOCK_SIZE*9)/10,
-                    1*1024*1024,
-
-            },
             {
                     "DATA_BLOCK_SIZE_MB_PER_S",
                     SIMPLE_PV_INT,
@@ -721,13 +605,6 @@ main(int argc, char **argv)
                     0,
                     (DAQ_TRANSIT_MAX_DC_BYTE_SEC/(1024*1024))*9/10,
                     1,
-            },
-            {
-                "ENDPOINTS_MISSED",
-                        SIMPLE_PV_STRING,
-                        endpoints_missed_buffer,
-
-                        0, 0, 0, 0,
             },
 
 	};
@@ -771,8 +648,10 @@ main(int argc, char **argv)
 			timeout += 1;
 		}while(threads_rdy < nsys && timeout < delay_cycles);
 		if(timeout >= 100) rcv_errors += (nsys - threads_rdy);
+		// printf("Threads ready = %d\n",threads_rdy);
 
 		if(any_rdy) {
+			int tbsize = 0;
 			// Timing diagnostics
 			mytime = s_clock();
 			myptime = mytime - mylasttime;
@@ -845,7 +724,7 @@ main(int argc, char **argv)
 					char *mbuffer = (char *)&mxDataBlockSingle[ii].dataBlock[0];
 					if (mydbs > zbuffer_remaining)
                     {
-					    fprintf(stderr, "Buffer overflow found.  Attempting to write %d bytes to zbuffer which has %d bytes remainging\n",
+					    printf("Buffer overflow found.  Attempting to write %d bytes to zbuffer which has %d bytes remainging\n",
                                 (int)mydbs, (int)zbuffer_remaining);
 					    abort();
                     }
@@ -854,11 +733,14 @@ main(int argc, char **argv)
 					// Increment shared memory data buffer pointer for next data set
 					zbuffer += mydbs;
 					// Calc total size of data block for this cycle
+					// printf("data size %d = %d\n",ii,mydbs);
 					dc_datablock_size += mydbs;
+					tbsize += mydbs;
+					// printf("dc block = %d %d\n",tbsize,dc_datablock_size);
 		  		} else {
 		  			missed_nsys[ii] |= missed_flag;
                     if (do_verbose && nextCycle == 0) {
-                        fprintf(stderr, "---%s\n", sname[ii]);
+                        fprintf(stderr, "---%d\n", ii);
                     } 
 		  		}
 			}
@@ -901,77 +783,83 @@ main(int argc, char **argv)
             datablock_size_running += dc_datablock_size;
             if (nextCycle == 0) {
                 datablock_size_mb_s = datablock_size_running / (1024*1024);
-				pv_dcu_count = mytotaldcu;
-				pv_total_datablock_size = dc_datablock_size;
-				mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time / n_cycle_time : 1 << 31);
-				endpoint_mean_count = (n_cycle_time > 0 ? endpoint_mean_count/n_cycle_time :  1<<31);
+		// printf("Data rate = %d\n",datablock_size_mb_s);
+		pv_dcu_count = mytotaldcu;
+		// pv_total_datablock_size = dc_datablock_size;
+		mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time / n_cycle_time : 1 << 31);
+		endpoint_mean_count = (n_cycle_time > 0 ? endpoint_mean_count/n_cycle_time :  1<<31);
 
-				endpoints_missed_remaining = sizeof(endpoints_missed_buffer)-1;
-				endpoints_missed_buffer[0] = '\0';
-				for (ii = 0; ii < sizeof(missed_nsys)/sizeof(missed_nsys[0]) && endpoints_missed_remaining > 0; ++ii) {
-					if (missed_nsys[ii]) {
-						char tmp[80];
-						int count = snprintf(tmp, sizeof(tmp), "%s(%x) ", sname[ii], missed_nsys[ii]);
-						if (count < sizeof(tmp)) {
-							strncat(endpoints_missed_buffer, tmp, count);
-							endpoints_missed_remaining -= count;
-						}
-					}
-					missed_nsys[ii] = 0;
+		endpoints_missed_remaining = sizeof(endpoints_missed_buffer)-1;
+		endpoints_missed_buffer[0] = '\0';
+		for (ii = 0; ii < sizeof(missed_nsys)/sizeof(missed_nsys[0]) && endpoints_missed_remaining > 0; ++ii) {
+			if (missed_nsys[ii]) {
+				char tmp[80];
+				int count = snprintf(tmp, sizeof(tmp), "%s(%x) ", sname[ii], missed_nsys[ii]);
+				if (count < sizeof(tmp)) {
+					strncat(endpoints_missed_buffer, tmp, count);
+					endpoints_missed_remaining -= count;
 				}
-				send_pv_update(pv_debug_pipe, pv_prefix, pvs, sizeof(pvs)/sizeof(pvs[0]));
+			}
+			missed_nsys[ii] = 0;
+		}
+		pv_mean_cycle_time = mean_cycle_time;
+		pv_max_cycle_time = max_cycle_time;
+		pv_min_cycle_time = min_cycle_time;
+		send_pv_update(pv_debug_pipe, pv_prefix, pvs, sizeof(pvs)/sizeof(pvs[0]));
 
-				if (do_verbose) {
-					printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec\n", nextCycle, myptime);
-					printf("Min/Max/Mean cylce time %d/%d/%d msec over %ld cycles\n", min_cycle_time, max_cycle_time,
-						   mean_cycle_time, n_cycle_time);
-					printf("Total DCU = %d\t\t\tBlockSize = %d\n", mytotaldcu, dc_datablock_size);
-					print_diags(mytotaldcu, nextCycle, sendLength, ifoDataBlock, edbs);
-				}
-				n_cycle_time = 0;
-				min_cycle_time = 1 << 30;
-				max_cycle_time = 0;
-				mean_cycle_time = 0;
+		if (do_verbose) {
+			printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec\n", nextCycle, myptime);
+			printf("Min/Max/Mean cylce time %d/%d/%d msec over %ld cycles\n", min_cycle_time, max_cycle_time,
+				   mean_cycle_time, n_cycle_time);
+			printf("Total DCU = %d\t\t\tBlockSize = %d\n", mytotaldcu, dc_datablock_size);
+			print_diags(mytotaldcu, nextCycle, sendLength, ifoDataBlock, edbs);
+		}
+		n_cycle_time = 0;
+		min_cycle_time = 1 << 30;
+		max_cycle_time = 0;
+		mean_cycle_time = 0;
 
                 endpoint_min_count = nsys;
                 endpoint_max_count = 0;
                 endpoint_mean_count = 0;
 
-				missed_flag = 1;
+		missed_flag = 1;
                 datablock_size_running = 0;
-			} else {
-				missed_flag <<= 1;
-			}
-			if(xmitData) {
-			    if (sendLength > IX_BLOCK_SIZE)
-                {
-			        fprintf(stderr, "Buffer overflow.  Sending %d bytes into a dolphin block that holds %d\n",
-                            (int)sendLength, (int)IX_BLOCK_SIZE);
-			        abort();
-                }
-				// WRITEDATA to Dolphin Network
-	    		SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset[xmitBlockNum],sendLength,memcpyFlag,&error);
-				error = SCI_ERR_OK;
-        		if (error != SCI_ERR_OK) {
-					fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
+	} else {
+		missed_flag <<= 1;
+	}
+	if(xmitData) {
+	    if (sendLength > IX_BLOCK_SIZE)
+            {
+	        fprintf(stderr, "Buffer overflow.  Sending %d bytes into a dolphin block that holds %d\n",
+                	(int)sendLength, (int)IX_BLOCK_SIZE);
+		        abort();
+            }
+	    // WRITEDATA to Dolphin Network
+	    printf("Offset = %d Size = %d\n",xmitDataOffset[xmitBlockNum],sendLength);
+	    SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset[xmitBlockNum],sendLength,memcpyFlag,&error);
+		error = SCI_ERR_OK;
+        	if (error != SCI_ERR_OK) {
+		    fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
                     fprintf(stderr,"For reference the expected error codes are:\n");
                     fprintf(stderr,"SCI_ERR_OUT_OF_RANGE = 0x%x\n", SCI_ERR_OUT_OF_RANGE);
                     fprintf(stderr,"SCI_ERR_SIZE_ALIGNMENT = 0x%x\n", SCI_ERR_SIZE_ALIGNMENT);
                     fprintf(stderr,"SCI_ERR_OFFSET_ALIGNMENT = 0x%x\n", SCI_ERR_OFFSET_ALIGNMENT);
                     fprintf(stderr,"SCI_ERR_TRANSFER_FAILED = 0x%x\n", SCI_ERR_TRANSFER_FAILED);
-		    		return error;
-				}
-				// Set data header information
-        		xmitHeader[xmitBlockNum]->maxCycle = ifo_header->maxCycle;
+		    return error;
+		}
+		// Set data header information
+        	// xmitHeader[xmitBlockNum]->maxCycle = ifo_header->maxCycle;
         		// xmitHeader->cycleDataSize = ifo_header->cycleDataSize;
-        		xmitHeader[xmitBlockNum]->cycleDataSize = sendLength;;
+        	// xmitHeader[xmitBlockNum]->cycleDataSize = sendLength;;
         		// xmitHeader->msgcrc = myCrc;
-        		// Send cycle last as indication of data ready for receivers
-        		xmitHeader[xmitBlockNum]->curCycle = ifo_header->curCycle;
-        		// Have to flush the buffers to make data go onto Dolphin network
-        		SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
-			}
+        	// Send cycle last as indication of data ready for receivers
+        	// xmitHeader[xmitBlockNum]->curCycle = ifo_header->curCycle;
+        	// Have to flush the buffers to make data go onto Dolphin network
+        	// SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
+	}
 
+		printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec len %d %d\n", nextCycle, myptime,sendLength,IX_BLOCK_SIZE);
 		}
 		sprintf(dcstatus,"%ld ",ets);
 		for(ii=0;ii<mytotaldcu;ii++) {
