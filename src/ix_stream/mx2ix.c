@@ -73,6 +73,8 @@ MX_MUTEX_T stream_mutex;
 #define MATCH_VAL_MAIN (1 << 31)
 #define MATCH_VAL_THREAD 1
 
+static int xmitDataOffset[IX_BLOCK_COUNT];
+daq_multi_cycle_header_t *xmitHeader[IX_BLOCK_COUNT];
 
 extern void *findSharedMemorySize(char *,int);
 
@@ -376,8 +378,8 @@ main(int argc, char **argv)
 	int max_data_size_mb = 100;
 	int max_data_size = 0;
 	char *mywriteaddr;
-	daq_multi_cycle_header_t *xmitHeader[IX_BLOCK_COUNT];
-	static int xmitDataOffset[IX_BLOCK_COUNT];
+	// daq_multi_cycle_header_t *xmitHeader[IX_BLOCK_COUNT];
+	// static int xmitDataOffset[IX_BLOCK_COUNT];
 	int xmitBlockNum = 0;
     	uint32_t mybid = 0;
 	
@@ -468,6 +470,20 @@ main(int argc, char **argv)
 	ifo_header->cycleDataSize = cycle_data_size;
     ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
+	if(xmitData) {
+		// Connect to Dolphin
+		error = dolphin_init();
+		printf("Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
+
+		// Set pointer to xmit header in Dolphin xmit data area.
+		mywriteaddr = (char *)writeAddr;
+		for(ii=0;ii<IX_BLOCK_COUNT;ii++) {
+			xmitHeader[ii] = (daq_multi_cycle_header_t *)mywriteaddr;
+			mywriteaddr += IX_BLOCK_SIZE;
+			xmitDataOffset[ii] = IX_BLOCK_SIZE * ii + sizeof(struct daq_multi_cycle_header_t);
+			printf("Dolphin at 0x%lx and 0x%lx",(long)xmitHeader[ii],(long)xmitDataOffset[ii]);
+		}
+	}
 
 	printf("nsys = %d\n",nsys);
 	// do_verbose = 1;
@@ -482,7 +498,7 @@ main(int argc, char **argv)
 		pthread_create(&thread_id[ii],NULL,rcvr_thread,(void *)&thread_index[ii]);
 
 	}
-
+#if 0
 	if(xmitData) {
 		// Connect to Dolphin
 		error = dolphin_init();
@@ -494,8 +510,10 @@ main(int argc, char **argv)
 			xmitHeader[ii] = (daq_multi_cycle_header_t *)mywriteaddr;
 			mywriteaddr += IX_BLOCK_SIZE;
 			xmitDataOffset[ii] = IX_BLOCK_SIZE * ii + sizeof(struct daq_multi_cycle_header_t);
+			printf("Dolphin at 0x%lx and 0x%lx",(long)xmitHeader[ii],(long)xmitDataOffset[ii]);
 		}
 	}
+	#endif
 	//
 
 	int nextCycle = 0;
@@ -532,6 +550,11 @@ main(int argc, char **argv)
 	int pv_mean_cycle_time = 0;
 	int pv_dcu_count = 0;
 	int pv_total_datablock_size = 0;
+    	int pv_datablock_size_mb_s = 0;
+	int uptime = 0;
+	int pv_uptime = 0;
+	int gps_time = 0;
+	int pv_gps_time = 0;
 	int endpoint_min_count = 1 << 30;
 	int endpoint_max_count = 0;
 	int endpoint_mean_count = 0;
@@ -597,13 +620,35 @@ main(int argc, char **argv)
 					1*1024*1024,
 			},
             {
-                    "DATA_BLOCK_SIZE_MB_PER_S",
+                    "DATA_RATE",
                     SIMPLE_PV_INT,
-                    &datablock_size_mb_s,
+                    &pv_datablock_size_mb_s,
 
-                    DAQ_TRANSIT_MAX_DC_BYTE_SEC/(1024*1024),
+			100*1024*1024,
                     0,
-                    (DAQ_TRANSIT_MAX_DC_BYTE_SEC/(1024*1024))*9/10,
+					90*1024*1024,
+                    1000000,
+            },
+            {
+                    "UPTIME_SECONDS",
+                    SIMPLE_PV_INT,
+                    &pv_uptime,
+
+			100*1024*1024,
+                    0,
+					90*1024*1024,
+
+                    1,
+            },
+            {
+                    "GPS",
+                    SIMPLE_PV_INT,
+                    &pv_gps_time,
+
+			100*1024*1024,
+                    0,
+					90*1024*1024,
+
                     1,
             },
 
@@ -782,7 +827,12 @@ main(int argc, char **argv)
             }
             datablock_size_running += dc_datablock_size;
             if (nextCycle == 0) {
-                datablock_size_mb_s = datablock_size_running / (1024*1024);
+                datablock_size_mb_s = datablock_size_running / 1024 ;
+		pv_datablock_size_mb_s = datablock_size_mb_s;
+		uptime ++;
+		pv_uptime = uptime;
+		gps_time = ifoDataBlock->header.dcuheader[0].timeSec;
+		pv_gps_time = gps_time;
 		// printf("Data rate = %d\n",datablock_size_mb_s);
 		pv_dcu_count = mytotaldcu;
 		// pv_total_datablock_size = dc_datablock_size;
@@ -836,7 +886,7 @@ main(int argc, char **argv)
 		        abort();
             }
 	    // WRITEDATA to Dolphin Network
-	    printf("Offset = %d Size = %d\n",xmitDataOffset[xmitBlockNum],sendLength);
+	    // printf("Offset = %d Size = %d %d\n",xmitDataOffset[xmitBlockNum],sendLength,xmitBlockNum);
 	    SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset[xmitBlockNum],sendLength,memcpyFlag,&error);
 		error = SCI_ERR_OK;
         	if (error != SCI_ERR_OK) {
@@ -849,17 +899,19 @@ main(int argc, char **argv)
 		    return error;
 		}
 		// Set data header information
-        	xmitHeader[xmitBlockNum]->maxCycle = ifo_header->maxCycle;
+		unsigned int maxCycle = ifo_header->maxCycle;
+		unsigned int curCycle = ifo_header->curCycle;
+        	xmitHeader[xmitBlockNum]->maxCycle = maxCycle;
         		// xmitHeader->cycleDataSize = ifo_header->cycleDataSize;
         	xmitHeader[xmitBlockNum]->cycleDataSize = sendLength;;
         		// xmitHeader->msgcrc = myCrc;
         	// Send cycle last as indication of data ready for receivers
-        	xmitHeader[xmitBlockNum]->curCycle = ifo_header->curCycle;
+        	xmitHeader[xmitBlockNum]->curCycle = curCycle;
         	// Have to flush the buffers to make data go onto Dolphin network
-        	SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
+        	// SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
 	}
 
-		printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec len %d %d\n", nextCycle, myptime,sendLength,IX_BLOCK_SIZE);
+		// printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec len %d %d\n", nextCycle, myptime,sendLength,IX_BLOCK_SIZE);
 		}
 		sprintf(dcstatus,"%ld ",ets);
 		for(ii=0;ii<mytotaldcu;ii++) {
