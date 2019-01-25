@@ -85,9 +85,6 @@ size_t cycle_data_size;
 
 // ZMQ defines
 char msg_buffer[0x200000];
-// daq_multi_dcu_data_t msg_buffer;
-void *daq_context;
-void *daq_publisher;
 
 
 int symmetricom_fd = -1;
@@ -106,13 +103,15 @@ volatile int threads_running;
 
 void Usage()
 {
-    printf("Usage of zmq_fe:\n");
-    printf("zmq_fe  -s <models> <OPTIONS>\n");
+    printf("Usage of mx_fe:\n");
+    printf("mx_fe  -s <models> <OPTIONS>\n");
     printf(" -b <buffer>    : Name of the mbuf to concentrate the data to locally (defaults to ifo)\n");
     printf(" -s <value>     : Name of FE control models\n");
     printf(" -m <value>     : Local memory buffer size in megabytes\n");
     printf(" -v 1           : Enable verbose output\n");
-    printf(" -e <interface> : Name of the interface to broadcast data through\n");
+    printf(" -e <0-31> 	    : Number of the local mx end point to transmit on\n");
+    printf(" -r <0-31>      : Number of the remote mx end point to transmit to\n");
+    printf(" -t <target name: Name of MX target computer to transmit to\n");
     printf(" -d <directory> : Path to the gds tp dir used to lookup model rates\n");
     printf(" -D <value>     : Add a delay in ms to sending the data.  Used to spread the load\n");
     printf("                : when working with multiple sending systems.  Defaults to 0.");
@@ -148,9 +147,9 @@ symm_ok() {
 // This function uses time from IRIG-B card
 // Abandoned due to interference with IOP model reading same card
 int 
-waitNextCycle(	unsigned int cyclereq,				// Cycle to wait for
-				int reset,					// Request to reset model ipc shared memory
-				struct rmIpcStr *ipcPtr) 	// Pointer to IOP IPC shared memory
+waitNextCycle(	unsigned int cyclereq,		// Cycle to wait for
+		int reset,			// Request to reset model ipc shared memory
+		struct rmIpcStr *ipcPtr) 	// Pointer to IOP IPC shared memory
 {
 	unsigned long gps_frac;
 	int gps_stt;
@@ -158,66 +157,66 @@ waitNextCycle(	unsigned int cyclereq,				// Cycle to wait for
 	int iopRunning = 0;
 	int runontimer = 0;
 
-		// if reset, want to set IOP cycle to impossible number
-		if(reset) ipcPtr->cycle = 50;
+	// if reset, want to set IOP cycle to impossible number
+	if(reset) ipcPtr->cycle = 50;
         // Find cycle 
-		do {
+	do {
      		usleep(1000);
-			// Get GPS time from gpstime driver
-			gps_time = symm_gps_time(&gps_frac, &gps_stt);
-			// Convert nanoseconds to microseconds
-			gps_frac /= 1000;
-			// If requested cycle matches IOP shared memory cycle, 
-			// then IOP is running and requested cycle is found
-			if(ipcPtr->cycle == cyclereq) iopRunning = 1;
-			// If GPS time is within window that requested cycle should be ready,
-			// then return on timer event.
-			if(gps_frac > window_start[cyclereq] && gps_frac < window_stop[cyclereq]) runontimer = 1;
-		}while(iopRunning == 0 && runontimer == 0 && keepRunning);
-		// Return iopRunning:
-		// 	- One (1) if synced to IOP 
-		// 	- Zero (0) if synced by GPS time ie IOP not running.
+		// Get GPS time from gpstime driver
+		gps_time = symm_gps_time(&gps_frac, &gps_stt);
+		// Convert nanoseconds to microseconds
+		gps_frac /= 1000;
+		// If requested cycle matches IOP shared memory cycle, 
+		// then IOP is running and requested cycle is found
+		if(ipcPtr->cycle == cyclereq) iopRunning = 1;
+		// If GPS time is within window that requested cycle should be ready,
+		// then return on timer event.
+		if(gps_frac > window_start[cyclereq] && gps_frac < window_stop[cyclereq]) runontimer = 1;
+	}while(iopRunning == 0 && runontimer == 0 && keepRunning);
+	// Return iopRunning:
+	// 	- One (1) if synced to IOP 
+	// 	- Zero (0) if synced by GPS time ie IOP not running.
         return(iopRunning);
 }
 // **********************************************************************************************
 int 
 waitNextCycle2(	int nsys,
-				unsigned int cyclereq,				// Cycle to wait for
-				int reset,					// Request to reset model ipc shared memory
-				int dataRdy[],
-				struct rmIpcStr *ipcPtr[]) 	// Pointer to IOP IPC shared memory
+		unsigned int cyclereq,				// Cycle to wait for
+		int reset,					// Request to reset model ipc shared memory
+		int dataRdy[],
+		struct rmIpcStr *ipcPtr[]) 	// Pointer to IOP IPC shared memory
 {
-	int iopRunning = 0;
-	int ii;
-	int threads_rdy = 0;
-	int timeout = 0;
+int iopRunning = 0;
+int ii;
+int threads_rdy = 0;
+int timeout = 0;
 
-		// if reset, want to set IOP cycle to impossible number
-		if(reset) ipcPtr[0]->cycle = 50;
+	// if reset, want to set IOP cycle to impossible number
+	if(reset) ipcPtr[0]->cycle = 50;
         // Find cycle 
-		// do {
-     		usleep(1000);
-			// Wait until received data from at least 1 FE or timeout
-			do {
-				usleep(2000);
-				if(ipcPtr[0]->cycle == cyclereq) 
-				{
-						iopRunning = 1;
-						dataRdy[0] = 1;
-				}
-			    timeout += 1;
-			}while(!iopRunning && timeout < 500);
+	// do {
+     	usleep(1000);
+	// Wait until received data from at least 1 FE or timeout
+	do {
+		usleep(2000);
+		if(ipcPtr[0]->cycle == cyclereq) 
+		{
+			iopRunning = 1;
+			dataRdy[0] = 1;
+		}
+		timeout += 1;
+	}while(!iopRunning && timeout < 500);
 
-            // Wait until data received from everyone or timeout
-            timeout = 0;
-            do {
-             	usleep(100);
-				for(ii=1;ii<nsys;ii++) {
+        // Wait until data received from everyone or timeout
+        timeout = 0;
+        do {
+       		usleep(100);
+		for(ii=1;ii<nsys;ii++) {
              		if(ipcPtr[ii]->cycle == cyclereq && !dataRdy[ii]) threads_rdy ++;
              		if(ipcPtr[ii]->cycle == cyclereq) dataRdy[ii] = 1;
                 }
                 timeout += 1;
-            }while(threads_rdy < nsys && timeout < 20);
+        }while(threads_rdy < nsys && timeout < 20);
 
 		// }while(iopRunning == 0 && keepRunning);
 		// Return iopRunning:
@@ -325,10 +324,10 @@ int getmodelrate( int *rate, int *dcuid, char *modelname, char *gds_tp_dir) {
 
 // **********************************************************************************************
 int loadMessageBuffer(	int nsys, 
-						int lastCycle,
-						int status,
-						int dataRdy[]
-					 )
+			int lastCycle,
+			int status,
+			int dataRdy[]
+			 )
 {
 	int sendLength = 0;
 	int ii;
@@ -411,14 +410,14 @@ int loadMessageBuffer(	int nsys,
 
 // **********************************************************************************************
 int send_to_local_memory(int nsys, 
-						int xmitData, 
-						int send_delay_ms,
-						mx_endpoint_t ep,
-						int64_t his_nic_id,
-					    uint16_t his_eid,
-					    int len,
-					    uint32_t match_val, 
-						uint16_t my_dcu)
+			int xmitData, 
+			int send_delay_ms,
+			mx_endpoint_t ep,
+			int64_t his_nic_id,
+		    	uint16_t his_eid,
+		    	int len,
+		    	uint32_t match_val, 
+			uint16_t my_dcu)
 {
     int do_wait = 1;
     int daqStatBit[2];
@@ -495,7 +494,6 @@ int send_to_local_memory(int nsys,
 		// Copy data to 0mq message buffer
 		memcpy((void*)&msg_buffer,nextData,sendLength);
 		// Send Data
-        //msg_size = zmq_send(daq_publisher,(void*)&msg_buffer,sendLength,0);
         usleep(send_delay_ms * 1000);
 		seg.segment_ptr = &msg_buffer;
 		seg.segment_length = sendLength;
