@@ -92,8 +92,6 @@ struct thread_mon_info {
     void *ctx;
 };
 struct thread_info thread_index[DCU_COUNT];
-void *daq_context[DCU_COUNT];
-void *daq_subscriber[DCU_COUNT];
 char *sname[DCU_COUNT];	// Names of FE computers serving DAQ data
 char *local_iface[MAX_FE_COMPUTERS];
 daq_multi_dcu_data_t mxDataBlockSingle[MAX_FE_COMPUTERS];
@@ -111,15 +109,12 @@ usage()
 {
 	fprintf(stderr, "Usage: mx2ix [args] -s server names -m shared memory size -g IX channel \n");
 	fprintf(stderr, "-l filename - log file name\n");
-	fprintf(stderr, "-b buffername - name of the mbuf to write to\n");
-	fprintf(stderr, "-s - server names separated by spaces eg \"x1lsc0 x1susex etc.\"\n");
+	fprintf(stderr, "-s - number of FE computers to connect (1-32)\n");
 	fprintf(stderr, "-v - verbose prints diag test data\n");
 	fprintf(stderr, "-g - Dolphin IX channel to xmit on\n");
 	fprintf(stderr, "-p - Debug pv prefix, requires -P as well\n");
 	fprintf(stderr, "-P - Path to a named pipe to send PV debug information to\n");
 	fprintf(stderr, "-d - Max delay in milli seconds to wait for a FE to send data, defaults to 10\n");
-	fprintf(stderr, "-L ifaces - local interfaces to listen on [used for load balancing], eg \"eth0 eth1\"\n");
-    fprintf(stderr, "-z - output zmq debug information (state changes)\n");
 	fprintf(stderr, "-h - help\n");
 }
 
@@ -167,84 +162,6 @@ void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *
 		#endif
 }
 
-#if 0
-const char *pevent_zmq(int event, char *buffer, size_t max_size)
-{
-    if (!buffer || max_size < 1) {
-        return "";
-    }
-    switch (event) {
-        default:
-            snprintf(buffer, max_size, "%d", event);
-            break;
-        case ZMQ_EVENT_CONNECTED:
-            strncpy(buffer, "CONNECTED", max_size);   
-            break;
-        case ZMQ_EVENT_CONNECT_DELAYED:
-            strncpy(buffer, "CONNECT_DELAYED", max_size);
-            break;
-        case ZMQ_EVENT_CONNECT_RETRIED:
-            strncpy(buffer, "CONNECT_RETRIED", max_size);
-            break;
-        case ZMQ_EVENT_LISTENING:
-            strncpy(buffer, "LISTENING", max_size);
-            break;
-        case ZMQ_EVENT_BIND_FAILED:
-            strncpy(buffer, "BIND_FAILED", max_size);
-            break;
-        case ZMQ_EVENT_ACCEPTED:
-            strncpy(buffer, "ACCEPTED", max_size);
-            break;
-        case ZMQ_EVENT_ACCEPT_FAILED:
-            strncpy(buffer, "ACCEPT_FAILED", max_size);
-            break;
-        case ZMQ_EVENT_CLOSED:
-            strncpy(buffer, "CLOSED", max_size);
-            break;
-        case ZMQ_EVENT_CLOSE_FAILED:
-            strncpy(buffer, "CLOSE_FAILED", max_size);
-            break;
-        case ZMQ_EVENT_DISCONNECTED:
-            strncpy(buffer, "DISCONNECTED", max_size);
-            break;
-        case ZMQ_EVENT_MONITOR_STOPPED:
-            strncpy(buffer, "MONITOR_STOPPED", max_size);
-            break;
-    }
-    buffer[max_size-1] = '\0';
-    return buffer;
-}
-
-// *****
-// monitoring thread callback
-// *****
-void *rcvr_thread_mon(void *args)
-{
-    int rc;
-    char msg_buf[100];
-    struct thread_mon_info *info = (struct thread_mon_info*)args;
-    
-    void *s = zmq_socket(info->ctx, ZMQ_PAIR);
-    rc = zmq_connect(s, "inproc://monitor.req");
-    while (1)
-    {
-        zmq_msg_t msg;
-        zmq_msg_init(&msg);
-        rc = zmq_recvmsg(s, &msg, 0);
-        if (rc == -1) break;
-        unsigned short *event = (unsigned short*)zmq_msg_data(&msg);
-        unsigned int *value = (unsigned int*)(event+1);
-        fprintf(stderr, "%s) %d - %s\n", pevent_zmq(*event, msg_buf, sizeof(msg_buf)), *value, sname[info->index]);
-        if (zmq_msg_more(&msg)) {
-            zmq_msg_init(&msg);
-            zmq_msg_recv(&msg, s, 0);
-        }
-    }
-    zmq_close(s);
-    free(args);
-    return NULL;
-}
-#endif
 
 // *************************************************************************
 // Thread for receiving DAQ data via ZMQ
@@ -328,9 +245,7 @@ void *rcvr_thread(void *arg) {
 		// Pass cycle and timestamp data back to main process
 		thread_cycle[mt] = cycle;
 		thread_timestamp[mt] = mxDataBlock->header.dcuheader[0].timeSec;
-        dataRecvTime[mt] = s_clock();
-		int mydbs = mxDataBlock->header.fullDataBlockSize;
-		// printf("Thread %d cycle %d size %d size %d\n",mt,cycle,copySize,mydbs);
+        	dataRecvTime[mt] = s_clock();
 		mx_irecv(ep, &seg, 1, mv, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
 		}
 
@@ -498,24 +413,6 @@ main(int argc, char **argv)
 		pthread_create(&thread_id[ii],NULL,rcvr_thread,(void *)&thread_index[ii]);
 
 	}
-#if 0
-	if(xmitData) {
-		// Connect to Dolphin
-		error = dolphin_init();
-		printf("Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
-
-		// Set pointer to xmit header in Dolphin xmit data area.
-		mywriteaddr = (char *)writeAddr;
-		for(ii=0;ii<IX_BLOCK_COUNT;ii++) {
-			xmitHeader[ii] = (daq_multi_cycle_header_t *)mywriteaddr;
-			mywriteaddr += IX_BLOCK_SIZE;
-			xmitDataOffset[ii] = IX_BLOCK_SIZE * ii + sizeof(struct daq_multi_cycle_header_t);
-			printf("Dolphin at 0x%lx and 0x%lx",(long)xmitHeader[ii],(long)xmitDataOffset[ii]);
-		}
-	}
-	#endif
-	//
-
 	int nextCycle = 0;
 	start_acq = 1;
 	int64_t mytime = 0;
@@ -908,10 +805,9 @@ main(int argc, char **argv)
         	// Send cycle last as indication of data ready for receivers
         	xmitHeader[xmitBlockNum]->curCycle = curCycle;
         	// Have to flush the buffers to make data go onto Dolphin network
-        	// SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
+        	SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
 	}
 
-		// printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec len %d %d\n", nextCycle, myptime,sendLength,IX_BLOCK_SIZE);
 		}
 		sprintf(dcstatus,"%ld ",ets);
 		for(ii=0;ii<mytotaldcu;ii++) {
