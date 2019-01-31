@@ -14,13 +14,15 @@ srcdir = .
 
 # TARGETS does not append $(EXEEXT) because we don't want the GNU make
 # rules to apply to Windows.
-TARGETS=mx_stream mx_multi_stream
+TARGETS=mx_stream mx_multi_stream mx_mem_test
 
 mx_stream: mx_stream.o rfm.o
 
 mx_multi_stream: mx_multi_stream.o rfm.o
 
 mx_crc_only: mx_crc_only.o rfm.o
+
+mx_mem_test: mx_mem_test.o rfm.o
 
 mx_stream_single: mx_stream_single.o rfm.o
 
