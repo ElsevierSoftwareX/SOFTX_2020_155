@@ -1,6 +1,6 @@
 //
-/// @file zmq_rcv_ix_xmitcc
-/// @brief  DAQ data concentrator code. Receives data via ZMQ and sends via Dolphin IX..
+/// @file mx2ix.c
+/// @brief  DAQ data concentrator code. Receives data via Open-MX and sends via Dolphin IX..
 //
 
 #include "myriexpress.h"
@@ -20,7 +20,6 @@
 #include <string.h>
 #include <signal.h>
 #include "../drv/crc.c"
-#include <assert.h>
 #include <time.h>
 #include "../include/daqmap.h"
 #include "../include/daq_core.h"
@@ -32,7 +31,6 @@
 #include "sisci_demolib.h"
 #include "testlib.h"
 
-#include "zmq_transport.h"
 #include "simple_pv.h"
 
 #define __CDECL
@@ -79,7 +77,6 @@ daq_multi_cycle_header_t *xmitHeader[IX_BLOCK_COUNT];
 extern void *findSharedMemorySize(char *,int);
 
 int do_verbose = 0;
-int debug_zmq = 0;
 
 struct thread_info {
     int index;
@@ -111,7 +108,7 @@ usage()
     fprintf(stderr, "-l filename - log file name\n");
     fprintf(stderr, "-s - number of FE computers to connect (1-32)\n");
     fprintf(stderr, "-v - verbose prints diag test data\n");
-    fprintf(stderr, "-g - Dolphin IX channel to xmit on\n");
+    fprintf(stderr, "-g - Dolphin IX channel to xmit on (0-3)\n");
     fprintf(stderr, "-p - Debug pv prefix, requires -P as well\n");
     fprintf(stderr, "-P - Path to a named pipe to send PV debug information to\n");
     fprintf(stderr, "-d - Max delay in milli seconds to wait for a FE to send data, defaults to 10\n");
@@ -147,7 +144,6 @@ void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *
         printf("Receive errors = %d\n",rcv_errors);
         printf("Time = %d\t size = %d\n",ixDataBlock->header.dcuheader[0].timeSec,sendLength);
         printf("DCU ID\tCycle \t TimeSec\tTimeNSec\tDataSize\tTPCount\tTPSize\tXmitSize\n");
-        #if 0
         for(ii=0;ii<nsys;ii++) {
             printf("%d",ixDataBlock->header.dcuheader[ii].dcuId);
             printf("\t%d",ixDataBlock->header.dcuheader[ii].cycle);
@@ -159,12 +155,11 @@ void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *
             printf("\t%d",dbs[ii]);
             printf("\n ");
         }
-        #endif
 }
 
 
 // *************************************************************************
-// Thread for receiving DAQ data via ZMQ
+// Thread for receiving DAQ data via Open-MX
 // *************************************************************************
 void *rcvr_thread(void *arg) {
     struct thread_info* my_info = (struct thread_info*)arg;
@@ -191,7 +186,6 @@ void *rcvr_thread(void *arg) {
 
 
     printf("Starting receive loop for thread %d \n", mt);
-//  mt = 0;
 
     ret = mx_open_endpoint(board_id, mt, filter, NULL, 0, &ep);
     if (ret != MX_SUCCESS) {
@@ -200,8 +194,6 @@ void *rcvr_thread(void *arg) {
     }
 
     printf("waiting for someone to connect on CH %d\n",mt);
-    // len = sizeof(struct daqMXdata);
-    // len *= NUM_RREQ;
     len = 0xa00000;
     printf("buffer length = %d\n",len);
     buffer = (char *)malloc(len);
@@ -308,7 +300,7 @@ main(int argc, char **argv)
 
 
     // Get arguments sent to process
-    while ((c = getopt(argc, argv, "b:hs:m:g:vp:P:n:d:L:z")) != EOF) switch(c) {
+    while ((c = getopt(argc, argv, "b:hs:m:g:vp:P:n:d:L")) != EOF) switch(c) {
     case 's':
         nsys = atoi(optarg);
         break;
@@ -316,10 +308,7 @@ main(int argc, char **argv)
         mybid = atoi(optarg);
         break;
     case 'v':
-        do_verbose = 0;
-        break;
-    case 'z':
-        debug_zmq = 1;
+        do_verbose = 1;
         break;
     case 'm':
         max_data_size_mb = atoi(optarg);
@@ -401,7 +390,6 @@ main(int argc, char **argv)
     }
 
     printf("nsys = %d\n",nsys);
-    // do_verbose = 1;
 
     // Make 0MQ socket connections
     for(ii=0;ii<nsys;ii++) {
@@ -521,7 +509,7 @@ main(int argc, char **argv)
                     SIMPLE_PV_INT,
                     &pv_datablock_size_mb_s,
 
-            100*1024*1024,
+                    100*1024*1024,
                     0,
                     90*1024*1024,
                     1000000,
@@ -531,7 +519,7 @@ main(int argc, char **argv)
                     SIMPLE_PV_INT,
                     &pv_uptime,
 
-            100*1024*1024,
+                    100*1024*1024,
                     0,
                     90*1024*1024,
 
@@ -542,7 +530,7 @@ main(int argc, char **argv)
                     SIMPLE_PV_INT,
                     &pv_gps_time,
 
-            100*1024*1024,
+                    100*1024*1024,
                     0,
                     90*1024*1024,
 
@@ -606,7 +594,6 @@ main(int argc, char **argv)
             }
             mean_cycle_time += myptime;
             ++n_cycle_time;
-            // if(do_verbose)printf("Data rdy for cycle = %d\t\t%ld\n",nextCycle,myptime);
 
             // Reset total DCU counter
             mytotaldcu = 0;
@@ -766,46 +753,45 @@ main(int argc, char **argv)
         max_cycle_time = 0;
         mean_cycle_time = 0;
 
-                endpoint_min_count = nsys;
-                endpoint_max_count = 0;
-                endpoint_mean_count = 0;
+        endpoint_min_count = nsys;
+        endpoint_max_count = 0;
+        endpoint_mean_count = 0;
 
         missed_flag = 1;
-                datablock_size_running = 0;
+        datablock_size_running = 0;
     } else {
         missed_flag <<= 1;
     }
     if(xmitData) {
         if (sendLength > IX_BLOCK_SIZE)
-            {
+        {
             fprintf(stderr, "Buffer overflow.  Sending %d bytes into a dolphin block that holds %d\n",
-                    (int)sendLength, (int)IX_BLOCK_SIZE);
-                abort();
-            }
+            (int)sendLength, (int)IX_BLOCK_SIZE);
+            abort();
+        }
         // WRITEDATA to Dolphin Network
-        // printf("Offset = %d Size = %d %d\n",xmitDataOffset[xmitBlockNum],sendLength,xmitBlockNum);
         SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset[xmitBlockNum],sendLength,memcpyFlag,&error);
         error = SCI_ERR_OK;
-            if (error != SCI_ERR_OK) {
+        if (error != SCI_ERR_OK) {
             fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
-                    fprintf(stderr,"For reference the expected error codes are:\n");
-                    fprintf(stderr,"SCI_ERR_OUT_OF_RANGE = 0x%x\n", SCI_ERR_OUT_OF_RANGE);
-                    fprintf(stderr,"SCI_ERR_SIZE_ALIGNMENT = 0x%x\n", SCI_ERR_SIZE_ALIGNMENT);
-                    fprintf(stderr,"SCI_ERR_OFFSET_ALIGNMENT = 0x%x\n", SCI_ERR_OFFSET_ALIGNMENT);
-                    fprintf(stderr,"SCI_ERR_TRANSFER_FAILED = 0x%x\n", SCI_ERR_TRANSFER_FAILED);
+            fprintf(stderr,"For reference the expected error codes are:\n");
+            fprintf(stderr,"SCI_ERR_OUT_OF_RANGE = 0x%x\n", SCI_ERR_OUT_OF_RANGE);
+            fprintf(stderr,"SCI_ERR_SIZE_ALIGNMENT = 0x%x\n", SCI_ERR_SIZE_ALIGNMENT);
+            fprintf(stderr,"SCI_ERR_OFFSET_ALIGNMENT = 0x%x\n", SCI_ERR_OFFSET_ALIGNMENT);
+            fprintf(stderr,"SCI_ERR_TRANSFER_FAILED = 0x%x\n", SCI_ERR_TRANSFER_FAILED);
             return error;
         }
         // Set data header information
         unsigned int maxCycle = ifo_header->maxCycle;
         unsigned int curCycle = ifo_header->curCycle;
-            xmitHeader[xmitBlockNum]->maxCycle = maxCycle;
+        xmitHeader[xmitBlockNum]->maxCycle = maxCycle;
                 // xmitHeader->cycleDataSize = ifo_header->cycleDataSize;
-            xmitHeader[xmitBlockNum]->cycleDataSize = sendLength;;
+        xmitHeader[xmitBlockNum]->cycleDataSize = sendLength;;
                 // xmitHeader->msgcrc = myCrc;
-            // Send cycle last as indication of data ready for receivers
-            xmitHeader[xmitBlockNum]->curCycle = curCycle;
-            // Have to flush the buffers to make data go onto Dolphin network
-            SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
+        // Send cycle last as indication of data ready for receivers
+        xmitHeader[xmitBlockNum]->curCycle = curCycle;
+        // Have to flush the buffers to make data go onto Dolphin network
+        SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
     }
 
         }
@@ -827,7 +813,7 @@ main(int argc, char **argv)
 
     // Wait for threads to stop
     sleep(5);
-    printf("closing out zmq\n");
+    printf("closing out MX\n");
     mx_finalize();
     if(xmitData) {
         printf("closing out ix\n");
