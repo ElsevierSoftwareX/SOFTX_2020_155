@@ -1,10 +1,8 @@
 //
-///// @file fe_dc.c
+///// @file mx_fe.c
 ///// @brief  Front End data concentrator
 ////
 //
-// #define _GNU_SOURCE
-//  #define _XOPEN_SOURCE 700
 
 #include <ctype.h>
 #include <stdio.h>
@@ -24,7 +22,6 @@
 #include "../include/drv/fb.h"
 #include "../include/daq_core.h"
 #include "../drv/gpstime/gpstime.h"
-#include <assert.h>
 #include "myriexpress.h"
 #include "mx_extensions.h"
 #include <pthread.h>
@@ -77,23 +74,15 @@ extern void *findSharedMemorySize(char *,int);
 char modelnames[DAQ_TRANSIT_MAX_DCU][64];
 char *sysname;
 int do_verbose = 0;
-// int sendLength = 0;
 static volatile int keepRunning = 1;
 char *ifo;
 char *ifo_data;
 size_t cycle_data_size;
 
-// ZMQ defines
 char msg_buffer[0x200000];
 
 
 int symmetricom_fd = -1;
-unsigned long  window_start[16] = {63500,135000,197500,260000,322500,395000,447500,510000,572500,635000,697500,760000,822500,885000,947500,10000};
-unsigned long  window_stop[16] =  {135000,197500,260000,322500,395000,447500,510000,572500,635000,697500,760000,822500,885000,947500,999990,63500};
-
-
-int num_threads;
-volatile int threads_running;
 
 
 /*********************************************************************************/
@@ -109,7 +98,7 @@ void Usage()
     printf(" -s <value>     : Name of FE control models\n");
     printf(" -m <value>     : Local memory buffer size in megabytes\n");
     printf(" -v 1           : Enable verbose output\n");
-    printf(" -e <0-31> 	    : Number of the local mx end point to transmit on\n");
+    printf(" -e <0-31>	    : Number of the local mx end point to transmit on\n");
     printf(" -r <0-31>      : Number of the remote mx end point to transmit to\n");
     printf(" -t <target name: Name of MX target computer to transmit to\n");
     printf(" -d <directory> : Path to the gds tp dir used to lookup model rates\n");
@@ -133,58 +122,23 @@ symm_gps_time(unsigned long *frac, int *stt) {
     return  t[0];
 }
 
-// **********************************************************************************************
+// *******************************************************************************
 /// See if the GPS card is locked.
 int
 symm_ok() {
 	unsigned long req = 0;
-   	ioctl (symmetricom_fd, IOCTL_SYMMETRICOM_STATUS, &req);
+	ioctl (symmetricom_fd, IOCTL_SYMMETRICOM_STATUS, &req);
     printf("Symmetricom status: %s\n", req? "LOCKED": "UNCLOCKED");
 	return req;
 }
 
-// **********************************************************************************************
-// This function uses time from IRIG-B card
-// Abandoned due to interference with IOP model reading same card
-int 
-waitNextCycle(	unsigned int cyclereq,		// Cycle to wait for
-		int reset,			// Request to reset model ipc shared memory
-		struct rmIpcStr *ipcPtr) 	// Pointer to IOP IPC shared memory
-{
-	unsigned long gps_frac;
-	int gps_stt;
-	unsigned long gps_time;
-	int iopRunning = 0;
-	int runontimer = 0;
-
-	// if reset, want to set IOP cycle to impossible number
-	if(reset) ipcPtr->cycle = 50;
-        // Find cycle 
-	do {
-     		usleep(1000);
-		// Get GPS time from gpstime driver
-		gps_time = symm_gps_time(&gps_frac, &gps_stt);
-		// Convert nanoseconds to microseconds
-		gps_frac /= 1000;
-		// If requested cycle matches IOP shared memory cycle, 
-		// then IOP is running and requested cycle is found
-		if(ipcPtr->cycle == cyclereq) iopRunning = 1;
-		// If GPS time is within window that requested cycle should be ready,
-		// then return on timer event.
-		if(gps_frac > window_start[cyclereq] && gps_frac < window_stop[cyclereq]) runontimer = 1;
-	}while(iopRunning == 0 && runontimer == 0 && keepRunning);
-	// Return iopRunning:
-	// 	- One (1) if synced to IOP 
-	// 	- Zero (0) if synced by GPS time ie IOP not running.
-        return(iopRunning);
-}
-// **********************************************************************************************
+// *******************************************************************************
 int 
 waitNextCycle2(	int nsys,
-		unsigned int cyclereq,				// Cycle to wait for
-		int reset,					// Request to reset model ipc shared memory
-		int dataRdy[],
-		struct rmIpcStr *ipcPtr[]) 	// Pointer to IOP IPC shared memory
+	    unsigned int cyclereq,		// Cycle to wait for
+	    int reset,					// Request to reset model ipc shared memory
+	    int dataRdy[],
+	    struct rmIpcStr *ipcPtr[])	// Pointer to IOP IPC shared memory
 {
 int iopRunning = 0;
 int ii;
@@ -195,7 +149,7 @@ int timeout = 0;
 	if(reset) ipcPtr[0]->cycle = 50;
         // Find cycle 
 	// do {
-     	usleep(1000);
+	usleep(1000);
 	// Wait until received data from at least 1 FE or timeout
 	do {
 		usleep(2000);
@@ -210,18 +164,18 @@ int timeout = 0;
         // Wait until data received from everyone or timeout
         timeout = 0;
         do {
-       		usleep(100);
+		usleep(100);
 		for(ii=1;ii<nsys;ii++) {
-             		if(ipcPtr[ii]->cycle == cyclereq && !dataRdy[ii]) threads_rdy ++;
-             		if(ipcPtr[ii]->cycle == cyclereq) dataRdy[ii] = 1;
+			if(ipcPtr[ii]->cycle == cyclereq && !dataRdy[ii]) threads_rdy ++;
+			if(ipcPtr[ii]->cycle == cyclereq) dataRdy[ii] = 1;
                 }
                 timeout += 1;
         }while(threads_rdy < nsys && timeout < 20);
 
 		// }while(iopRunning == 0 && keepRunning);
 		// Return iopRunning:
-		// 	- One (1) if synced to IOP 
-		// 	- Zero (0) if synced by GPS time ie IOP not running.
+		//	- One (1) if synced to IOP 
+		//	- Zero (0) if synced by GPS time ie IOP not running.
         return(iopRunning);
 }
 
@@ -249,13 +203,13 @@ void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *
 		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].timeNSec);
 		printf("\n\tDataSize = ");
 		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].dataBlockSize);
-	   	printf("\n\tTPCount = ");
-	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpCount);
-	   	printf("\n\tTPSize = ");
-	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpBlockSize);
-	   	printf("\n\tXmitSize = ");
-	   	for(ii=0;ii<nsys;ii++) printf("\t\t%d",shmIpcPtr[ii]->dataBlockSize);
-	   	printf("\n\n ");
+		printf("\n\tTPCount = ");
+		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpCount);
+		printf("\n\tTPSize = ");
+		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpBlockSize);
+		printf("\n\tXmitSize = ");
+		for(ii=0;ii<nsys;ii++) printf("\t\t%d",shmIpcPtr[ii]->dataBlockSize);
+		printf("\n\n ");
 }
 
 // **********************************************************************************************
@@ -414,9 +368,9 @@ int send_to_local_memory(int nsys,
 			int send_delay_ms,
 			mx_endpoint_t ep,
 			int64_t his_nic_id,
-		    	uint16_t his_eid,
-		    	int len,
-		    	uint32_t match_val, 
+			uint16_t his_eid,
+			int len,
+			uint32_t match_val, 
 			uint16_t my_dcu)
 {
     int do_wait = 1;
@@ -430,7 +384,7 @@ int send_to_local_memory(int nsys,
     int lastCycle = 0;
 	unsigned int nextCycle = 0;
 
-  	int sync2iop = 1;
+	int sync2iop = 1;
 	int status = 0;
 	int dataRdy[10];
 
@@ -453,7 +407,7 @@ int send_to_local_memory(int nsys,
      if(init_mx) {
 	  do{
 	    mx_return_t conStat = mx_connect(ep, his_nic_id, his_eid, filter,
-	                 1000, &dest);
+			 1000, &dest);
 	    if (conStat != MX_SUCCESS) myErrorSignal = 1;
 		else {
 			myErrorSignal = 0;
@@ -500,7 +454,7 @@ int send_to_local_memory(int nsys,
 		mx_return_t res = mx_isend(ep, &seg, 1, dest, match_val, NULL, &req[cur_req]);
 		if (res != MX_SUCCESS) {
 			fprintf(stderr, "mx_isend failed ret=%d\n", res);
-	        myErrorSignal = 1;
+		myErrorSignal = 1;
             break;
         }
 	    mx_wait(ep, &req[cur_req], 150, &stat, &result);
@@ -547,7 +501,7 @@ main(int argc,char *argv[])
 	int gps_stt = 0;
 	int gps_ok = 0;
 	unsigned long gps_time = 0;
-	int sendViaZmq = 0;
+	int sendViaOmx = 0;
 	char *buffer_name = "ifo";
 	int send_delay_ms = 0;
 
@@ -579,17 +533,11 @@ main(int argc,char *argv[])
     iter = DFLT_ITER;
     do_wait = 0;
     do_bothways = 0;
-    num_threads = 1;
 
 
 
     printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
    
-    printf("argc = %d\n", argc);
-    for (ii = 0; ii < argc; ++ii)
-    {
-    	printf("argv[%d] = %s\n", ii, argv[ii]);
-    }
     ii = 0;
     
     if (argc<3) {
@@ -626,16 +574,16 @@ main(int argc,char *argv[])
 		case 'r':
 			his_eid = atoi(optarg);
         case 'v':
-	    	do_verbose = atoi(optarg);
+		do_verbose = atoi(optarg);
 			break;
 		case 'e':
-	        my_eid = atoi(optarg);
-	        printf ("myeid = %d\n",my_eid);
-			sendViaZmq = 1;
-	        break;
+		my_eid = atoi(optarg);
+		printf ("myeid = %d\n",my_eid);
+			sendViaOmx = 1;
+		break;
 	    case 'd':
-	    	gds_tp_dir = optarg;
-	    	break;
+		gds_tp_dir = optarg;
+		break;
         case 'h':
             Usage();
             return(0);
@@ -645,17 +593,17 @@ main(int argc,char *argv[])
     }
     max_data_size = max_data_size_mb * 1024*1024;
 
-	if (sendViaZmq) printf("Writing DAQ data to local shared memory and sending out on ZMQ\n");
+	if (sendViaOmx) printf("Writing DAQ data to local shared memory and sending out on Open-MX\n");
 	else	printf("Writing DAQ data to local shared memory only \n");
     if(sysname != NULL) {
 	printf("System names: %s\n", sysname);
         sprintf(modelnames[0],"%s",strtok(sysname, " "));
         for(;;) {
-        	char *s = strtok(0, " ");
-	        if (!s) break;
-	        sprintf(modelnames[nsys],"%s",s);
-	        dcuId[nsys] = 0;
-	        nsys++;
+		char *s = strtok(0, " ");
+		if (!s) break;
+		sprintf(modelnames[nsys],"%s",s);
+		dcuId[nsys] = 0;
+		nsys++;
 	}
     } else {
 	Usage();
@@ -677,24 +625,24 @@ main(int argc,char *argv[])
     for(ii=0;ii<nsys;ii++) {
 		char shmem_fname[128];
 		sprintf(shmem_fname, "%s_daq", modelnames[ii]);
-	 	void *dcu_addr = findSharedMemory(shmem_fname);
-	 	if (dcu_addr == NULL) {
-	 		fprintf(stderr, "Can't map shmem\n");
+		void *dcu_addr = findSharedMemory(shmem_fname);
+		if (dcu_addr == NULL) {
+			fprintf(stderr, "Can't map shmem\n");
 			exit(-1);
 		} else {
 			printf(" %s mapped at 0x%lx\n",modelnames[ii],(unsigned long)dcu_addr);
 		}
-	 	shmIpcPtr[ii] = (struct rmIpcStr *)((char *)dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
-	 	shmDataPtr[ii] = ((char *)dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
-	 	shmTpTable[ii] = (struct cdsDaqNetGdsTpNum *)((char *)dcu_addr + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
+		shmIpcPtr[ii] = (struct rmIpcStr *)((char *)dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
+		shmDataPtr[ii] = ((char *)dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
+		shmTpTable[ii] = (struct cdsDaqNetGdsTpNum *)((char *)dcu_addr + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
     }
 	// Get model rates to get GDS TP data sizes.
     for (ii = 0; ii < nsys; ii++) {
         status = getmodelrate(&modelrates[ii],&dcuid[ii],modelnames[ii], gds_tp_dir);
 		printf("Model %s rate = %d dcuid = %d\n",modelnames[ii],modelrates[ii],dcuid[ii]);
 	    if (status != 0) {
-	    	fprintf(stderr, "Unable to determine the rate of %s\n", modelnames[ii]);
-	        exit(1);
+		fprintf(stderr, "Unable to determine the rate of %s\n", modelnames[ii]);
+		exit(1);
         }
     }
 
@@ -718,17 +666,12 @@ main(int argc,char *argv[])
 	printf("Get NIC ID \n");
 	mx_hostname_to_nic_id(rem_host, &his_nic_id);
 
-
-
-	sleep(1);
-	printf("Go sending data\n");
-
 	// Enter infinite loop of reading control model data and writing to local shared memory
     do {
-	    error = send_to_local_memory(nsys, sendViaZmq, send_delay_ms,ep,his_nic_id,his_eid,len,MATCH_VAL_MAIN,my_eid);
+	    error = send_to_local_memory(nsys, sendViaOmx, send_delay_ms,ep,his_nic_id,his_eid,len,MATCH_VAL_MAIN,my_eid);
     } while (error == 0 && keepRunning == 1);
-	if(sendViaZmq) {
-		printf("Closing out ZMQ and exiting\n");
+	if(sendViaOmx) {
+		printf("Closing out OpenMX and exiting\n");
 		mx_close_endpoint(ep);
 		mx_finalize();
 
