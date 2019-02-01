@@ -32,7 +32,7 @@ endif (${LibZMQ_FOUND})
 if (${MX_FOUND})
 
 add_executable(mx_rcv mx_rcv.cc dolphin_common.cc)
-target_compile_options(mx_rcv PRIVATE -O)
+target_compile_options(mx_rcv PRIVATE -O2)
 target_link_libraries(mx_rcv PUBLIC
     driver::shmem
     dolphin::sisci
@@ -42,7 +42,7 @@ target_link_libraries(mx_rcv PUBLIC
 )
 
 add_executable(mx_rcv_simple mx_rcv_simple.cc dolphin_common.cc)
-target_compile_options(mx_rcv_simple PRIVATE -O)
+target_compile_options(mx_rcv_simple PRIVATE -O2)
 target_link_libraries(mx_rcv_simple PUBLIC
     driver::shmem
     dolphin::sisci
