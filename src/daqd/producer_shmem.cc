@@ -321,6 +321,14 @@ void *producer::frame_writer() {
                           << "prev " << prev_gps << ":" << prev_frac << "    cur " << gps << ":" << frac << std::endl;
             }
         }
+        if (data_block->header.dcuTotalModels == 0 || (gps > prev_gps + 1))
+        {
+            fprintf(
+                    stderr,
+                    "Dropped data from shmem or received 0 dcus; gps now = %d, %d; was = %d, %d; dcu count = %d\n",
+                    gps, frac, (int)prev_gps, (int)prev_frac, (int)(data_block->header.dcuTotalModels));
+            exit(1);
+        }
 
         // map out the order of the dcuids in the zmq data, this could change
         // with each data block
