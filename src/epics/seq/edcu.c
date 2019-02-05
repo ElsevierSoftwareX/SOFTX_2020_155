@@ -446,7 +446,7 @@ int ii;
 		daqData ++;
 	}
 	daqData = (float *)(shmDataPtr + (buf_size * daqBlockNum));
-	dipc->dcuId = 119;
+	dipc->dcuId = 52;
 	dipc->crc = daqFileCrc;
 	dipc->dataBlockSize = xferInfo.crcLength;
 	dipc->bp[daqBlockNum].cycle = daqBlockNum;
