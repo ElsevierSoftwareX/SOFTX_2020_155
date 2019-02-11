@@ -186,6 +186,8 @@ if (@ARGV > 3) {
 		$location = "uwa";
 	} elsif ($site =~ /^W/) {
 		$location = "cardiff";
+	} elsif ($site =~ /^B/) {
+		$location = "bham";
 	}
 }
 if (@ARGV > 4) {
