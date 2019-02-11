@@ -29,6 +29,12 @@ if test ${site} = geo; then site_letter=G; fi
 if test ${site} = caltech; then site_letter=C; fi
 if test ${site} = tst; then site_letter=X; fi
 if test ${site} = stn; then site_letter=S; fi
+if test ${site} = kamioka; then site_letter=K; fi
+if test ${site} = indigo; then site_letter=I; fi
+if test ${site} = anu; then site_letter=A; fi
+if test ${site} = uwa; then site_letter=U; fi
+if test ${site} = cardiff; then site_letter=W; fi
+if test ${site} = bham; then site_letter=B; fi
 ifo=`grep ifo= target/${system}epics/${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`
 lower_ifo=`echo $ifo | tr A-Z a-z`
 
