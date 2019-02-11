@@ -232,6 +232,26 @@ CDS_HARDWARE cdsPciModules;
 		strcpy(site_prefix_storage, "K");
 		strcpy(site_name_lower, "kamioka");
 		break;
+	case 'i':
+		strcpy(site_prefix_storage, "I");
+		strcpy(site_name_lower, "indigo");
+		break;
+	case 'a':
+		strcpy(site_prefix_storage, "A");
+		strcpy(site_name_lower, "anu");
+		break;
+	case 'u':
+		strcpy(site_prefix_storage, "U");
+		strcpy(site_name_lower, "uwa");
+		break;
+	case 'w':
+		strcpy(site_prefix_storage, "W");
+		strcpy(site_name_lower, "cardiff");
+		break;
+	case 'b':
+		strcpy(site_prefix_storage, "B");
+		strcpy(site_name_lower, "bham");
+		break;
 	case 'x':
 		strcpy(site_prefix_storage, "X");
 		strcpy(site_name_lower, "tst");
