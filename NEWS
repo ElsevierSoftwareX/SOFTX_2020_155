@@ -21,12 +21,13 @@ Changes for 3.5  (NOT YET RELEASED)
 	- Set rate=32K in IOP model Parameter Block
 	- Set virtualIOP=3 in IOP model Parameter Block
 	- NOTE: Presently, this only reads ADC modules ie not DAC writes, as it was implemented for PEM DAQ channel.s
-- Add installer support for kamioka,indigo,anu,uwa,cardiff,bham sites
 ==================================================================================================
 Changes for 3.4.5
 ==================================================================================================
 - Bug Fix (1133) - Fix cdsEzCaRead/Write implementation 
 - Bug Fix (1132) - Increase ADC parser part limit to 6000
+- Add installer support for kamioka,indigo,anu,uwa,cardiff,bham sites
+- Add awgtpman support for indigo,anu,uwa,cardiff,bham sites
 ==================================================================================================
 Changes for 3.4.3
 ==================================================================================================
