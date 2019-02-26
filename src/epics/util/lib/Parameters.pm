@@ -87,6 +87,9 @@ sub parseParams {
 			} elsif ($spp[0] eq "plant_name") {
 				print "Plant name is set to $spp[1]\n";
 				$::plantName = $spp[1];
+			} elsif ($spp[0] eq "sync") {
+				print "Sync name is set to $spp[1]\n";
+				$::sync = $spp[1];
 			} elsif ($spp[0] eq "shmem_daq" && $spp[1] == 1) {
 				print "Shared memory DAQ connection (No Myrinet)\n";
 				$::shmem_daq = 1;

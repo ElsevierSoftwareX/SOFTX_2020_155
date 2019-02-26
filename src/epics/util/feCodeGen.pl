@@ -154,6 +154,7 @@ $remoteGpsPart = 0;
 $remoteGPS = 0;
 $daq2dc = 0;
 $requireIOcnt = 0;
+$sync ="";
 
 # Normally, ARGV !> 2, so the following are not invoked in a standard make
 # This is legacy.
@@ -2306,6 +2307,9 @@ sub createEpicsMakefile {
 	print OUTME "TARGET = $skeleton";
 	print OUTME "epics\n";
 	print OUTME "\n";
+	if ($edcu) {
+	print OUTME "SYNC_SRC = $sync\n";
+    }
 	print OUTME "SRC = build/\$(TARGET)/";
 	print OUTME "$skeleton";
 	print OUTME "\.st\n";
