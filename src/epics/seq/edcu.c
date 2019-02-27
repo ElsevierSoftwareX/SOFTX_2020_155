@@ -319,9 +319,10 @@ int erucError = 0;
 		sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
 		status = dbNameToAddr(s,&saddr);
 		status = dbPutField(&saddr,DBR_UCHAR,tmpstr,flength);
-		sprintf(sl, "%s_SDF_LINE_%d", pref, (ii - myindex));
+		// sprintf(sl, "%s_SDF_LINE_%d", pref, (ii - myindex));
+		sprintf(sl, "%s_SDF_LINE_%d", pref, ii);
 		status = dbNameToAddr(sl,&laddr);
-		lineNum = ii + 1;
+		lineNum += 1;
 		status = dbPutField(&laddr,DBR_LONG,&lineNum,1);
 	}
 	 char speStat[256]; sprintf(speStat, "%s_%s", pref, "SDF_TABLE_ENTRIES");             // Setpoint diff counter
@@ -588,7 +589,8 @@ int main(int argc,char *argv[])
 	struct stat st = {0};
 	char filemsg[128];
 	char logmsg[256];
-	unsigned int pageNum = 0;
+	int pageNum = 0;
+	int pageNumDisp = 0;
     char errMsg[64];
     char *dcuid;
 
@@ -657,7 +659,7 @@ sleep(2);
 	status = dbNameToAddr(gpstimedisplayname,&gpstimedisplayaddr);		// Get Address.
 
 	dbAddr pagereqaddr;
-	char pagereqname[256]; sprintf(pagereqname, "%s_%s", pref, "SDF_PAGE");	// SDF Save command.
+	char pagereqname[256]; sprintf(pagereqname, "%s_%s", pref, "SDF_PAGE");	// SDF Page request.
 	status = dbNameToAddr(pagereqname,&pagereqaddr);		// Get Address.
 
 // EDCU STUFF ********************************************************************************************************
@@ -693,26 +695,22 @@ sleep(2);
 	for(;;) {
 		dropout = 0;
         daqd_edcu1.epicsSync = waitNewCycle(&daqd_edcu1.gpsTime);
-        // if(daqd_edcu1.epicsSync == 0) printf("sync = %d time = %d\n",daqd_edcu1.epicsSync, daqd_edcu1.gpsTime);
 		edcuWriteData(daqd_edcu1.epicsSync, daqd_edcu1.gpsTime,mydcuid);
-		// printf("EDCU %ld - %d\n",daqd_edcu1.gpsTime,daqd_edcu1.epicsSync);
 		status = dbPutField(&gpstimedisplayaddr,DBR_LONG,&daqd_edcu1.gpsTime,1);		// Init to zero.
-		// daqd_edcu1.epicsSync = (daqd_edcu1.epicsSync + 1) % 16;
-		// if (daqd_edcu1.epicsSync == 0) daqd_edcu1.gpsTime ++;
 		status = dbPutField(&daqbyteaddr,DBR_LONG,&datarate,1);
 		int conChans = daqd_edcu1.con_chans;
 		status = dbPutField(&eccaddr,DBR_LONG,&conChans,1);
-		// if((conChans != daqd_edcu1.num_chans) || (numDC != 0)) numDC = edcuReportUnconnChannels(pref);
-		// if(conChans != daqd_edcu1.num_chans) numDC = edcuReportUnconnChannels(pref);
+        // Check unconnected channels once per second
 		if (daqd_edcu1.epicsSync == 0) {
-			status = dbGetField(&pagereqaddr,DBR_USHORT,&pageNum,&ropts,&nvals,NULL);
-			// printf("Page is %d\n",pageNum);
+			status = dbGetField(&pagereqaddr,DBR_LONG,&pageNum,&ropts,&nvals,NULL);
+            if((int)pageNum != 0) {
+                pageNumDisp += pageNum;
+                if(pageNumDisp < 0) pageNumDisp = 0;
+                status = dbPutField(&pagereqaddr,DBR_LONG,&ropts,1);                // Init to zero.
+            }
 			numDC = edcuFindUnconnChannels();
-			numReport = edcuReportUnconnChannels(pref,numDC,pageNum);
-			if(numReport == -1) {
-				pageNum = 0;
-				status = dbPutField(&pagereqaddr,DBR_USHORT,&pageNum,1);		// Init to zero.
-			}
+            if(numDC < (pageNumDisp * 40)) pageNumDisp --; 
+			numReport = edcuReportUnconnChannels(pref,numDC,pageNumDisp);
 		}
 		status = dbPutField(&chnotfoundaddr,DBR_LONG,&numDC,1);
 
