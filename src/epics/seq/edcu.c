@@ -459,7 +459,7 @@ char *newname;
 }
 
 // **************************************************************************
-void edcuWriteData(int daqBlockNum, unsigned long cycle_gps_time, int dcuId)
+void edcuWriteData(int daqBlockNum, unsigned long cycle_gps_time, int dcuId, int daqreset)
 // **************************************************************************
 {
 float *daqData;
@@ -481,6 +481,13 @@ int ii;
 	dipc->bp[daqBlockNum].crc = xferInfo.crcLength;
 	dipc->bp[daqBlockNum].timeSec = (unsigned int) cycle_gps_time;
 	dipc->bp[daqBlockNum].timeNSec = (unsigned int)daqBlockNum;
+    if(daqreset) {
+        shmTpTable->count = 1;
+        shmTpTable->tpNum[0] = 1;
+    } else {
+        shmTpTable->count = 0;
+        shmTpTable->tpNum[0] = 0;
+    }
 	// DAQ expects data xmission 2 cycles later, so trigger sending of 
 	// data already buffered and ready to go to keep sample time correct.
     #if 0
@@ -505,6 +512,7 @@ void edcuInitialize(char *shmem_fname, char *sync_source)
 	dipc = (struct rmIpcStr *)((char *)dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
 	// Find the DAQ data area.
     shmDataPtr = (char *)((char *)dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
+    shmTpTable = (struct cdsDaqNetGdsTpNum *)((char *)dcu_addr + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
     // Find Sync source
 	void *sync_addr = findSharedMemory(sync_source);
 	sipc = (struct rmIpcStr *)((char *)sync_addr + CDS_DAQ_NET_IPC_OFFSET);
@@ -591,8 +599,10 @@ int main(int argc,char *argv[])
 	char logmsg[256];
 	int pageNum = 0;
 	int pageNumDisp = 0;
+    int daqreset = 0;
     char errMsg[64];
     char *dcuid;
+    int send_daq_reset = 0;
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -662,6 +672,10 @@ sleep(2);
 	char pagereqname[256]; sprintf(pagereqname, "%s_%s", pref, "SDF_PAGE");	// SDF Page request.
 	status = dbNameToAddr(pagereqname,&pagereqaddr);		// Get Address.
 
+	dbAddr daqresetaddr;
+	char daqresetname[256]; sprintf(daqresetname, "%s_%s", pref, "EDCU_DAQ_RESET");	// SDF Page request.
+	status = dbNameToAddr(daqresetname,&daqresetaddr);		// Get Address.
+
 // EDCU STUFF ********************************************************************************************************
 	
 	sprintf(edculogfilename, "%s%s", logdir, "/edcu.log");
@@ -695,13 +709,19 @@ sleep(2);
 	for(;;) {
 		dropout = 0;
         daqd_edcu1.epicsSync = waitNewCycle(&daqd_edcu1.gpsTime);
-		edcuWriteData(daqd_edcu1.epicsSync, daqd_edcu1.gpsTime,mydcuid);
+		edcuWriteData(daqd_edcu1.epicsSync, daqd_edcu1.gpsTime,mydcuid,send_daq_reset);
+        send_daq_reset = 0;
 		status = dbPutField(&gpstimedisplayaddr,DBR_LONG,&daqd_edcu1.gpsTime,1);		// Init to zero.
 		status = dbPutField(&daqbyteaddr,DBR_LONG,&datarate,1);
 		int conChans = daqd_edcu1.con_chans;
 		status = dbPutField(&eccaddr,DBR_LONG,&conChans,1);
         // Check unconnected channels once per second
 		if (daqd_edcu1.epicsSync == 0) {
+			status = dbGetField(&daqresetaddr,DBR_LONG,&daqreset,&ropts,&nvals,NULL);
+            if(daqreset) {
+                status = dbPutField(&daqresetaddr,DBR_LONG,&ropts,1);                // Init to zero.
+                send_daq_reset = 1;
+            }
 			status = dbGetField(&pagereqaddr,DBR_LONG,&pageNum,&ropts,&nvals,NULL);
             if((int)pageNum != 0) {
                 pageNumDisp += pageNum;
