@@ -88,7 +88,7 @@ int timemarks[16] = {1000,63500,126000,188500,251000,313500,376000,438500,501000
 int nextTrig = 0;
 
 
-// End Header **********************************************************************************************************
+// End Header ************************************************************
 //
 
 // **************************************************************************
@@ -201,7 +201,9 @@ void subscriptionHandler(struct event_handler_args args) {
 	}
 }
 
+// **************************************************************************
 int edcuClearSdf(char *pref)
+// **************************************************************************
 {
 unsigned char clearString[64] = "          ";
 int flength = 62;
@@ -247,7 +249,9 @@ dbAddr daddr;
 
 }
 
+// **************************************************************************
 int edcuFindUnconnChannels()
+// **************************************************************************
 {
 int ii;
 int dcc = 0;
@@ -488,15 +492,6 @@ int ii;
         shmTpTable->count = 0;
         shmTpTable->tpNum[0] = 0;
     }
-	// DAQ expects data xmission 2 cycles later, so trigger sending of 
-	// data already buffered and ready to go to keep sample time correct.
-    #if 0
-    printf("cycle = %d timeSec = %d\n",dipc->bp[daqBlockNum].cycle,dipc->bp[daqBlockNum].timeSec);
-	daqBlockNum -= 1;
-	if(daqBlockNum < 0) {
-		daqBlockNum += 16;
-	}
-    #endif
 	dipc->cycle = daqBlockNum;	// Triggers sending of data by mx_stream.
 
 }
@@ -679,6 +674,7 @@ sleep(2);
 // EDCU STUFF ********************************************************************************************************
 	
 	sprintf(edculogfilename, "%s%s", logdir, "/edcu.log");
+	for (ii=0;ii<EDCU_MAX_CHANS;ii++) daqd_edcu1.channel_status[ii] = 0xbad;
 	edcuInitialize(daqsharedmemname,syncsharedmemname);
 	edcuCreateChanFile(daqDir,daqFile,pref);
 	edcuCreateChanList(daqFile);
@@ -691,7 +687,6 @@ sleep(2);
 	daqd_edcu1.epicsSync = 0;
 
 // End SPECT
-	for (ii=0;ii<EDCU_MAX_CHANS;ii++) daqd_edcu1.channel_status[ii] = 0xbad;
 
 	int dropout = 0;
 	int numDC = 0;
