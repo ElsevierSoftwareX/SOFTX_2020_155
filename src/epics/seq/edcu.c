@@ -45,7 +45,7 @@ of this distribution.
 #include "fb.h"
 #include "../../drv/gpstime/gpstime.h"
 
-#define EDCU_MAX_CHANS	30000
+#define EDCU_MAX_CHANS	50000
 // Gloabl variables		****************************************************************************************
 char timechannel[256];		///< Name of the GPS time channel for timestamping.
 char reloadtimechannel[256];	///< Name of EPICS channel which contains the BURT reload requests.
@@ -74,6 +74,7 @@ typedef struct daqd_c {
 
 daqd_c daqd_edcu1;
 static struct rmIpcStr *dipc;
+static struct rmIpcStr *sipc;
 static char *shmDataPtr;
 static struct cdsDaqNetGdsTpNum *shmTpTable;
 static const int buf_size = DAQ_DCU_BLOCK_SIZE * 2;
@@ -105,6 +106,7 @@ unsigned long symm_gps_time(unsigned long *frac, int *stt) {
 }
 // **************************************************************************
 void waitGpsTrigger(unsigned long gpssec, int cycle)
+// No longer used in favor of sync to IOP
 // **************************************************************************
 {
 unsigned long gpsSec, gpsuSec;
@@ -114,6 +116,30 @@ int gpsx;
 		gpsSec = symm_gps_time(&gpsuSec, &gpsx);
 		gpsuSec /= 1000;
 	}while(gpsSec < gpssec || gpsuSec < timemarks[cycle]); 
+}
+
+// **************************************************************************
+long waitNewCycle(long *gps_sec)
+// **************************************************************************
+{
+  static long newCycle = 0;
+  static int lastCycle = 0;
+  static int sync21pps = 1;
+  unsigned long lastSec;
+
+    if(sync21pps)  {
+        for (;sipc->cycle;) usleep(1000); 
+        printf("Found Sync at %ld %ld\n",sipc->bp[lastCycle].timeSec, sipc->bp[lastCycle].timeNSec);
+        sync21pps = 0;
+    }
+    do {
+        usleep(1000);
+        newCycle = sipc->cycle;
+    }while (newCycle == lastCycle);
+    *gps_sec = sipc->bp[newCycle].timeSec;
+    // printf("new cycle %d %ld\n",newCycle,*gps_sec);
+    lastCycle = newCycle;
+    return newCycle;
 }
 
 // **************************************************************************
@@ -293,9 +319,10 @@ int erucError = 0;
 		sprintf(s, "%s_%s_STAT%d", pref,"SDF_SP", ii);
 		status = dbNameToAddr(s,&saddr);
 		status = dbPutField(&saddr,DBR_UCHAR,tmpstr,flength);
-		sprintf(sl, "%s_SDF_LINE_%d", pref, (ii - myindex));
+		// sprintf(sl, "%s_SDF_LINE_%d", pref, (ii - myindex));
+		sprintf(sl, "%s_SDF_LINE_%d", pref, ii);
 		status = dbNameToAddr(sl,&laddr);
-		lineNum = ii + 1;
+		lineNum += 1;
 		status = dbPutField(&laddr,DBR_LONG,&lineNum,1);
 	}
 	 char speStat[256]; sprintf(speStat, "%s_%s", pref, "SDF_TABLE_ENTRIES");             // Setpoint diff counter
@@ -321,6 +348,7 @@ char line[128];
 char *newname;
 char edcufilename[64];
 char *dcuid;
+
 
 	sprintf(errMsg,"%s",fecid);
 	dcuid = strtok(errMsg,"-");
@@ -431,7 +459,7 @@ char *newname;
 }
 
 // **************************************************************************
-void edcuWriteData(int daqBlockNum, unsigned long cycle_gps_time)
+void edcuWriteData(int daqBlockNum, unsigned long cycle_gps_time, int dcuId, int daqreset)
 // **************************************************************************
 {
 float *daqData;
@@ -446,25 +474,35 @@ int ii;
 		daqData ++;
 	}
 	daqData = (float *)(shmDataPtr + (buf_size * daqBlockNum));
-	dipc->dcuId = 52;
+	dipc->dcuId = dcuId;
 	dipc->crc = daqFileCrc;
 	dipc->dataBlockSize = xferInfo.crcLength;
 	dipc->bp[daqBlockNum].cycle = daqBlockNum;
 	dipc->bp[daqBlockNum].crc = xferInfo.crcLength;
 	dipc->bp[daqBlockNum].timeSec = (unsigned int) cycle_gps_time;
 	dipc->bp[daqBlockNum].timeNSec = (unsigned int)daqBlockNum;
+    if(daqreset) {
+        shmTpTable->count = 1;
+        shmTpTable->tpNum[0] = 1;
+    } else {
+        shmTpTable->count = 0;
+        shmTpTable->tpNum[0] = 0;
+    }
 	// DAQ expects data xmission 2 cycles later, so trigger sending of 
 	// data already buffered and ready to go to keep sample time correct.
+    #if 0
+    printf("cycle = %d timeSec = %d\n",dipc->bp[daqBlockNum].cycle,dipc->bp[daqBlockNum].timeSec);
 	daqBlockNum -= 1;
 	if(daqBlockNum < 0) {
 		daqBlockNum += 16;
 	}
+    #endif
 	dipc->cycle = daqBlockNum;	// Triggers sending of data by mx_stream.
 
 }
 
 // **************************************************************************
-void edcuInitialize(char *shmem_fname)
+void edcuInitialize(char *shmem_fname, char *sync_source)
 // **************************************************************************
 {
 
@@ -473,7 +511,11 @@ void edcuInitialize(char *shmem_fname)
 	// Find the IPC area to communicate with mxstream
 	dipc = (struct rmIpcStr *)((char *)dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
 	// Find the DAQ data area.
-        shmDataPtr = (char *)((char *)dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
+    shmDataPtr = (char *)((char *)dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
+    shmTpTable = (struct cdsDaqNetGdsTpNum *)((char *)dcu_addr + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
+    // Find Sync source
+	void *sync_addr = findSharedMemory(sync_source);
+	sipc = (struct rmIpcStr *)((char *)sync_addr + CDS_DAQ_NET_IPC_OFFSET);
 }
 
 
@@ -555,7 +597,12 @@ int main(int argc,char *argv[])
 	struct stat st = {0};
 	char filemsg[128];
 	char logmsg[256];
-	unsigned int pageNum = 0;
+	int pageNum = 0;
+	int pageNumDisp = 0;
+    int daqreset = 0;
+    char errMsg[64];
+    char *dcuid;
+    int send_daq_reset = 0;
 
     if(argc>=2) {
         iocsh(argv[1]);
@@ -565,14 +612,22 @@ int main(int argc,char *argv[])
 	char *modelname =  getenv("SDF_MODEL");
 	char daqsharedmemname[64];
 	sprintf(daqsharedmemname, "%s%s", modelname, "_daq");
+	char *sync =  getenv("SYNC_SRC");
+	char syncsharedmemname[64];
+	sprintf(syncsharedmemname, "%s%s", sync, "_daq");
 	char *targetdir =  getenv("TARGET_DIR");
 	char *daqFile =  getenv("DAQ_FILE");
 	char *daqDir =  getenv("DAQ_DIR");
 	char *coeffFile =  getenv("COEFF_FILE");
 	char *logdir = getenv("LOG_DIR");
 	if(stat(logdir, &st) == -1) mkdir(logdir,0777);
+	sprintf(errMsg,"%s",pref);
+	dcuid = strtok(errMsg,"-");
+	dcuid = strtok(NULL,"-");
+    int mydcuid = atoi(dcuid);
 	// strcat(sdf,"_safe");
 	printf("My prefix is %s\n",pref);
+	printf("My dcuid is %d\n",mydcuid);
 	sprintf(logfilename, "%s%s", logdir, "/ioc.log");
 	printf("LOG FILE = %s\n",logfilename);
 sleep(2);
@@ -614,17 +669,21 @@ sleep(2);
 	status = dbNameToAddr(gpstimedisplayname,&gpstimedisplayaddr);		// Get Address.
 
 	dbAddr pagereqaddr;
-	char pagereqname[256]; sprintf(pagereqname, "%s_%s", pref, "SDF_PAGE");	// SDF Save command.
+	char pagereqname[256]; sprintf(pagereqname, "%s_%s", pref, "SDF_PAGE");	// SDF Page request.
 	status = dbNameToAddr(pagereqname,&pagereqaddr);		// Get Address.
+
+	dbAddr daqresetaddr;
+	char daqresetname[256]; sprintf(daqresetname, "%s_%s", pref, "EDCU_DAQ_RESET");	// SDF Page request.
+	status = dbNameToAddr(daqresetname,&daqresetaddr);		// Get Address.
 
 // EDCU STUFF ********************************************************************************************************
 	
 	sprintf(edculogfilename, "%s%s", logdir, "/edcu.log");
-	edcuInitialize(daqsharedmemname);
+	edcuInitialize(daqsharedmemname,syncsharedmemname);
 	edcuCreateChanFile(daqDir,daqFile,pref);
 	edcuCreateChanList(daqFile);
 	status = dbPutField(&chcntaddr,DBR_LONG,&daqd_edcu1.num_chans,1);
-	int datarate = daqd_edcu1.num_chans * 4 / 1000;
+	int datarate = daqd_edcu1.num_chans * 64 / 1000;
 	status = dbPutField(&daqbyteaddr,DBR_LONG,&datarate,1);
 
 // Start SPECT
@@ -649,32 +708,32 @@ sleep(2);
 	// Start Infinite Loop 		*******************************************************************************
 	for(;;) {
 		dropout = 0;
-		waitGpsTrigger(daqd_edcu1.gpsTime, daqd_edcu1.epicsSync);
-		edcuWriteData(daqd_edcu1.epicsSync, daqd_edcu1.gpsTime);
-		// printf("EDCU %ld - %d\n",daqd_edcu1.gpsTime,daqd_edcu1.epicsSync);
+        daqd_edcu1.epicsSync = waitNewCycle(&daqd_edcu1.gpsTime);
+		edcuWriteData(daqd_edcu1.epicsSync, daqd_edcu1.gpsTime,mydcuid,send_daq_reset);
+        send_daq_reset = 0;
 		status = dbPutField(&gpstimedisplayaddr,DBR_LONG,&daqd_edcu1.gpsTime,1);		// Init to zero.
-		daqd_edcu1.epicsSync = (daqd_edcu1.epicsSync + 1) % 16;
-		if (daqd_edcu1.epicsSync == 0) daqd_edcu1.gpsTime ++;
 		status = dbPutField(&daqbyteaddr,DBR_LONG,&datarate,1);
 		int conChans = daqd_edcu1.con_chans;
 		status = dbPutField(&eccaddr,DBR_LONG,&conChans,1);
-		// if((conChans != daqd_edcu1.num_chans) || (numDC != 0)) numDC = edcuReportUnconnChannels(pref);
-		// if(conChans != daqd_edcu1.num_chans) numDC = edcuReportUnconnChannels(pref);
+        // Check unconnected channels once per second
 		if (daqd_edcu1.epicsSync == 0) {
-			status = dbGetField(&pagereqaddr,DBR_USHORT,&pageNum,&ropts,&nvals,NULL);
-			// printf("Page is %d\n",pageNum);
+			status = dbGetField(&daqresetaddr,DBR_LONG,&daqreset,&ropts,&nvals,NULL);
+            if(daqreset) {
+                status = dbPutField(&daqresetaddr,DBR_LONG,&ropts,1);                // Init to zero.
+                send_daq_reset = 1;
+            }
+			status = dbGetField(&pagereqaddr,DBR_LONG,&pageNum,&ropts,&nvals,NULL);
+            if((int)pageNum != 0) {
+                pageNumDisp += pageNum;
+                if(pageNumDisp < 0) pageNumDisp = 0;
+                status = dbPutField(&pagereqaddr,DBR_LONG,&ropts,1);                // Init to zero.
+            }
 			numDC = edcuFindUnconnChannels();
-			numReport = edcuReportUnconnChannels(pref,numDC,pageNum);
-			if(numReport == -1) {
-				pageNum = 0;
-				status = dbPutField(&pagereqaddr,DBR_USHORT,&pageNum,1);		// Init to zero.
-			}
+            if(numDC < (pageNumDisp * 40)) pageNumDisp --; 
+			numReport = edcuReportUnconnChannels(pref,numDC,pageNumDisp);
 		}
 		status = dbPutField(&chnotfoundaddr,DBR_LONG,&numDC,1);
 
-        // printf("EDCU C1 = %f status = %d\n",daqd_edcu1.channel_value[2],daqd_edcu1.channel_status[2]);
-	// printf("Channels CONN = %d   NO_CONN = %d TIME = %ld SYNC = %ld \n",daqd_edcu1.con_chans,(daqd_edcu1.num_chans - daqd_edcu1.con_chans),daqd_edcu1.gpsTime, daqd_edcu1.epicsSync);
-        //printf("EDCU C2 = %f\n",daqd_edcu1.channel_value[1]);
 		fivesectimer = (fivesectimer + 1) % 50;		// Increment 5 second timer for triggering CRC checks.
 		// Check file CRCs every 5 seconds.
 		// DAQ and COEFF file checking was moved from skeleton.st to here RCG V2.9.
