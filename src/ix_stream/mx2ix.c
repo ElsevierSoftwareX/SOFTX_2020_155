@@ -43,7 +43,7 @@
 #define MIN_DELAY_MS 5
 #define MAX_DELAY_MS 40
 
-#define MAX_FE_COMPUTERS 64
+#define MAX_FE_COMPUTERS 32
 
 #define MX_MUTEX_T pthread_mutex_t
 #define MX_MUTEX_INIT(mutex_) pthread_mutex_init(mutex_, 0)
@@ -70,7 +70,8 @@ MX_MUTEX_T stream_mutex;
 #define DO_HANDSHAKE 0
 #define MATCH_VAL_MAIN (1 << 31)
 #define MATCH_VAL_THREAD 1
-
+#define THREADS_PER_NIC     16
+#define IX_STOP_SEC     5
 static int xmitDataOffset[IX_BLOCK_COUNT];
 daq_multi_cycle_header_t *xmitHeader[IX_BLOCK_COUNT];
 
@@ -81,7 +82,7 @@ int do_verbose = 0;
 struct thread_info {
     int index;
     uint32_t match_val;
-    uint32_t filter;
+    uint32_t tpn;
     uint32_t bid;
 };
 struct thread_mon_info {
@@ -100,18 +101,21 @@ static volatile int keepRunning = 1;
 int thread_cycle[MAX_FE_COMPUTERS];
 int thread_timestamp[MAX_FE_COMPUTERS];
 int rcv_errors = 0;
+int dataRdy[MAX_FE_COMPUTERS];
 
 void
 usage()
 {
     fprintf(stderr, "Usage: mx2ix [args] -s server names -m shared memory size -g IX channel \n");
     fprintf(stderr, "-l filename - log file name\n");
-    fprintf(stderr, "-s - number of FE computers to connect (1-32)\n");
+    fprintf(stderr, "-s - number of FE computers to connect (1-32): Default = 32\n");
     fprintf(stderr, "-v - verbose prints diag test data\n");
     fprintf(stderr, "-g - Dolphin IX channel to xmit on (0-3)\n");
     fprintf(stderr, "-p - Debug pv prefix, requires -P as well\n");
     fprintf(stderr, "-P - Path to a named pipe to send PV debug information to\n");
     fprintf(stderr, "-d - Max delay in milli seconds to wait for a FE to send data, defaults to 10\n");
+    fprintf(stderr, "-t - Number of rcvr threads per NIC: default = 16\n");
+    fprintf(stderr, "-n - Data Concentrator number (0 or 1) : default = 0\n");
     fprintf(stderr, "-h - help\n");
 }
 
@@ -141,19 +145,19 @@ void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *
 // **********************************************************************************************
     int ii = 0;
         // Print diags in verbose mode
-        printf("Receive errors = %d\n",rcv_errors);
-        printf("Time = %d\t size = %d\n",ixDataBlock->header.dcuheader[0].timeSec,sendLength);
-        printf("DCU ID\tCycle \t TimeSec\tTimeNSec\tDataSize\tTPCount\tTPSize\tXmitSize\n");
+        fprintf(stderr,"Receive errors = %d\n",rcv_errors);
+        fprintf(stderr,"Time = %d\t size = %d\n",ixDataBlock->header.dcuheader[0].timeSec,sendLength);
+        fprintf(stderr,"DCU ID\tCycle \t TimeSec\tTimeNSec\tDataSize\tTPCount\tTPSize\tXmitSize\n");
         for(ii=0;ii<nsys;ii++) {
-            printf("%d",ixDataBlock->header.dcuheader[ii].dcuId);
-            printf("\t%d",ixDataBlock->header.dcuheader[ii].cycle);
-            printf("\t%d",ixDataBlock->header.dcuheader[ii].timeSec);
-            printf("\t%d",ixDataBlock->header.dcuheader[ii].timeNSec);
-            printf("\t\t%d",ixDataBlock->header.dcuheader[ii].dataBlockSize);
-            printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpCount);
-            printf("\t%d",ixDataBlock->header.dcuheader[ii].tpBlockSize);
-            printf("\t%d",dbs[ii]);
-            printf("\n ");
+            fprintf(stderr,"%d",ixDataBlock->header.dcuheader[ii].dcuId);
+            fprintf(stderr,"\t%d",ixDataBlock->header.dcuheader[ii].cycle);
+            fprintf(stderr,"\t%d",ixDataBlock->header.dcuheader[ii].timeSec);
+            fprintf(stderr,"\t%d",ixDataBlock->header.dcuheader[ii].timeNSec);
+            fprintf(stderr,"\t\t%d",ixDataBlock->header.dcuheader[ii].dataBlockSize);
+            fprintf(stderr,"\t\t%d",ixDataBlock->header.dcuheader[ii].tpCount);
+            fprintf(stderr,"\t%d",ixDataBlock->header.dcuheader[ii].tpBlockSize);
+            fprintf(stderr,"\t%d",dbs[ii]);
+            fprintf(stderr,"\n ");
         }
 }
 
@@ -165,8 +169,8 @@ void *rcvr_thread(void *arg) {
     struct thread_info* my_info = (struct thread_info*)arg;
     int mt = my_info->index;
     uint32_t mv = my_info->match_val;
-    uint32_t filt = my_info->filter;
     uint32_t board_id = my_info->bid;
+    uint32_t tpn = my_info->tpn;
     int cycle = 0;
     daq_multi_dcu_data_t *mxDataBlock;
     mx_return_t ret;
@@ -181,11 +185,11 @@ void *rcvr_thread(void *arg) {
     int myErrorStat = 0;
 
     filter = FILTER;
-    board_id = MX_ANY_NIC;
     int copySize;
 
 
-    printf("Starting receive loop for thread %d \n", mt);
+    int dblock = board_id * tpn + mt;
+    fprintf(stderr,"Starting receive loop for thread %d %d\n", board_id,mt);
 
     ret = mx_open_endpoint(board_id, mt, filter, NULL, 0, &ep);
     if (ret != MX_SUCCESS) {
@@ -193,9 +197,9 @@ void *rcvr_thread(void *arg) {
         return(0);
     }
 
-    printf("waiting for someone to connect on CH %d\n",mt);
-    len = 0xa00000;
-    printf("buffer length = %d\n",len);
+    fprintf(stderr,"waiting for someone to connect on CH %d\n",mt);
+    len = 0xf00000;
+    fprintf(stderr,"buffer length = %d\n",len);
     buffer = (char *)malloc(len);
     if (buffer == NULL) {
        fprintf(stderr, "Can't allocate buffers here\n");
@@ -203,7 +207,7 @@ void *rcvr_thread(void *arg) {
        return(0);
     }
     len /= NUM_RREQ;
-    printf(" length = %d\n",len);
+    fprintf(stderr," length = %d\n",len);
 
     for (cur_req = 0; cur_req < NUM_RREQ; cur_req++) {
        seg.segment_ptr = &buffer[cur_req * len];
@@ -214,7 +218,7 @@ void *rcvr_thread(void *arg) {
 
     mx_set_error_handler(MX_ERRORS_RETURN);
 
-    char *daqbuffer = (char *)&mxDataBlockSingle[mt];
+    char *daqbuffer = (char *)&mxDataBlockSingle[dblock];
     do {
       for (count = 0; count < NUM_RREQ; count++) {
          cur_req = count & (16 - 1);
@@ -235,16 +239,16 @@ void *rcvr_thread(void *arg) {
         // Get the message DAQ cycle number
         cycle = mxDataBlock->header.dcuheader[0].cycle;
         // Pass cycle and timestamp data back to main process
-        thread_cycle[mt] = cycle;
-        thread_timestamp[mt] = mxDataBlock->header.dcuheader[0].timeSec;
-            dataRecvTime[mt] = s_clock();
+        thread_cycle[dblock] = cycle;
+        thread_timestamp[dblock] = mxDataBlock->header.dcuheader[0].timeSec;
+            dataRecvTime[dblock] = s_clock();
         mx_irecv(ep, &seg, 1, mv, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
         }
 
     // Run until told to stop by main thread
       }
     } while(!stop_working_threads);
-    printf("Stopping thread %d\n",mt);
+    fprintf(stderr,"Stopping thread %d\n",mt);
     usleep(200000);
 
     mx_close_endpoint(ep);
@@ -259,14 +263,12 @@ int
 main(int argc, char **argv)
 {
     pthread_t thread_id[MAX_FE_COMPUTERS];
-    unsigned int nsys = 1; // The number of mapped shared memories (number of data sources)
-    char *sysname;
+    unsigned int nsys = MAX_FE_COMPUTERS; // The number of mapped shared memories (number of data sources)
     char *buffer_name = "ifo";
     int c;
     int ii;                 // Loop counter
     int delay_ms = 10;
     int delay_cycles = 0;
-    char *local_iface_names = 0;
 
     extern char *optarg;    // Needed to get arguments to program
 
@@ -288,42 +290,54 @@ main(int argc, char **argv)
     // daq_multi_cycle_header_t *xmitHeader[IX_BLOCK_COUNT];
     // static int xmitDataOffset[IX_BLOCK_COUNT];
     int xmitBlockNum = 0;
-        uint32_t mybid = 0;
+    int dc_number = 1;
     
 
     /* set up defaults */
-    sysname = NULL;
     int xmitData = 0;
+    int tpn = THREADS_PER_NIC;
 
-    mx_init();
-    // MX_MUTEX_INIT(&stream_mutex);
 
 
     // Get arguments sent to process
-    while ((c = getopt(argc, argv, "b:hs:m:g:vp:P:n:d:L")) != EOF) switch(c) {
+    while ((c = getopt(argc, argv, "b:hs:m:g:vp:P:d:l:t:n:")) != EOF) switch(c) {
     case 's':
         nsys = atoi(optarg);
-        break;
-    case 'n':
-        mybid = atoi(optarg);
+        if(nsys > MAX_FE_COMPUTERS) {
+            fprintf(stderr,"Max number of FE computers is 32\n");
+            usage();
+            exit(1);
+        }
         break;
     case 'v':
         do_verbose = 1;
         break;
+    case 'n':
+        dc_number = atoi(optarg);
+        dc_number ++;
+        if(dc_number > 2) {
+            fprintf(stderr,"DC number must be 0 or 1\n");
+            usage();
+            exit(1);
+        }
+        break;
     case 'm':
         max_data_size_mb = atoi(optarg);
         if (max_data_size_mb < 20){
-            printf("Min data block size is 20 MB\n");
+            fprintf(stderr,"Min data block size is 20 MB\n");
             return -1;
         }
         if (max_data_size_mb > 100){
-            printf("Max data block size is 100 MB\n");
+            fprintf(stderr,"Max data block size is 100 MB\n");
             return -1;
         }
         break;
     case 'g':
             segmentId = atoi(optarg);
             xmitData = 1;
+            break;
+    case 't':
+            tpn = atoi(optarg);
             break;
     case 'b':
         buffer_name = optarg;
@@ -337,14 +351,19 @@ main(int argc, char **argv)
     case 'd':
         delay_ms = atoi(optarg);
         if (delay_ms < MIN_DELAY_MS || delay_ms > MAX_DELAY_MS) {
-            printf("The delay factor must be between 5ms and 40ms\n");
+            fprintf(stderr,"The delay factor must be between 5ms and 40ms\n");
             return -1;
         }
         break;
-    case 'h':
-    case 'L':
-        local_iface_names = optarg;
+    case 'l':
+        if (0 == freopen(optarg, "w", stdout)) {
+            perror ("freopen");
+            exit (1);
+        }
+        setvbuf(stdout, NULL, _IOLBF, 0);
+        stderr = stdout;
         break;
+    case 'h':
     default:
         usage();
         exit(1);
@@ -352,14 +371,15 @@ main(int argc, char **argv)
     max_data_size = max_data_size_mb * 1024*1024;
     delay_cycles = delay_ms * 10;
 
-    // if (sysname == NULL) { usage(); exit(1); }
+    mx_init();
+    // MX_MUTEX_INIT(&stream_mutex);
 
     // set up to catch Control C
     signal(SIGINT,intHandler);
     // setup to ignore sig pipe
     signal(SIGPIPE, sigpipeHandler);
 
-    printf("Num of sys = %d\n",nsys);
+    fprintf(stderr,"Num of sys = %d\n",nsys);
 
     // Get pointers to local DAQ mbuf
     ifo = (char *)findSharedMemorySize(buffer_name,max_data_size_mb);
@@ -369,7 +389,7 @@ main(int argc, char **argv)
     // max_data_size *= 1024 * 1024;
     cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t)) / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
     cycle_data_size -= (cycle_data_size % 8);
-    printf ("cycle data size = %d\t%d\n",cycle_data_size, max_data_size_mb);
+    fprintf (stderr,"cycle data size = %d\t%d\n",cycle_data_size, max_data_size_mb);
     sleep(3);
     ifo_header->cycleDataSize = cycle_data_size;
     ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
@@ -377,7 +397,7 @@ main(int argc, char **argv)
     if(xmitData) {
         // Connect to Dolphin
         error = dolphin_init();
-        printf("Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
+        fprintf(stderr,"Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
 
         // Set pointer to xmit header in Dolphin xmit data area.
         mywriteaddr = (char *)writeAddr;
@@ -385,19 +405,19 @@ main(int argc, char **argv)
             xmitHeader[ii] = (daq_multi_cycle_header_t *)mywriteaddr;
             mywriteaddr += IX_BLOCK_SIZE;
             xmitDataOffset[ii] = IX_BLOCK_SIZE * ii + sizeof(struct daq_multi_cycle_header_t);
-            printf("Dolphin at 0x%lx and 0x%lx",(long)xmitHeader[ii],(long)xmitDataOffset[ii]);
+            fprintf(stderr,"Dolphin at 0x%lx and 0x%lx",(long)xmitHeader[ii],(long)xmitDataOffset[ii]);
         }
     }
 
-    printf("nsys = %d\n",nsys);
+    fprintf(stderr,"nsys = %d\n",nsys);
 
     // Make 0MQ socket connections
     for(ii=0;ii<nsys;ii++) {
         // Create a thread to receive data from each data server
-        thread_index[ii].index = ii;
+        thread_index[ii].index = ii % tpn;
         thread_index[ii].match_val = MATCH_VAL_MAIN;
-        thread_index[ii].filter = FILTER;
-        thread_index[ii].bid = mybid;
+        thread_index[ii].tpn = tpn;
+        thread_index[ii].bid = ii/tpn;
         pthread_create(&thread_id[ii],NULL,rcvr_thread,(void *)&thread_index[ii]);
 
     }
@@ -421,7 +441,6 @@ main(int argc, char **argv)
     int edbs[10];
     unsigned long ets = 0;
     int timeout = 0;
-    int dataRdy[MAX_FE_COMPUTERS];
     int threads_rdy;
     int any_rdy = 0;
     int jj,kk;
@@ -440,19 +459,22 @@ main(int argc, char **argv)
     int pv_uptime = 0;
     int gps_time = 0;
     int pv_gps_time = 0;
-    int endpoint_min_count = 1 << 30;
-    int endpoint_max_count = 0;
-    int endpoint_mean_count = 0;
+    // int endpoint_min_count = 1 << 30;
+    // int endpoint_max_count = 0;
+    // int endpoint_mean_count = 0;
     int cur_endpoint_ready_count;
-    char endpoints_missed_buffer[256];
-    int endpoints_missed_remaining;
+    // char endpoints_missed_buffer[256];
+    // int endpoints_missed_remaining;
     int missed_flag = 0;
     int missed_nsys[MAX_FE_COMPUTERS];
     int64_t recv_time[MAX_FE_COMPUTERS];
     int64_t min_recv_time = 0;
     int64_t cur_ref_time = 0;
     int recv_buckets[(MAX_DELAY_MS/5)+2];
-    int entry_binned = 0;
+    // int entry_binned = 0;
+    int festatus = 0;
+    int pv_festatus = 0;
+    int ix_xmit_stop = 0;
     SimplePV pvs[] = {
             {
                     "RECV_MIN_MS",
@@ -526,13 +548,28 @@ main(int argc, char **argv)
                     1,
             },
             {
+                    "RCV_STATUS",
+                    SIMPLE_PV_INT,
+                    &pv_festatus,
+
+                    // 100*1024*1024,
+                    0xffffffff,
+                    0,
+                    // 90*1024*1024,
+                    0xfffffffe,
+
+                    1,
+            },
+            {
                     "GPS",
                     SIMPLE_PV_INT,
                     &pv_gps_time,
 
-                    100*1024*1024,
+                    // 100*1024*1024,
+                    0xfffffff,
                     0,
-                    90*1024*1024,
+                    // 90*1024*1024,
+                    0xfffffffe,
 
                     1,
             },
@@ -578,7 +615,6 @@ main(int argc, char **argv)
             timeout += 1;
         }while(threads_rdy < nsys && timeout < delay_cycles);
         if(timeout >= 100) rcv_errors += (nsys - threads_rdy);
-        // printf("Threads ready = %d\n",threads_rdy);
 
         if(any_rdy) {
             int tbsize = 0;
@@ -607,13 +643,15 @@ main(int argc, char **argv)
             zbuffer_remaining = cycle_data_size - header_size;
 
             cur_endpoint_ready_count = 0;
-            endpoints_missed_remaining = sizeof(endpoints_missed_buffer);
-            endpoints_missed_buffer[0] = '\0';
+            // endpoints_missed_remaining = sizeof(endpoints_missed_buffer);
+            // endpoints_missed_buffer[0] = '\0';
             min_recv_time = 0x7fffffffffffffff;
+            festatus = 0;
             // Loop over all data buffers received from FE computers
             for(ii=0;ii<nsys;ii++) {
                 recv_time[ii] = -1;
                 if(dataRdy[ii]) {
+                    festatus += (1 << ii);
                     recv_time[ii] = dataRecvTime[ii];
                     if (recv_time[ii] < min_recv_time) {
                         min_recv_time = recv_time[ii];
@@ -630,12 +668,20 @@ main(int argc, char **argv)
                         ifoDataBlock->header.dcuheader[mytotaldcu].fileCrc = mxDataBlockSingle[ii].header.dcuheader[jj].fileCrc;
                         ifoDataBlock->header.dcuheader[mytotaldcu].status = mxDataBlockSingle[ii].header.dcuheader[jj].status;
                         ifoDataBlock->header.dcuheader[mytotaldcu].cycle = mxDataBlockSingle[ii].header.dcuheader[jj].cycle;
+                        if(!ix_xmit_stop) {
                         ifoDataBlock->header.dcuheader[mytotaldcu].timeSec = mxDataBlockSingle[ii].header.dcuheader[jj].timeSec;
                         ifoDataBlock->header.dcuheader[mytotaldcu].timeNSec = mxDataBlockSingle[ii].header.dcuheader[jj].timeNSec;
+                        }
                         ifoDataBlock->header.dcuheader[mytotaldcu].dataCrc = mxDataBlockSingle[ii].header.dcuheader[jj].dataCrc;
                         ifoDataBlock->header.dcuheader[mytotaldcu].dataBlockSize = mxDataBlockSingle[ii].header.dcuheader[jj].dataBlockSize;
                         ifoDataBlock->header.dcuheader[mytotaldcu].tpBlockSize = mxDataBlockSingle[ii].header.dcuheader[jj].tpBlockSize;
                         ifoDataBlock->header.dcuheader[mytotaldcu].tpCount = mxDataBlockSingle[ii].header.dcuheader[jj].tpCount;
+                        if(mxDataBlockSingle[ii].header.dcuheader[jj].dcuId == 52 && mxDataBlockSingle[ii].header.dcuheader[jj].tpCount == dc_number)
+                        {
+                            fprintf(stderr,"Got a DAQ Reset REQUEST %u\n",mxDataBlockSingle[ii].header.dcuheader[jj].timeSec);
+                            ifoDataBlock->header.dcuheader[mytotaldcu].tpCount = 0;
+                            ix_xmit_stop = 16 * IX_STOP_SEC;
+                        }
                         for(kk=0;kk<DAQ_GDS_MAX_TP_NUM ;kk++)   
                             ifoDataBlock->header.dcuheader[mytotaldcu].tpNum[kk] = mxDataBlockSingle[ii].header.dcuheader[jj].tpNum[kk];
                         edbs[mytotaldcu] = mxDataBlockSingle[ii].header.dcuheader[jj].tpBlockSize + mxDataBlockSingle[ii].header.dcuheader[jj].dataBlockSize;
@@ -653,7 +699,7 @@ main(int argc, char **argv)
                     char *mbuffer = (char *)&mxDataBlockSingle[ii].dataBlock[0];
                     if (mydbs > zbuffer_remaining)
                     {
-                        printf("Buffer overflow found.  Attempting to write %d bytes to zbuffer which has %d bytes remainging\n",
+                        fprintf(stderr,"Buffer overflow found.  Attempting to write %d bytes to zbuffer which has %d bytes remainging\n",
                                 (int)mydbs, (int)zbuffer_remaining);
                         abort();
                     }
@@ -662,10 +708,8 @@ main(int argc, char **argv)
                     // Increment shared memory data buffer pointer for next data set
                     zbuffer += mydbs;
                     // Calc total size of data block for this cycle
-                    // printf("data size %d = %d\n",ii,mydbs);
                     dc_datablock_size += mydbs;
                     tbsize += mydbs;
-                    // printf("dc block = %d %d\n",tbsize,dc_datablock_size);
                 } else {
                     missed_nsys[ii] |= missed_flag;
                     if (do_verbose && nextCycle == 0) {
@@ -673,6 +717,7 @@ main(int argc, char **argv)
                     } 
                 }
             }
+            /*
             if (cur_endpoint_ready_count < endpoint_min_count) {
                 endpoint_min_count = cur_endpoint_ready_count;
             }
@@ -680,6 +725,7 @@ main(int argc, char **argv)
                 endpoint_max_count = cur_endpoint_ready_count;
             }
             endpoint_mean_count += cur_endpoint_ready_count;
+            */
             // Write total data block size to shared memory header
             ifoDataBlock->header.fullDataBlockSize = dc_datablock_size;
             // Write total dcu count to shared memory header
@@ -690,12 +736,15 @@ main(int argc, char **argv)
 
             // Calc IX message size
             sendLength = header_size + ifoDataBlock->header.fullDataBlockSize;
+            /*
             if (nextCycle == 0) {
                 memset(recv_buckets, 0, sizeof(recv_buckets));
             }
+            */
             for (ii = 0; ii < nsys; ++ii) {
                 cur_ref_time = 0;
                 recv_time[ii] -= min_recv_time;
+                /*
                 entry_binned = 0;
                 for (jj = 0; jj < sizeof(recv_buckets)/sizeof(recv_buckets[0]); ++jj) {
                     if (recv_time[ii] < cur_ref_time) {
@@ -708,91 +757,100 @@ main(int argc, char **argv)
                 if (!entry_binned) {
                     ++recv_buckets[sizeof(recv_buckets)/sizeof(recv_buckets[0])-1];
                 }
+                */
             }
             datablock_size_running += dc_datablock_size;
             if (nextCycle == 0) {
                 datablock_size_mb_s = datablock_size_running / 1024 ;
-        pv_datablock_size_mb_s = datablock_size_mb_s;
-        uptime ++;
-        pv_uptime = uptime;
-        gps_time = ifoDataBlock->header.dcuheader[0].timeSec;
-        pv_gps_time = gps_time;
-        // printf("Data rate = %d\n",datablock_size_mb_s);
-        pv_dcu_count = mytotaldcu;
-        // pv_total_datablock_size = dc_datablock_size;
-        mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time / n_cycle_time : 1 << 31);
-        endpoint_mean_count = (n_cycle_time > 0 ? endpoint_mean_count/n_cycle_time :  1<<31);
+                pv_datablock_size_mb_s = datablock_size_mb_s;
+                uptime ++;
+                pv_uptime = uptime;
+                gps_time = ifoDataBlock->header.dcuheader[0].timeSec;
+                pv_gps_time = gps_time;
+                pv_dcu_count = mytotaldcu;
+                pv_festatus = festatus;
+                // pv_total_datablock_size = dc_datablock_size;
+                mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time / n_cycle_time : 1 << 31);
+                /*
+                endpoint_mean_count = (n_cycle_time > 0 ? endpoint_mean_count/n_cycle_time :  1<<31);
 
-        endpoints_missed_remaining = sizeof(endpoints_missed_buffer)-1;
-        endpoints_missed_buffer[0] = '\0';
-        for (ii = 0; ii < sizeof(missed_nsys)/sizeof(missed_nsys[0]) && endpoints_missed_remaining > 0; ++ii) {
-            if (missed_nsys[ii]) {
-                char tmp[80];
-                int count = snprintf(tmp, sizeof(tmp), "%s(%x) ", sname[ii], missed_nsys[ii]);
-                if (count < sizeof(tmp)) {
-                    strncat(endpoints_missed_buffer, tmp, count);
-                    endpoints_missed_remaining -= count;
+                endpoints_missed_remaining = sizeof(endpoints_missed_buffer)-1;
+                endpoints_missed_buffer[0] = '\0';
+                for (ii = 0; ii < sizeof(missed_nsys)/sizeof(missed_nsys[0]) && endpoints_missed_remaining > 0; ++ii) {
+                    if (missed_nsys[ii]) {
+                        char tmp[80];
+                        int count = snprintf(tmp, sizeof(tmp), "%s(%x) ", sname[ii], missed_nsys[ii]);
+                        if (count < sizeof(tmp)) {
+                            strncat(endpoints_missed_buffer, tmp, count);
+                            endpoints_missed_remaining -= count;
+                        }       
+                    }
+                    missed_nsys[ii] = 0;
                 }
+                */
+                pv_mean_cycle_time = mean_cycle_time;
+                pv_max_cycle_time = max_cycle_time;
+                pv_min_cycle_time = min_cycle_time;
+                send_pv_update(pv_debug_pipe, pv_prefix, pvs, sizeof(pvs)/sizeof(pvs[0]));
+
+                if (do_verbose) {
+                    fprintf(stderr,"\nData rdy for cycle = %d\t\tTime Interval = %ld msec\n", nextCycle, myptime);
+                    fprintf(stderr,"Min/Max/Mean cylce time %d/%d/%d msec over %ld cycles\n", min_cycle_time, max_cycle_time,
+                        mean_cycle_time, n_cycle_time);
+                    fprintf(stderr,"Total DCU = %d\t\t\tBlockSize = %d\n", mytotaldcu, dc_datablock_size);
+                    print_diags(mytotaldcu, nextCycle, sendLength, ifoDataBlock, edbs);
+                }
+                n_cycle_time = 0;
+                min_cycle_time = 1 << 30;
+                max_cycle_time = 0;
+                mean_cycle_time = 0;
+
+                /*
+                endpoint_min_count = nsys;
+                endpoint_max_count = 0;
+                endpoint_mean_count = 0;
+                */
+
+                missed_flag = 1;
+                datablock_size_running = 0;
+            } else {
+                missed_flag <<= 1;
             }
-            missed_nsys[ii] = 0;
-        }
-        pv_mean_cycle_time = mean_cycle_time;
-        pv_max_cycle_time = max_cycle_time;
-        pv_min_cycle_time = min_cycle_time;
-        send_pv_update(pv_debug_pipe, pv_prefix, pvs, sizeof(pvs)/sizeof(pvs[0]));
-
-        if (do_verbose) {
-            printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec\n", nextCycle, myptime);
-            printf("Min/Max/Mean cylce time %d/%d/%d msec over %ld cycles\n", min_cycle_time, max_cycle_time,
-                   mean_cycle_time, n_cycle_time);
-            printf("Total DCU = %d\t\t\tBlockSize = %d\n", mytotaldcu, dc_datablock_size);
-            print_diags(mytotaldcu, nextCycle, sendLength, ifoDataBlock, edbs);
-        }
-        n_cycle_time = 0;
-        min_cycle_time = 1 << 30;
-        max_cycle_time = 0;
-        mean_cycle_time = 0;
-
-        endpoint_min_count = nsys;
-        endpoint_max_count = 0;
-        endpoint_mean_count = 0;
-
-        missed_flag = 1;
-        datablock_size_running = 0;
-    } else {
-        missed_flag <<= 1;
-    }
-    if(xmitData) {
-        if (sendLength > IX_BLOCK_SIZE)
-        {
-            fprintf(stderr, "Buffer overflow.  Sending %d bytes into a dolphin block that holds %d\n",
-            (int)sendLength, (int)IX_BLOCK_SIZE);
-            abort();
-        }
-        // WRITEDATA to Dolphin Network
-        SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset[xmitBlockNum],sendLength,memcpyFlag,&error);
-        error = SCI_ERR_OK;
-        if (error != SCI_ERR_OK) {
-            fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
-            fprintf(stderr,"For reference the expected error codes are:\n");
-            fprintf(stderr,"SCI_ERR_OUT_OF_RANGE = 0x%x\n", SCI_ERR_OUT_OF_RANGE);
-            fprintf(stderr,"SCI_ERR_SIZE_ALIGNMENT = 0x%x\n", SCI_ERR_SIZE_ALIGNMENT);
-            fprintf(stderr,"SCI_ERR_OFFSET_ALIGNMENT = 0x%x\n", SCI_ERR_OFFSET_ALIGNMENT);
-            fprintf(stderr,"SCI_ERR_TRANSFER_FAILED = 0x%x\n", SCI_ERR_TRANSFER_FAILED);
-            return error;
-        }
-        // Set data header information
-        unsigned int maxCycle = ifo_header->maxCycle;
-        unsigned int curCycle = ifo_header->curCycle;
-        xmitHeader[xmitBlockNum]->maxCycle = maxCycle;
+            if(xmitData && !ix_xmit_stop) {
+                if (sendLength > IX_BLOCK_SIZE)
+                {
+                    fprintf(stderr, "Buffer overflow.  Sending %d bytes into a dolphin block that holds %d\n",
+                    (int)sendLength, (int)IX_BLOCK_SIZE);
+                    abort();
+                }
+                // WRITEDATA to Dolphin Network
+                SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset[xmitBlockNum],sendLength,memcpyFlag,&error);
+                error = SCI_ERR_OK;
+                if (error != SCI_ERR_OK) {
+                    fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
+                    fprintf(stderr,"For reference the expected error codes are:\n");
+                    fprintf(stderr,"SCI_ERR_OUT_OF_RANGE = 0x%x\n", SCI_ERR_OUT_OF_RANGE);
+                    fprintf(stderr,"SCI_ERR_SIZE_ALIGNMENT = 0x%x\n", SCI_ERR_SIZE_ALIGNMENT);
+                    fprintf(stderr,"SCI_ERR_OFFSET_ALIGNMENT = 0x%x\n", SCI_ERR_OFFSET_ALIGNMENT);
+                    fprintf(stderr,"SCI_ERR_TRANSFER_FAILED = 0x%x\n", SCI_ERR_TRANSFER_FAILED);
+                    return error;
+                }
+                // Set data header information
+                unsigned int maxCycle = ifo_header->maxCycle;
+                unsigned int curCycle = ifo_header->curCycle;
+                xmitHeader[xmitBlockNum]->maxCycle = maxCycle;
                 // xmitHeader->cycleDataSize = ifo_header->cycleDataSize;
-        xmitHeader[xmitBlockNum]->cycleDataSize = sendLength;;
+                xmitHeader[xmitBlockNum]->cycleDataSize = sendLength;;
                 // xmitHeader->msgcrc = myCrc;
-        // Send cycle last as indication of data ready for receivers
-        xmitHeader[xmitBlockNum]->curCycle = curCycle;
-        // Have to flush the buffers to make data go onto Dolphin network
-        SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
-    }
+                // Send cycle last as indication of data ready for receivers
+                xmitHeader[xmitBlockNum]->curCycle = curCycle;
+                // Have to flush the buffers to make data go onto Dolphin network
+                SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
+            }
+            if(ix_xmit_stop)  {
+                ix_xmit_stop --;
+                if(ix_xmit_stop == 0) fprintf(stderr,"Restarting Dolphin Xmit\n");
+            }
 
         }
         sprintf(dcstatus,"%ld ",ets);
@@ -808,15 +866,15 @@ main(int argc, char **argv)
     }while (keepRunning);   // End of infinite loop
 
     // Stop Rcv Threads
-    printf("stopping threads %d \n",nsys);
+    fprintf(stderr,"stopping threads %d \n",nsys);
     stop_working_threads = 1;
 
     // Wait for threads to stop
     sleep(5);
-    printf("closing out MX\n");
+    fprintf(stderr,"closing out MX\n");
     mx_finalize();
     if(xmitData) {
-        printf("closing out ix\n");
+        fprintf(stderr,"closing out ix\n");
         // Cleanup the Dolphin connections
         error = dolphin_closeout();
     }
