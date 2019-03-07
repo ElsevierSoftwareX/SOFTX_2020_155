@@ -92,20 +92,21 @@ int symmetricom_fd = -1;
 
 void Usage()
 {
-    printf("Usage of mx_fe:\n");
-    printf("mx_fe  -s <models> <OPTIONS>\n");
-    printf(" -b <buffer>    : Name of the mbuf to concentrate the data to locally (defaults to ifo)\n");
-    printf(" -s <value>     : Name of FE control models\n");
-    printf(" -m <value>     : Local memory buffer size in megabytes\n");
-    printf(" -v 1           : Enable verbose output\n");
-    printf(" -e <0-31>	    : Number of the local mx end point to transmit on\n");
-    printf(" -r <0-31>      : Number of the remote mx end point to transmit to\n");
-    printf(" -t <target name: Name of MX target computer to transmit to\n");
-    printf(" -d <directory> : Path to the gds tp dir used to lookup model rates\n");
-    printf(" -D <value>     : Add a delay in ms to sending the data.  Used to spread the load\n");
-    printf("                : when working with multiple sending systems.  Defaults to 0.");
-    printf(" -h             : This helpscreen\n");
-    printf("\n");
+    fprintf(stderr,"Usage of mx_fe:\n");
+    fprintf(stderr,"mx_fe  -s <models> <OPTIONS>\n");
+    fprintf(stderr," -b <buffer>    : Name of the mbuf to concentrate the data to locally (defaults to ifo)\n");
+    fprintf(stderr," -s <value>     : Name of FE control models\n");
+    fprintf(stderr," -m <value>     : Local memory buffer size in megabytes\n");
+    fprintf(stderr," -l <filename>  : log file name\n");
+    fprintf(stderr," -v 1           : Enable verbose output\n");
+    fprintf(stderr," -e <0-31>	    : Number of the local mx end point to transmit on\n");
+    fprintf(stderr," -r <0-31>      : Number of the remote mx end point to transmit to\n");
+    fprintf(stderr," -t <target name: Name of MX target computer to transmit to\n");
+    fprintf(stderr," -d <directory> : Path to the gds tp dir used to lookup model rates\n");
+    fprintf(stderr," -D <value>     : Add a delay in ms to sending the data.  Used to spread the load\n");
+    fprintf(stderr,"                : when working with multiple sending systems.  Defaults to 0.");
+    fprintf(stderr," -h             : This helpscreen\n");
+    fprintf(stderr,"\n");
 }
 
 // **********************************************************************************************
@@ -128,7 +129,7 @@ int
 symm_ok() {
 	unsigned long req = 0;
 	ioctl (symmetricom_fd, IOCTL_SYMMETRICOM_STATUS, &req);
-    printf("Symmetricom status: %s\n", req? "LOCKED": "UNCLOCKED");
+    fprintf(stderr,"Symmetricom status: %s\n", req? "LOCKED": "UNCLOCKED");
 	return req;
 }
 
@@ -193,23 +194,23 @@ void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *
 
 		sym_gps_sec = symm_gps_time(&sym_gps_nsec, 0);
 		// Print diags in verbose mode
-		printf("\nTime = %d-%d size = %d\n",shmIpcPtr[0]->bp[lastCycle].timeSec,shmIpcPtr[0]->bp[lastCycle].timeNSec,sendLength);
-		printf("Sym gps = %d-%d (time received)\n", (int)sym_gps_sec, (int)sym_gps_nsec);
-		printf("\tCycle = ");
-		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].cycle);
-		printf("\n\tTimeSec = ");
-		for(ii=0;ii<nsys;ii++) printf("\t%d",ixDataBlock->header.dcuheader[ii].timeSec);
-		printf("\n\tTimeNSec = ");
-		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].timeNSec);
-		printf("\n\tDataSize = ");
-		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].dataBlockSize);
-		printf("\n\tTPCount = ");
-		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpCount);
-		printf("\n\tTPSize = ");
-		for(ii=0;ii<nsys;ii++) printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpBlockSize);
-		printf("\n\tXmitSize = ");
-		for(ii=0;ii<nsys;ii++) printf("\t\t%d",shmIpcPtr[ii]->dataBlockSize);
-		printf("\n\n ");
+		fprintf(stderr,"\nTime = %d-%d size = %d\n",shmIpcPtr[0]->bp[lastCycle].timeSec,shmIpcPtr[0]->bp[lastCycle].timeNSec,sendLength);
+		fprintf(stderr,"Sym gps = %d-%d (time received)\n", (int)sym_gps_sec, (int)sym_gps_nsec);
+		fprintf(stderr,"\tCycle = ");
+		for(ii=0;ii<nsys;ii++) fprintf(stderr,"\t\t%d",ixDataBlock->header.dcuheader[ii].cycle);
+		fprintf(stderr,"\n\tTimeSec = ");
+		for(ii=0;ii<nsys;ii++) fprintf(stderr,"\t%d",ixDataBlock->header.dcuheader[ii].timeSec);
+		fprintf(stderr,"\n\tTimeNSec = ");
+		for(ii=0;ii<nsys;ii++) fprintf(stderr,"\t\t%d",ixDataBlock->header.dcuheader[ii].timeNSec);
+		fprintf(stderr,"\n\tDataSize = ");
+		for(ii=0;ii<nsys;ii++) fprintf(stderr,"\t\t%d",ixDataBlock->header.dcuheader[ii].dataBlockSize);
+		fprintf(stderr,"\n\tTPCount = ");
+		for(ii=0;ii<nsys;ii++) fprintf(stderr,"\t\t%d",ixDataBlock->header.dcuheader[ii].tpCount);
+		fprintf(stderr,"\n\tTPSize = ");
+		for(ii=0;ii<nsys;ii++) fprintf(stderr,"\t\t%d",ixDataBlock->header.dcuheader[ii].tpBlockSize);
+		fprintf(stderr,"\n\tXmitSize = ");
+		for(ii=0;ii<nsys;ii++) fprintf(stderr,"\t\t%d",shmIpcPtr[ii]->dataBlockSize);
+		fprintf(stderr,"\n\n ");
 }
 
 // **********************************************************************************************
@@ -437,8 +438,7 @@ int send_to_local_memory(int nsys,
 		ixDataBlock = (daq_multi_dcu_data_t *)nextData;
 		int sendLength = loadMessageBuffer(nsys, nextCycle, status,dataRdy);
 		// Print diags in verbose mode
-		do_verbose = 0;
-		if(nextCycle == 0 && do_verbose) print_diags(nsys,lastCycle,sendLength,ixDataBlock);
+		if(nextCycle == 8 && do_verbose) print_diags(nsys,lastCycle,sendLength,ixDataBlock);
 		// Write header info
 		ifo_header->curCycle = nextCycle;
         ifo_header->cycleDataSize = cycle_data_size;
@@ -473,7 +473,7 @@ int send_to_local_memory(int nsys,
             
     } while (keepRunning && !myErrorSignal); /* do this until sighalt */
     
-    printf("\n***********************************************************\n\n");
+    fprintf(stderr,"\n***********************************************************\n\n");
     
     
     return 0;
@@ -536,7 +536,7 @@ main(int argc,char *argv[])
 
 
 
-    printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
+    fprintf(stderr,"\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
    
     ii = 0;
     
@@ -546,7 +546,7 @@ main(int argc,char *argv[])
     }
 
     /* Get the parameters */
-     while ((counter = getopt(argc, argv, "b:e:m:h:v:s:r:t:d:D:")) != EOF)
+     while ((counter = getopt(argc, argv, "b:e:m:h:v:s:r:t:d:l:D:")) != EOF)
       switch(counter) {
         case 't':
 			rem_host = optarg;
@@ -558,27 +558,36 @@ main(int argc,char *argv[])
         case 'm':
             max_data_size_mb = atoi(optarg);
             if (max_data_size_mb < 20){
-                printf("Min data block size is 20 MB\n");
+                fprintf(stderr,"Min data block size is 20 MB\n");
                 return -1;
             }
             if (max_data_size_mb > 100){
-                printf("Max data block size is 100 MB\n");
+                fprintf(stderr,"Max data block size is 100 MB\n");
                 return -1;
             }
             break;
 
         case 's':
 	    sysname = optarg;
-	    printf ("sysnames = %s\n",sysname);
+	    fprintf (stderr,"sysnames = %s\n",sysname);
             continue;
+        case 'l':
+            if (0 == freopen(optarg, "w", stdout)) {
+                perror ("freopen");
+                exit (1);
+            }
+            setvbuf(stdout, NULL, _IOLBF, 0);
+            stderr = stdout;
+            break;
 		case 'r':
 			his_eid = atoi(optarg);
+            break;
         case 'v':
 		do_verbose = atoi(optarg);
 			break;
 		case 'e':
 		my_eid = atoi(optarg);
-		printf ("myeid = %d\n",my_eid);
+		fprintf (stderr,"myeid = %d\n",my_eid);
 			sendViaOmx = 1;
 		break;
 	    case 'd':
@@ -593,10 +602,10 @@ main(int argc,char *argv[])
     }
     max_data_size = max_data_size_mb * 1024*1024;
 
-	if (sendViaOmx) printf("Writing DAQ data to local shared memory and sending out on Open-MX\n");
-	else	printf("Writing DAQ data to local shared memory only \n");
+	if (sendViaOmx) fprintf(stderr,"Writing DAQ data to local shared memory and sending out on Open-MX\n");
+	else	fprintf(stderr,"Writing DAQ data to local shared memory only \n");
     if(sysname != NULL) {
-	printf("System names: %s\n", sysname);
+	fprintf(stderr,"System names: %s\n", sysname);
         sprintf(modelnames[0],"%s",strtok(sysname, " "));
         for(;;) {
 		char *s = strtok(0, " ");
@@ -619,7 +628,7 @@ main(int argc,char *argv[])
 	
 	gps_ok = symm_ok();
 	gps_time = symm_gps_time(&gps_frac, &gps_stt);
-	printf("GPS TIME = %ld\tfrac = %ld\tstt = %d\n",gps_time,gps_frac,gps_stt);
+	fprintf(stderr,"GPS TIME = %ld\tfrac = %ld\tstt = %d\n",gps_time,gps_frac,gps_stt);
 
 	// Parse the model names from the command line entry
     for(ii=0;ii<nsys;ii++) {
@@ -630,7 +639,7 @@ main(int argc,char *argv[])
 			fprintf(stderr, "Can't map shmem\n");
 			exit(-1);
 		} else {
-			printf(" %s mapped at 0x%lx\n",modelnames[ii],(unsigned long)dcu_addr);
+			fprintf(stderr," %s mapped at 0x%lx\n",modelnames[ii],(unsigned long)dcu_addr);
 		}
 		shmIpcPtr[ii] = (struct rmIpcStr *)((char *)dcu_addr + CDS_DAQ_NET_IPC_OFFSET);
 		shmDataPtr[ii] = ((char *)dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
@@ -639,7 +648,7 @@ main(int argc,char *argv[])
 	// Get model rates to get GDS TP data sizes.
     for (ii = 0; ii < nsys; ii++) {
         status = getmodelrate(&modelrates[ii],&dcuid[ii],modelnames[ii], gds_tp_dir);
-		printf("Model %s rate = %d dcuid = %d\n",modelnames[ii],modelrates[ii],dcuid[ii]);
+		fprintf(stderr,"Model %s rate = %d dcuid = %d\n",modelnames[ii],modelrates[ii],dcuid[ii]);
 	    if (status != 0) {
 		fprintf(stderr, "Unable to determine the rate of %s\n", modelnames[ii]);
 		exit(1);
@@ -656,14 +665,13 @@ main(int argc,char *argv[])
     signal(SIGINT,intHandler);
 	sleep(1);
 
-	printf("Open endpoint \n");
+	fprintf(stderr,"Open endpoint \n");
 	ret = mx_open_endpoint(board_id, my_eid, filter, NULL, 0, &ep);
     if (ret != MX_SUCCESS) {
         fprintf(stderr, "Failed to open endpoint %s\n", mx_strerror(ret));
         exit(1);
     }
 	sleep(1);
-	printf("Get NIC ID \n");
 	mx_hostname_to_nic_id(rem_host, &his_nic_id);
 
 	// Enter infinite loop of reading control model data and writing to local shared memory
@@ -671,7 +679,7 @@ main(int argc,char *argv[])
 	    error = send_to_local_memory(nsys, sendViaOmx, send_delay_ms,ep,his_nic_id,his_eid,len,MATCH_VAL_MAIN,my_eid);
     } while (error == 0 && keepRunning == 1);
 	if(sendViaOmx) {
-		printf("Closing out OpenMX and exiting\n");
+		fprintf(stderr,"Closing out OpenMX and exiting\n");
 		mx_close_endpoint(ep);
 		mx_finalize();
 
