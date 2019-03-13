@@ -326,7 +326,7 @@ int loadMessageBuffer(	int nsys,
 				if (ixDataBlock->header.dcuheader[db].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
 					ixDataBlock->header.dcuheader[db].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
 				// Calculate TP data size
-                ixDataBlock->header.dcuheader[db].tpCount = (unsigned int)shmTpTable[ii]->count;
+                ixDataBlock->header.dcuheader[db].tpCount = (unsigned int)shmTpTable[ii]->count & 0xff;
 				ixDataBlock->header.dcuheader[db].tpBlockSize = sizeof(float) * modelrates[ii] * ixDataBlock->header.dcuheader[ii].tpCount /  DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
 				// Copy GDSTP table to xmission buffer header
