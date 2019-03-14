@@ -40,20 +40,17 @@ pthread_create(thread_, 0, start_routine_, arg_)
 MX_MUTEX_T stream_mutex;
 #define FILTER     0x12345
 #define MATCH_VAL  0xabcdef
-#define DFLT_EID   1
+#define DFLT_EID   64
 #define DFLT_LEN   8192
 #define DFLT_END   128
-#define MAX_LEN    (1024*1024*1024) 
 #define DFLT_ITER  1000
 #define NUM_RREQ   16  /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
 #define NUM_SREQ   256  /* currently constrained by  MX_MCP_RDMA_HANDLES_CNT*/
+#define MSG_BUF_SIZE    0x200000
 
 #define DO_HANDSHAKE 0
 #define MATCH_VAL_MAIN (1 << 31)
 #define MATCH_VAL_THREAD 1
-
-
-
 
 #define __CDECL
 
@@ -79,8 +76,7 @@ char *ifo;
 char *ifo_data;
 size_t cycle_data_size;
 
-char msg_buffer[0x200000];
-
+char msg_buffer[MSG_BUF_SIZE];
 
 int symmetricom_fd = -1;
 
@@ -104,7 +100,7 @@ void Usage()
     fprintf(stderr," -t <target name: Name of MX target computer to transmit to\n");
     fprintf(stderr," -d <directory> : Path to the gds tp dir used to lookup model rates\n");
     fprintf(stderr," -D <value>     : Add a delay in ms to sending the data.  Used to spread the load\n");
-    fprintf(stderr,"                : when working with multiple sending systems.  Defaults to 0.");
+    fprintf(stderr,"                : when working with multiple sending systems.  Defaults to 0.\n");
     fprintf(stderr," -h             : This helpscreen\n");
     fprintf(stderr,"\n");
 }
@@ -134,6 +130,8 @@ symm_ok() {
 }
 
 // *******************************************************************************
+// Wait for data ready from FE models
+// *******************************************************************************
 int 
 waitNextCycle2(	int nsys,
 	    unsigned int cyclereq,		// Cycle to wait for
@@ -148,8 +146,6 @@ int timeout = 0;
 
 	// if reset, want to set IOP cycle to impossible number
 	if(reset) ipcPtr[0]->cycle = 50;
-        // Find cycle 
-	// do {
 	usleep(1000);
 	// Wait until received data from at least 1 FE or timeout
 	do {
@@ -162,22 +158,18 @@ int timeout = 0;
 		timeout += 1;
 	}while(!iopRunning && timeout < 500);
 
-        // Wait until data received from everyone or timeout
-        timeout = 0;
-        do {
+    // Wait until data received from everyone or timeout
+    timeout = 0;
+    do {
 		usleep(100);
 		for(ii=1;ii<nsys;ii++) {
 			if(ipcPtr[ii]->cycle == cyclereq && !dataRdy[ii]) threads_rdy ++;
 			if(ipcPtr[ii]->cycle == cyclereq) dataRdy[ii] = 1;
-                }
-                timeout += 1;
-        }while(threads_rdy < nsys && timeout < 20);
+        }
+        timeout += 1;
+    }while(threads_rdy < nsys && timeout < 20);
 
-		// }while(iopRunning == 0 && keepRunning);
-		// Return iopRunning:
-		//	- One (1) if synced to IOP 
-		//	- Zero (0) if synced by GPS time ie IOP not running.
-        return(iopRunning);
+    return(iopRunning);
 }
 
 // **********************************************************************************************
@@ -326,7 +318,7 @@ int loadMessageBuffer(	int nsys,
 				if (ixDataBlock->header.dcuheader[db].dataBlockSize > DAQ_DCU_BLOCK_SIZE)
 					ixDataBlock->header.dcuheader[db].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
 				// Calculate TP data size
-                ixDataBlock->header.dcuheader[db].tpCount = (unsigned int)shmTpTable[ii]->count;
+                ixDataBlock->header.dcuheader[db].tpCount = (unsigned int)shmTpTable[ii]->count & 0xff;
 				ixDataBlock->header.dcuheader[db].tpBlockSize = sizeof(float) * modelrates[ii] * ixDataBlock->header.dcuheader[ii].tpCount /  DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
 				// Copy GDSTP table to xmission buffer header
@@ -338,7 +330,8 @@ int loadMessageBuffer(	int nsys,
 				dataBuff = (char *)(shmDataPtr[ii] + lastCycle * buf_size);
 				// Copy data from shared memory into local buffer
 				dataXferSize = ixDataBlock->header.dcuheader[db].dataBlockSize + ixDataBlock->header.dcuheader[db].tpBlockSize;
-				//dataXferSize = shmIpcPtr[ii]->dataBlockSize;
+				// if the dataXferSize is too large, something is wrong so return error message.
+                if(dataXferSize > DAQ_DCU_BLOCK_SIZE) return(-1);
 				memcpy((void *)zbuffer, dataBuff, dataXferSize);
 
 				// Calculate CRC on the data and add to header info
@@ -405,19 +398,25 @@ int send_to_local_memory(int nsys,
 
     do {
 
-     if(init_mx) {
-	  do{
-	    mx_return_t conStat = mx_connect(ep, his_nic_id, his_eid, filter,
-			 1000, &dest);
-	    if (conStat != MX_SUCCESS) myErrorSignal = 1;
-		else {
-			myErrorSignal = 0;
-			fprintf(stderr, "Connection Made\n");
-		}
-	  }while(myErrorSignal);
-	    init_mx = 0;
-	  }
-	  myErrorSignal = 0;
+        if(init_mx && xmitData) {
+	        do{
+	            mx_return_t conStat = mx_connect(ep, his_nic_id, his_eid, filter,
+			        1000, &dest);
+	            if (conStat != MX_SUCCESS) myErrorSignal = 1;
+		        else {
+			        myErrorSignal = 0;
+			        fprintf(stderr, "Connection Made\n");
+                    mx_return_t ret = mx_set_request_timeout(ep, 0, 1); // Set one second timeout
+                    if (ret != MX_SUCCESS) {
+                        fprintf(stderr, "Failed to set request timeout %s\n", mx_strerror(ret));
+                        exit(1);
+                    }
+
+		        }
+	        }while(myErrorSignal);
+	        init_mx = 0;
+	    }
+	    myErrorSignal = 0;
         
 		for(ii=0;ii<nsys;ii++) dataRdy[ii] = 0;
 		status = waitNextCycle2(nsys,nextCycle,sync2iop,dataRdy,shmIpcPtr);
@@ -437,6 +436,10 @@ int send_to_local_memory(int nsys,
 		nextData += cycle_data_size * nextCycle;
 		ixDataBlock = (daq_multi_dcu_data_t *)nextData;
 		int sendLength = loadMessageBuffer(nsys, nextCycle, status,dataRdy);
+        if(sendLength == -1 || sendLength > MSG_BUF_SIZE) {
+		    fprintf(stderr, "Message buffer overflow error\n");
+            return(-1);
+        }
 		// Print diags in verbose mode
 		if(nextCycle == 8 && do_verbose) print_diags(nsys,lastCycle,sendLength,ixDataBlock);
 		// Write header info
@@ -445,28 +448,27 @@ int send_to_local_memory(int nsys,
         ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
 		if(xmitData) {
-		// Copy data to 0mq message buffer
-		memcpy((void*)&msg_buffer,nextData,sendLength);
-		// Send Data
-        usleep(send_delay_ms * 1000);
-		seg.segment_ptr = &msg_buffer;
-		seg.segment_length = sendLength;
-		mx_return_t res = mx_isend(ep, &seg, 1, dest, match_val, NULL, &req[cur_req]);
-		if (res != MX_SUCCESS) {
-			fprintf(stderr, "mx_isend failed ret=%d\n", res);
-		myErrorSignal = 1;
-            break;
-        }
-	    mx_wait(ep, &req[cur_req], 150, &stat, &result);
-		if (!result) {
-            fprintf(stderr, "mxWait failed with status %s\n", mx_strstatus(stat.code));
-            myErrorSignal = 1;
-        }
-        if (stat.code != MX_STATUS_SUCCESS) {
-            fprintf(stderr, "isendxxx failed with status %s\n", mx_strstatus(stat.code));
-            myErrorSignal = 1;
-        }
-
+		    // Copy data to 0mq message buffer
+		    memcpy((void*)&msg_buffer,nextData,sendLength);
+		    // Send Data
+            usleep(send_delay_ms * 1000);
+		    seg.segment_ptr = &msg_buffer;
+		    seg.segment_length = sendLength;
+		    mx_return_t res = mx_isend(ep, &seg, 1, dest, match_val, NULL, &req[cur_req]);
+		    if (res != MX_SUCCESS) {
+			    fprintf(stderr, "mx_isend failed ret=%d\n", res);
+		        myErrorSignal = 1;
+                break;
+            }
+	        mx_wait(ep, &req[cur_req], 150, &stat, &result);
+		    if (!result) {
+                fprintf(stderr, "mxWait failed with status %s\n", mx_strstatus(stat.code));
+                myErrorSignal = 1;
+            }
+            if (stat.code != MX_STATUS_SUCCESS) {
+                fprintf(stderr, "isendxxx failed with status %s\n", mx_strstatus(stat.code));
+                myErrorSignal = 1;
+            }
 		}
 		
 		nextCycle = (nextCycle + 1) % 16;
@@ -550,6 +552,7 @@ main(int argc,char *argv[])
       switch(counter) {
         case 't':
 			rem_host = optarg;
+			sendViaOmx = 1;
         break;
         case 'b':
             buffer_name = optarg;
@@ -568,8 +571,8 @@ main(int argc,char *argv[])
             break;
 
         case 's':
-	    sysname = optarg;
-	    fprintf (stderr,"sysnames = %s\n",sysname);
+	        sysname = optarg;
+	        fprintf (stderr,"sysnames = %s\n",sysname);
             continue;
         case 'l':
             if (0 == freopen(optarg, "w", stdout)) {
@@ -583,15 +586,14 @@ main(int argc,char *argv[])
 			his_eid = atoi(optarg);
             break;
         case 'v':
-		do_verbose = atoi(optarg);
+		    do_verbose = atoi(optarg);
 			break;
 		case 'e':
-		my_eid = atoi(optarg);
-		fprintf (stderr,"myeid = %d\n",my_eid);
-			sendViaOmx = 1;
-		break;
+		    my_eid = atoi(optarg);
+		    fprintf (stderr,"myeid = %d\n",my_eid);
+		    break;
 	    case 'd':
-		gds_tp_dir = optarg;
+		    gds_tp_dir = optarg;
 		break;
         case 'h':
             Usage();
@@ -600,22 +602,35 @@ main(int argc,char *argv[])
             send_delay_ms = atoi(optarg);
             break;
     }
+
+
     max_data_size = max_data_size_mb * 1024*1024;
 
-	if (sendViaOmx) fprintf(stderr,"Writing DAQ data to local shared memory and sending out on Open-MX\n");
-	else	fprintf(stderr,"Writing DAQ data to local shared memory only \n");
+    // If sending to DAQ via net enabled, ensure all options have been set
+	if (sendViaOmx) {
+        if(my_eid == DFLT_EID || his_eid == DFLT_EID){
+        fprintf(stderr, "\n***ERROR\n***Must set both -e and -r options to send data to DAQ\n\n");
+        Usage();
+        return(0);
+        }
+        fprintf(stderr,"Writing DAQ data to local shared memory and sending out on Open-MX\n");
+	} else	{
+        fprintf(stderr,"Writing DAQ data to local shared memory only \n");
+    }
+
+    // Parse the model names
     if(sysname != NULL) {
-	fprintf(stderr,"System names: %s\n", sysname);
+	    fprintf(stderr,"System names: %s\n", sysname);
         sprintf(modelnames[0],"%s",strtok(sysname, " "));
         for(;;) {
-		char *s = strtok(0, " ");
-		if (!s) break;
-		sprintf(modelnames[nsys],"%s",s);
-		dcuId[nsys] = 0;
-		nsys++;
-	}
+		    char *s = strtok(0, " ");
+		    if (!s) break;
+		    sprintf(modelnames[nsys],"%s",s);
+		    dcuId[nsys] = 0;
+		    nsys++;
+	    }
     } else {
-	Usage();
+	    Usage();
         return(0);
     }
 
@@ -625,12 +640,11 @@ main(int argc,char *argv[])
 	    perror("/dev/gpstime");
 	exit(1);
 	}
-	
 	gps_ok = symm_ok();
 	gps_time = symm_gps_time(&gps_frac, &gps_stt);
 	fprintf(stderr,"GPS TIME = %ld\tfrac = %ld\tstt = %d\n",gps_time,gps_frac,gps_stt);
 
-	// Parse the model names from the command line entry
+	// Find the shared memory locations for the various model names
     for(ii=0;ii<nsys;ii++) {
 		char shmem_fname[128];
 		sprintf(shmem_fname, "%s_daq", modelnames[ii]);
@@ -645,6 +659,7 @@ main(int argc,char *argv[])
 		shmDataPtr[ii] = ((char *)dcu_addr + CDS_DAQ_NET_DATA_OFFSET);
 		shmTpTable[ii] = (struct cdsDaqNetGdsTpNum *)((char *)dcu_addr + CDS_DAQ_NET_GDS_TP_TABLE_OFFSET);
     }
+
 	// Get model rates to get GDS TP data sizes.
     for (ii = 0; ii < nsys; ii++) {
         status = getmodelrate(&modelrates[ii],&dcuid[ii],modelnames[ii], gds_tp_dir);
@@ -662,27 +677,32 @@ main(int argc,char *argv[])
 	cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t))/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
     cycle_data_size -= (cycle_data_size % 8);
 
+    // Setup signal handler to catch Control C
     signal(SIGINT,intHandler);
 	sleep(1);
 
-	fprintf(stderr,"Open endpoint \n");
-	ret = mx_open_endpoint(board_id, my_eid, filter, NULL, 0, &ep);
-    if (ret != MX_SUCCESS) {
-        fprintf(stderr, "Failed to open endpoint %s\n", mx_strerror(ret));
-        exit(1);
+    if(sendViaOmx) {
+        // Open the NIC endpoint to send data
+	    fprintf(stderr,"Open endpoint \n");
+	    ret = mx_open_endpoint(board_id, my_eid, filter, NULL, 0, &ep);
+        if (ret != MX_SUCCESS) {
+            fprintf(stderr, "Failed to open endpoint %s\n", mx_strerror(ret));
+            exit(1);
+        }
+	    sleep(1);
+	    mx_hostname_to_nic_id(rem_host, &his_nic_id);
     }
-	sleep(1);
-	mx_hostname_to_nic_id(rem_host, &his_nic_id);
 
 	// Enter infinite loop of reading control model data and writing to local shared memory
     do {
 	    error = send_to_local_memory(nsys, sendViaOmx, send_delay_ms,ep,his_nic_id,his_eid,len,MATCH_VAL_MAIN,my_eid);
     } while (error == 0 && keepRunning == 1);
+
+    // Cleanup Open-MX stuff
 	if(sendViaOmx) {
 		fprintf(stderr,"Closing out OpenMX and exiting\n");
 		mx_close_endpoint(ep);
 		mx_finalize();
-
 	}
 
     return 0;
