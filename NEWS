@@ -3,6 +3,8 @@ Changes for 3.5.1
 ==================================================================================================
 - Bug fix for mx_fe: Not reading test point count properly from FE code resulting in xmit buffer
   overflow.
+- Bug fix (1136) for the external edcu.  Exit instead of crash on bad filenames when building
+ the channel list.  Allow for blank lines and comments
 ==================================================================================================
 Changes for 3.5.0  
 ==================================================================================================
