@@ -232,21 +232,21 @@ void *rcvr_thread(void *arg) {
             myErrorStat = 2;
          }
          if(!myErrorStat) {
-         seg.segment_ptr = &buffer[cur_req * len];
-        mxDataBlock = (daq_multi_dcu_data_t *)seg.segment_ptr;
-        copySize = stat.xfer_length;
-        memcpy(daqbuffer,seg.segment_ptr,copySize);
-        // Get the message DAQ cycle number
-        cycle = mxDataBlock->header.dcuheader[0].cycle;
-        // Pass cycle and timestamp data back to main process
-        thread_cycle[dblock] = cycle;
-        thread_timestamp[dblock] = mxDataBlock->header.dcuheader[0].timeSec;
+            seg.segment_ptr = &buffer[cur_req * len];
+            mxDataBlock = (daq_multi_dcu_data_t *)seg.segment_ptr;
+            copySize = stat.xfer_length;
+            memcpy(daqbuffer,seg.segment_ptr,copySize);
+            // Get the message DAQ cycle number
+            cycle = mxDataBlock->header.dcuheader[0].cycle;
+            // Pass cycle and timestamp data back to main process
+            thread_cycle[dblock] = cycle;
+            thread_timestamp[dblock] = mxDataBlock->header.dcuheader[0].timeSec;
             dataRecvTime[dblock] = s_clock();
-        mx_irecv(ep, &seg, 1, mv, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
-        }
+            mx_irecv(ep, &seg, 1, mv, MX_MATCH_MASK_NONE, 0, &req[cur_req]);
+         }
 
+       }
     // Run until told to stop by main thread
-      }
     } while(!stop_working_threads);
     fprintf(stderr,"Stopping thread %d\n",mt);
     usleep(200000);
@@ -461,7 +461,6 @@ main(int argc, char **argv)
     int64_t min_recv_time = 0;
     int64_t cur_ref_time = 0;
     int recv_buckets[(MAX_DELAY_MS/5)+2];
-    // int entry_binned = 0;
     int festatus = 0;
     int pv_festatus = 0;
     int ix_xmit_stop = 0;
@@ -646,19 +645,32 @@ main(int argc, char **argv)
                     // For each model, copy over data header information
                     for(jj=0;jj<myc;jj++) {
                         // Copy data header information
-                        ifoDataBlock->header.dcuheader[mytotaldcu].dcuId = mxDataBlockSingle[ii].header.dcuheader[jj].dcuId;
-                        ifoDataBlock->header.dcuheader[mytotaldcu].fileCrc = mxDataBlockSingle[ii].header.dcuheader[jj].fileCrc;
-                        ifoDataBlock->header.dcuheader[mytotaldcu].status = mxDataBlockSingle[ii].header.dcuheader[jj].status;
-                        ifoDataBlock->header.dcuheader[mytotaldcu].cycle = mxDataBlockSingle[ii].header.dcuheader[jj].cycle;
+                        ifoDataBlock->header.dcuheader[mytotaldcu].dcuId = 
+                                mxDataBlockSingle[ii].header.dcuheader[jj].dcuId;
+                        ifoDataBlock->header.dcuheader[mytotaldcu].fileCrc = 
+                                mxDataBlockSingle[ii].header.dcuheader[jj].fileCrc;
+                        ifoDataBlock->header.dcuheader[mytotaldcu].status = 
+                                mxDataBlockSingle[ii].header.dcuheader[jj].status;
+                        ifoDataBlock->header.dcuheader[mytotaldcu].cycle = 
+                                mxDataBlockSingle[ii].header.dcuheader[jj].cycle;
                         if(!ix_xmit_stop) {
-                        ifoDataBlock->header.dcuheader[mytotaldcu].timeSec = mxDataBlockSingle[ii].header.dcuheader[jj].timeSec;
-                        ifoDataBlock->header.dcuheader[mytotaldcu].timeNSec = mxDataBlockSingle[ii].header.dcuheader[jj].timeNSec;
+                            ifoDataBlock->header.dcuheader[mytotaldcu].timeSec = 
+                                mxDataBlockSingle[ii].header.dcuheader[jj].timeSec;
+                            ifoDataBlock->header.dcuheader[mytotaldcu].timeNSec = 
+                                mxDataBlockSingle[ii].header.dcuheader[jj].timeNSec;
                         }
-                        ifoDataBlock->header.dcuheader[mytotaldcu].dataCrc = mxDataBlockSingle[ii].header.dcuheader[jj].dataCrc;
-                        ifoDataBlock->header.dcuheader[mytotaldcu].dataBlockSize = mxDataBlockSingle[ii].header.dcuheader[jj].dataBlockSize;
-                        ifoDataBlock->header.dcuheader[mytotaldcu].tpBlockSize = mxDataBlockSingle[ii].header.dcuheader[jj].tpBlockSize;
-                        ifoDataBlock->header.dcuheader[mytotaldcu].tpCount = mxDataBlockSingle[ii].header.dcuheader[jj].tpCount;
-                        if(mxDataBlockSingle[ii].header.dcuheader[jj].dcuId == 52 && mxDataBlockSingle[ii].header.dcuheader[jj].tpCount == dc_number)
+                        ifoDataBlock->header.dcuheader[mytotaldcu].dataCrc = 
+                                mxDataBlockSingle[ii].header.dcuheader[jj].dataCrc;
+                        ifoDataBlock->header.dcuheader[mytotaldcu].dataBlockSize = 
+                                mxDataBlockSingle[ii].header.dcuheader[jj].dataBlockSize;
+                        ifoDataBlock->header.dcuheader[mytotaldcu].tpBlockSize = 
+                                mxDataBlockSingle[ii].header.dcuheader[jj].tpBlockSize;
+                        ifoDataBlock->header.dcuheader[mytotaldcu].tpCount = 
+                                mxDataBlockSingle[ii].header.dcuheader[jj].tpCount;
+
+                        // Check for downstream DAQ reset request from EDCU
+                        if(mxDataBlockSingle[ii].header.dcuheader[jj].dcuId == 52 && 
+                            mxDataBlockSingle[ii].header.dcuheader[jj].tpCount == dc_number)
                         {
                             fprintf(stderr,"Got a DAQ Reset REQUEST %u\n",mxDataBlockSingle[ii].header.dcuheader[jj].timeSec);
                             ifoDataBlock->header.dcuheader[mytotaldcu].tpCount = 0;
