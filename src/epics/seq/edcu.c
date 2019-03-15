@@ -88,7 +88,7 @@ int timemarks[16] = {1000,63500,126000,188500,251000,313500,376000,438500,501000
 int nextTrig = 0;
 
 
-// End Header **********************************************************************************************************
+// End Header ************************************************************
 //
 
 // **************************************************************************
@@ -201,7 +201,9 @@ void subscriptionHandler(struct event_handler_args args) {
 	}
 }
 
+// **************************************************************************
 int edcuClearSdf(char *pref)
+// **************************************************************************
 {
 unsigned char clearString[64] = "          ";
 int flength = 62;
@@ -247,7 +249,9 @@ dbAddr daddr;
 
 }
 
+// **************************************************************************
 int edcuFindUnconnChannels()
+// **************************************************************************
 {
 int ii;
 int dcc = 0;
@@ -332,22 +336,108 @@ int erucError = 0;
 	return(erucError);
 }
 
+/**
+ * Scan the input text for the first non-whitespace character and return a pointer to that location.
+ * @param line NULL terminated string to check.
+ * @return Pointer to the the first non whitespace (space, tab, nl, cr) character.  Returns NULL iff
+ * line is NULL.
+ */
+const char* skip_whitespace(const char* line)
+{
+    const char* cur = line;
+    char ch = 0;
+    if (!line)
+    {
+        return NULL;
+    }
+    ch = *cur;
+    while (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n')
+    {
+        ++cur;
+        ch = *cur;
+    }
+    return cur;
+}
+
+/**
+ * Given a line with an comment denoted by '#' terminate
+ * the line at the start of the comment.
+ * @param line The line to modify, a NULL terminated string
+ * @note This may modify the string pointed to by line.
+ * This is safe to call with a NULL pointer.
+ */
+void remove_line_comments(char *line)
+{
+    char ch = 0;
+
+    if (!line)
+    {
+        return;
+    }
+    while ((ch = *line))
+    {
+        if (ch == '#')
+        {
+            *line = '\0';
+            return;
+        }
+        ++line;
+    }
+}
+
+/**
+ * Given a NULL terminated string remove any trailing whitespace
+ * @param line The line to modify, a NULL terminated string
+ * @note This may modify the string pointed to by line.
+ * This is safe to call with a NULL pointer.
+ */
+void remove_trailing_whitespace(char* newname)
+{
+    char* cur = newname;
+    char* last_non_ws = NULL;
+    char ch = 0;
+
+    if (!newname)
+    {
+        return;
+    }
+    ch = *cur;
+    while (ch)
+    {
+        if (ch != ' ' && ch != '\t' && ch != '\r' && ch != '\n')
+        {
+            last_non_ws = cur;
+        }
+        ++cur;
+        ch = *cur;
+    }
+    if (!last_non_ws)
+    {
+        *newname = '\0';
+    }
+    else
+    {
+        last_non_ws++;
+        *last_non_ws = '\0';
+    }
+}
+
 // **************************************************************************
 void edcuCreateChanFile(char *fdir, char *edcuinifilename, char *fecid) {
 // **************************************************************************
-int i;
-int status;
-char errMsg[64];
-FILE *daqfileptr;
-FILE *edcuini;
-FILE *edcumaster;
-FILE *edcuheader;
-char masterfile[64]; 
-char edcuheaderfilename[64];
-char line[128];
-char *newname;
-char edcufilename[64];
-char *dcuid;
+    int ok = 0;
+    int i = 0;
+    int status = 0;
+    char errMsg[64] = "";
+    FILE *daqfileptr = NULL;
+    FILE *edcuini = NULL;
+    FILE *edcumaster = NULL;
+    char masterfile[64] = "";
+    char edcuheaderfilename[64] = "";
+    char line[128] = "";
+    char *newname = 0;
+    char edcufilename[64] = "";
+    char *dcuid = 0;
 
 
 	sprintf(errMsg,"%s",fecid);
@@ -360,14 +450,16 @@ char *dcuid;
 	edcumaster = fopen(masterfile,"r");
 	if(edcumaster == NULL) {
 		sprintf(errMsg,"DAQ FILE ERROR: FILE %s DOES NOT EXIST\n",masterfile);
-	        logFileEntry(errMsg);
-        }
+        logFileEntry(errMsg);
+        goto done;
+    }
 	// Open the file to write the composite channel list.
 	edcuini = fopen(edcuinifilename,"w");
 	if(edcuini == NULL) {
 		sprintf(errMsg,"DAQ FILE ERROR: FILE %s DOES NOT EXIST\n",edcuinifilename);
-	        logFileEntry(errMsg);
-        }
+        logFileEntry(errMsg);
+        goto done;
+    }
 
 	// Write standard header into .ini file
 	fprintf(edcuini,"%s","[default] \n");
@@ -384,21 +476,42 @@ char *dcuid;
 	// Read the master file entries.
 	while(fgets(line,sizeof line,edcumaster) != NULL) {
 		newname = strtok(line,"\n");
+		if (!newname)
+        {
+		    continue;
+        }
+		newname = (char*)skip_whitespace(newname);
+        remove_line_comments(newname);
+        remove_trailing_whitespace(newname);
+
+		if (*newname == '\0')
+        {
+		    continue;
+        }
 		strcpy(edcufilename,fdir);
 		strcat(edcufilename,newname);
 		printf("File in master = %s\n",edcufilename);
 		daqfileptr = fopen(edcufilename,"r");
 		if(daqfileptr == NULL) {
-			sprintf(errMsg,"DAQ FILE ERROR: FILE %s DOES NOT EXIST\n",edcufilename);
+			sprintf(errMsg,"DAQ FILE ERROR: FILE %s DOES NOT EXIST OR CANNOT BE READ!\n",edcufilename);
 			logFileEntry(errMsg);
+			goto done;
 		}
 		while(fgets(line,sizeof line,daqfileptr) != NULL) {
 			fprintf(edcuini,"%s",line);
 		}
 		fclose(daqfileptr);
+		daqfileptr = NULL;
 	}
-	fclose(edcumaster);
-	fclose(edcuini);
+	ok = 1;
+done:
+    if (daqfileptr) fclose(daqfileptr);
+	if (edcuini) fclose(edcuini);
+    if (edcumaster) fclose(edcumaster);
+    if (!ok)
+    {
+        exit(1);
+    }
 }
 
 // **************************************************************************
@@ -488,15 +601,6 @@ int ii;
         shmTpTable->count = 0;
         shmTpTable->tpNum[0] = 0;
     }
-	// DAQ expects data xmission 2 cycles later, so trigger sending of 
-	// data already buffered and ready to go to keep sample time correct.
-    #if 0
-    printf("cycle = %d timeSec = %d\n",dipc->bp[daqBlockNum].cycle,dipc->bp[daqBlockNum].timeSec);
-	daqBlockNum -= 1;
-	if(daqBlockNum < 0) {
-		daqBlockNum += 16;
-	}
-    #endif
 	dipc->cycle = daqBlockNum;	// Triggers sending of data by mx_stream.
 
 }
@@ -679,6 +783,7 @@ sleep(2);
 // EDCU STUFF ********************************************************************************************************
 	
 	sprintf(edculogfilename, "%s%s", logdir, "/edcu.log");
+	for (ii=0;ii<EDCU_MAX_CHANS;ii++) daqd_edcu1.channel_status[ii] = 0xbad;
 	edcuInitialize(daqsharedmemname,syncsharedmemname);
 	edcuCreateChanFile(daqDir,daqFile,pref);
 	edcuCreateChanList(daqFile);
@@ -691,7 +796,6 @@ sleep(2);
 	daqd_edcu1.epicsSync = 0;
 
 // End SPECT
-	for (ii=0;ii<EDCU_MAX_CHANS;ii++) daqd_edcu1.channel_status[ii] = 0xbad;
 
 	int dropout = 0;
 	int numDC = 0;
