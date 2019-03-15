@@ -1,5 +1,5 @@
 ==================================================================================================
-Changes for 3.5  (NOT YET RELEASED)
+Changes for 3.6  (NOT YET RELEASED)
 ==================================================================================================
 - When using daqd_shmem, must set a parameter "GDS_BROADCAST" = "1" to enable gds broadcast.
 - daqLibZmq.c developed to send out GDS TP data via separate shared memory area for use with 
@@ -21,6 +21,25 @@ Changes for 3.5  (NOT YET RELEASED)
 	- Set rate=32K in IOP model Parameter Block
 	- Set virtualIOP=3 in IOP model Parameter Block
 	- NOTE: Presently, this only reads ADC modules ie not DAC writes, as it was implemented for PEM DAQ channel.s
+==================================================================================================
+Changes for 3.5.1
+==================================================================================================
+- Bug fix for mx_fe: Not reading test point count properly from FE code resulting in xmit buffer
+  overflow.
+  - Bug fix (1136) for the external edcu.  Exit instead of crash on bad filenames when building
+   the channel list.  Allow for blank lines and comments
+   ==================================================================================================
+   Changes for 3.5.0
+   ==================================================================================================
+   - Removed old EPICS Control System Studio from plugins.
+   - Bug fix for MATH.pm: improper variable case when used with EPICS input.
+   - Bug Fix (1133) - Fix cdsEzCaRead/Write implementation
+   - Bug Fix (1132) - Increase ADC parser part limit to 6000
+   - Add installer support for kamioka,indigo,anu,uwa,cardiff,bham sites
+   - Add awgtpman support for indigo,anu,uwa,cardiff,bham sites
+   - Modifications to edcu.c:
+     - No longer hard coded dcuId: takes it from template model like all other FE code.
+       - Now synchonizes to IOP model on target computer: set sync=<iopmodelname> in model Param block.
 ==================================================================================================
 Changes for 3.4.5
 ==================================================================================================
