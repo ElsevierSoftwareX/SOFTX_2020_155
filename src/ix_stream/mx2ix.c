@@ -287,8 +287,6 @@ main(int argc, char **argv)
     int max_data_size_mb = 100;
     int max_data_size = 0;
     char *mywriteaddr;
-    // daq_multi_cycle_header_t *xmitHeader[IX_BLOCK_COUNT];
-    // static int xmitDataOffset[IX_BLOCK_COUNT];
     int xmitBlockNum = 0;
     int dc_number = 1;
     
@@ -385,8 +383,6 @@ main(int argc, char **argv)
     ifo = (char *)findSharedMemorySize(buffer_name,max_data_size_mb);
     ifo_header = (daq_multi_cycle_header_t *)ifo;
     ifo_data = (char *)ifo + sizeof(daq_multi_cycle_header_t);
-    // Following line breaks daqd for some reason
-    // max_data_size *= 1024 * 1024;
     cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t)) / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
     cycle_data_size -= (cycle_data_size % 8);
     fprintf (stderr,"cycle data size = %d\t%d\n",cycle_data_size, max_data_size_mb);
@@ -454,17 +450,11 @@ main(int argc, char **argv)
     int pv_mean_cycle_time = 0;
     int pv_dcu_count = 0;
     int pv_total_datablock_size = 0;
-        int pv_datablock_size_mb_s = 0;
+    int pv_datablock_size_mb_s = 0;
     int uptime = 0;
     int pv_uptime = 0;
     int gps_time = 0;
     int pv_gps_time = 0;
-    // int endpoint_min_count = 1 << 30;
-    // int endpoint_max_count = 0;
-    // int endpoint_mean_count = 0;
-    int cur_endpoint_ready_count;
-    // char endpoints_missed_buffer[256];
-    // int endpoints_missed_remaining;
     int missed_flag = 0;
     int missed_nsys[MAX_FE_COMPUTERS];
     int64_t recv_time[MAX_FE_COMPUTERS];
@@ -552,10 +542,8 @@ main(int argc, char **argv)
                     SIMPLE_PV_INT,
                     &pv_festatus,
 
-                    // 100*1024*1024,
                     0xffffffff,
                     0,
-                    // 90*1024*1024,
                     0xfffffffe,
 
                     1,
@@ -565,10 +553,8 @@ main(int argc, char **argv)
                     SIMPLE_PV_INT,
                     &pv_gps_time,
 
-                    // 100*1024*1024,
                     0xfffffff,
                     0,
-                    // 90*1024*1024,
                     0xfffffffe,
 
                     1,
@@ -642,9 +628,6 @@ main(int argc, char **argv)
             zbuffer = (char *)nextData + header_size;
             zbuffer_remaining = cycle_data_size - header_size;
 
-            cur_endpoint_ready_count = 0;
-            // endpoints_missed_remaining = sizeof(endpoints_missed_buffer);
-            // endpoints_missed_buffer[0] = '\0';
             min_recv_time = 0x7fffffffffffffff;
             festatus = 0;
             // Loop over all data buffers received from FE computers
@@ -659,7 +642,6 @@ main(int argc, char **argv)
                     if (do_verbose && nextCycle == 0) {
                         fprintf(stderr, "+++%d\n", ii);
                     }
-                    ++cur_endpoint_ready_count;
                     int myc = mxDataBlockSingle[ii].header.dcuTotalModels;
                     // For each model, copy over data header information
                     for(jj=0;jj<myc;jj++) {
@@ -717,15 +699,6 @@ main(int argc, char **argv)
                     } 
                 }
             }
-            /*
-            if (cur_endpoint_ready_count < endpoint_min_count) {
-                endpoint_min_count = cur_endpoint_ready_count;
-            }
-            if (cur_endpoint_ready_count > endpoint_max_count) {
-                endpoint_max_count = cur_endpoint_ready_count;
-            }
-            endpoint_mean_count += cur_endpoint_ready_count;
-            */
             // Write total data block size to shared memory header
             ifoDataBlock->header.fullDataBlockSize = dc_datablock_size;
             // Write total dcu count to shared memory header
@@ -736,28 +709,9 @@ main(int argc, char **argv)
 
             // Calc IX message size
             sendLength = header_size + ifoDataBlock->header.fullDataBlockSize;
-            /*
-            if (nextCycle == 0) {
-                memset(recv_buckets, 0, sizeof(recv_buckets));
-            }
-            */
             for (ii = 0; ii < nsys; ++ii) {
                 cur_ref_time = 0;
                 recv_time[ii] -= min_recv_time;
-                /*
-                entry_binned = 0;
-                for (jj = 0; jj < sizeof(recv_buckets)/sizeof(recv_buckets[0]); ++jj) {
-                    if (recv_time[ii] < cur_ref_time) {
-                        ++recv_buckets[jj];
-                        entry_binned = 1;
-                        break;
-                    }
-                    cur_ref_time += 5;
-                }
-                if (!entry_binned) {
-                    ++recv_buckets[sizeof(recv_buckets)/sizeof(recv_buckets[0])-1];
-                }
-                */
             }
             datablock_size_running += dc_datablock_size;
             if (nextCycle == 0) {
@@ -769,25 +723,8 @@ main(int argc, char **argv)
                 pv_gps_time = gps_time;
                 pv_dcu_count = mytotaldcu;
                 pv_festatus = festatus;
-                // pv_total_datablock_size = dc_datablock_size;
                 mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time / n_cycle_time : 1 << 31);
-                /*
-                endpoint_mean_count = (n_cycle_time > 0 ? endpoint_mean_count/n_cycle_time :  1<<31);
 
-                endpoints_missed_remaining = sizeof(endpoints_missed_buffer)-1;
-                endpoints_missed_buffer[0] = '\0';
-                for (ii = 0; ii < sizeof(missed_nsys)/sizeof(missed_nsys[0]) && endpoints_missed_remaining > 0; ++ii) {
-                    if (missed_nsys[ii]) {
-                        char tmp[80];
-                        int count = snprintf(tmp, sizeof(tmp), "%s(%x) ", sname[ii], missed_nsys[ii]);
-                        if (count < sizeof(tmp)) {
-                            strncat(endpoints_missed_buffer, tmp, count);
-                            endpoints_missed_remaining -= count;
-                        }       
-                    }
-                    missed_nsys[ii] = 0;
-                }
-                */
                 pv_mean_cycle_time = mean_cycle_time;
                 pv_max_cycle_time = max_cycle_time;
                 pv_min_cycle_time = min_cycle_time;
@@ -805,11 +742,6 @@ main(int argc, char **argv)
                 max_cycle_time = 0;
                 mean_cycle_time = 0;
 
-                /*
-                endpoint_min_count = nsys;
-                endpoint_max_count = 0;
-                endpoint_mean_count = 0;
-                */
 
                 missed_flag = 1;
                 datablock_size_running = 0;
@@ -839,9 +771,7 @@ main(int argc, char **argv)
                 unsigned int maxCycle = ifo_header->maxCycle;
                 unsigned int curCycle = ifo_header->curCycle;
                 xmitHeader[xmitBlockNum]->maxCycle = maxCycle;
-                // xmitHeader->cycleDataSize = ifo_header->cycleDataSize;
                 xmitHeader[xmitBlockNum]->cycleDataSize = sendLength;;
-                // xmitHeader->msgcrc = myCrc;
                 // Send cycle last as indication of data ready for receivers
                 xmitHeader[xmitBlockNum]->curCycle = curCycle;
                 // Have to flush the buffers to make data go onto Dolphin network
