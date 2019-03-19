@@ -460,10 +460,16 @@ int send_to_local_memory(int nsys,
 		        myErrorSignal = 1;
                 break;
             }
-	        mx_wait(ep, &req[cur_req], 150, &stat, &result);
-		    if (!result) {
-                fprintf(stderr, "mxWait failed with status %s\n", mx_strstatus(stat.code));
-                myErrorSignal = 1;
+again:
+	        res = mx_wait(ep, &req[cur_req], 50, &stat, &result);
+            if (res != MX_SUCCESS) {
+                fprintf(stderr, "mx_cancel() failed with status %s\n", mx_strerror(res));
+                exit(1);
+            }
+		    if (result == 0) {
+                fprintf(stderr, "trying again \n");
+                goto again;
+                // myErrorSignal = 1;
             }
             if (stat.code != MX_STATUS_SUCCESS) {
                 fprintf(stderr, "isendxxx failed with status %s\n", mx_strstatus(stat.code));
