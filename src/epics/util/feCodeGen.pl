@@ -1791,6 +1791,8 @@ print OUT "#include \"$rcg_src_dir/src/fe/controllerVirtual.c\"\n";
 print OUT "#include \"$rcg_src_dir/src/fe/controllerTS.c\"\n";
 } elsif ($virtualiop == 3) {
 print OUT "#include \"$rcg_src_dir/src/fe/controllerLR.c\"\n";
+} elsif ($virtualiop == 4) {
+print OUT "#include \"$rcg_src_dir/src/fe/controllerCymac.c\"\n";
 } else {
   if($adcMaster == 1) {
   	print OUT "#include \"$rcg_src_dir/src/fe/controllerIop.c\"\n";
