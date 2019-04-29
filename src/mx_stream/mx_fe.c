@@ -528,8 +528,6 @@ main(int argc,char *argv[])
     extern char *optarg;
 	mx_return_t ret;
 
-	mx_init();
-    MX_MUTEX_INIT(&stream_mutex);
 
 	rem_host = NULL;
     sysname = NULL;
@@ -614,6 +612,8 @@ main(int argc,char *argv[])
 
     // If sending to DAQ via net enabled, ensure all options have been set
 	if (sendViaOmx) {
+        mx_init();
+        MX_MUTEX_INIT(&stream_mutex);
         if(my_eid == DFLT_EID || his_eid == DFLT_EID){
         fprintf(stderr, "\n***ERROR\n***Must set both -e and -r options to send data to DAQ\n\n");
         Usage();
