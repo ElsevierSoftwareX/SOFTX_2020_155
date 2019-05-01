@@ -596,7 +596,7 @@ int ii;
 	dipc->bp[daqBlockNum].timeNSec = (unsigned int)daqBlockNum;
     if(daqreset) {
         shmTpTable->count = 1;
-        shmTpTable->tpNum[0] = 1;
+        shmTpTable->tpNum[0] = daqreset;
     } else {
         shmTpTable->count = 0;
         shmTpTable->tpNum[0] = 0;
@@ -823,8 +823,8 @@ sleep(2);
 		if (daqd_edcu1.epicsSync == 0) {
 			status = dbGetField(&daqresetaddr,DBR_LONG,&daqreset,&ropts,&nvals,NULL);
             if(daqreset) {
-                status = dbPutField(&daqresetaddr,DBR_LONG,&ropts,1);                // Init to zero.
-                send_daq_reset = 1;
+                status = dbPutField(&daqresetaddr,DBR_LONG,&ropts,1);  // Init to zero.
+                send_daq_reset = daqreset;
             }
 			status = dbGetField(&pagereqaddr,DBR_LONG,&pageNum,&ropts,&nvals,NULL);
             if((int)pageNum != 0) {
