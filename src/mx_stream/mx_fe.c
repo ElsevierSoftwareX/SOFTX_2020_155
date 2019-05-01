@@ -79,6 +79,7 @@ size_t cycle_data_size;
 char msg_buffer[MSG_BUF_SIZE];
 
 int symmetricom_fd = -1;
+int daqStatBit[2];
 
 
 /*********************************************************************************/
@@ -278,9 +279,6 @@ int loadMessageBuffer(	int nsys,
 {
 	int sendLength = 0;
 	int ii;
-	int daqStatBit[2];
-	daqStatBit[0] = 4;
-	daqStatBit[1] = 8;
     int dataXferSize;
 	char *dataBuff;
 	int myCrc = 0;
@@ -368,9 +366,6 @@ int send_to_local_memory(int nsys,
 			uint16_t my_dcu)
 {
     int do_wait = 1;
-    int daqStatBit[2];
-    daqStatBit[0] = 1;
-    daqStatBit[1] = 2;
 	char *nextData;
 
     
@@ -620,7 +615,16 @@ main(int argc,char *argv[])
         return(0);
         }
         fprintf(stderr,"Writing DAQ data to local shared memory and sending out on Open-MX\n");
+        if(my_eid == 0) {
+	        daqStatBit[0] = 1;
+	        daqStatBit[1] = 2;
+        } else {
+	        daqStatBit[0] = 4;
+	        daqStatBit[1] = 8;
+        }
 	} else	{
+	    daqStatBit[0] = 1;
+	    daqStatBit[1] = 2;
         fprintf(stderr,"Writing DAQ data to local shared memory only \n");
     }
 
