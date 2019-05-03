@@ -841,14 +841,14 @@ sleep(2);
 		fivesectimer = (fivesectimer + 1) % 50;		// Increment 5 second timer for triggering CRC checks.
 		// Check file CRCs every 5 seconds.
 		// DAQ and COEFF file checking was moved from skeleton.st to here RCG V2.9.
-		if(!fivesectimer) {
+		/*if(!fivesectimer) {
 			status = checkFileCrc(daqFile);
 			if(status != daqFileCrc) {
 				daqFileCrc = status;
 				status = dbPutField(&daqmsgaddr,DBR_STRING,modfilemsg,1);
 				logFileEntry("Detected Change to DAQ Config file.");
 			}
-		}
+		}*/
 	}
 	sleep(0xfffffff);
     } else
