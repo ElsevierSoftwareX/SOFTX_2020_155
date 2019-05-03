@@ -23,7 +23,7 @@ signed32 session_callback(session_cb_arg_t IN arg,
 			  session_cb_status_t IN status,
 			  unsigned32 IN target_node,
 			  unsigned32 IN local_adapter_number) {
-  // printkl("Session callback reason=%d status=%d target_node=%d\n", reason, status, target_node);
+  printkl("Session callback reason=%d status=%d target_node=%d\n", reason, status, target_node);
   // if (reason == SR_OK) iop_rfm_valid = 1;
   if (reason == SR_OK || status == SR_OK) iop_rfm_valid = 1;
   else iop_rfm_valid = 0;
