@@ -79,6 +79,7 @@ size_t cycle_data_size;
 char msg_buffer[MSG_BUF_SIZE];
 
 int symmetricom_fd = -1;
+int daqStatBit[2];
 
 
 /*********************************************************************************/
@@ -278,9 +279,6 @@ int loadMessageBuffer(	int nsys,
 {
 	int sendLength = 0;
 	int ii;
-	int daqStatBit[2];
-	daqStatBit[0] = 4;
-	daqStatBit[1] = 8;
     int dataXferSize;
 	char *dataBuff;
 	int myCrc = 0;
@@ -368,9 +366,6 @@ int send_to_local_memory(int nsys,
 			uint16_t my_dcu)
 {
     int do_wait = 1;
-    int daqStatBit[2];
-    daqStatBit[0] = 1;
-    daqStatBit[1] = 2;
 	char *nextData;
 
     
@@ -460,10 +455,16 @@ int send_to_local_memory(int nsys,
 		        myErrorSignal = 1;
                 break;
             }
-	        mx_wait(ep, &req[cur_req], 150, &stat, &result);
-		    if (!result) {
-                fprintf(stderr, "mxWait failed with status %s\n", mx_strstatus(stat.code));
-                myErrorSignal = 1;
+again:
+	        res = mx_wait(ep, &req[cur_req], 50, &stat, &result);
+            if (res != MX_SUCCESS) {
+                fprintf(stderr, "mx_cancel() failed with status %s\n", mx_strerror(res));
+                exit(1);
+            }
+		    if (result == 0) {
+                fprintf(stderr, "trying again \n");
+                goto again;
+                // myErrorSignal = 1;
             }
             if (stat.code != MX_STATUS_SUCCESS) {
                 fprintf(stderr, "isendxxx failed with status %s\n", mx_strstatus(stat.code));
@@ -522,8 +523,6 @@ main(int argc,char *argv[])
     extern char *optarg;
 	mx_return_t ret;
 
-	mx_init();
-    MX_MUTEX_INIT(&stream_mutex);
 
 	rem_host = NULL;
     sysname = NULL;
@@ -608,13 +607,24 @@ main(int argc,char *argv[])
 
     // If sending to DAQ via net enabled, ensure all options have been set
 	if (sendViaOmx) {
+        mx_init();
+        MX_MUTEX_INIT(&stream_mutex);
         if(my_eid == DFLT_EID || his_eid == DFLT_EID){
         fprintf(stderr, "\n***ERROR\n***Must set both -e and -r options to send data to DAQ\n\n");
         Usage();
         return(0);
         }
         fprintf(stderr,"Writing DAQ data to local shared memory and sending out on Open-MX\n");
+        if(my_eid == 0) {
+	        daqStatBit[0] = 1;
+	        daqStatBit[1] = 2;
+        } else {
+	        daqStatBit[0] = 4;
+	        daqStatBit[1] = 8;
+        }
 	} else	{
+	    daqStatBit[0] = 1;
+	    daqStatBit[1] = 2;
         fprintf(stderr,"Writing DAQ data to local shared memory only \n");
     }
 
