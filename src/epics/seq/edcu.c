@@ -65,7 +65,7 @@ typedef struct daqd_c {
 	int con_chans;
 	int val_events;
 	int con_events;
-	double channel_value[EDCU_MAX_CHANS];
+	float channel_value[EDCU_MAX_CHANS];
 	char channel_name[EDCU_MAX_CHANS][64];
 	int channel_status[EDCU_MAX_CHANS];
 	long gpsTime;
@@ -199,9 +199,6 @@ void subscriptionHandler(struct event_handler_args args) {
         if (args.type == DBR_FLOAT) {
         	float val = *((float *)args.dbr);
                 daqd_edcu1.channel_value[(unsigned long)args.usr] = val;
-        } else if (args.type == DBR_DOUBLE) {
-        	double val1 = *((double *)args.dbr);
-                daqd_edcu1.channel_value[(unsigned long)args.usr] = val1;
         }else{
 		printf("Arg type unknown\n");
 	}
@@ -633,11 +630,7 @@ int ii;
 		
 	buf_size = DAQ_DCU_BLOCK_SIZE*DAQ_NUM_SWING_BUFFERS;
 	daqData = (float *)(shmDataPtr + (buf_size * daqBlockNum));
-	for(ii=0;ii<daqd_edcu1.num_chans;ii++) {
-		*daqData = (float) daqd_edcu1.channel_value[ii];
-		daqData ++;
-	}
-	daqData = (float *)(shmDataPtr + (buf_size * daqBlockNum));
+    memcpy(daqData, daqd_edcu1.channel_value, daqd_edcu1.num_chans * sizeof(float));
 	dipc->dcuId = dcuId;
 	dipc->crc = daqFileCrc;
 	dipc->dataBlockSize = xferInfo.crcLength;
