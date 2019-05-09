@@ -505,9 +505,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
   // Calculate how many CPU cycles per code cycle
   cpc = cpu_khz * 1000;
   cpc /= CYCLE_PER_SECOND;
-#ifdef NO_CPU_SHUTDOWN
-	usleep_range(2,4);
-#endif
 
 
 #ifdef NO_CPU_SHUTDOWN
@@ -677,6 +674,9 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
           diagWord |= TIME_ERR_IRIGB;;
         }
       }
+#ifdef NO_CPU_SHUTDOWN
+	schedule();
+#endif
     }
 
 /// \> Update duotone diag information

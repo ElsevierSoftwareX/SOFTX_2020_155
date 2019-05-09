@@ -126,6 +126,8 @@ sub parseParams {
 				$::timeSlave = $spp[1];
 			} elsif ($spp[0] eq "iop_time_slave") {
 				$::iopTimeSlave = $spp[1];
+			} elsif ($spp[0] eq "no_cpu_shutdown") {
+				$::no_cpu_shutdown = $spp[1];
 			} elsif ($spp[0] eq "rfm_time_slave") {
 				$::rfmTimeSlave = $spp[1];
 			} elsif ($spp[0] eq "pciRfm") {

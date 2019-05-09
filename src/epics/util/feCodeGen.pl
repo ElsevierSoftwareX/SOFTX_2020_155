@@ -138,6 +138,7 @@ $rfmTimeSlave = -1;
 $diagTest = -1;
 $flipSignals = 0;
 $virtualiop = 0;
+$no_cpu_shutdown = 0;
 $edcu = 0;
 $casdf = 0;
 $globalsdf = 0;
@@ -2546,6 +2547,9 @@ if ($adcMaster > -1) {
   }
   if($dacWdOverride > -1) {
   print OUTM "EXTRA_CFLAGS += -DDAC_WD_OVERRIDE\n";
+  }
+  if ($no_cpu_shutdown > 0) {
+    print OUTM "EXTRA_CFLAGS += -DNO_CPU_SHUTDOWN\n";
   }
   # ADD DAC_AUTOCAL to IOPs
   print OUTM "EXTRA_CFLAGS += -DDAC_AUTOCAL\n";
