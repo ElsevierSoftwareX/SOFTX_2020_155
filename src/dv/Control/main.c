@@ -83,7 +83,7 @@ serverConnect()  {
       return -1;
     }
 
-    c = DataChanList(allChan);
+    c = DataChanList(allChan, MAX_CHANNELS);
     c1 = 0;
     c2 = 0;
     for ( j=0; j<c; j++ ) { /* count DMT & Obsolete channels */

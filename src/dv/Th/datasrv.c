@@ -975,7 +975,7 @@ int ssize, index, j;
 
 
 /* returns total number of the configured channels */
-int DataChanList(struct DChList allChan[])
+int DataChanList(struct DChList allChan[], size_t dest_size)
 {
 int j;
 

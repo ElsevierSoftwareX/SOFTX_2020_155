@@ -44,11 +44,13 @@ extern void XDdisable_link ( Widget w, XtPointer client_data, XtPointer call_dat
 
 
 
+#ifndef FRAMER_BASE_NAME
+#define FRAMER_BASE_NAME "framer"
+#endif
 
-
-
-
-
+#ifndef FRAMEMEM_READ_BASE_NAME
+#define FRAMEMEM_READ_BASE_NAME "frameMemRead"
+#endif
 
 
 
@@ -1181,7 +1183,7 @@ FILE   *fp, *fp1, *fp2;
 	      printf ( "Fatal error: Can't open writing file: %s. Please save your settings, exit Dataviewer and start again.\n", tempname );
 	    }
 	    else {
-	      c = DataChanList(allChan);
+          c = DataChanList(allChan, MAX_CHANNELS);
 	      c1 = 0;
 	      c2 = 0;
 	      for ( j=0; j<c; j++ ) { /* count DMT & Obsolete channels */
@@ -3673,7 +3675,7 @@ char  displaystring[MAX_FILELEN], tempstring[100];
            sscanf (iniDir, "%dDC/", &i);
 	   MSQKEY = i;    /*rand();*/
 	   
-	   sprintf ( displaystring, "%sframer%d %d %s %d %s %s /tmp/%s %s %s %d %d", origDir, plotterNum,  MSQKEY, serverIP, serverPort, origDir, displayIP, iniDir, version_n, version_y, zoomflag, nolimit );
+       sprintf ( displaystring, "%s%s%d %d %s %d %s %s /tmp/%s %s %s %d %d", origDir, FRAMER_BASE_NAME, plotterNum,  MSQKEY, serverIP, serverPort, origDir, displayIP, iniDir, version_n, version_y, zoomflag, nolimit );
 	   sprintf ( tempstring, "/tmp/%sstartDisplay", iniDir );
 	   fp = fopen(tempstring, "w");
 	   if (fp == NULL) {
@@ -5011,7 +5013,7 @@ int  trigchno, tr1=0, tr2=0;
 	  //printf ( "Long Playback Server: %s-%d\n", serverLongIP, serverLongPort );
 	  for ( j=0; j<copies; j++ ) { 
 	    if (!trigger)
-	      sprintf ( displaystring, "%sframeMemRead%s %s %d %s %s %s /tmp/%slongfile%d %d %d", origDir, plotterNum == 3? "XMGR": "", serverLongIP, serverLongPort, tempstring, origDir, displayIP, iniDir, j, j, totalch );
+	      sprintf ( displaystring, "%s%s%s %s %d %s %s %s /tmp/%slongfile%d %d %d", origDir, FRAMEMEM_READ_BASE_NAME, plotterNum == 3? "XMGR": "", serverLongIP, serverLongPort, tempstring, origDir, displayIP, iniDir, j, j, totalch );
 	    else
 	      sprintf ( displaystring, "%sframeMemTrig %s %d %s %s %s /tmp/%slongfile%d %d %d", origDir, serverLongIP, serverLongPort, tempstring, origDir, displayIP, iniDir, j, j, totalch );
 	    sprintf ( tempstring1, "/tmp/%sstartLong%d", iniDir, j );
@@ -5580,7 +5582,7 @@ int signalVerify (int chanNo, char chanV[]) {
 
   /* test if chanV is a valid signal name */
   //printf ( "Verifying %s ...\n", chanV);
-  c = DataChanList(allChan);
+  c = DataChanList(allChan, MAX_CHANNELS);
   //	printf ( "Comparing with %d channels\n", c);
   for ( j=0; j<c; j++ ) {
 /*    if (strncmp(allChan[j].name, chanV, strlen(allChan[j].name))==0)  */

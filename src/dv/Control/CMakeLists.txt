@@ -22,4 +22,17 @@ target_link_libraries(dv PUBLIC
         tai::tai
         ${CMAKE_THREAD_LIBS_INIT})
 
+add_executable(dv_nds dc3.c TabBook.c main.c dc3_stubs.c)
+target_include_directories(dv_nds PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(dv_nds PUBLIC MOTIF FRAMER_BASE_NAME="framer_nds" FRAMEMEM_READ_BASE_NAME="frameMemRead_nds")
+target_link_libraries(dv_nds PUBLIC
+        th::datasrv_nds
+        java_widgets
+        motif::motif
+        dv::X11
+        m
+        tai::tai
+        ${CMAKE_THREAD_LIBS_INIT})
+
 install(TARGETS dv DESTINATION bin)
+install(TARGETS dv_nds DESTINATION bin)

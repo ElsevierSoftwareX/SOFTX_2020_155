@@ -1,3 +1,6 @@
+#ifndef TH_DATASRV_H
+#define TH_DATASRV_H
+
 /* datasrv.h  */
 
 #include <stdlib.h>
@@ -23,6 +26,10 @@
 */
 #include "channel.h"
 #include "daqc.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 struct DChList {
     char    name[MAX_LONG_CHANNEL_NAME_LENGTH+1]; /* Channel name */
@@ -148,7 +155,7 @@ long  DataUTCtoGPS1(int yr, int mo, int da, int hr, int mn, int sc);
 
 /***** the following are information functions  *****/
 /** DataChanList: show the list of all configured channels **/
-int    DataChanList(struct DChList allChan[]); 
+int    DataChanList(struct DChList allChan[], size_t dest_size);
 
 /** DataGroup: get channel group information
     returns number of channel groups or -1 if fails **/
@@ -165,3 +172,8 @@ int    DataChanRate(const char* chName);
       -1: trend data is not available for the channel **/
 int    DataChanType(const char* chName);
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif

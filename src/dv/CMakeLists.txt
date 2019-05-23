@@ -17,6 +17,8 @@ endif (${X11_Xt_FOUND})
 if (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xpm} AND ${_has_X11_Xt} AND ${X11_FOUND})
     Message("Dataviewr will be built")
 
+    enable_testing()
+
     # create some targets to make things look nice
     add_library(motif_ INTERFACE)
     target_include_directories(motif_ INTERFACE ${MOTIF_INCLUDE_DIR})
@@ -37,9 +39,11 @@ if (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xpm} AND ${_has_X11_Xt} AND
     add_subdirectory(Control)
 
     configure_file(dataviewer.sh.cmake ${CMAKE_CURRENT_BINARY_DIR}/dataviewer @ONLY)
+    configure_file(dataviewer_nds.sh.cmake ${CMAKE_CURRENT_BINARY_DIR}/dataviewer_nds @ONLY)
     configure_file(dataviewer_msgwin.sh.cmake ${CMAKE_CURRENT_BINARY_DIR}/dataviewer_msgwin @ONLY)
 
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/dataviewer"
+            "${CMAKE_CURRENT_BINARY_DIR}/dataviewer_nds"
             "${CMAKE_CURRENT_BINARY_DIR}/dataviewer_msgwin"
             DESTINATION bin
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
