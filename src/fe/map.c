@@ -135,10 +135,11 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
-		  printk("DAC card on bus %x; device %x prim %x\n",
+		  /* printk("DAC card on bus %x; device %x prim %x\n",
 			dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn),
 			dacdev->bus->secondary);
+			*/
 			/* See if ought to use this one or not */
 			for (i = 0; i < pCds->cards; i++) {
 				if (pCds->cards_used[i].type == GSC_16AO16
@@ -164,10 +165,11 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
-		  printk("ADC card on bus %x; device %x prim %x\n",
+		  /* printk("ADC card on bus %x; device %x prim %x\n",
 			dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn),
 			dacdev->bus->secondary);
+			*/ 
 			/* See if ought to use this one or not */
 			for (i = 0; i < pCds->cards; i++) {
 				if (pCds->cards_used[i].type == GSC_16AI64SSA
@@ -178,10 +180,11 @@ int mapPciModules(CDS_HARDWARE *pCds)
 			}
 		}
 		if (use_it) {
-		  printk("adc card on bus %x; device %x prim %x\n",
+		  /*printk("adc card on bus %x; device %x prim %x\n",
 			dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn),
 			dacdev->bus->secondary);
+			*/
 		  status = gsc16ai64Init(pCds,dacdev);
 		  modCount ++;
 		}

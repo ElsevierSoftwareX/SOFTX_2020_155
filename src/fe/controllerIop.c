@@ -37,6 +37,7 @@
 #include <linux/kthread.h>
 #include <asm/delay.h>
 #include <asm/cacheflush.h>
+// #include <asm/msr.h>
 
 #include <linux/slab.h>
 /// Can't use printf in kernel module so redefine to use Linux printk function
@@ -493,10 +494,10 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
   timeSec = remote_time((struct CDS_EPICS *)pLocalEpics);
   printf ("Using remote GPS time %d \n",timeSec);
 #else
-  timeSec = current_time() -1;
+  timeSec = current_time_fe() -1;
 #endif
 
-  rdtscl(adcinfo.adcTime);
+  rdtscll(adcinfo.adcTime);
 
   /// ******************************************************************************\n
   /// Enter the infinite FE control loop  ******************************************\n
@@ -598,9 +599,9 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // **************************************************************************************
 /// \> Call the front end specific application  ******************\n
 /// - -- This is where the user application produced by RCG gets called and executed. \n\n
-    rdtscl(cpuClock[CPU_TIME_USR_START]);
+    rdtscll(cpuClock[CPU_TIME_USR_START]);
     iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
-    rdtscl(cpuClock[CPU_TIME_USR_END]);
+    rdtscll(cpuClock[CPU_TIME_USR_END]);
 // **************************************************************************************
 //
     /// - ---- Reset ADC DMA Start Flag \n
@@ -1023,7 +1024,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // Update end of cycle information
 // *****************************************************************
     // Capture end of cycle time.
-    rdtscl(cpuClock[CPU_TIME_CYCLE_END]);
+    rdtscll(cpuClock[CPU_TIME_CYCLE_END]);
 
     /// \> Compute code cycle time diag information.
     timeinfo.cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;

@@ -534,10 +534,10 @@ udelay(1000);
   timeSec = remote_time((struct CDS_EPICS *)pLocalEpics);
   printf ("Using remote GPS time %d \n",timeSec);
 #else
-  timeSec = current_time() -1;
+  timeSec = current_time_fe() -1;
 #endif
 
-  rdtscl(adcinfo.adcTime);
+  rdtscll(adcinfo.adcTime);
 
   /// ******************************************************************************\n
   /// Enter the infinite FE control loop  ******************************************\n
@@ -617,9 +617,9 @@ udelay(1000);
 // **************************************************************************************
 /// \> Call the front end specific application  ******************\n
 /// - -- This is where the user application produced by RCG gets called and executed. \n\n
-	rdtscl(cpuClock[CPU_TIME_USR_START]);
+	rdtscll(cpuClock[CPU_TIME_USR_START]);
  	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
-    rdtscl(cpuClock[CPU_TIME_USR_END]);
+    rdtscll(cpuClock[CPU_TIME_USR_END]);
 // **************************************************************************************
 //
    	/// - ---- Reset ADC DMA Start Flag \n
@@ -1047,7 +1047,7 @@ udelay(1000);
 // Update end of cycle information
 // *****************************************************************
 	// Capture end of cycle time.
-    rdtscl(cpuClock[CPU_TIME_CYCLE_END]);
+    rdtscll(cpuClock[CPU_TIME_CYCLE_END]);
 
 	/// \> Compute code cycle time diag information.
 	timeinfo.cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;

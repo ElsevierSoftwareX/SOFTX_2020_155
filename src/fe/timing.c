@@ -5,7 +5,7 @@
 /// \brief Get current kernel time (in GPS)
 ///	@return Current time in form of GPS Seconds.
 //***********************************************************************
-inline unsigned long current_time(void) {
+inline unsigned long current_time_fe(void) {
     struct timespec t;
     extern struct timespec current_kernel_time(void);
     	t = current_kernel_time();

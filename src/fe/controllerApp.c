@@ -413,26 +413,17 @@ udelay(1000);
   // Find memory buffer of first ADC to be used in SLAVE application.
   ll = cdsPciModules.adcConfig[0];
   // printf("waiting to sync %d\n",ioMemData->iodata[ll][0].cycle);
-  rdtscl(cpuClock[CPU_TIME_CYCLE_START]);
+  rdtscll(cpuClock[CPU_TIME_CYCLE_START]);
 
   pLocalEpics->epicsOutput.fe_status = INIT_SYNC;
-  if (boot_cpu_has(X86_FEATURE_MWAIT)) {
-	  for(;;) {
-	    if (ioMemData->iodata[ll][0].cycle == 0) break;
-	    __monitor((void *)&(ioMemData->iodata[ll][0].cycle), 0, 0);
-	    if (ioMemData->iodata[ll][0].cycle == 0) break;
-	    __mwait(0, 0);
-	  }
-  } else {
     // Spin until cycle 0 detected in first ADC buffer location.
 	do {
 	udelay(1);
     } while(ioMemData->iodata[ll][0].cycle != 0);
-  }
   pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;
 
   timeSec = ioMemData->iodata[ll][0].timeSec;
-  rdtscl(cpuClock[CPU_TIME_CYCLE_END]);
+  rdtscll(cpuClock[CPU_TIME_CYCLE_END]);
   cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
   // printf("Synched %d\n",cycleTime);
   // Get GPS seconds from MASTER
@@ -446,10 +437,10 @@ udelay(1000);
   timeSec = remote_time((struct CDS_EPICS *)pLocalEpics);
   // printf ("Using remote GPS time %d \n",timeSec);
 #else
-  timeSec = current_time() -1;
+  timeSec = current_time_fe() -1;
 #endif
 
-  rdtscl(adcTime);
+  rdtscll(adcTime);
 
   /// ******************************************************************************\n
   /// Enter the infinite FE control loop  ******************************************\n
@@ -507,7 +498,7 @@ udelay(1000);
 		/// \> Set counters for next read from ipc memory
         ioClock = (ioClock + 1) % IOP_IO_RATE;
         ioMemCntr = (ioMemCntr + 1) % IO_MEMORY_SLOTS;
-       	rdtscl(cpuClock[CPU_TIME_CYCLE_START]);
+       	rdtscll(cpuClock[CPU_TIME_CYCLE_START]);
 
 	}
 
@@ -517,9 +508,9 @@ udelay(1000);
 
 /// \> Call the front end specific application  ******************\n
 /// - -- This is where the user application produced by RCG gets called and executed. \n\n
-    rdtscl(cpuClock[CPU_TIME_USR_START]);
+    rdtscll(cpuClock[CPU_TIME_USR_START]);
  	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
-    rdtscl(cpuClock[CPU_TIME_USR_END]);
+    rdtscll(cpuClock[CPU_TIME_USR_END]);
   	odcStateWord = 0;
 
 
@@ -694,7 +685,7 @@ udelay(1000);
 		feStatus |= app_dac_status_update(&dacInfo);
 	}
 	// Capture end of cycle time.
-    rdtscl(cpuClock[CPU_TIME_CYCLE_END]);
+    rdtscll(cpuClock[CPU_TIME_CYCLE_END]);
 
 	/// \> Compute code cycle time diag information.
 	cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;

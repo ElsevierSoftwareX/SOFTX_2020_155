@@ -6,7 +6,7 @@ void print_io_info(CDS_HARDWARE *cdsp) {
   jj = 0;
 	printf("THIS IS A TEST \n");
 #ifndef USER_SPACE
-	printf("startup time is %ld\n", current_time());
+	printf("startup time is %ld\n", current_time_fe());
 	printf("cpu clock %u\n",cpu_khz);
 #endif
 	printf("EPICSM at 0x%lx\n", (unsigned long)_epics_shm);
