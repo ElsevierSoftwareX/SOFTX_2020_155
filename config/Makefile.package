@@ -1,0 +1,285 @@
+# Linux Epics IOC system build rules
+
+
+EPICS_VERSION := $(shell pkg-config --modversion epics-base)
+EPICS_BIN_PATH := $(shell pkg-config --variable=bindir epics-base)
+
+# Sequencer synchronization; to fix broken seq package
+SRC += $(RCG_SRC_DIR)/src/drv/sync.c
+
+# Do not delete these intermediate files
+.SECONDARY: build/$(TARGET)/*.i
+
+# Preprocessor is used on .st file to get .i which is later fed to SNC
+PREPROCESS = /usr/bin/gcc -x c -E -P 
+
+# Standard C and C++ compiler and C preprocessor flags
+CFLAGS += $(EXTRA_CFLAGS)
+CFLAGS += $(shell pkg-config --cflags epics-base)
+CFLAGS += -I/usr/lib/rmnet -I/usr/lib/rfm2g
+CFLAGS += -Isrc/include
+CFLAGS += -I$(RCG_SRC_DIR)/src/include -I$(RCG_SRC_DIR)/src/include/drv
+ifeq (,$(findstring tcsepics, $(TARGET)))
+CFLAGS += -DRFM_EPICS -DNO_FM10GEN_C_CODE
+endif
+ifeq (rtlepics,$(findstring rtlepics, $(TARGET)))
+CFLAGS += -DNO_RFM_EPICS_RECORD_SUPPORT
+endif
+CFLAGS += -D_POSIX_C_SOURCE=199506L -D_POSIX_THREADS  
+CFLAGS += -DOSITHREAD_USE_DEFAULT_STACK  -D_X86_  -DUNIX  -D_BSD_SOURCE -Dlinux
+CFLAGS += -D_REENTRANT -g -fPIC 
+
+rtl_module := $(shell /sbin/lsmod | grep rtl)
+ifeq ($(rtl_module),)
+CFLAGS += -DNO_RTL=1
+endif
+
+CXXFLAGS = $(CFLAGS)
+SNCFLAGS += +a -c -w
+#SNCFLAGS += -e
+
+# Sequencer file (.st) compiler
+#SNC = $(EPICS_SEQ_PATH)/bin/$(EPICS_ARCH)/snc $(SNCFLAGS)
+SNC = $(EPICS_BIN_PATH)/snc $(SNCFLAGS)
+
+# registration code generator
+REGGEN = $(EPICS_BIN_PATH)/registerRecordDeviceDriver.pl
+
+# Sequencer generator files
+FMSEQFILES = $(RCG_SRC_DIR)/src/epics/util/fmseq.pl $(RCG_SRC_DIR)/src/epics/util/skeleton.db $(RCG_SRC_DIR)/src/epics/util/skeleton.st
+
+# Standard Epics IOC server library flags
+LIBFLAGS += -g
+#LIBFLAGS += -L$(EPICS_LIB_PATH)
+#LIBFLAGS += -L$(EPICS_SEQ_PATH)/lib/$(EPICS_ARCH)
+#LIBFLAGS += -L$(EPICS_EXT_PATH)/lib/$(EPICS_ARCH)
+LIBFLAGS += $(shell pkg-config --libs epics-base)
+
+# test for 3.15 libraries, otherwise use 3.14
+#ifneq ("$(wildcard $(EPICS_LIB_PATH)/libdbCore.a)","")
+ifneq ($(wordlist 1,2,$(subst '.',' ',$(EPICS_VERSION))), (3 15))
+LIBFLAGS += -lseq -lpv -ldbRecStd -ldbCore
+LIBFLAGS += -lca -lCom
+else
+LIBFLAGS += -lseq -lseqDev -lpv -lsoftDevIoc -lrecIoc
+LIBFLAGS += -lmiscIoc -lrsrvIoc -ldbtoolsIoc
+LIBFLAGS += -lasIoc -ldbIoc -lregistryIoc -ldbStaticIoc -lca -lCom
+endif
+LIBFLAGS += -lpthread -lreadline -lcurses -lrt
+
+# User Makefiles's $(SRC) variable is split here in sequencer source
+# and all the rest, which should be C files
+SEQ_SRCS = $(filter %.st, $(SRC))
+CSRCS = $(filter-out %.st, $(SRC))
+# Required Epics files
+CCSRCS += build/$(TARGET)/registerRecordDeviceDriver.cc
+
+# Each .st file gets preprocessed twice to make one C and one C++
+# file. C++ file has different name. Both files are exactly the same
+# in content
+SEQ_ISRC = $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%st=%i)))
+#SEQ_CCSRC = $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%.st=%_foo.cc)))
+SEQ_CCSRC += $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%st=%c)))
+SEQ_OBJ = $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%st=%o)))
+#SEQ_OBJ += $(addprefix build/$(TARGET)/, $(notdir $(SEQ_SRCS:%.st=%_foo.o)))
+SEQ_OBJ += $(addprefix build/$(TARGET)/, $(notdir $(CSRCS:%.c=%.o)))
+SEQ_OBJ += $(addprefix build/$(TARGET)/, $(notdir $(CCSRCS:%.cc=%.o)))
+
+# Standard Epics IOC database definition file
+DBD += $(RCG_SRC_DIR)/src/epics/dbd/a.dbd build/$(TARGET)/*.dbd
+
+# Main target to make an Epics IOC server
+all: target build/$(TARGET)/$(TARGET) install
+
+# Install built epics IOC into target/$(TARGET)
+install: $(DB)
+	mkdir -p target/$(TARGET)/db
+	cp build/$(TARGET)/$(TARGET) target/$(TARGET)
+	/bin/rm -f target/$(TARGET)/db/*/autoBurt.req
+	for ifo in $(IFO) ; do \
+	  system=`echo $(subst epics,,$(TARGET)) | tr a-z A-Z | cut -c1-3`; \
+	  model=`echo $(subst epics,,$(TARGET))`; \
+	  ucmodel=`echo $(subst epics,,$(TARGET)) | tr a-z A-Z `; \
+	  ifo0=`echo $$ifo | sed 's/[0-9]/0/g'`; \
+	  mkdir -p target/$(TARGET)/db/$$ifo; \
+	  echo "#!/bin/sh" > target/$(TARGET)/startup$$ifo; \
+	  echo "if fuser -s ioc$$ifo.log; then" >> target/$(TARGET)/startup$$ifo; \
+	  echo "echo Another copy of Epics process running already\!" >> target/$(TARGET)/startup$$ifo; \
+	  echo "exit 1" >> target/$(TARGET)/startup$$ifo; \
+	  echo "fi" >> target/$(TARGET)/startup$$ifo; \
+	  echo "mkdir -p /opt/rtcds/$(SITE)/${ifo}/log/$$model" >> target/$(TARGET)/startup$$ifo; \
+	  echo ./$(TARGET) $(TARGET)$$ifo.cmd \> /opt/rtcds/$(SITE)/${ifo}/log/$$model/ioc$$ifo.log 2\>\&1 \& >> target/$(TARGET)/startup$$ifo ; \
+	  echo echo $(TARGET) $$ifo IOC Server started >> target/$(TARGET)/startup$$ifo ; \
+	  chmod +x target/$(TARGET)/startup$$ifo ; \
+	  /bin/rm -f target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
+	  echo "dbLoadDatabase \"base.dbd\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+	  echo 'registerRecordDeviceDriver(pdbbase)' >> target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
+	  for i in $(DB) ; do \
+		cat $$i | sed s/%IFO%/$$ifo/g\;s/%IFO0%/$$ifo0/g\;s/%SYS%/$$system/g > target/$(TARGET)/db/$$ifo/`basename $$i`; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'DACKILL|record\(ao|record\(stringout' | egrep -v 'DACKILL_PANIC|_SDF_' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "RO %s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(stringin' | egrep -v 'SDF_NAME | _SDF_' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s\n", $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(ao' | egrep -v 'record\(mbbi' | egrep -v 'SWSTAT|DACKILL|_SDF_' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0, $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+                grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'SWSTAT|DACKILL' | egrep -v 'DACKILL_PANIC' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "RO %s.HSV\nRO %s.LSV\nRO %s.LOW\n", $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		\
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(bo|record\(bi' | egrep -v '_SDF_' | sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep 'record\(bo|record\(bi' | egrep -v '_SDF_' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.OSV\n%s.ZSV\n", $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		\
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'DACKILL|SDF_RELOAD|_SDF_|record\(ao|record\(string|record\(bi|record\(bo'| sed 's/.*"\(.*\)\".*/\1/g' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		grep record  target/$(TARGET)/db/$$ifo/`basename $$i` | egrep -v 'SWSTAT|DACKILL|_SDF_|record\(ao|record\(string|record\(bi|record\(bo|record\(mbbi' | sed 's/.*"\(.*\)\".*/\1/g' | awk '{ printf "%s.HSV\n%s.LSV\n%s.HIGH\n%s.LOW\n", $$0 , $$0, $$0, $$0 }' >> target/$(TARGET)/db/$$ifo/autoBurt.req; \
+		\
+		echo "dbLoadRecords \"db/$${ifo}/`basename $$i`\"" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet DAQ_FILE /opt/rtcds/$(SITE)/${ifo}/chans/daq/$$ucmodel.ini" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet DAQ_DIR /opt/rtcds/$(SITE)/${ifo}/chans/daq/" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet FOTON_FILE /opt/rtcds/$(SITE)/${ifo}/chans/$$ucmodel.txt" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet FOTON_DIFF_FILE /opt/rtcds/$(SITE)/${ifo}/chans/tmp/$$ucmodel.diff" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet COEFF_FILE /opt/rtcds/$(SITE)/${ifo}/chans/tmp/$$ucmodel.txt" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet LOG_DIR /opt/rtcds/$(SITE)/${ifo}/log/$$model" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet SDF_DIR /opt/rtcds/$(SITE)/${ifo}/target/$$model/$(TARGET)/burt/" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+                echo "epicsEnvSet SDF_FILE safe" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+                echo "epicsEnvSet SDF_MODEL $$model" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet MODEL_SITE $(SITE)" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo "epicsEnvSet MODEL_IFO ${ifo}" >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		echo -n 'epicsEnvSet PREFIX '>> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+		grep _GRD_RB_STAT0  target/$(TARGET)/db/$$ifo/`basename $$i` | head -1 | sed 's/[^"]*"\([^"]*\)_GRD_RB_STAT0.*/\1/g' >>  target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+	  done ; \
+	done
+	for ifo in $(IFO) ; do \
+	  echo "iocInit" >> target/$(TARGET)/$(TARGET)$$ifo.cmd ; \
+	  for i in $(SEQ) ; do \
+		echo "seq &$$i" | sed s/%IFO%/$$ifo/g\;s/%SITE%/`if test $$ifo = L1 ; then echo llo ; else echo lho ; fi`/g >> target/$(TARGET)/$(TARGET)$$ifo.cmd; \
+	  done ; \
+	done
+	for i in $(SEQH1) ; do \
+		echo "seq &$$i" | sed s/%IFO%/H1/g\;s/%SITE%/lho/g >> target/$(TARGET)/$(TARGET)H1.cmd; \
+	done
+	for i in $(SEQH2) ; do \
+		echo "seq &$$i" | sed s/%IFO%/H2/g\;s/%SITE%/lho/g >> target/$(TARGET)/$(TARGET)H2.cmd; \
+	done
+	for i in $(SEQL1) ; do \
+		echo "seq &$$i" | sed s/%IFO%/L1/g\;s/%SITE%/llo/g >> target/$(TARGET)/$(TARGET)L1.cmd; \
+	done
+	echo 'This is generated directory. Please make changes in CVS and reinstall from scratch.' > target/$(TARGET)/README.making_changes
+	echo 'Changes made to files in this directory will be lost.' >> target/$(TARGET)/README.making_changes
+	echo >> target/$(TARGET)/README.making_changes
+	echo 'Built on date' `date` >> target/$(TARGET)/README.making_changes
+
+# Epics IOC server link target
+build/$(TARGET)/$(TARGET): $(SEQ_OBJ)
+	$(CXX) -o $@ $? $(LIBFLAGS)
+
+# Object files depend on sources
+$(SEQ_OBJ): $(SEQ_CCSRC) $(CCSRCS) $(CSRCS)
+
+# Need to get .i files before we can run SNC to produce sources
+$(SEQ_CCSRC): $(SEQ_ISRC)
+
+# Make installation target directory
+target:
+	@mkdir -p build/$(TARGET)
+
+# Preprocess a sequencer file
+build/$(TARGET)/%.i: src/epics/seq/%.st
+	$(PREPROCESS) $(CFLAGS) $< > $@
+
+build/$(TARGET)/%.i: src/epics/seq/lsc/%.st
+	$(PREPROCESS) $(CFLAGS) $< > $@
+
+build/$(TARGET)/%.i: src/epics/seq/sus/%.st
+	$(PREPROCESS) $(CFLAGS) $< > $@
+
+build/$(TARGET)/%.i: src/epics/seq/quad/%.st
+	$(PREPROCESS) $(CFLAGS) $< > $@
+
+# Preprocess generated sequencer file
+# Preprocess generated sequencer file
+.PRECIOUS: build/$(TARGET)/%.st
+build/$(TARGET)/%.i: build/$(TARGET)/%.st
+	$(PREPROCESS) $(CFLAGS) $< > $@
+
+# Generate sequencer file using fmseq.pl
+build/$(TARGET)/%.st: src/epics/fmseq/% $(FMSEQFILES)
+	(cd src/epics/fmseq; \
+	 cat $(notdir $<) | cpp $(CFLAGS) -  | grep -v ^# | $(if $(FMSEQ), $(FMSEQ), $(RCG_SRC_DIR)/src/epics/util/fmseq.pl) $(notdir $<) &&\
+	 mv $(notdir $<)_proc.h ../../include/ &&\
+	 mv $(notdir $<).* ../../../build/$(TARGET))
+
+
+# Replicate sequencer source, because I am too lazy to write re-entrant code
+# Following block of rules used to replicate fmseq.pl generated sequencers
+build/$(TARGET)/%1.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\11/g > $@
+build/$(TARGET)/%2.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\12/g > $@
+build/$(TARGET)/%3.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\13/g > $@
+build/$(TARGET)/%4.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\14/g > $@
+build/$(TARGET)/%5.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\15/g > $@
+build/$(TARGET)/%6.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\16/g > $@
+build/$(TARGET)/%7.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\17/g > $@
+build/$(TARGET)/%8.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\18/g > $@
+build/$(TARGET)/%9.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\19/g > $@
+build/$(TARGET)/%10.st: build/$(TARGET)/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\110/g > $@
+
+# Replicate sequncers
+build/$(TARGET)/%1.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\11/g > $@
+build/$(TARGET)/%2.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\12/g > $@
+build/$(TARGET)/%3.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\13/g > $@
+build/$(TARGET)/%4.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\14/g > $@
+build/$(TARGET)/%5.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\15/g > $@
+build/$(TARGET)/%6.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\16/g > $@
+build/$(TARGET)/%7.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\17/g > $@
+build/$(TARGET)/%8.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\18/g > $@
+build/$(TARGET)/%9.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\19/g > $@
+build/$(TARGET)/%10.st: $(RCG_SRC_DIR)/src/epics/seq/%.st
+	cat $< | sed s/program\\w\*\\\(\.\*\\\)/program\ \\110/g > $@
+
+# Build C++ version of sequencer code
+#build/$(TARGET)/%_foo.cc: build/$(TARGET)/%.i
+#	$(SNC) $< -o $@
+# Build C version of sequencer code
+%.c: %.i
+	$(SNC) $< -o $@
+	echo 'registrar('`basename $(@:%.c=%)`'Registrar)' > $(@:%c=%dbd) 
+
+# Compile sequencer-related C code
+build/$(TARGET)/%o: $(RCG_SRC_DIR)/src/epics/seq/%c
+	$(CC) -c $(CFLAGS) $< -o $@
+
+# Compile driver C code
+build/$(TARGET)/%o: $(RCG_SRC_DIR)/src/drv/%c
+	$(CC) -c $(CFLAGS) $< -o $@
+
+# Compile sequencer-related C++ code
+build/$(TARGET)/%o: $(RCG_SRC_DIR)/src/epics/seq/%cc
+	$(CXX) -c $(CFLAGS) $< -o $@
+
+# Compile generate C++ code
+#build/$(TARGET)/%_foo.o: build/$(TARGET)/%_foo.cc
+#	$(CXX) -c $(CFLAGS) $< -o $@
+
+# Generate records and sequencers generation code
+build/$(TARGET)/registerRecordDeviceDriver.cc: 
+	cat $(DBD) > build/$(TARGET)/full.dbd
+	$(REGGEN) build/$(TARGET)/full.dbd  registerRecordDeviceDriver > $@
+	/bin/rm -f build/$(TARGET)/full.dbd
+
+
+# Targets not files
+.PHONY: target
+.PHONY: install
