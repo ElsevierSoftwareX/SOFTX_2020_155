@@ -1216,6 +1216,12 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER_MAX epicsOutput.cpuMeterMax int 
 print OUTH "\tint adcWaitTime;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT epicsOutput.adcWaitTime int ao 0 field(HOPR,\"$rate\") field(EGU,\"usec\") field(LOPR,\"0\")\n";
 
+print OUTH "\tint adcWaitMin;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT_MIN epicsOutput.adcWaitMin int ao 0 field(HOPR,\"$rate\") field(EGU,\"usec\") field(LOPR,\"0\")\n";
+
+print OUTH "\tint adcWaitMax;\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT_MAX epicsOutput.adcWaitMax int ao 0 field(HOPR,\"$rate\") field(EGU,\"usec\") field(LOPR,\"0\")\n";
+
 print OUTH "\tint timeErr;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_ERR epicsOutput.timeErr int ao 0\n";
 
