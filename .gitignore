@@ -1,0 +1,30 @@
+# Backup and binary files
+*~
+*.bak
+*.so
+*.so.*
+*.ko
+*.o
+*.a
+
+# build areas
+cmake-build-*
+
+# OS X specific
+.DS_Store
+
+# editor environments
+.idea
+
+# left overs from autotools setups
+config.log
+config.status
+aclocal.m4
+src/nds/config/install-sh
+src/nds/config/ltmain.sh
+src/nds/m4
+src/nds/autom4te.cache
+src/daqd/config/install-sh
+src/daqd/config/ltmain.sh
+src/daqd/m4
+src/daqd/autom4te.cache
