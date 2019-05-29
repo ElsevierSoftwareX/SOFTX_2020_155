@@ -161,6 +161,7 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
 #ifdef TIME_MASTER
             pcieTimer->gps_time = timeSec;
             pcieTimer->cycle = cycleNum;
+            clflush_cache_range(&pcieTimer->gps_time,16);
 #endif
         } else {
             adcinfo->adcRdTime[jj] = adcinfo->adcWait;

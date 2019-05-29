@@ -495,7 +495,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
   timeSec = remote_time((struct CDS_EPICS *)pLocalEpics);
   printf ("Using remote GPS time %d \n",timeSec);
 #else
-  timeSec = current_time() -1;
+  timeSec = current_time_fe() -1;
 #endif
 
   rdtscl(adcinfo.adcTime);
@@ -662,24 +662,10 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // *****************************************************************
     if(cycleNum ==HKP_TIMING_UPDATES)	
     {
-      pLocalEpics->epicsOutput.cpuMeter = timeinfo.timeHold;
-      pLocalEpics->epicsOutput.cpuMeterMax = timeinfo.timeHoldMax;
+	  sendTimingDiags2Epics(pLocalEpics, &timeinfo, &adcinfo);
       pLocalEpics->epicsOutput.dacEnable = dacEnable;
-      timeinfo.timeHoldHold = timeinfo.timeHold;
-      timeinfo.timeHold = 0;
-      timeinfo.timeHoldWhenHold = timeinfo.timeHoldWhen;
 
-      if (timeSec % 4 == 0) pLocalEpics->epicsOutput.adcWaitTime = 
-        adcinfo.adcHoldTimeMin;
-      else if (timeSec % 4 == 1)
-        pLocalEpics->epicsOutput.adcWaitTime =  adcinfo.adcHoldTimeMax;
-      else
-        pLocalEpics->epicsOutput.adcWaitTime = adcinfo.adcHoldTimeAvg/CYCLE_PER_SECOND;
 
-      adcinfo.adcHoldTimeAvgPerSec = adcinfo.adcHoldTimeAvg/CYCLE_PER_SECOND;
-      adcinfo.adcHoldTimeMax = 0;
-      adcinfo.adcHoldTimeMin = 0xffff;
-      adcinfo.adcHoldTimeAvg = 0;
       if((adcinfo.adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcinfo.adcHoldTime < CYCLE_TIME_ALRM_LO)) 
       {
         diagWord |= FE_ADC_HOLD_ERR;
@@ -697,7 +683,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
         initialDiagReset = 0;
         pLocalEpics->epicsInput.diagReset = 0;
         pLocalEpics->epicsInput.ipcDiagReset = 1;
-  	// pLocalEpics->epicsOutput.diags[1] = 0;
         timeinfo.timeHoldMax = 0;
         diagWord = 0;
         ipcErrBits = 0;
@@ -970,31 +955,9 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     rdtscl(cpuClock[CPU_TIME_CYCLE_END]);
 
     /// \> Compute code cycle time diag information.
+	captureEocTiming(cycleNum, cycle_gps_time, &timeinfo, &adcinfo);
     timeinfo.cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
-    // Hold the max cycle time over the last 1 second
-    if(timeinfo.cycleTime > timeinfo.timeHold) { 
-      timeinfo.timeHold = timeinfo.cycleTime;
-      timeinfo.timeHoldWhen = cycleNum;
-    }
-    // Hold the max cycle time since last diag reset
-    if(timeinfo.cycleTime > timeinfo.timeHoldMax) timeinfo.timeHoldMax = timeinfo.cycleTime;
     adcinfo.adcHoldTime = (cpuClock[CPU_TIME_CYCLE_START] - adcinfo.adcTime)/CPURATE;
-    // Avoid calculating the max hold time for the first few seconds
-    if (cycleNum != 0 && (timeinfo.startGpsTime+3) < cycle_gps_time) {
-      if(adcinfo.adcHoldTime > adcinfo.adcHoldTimeMax) 
-        adcinfo.adcHoldTimeMax = adcinfo.adcHoldTime;
-      if(adcinfo.adcHoldTime < adcinfo.adcHoldTimeMin) 
-        adcinfo.adcHoldTimeMin = adcinfo.adcHoldTime;
-      adcinfo.adcHoldTimeAvg += adcinfo.adcHoldTime;
-      if (adcinfo.adcHoldTimeMax > adcinfo.adcHoldTimeEverMax)  {
-        adcinfo.adcHoldTimeEverMax = adcinfo.adcHoldTimeMax;
-        adcinfo.adcHoldTimeEverMaxWhen = cycle_gps_time;
-      }
-      if (timeinfo.timeHoldMax > timeinfo.cpuTimeEverMax)  {
-        timeinfo.cpuTimeEverMax = timeinfo.timeHoldMax;
-        timeinfo.cpuTimeEverMaxWhen = cycle_gps_time;
-      }
-    }
     adcinfo.adcTime = cpuClock[CPU_TIME_CYCLE_START];
     // Calc the max time of one cycle of the user code
     // For IOP, more interested in time to get thru ADC read code and send to slave apps

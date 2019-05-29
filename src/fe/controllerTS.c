@@ -70,6 +70,7 @@ int printk(const char *fmt, ...) {
 #include "fm10Gen.h"		// CDS filter module defs and C code
 #include "feComms.h"		// Lvea control RFM network defs.
 #include "daqmap.h"		// DAQ network layout
+#include "cds_types.h"
 #include "controller.h"
 
 #ifndef NO_DAQ
@@ -93,6 +94,10 @@ int printk(const char *fmt, ...) {
 #endif
 
 TIMING_SIGNAL *pcieTimer;
+
+adcInfo_t adcinfo;
+dacInfo_t dacinfo;
+timing_diag_t timeinfo;
 
 // Contec 64 input bits plus 64 output bits (Standard for aLIGO)
 /// Contec6464 input register values
@@ -130,6 +135,8 @@ unsigned int timeSec = 0;
 unsigned int timeSecDiag = 0;
 /* 1 - error occured on shmem; 2 - RFM; 3 - Dolphin */
 unsigned int ipcErrBits = 0;
+int cardCountErr = 0;
+#if 0
 int adcTime;			///< Used in code cycle timing
 int adcHoldTime;		///< Stores time between code cycles
 int adcHoldTimeMax;		///< Stores time between code cycles
@@ -141,14 +148,13 @@ int startGpsTime;
 int adcHoldTimeMin;
 int adcHoldTimeAvg;
 int adcHoldTimeAvgPerSec;
-int usrTime;			///< Time spent in user app code
 int usrHoldTime;		///< Max time spent in user app code
-int cardCountErr = 0;
 int cycleTime;			///< Current cycle time
 int timeHold = 0;			///< Max code cycle time within 1 sec period
 int timeHoldHold = 0;			///< Max code cycle time within 1 sec period; hold for another sec
 int timeHoldWhen= 0;			///< Cycle number within last second when maximum reached; running
 int timeHoldWhenHold = 0;		///< Cycle number within last second when maximum reached
+#endif
 
 // The following are for timing histograms written to /proc files
 #if defined(SERVO64K) || defined(SERVO32K)
@@ -247,7 +253,7 @@ void *fe_start(void *arg)
   					///< Code runs longer for first few cycles on startup as it settles in,
 					///< so this helps prevent long cycles during that time.
   int limit = OVERFLOW_LIMIT_16BIT;      /// @param limit ADC/DAC overflow test value
-  int mask = GSAI_DATA_MASK;            /// @param mask Bit mask for ADC/DAC read/writes
+  // int mask = GSAI_DATA_MASK;            /// @param mask Bit mask for ADC/DAC read/writes
   int num_outs = MAX_DAC_CHN_PER_MOD;   /// @param num_outs Number of DAC channels variable
   volatile int *packedData;		/// @param *packedData Pointer to ADC PCI data space
   volatile unsigned int *pDacData;	/// @param *pDacData Pointer to DAC PCI data space
@@ -257,7 +263,6 @@ void *fe_start(void *arg)
   int sync21ppsCycles = 0;		/// @param sync32ppsCycles Number of attempts to sync to 1PPS
   int dkiTrip = 0;
   RFM_FE_COMMS *pEpicsComms;		/// @param *pEpicsComms Pointer to EPICS shared memory space
-  int timeHoldMax = 0;			/// @param timeHoldMax Max code cycle time since last diag reset
   int myGmError2 = 0;			/// @param myGmError2 Myrinet error variable
   int status;				/// @param status Typical function return value
   float onePps;				/// @param onePps Value of 1PPS signal, if used, for diagnostics
@@ -296,9 +301,11 @@ void *fe_start(void *arg)
   static int dacTimingError = 0;
   static int dacTimingErrorPending[MAX_DAC_MODULES];
 
+#if 0
   volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
   volatile GSA_20BIT_DAC_REG *dac20bitPtr;  // Pointer to 20bit DAC memory area
   volatile GSC_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
+  #endif
   unsigned int usec = 0;
   unsigned int offset = 0;
 
@@ -500,16 +507,7 @@ udelay(1000);
   iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0], (struct CDS_EPICS *)pLocalEpics,1);
 
   // Clear timing diags.
-  adcHoldTime = 0;
-  adcHoldTimeMax = 0;
-  adcHoldTimeEverMax = 0;	
-  adcHoldTimeEverMaxWhen = 0;	
-  cpuTimeEverMax = 0;		
-  cpuTimeEverMaxWhen = 0;	
-  startGpsTime = 0;
-  adcHoldTimeMin = 0xffff;	
-  adcHoldTimeAvg = 0;		
-  usrHoldTime = 0;		
+  initializeTimingDiags(&timeinfo);
   missedCycle = 0;
 
   /// \> If IOP,  Initialize the ADC modules
@@ -527,7 +525,7 @@ udelay(1000);
 	  }
 	  // Set ADC Present Flag
   	  pLocalEpics->epicsOutput.statAdc[jj] = 1;
-	  adcRdTimeErr[jj] = 0;
+	  adcinfo.adcRdTimeErr[jj] = 0;
   }
   printf("ADC setup complete \n");
 
@@ -558,10 +556,10 @@ udelay(1000);
   timeSec = remote_time((struct CDS_EPICS *)pLocalEpics);
   printf ("Using remote GPS time %d \n",timeSec);
 #else
-  timeSec = current_time() -1;
+  timeSec = current_time_fe() -1;
 #endif
 
-  rdtscl(adcTime);
+  rdtscl(adcinfo.adcTime);
 
   /// ******************************************************************************\n
   /// Enter the infinite FE control loop  ******************************************\n
@@ -594,7 +592,7 @@ udelay(1000);
           	timeSec ++;
           	pLocalEpics->epicsOutput.timeDiag = timeSec;
 	  		if (cycle_gps_time == 0) {
-				startGpsTime = timeSec;
+				timeinfo.startGpsTime = timeSec;
 	  		}	
 	  		cycle_gps_time = timeSec;
 		}
@@ -622,16 +620,16 @@ udelay(1000);
 
 			/// - ---- Added ADC timing diagnostics to verify timing consistent and all rdy together.
 		    if(jj==0)
-			    adcRdTime[jj] = (cpuClock[CPU_TIME_ADC_WAIT] - cpuClock[CPU_TIME_CYCLE_START]) / CPURATE;
+			    adcinfo.adcRdTime[jj] = (cpuClock[CPU_TIME_ADC_WAIT] - cpuClock[CPU_TIME_CYCLE_START]) / CPURATE;
 		    else
-			    adcRdTime[jj] = adcWait;
+			    adcinfo.adcRdTime[jj] = adcWait;
 	
-		    if(adcRdTime[jj] > adcRdTimeMax[jj]) adcRdTimeMax[jj] = adcRdTime[jj];
+		    if(adcinfo.adcRdTime[jj] > adcinfo.adcRdTimeMax[jj]) adcinfo.adcRdTimeMax[jj] = adcinfo.adcRdTime[jj];
 
-		    if((jj==0) && (adcRdTimeMax[jj] > MAX_ADC_WAIT_CARD_0)) 
-			adcRdTimeErr[jj] ++;
-		    if((jj!=0) && (adcRdTimeMax[jj] > MAX_ADC_WAIT_CARD_S)) 
-			adcRdTimeErr[jj] ++;
+		    if((jj==0) && (adcinfo.adcRdTimeMax[jj] > MAX_ADC_WAIT_CARD_0)) 
+			adcinfo.adcRdTimeErr[jj] ++;
+		    if((jj!=0) && (adcinfo. adcRdTimeMax[jj] > MAX_ADC_WAIT_CARD_S)) 
+			adcinfo.adcRdTimeErr[jj] ++;
 
 		    /// - --------- If data not ready in time, abort.
 		    /// Either the clock is missing or code is running too slow and ADC FIFO
@@ -695,7 +693,7 @@ udelay(1000);
 			{
 				if((adcData[jj][ii] > limit) || (adcData[jj][ii] < -limit))
 			  	{
-					overflowAdc[jj][ii] ++;
+					adcinfo.overflowAdc[jj][ii] ++;
 					pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] ++;
 					overflowAcc ++;
 					adcOF[jj] = 1;
@@ -817,35 +815,14 @@ udelay(1000);
 /// \> Cycle 18, Send timing info to EPICS at 1Hz
 	if(cycleNum ==HKP_TIMING_UPDATES)	
     {
-	  pLocalEpics->epicsOutput.cpuMeter = timeHold;
-	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
-  	  pLocalEpics->epicsOutput.dacEnable = dacEnable;
-          timeHoldHold = timeHold;
-          timeHold = 0;
-	  timeHoldWhenHold = timeHoldWhen;
-
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
-	  memcpy(cycleHistMax, cycleHist, sizeof(cycleHist));
-	  memset(cycleHist, 0, sizeof(cycleHist));
-	  memcpy(cycleHistWhenHold, cycleHistWhen, sizeof(cycleHistWhen));
-	  memset(cycleHistWhen, 0, sizeof(cycleHistWhen));
-#endif
-	  if (timeSec % 4 == 0) pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeMin;
-	  else if (timeSec % 4 == 1)
-		pLocalEpics->epicsOutput.adcWaitTime =  adcHoldTimeMax;
-	  else
-	  	pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeAvg/CYCLE_PER_SECOND;
-	  adcHoldTimeAvgPerSec = adcHoldTimeAvg/CYCLE_PER_SECOND;
-	  adcHoldTimeMax = 0;
-	  adcHoldTimeMin = 0xffff;
-	  adcHoldTimeAvg = 0;
-	  if((adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcHoldTime < CYCLE_TIME_ALRM_LO)) 
+      sendTimingDiags2Epics(pLocalEpics, &timeinfo, &adcinfo);
+	  if((adcinfo.adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcinfo.adcHoldTime < CYCLE_TIME_ALRM_LO)) 
 	  {
 	  	diagWord |= FE_ADC_HOLD_ERR;
 		feStatus |= FE_ERROR_TIMING;
 	  
 	  }
-	  if(timeHoldMax > CYCLE_TIME_ALRM) 
+	  if(timeinfo.timeHoldMax > CYCLE_TIME_ALRM) 
 	  {
 	  	diagWord |= FE_PROC_TIME_ERR;
 		feStatus |= FE_ERROR_TIMING;
@@ -858,20 +835,20 @@ udelay(1000);
 		pLocalEpics->epicsInput.diagReset = 0;
 		pLocalEpics->epicsInput.ipcDiagReset = 1;
   		// pLocalEpics->epicsOutput.diags[1] = 0;
-		timeHoldMax = 0;
+		timeinfo.timeHoldMax = 0;
 	  	diagWord = 0;
 		ipcErrBits = 0;
 		
 		// feStatus = 0;
-        for(jj=0;jj<cdsPciModules.adcCount;jj++) adcRdTimeMax[jj] = 0;
+        for(jj=0;jj<cdsPciModules.adcCount;jj++) adcinfo.adcRdTimeMax[jj] = 0;
 	  }
 	  // Flip the onePPS various once/sec as a watchdog monitor.
 	  // pLocalEpics->epicsOutput.onePps ^= 1;
 	  pLocalEpics->epicsOutput.diagWord = diagWord;
        	  for(jj=0;jj<cdsPciModules.adcCount;jj++) {
-		if(adcRdTimeErr[jj] > MAX_ADC_WAIT_ERR_SEC)
+		if(adcinfo.adcRdTimeErr[jj] > MAX_ADC_WAIT_ERR_SEC)
 			pLocalEpics->epicsOutput.stateWord |= FE_ERROR_ADC;
-		adcRdTimeErr[jj] = 0;
+		adcinfo.adcRdTimeErr[jj] = 0;
 	  }
     }
 
@@ -914,7 +891,7 @@ udelay(1000);
 /// \> Cycle 19, write updated diag info to EPICS
 	if(cycleNum == HKP_DIAG_UPDATES)	
         {
-	  pLocalEpics->epicsOutput.userTime = usrHoldTime;
+	  pLocalEpics->epicsOutput.userTime = timeinfo.usrHoldTime;
 	  pLocalEpics->epicsOutput.ipcStat = ipcErrBits;
 	  if(ipcErrBits & 0xf) feStatus |= FE_ERROR_IPC;
 	  // Create FB status word for return to EPICS
@@ -930,14 +907,14 @@ udelay(1000);
   	  mxDiag = mxDiagR;
 	  if(mxStat != MX_OK)
 		feStatus |= FE_ERROR_DAQ;;
-	  usrHoldTime = 0;
+	  timeinfo.usrHoldTime = 0;
   	  if(pLocalEpics->epicsInput.overflowReset)
 	  {
                 if (pLocalEpics->epicsInput.overflowReset) {
                    for (ii = 0; ii < 16; ii++) {
                       for (jj = 0; jj < cdsPciModules.adcCount; jj++) {
-                         overflowAdc[jj][ii] = 0;
-                         overflowAdc[jj][ii + 16] = 0;
+                         adcinfo.overflowAdc[jj][ii] = 0;
+                         adcinfo.overflowAdc[jj][ii + 16] = 0;
 			pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
 			pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii + 16] = 0;
                       }
@@ -997,8 +974,8 @@ udelay(1000);
                 if (pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] > OVERFLOW_CNTR_LIMIT) {
 		   pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
                 }
-		pLocalEpics->epicsOutput.overflowAdc[jj][ii] = overflowAdc[jj][ii];
-		overflowAdc[jj][ii] = 0;
+		pLocalEpics->epicsOutput.overflowAdc[jj][ii] = adcinfo.overflowAdc[jj][ii];
+		adcinfo.overflowAdc[jj][ii] = 0;
 
 	    }
 	  }
@@ -1045,49 +1022,16 @@ udelay(1000);
         rdtscl(cpuClock[CPU_TIME_CYCLE_END]);
 
 	/// \> Compute code cycle time diag information.
-	cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
+    captureEocTiming(cycleNum, cycle_gps_time, &timeinfo, &adcinfo);
+	timeinfo.cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
 	if (longestWrite2 < ((tempClock[3]-tempClock[2])/CPURATE)) longestWrite2 = (tempClock[3]-tempClock[2])/CPURATE;
-	// Hold the max cycle time over the last 1 second
-	if(cycleTime > timeHold) { 
-		timeHold = cycleTime;
-		timeHoldWhen = cycleNum;
-	}
-	// Hold the max cycle time since last diag reset
-	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
-#if defined(SERVO64K) || defined(SERVO32K) || defined(SERVO16K)
-// This produces cycle time histogram in /proc file
-	{
-#if defined(SERVO64K) || defined(SERVO32K)
-		static const int nb = 31;
-#elif defined(SERVO16K)
-		static const int nb = 63;
-#endif
 
-		cycleHist[cycleTime<nb?cycleTime:nb]++;
-		cycleHistWhen[cycleTime<nb?cycleTime:nb] = cycleNum;
-	}
-#endif
-	adcHoldTime = (cpuClock[CPU_TIME_CYCLE_START] - adcTime)/CPURATE;
-	// Avoid calculating the max hold time for the first few seconds
-	if (cycleNum != 0 && (startGpsTime+3) < cycle_gps_time) {
-		if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
-		if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
-		adcHoldTimeAvg += adcHoldTime;
-		if (adcHoldTimeMax > adcHoldTimeEverMax)  {
-			adcHoldTimeEverMax = adcHoldTimeMax;
-			adcHoldTimeEverMaxWhen = cycle_gps_time;
-			//printf("Maximum adc hold time %d on cycle %d gps %d\n", adcHoldTimeMax, cycleNum, cycle_gps_time);
-		}
-		if (timeHoldMax > cpuTimeEverMax)  {
-			cpuTimeEverMax = timeHoldMax;
-			cpuTimeEverMaxWhen = cycle_gps_time;
-		}
-	}
-	adcTime = cpuClock[CPU_TIME_CYCLE_START];
+	adcinfo.adcHoldTime = (cpuClock[CPU_TIME_CYCLE_START] - adcinfo.adcTime)/CPURATE;
+	adcinfo.adcTime = cpuClock[CPU_TIME_CYCLE_START];
 	// Calc the max time of one cycle of the user code
 	// For IOP, more interested in time to get thru ADC read code and send to slave apps
-	usrTime = (cpuClock[CPU_TIME_USR_START] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
-	if(usrTime > usrHoldTime) usrHoldTime = usrTime;
+	timeinfo.usrTime = (cpuClock[CPU_TIME_USR_START] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
+	if(timeinfo.usrTime > timeinfo.usrHoldTime) timeinfo.usrHoldTime = timeinfo.usrTime;
 
         /// \> Update internal cycle counters
           cycleNum += 1;

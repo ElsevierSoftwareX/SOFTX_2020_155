@@ -100,6 +100,7 @@ inline void initializeDuotoneDiags(duotone_diag_t *dt_diag)
     dt_diag->dacDuoEnable = 0.0;
 
 }
+#endif
 
 inline void initializeTimingDiags(timing_diag_t *timeinfo)
 {
@@ -164,4 +165,3 @@ inline void captureEocTiming(int cycle, unsigned int cycle_gps, timing_diag_t *t
       }
     }
 }
-#endif
