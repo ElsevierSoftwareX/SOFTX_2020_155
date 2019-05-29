@@ -1,4 +1,10 @@
 ==================================================================================================
+Changes for 3.5.next
+==================================================================================================
+- Updated mbuf/gpstime kernel drivers to work with newer kernels (> 4.4)
+- Updated daqd_shmem to report DCU data misses using the CRC_SUM/CRC_CPS EPICS PVs like the older
+daqd variants.
+==================================================================================================
 Changes for 3.5.1  
 ==================================================================================================
 - Bug fix for mx_fe: Not reading test point count properly from FE code resulting in xmit buffer

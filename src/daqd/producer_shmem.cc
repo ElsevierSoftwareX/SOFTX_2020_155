@@ -145,6 +145,10 @@ void *producer::frame_writer() {
     unsigned long prev_gps, prev_frac;
     unsigned long gps, frac;
 
+    // last status value
+    std::array<bool, DCU_COUNT> dcuSeenLastCycle{};
+    std::fill(dcuSeenLastCycle.begin(), dcuSeenLastCycle.end(), false);
+
     // error message buffer
     char errmsgbuf[80];
     unsigned long stat_cycles = 0;
@@ -348,12 +352,22 @@ void *producer::frame_writer() {
 
         read_dest = move_buf;
         for (int j = DCU_ID_EDCU; j < DCU_COUNT; j++) {
+
             // printf("DCU %d is %d bytes long\n", j, daqd.dcuSize[0][j]);
             if (daqd.dcuSize[0][j] == 0 || dcu_to_zmq_lookup[j] < 0 || dcu_data_from_zmq[j] == (void*)0)
             {
+                bool seenLastCycle = dcuSeenLastCycle[j];
+                if (seenLastCycle)
+                {
+                    daqd.dcuCrcErrCntPerSecond[0][j] ++;
+                    daqd.dcuCrcErrCntPerSecondRunning[0][j] ++;
+                    daqd.dcuCrcErrCnt[0][j]++;
+                }
+                dcuSeenLastCycle[j] = false;
                 daqd.dcuStatus[0][j] = 0xbad;
                 continue; // skip unconfigured DCU nodes
             }
+            dcuSeenLastCycle[j] = true;
             read_dest = dcu_move_addresses.start[j];
             long read_size = daqd.dcuDAQsize[0][j];
             if (IS_EPICS_DCU(j)) {
@@ -411,20 +425,14 @@ void *producer::frame_writer() {
                 // Calculate DCU status, if needed
                 if (daqd.dcu_status_check & (1 << ifo)) {
                     if (cblk1 % 16 == 0) {
-                        /* DCU checking mask (Which DCUs to check for SYNC
-                         * fault) */
-                        unsigned int dcm = 0xfffffff0;
-
                         int lastStatus = dcuStatus[ifo][j];
-                        dcuStatus[ifo][j] = DAQ_STATE_FAULT;
 
                         /* Check if DCU running at all */
-                        if (1 /*dcm & (1 << j)*/) {
-                            if (dcuStatCycle[ifo][j] == 0)
-                                dcuStatus[ifo][j] = DAQ_STATE_SYNC_ERR;
-                            else
-                                dcuStatus[ifo][j] = DAQ_STATE_RUN;
-                        }
+                        if (dcuStatCycle[ifo][j] == 0)
+                            dcuStatus[ifo][j] = DAQ_STATE_SYNC_ERR;
+                        else
+                            dcuStatus[ifo][j] = DAQ_STATE_RUN;
+
                         // dcuCycleStatus shows how many matches of cycle number
                         // we got
                         DEBUG(4, cerr << "dcuid=" << j << " dcuCycleStatus="
@@ -522,6 +530,8 @@ void *producer::frame_writer() {
                     daqd.dcuCrcErrCntPerSecondRunning[0][j] = 0;
                 }
 
+                read_dest += 2 * DAQ_DCU_BLOCK_SIZE; // cur_dcu.dataBlockSize;
+
                 if (j >= DCU_ID_ADCU_1 && (!IS_TP_DCU(j)) &&
                     daqd.dcuStatus[0][j] == 0) {
 
@@ -565,12 +575,7 @@ void *producer::frame_writer() {
                         daqd.dcuCrcErrCnt[0][j]++;
                         daqd.dcuCrcErrCntPerSecondRunning[0][j]++;
                     }
-                    // FIXME: is this right? Why 2* DAQ_DCU_BLOCK_SIZE?
-                    read_dest += 2 * DAQ_DCU_BLOCK_SIZE;
-                } else {
-                    read_dest += 2 * DAQ_DCU_BLOCK_SIZE; // cur_dcu.dataBlockSize;
                 }
-
             }
         }
 
