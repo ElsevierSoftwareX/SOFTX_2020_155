@@ -20,7 +20,7 @@
 #include <linux/mm.h>
 #include <linux/miscdevice.h>
 #include <linux/proc_fs.h>
-#include <asm/uaccess.h>
+#include <linux/uaccess.h>
 #include <linux/vmalloc.h>
 
 #ifdef MODVERSIONS
