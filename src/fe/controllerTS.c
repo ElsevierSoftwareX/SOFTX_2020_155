@@ -136,25 +136,6 @@ unsigned int timeSecDiag = 0;
 /* 1 - error occured on shmem; 2 - RFM; 3 - Dolphin */
 unsigned int ipcErrBits = 0;
 int cardCountErr = 0;
-#if 0
-int adcTime;			///< Used in code cycle timing
-int adcHoldTime;		///< Stores time between code cycles
-int adcHoldTimeMax;		///< Stores time between code cycles
-int adcHoldTimeEverMax;		///< Maximum cycle time recorded
-int adcHoldTimeEverMaxWhen;
-int cpuTimeEverMax;		///< Maximum code cycle time recorded
-int cpuTimeEverMaxWhen;
-int startGpsTime;
-int adcHoldTimeMin;
-int adcHoldTimeAvg;
-int adcHoldTimeAvgPerSec;
-int usrHoldTime;		///< Max time spent in user app code
-int cycleTime;			///< Current cycle time
-int timeHold = 0;			///< Max code cycle time within 1 sec period
-int timeHoldHold = 0;			///< Max code cycle time within 1 sec period; hold for another sec
-int timeHoldWhen= 0;			///< Cycle number within last second when maximum reached; running
-int timeHoldWhenHold = 0;		///< Cycle number within last second when maximum reached
-#endif
 
 // The following are for timing histograms written to /proc files
 #if defined(SERVO64K) || defined(SERVO32K)
@@ -199,17 +180,19 @@ int initialDiagReset = 1;
 // Did not see any effect
   char fp [64*1024];
 
-inline waitPcieTimingSignal(TIMING_SIGNAL *timePtr,int cycle) {
+inline int waitPcieTimingSignal(TIMING_SIGNAL *timePtr,int cycle) {
 int loop = 0;
 
     do{
 	udelay(1);
 	loop ++;
-    }while(timePtr->cycle != cycle && loop < 16);
+    }while(timePtr->cycle != cycle && loop < 18);
+    if(loop >= 18) return(1);
+    else return(0);
 }
 inline sync2master(TIMING_SIGNAL *timePtr) {
   int loop = 0;
-  int cycle = 65535;
+  int cycle = 0;
 
     do{
 	udelay(5);
@@ -542,14 +525,13 @@ udelay(1000);
 	pLocalEpics->epicsOutput.timeErr = syncSource;
 
 	pcieTimer = (TIMING_SIGNAL *) ((volatile char *)(cdsPciModules.dolphinRead[0]) + IPC_PCIE_TIME_OFFSET);
-	printf("I am a PCIe Network TIMING SLAVE **************\n");
-	printf("Address is 0x%lx \n",(long)pcieTimer);
+    pLocalEpics->epicsOutput.fe_status = INIT_SYNC;
   	sync2master(pcieTimer);
 	timeSec = pcieTimer->gps_time;
 
 
 
-    printf("Triggered the ADC\n");
+    pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;
 
   onePpsTime = cycleNum;
 #ifdef REMOTE_GPS
@@ -593,6 +575,7 @@ udelay(1000);
           	pLocalEpics->epicsOutput.timeDiag = timeSec;
 	  		if (cycle_gps_time == 0) {
 				timeinfo.startGpsTime = timeSec;
+                pLocalEpics->epicsOutput.startgpstime = timeinfo.startGpsTime;
 	  		}	
 	  		cycle_gps_time = timeSec;
 		}
@@ -606,7 +589,7 @@ udelay(1000);
 	/// code rate eg 32 samples each time thru before proceeding to match 2048 system.
 		// Read ADC data
     /// - ---- Wait new cycle count from PCIe network before proceeding
-	waitPcieTimingSignal(pcieTimer,cycleNum);
+	missedCycle += waitPcieTimingSignal(pcieTimer,cycleNum);
 	timeSec = pcieTimer->gps_time;
         for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		{
@@ -639,7 +622,6 @@ udelay(1000);
 	  		pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
                         stop_working_threads = 1;
 			vmeDone = 1;
-                        printf("timeout %d %d \n",jj,adcWait);
 			continue;
 		    }
 		    if(jj == 0) 
@@ -816,6 +798,7 @@ udelay(1000);
 	if(cycleNum ==HKP_TIMING_UPDATES)	
     {
       sendTimingDiags2Epics(pLocalEpics, &timeinfo, &adcinfo);
+      pLocalEpics->epicsOutput.irigbTime = missedCycle;
 	  if((adcinfo.adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcinfo.adcHoldTime < CYCLE_TIME_ALRM_LO)) 
 	  {
 	  	diagWord |= FE_ADC_HOLD_ERR;
@@ -838,6 +821,7 @@ udelay(1000);
 		timeinfo.timeHoldMax = 0;
 	  	diagWord = 0;
 		ipcErrBits = 0;
+        missedCycle = 0;
 		
 		// feStatus = 0;
         for(jj=0;jj<cdsPciModules.adcCount;jj++) adcinfo.adcRdTimeMax[jj] = 0;

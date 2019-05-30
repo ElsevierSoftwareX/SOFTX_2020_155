@@ -136,7 +136,6 @@ unsigned int   gps_receiver_locked = 0; // Lock/unlock flag for GPS time card
 /// GPS time in GPS seconds
 unsigned int timeSec = 0;
 unsigned int timeSecDiag = 0;
-/* 1 - error occured on shmem; 2 - RFM; 3 - Dolphin */
 unsigned int ipcErrBits = 0;
 int cardCountErr = 0;
 
@@ -202,23 +201,12 @@ void *fe_start(void *arg)
 {
   int tempClock[4];
   int ii,jj,kk,ll;			// Dummy loop counter variables
-  // int mm;
   static int clock1Min = 0;		///  @param clockMin Minute counter (Not Used??)
   static int cpuClock[CPU_TIMER_CNT];	///  @param cpuClock[] Code timing diag variables
 
-
-  					///< Code runs longer for first few cycles on startup as it settles in,
-					///< so this helps prevent long cycles during that time.
-  // int limit = OVERFLOW_LIMIT_16BIT;      /// @param limit ADC/DAC overflow test value
-  // int mask = GSAI_DATA_MASK;            /// @param mask Bit mask for ADC/DAC read/writes
-  // int num_outs = MAX_DAC_CHN_PER_MOD;   /// @param num_outs Number of DAC channels variable
-  // volatile unsigned int *pDacData;	/// @param *pDacData Pointer to DAC PCI data space
-  // int dacEnable = 0;
-  // int pBits[9] = {1,2,4,8,16,32,64,128,256};	/// @param pBits[] Lookup table for quick power of 2 calcs
   int sync21ppsCycles = 0;		/// @param sync32ppsCycles Number of attempts to sync to 1PPS
   // int dkiTrip = 0;
   RFM_FE_COMMS *pEpicsComms;		/// @param *pEpicsComms Pointer to EPICS shared memory space
-  int myGmError2 = 0;			/// @param myGmError2 Myrinet error variable
   int status;				/// @param status Typical function return value
   float onePps;				/// @param onePps Value of 1PPS signal, if used, for diagnostics
   int onePpsHi = 0;			/// @param onePpsHi One PPS diagnostic check
@@ -244,12 +232,7 @@ void *fe_start(void *arg)
   int adcMissedCycle = 0;
   int dac_restore = 0;
 
-  // volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
-  // volatile GSA_20BIT_DAC_REG *dac20bitPtr;  // Pointer to 20bit DAC memory area
-  // volatile GSC_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
   unsigned int usec = 0;
-
-
   unsigned long cpc;
   float duotoneTimeDac;
   float duotoneTime;
@@ -391,7 +374,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
   vmeDone = 0;
 
   /// \> Call user application software initialization routine.
-  // printf("Calling feCode() to initialize\n");
   iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0], (struct CDS_EPICS *)pLocalEpics,1);
 
   // Initialize timing info variables
@@ -804,7 +786,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 		
     // Call daqLib
     pLocalEpics->epicsOutput.daqByteCnt = 
-    daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
+    daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],0,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
     // Send the current DAQ block size to the awgtpman for TP number checking
     pEpicsComms->padSpace.feDaqBlockSize = curDaqBlockSize;
     pLocalEpics->epicsOutput.tpCnt = tpPtr->count & 0xff;
