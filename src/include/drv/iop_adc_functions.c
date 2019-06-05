@@ -99,7 +99,7 @@ inline int sync_adc_2_1pps() {
 	    adcDummyData = (int *)cdsPciModules.pci_adc[0];
             adcDummyData += 31;
             gsc16ai64Enable1PPS(jj);
-            // rdtscl(cpuClock[jj]);
+            // rdtscll(cpuClock[jj]);
             status = gsc16ai64WaitDmaDone(0, adcDummyData);
             kk ++;
             udelay(2);
@@ -143,11 +143,11 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
         packedData = (int *)cdsPciModules.pci_adc[jj];
         packedData += 31;
 		
-        rdtscl(cpuClk[CPU_TIME_RDY_ADC]);
+        rdtscll(cpuClk[CPU_TIME_RDY_ADC]);
         do {
             /// - ---- Need to delay if not ready as constant banging of the input register
             /// will slow down the ADC DMA.
-            rdtscl(cpuClk[CPU_TIME_ADC_WAIT]);
+            rdtscll(cpuClk[CPU_TIME_ADC_WAIT]);
             adcinfo->adcWait = (cpuClk[CPU_TIME_ADC_WAIT] - cpuClk[CPU_TIME_RDY_ADC])/CPURATE;
             /// - ---- Allow 1sec for data to be ready (should never take that long).
         }while((*packedData == DUMMY_ADC_VAL) && (adcinfo->adcWait < MAX_ADC_WAIT));
@@ -191,7 +191,7 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
         if(jj == 0) 
         {
         // Capture cpu clock for cpu meter diagnostics
-            rdtscl(cpuClk[CPU_TIME_CYCLE_START]);
+            rdtscll(cpuClk[CPU_TIME_CYCLE_START]);
             /// \> If first cycle of a new second, capture IRIG-B time. Standard for aLIGO is
             /// TSYNC_RCVR.
             if(cycleNum == 0) 
@@ -310,11 +310,11 @@ inline int iop_adc_read_32 (adcInfo_t *adcinfo,int cpuClk[])
         packedData = (int *)cdsPciModules.pci_adc[jj];
         packedData += 63;
 		
-        rdtscl(cpuClk[CPU_TIME_RDY_ADC]);
+        rdtscll(cpuClk[CPU_TIME_RDY_ADC]);
         do {
             /// - ---- Need to delay if not ready as constant banging of the input register
             /// will slow down the ADC DMA.
-            rdtscl(cpuClk[CPU_TIME_ADC_WAIT]);
+            rdtscll(cpuClk[CPU_TIME_ADC_WAIT]);
             adcinfo->adcWait = (cpuClk[CPU_TIME_ADC_WAIT] - cpuClk[CPU_TIME_RDY_ADC])/CPURATE;
             /// - ---- Allow 1sec for data to be ready (should never take that long).
         }while((*packedData == DUMMY_ADC_VAL) && (adcinfo->adcWait < MAX_ADC_WAIT));
@@ -352,7 +352,7 @@ inline int iop_adc_read_32 (adcInfo_t *adcinfo,int cpuClk[])
         if(jj == 0) 
         {
         // Capture cpu clock for cpu meter diagnostics
-            rdtscl(cpuClk[CPU_TIME_CYCLE_START]);
+            rdtscll(cpuClk[CPU_TIME_CYCLE_START]);
             /// \> If first cycle of a new second, capture IRIG-B time. Standard for aLIGO is
             /// TSYNC_RCVR.
             if(cycleNum == 0) 
