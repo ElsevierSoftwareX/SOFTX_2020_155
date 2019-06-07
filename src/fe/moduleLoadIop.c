@@ -235,7 +235,7 @@ printk("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRest
 
 void rt_iop_cleanup(void) {
 #ifndef NO_CPU_SHUTDOWN
-	extern int __cpuinit cpu_up(unsigned int cpu);
+	extern int cpu_up(unsigned int cpu);
 
 	// Unset the code callback
         set_fe_code_idle(0, CPUID);
