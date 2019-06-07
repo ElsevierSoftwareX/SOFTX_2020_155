@@ -278,15 +278,6 @@ sub createDac20Medm
         # Add FIFO Status Monitor
         $xpos = 26; $ypos = 112; $width = 12; $height = 12;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","3","3",$ecolors{green},$ecolors{red});
-        # Add FIFO EMPTY Monitor
-        $xpos = 58; $ypos = 132; $width = 12; $height = 12;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","5","5",$ecolors{red},$ecolors{green});
-        # Add FIFO HI QTR Monitor
-        $xpos = 58; $ypos = 147; $width = 12; $height = 12;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","6","6",$ecolors{red},$ecolors{green});
-        # Add FIFO FULL Monitor
-        $xpos = 58; $ypos = 162; $width = 12; $height = 12;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","7","7",$ecolors{red},$ecolors{green});
 	# Add ON LINE Label
         $xpos = 51; $ypos = 52; $width = 100; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"ON LINE",$ecolors{black});
@@ -304,15 +295,6 @@ sub createDac20Medm
 	# Add FIFO STATUS Label
         $xpos = 51; $ypos = 112; $width = 100; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"FIFO STATUS",$ecolors{black});
-	# Add FIFO EMPTY Label
-        $xpos = 81; $ypos = 132; $width = 100; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"EMPTY",$ecolors{black});
-	# Add FIFO HI QTR Label
-        $xpos = 81; $ypos = 147; $width = 100; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"HIGH QUARTER",$ecolors{black});
-	# Add FIFO FULL Label
-        $xpos = 81; $ypos = 162; $width = 100; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"FULL",$ecolors{black});
 	}
 
 print OUTMEDM "$medmdata \n";

@@ -1289,6 +1289,12 @@ for($ii=0;$ii<$dacCnt;$ii++)
 	print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_STAT_$ii epicsOutput.statDac\[$ii\] int ao 0\n";
 }
 
+print OUTH "\tint buffDac[$dacCnt];\n";
+for($ii=0;$ii<$dacCnt;$ii++)
+{
+	print EPICS "OUTVARIABLE FEC\_$dcuId\_DAC_BUFF_$ii epicsOutput.buffDac\[$ii\] int ao 0\n";
+}
+
 print OUTH "\tint overflowDac[$dacCnt][16];\n";
 for($ii=0;$ii<$dacCnt;$ii++)
 {

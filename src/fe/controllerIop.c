@@ -412,6 +412,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       gsc16ai64Enable(cdsPciModules.adcCount);
       /// - ----  Arm DAC outputs
       gsc18ao8Enable(&cdsPciModules);
+      gsc20ao8Enable(&cdsPciModules);
       gsc16ao16Enable(&cdsPciModules);
       // Set synched flag so later code will not check for 1PPS
       sync21pps = 1;

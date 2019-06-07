@@ -229,6 +229,7 @@ inline int check_dac_buffers (int cycleNum)
 			dac18bitPtr = (volatile GSA_18BIT_DAC_REG *)(dacPtr[jj]);
 			out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
 			dacOutBufSize[jj] = out_buf_size;
+			pLocalEpics->epicsOutput.buffDac[jj] = out_buf_size;
 			if(!dacTimingError) {
 				if((out_buf_size < 8) || (out_buf_size > 24))
 				{
@@ -257,6 +258,8 @@ inline int check_dac_buffers (int cycleNum)
             dac20bitPtr = (volatile GSA_20BIT_DAC_REG *)(dacPtr[jj]);
             out_buf_size = dac20bitPtr->OUT_BUF_SIZE;
             dacOutBufSize[jj] = out_buf_size;
+	    pLocalEpics->epicsOutput.buffDac[jj] = out_buf_size;
+			pLocalEpics->epicsOutput.buffDac[jj] = out_buf_size;
             if((out_buf_size > 24))
             {
                 pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_FIFO_BIT);
