@@ -12,10 +12,10 @@ inline int app_adc_read (int ioMemCtr,int ioClk,adcInfo_t *adcinfo,int cpuClk[])
 		for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		{
 			mm = cdsPciModules.adcConfig[jj];
-	    	rdtscl(cpuClk[CPU_TIME_RDY_ADC]);
+	    	rdtscll(cpuClk[CPU_TIME_RDY_ADC]);
 			/// - ---- Wait for proper timestamp in shared memory, indicating data ready.
             do{
-		   		rdtscl(cpuClk[CPU_TIME_ADC_WAIT]);
+		   		rdtscll(cpuClk[CPU_TIME_ADC_WAIT]);
 				adcinfo->adcWait = (cpuClk[CPU_TIME_ADC_WAIT] - cpuClk[CPU_TIME_RDY_ADC])/CPURATE;
             }while((ioMemData->iodata[mm][ioMemCtr].cycle != ioClk) && (adcinfo->adcWait < MAX_ADC_WAIT_SLAVE));
 			timeSec = ioMemData->iodata[mm][ioMemCtr].timeSec;

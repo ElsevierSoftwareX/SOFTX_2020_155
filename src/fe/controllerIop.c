@@ -45,13 +45,11 @@
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
 
-#include </usr/src/linux/arch/x86/include/asm/processor.h>
-#include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
+#include <asm/processor.h>
+#include <asm/cacheflush.h>
 
 // Code can be run without shutting down CPU by changing this compile flag
 #ifndef NO_CPU_SHUTDOWN
-extern int vprintkl(const char*, va_list);
-extern int printkl(const char*, ...);
 extern long ligo_get_gps_driver_offset(void);
 char fmt1[512];
 int printk(const char *fmt, ...) {
@@ -61,7 +59,6 @@ int printk(const char *fmt, ...) {
     strcat(strcpy(fmt1, SYSTEM_NAME_STRING_LOWER), ": ");
     strcat(fmt1, fmt);
     va_start(args, fmt);
-    r = vprintkl(fmt1, args);
     va_end(args);
     return r;
 }
@@ -642,7 +639,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
         }
       }
 #ifdef NO_CPU_SHUTDOWN
-	schedule();
+	// schedule();
 #endif
     }
 

@@ -332,7 +332,7 @@ int rt_fe_init (void)
 void rt_fe_cleanup (void) {
 	int i;
 	int ret;
-	extern int __cpuinit cpu_up(unsigned int cpu);
+	extern int cpu_up(unsigned int cpu);
 
 
 #ifndef NO_CPU_SHUTDOWN
@@ -352,7 +352,7 @@ void rt_fe_cleanup (void) {
 
 	// Unset the code callback
         set_fe_code_idle(0, CPUID);
-	printkl("Will bring back CPU %d\n", CPUID);
+//	printkl("Will bring back CPU %d\n", CPUID);
         msleep(1000);
 	// Bring the CPU back up
         cpu_up(CPUID);
