@@ -2682,7 +2682,7 @@ print OUTM "\n";
 
 print OUTM "EXTRA_CFLAGS += -DMODULE -DNO_RTL=1\n";
 print OUTM "EXTRA_CFLAGS += -I\$(SUBDIRS)/../../include -I$rcg_src_dir/src/include\n";
-print OUTM "EXTRA_CFLAGS += -ffast-math -m80387 -msse2 -mpreferred-stack-boundary=4\n";
+print OUTM "EXTRA_CFLAGS += -ffast-math -m80387 -msse2 -fno-builtin-sincos -mpreferred-stack-boundary=4\n";
 
 print OUTM "obj-m += $skeleton" . ".o\n";
 
