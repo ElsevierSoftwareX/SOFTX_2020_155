@@ -44,26 +44,12 @@
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
 
-#include </usr/src/linux/arch/x86/include/asm/processor.h>
-#include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
+#include <asm/processor.h>
+#include <asm/cacheflush.h>
 
 // Code can be run without shutting down CPU by changing this compile flag
 #ifndef NO_CPU_SHUTDOWN
-extern int vprintkl(const char*, va_list);
-extern int printkl(const char*, ...);
 extern long ligo_get_gps_driver_offset(void);
-char fmt1[512];
-int printk(const char *fmt, ...) {
-    va_list args;
-    int r;
-
-    strcat(strcpy(fmt1, SYSTEM_NAME_STRING_LOWER), ": ");
-    strcat(fmt1, fmt);
-    va_start(args, fmt);
-    r = vprintkl(fmt1, args);
-    va_end(args);
-    return r;
-}
 #endif
 
 
@@ -304,7 +290,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 
 #ifdef TIME_MASTER
   pcieTimer = (TIMING_SIGNAL *) ((volatile char *)(cdsPciModules.dolphinWrite[0]) + IPC_PCIE_TIME_OFFSET);
-// printf("I am a TIMING MASTER **************\n");
 #endif
 
 /// < Read in all Filter Module EPICS coeff settings
@@ -391,7 +376,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
   vmeDone = 0;
 
   /// \> Call user application software initialization routine.
-  // printf("Calling feCode() to initialize\n");
   iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0], (struct CDS_EPICS *)pLocalEpics,1);
 
   // Initialize timing info variables
@@ -493,12 +477,11 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
   onePpsTime = cycleNum;
 #ifdef REMOTE_GPS
   timeSec = remote_time((struct CDS_EPICS *)pLocalEpics);
-  printf ("Using remote GPS time %d \n",timeSec);
 #else
   timeSec = current_time_fe() -1;
 #endif
 
-  rdtscl(adcinfo.adcTime);
+  rdtscll(adcinfo.adcTime);
 
   /// ******************************************************************************\n
   /// Enter the infinite FE control loop  ******************************************\n
@@ -557,7 +540,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     // Read ADC data
     status = iop_adc_read (padcinfo, cpuClock);
     if(status == ADC_BUS_DELAY && dacWriteEnable > 8) {
-      printf("ADC long cycle \n");
       adcInAlarm = 10;
       adcMissedCycle = 0;
       status = gsc16ao16ClearDacBuffer(0);
@@ -566,7 +548,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     if(status == ADC_SHORT_CYCLE && adcInAlarm) adcMissedCycle ++;
     if(adcInAlarm > 1) adcInAlarm --;
     if(status == 0 && adcInAlarm == 1) {
-      printf("IOP missed %d ADC clocks\n",adcMissedCycle);
       adcInAlarm = 0;
       dac_restore = adcMissedCycle;
     }
@@ -603,9 +584,9 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // **************************************************************************************
 /// \> Call the front end specific application  ******************\n
 /// - -- This is where the user application produced by RCG gets called and executed. \n\n
-    rdtscl(cpuClock[CPU_TIME_USR_START]);
+    rdtscll(cpuClock[CPU_TIME_USR_START]);
     iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
-    rdtscl(cpuClock[CPU_TIME_USR_END]);
+    rdtscll(cpuClock[CPU_TIME_USR_END]);
 // **************************************************************************************
 //
     /// - ---- Reset ADC DMA Start Flag \n
@@ -626,7 +607,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     if(dac_restore == 4) {
       status = gsc16ao16ClearDacBuffer(0);
       status = iop_dac_recover(8,dacPtr);
-      printf("Restored DAC \n");
     }
     dkiTrip = 0;
     if(dac_restore > 4) dacWriteEnable = 0;
@@ -942,7 +922,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
    if (cycleNum >= HKP_DAC_FIFO_CHK && cycleNum < (HKP_DAC_FIFO_CHK + cdsPciModules.dacCount)) 
    {
       status = check_dac_buffers(cycleNum);
-	  printf("DAC status = %d\n",status);
    }
    if (dacTimingError) feStatus |= FE_ERROR_DAC;
 
@@ -952,7 +931,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // Update end of cycle information
 // *****************************************************************
     // Capture end of cycle time.
-    rdtscl(cpuClock[CPU_TIME_CYCLE_END]);
+    rdtscll(cpuClock[CPU_TIME_CYCLE_END]);
 
     /// \> Compute code cycle time diag information.
 	captureEocTiming(cycleNum, cycle_gps_time, &timeinfo, &adcinfo);
@@ -992,7 +971,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 /// \> If not exit request, then continue INFINITE LOOP  *******
   }
 
-  // printf("exiting from fe_code()\n");
   pLocalEpics->epicsOutput.cpuMeter = 0;
 
 
