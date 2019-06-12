@@ -30,7 +30,8 @@ int rt_fe_init (void)
 	int cards;		/// @param cards Number of PCIe cards found on bus
 	int adcCnt;		/// @param adcCnt Number of ADC cards found by slave model.
 	int dacCnt;		/// @param dacCnt Number of 16bit DAC cards found by slave model.
-        int dac18Cnt;		/// @param dac18Cnt Number of 18bit DAC cards found by slave model.
+    int dac18Cnt;		/// @param dac18Cnt Number of 18bit DAC cards found by slave model.
+    int dac20Cnt;		/// @param dac20Cnt Number of 20bit DAC cards found by slave model.
 	int doCnt;		/// @param doCnt Total number of digital I/O cards found by slave model.
 	int do32Cnt;		/// @param do32Cnt Total number of Contec 32 bit DIO cards found by slave model.
 	int doIIRO16Cnt;	/// @param doIIRO16Cnt Total number of Acces I/O 16 bit relay cards found by slave model.
@@ -105,6 +106,7 @@ int rt_fe_init (void)
 	adcCnt = 0;
 	dacCnt = 0;
 	dac18Cnt = 0;
+	dac20Cnt = 0;
 	doCnt = 0;
 	do32Cnt = 0;
 	cdo64Cnt = 0;
@@ -155,6 +157,20 @@ int rt_fe_init (void)
 					status ++;
 				}
 				break;
+            case GSC_20AO8:
+                if(cdsPciModules.cards_used[jj].type == GSC_20AO8  &&
+                       (cdsPciModules.cards_used[jj].instance == dac20Cnt))
+                {
+                    printf("Found DAC at %d %d\n",jj,ioMemData->ipc[ii]);
+                    kk = cdsPciModules.dacCount;
+                    cdsPciModules.dacType[kk] = GSC_20AO8;
+                    cdsPciModules.dacConfig[kk] = ioMemData->ipc[ii];
+                    cdsPciModules.pci_dac[kk] = (long)(ioMemData->iodata[ii]);
+                    cdsPciModules.dacCount ++;
+                    status ++;
+                }
+                break;
+
 			case CON_6464DIO:
 				if((cdsPciModules.cards_used[jj].type == CON_6464DIO) && 
 					(cdsPciModules.cards_used[jj].instance == doCnt))
@@ -239,6 +255,7 @@ int rt_fe_init (void)
 		if(ioMemData->model[ii] == GSC_16AI64SSA) adcCnt ++;
 		if(ioMemData->model[ii] == GSC_16AO16) dacCnt ++;
 		if(ioMemData->model[ii] == GSC_18AO8) dac18Cnt ++;
+        if(ioMemData->model[ii] == GSC_20AO8) dac20Cnt ++;
 		if(ioMemData->model[ii] == CON_6464DIO) doCnt ++;
 		if(ioMemData->model[ii] == CON_32DO) do32Cnt ++;
 		if(ioMemData->model[ii] == ACS_16DIO) doIIRO16Cnt ++;

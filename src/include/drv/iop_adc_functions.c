@@ -184,7 +184,7 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
             pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
             stop_working_threads = 1;
             vmeDone = 1;
-            printf("timeout %d %d \n",jj,adcinfo->adcWait);
+            // printf("timeout %d %d \n",jj,adcinfo->adcWait);
             continue;
         }
 
@@ -345,7 +345,7 @@ inline int iop_adc_read_32 (adcInfo_t *adcinfo,int cpuClk[])
             pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
             stop_working_threads = 1;
             vmeDone = 1;
-            printf("timeout %d %d \n",jj,adcinfo->adcWait);
+            // printf("timeout %d %d \n",jj,adcinfo->adcWait);
             continue;
         }
 

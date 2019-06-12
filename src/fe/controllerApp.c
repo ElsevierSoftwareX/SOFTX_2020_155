@@ -46,22 +46,6 @@
 #include <asm/processor.h>
 #include <asm/cacheflush.h>
 
-// Code can be run without shutting down CPU by changing this compile flag
-#ifndef NO_CPU_SHUTDOWN
-char fmt1[512];
-int printk(const char *fmt, ...) {
-    va_list args;
-    int r;
-
-    strcat(strcpy(fmt1, SYSTEM_NAME_STRING_LOWER), ": ");
-    strcat(fmt1, fmt);
-    va_start(args, fmt);
-    va_end(args);
-    return r;
-}
-#endif
-
-
 #include "fm10Gen.h"		// CDS filter module defs and C code
 #include "feComms.h"		// Lvea control RFM network defs.
 #include "daqmap.h"		// DAQ network layout
@@ -243,7 +227,6 @@ void *fe_start(void *arg)
   pEpicsComms = (RFM_FE_COMMS *)_epics_shm;
   pLocalEpics = (CDS_EPICS *)&pEpicsComms->epicsSpace;
   pEpicsDaq = (char *)&(pLocalEpics->epicsOutput);
-// printf("Epics at 0x%x and DAQ at 0x%x  size = %d \n",pLocalEpics,pEpicsDaq,sizeof(CDS_EPICS_IN));
 
 #ifdef OVERSAMPLE
   /// \> Zero out filter histories
@@ -314,12 +297,10 @@ void *fe_start(void *arg)
 
   /// \> Initialize IIR filter bank values
     if (initVars(pDsp[0], pDsp[0], dspCoeff, MAX_MODULES, pCoeff[0])) {
-    	// printf("Filter module init failed, exiting\n");
 		pLocalEpics->epicsOutput.fe_status = FILT_INIT_ERROR;
 	return 0;
     }
 
-  // printf("Initialized servo control parameters.\n");
 
 udelay(1000);
 
@@ -346,7 +327,6 @@ udelay(1000);
   status = daqWrite(0,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],0, (int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
   if(status == -1) 
   {
-    // printf("DAQ init failed -- exiting\n");
 	pLocalEpics->epicsOutput.fe_status = DAQ_INIT_ERROR;
     vmeDone = 1;
     return(0);
@@ -376,7 +356,6 @@ udelay(1000);
   vmeDone = 0;
 
   /// \> Call user application software initialization routine.
-  // printf("Calling feCode() to initialize\n");
   iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0], (struct CDS_EPICS *)pLocalEpics,1);
 
 // Initialize timing info variables
@@ -399,7 +378,6 @@ udelay(1000);
   // SLAVE needs to sync with MASTER by looking for cycle 0 count in ipc memory
   // Find memory buffer of first ADC to be used in SLAVE application.
   ll = cdsPciModules.adcConfig[0];
-  // printf("waiting to sync %d\n",ioMemData->iodata[ll][0].cycle);
   rdtscll(cpuClock[CPU_TIME_CYCLE_START]);
 
   pLocalEpics->epicsOutput.fe_status = INIT_SYNC;
@@ -412,7 +390,6 @@ udelay(1000);
   timeSec = ioMemData->iodata[ll][0].timeSec;
   rdtscll(cpuClock[CPU_TIME_CYCLE_END]);
   cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
-  // printf("Synched %d\n",cycleTime);
   // Get GPS seconds from MASTER
   timeSec = ioMemData->gpsSecond;
   pLocalEpics->epicsOutput.timeDiag = timeSec;
@@ -422,7 +399,6 @@ udelay(1000);
   onePpsTime = cycleNum;
 #ifdef REMOTE_GPS
   timeSec = remote_time((struct CDS_EPICS *)pLocalEpics);
-  // printf ("Using remote GPS time %d \n",timeSec);
 #else
   timeSec = current_time_fe() -1;
 #endif
@@ -459,7 +435,6 @@ udelay(1000);
 	if(cycleNum == 0)
     {
 	  	/// - ---- Check awgtpman status.
-	  	//printf("awgtpman gps = %d local = %d\n", pEpicsComms->padSpace.awgtpman_gps, timeSec);
 		pLocalEpics->epicsOutput.awgStat = (pEpicsComms->padSpace.awgtpman_gps != timeSec);
 	  	if(pLocalEpics->epicsOutput.awgStat) feStatus |= FE_ERROR_AWG;
 	  	/// - ---- Check if DAC outputs are enabled, report error.
@@ -709,7 +684,6 @@ udelay(1000);
 /// \> If not exit request, then continue INFINITE LOOP  *******
   }
 
-  // printf("exiting from fe_code()\n");
   pLocalEpics->epicsOutput.cpuMeter = 0;
 
   deallocate_dac_channels();

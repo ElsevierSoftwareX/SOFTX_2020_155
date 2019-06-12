@@ -51,17 +51,6 @@
 // Code can be run without shutting down CPU by changing this compile flag
 #ifndef NO_CPU_SHUTDOWN
 extern long ligo_get_gps_driver_offset(void);
-char fmt1[512];
-int printk(const char *fmt, ...) {
-    va_list args;
-    int r;
-
-    strcat(strcpy(fmt1, SYSTEM_NAME_STRING_LOWER), ": ");
-    strcat(fmt1, fmt);
-    va_start(args, fmt);
-    va_end(args);
-    return r;
-}
 #endif
 
 
@@ -284,7 +273,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 
 #ifdef TIME_MASTER
   pcieTimer = (TIMING_SIGNAL *) ((volatile char *)(cdsPciModules.dolphinWrite[0]) + IPC_PCIE_TIME_OFFSET);
-// printf("I am a TIMING MASTER **************\n");
 #endif
 
 /// < Read in all Filter Module EPICS coeff settings
@@ -455,7 +443,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
   onePpsTime = cycleNum;
 #ifdef REMOTE_GPS
   timeSec = remote_time((struct CDS_EPICS *)pLocalEpics);
-  printf ("Using remote GPS time %d \n",timeSec);
 #else
   timeSec = current_time_fe() -1;
 #endif
@@ -516,7 +503,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     // Read ADC data
     status = iop_adc_read (padcinfo, cpuClock);
     if(status == ADC_BUS_DELAY && dacWriteEnable > 8) {
-      printf("ADC long cycle \n");
       adcInAlarm = 10;
       adcMissedCycle = 0;
       status = gsc16ao16ClearDacBuffer(0);
@@ -525,7 +511,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     if(status == ADC_SHORT_CYCLE && adcInAlarm) adcMissedCycle ++;
     if(adcInAlarm > 1) adcInAlarm --;
     if(status == 0 && adcInAlarm == 1) {
-      printf("IOP missed %d ADC clocks\n",adcMissedCycle);
       adcInAlarm = 0;
       dac_restore = adcMissedCycle;
     }
@@ -585,7 +570,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     if(dac_restore == 4) {
       status = gsc16ao16ClearDacBuffer(0);
       status = iop_dac_recover(7,dacPtr);
-      printf("Restored DAC \n");
     }
     dkiTrip = 0;
     if(dac_restore > 4) dacWriteEnable = 0;
@@ -1009,7 +993,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 /// \> If not exit request, then continue INFINITE LOOP  *******
   }
 
-  // printf("exiting from fe_code()\n");
   pLocalEpics->epicsOutput.cpuMeter = 0;
 
 
