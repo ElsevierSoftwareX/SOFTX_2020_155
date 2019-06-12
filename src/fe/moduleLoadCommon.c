@@ -6,17 +6,17 @@ void print_io_info(CDS_HARDWARE *cdsp) {
   jj = 0;
 	printf("THIS IS A TEST \n");
 #ifndef USER_SPACE
-	printf("startup time is %ld\n", current_time_fe());
-	printf("cpu clock %u\n",cpu_khz);
+	printf("" SYSTEM_NAME_STRING_LOWER ":startup time is %ld\n", current_time_fe());
+	printf("" SYSTEM_NAME_STRING_LOWER ":cpu clock %u\n",cpu_khz);
 #endif
-	printf("EPICSM at 0x%lx\n", (unsigned long)_epics_shm);
-	printf("IPC    at 0x%lx\n",(unsigned long)_ipc_shm);
-	printf("IOMEM  at 0x%lx size 0x%lx\n",((unsigned long)_ipc_shm + 0x4000),sizeof(IO_MEM_DATA));
-	printf("DAQSM at 0x%lx\n",(unsigned long)_daq_shm);
-	printf("configured to use %d cards\n", cdsp->cards);
+	printf("" SYSTEM_NAME_STRING_LOWER ":EPICSM at 0x%lx\n", (unsigned long)_epics_shm);
+	printf("" SYSTEM_NAME_STRING_LOWER ":IPC    at 0x%lx\n",(unsigned long)_ipc_shm);
+	printf("" SYSTEM_NAME_STRING_LOWER ":IOMEM  at 0x%lx size 0x%lx\n",((unsigned long)_ipc_shm + 0x4000),sizeof(IO_MEM_DATA));
+	printf("" SYSTEM_NAME_STRING_LOWER ":DAQSM at 0x%lx\n",(unsigned long)_daq_shm);
+	printf("" SYSTEM_NAME_STRING_LOWER ":configured to use %d cards\n", cdsp->cards);
 	kk = 0;
 	printf("***************************************************************************\n");
-	printf("%d ADC cards found\n",cdsp->adcCount);
+	printf("" SYSTEM_NAME_STRING_LOWER ":%d ADC cards found\n",cdsp->adcCount);
 	for(ii=0;ii<cdsp->adcCount;ii++)
         {
 		kk ++;
@@ -36,7 +36,7 @@ void print_io_info(CDS_HARDWARE *cdsp) {
                 }
 	}
 	printf("***************************************************************************\n");
-	printf("%d DAC cards found\n",cdsp->dacCount);
+	printf("" SYSTEM_NAME_STRING_LOWER ":%d DAC cards found\n",cdsp->dacCount);
         for(ii=0;ii<cdsp->dacCount;ii++)
         {
 		kk ++;
@@ -77,19 +77,19 @@ void print_io_info(CDS_HARDWARE *cdsp) {
 	}
 	kk += cdsp->dioCount;
 	printf("***************************************************************************\n");
-        printf("%d DIO cards found\n",cdsp->dioCount);
+        printf("" SYSTEM_NAME_STRING_LOWER ":%d DIO cards found\n",cdsp->dioCount);
         printf("***************************************************************************\n");
-        printf("%d IIRO-8 Isolated DIO cards found\n",cdsp->iiroDioCount);
+        printf("" SYSTEM_NAME_STRING_LOWER ":%d IIRO-8 Isolated DIO cards found\n",cdsp->iiroDioCount);
         printf("***************************************************************************\n");
-        printf("%d IIRO-16 Isolated DIO cards found\n",cdsp->iiroDio1Count);
+        printf("" SYSTEM_NAME_STRING_LOWER ":%d IIRO-16 Isolated DIO cards found\n",cdsp->iiroDio1Count);
         printf("***************************************************************************\n");
-        printf("%d Contec 32ch PCIe DO cards found\n",cdsp->cDo32lCount);
-        printf("%d Contec PCIe DIO1616 cards found\n",cdsp->cDio1616lCount);
-        printf("%d Contec PCIe DIO6464 cards found\n",cdsp->cDio6464lCount);
-        printf("%d DO cards found\n",cdsp->doCount);
-        printf("Total of %d I/O modules found and mapped\n",kk);
+        printf("" SYSTEM_NAME_STRING_LOWER ":%d Contec 32ch PCIe DO cards found\n",cdsp->cDo32lCount);
+        printf("" SYSTEM_NAME_STRING_LOWER ":%d Contec PCIe DIO1616 cards found\n",cdsp->cDio1616lCount);
+        printf("" SYSTEM_NAME_STRING_LOWER ":%d Contec PCIe DIO6464 cards found\n",cdsp->cDio6464lCount);
+        printf("" SYSTEM_NAME_STRING_LOWER ":%d DO cards found\n",cdsp->doCount);
+        printf("" SYSTEM_NAME_STRING_LOWER ":Total of %d I/O modules found and mapped\n",kk);
         printf("***************************************************************************\n");
-	printf("%d RFM cards found\n",cdsp->rfmCount);
+	printf("" SYSTEM_NAME_STRING_LOWER ":%d RFM cards found\n",cdsp->rfmCount);
 	for(ii=0;ii<cdsp->rfmCount;ii++)
         {
                  printf("\tRFM %d is a VMIC_%x module with Node ID %d\n", ii, cdsp->rfmType[ii], cdsp->rfmConfig[ii]);
@@ -97,7 +97,7 @@ void print_io_info(CDS_HARDWARE *cdsp) {
 	}
         printf("***************************************************************************\n");
   	if (cdsp->gps) {
-	printf("IRIG-B card found %d\n",cdsp->gpsType);
+	printf("" SYSTEM_NAME_STRING_LOWER ":IRIG-B card found %d\n",cdsp->gpsType);
         printf("***************************************************************************\n");
   	}
 

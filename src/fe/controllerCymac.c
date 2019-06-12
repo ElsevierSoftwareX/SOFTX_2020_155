@@ -11,7 +11,7 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-///	@file controllerIop.c
+///	@file controllerCymac.c
 ///	@brief Main scheduler program for compiled real-time kernal object. \n
 /// 	@detail More information can be found in the following DCC document:
 ///<	<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">T0900607 CDS RT Sequencer Software</a>
@@ -190,18 +190,8 @@ void *fe_start(void *arg)
   // int mm;
   static int clock1Min = 0;		///  @param clockMin Minute counter (Not Used??)
   static int cpuClock[CPU_TIMER_CNT];	///  @param cpuClock[] Code timing diag variables
+  unsigned long tns = 0;
 
-
-  					///< Code runs longer for first few cycles on startup as it settles in,
-					///< so this helps prevent long cycles during that time.
-  // int limit = OVERFLOW_LIMIT_16BIT;      /// @param limit ADC/DAC overflow test value
-  // int mask = GSAI_DATA_MASK;            /// @param mask Bit mask for ADC/DAC read/writes
-  // int num_outs = MAX_DAC_CHN_PER_MOD;   /// @param num_outs Number of DAC channels variable
-  // volatile unsigned int *pDacData;	/// @param *pDacData Pointer to DAC PCI data space
-  // int dacEnable = 0;
-  // int pBits[9] = {1,2,4,8,16,32,64,128,256};	/// @param pBits[] Lookup table for quick power of 2 calcs
-  int sync21ppsCycles = 0;		/// @param sync32ppsCycles Number of attempts to sync to 1PPS
-  // int dkiTrip = 0;
   RFM_FE_COMMS *pEpicsComms;		/// @param *pEpicsComms Pointer to EPICS shared memory space
   int myGmError2 = 0;			/// @param myGmError2 Myrinet error variable
   int status;				/// @param status Typical function return value
@@ -217,8 +207,7 @@ void *fe_start(void *arg)
   static int missedCycle = 0;		/// @param missedCycle Incremented error counter when too many values in ADC FIFO
   int diagWord = 0;			/// @param diagWord Code diagnostic bit pattern returned to EPICS
   int system = 0;
-  int sync21pps = 0;			/// @param sync21pps Code startup sync to 1PPS flag
-  int syncSource = SYNC_SRC_NONE;	/// @param syncSource Code startup synchronization source
+  int syncSource = SYNC_SRC_TIMER;	/// @param syncSource Code startup synchronization source
   int mxStat = 0;			/// @param mxStat Net diags when myrinet express is used
   int mxDiag = 0;
   int mxDiagR = 0;
@@ -229,11 +218,7 @@ void *fe_start(void *arg)
   int adcMissedCycle = 0;
   int dac_restore = 92160;
 
-  // volatile GSA_18BIT_DAC_REG *dac18bitPtr;	// Pointer to 16bit DAC memory area
-  // volatile GSA_20BIT_DAC_REG *dac20bitPtr;  // Pointer to 20bit DAC memory area
-  // volatile GSC_DAC_REG *dac16bitPtr;		// Pointer to 18bit DAC memory area
   unsigned int usec = 0;
-
 
   unsigned long cpc;
   float duotoneTimeDac;
@@ -279,13 +264,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
   // Clear input masks
   pLocalEpics->epicsInput.burtRestore_mask = 0;
   pLocalEpics->epicsInput.dacDuoSet_mask = 0;
-
-/// \> Init code synchronization source.
-  // Look for DIO card or IRIG-B Card
-  // if Contec 1616 BIO present, TDS slave will be used for timing.
-  if(cdsPciModules.cDio1616lCount) syncSource = SYNC_SRC_TDS;
-  else syncSource = SYNC_SRC_1PPS;
-  syncSource = SYNC_SRC_NONE;
 
 
 #ifdef TIME_MASTER
@@ -412,75 +390,14 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 
   pLocalEpics->epicsOutput.fe_status = INIT_SYNC;
 
-/// \> Find the code syncrhonization source. \n
-/// - Standard aLIGO Sync source is the Timing Distribution System (TDS) (SYNC_SRC_TDS). 
-  if (!run_on_timer) {
-  switch(syncSource)
-  {
-    /// \>\> For SYNC_SRC_TDS, initialize system for synchronous start on 1PPS mark:
-    case SYNC_SRC_TDS:
-    case SYNC_SRC_NONE:
-      /// - ---- Turn off TDS slave unit timing clocks, in turn removing clocks from ADC/DAC modules.
-      for(ii=0;ii<tdsCount;ii++)
-      {
-        CDIO1616Output[ii] = TDS_STOP_CLOCKS;
-        CDIO1616Input[ii] = contec1616WriteOutputRegister(&cdsPciModules, tdsControl[ii], CDIO1616Output[ii]);
-      }
-      udelay(MAX_UDELAY);
-      udelay(MAX_UDELAY);
-      /// - ---- Arm ADC modules
-      gsc16ai64Enable(cdsPciModules.adcCount);
-      /// - ----  Arm DAC outputs
-      gsc18ao8Enable(&cdsPciModules);
-      gsc16ao16Enable(&cdsPciModules);
-      // Set synched flag so later code will not check for 1PPS
-      sync21pps = 1;
-      udelay(MAX_UDELAY);
-      udelay(MAX_UDELAY);
-      /// - ---- Preload DAC FIFOS\n
-      /// - --------- Code runs intrinsically slower first few cycle after startup, so new DAC
-      /// values not written until a few cycle into run. \n
-      /// - --------- DAC timing diags will later check FIFO sizes to verify synchrounous timing.
-      #ifndef NO_DAC_PRELOAD
-      status = iop_dac_preload(dacPtr);
-      #endif
-      /// - ---- Start the timing clocks\n
-      /// - --------- Send start command to TDS slave.\n
-      /// - --------- TDS slave will begin sending 64KHz clocks synchronous to next 1PPS mark.
-      // CDIO1616Output[tdsControl] = 0x7B00000;
-      for(ii=0;ii<tdsCount;ii++)
-      {
-        // CDIO1616Output[ii] = TDS_START_ADC_NEG_DAC_POS;
-        CDIO1616Output[ii] = TDS_START_ADC_NEG_DAC_POS | TDS_NO_DAC_DUOTONE;
-        CDIO1616Input[ii] = contec1616WriteOutputRegister(&cdsPciModules, tdsControl[ii], CDIO1616Output[ii]);
-      }
-      break;
-    case SYNC_SRC_1PPS:
-#ifndef NO_DAC_PRELOAD
-      status = iop_dac_preload(dacPtr);
-#endif
-      // Arm ADC modules
-      // This has to be done sequentially, one at a time.
-      status = sync_adc_2_1pps();
-      break;
-    default: {
-      // IRIG-B card not found, so use CPU time to get close to 1PPS on startup
-      // Pause until this second ends
-      break;
-    }
-  }
-  }
-
-
-  pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;
 
   onePpsTime = cycleNum;
-#ifdef REMOTE_GPS
-  timeSec = remote_time((struct CDS_EPICS *)pLocalEpics);
-#else
   timeSec = current_time_fe() -1;
-#endif
-
+  pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;
+// Trigger ADC
+  gsc16ai64Enable(cdsPciModules.adcCount);
+// Trigger DAC
+  gsc16ao16Enable(&cdsPciModules);
   rdtscll(adcinfo.adcTime);
 
   /// ******************************************************************************\n
@@ -503,17 +420,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // *****************************************************************************************
 // NORMAL OPERATION -- Wait for ADC data ready
 // *****************************************************************************************
-#ifndef RFM_DIRECT_READ
-/// \> If IOP and RFM DMA selected, block transfer data from GeFanuc RFM cards.
-// Used in block transfers of data from GEFANUC RFM
-/// - ---- Want to start the DMA ASAP, before ADC data starts coming in.
-/// - ----  Note that data only xferred every 4th cycle of IOP, so max data rate on RFM is 16K.
-    if((cycleNum % 4) == 0)
-    {
-      if (cdsPciModules.pci_rfm[0]) vmic5565DMA(&cdsPciModules,0,(cycleNum % IPC_BLOCKS));
-      if (cdsPciModules.pci_rfm[1]) vmic5565DMA(&cdsPciModules,1,(cycleNum % IPC_BLOCKS));
-    }
-#endif
 
 /// \> On 1PPS mark \n
     if(cycleNum == 0)
@@ -533,53 +439,9 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       }
       cycle_gps_time = timeSec;
     }
-#ifdef NO_CPU_SHUTDOWN
-    if((cycleNum % 2048) == 0) usleep_range(2,4);
-#endif
 // Start of ADC Read **********************************************************************
     // Read ADC data
     status = iop_adc_read (padcinfo, cpuClock);
-    if(status == ADC_BUS_DELAY && dacWriteEnable > 8) {
-      adcInAlarm = 10;
-      adcMissedCycle = 0;
-      status = gsc16ao16ClearDacBuffer(0);
-      status = iop_dac_recover(1,dacPtr);
-    }
-    if(status == ADC_SHORT_CYCLE && adcInAlarm) adcMissedCycle ++;
-    if(adcInAlarm > 1) adcInAlarm --;
-    if(status == 0 && adcInAlarm == 1) {
-      adcInAlarm = 0;
-      dac_restore = adcMissedCycle;
-    }
-
-    // Try synching to 1PPS on ADC[0][31] if not using IRIG-B or TDS
-    // Only try for 1 sec.
-    if(!sync21pps)
-    {
-      // 1PPS signal should rise above 4000 ADC counts if present.
-      if((adcinfo.adcData[0][31] < ONE_PPS_THRESH) && (sync21ppsCycles < (CYCLE_PER_SECOND*OVERSAMPLE_TIMES))) 
-      {
-        ll = -1;
-        sync21ppsCycles ++;
-      }else {
-        // Need to start clocking the DAC outputs.
-        gsc18ao8Enable(&cdsPciModules);
-	gsc16ao16Enable(&cdsPciModules);
-        sync21pps = 1;
-	// 1PPS never found, so indicate NO SYNC to user
-	if(sync21ppsCycles >= (CYCLE_PER_SECOND*OVERSAMPLE_TIMES))
-	{
-          syncSource = SYNC_SRC_NONE;
-        } else {
-          // 1PPS found and synched to
-          syncSource = SYNC_SRC_1PPS;
-        }
-        pLocalEpics->epicsOutput.timeErr = syncSource;
-      }
-    }
-
-
-
 
 // **************************************************************************************
 /// \> Call the front end specific application  ******************\n
@@ -604,14 +466,8 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     // if(dacTimingError) iopDacEnable = 0;
 #endif
     // Write out data to DAC modules
-    if(dac_restore == 4) {
-      status = gsc16ao16ClearDacBuffer(0);
-      status = iop_dac_recover(8,dacPtr);
-    }
     dkiTrip = 0;
-    if(dac_restore > 4) dacWriteEnable = 0;
     dkiTrip = iop_dac_write();
-    if(dac_restore) dac_restore --;
 
 
 // ***********************************************************************
@@ -718,24 +574,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       // If not, set sync error flag
       if(onePpsTime > 1) pLocalEpics->epicsOutput.timeErr |= TIME_ERR_1PPS;
     }
-#ifdef DIAG_TEST
-    for(ii=0;ii<10;ii++)
-    {
-      if(ii<5) onePpsTest = adcinfo.adcData[0][ii];
-      else onePpsTest = adcinfo.adcData[1][(ii-5)];
-      if((onePpsTest > 400) && (onePpsHiTest[ii] == 0))  
-      {
-        onePpsTimeTest[ii] = cycleNum;
-        onePpsHiTest[ii] = 1;
-        if((ii == 0) || (ii == 5)) pLocalEpics->epicsOutput.timingTest[ii] = cycleNum * 15.26;
-        // Slaves do not see 1pps until after IOP signal loops around and back into ADC channel 0,
-        // therefore, need to subtract IOP loop time.
-        else pLocalEpics->epicsOutput.timingTest[ii] = (cycleNum * 15.26) - pLocalEpics->epicsOutput.timingTest[0];
-      }
-      // Reset the diagnostic for next cycle
-      if(cycleNum > 2000) onePpsHiTest[ii] = 0;  
-    }
-#endif
 
 // *****************************************************************
 /// \>  Write data to DAQ.
@@ -923,7 +761,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
    {
       status = check_dac_buffers(cycleNum);
    }
-   if (dacTimingError) feStatus |= FE_ERROR_DAC;
+   // if (dacTimingError) feStatus |= FE_ERROR_DAC;
 
 #endif
 

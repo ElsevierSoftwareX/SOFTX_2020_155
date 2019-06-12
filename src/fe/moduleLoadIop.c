@@ -15,6 +15,7 @@ extern char daqArea[2*DAQ_DCU_SIZE];           // Space allocation for daqLib bu
 struct task_struct *sthread;
 
 
+
 // MAIN routine: Code starting point ****************************************************************
 int need_to_load_IOP_first;
 EXPORT_SYMBOL(need_to_load_IOP_first);
@@ -223,7 +224,7 @@ printk("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRest
 
 #ifndef NO_CPU_SHUTDOWN
     pLocalEpics->epicsOutput.fe_status = 3;
-	printk("Locking CPU core %d\n", CPUID);
+	printk("" SYSTEM_NAME_STRING_LOWER ": Locking CPU core %d\n", CPUID);
 	// The code runs on the disabled CPU
     set_fe_code_idle(fe_start, CPUID);
     msleep(100);
