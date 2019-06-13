@@ -149,7 +149,8 @@ inline void captureEocTiming(int cycle, unsigned int cycle_gps, timing_diag_t *t
     // Hold the max cycle time since last diag reset
     if(timeinfo->cycleTime > timeinfo->timeHoldMax) timeinfo->timeHoldMax = timeinfo->cycleTime;
     // Avoid calculating the max hold time for the first few seconds
-    if (cycle != 0 && (timeinfo->startGpsTime+3) < cycle_gps) {
+    // if (cycle != 0 && (timeinfo->startGpsTime+3) < cycle_gps) {
+    if ((timeinfo->startGpsTime+3) < cycle_gps) {
       if(adcinfo->adcHoldTime > adcinfo->adcHoldTimeMax) 
         adcinfo->adcHoldTimeMax = adcinfo->adcHoldTime;
       if(adcinfo->adcHoldTime < adcinfo->adcHoldTimeMin) 

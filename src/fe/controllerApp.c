@@ -412,9 +412,6 @@ udelay(1000);
   // Calculate how many CPU cycles per code cycle
   cpc = cpu_khz * 1000;
   cpc /= CYCLE_PER_SECOND;
-#ifdef NO_CPU_SHUTDOWN
-	usleep_range(2,4);
-#endif
 
 
 	// *******************************************************************************
@@ -494,7 +491,9 @@ udelay(1000);
 
     pLocalEpics->epicsOutput.cycle = cycleNum;
 
+// **********************************************************************
 /// \> Cycle 18, Send timing info to EPICS at 1Hz
+// **********************************************************************
 	if(cycleNum ==HKP_TIMING_UPDATES)	
     {
         sendTimingDiags2Epics(pLocalEpics, &timeinfo, &adcinfo);
@@ -587,8 +586,7 @@ udelay(1000);
 #endif
 	  	pLocalEpics->epicsOutput.fbNetStat = mxStat;
   	  	mxDiag = mxDiagR;
-	  	if(mxStat != MX_OK)
-			feStatus |= FE_ERROR_DAQ;;
+	  	if(mxStat != MX_OK) feStatus |= FE_ERROR_DAQ;;
   	  	if(pLocalEpics->epicsInput.overflowReset)
 	  	{
         	if (pLocalEpics->epicsInput.overflowReset) {
@@ -599,7 +597,6 @@ udelay(1000);
 						pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
 						pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii + 16] = 0;
                      }
-
                      for (jj = 0; jj < cdsPciModules.dacCount; jj++) {
                         pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] = 0;
                      }

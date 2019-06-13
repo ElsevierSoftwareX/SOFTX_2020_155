@@ -191,7 +191,6 @@ void *fe_start(void *arg)
   static int cpuClock[CPU_TIMER_CNT];	///  @param cpuClock[] Code timing diag variables
 
   int sync21ppsCycles = 0;		/// @param sync32ppsCycles Number of attempts to sync to 1PPS
-  // int dkiTrip = 0;
   RFM_FE_COMMS *pEpicsComms;		/// @param *pEpicsComms Pointer to EPICS shared memory space
   int status;				/// @param status Typical function return value
   float onePps;				/// @param onePps Value of 1PPS signal, if used, for diagnostics
@@ -214,9 +213,6 @@ void *fe_start(void *arg)
 
   int feStatus = 0;
   int dkiTrip = 0;
-  int adcInAlarm = 0;
-  int adcMissedCycle = 0;
-  int dac_restore = 0;
 
   unsigned int usec = 0;
   unsigned long cpc;
@@ -502,18 +498,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // Start of ADC Read **********************************************************************
     // Read ADC data
     status = iop_adc_read (padcinfo, cpuClock);
-    if(status == ADC_BUS_DELAY && dacWriteEnable > 8) {
-      adcInAlarm = 10;
-      adcMissedCycle = 0;
-      status = gsc16ao16ClearDacBuffer(0);
-      status = iop_dac_recover(1,dacPtr);
-    }
-    if(status == ADC_SHORT_CYCLE && adcInAlarm) adcMissedCycle ++;
-    if(adcInAlarm > 1) adcInAlarm --;
-    if(status == 0 && adcInAlarm == 1) {
-      adcInAlarm = 0;
-      dac_restore = adcMissedCycle;
-    }
 
     // Try synching to 1PPS on ADC[0][31] if not using IRIG-B or TDS
     // Only try for 1 sec.
@@ -561,20 +545,13 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 /// WRITE DAC OUTPUTS ***************************************** \n
 // ********************************************************************
 
-    // COMMENT OUT NEX LINE FOR TEST STAND w/bad DAC cards. 
 #ifndef DAC_WD_OVERRIDE
     // If a DAC module has bad timing then quit writing outputs
-    // if(dacTimingError) iopDacEnable = 0;
+    // COMMENT OUT NEXT LINE FOR TEST STAND w/bad DAC cards. 
+    if(dacTimingError) iopDacEnable = 0;
 #endif
     // Write out data to DAC modules
-    if(dac_restore == 4) {
-      status = gsc16ao16ClearDacBuffer(0);
-      status = iop_dac_recover(7,dacPtr);
-    }
-    dkiTrip = 0;
-    if(dac_restore > 4) dacWriteEnable = 0;
     dkiTrip = iop_dac_write();
-    if(dac_restore) dac_restore --;
 
 
 // ***********************************************************************
@@ -622,9 +599,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
           diagWord |= TIME_ERR_IRIGB;;
         }
       }
-#ifdef NO_CPU_SHUTDOWN
-	// schedule();
-#endif
     }
 
 /// \> Update duotone diag information
@@ -742,6 +716,8 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       // If not, set sync error flag
       if(onePpsTime > 1) pLocalEpics->epicsOutput.timeErr |= TIME_ERR_1PPS;
     }
+
+// Following is only used on automated test system
 #ifdef DIAG_TEST
     for(ii=0;ii<10;ii++)
     {
@@ -778,9 +754,10 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     if(pLocalEpics->epicsOutput.daqByteCnt > DAQ_DCU_RATE_WARNING) 
       feStatus |= FE_ERROR_DAQ;
 #endif
-// *****************************************************************
 
+// *****************************************************************
 /// \> Cycle 19, write updated diag info to EPICS
+// *****************************************************************
     if(cycleNum == HKP_DIAG_UPDATES)	
     {
       pLocalEpics->epicsOutput.ipcStat = ipcErrBits;
