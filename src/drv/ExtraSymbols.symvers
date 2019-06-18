@@ -21,3 +21,4 @@
 0x00000000	set_fe_code_idle	/	EXPORT_SYMBOL
 0x00000000	is_cpu_taken_by_rcg_model	/	EXPORT_SYMBOL
 0x00000000	vprintkl	/	EXPORT_SYMBOL
+0x00000000	ligo_get_gps_driver_offset	/	EXPORT_SYMBOL
