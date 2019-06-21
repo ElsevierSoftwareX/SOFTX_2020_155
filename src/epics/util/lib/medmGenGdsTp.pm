@@ -147,7 +147,7 @@ sub createGdsMedm
 	$xpos = 21; $ypos = 70; $width = 12; $height = 16; $vis = "calc"; $calc = "(a&1)";
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{ltblue},$vis,$calc,"$site\:FEC-$dcuid\_TIME_DIAG");
 	# ADD FE status indicator
-	$xpos = 14; $ypos = 2; $width = 240; $height = 17;
+	$xpos = 480; $ypos = 330; $width = 240; $height = 17;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_MSG_FESTAT",$ecolors{white},$ecolors{blue},"static");
 	# Add timing label
 	$xpos = 63; $ypos = 72; $width = 45; $height = 15; 

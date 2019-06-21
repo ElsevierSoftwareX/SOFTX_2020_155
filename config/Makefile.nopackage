@@ -1,8 +1,25 @@
 # Linux Epics IOC system build rules
 
 
-EPICS_VERSION := $(shell pkg-config --modversion epics-base)
-EPICS_BIN_PATH := $(shell pkg-config --variable=bindir epics-base)
+###
+#  if EPICS environment variables defined, use those
+#  - otherwise set to old defaults for now
+ifeq (${EPICS_BASE},)
+EPICS_BASE = /opt/rtapps/epics/base
+EPICS_SEQ = /opt/rtapps/epics/modules/sncseq
+EPICS_EXTENSIONS = /opt/rtapps/epics/extensions
+endif
+ifeq (${EPICS_HOST_ARCH},)
+EPICS_HOST_ARCH = linux-x86_64
+endif
+
+EPICS_BASE_PATH := $(EPICS_BASE)
+EPICS_SEQ_PATH := $(EPICS_SEQ)
+EPICS_EXT_PATH := $(EPICS_EXTENSIONS)
+EPICS_ARCH := $(EPICS_HOST_ARCH)
+
+EPICS_BIN_PATH := $(EPICS_BASE)/bin/$(EPICS_ARCH)
+EPICS_LIB_PATH := $(EPICS_BASE)/lib/$(EPICS_ARCH)
 
 # Sequencer synchronization; to fix broken seq package
 SRC += $(RCG_SRC_DIR)/src/drv/sync.c
@@ -15,7 +32,9 @@ PREPROCESS = /usr/bin/gcc -x c -E -P
 
 # Standard C and C++ compiler and C preprocessor flags
 CFLAGS += $(EXTRA_CFLAGS)
-CFLAGS += $(shell pkg-config --cflags epics-base)
+CFLAGS += -I$(EPICS_BASE_PATH)/include/os/Linux -I$(EPICS_BASE_PATH)/include/compiler/gcc -I$(EPICS_BASE_PATH)/include 
+CFLAGS += -I$(EPICS_SEQ_PATH)/include
+CFLAGS += -I$(EPICS_EXT_PATH)/include
 CFLAGS += -I/usr/lib/rmnet -I/usr/lib/rfm2g
 CFLAGS += -Isrc/include
 CFLAGS += -I$(RCG_SRC_DIR)/src/include -I$(RCG_SRC_DIR)/src/include/drv
@@ -26,7 +45,7 @@ ifeq (rtlepics,$(findstring rtlepics, $(TARGET)))
 CFLAGS += -DNO_RFM_EPICS_RECORD_SUPPORT
 endif
 CFLAGS += -D_POSIX_C_SOURCE=199506L -D_POSIX_THREADS  
-CFLAGS += -DOSITHREAD_USE_DEFAULT_STACK  -D_X86_  -DUNIX  -D_BSD_SOURCE -Dlinux
+CFLAGS += -DOSITHREAD_USE_DEFAULT_STACK  -D_X86_  -DUNIX  -D_DEFAULT_SOURCE -Dlinux
 CFLAGS += -D_REENTRANT -g -fPIC 
 
 rtl_module := $(shell /sbin/lsmod | grep rtl)
@@ -39,8 +58,7 @@ SNCFLAGS += +a -c -w
 #SNCFLAGS += -e
 
 # Sequencer file (.st) compiler
-#SNC = $(EPICS_SEQ_PATH)/bin/$(EPICS_ARCH)/snc $(SNCFLAGS)
-SNC = $(EPICS_BIN_PATH)/snc $(SNCFLAGS)
+SNC = $(EPICS_SEQ_PATH)/bin/$(EPICS_ARCH)/snc $(SNCFLAGS)
 
 # registration code generator
 REGGEN = $(EPICS_BIN_PATH)/registerRecordDeviceDriver.pl
@@ -50,14 +68,12 @@ FMSEQFILES = $(RCG_SRC_DIR)/src/epics/util/fmseq.pl $(RCG_SRC_DIR)/src/epics/uti
 
 # Standard Epics IOC server library flags
 LIBFLAGS += -g
-#LIBFLAGS += -L$(EPICS_LIB_PATH)
-#LIBFLAGS += -L$(EPICS_SEQ_PATH)/lib/$(EPICS_ARCH)
-#LIBFLAGS += -L$(EPICS_EXT_PATH)/lib/$(EPICS_ARCH)
-LIBFLAGS += $(shell pkg-config --libs epics-base)
+LIBFLAGS += -L$(EPICS_LIB_PATH)
+LIBFLAGS += -L$(EPICS_SEQ_PATH)/lib/$(EPICS_ARCH)
+LIBFLAGS += -L$(EPICS_EXT_PATH)/lib/$(EPICS_ARCH)
 
 # test for 3.15 libraries, otherwise use 3.14
-#ifneq ("$(wildcard $(EPICS_LIB_PATH)/libdbCore.a)","")
-ifneq ($(wordlist 1,2,$(subst '.',' ',$(EPICS_VERSION))), (3 15))
+ifneq ("$(wildcard $(EPICS_LIB_PATH)/libdbCore.a)","")
 LIBFLAGS += -lseq -lpv -ldbRecStd -ldbCore
 LIBFLAGS += -lca -lCom
 else
