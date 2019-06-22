@@ -1,0 +1,96 @@
+#include <linux/version.h>
+#include <linux/init.h>
+#undef printf
+#include <linux/module.h>
+#include <linux/kernel.h>
+#include <linux/kthread.h>
+#include <asm/delay.h>
+#include <asm/cacheflush.h>
+
+#include <linux/slab.h>
+/// Can't use printf in kernel module so redefine to use Linux printk function
+#define printf printk
+#include <drv/cdsHardware.h>
+#include "inlineMath.h"
+
+#include <asm/processor.h>
+#include <asm/cacheflush.h>
+
+// Code can be run without shutting down CPU by changing this compile flag
+#ifndef NO_CPU_SHUTDOWN
+// extern long ligo_get_gps_driver_offset(void);
+#endif
+
+
+#include "fm10Gen.h"        // CDS filter module defs and C code
+#include "feComms.h"        // Lvea control RFM network defs.
+#include "daqmap.h"     // DAQ network layout
+#include "cds_types.h"
+#include "controller.h"
+
+#ifndef NO_DAQ
+#include "drv/fb.h"
+#include "drv/daqLib.c"         // DAQ/GDS connection software
+#endif
+
+#include "drv/map.h"        // PCI hardware defs
+#include "drv/epicsXfer.c"  // User defined EPICS to/from FE data transfer function
+#include "../fe/timing.c"     // timing module / IRIG-B  functions
+
+#include "drv/inputFilterModule.h"
+#include "drv/inputFilterModule1.h"
+
+// Contec 64 input bits plus 64 output bits (Standard for aLIGO)
+/// Contec6464 input register values
+unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
+/// Contec6464 - Last output request sent to module.
+unsigned int CDIO6464LastOutState[MAX_DIO_MODULES]; // Current requested value of the BO bits
+/// Contec6464 values to be written to the output register
+unsigned int CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
+
+// This Contect 16 input / 16 output DIO card is used to control timing slave by IOP
+/// Contec1616 input register values
+unsigned int CDIO1616InputInput[MAX_DIO_MODULES]; // Binary input bits
+/// Contec1616 output register values read back from the module
+unsigned int CDIO1616Input[MAX_DIO_MODULES]; // Current value of the BO bits
+/// Contec1616 values to be written to the output register
+unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
+/// Holds ID number of Contec1616 DIO card(s) used for timing control.
+int tdsControl[3];  // Up to 3 timing control modules allowed in case I/O chassis are daisy chained
+/// Total number of timing control modules found on bus
+int tdsCount = 0;
+
+/// Maintains present cycle count within a one second period.
+int cycleNum = 0;
+unsigned int odcStateWord = 0xffff;
+/// Value of readback from DAC FIFO size registers; used in diags for FIFO overflow/underflow.
+int out_buf_size = 0; // test checking DAC buffer size
+unsigned int cycle_gps_time = 0; // Time at which ADCs triggered
+unsigned int cycle_gps_event_time = 0; // Time at which ADCs triggered
+unsigned int   cycle_gps_ns = 0;
+unsigned int   cycle_gps_event_ns = 0;
+unsigned int   gps_receiver_locked = 0; // Lock/unlock flag for GPS time card
+/// GPS time in GPS seconds
+unsigned int timeSec = 0;
+unsigned int timeSecDiag = 0;
+unsigned int ipcErrBits = 0;
+int cardCountErr = 0;
+struct rmIpcStr *daqPtr;
+int dacOF[MAX_DAC_MODULES];     /// @param dacOF[]  DAC overrange counters
+
+char daqArea[2*DAQ_DCU_SIZE];       // Space allocation for daqLib buffers
+int cpuId = 1;
+
+#ifdef DUAL_DAQ_DC
+    #define MX_OK   15
+#else
+    #define MX_OK   3
+#endif
+
+// Initial diag reset flag
+int initialDiagReset = 1;
+
+// Cache flushing mumbo jumbo suggested by Thomas Gleixner, it is probably useless
+// Did not see any effect
+char fp [64*1024];
+
