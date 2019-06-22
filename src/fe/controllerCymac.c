@@ -28,48 +28,8 @@
 ///<    GNU General Public License for more details.
 
 
-#include <linux/version.h>
-#include <linux/init.h>
-#undef printf
-#include <linux/module.h>
-#include <linux/kernel.h>
-#include <linux/proc_fs.h>
-#include <linux/kthread.h>
-#include <asm/delay.h>
-#include <asm/cacheflush.h>
+#include "controllerko.h"
 
-#include <linux/slab.h>
-/// Can't use printf in kernel module so redefine to use Linux printk function
-#define printf printk
-#include <drv/cdsHardware.h>
-#include "inlineMath.h"
-
-#include <asm/processor.h>
-#include <asm/cacheflush.h>
-
-// Code can be run without shutting down CPU by changing this compile flag
-#ifndef NO_CPU_SHUTDOWN
-extern long ligo_get_gps_driver_offset(void);
-#endif
-
-
-#include "fm10Gen.h"		// CDS filter module defs and C code
-#include "feComms.h"		// Lvea control RFM network defs.
-#include "daqmap.h"		// DAQ network layout
-#include "cds_types.h"
-#include "controller.h"
-
-#ifndef NO_DAQ
-#include "drv/fb.h"
-#include "drv/daqLib.c"         // DAQ/GDS connection software
-#endif
-
-#include "drv/map.h"		// PCI hardware defs
-#include "drv/epicsXfer.c"	// User defined EPICS to/from FE data transfer function
-#include "timing.c"		// timing module / IRIG-B  functions
-
-#include "drv/inputFilterModule.h"		
-#include "drv/inputFilterModule1.h"		
 
 #ifdef DOLPHIN_TEST
 #include "dolphin.c"
@@ -79,7 +39,6 @@ extern long ligo_get_gps_driver_offset(void);
 #ifdef TIME_MASTER
 TIMING_SIGNAL *pcieTimer;
 #endif
-
 
 duotone_diag_t dt_diag;
 
@@ -98,13 +57,8 @@ unsigned int CDIO1616InputInput[MAX_DIO_MODULES]; // Binary input bits
 unsigned int CDIO1616Input[MAX_DIO_MODULES]; // Current value of the BO bits
 /// Contec1616 values to be written to the output register
 unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
-/// Holds ID number of Contec1616 DIO card(s) used for timing control.
-int tdsControl[3];	// Up to 3 timing control modules allowed in case I/O chassis are daisy chained
-/// Total number of timing control modules found on bus
-int tdsCount = 0;
+
 int adcCycleNum = 0;
-
-
 int ioClockDac = DAC_PRELOAD_CNT;
 int ioMemCntr = 0;
 int ioMemCntrDac = DAC_PRELOAD_CNT;
@@ -120,6 +74,7 @@ struct rmIpcStr *daqPtr;
 int dacWatchDog = 0;
 
 int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
+
 
 // Include C code modules
 #include "moduleLoadIop.c"
@@ -166,7 +121,6 @@ void *fe_start(void *arg)
   int onePpsTimeTest[10];		/// @param onePpsTimeTest[] One PPS diagnostic check
 #endif
   int dcuId;				/// @param dcuId DAQ ID number for this process
-  static int missedCycle = 0;		/// @param missedCycle Incremented error counter when too many values in ADC FIFO
   int diagWord = 0;			/// @param diagWord Code diagnostic bit pattern returned to EPICS
   int system = 0;
   int syncSource = SYNC_SRC_TIMER;	/// @param syncSource Code startup synchronization source
@@ -183,8 +137,6 @@ void *fe_start(void *arg)
   unsigned int usec = 0;
 
   unsigned long cpc;
-  float duotoneTimeDac;
-  float duotoneTime;
 
 
 /// **********************************************************************************************\n
@@ -319,28 +271,10 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
   iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0], (struct CDS_EPICS *)pLocalEpics,1);
 
   // Initialize timing info variables
-  timeinfo.cpuTimeEverMax = 0;		
-  timeinfo.cpuTimeEverMaxWhen = 0;	
-  timeinfo.startGpsTime = 0;
-  timeinfo.usrHoldTime = 0;		
-  timeinfo.timeHold = 0;		
-  timeinfo.timeHoldHold = 0;		
-  timeinfo.timeHoldWhen = 0;		
-  timeinfo.timeHoldWhenHold = 0;		
-  timeinfo.usrTime = 0;		
-  timeinfo.cycleTime = 0;		
-  missedCycle = 0;
+  initializeTimingDiags(&timeinfo);
 
   // Initialize duotone measurement signals
-  for(ii=0;ii<IOP_IO_RATE;ii++) {
-    dt_diag.adc[ii] = 0;
-    dt_diag.dac[ii] = 0;
-  }
-  dt_diag.totalAdc = 0.0;
-  dt_diag.totalDac = 0.0;
-  dt_diag.meanAdc = 0.0;
-  dt_diag.meanDac = 0.0;
-  dt_diag.dacDuoEnable = 0.0;
+  initializeDuotoneDiags(&dt_diag);
 
   /// \> Initialize the ADC modules *************************************
   pLocalEpics->epicsOutput.fe_status = INIT_ADC_MODS;
