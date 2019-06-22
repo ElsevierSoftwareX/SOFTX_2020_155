@@ -11,8 +11,8 @@
 /*                                                                      */
 /*----------------------------------------------------------------------*/
 
-///	@file controller.c
-///	@brief Main scheduler program for compiled real-time kernal object. \n
+///	@file controllerAppUser.c
+///	@brief Main scheduler program for compiled real-time user space object. \n
 /// 	@detail More information can be found in the following DCC document:
 ///<	<a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">T0900607 CDS RT Sequencer Software</a>
 ///	@author R.Bork, A.Ivanov
@@ -51,10 +51,12 @@
 
 #include "drv/epicsXfer.c"	// User defined EPICS to/from FE data transfer function
 #include "drv/mapuser.h"
-// #include "timing.c"		// timing module / IRIG-B  functions
+#include "timing.c"		// timing module / IRIG-B  functions
 
+int dacOF[MAX_DAC_MODULES];
 #include "drv/inputFilterModule.h"		
 #include "drv/inputFilterModule1.h"		
+#include <drv/app_dac_functions.c>
 
 #ifdef DOLPHIN_TEST
 #include "dolphin.c"
@@ -79,60 +81,12 @@ unsigned int CDIO1616Input[MAX_DIO_MODULES]; // Current value of the BO bits
 unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
 // /// Holds ID number of Contec1616 DIO card(s) used for timing control.
 
-/// Maintains present cycle count within a one second period.
-int cycleNum = 0;
-unsigned int odcStateWord = 0xffff;
-/// Value of readback from DAC FIFO size registers; used in diags for FIFO overflow/underflow.
-int out_buf_size = 0; // test checking DAC buffer size
-unsigned int cycle_gps_time = 0; // Time at which ADCs triggered
-unsigned int cycle_gps_event_time = 0; // Time at which ADCs triggered
-unsigned int   cycle_gps_ns = 0;
-unsigned int   cycle_gps_event_ns = 0;
-unsigned int   gps_receiver_locked = 0; // Lock/unlock flag for GPS time card
-/// GPS time in GPS seconds
-unsigned int timeSec = 0;
-unsigned int timeSecDiag = 0;
-/* 1 - error occured on shmem; 2 - RFM; 3 - Dolphin */
-unsigned int ipcErrBits = 0;
-struct timespec adcTime;			///< Used in code cycle timing
-struct timespec myTimer[2];			///< Used in code cycle timing
-int adcHoldTime = 0;		///< Stores time between code cycles
-int adcHoldTimeMax = 0;		///< Stores time between code cycles
-int startGpsTime = 0;
-int adcHoldTimeMin = 0xffff;
-int adcHoldTimeAvg = 0;
-int adcHoldTimeAvgPerSec;
-int usrTime;			///< Time spent in user app code
-int usrHoldTime = 0;		///< Max time spent in user app code
-int cardCountErr = 0;
-int cycleTime;			///< Current cycle time
-int timeHold = 0;			///< Max code cycle time within 1 sec period
-int timeHoldHold = 0;			///< Max code cycle time within 1 sec period; hold for another sec
-
-
-struct rmIpcStr *daqPtr;
-
-int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
-
 // Include C code modules
-	#include "rcguser.c"
-
-char daqArea[2*DAQ_DCU_SIZE];		// Space allocation for daqLib buffers
-int cpuId = 1;
-
-#ifdef DUAL_DAQ_DC
-	#define MX_OK	15
-#else
-	#define MX_OK	3
-#endif
-
-// Initial diag reset flag
-int initialDiagReset = 1;
-
-// Cache flushing mumbo jumbo suggested by Thomas Gleixner, it is probably useless
-// Did not see any effect
-  char fp [64*1024];
-
+#include "rcguser.c"
+int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
+struct timespec adcTime;			///< Used in code cycle timing
+int timeHoldHold = 0;			///< Max code cycle time within 1 sec period; hold for another sec
+struct timespec myTimer[2];			///< Used in code cycle timing
 
 // Clear DAC channel shared memory map,
 // used to keep track of non-overlapping DAC channels among slave models
@@ -185,7 +139,7 @@ int fe_start()
   static int clock1Min = 0;		///  @param clockMin Minute counter (Not Used??)
   struct timespec tp;
   static struct timespec cpuClock[CPU_TIMER_CNT];	///  @param cpuClock[] Code timing diag variables
-int dacOF[MAX_DAC_MODULES]; 
+  // int dacOF[MAX_DAC_MODULES]; 
 
   adcInfo_t adcInfo;
   dacInfo_t dacInfo;
@@ -198,7 +152,7 @@ int dacOF[MAX_DAC_MODULES];
   int num_outs = MAX_DAC_CHN_PER_MOD;   /// @param num_outs Number of DAC channels variable
   int dkiTrip = 0;
   RFM_FE_COMMS *pEpicsComms;		/// @param *pEpicsComms Pointer to EPICS shared memory space
-  int timeHoldMax = 0;			/// @param timeHoldMax Max code cycle time since last diag reset
+  // int timeHoldMax = 0;			/// @param timeHoldMax Max code cycle time since last diag reset
   int myGmError2 = 0;			/// @param myGmError2 Myrinet error variable
   int status;				/// @param status Typical function return value
   float onePps;				/// @param onePps Value of 1PPS signal, if used, for diagnostics
@@ -282,7 +236,6 @@ int dacOF[MAX_DAC_MODULES];
   // Clear input masks
   pLocalEpics->epicsInput.burtRestore_mask = 0;
   pLocalEpics->epicsInput.dacDuoSet_mask = 0;
-  memset(proc_futures, 0, sizeof(proc_futures));
 
 
 /// < Read in all Filter Module EPICS coeff settings
@@ -424,6 +377,7 @@ usleep(1000);
 
 	// SLAVE needs to sync with MASTER by looking for cycle 0 count in ipc memory
 	// Find memory buffer of first ADC to be used in SLAVE application.
+    pLocalEpics->epicsOutput.fe_status = INIT_SYNC;
         ll = cdsPciModules.adcConfig[0];
         printf("waiting to sync %d\n",ioMemData->iodata[ll][0].cycle);
 	clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_CYCLE_START]);
@@ -435,10 +389,10 @@ usleep(1000);
         timeSec = ioMemData->iodata[ll][0].timeSec;
 
         clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_CYCLE_END]);
-	cycleTime = BILLION * (cpuClock[CPU_TIME_CYCLE_END].tv_sec - cpuClock[CPU_TIME_CYCLE_START].tv_sec) + 
+	timeinfo.cycleTime = BILLION * (cpuClock[CPU_TIME_CYCLE_END].tv_sec - cpuClock[CPU_TIME_CYCLE_START].tv_sec) + 
 	    	               cpuClock[CPU_TIME_CYCLE_END].tv_nsec - cpuClock[CPU_TIME_CYCLE_START].tv_nsec;
-	cycleTime /= 1000;
-        printf("Synched %d\n",cycleTime);
+	timeinfo.cycleTime /= 1000;
+        printf("Synched %d\n",timeinfo.cycleTime);
 	// Need to set sync21pps so code will not try to sync with 1pps pulse later.
 	sync21pps=1;
 	// Get GPS seconds from MASTER
@@ -452,6 +406,7 @@ usleep(1000);
 	timeSec = ioMemData->gpsSecond;
         // timeSec = ioMemData->iodata[0][0].timeSec;
   printf ("Using local GPS time %d \n",timeSec);
+  pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;
 
   clock_gettime(CLOCK_MONOTONIC, &adcTime);
 
@@ -484,83 +439,82 @@ usleep(1000);
 	  if(!iopDacEnable || dkiTrip) feStatus |= FE_ERROR_DAC_ENABLE;
 
 	}
-        for(ll=0;ll<sampleCount;ll++)
-        {
+    for(ll=0;ll<sampleCount;ll++)
+    {
 		/// \> SLAVE gets its adc data from MASTER via ipc shared memory\n
-               for(jj=0;jj<cdsPciModules.adcCount;jj++)
+        for(jj=0;jj<cdsPciModules.adcCount;jj++)
 		{
-        		mm = cdsPciModules.adcConfig[jj];
-                        kk = 0;
-		    		clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_RDY_ADC]);
+            mm = cdsPciModules.adcConfig[jj];
+            kk = 0;
+		    clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_RDY_ADC]);
 			/// - ---- Wait for proper timestamp in shared memory, indicating data ready.
-                        do{
-                                // usleep(1);
-		    		clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_ADC_WAIT]);
-				adcInfo.adcWait = BILLION * (cpuClock[CPU_TIME_ADC_WAIT].tv_sec - cpuClock[CPU_TIME_RDY_ADC].tv_sec) + 
-	    	               			     cpuClock[CPU_TIME_ADC_WAIT].tv_nsec - cpuClock[CPU_TIME_RDY_ADC].tv_nsec;
+            do{
+		        clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_ADC_WAIT]);
+				adcInfo.adcWait = BILLION * 
+                    (cpuClock[CPU_TIME_ADC_WAIT].tv_sec - cpuClock[CPU_TIME_RDY_ADC].tv_sec) + 
+	    	        cpuClock[CPU_TIME_ADC_WAIT].tv_nsec - cpuClock[CPU_TIME_RDY_ADC].tv_nsec;
 				adcInfo.adcWait /= 1000;
-                                // kk++;
-                        }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (adcInfo.adcWait < MAX_ADC_WAIT_SLAVE));
+            }while((ioMemData->iodata[mm][ioMemCntr].cycle != ioClock) && (adcInfo.adcWait < MAX_ADC_WAIT_SLAVE));
 			timeSec = ioMemData->iodata[mm][ioMemCntr].timeSec;
 			if (cycle_gps_time == 0) {
-				startGpsTime = timeSec;
-				pLocalEpics->epicsOutput.startgpstime = startGpsTime;
+				timeinfo.startGpsTime = timeSec;
+				pLocalEpics->epicsOutput.startgpstime = timeinfo.startGpsTime;
 			}
 			cycle_gps_time = timeSec;
 
 			/// - --------- If data not ready in time, set error, release DAC channel reservation and exit the code.
-                        if(adcInfo.adcWait >= MAX_ADC_WAIT_SLAVE)
-                        {
-                                printf ("ADC TIMEOUT %d %d %d %d\n",mm,ioMemData->iodata[mm][ioMemCntr].cycle, ioMemCntr,ioClock);
+            if(adcInfo.adcWait >= MAX_ADC_WAIT_SLAVE)
+            {
+                printf ("ADC TIMEOUT %d %d %d %d\n",mm,ioMemData->iodata[mm][ioMemCntr].cycle, ioMemCntr,ioClock);
 	  			pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
 	  			pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
 				deallocate_dac_channels();
   				return (void *)-1;
-                        }
-                        for(ii=0;ii<MAX_ADC_CHN_PER_MOD;ii++)
-                        {
-				/// - ---- Read data from shared memory.
-                                adcInfo.adcData[jj][ii] = ioMemData->iodata[mm][ioMemCntr].data[ii];
+            }
+            for(ii=0;ii<MAX_ADC_CHN_PER_MOD;ii++)
+            {
+			    /// - ---- Read data from shared memory.
+                adcInfo.adcData[jj][ii] = ioMemData->iodata[mm][ioMemCntr].data[ii];
 #ifdef FLIP_SIGNALS
-                                adcInfo.adcData[jj][ii] *= -1;
+                adcInfo.adcData[jj][ii] *= -1;
 #endif
-                                dWord[jj][ii] = adcInfo.adcData[jj][ii];
+                dWord[jj][ii] = adcInfo.adcData[jj][ii];
 #ifdef OVERSAMPLE
 				/// - ---- Downsample ADC data from 64K to rate of user application
 				if (dWordUsed[jj][ii]) {
 					dWord[jj][ii] = iir_filter_biquad(dWord[jj][ii],FE_OVERSAMPLE_COEFF,2,&dHistory[ii+jj*32][0]);
-				}
-			/// - ---- Check for ADC data over/under range
-			if((adcInfo.adcData[jj][ii] > limit) || (adcInfo.adcData[jj][ii] < -limit))
-			  {
-				adcInfo.overflowAdc[jj][ii] ++;
-				pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] ++;
-				overflowAcc ++;
-				adcInfo.adcOF[jj] = 1;
-				odcStateWord |= ODC_ADC_OVF;
-			  }
+			    }
+			    /// - ---- Check for ADC data over/under range
+			    if((adcInfo.adcData[jj][ii] > limit) || (adcInfo.adcData[jj][ii] < -limit))
+		        {
+				    adcInfo.overflowAdc[jj][ii] ++;
+				    pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] ++;
+				    overflowAcc ++;
+				    adcInfo.adcOF[jj] = 1;
+				    odcStateWord |= ODC_ADC_OVF;
+		        }   
 #endif
-                                // No filter  dWord[kk][ll] = adcData[kk][ll];
-                        }
-                }
+            // No filter  dWord[kk][ll] = adcData[kk][ll];
+            }
+        }
 		/// \> Set counters for next read from ipc memory
-                ioClock = (ioClock + 1) % IOP_IO_RATE;
-                ioMemCntr = (ioMemCntr + 1) % IO_MEMORY_SLOTS;
-        	clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_CYCLE_START]);
+        ioClock = (ioClock + 1) % IOP_IO_RATE;
+        ioMemCntr = (ioMemCntr + 1) % IO_MEMORY_SLOTS;
+        clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_CYCLE_START]);
 
 	}
 
 	// After first synced ADC read, must set to code to read number samples/cycle
-        sampleCount = OVERSAMPLE_TIMES;
+    sampleCount = OVERSAMPLE_TIMES;
 /// End of ADC Read **************************************************************************************
 
 
 
 /// \> Call the front end specific application  ******************\n
 /// - -- This is where the user application produced by RCG gets called and executed. \n\n
-         clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_USR_START]);
+    clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_USR_START]);
  	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
-         clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_USR_END]);
+    clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_USR_END]);
 
   	odcStateWord = 0;
 /// WRITE DAC OUTPUTS ***************************************** \n
@@ -570,157 +524,58 @@ usleep(1000);
 /// - -- USER APP (ADC_SLAVE) sends output values to memory shared with IOP. \n
 
 /// START OF USER APP DAC WRITE *****************************************
-        // Write out data to DAC modules
+    // Write out data to DAC modules
 	/// \> Loop thru all DAC modules
-        for(jj=0;jj<cdsPciModules.dacCount;jj++)
-        {
-		/// - -- locate the proper DAC memory block
-           	mm = cdsPciModules.dacConfig[jj];
-		/// - -- Set overflow limits, data mask, and chan count based on DAC type
-                limit = OVERFLOW_LIMIT_16BIT;
-                mask = GSAO_16BIT_MASK;
-                num_outs = GSAO_16BIT_CHAN_COUNT;
-                if (cdsPciModules.dacType[jj] == GSC_18AO8) {
-                        limit = OVERFLOW_LIMIT_18BIT; // 18 bit limit
-                        mask = GSAO_18BIT_MASK;
-                        num_outs = GSAO_18BIT_CHAN_COUNT;
-
-
-                }
-		/// - -- If user app < 64k rate (typical), need to upsample from code rate to IOP rate
-           	for (kk=0; kk < OVERSAMPLE_TIMES; kk++) {
-		     /// - -- For each DAC channel
-                    for (ii=0; ii < num_outs; ii++)
-                    {
-#ifdef FLIP_SIGNALS
-                        dacOut[jj][ii] *= -1;
-#endif
-			/// - ---- Read in DAC value, if channel is used by the application,  and run thru upsample filter\n
-                        if (dacOutUsed[jj][ii]) {
-#ifdef OVERSAMPLE_DAC
-#ifdef NO_ZERO_PAD
-				/// - --------- If set to NO_ZERO_PAD (not standard setting), then DAC output value is 
-				/// repeatedly run thru the filter OVERSAMPE_TIMES.\n
-                          	dac_in = dacOut[jj][ii];
-#ifdef CORE_BIQUAD
-                          	dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
-#else
-                          	dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
-#endif
-#else
-				/// - --------- Otherwise zero padding is used (standard), 
-				/// ie DAC output value is applied to filter on first
-				/// interation, thereafter zeros are applied.
-                          	dac_in =  kk == 0? (double)dacOut[jj][ii]: 0.0;
-#ifdef CORE_BIQUAD
-                          	dac_in = iir_filter_biquad(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
-#else
-                          	dac_in = iir_filter(dac_in,FE_OVERSAMPLE_COEFF,2,&dDacHistory[ii+jj*MAX_DAC_CHN_PER_MOD][0]);
-#endif
-                          	dac_in *= OVERSAMPLE_TIMES;
-#endif
-#else
-                          	dac_in = dacOut[jj][ii];
-#endif
-                        }
-			/// - ---- If channel is not used, then set value to zero.
-                        else 
-				dac_in = 0.0;
-                        /// - ---- Smooth out some of the double > short roundoff errors
-                        if(dac_in > 0.0) dac_in += 0.5;
-                        else dac_in -= 0.5;
-                        dac_out = dac_in;
-
-                        /// - ---- Check output values are within range of DAC \n
-                        /// - --------- If overflow, clip at DAC limits and report errors
-                        if(dac_out > limit || dac_out < -limit)
-                        {
-                                dacInfo.overflowDac[jj][ii] ++;
-				pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] ++;
-                                overflowAcc ++;
-                                dacOF[jj] = 1;
-				odcStateWord |= ODC_DAC_OVF;;
-				if(dac_out > limit) dac_out = limit;
-				else dac_out = -limit;
-                        }
-			/// - ---- If DAQKILL tripped, set output to zero.
-                        if(!iopDacEnable) dac_out = 0;
-			/// - ---- Load last values to EPICS channels for monitoring on GDS_TP screen.
-                        dacInfo.dacOutEpics[jj][ii] = dac_out;
-
-                        /// - ---- Load DAC testpoints
-                        floatDacOut[16*jj + ii] = dac_out;
-                        /// - ---- Determine shared memory location for new DAC output data 
-                        memCtr = (ioMemCntrDac + kk) % IO_MEMORY_SLOTS;
-			/// - ---- Write DAC output to shared memory. \n
-                        /// - --------- Only write to DAC channels being used to allow two or more
-                        /// slaves to write to same DAC module.
-                        if (dacOutUsed[jj][ii])
-                                ioMemData->iodata[mm][memCtr].data[ii] = dac_out;
-		    }
-                /// - ---- Write cycle count to make DAC data complete
-                if(iopDacEnable)
-                ioMemData->iodata[mm][memCtr].cycle = (ioClockDac + kk) % IOP_IO_RATE;
-           }
-	}
-        /// \> Increment DAC memory block pointers for next cycle
-        ioClockDac = (ioClockDac + OVERSAMPLE_TIMES) % IOP_IO_RATE;
-        ioMemCntrDac = (ioMemCntrDac  + OVERSAMPLE_TIMES) % IO_MEMORY_SLOTS;
-        if(dacWriteEnable < 10) dacWriteEnable ++;
+    status = app_dac_write(ioMemCntrDac,ioClockDac, &dacinfo);
+    /// \> Increment DAC memory block pointers for next cycle
+    ioClockDac = (ioClockDac + OVERSAMPLE_TIMES) % IOP_IO_RATE;
+    ioMemCntrDac = (ioMemCntrDac  + OVERSAMPLE_TIMES) % IO_MEMORY_SLOTS;
+    if(dacWriteEnable < 10) dacWriteEnable ++;
 
 /// END OF DAC WRITE *************************************************
 
 
 /// BEGIN HOUSEKEEPING ************************************************ \n
 
-        pLocalEpics->epicsOutput.cycle = cycleNum;
+    pLocalEpics->epicsOutput.cycle = cycleNum;
 
+// *******************************************************************
 /// \> Cycle 18, Send timing info to EPICS at 1Hz
+// *******************************************************************
 	if(cycleNum ==HKP_TIMING_UPDATES)	
-        {
-	  pLocalEpics->epicsOutput.cpuMeter = timeHold;
-	  pLocalEpics->epicsOutput.cpuMeterMax = timeHoldMax;
-          timeHoldHold = timeHold;
-          timeHold = 0;
+    {
+        sendTimingDiags2Epics(pLocalEpics, &timeinfo, &adcinfo);
 
-	  if (timeSec % 4 == 0) pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeMin;
-	  else if (timeSec % 4 == 1)
-		pLocalEpics->epicsOutput.adcWaitTime =  adcHoldTimeMax;
-	  else
-	  	pLocalEpics->epicsOutput.adcWaitTime = adcHoldTimeAvg/CYCLE_PER_SECOND;
-	  adcHoldTimeAvgPerSec = adcHoldTimeAvg/CYCLE_PER_SECOND;
-	  adcHoldTimeMax = 0;
-	  adcHoldTimeMin = 0xffff;
-	  adcHoldTimeAvg = 0;
-	  if((adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcHoldTime < CYCLE_TIME_ALRM_LO)) 
-	  {
-	  	diagWord |= FE_ADC_HOLD_ERR;
-		feStatus |= FE_ERROR_TIMING;
+
+	    if((adcinfo.adcHoldTime > CYCLE_TIME_ALRM_HI) || (adcinfo.adcHoldTime < CYCLE_TIME_ALRM_LO)) 
+	    {
+	  	    diagWord |= FE_ADC_HOLD_ERR;
+		    feStatus |= FE_ERROR_TIMING;
 	  
-	  }
-	  if(timeHoldMax > CYCLE_TIME_ALRM) 
-	  {
-	  	diagWord |= FE_PROC_TIME_ERR;
-		feStatus |= FE_ERROR_TIMING;
-	  }
-	  pLocalEpics->epicsOutput.stateWord = feStatus;
-  	  feStatus = 0;
-  	  if(pLocalEpics->epicsInput.diagReset || initialDiagReset)
-	  {
-		initialDiagReset = 0;
-		pLocalEpics->epicsInput.diagReset = 0;
-		pLocalEpics->epicsInput.ipcDiagReset = 1;
+	    }
+	    if(timeinfo.timeHoldMax > CYCLE_TIME_ALRM) 
+	    {
+	  	    diagWord |= FE_PROC_TIME_ERR;
+		    feStatus |= FE_ERROR_TIMING;
+	    }
+	    pLocalEpics->epicsOutput.stateWord = feStatus;
+  	    feStatus = 0;
+  	    if(pLocalEpics->epicsInput.diagReset || initialDiagReset)
+	    {
+		    initialDiagReset = 0;
+		    pLocalEpics->epicsInput.diagReset = 0;
+		    pLocalEpics->epicsInput.ipcDiagReset = 1;
   		// pLocalEpics->epicsOutput.diags[1] = 0;
-		timeHoldMax = 0;
-	  	diagWord = 0;
-		ipcErrBits = 0;
+		    timeinfo.timeHoldMax = 0;
+	  	    diagWord = 0;
+		    ipcErrBits = 0;
 		
 		// feStatus = 0;
-	  }
-	  // Flip the onePPS various once/sec as a watchdog monitor.
-	  // pLocalEpics->epicsOutput.onePps ^= 1;
-	  pLocalEpics->epicsOutput.diagWord = diagWord;
-        }
+	    }
+	    // Flip the onePPS various once/sec as a watchdog monitor.
+	    // pLocalEpics->epicsOutput.onePps ^= 1;
+	    pLocalEpics->epicsOutput.diagWord = diagWord;
+    }
 
 
 /// \> Check for requests for filter module clear history requests. This is spread out over a number of cycles.
@@ -742,195 +597,194 @@ usleep(1000);
 /// \>  Write data to DAQ.
 #ifndef NO_DAQ
 		
-		// Call daqLib
-		pLocalEpics->epicsOutput.daqByteCnt = 
-			daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
-		// Send the current DAQ block size to the awgtpman for TP number checking
-	  	pEpicsComms->padSpace.feDaqBlockSize = curDaqBlockSize;
-	  	pLocalEpics->epicsOutput.tpCnt = tpPtr->count & 0xff;
-		feStatus |= (FE_ERROR_EXC_SET & tpPtr->count);
-		if (FE_ERROR_EXC_SET & tpPtr->count) odcStateWord |= ODC_EXC_SET;
-		else odcStateWord &= ~(ODC_EXC_SET);
-		if(pLocalEpics->epicsOutput.daqByteCnt > DAQ_DCU_RATE_WARNING) 
-			feStatus |= FE_ERROR_DAQ;
+	// Call daqLib
+	pLocalEpics->epicsOutput.daqByteCnt = 
+		daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],myGmError2,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
+	// Send the current DAQ block size to the awgtpman for TP number checking
+  	pEpicsComms->padSpace.feDaqBlockSize = curDaqBlockSize;
+  	pLocalEpics->epicsOutput.tpCnt = tpPtr->count & 0xff;
+	feStatus |= (FE_ERROR_EXC_SET & tpPtr->count);
+	if (FE_ERROR_EXC_SET & tpPtr->count) odcStateWord |= ODC_EXC_SET;
+	else odcStateWord &= ~(ODC_EXC_SET);
+	if(pLocalEpics->epicsOutput.daqByteCnt > DAQ_DCU_RATE_WARNING) 
+		feStatus |= FE_ERROR_DAQ;
 #endif
 
+// *******************************************************************
 /// \> Cycle 19, write updated diag info to EPICS
+// *******************************************************************
 	if(cycleNum == HKP_DIAG_UPDATES)	
-        {
-	  pLocalEpics->epicsOutput.userTime = usrHoldTime;
-	  pLocalEpics->epicsOutput.ipcStat = ipcErrBits;
-	  if(ipcErrBits & 0xf) feStatus |= FE_ERROR_IPC;
-	  // Create FB status word for return to EPICS
-	  mxStat = 0;
-	  mxDiagR = daqPtr->reqAck;
-	  if((mxDiag & 1) != (mxDiagR & 1)) mxStat = 1;
-	  if((mxDiag & 2) != (mxDiagR & 2)) mxStat += 2;
+    {
+	    pLocalEpics->epicsOutput.userTime = timeinfo.usrHoldTime;
+	    pLocalEpics->epicsOutput.ipcStat = ipcErrBits;
+	    if(ipcErrBits & 0xf) feStatus |= FE_ERROR_IPC;
+	    // Create FB status word for return to EPICS
+	    mxStat = 0;
+	    mxDiagR = daqPtr->reqAck;
+	    if((mxDiag & 1) != (mxDiagR & 1)) mxStat = 1;
+	    if((mxDiag & 2) != (mxDiagR & 2)) mxStat += 2;
 #ifdef DUAL_DAQ_DC
-	  if((mxDiag & 4) != (mxDiagR & 4)) mxStat += 4;
-	  if((mxDiag & 8) != (mxDiagR & 8)) mxStat += 8;
+	    if((mxDiag & 4) != (mxDiagR & 4)) mxStat += 4;
+	    if((mxDiag & 8) != (mxDiagR & 8)) mxStat += 8;
 #endif
-	  pLocalEpics->epicsOutput.fbNetStat = mxStat;
-  	  mxDiag = mxDiagR;
-	  if(mxStat != MX_OK)
-		feStatus |= FE_ERROR_DAQ;;
-	  usrHoldTime = 0;
-  	  if(pLocalEpics->epicsInput.overflowReset)
-	  {
-                if (pLocalEpics->epicsInput.overflowReset) {
-                   for (ii = 0; ii < 16; ii++) {
-                      for (jj = 0; jj < cdsPciModules.adcCount; jj++) {
-                         adcInfo.overflowAdc[jj][ii] = 0;
-                         adcInfo.overflowAdc[jj][ii + 16] = 0;
-			pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
-			pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii + 16] = 0;
-                      }
-
-                      for (jj = 0; jj < cdsPciModules.dacCount; jj++) {
-                         pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] = 0;
-                      }
-                   }
+	    pLocalEpics->epicsOutput.fbNetStat = mxStat;
+  	    mxDiag = mxDiagR;
+	    if(mxStat != MX_OK)
+		    feStatus |= FE_ERROR_DAQ;;
+	    timeinfo.usrHoldTime = 0;
+  	    if(pLocalEpics->epicsInput.overflowReset)
+	    {
+            for (ii = 0; ii < 16; ii++) {
+                for (jj = 0; jj < cdsPciModules.adcCount; jj++) {
+                    adcInfo.overflowAdc[jj][ii] = 0;
+                    adcInfo.overflowAdc[jj][ii + 16] = 0;
+			        pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
+			        pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii + 16] = 0;
                 }
-	  }
-  	  if((pLocalEpics->epicsInput.overflowReset) || (overflowAcc > OVERFLOW_CNTR_LIMIT))
-	  {
-		pLocalEpics->epicsInput.overflowReset = 0;
-		pLocalEpics->epicsOutput.ovAccum = 0;
-		overflowAcc = 0;
-	  }
-        }
 
-        if(cycleNum == 1)
+                for (jj = 0; jj < cdsPciModules.dacCount; jj++) {
+                    pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] = 0;
+                }
+            }
+	    }
+  	    if((pLocalEpics->epicsInput.overflowReset) || (overflowAcc > OVERFLOW_CNTR_LIMIT))
+	    {
+		    pLocalEpics->epicsInput.overflowReset = 0;
+		    pLocalEpics->epicsOutput.ovAccum = 0;
+		    overflowAcc = 0;
+	    }
+    }
+
+// *******************************************************************
+// *******************************************************************
+    if(cycleNum == 1)
 	{
           pLocalEpics->epicsOutput.timeDiag = timeSec;
 	}
+// *******************************************************************
 /// \> Cycle 20, Update latest DAC output values to EPICS
-        if(subcycle == HKP_DAC_EPICS_UPDATES)
+// *******************************************************************
+    if(subcycle == HKP_DAC_EPICS_UPDATES)
 	{
-	      // Send DAC output values at 16Hzfb
-	      for(jj=0;jj<cdsPciModules.dacCount;jj++)
-	      {
+	    // Send DAC output values at 16Hzfb
+	    for(jj=0;jj<cdsPciModules.dacCount;jj++)
+	    {
 	    	for(ii=0;ii<MAX_DAC_CHN_PER_MOD;ii++)
 	    	{
-			pLocalEpics->epicsOutput.dacValue[jj][ii] = dacInfo.dacOutEpics[jj][ii];
-		}
-	      }
+			    pLocalEpics->epicsOutput.dacValue[jj][ii] = dacInfo.dacOutEpics[jj][ii];
+		    }
+	    }
 	}
 
+// *******************************************************************
 /// \> Cycle 21, Update ADC/DAC status to EPICS.
-        if(cycleNum == HKP_ADC_DAC_STAT_UPDATES)
-        {
-	  pLocalEpics->epicsOutput.ovAccum = overflowAcc;
-	  for(jj=0;jj<cdsPciModules.adcCount;jj++)
-	  {
-	    // SET/CLR Channel Hopping Error
-	    if(adcInfo.adcChanErr[jj]) 
+// *******************************************************************
+    if(cycleNum == HKP_ADC_DAC_STAT_UPDATES)
+    {
+	    pLocalEpics->epicsOutput.ovAccum = overflowAcc;
+	    for(jj=0;jj<cdsPciModules.adcCount;jj++)
 	    {
-	    	pLocalEpics->epicsOutput.statAdc[jj] &= ~(2);
-		feStatus |= FE_ERROR_ADC;;
-	    }
- 	    else pLocalEpics->epicsOutput.statAdc[jj] |= 2;
-	    adcInfo.adcChanErr[jj] = 0;
-	    // SET/CLR Overflow Error
-	    if(adcInfo.adcOF[jj]) 
-	    {
-	    	pLocalEpics->epicsOutput.statAdc[jj] &= ~(4);
-		feStatus |= FE_ERROR_OVERFLOW;;
-	    }
- 	    else pLocalEpics->epicsOutput.statAdc[jj] |= 4;
-	    adcInfo.adcOF[jj] = 0;
-	    for(ii=0;ii<32;ii++)
-	    {
-
+	        // SET/CLR Channel Hopping Error
+	        if(adcInfo.adcChanErr[jj]) 
+	        {
+	    	    pLocalEpics->epicsOutput.statAdc[jj] &= ~(2);
+		        feStatus |= FE_ERROR_ADC;;
+	        }
+ 	        else pLocalEpics->epicsOutput.statAdc[jj] |= 2;
+	        adcInfo.adcChanErr[jj] = 0;
+	        // SET/CLR Overflow Error
+	        if(adcInfo.adcOF[jj]) 
+	        {
+	    	    pLocalEpics->epicsOutput.statAdc[jj] &= ~(4);
+		        feStatus |= FE_ERROR_OVERFLOW;;
+	        }
+ 	        else pLocalEpics->epicsOutput.statAdc[jj] |= 4;
+	        adcInfo.adcOF[jj] = 0;
+	        for(ii=0;ii<32;ii++)
+	        {
                 if (pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] > OVERFLOW_CNTR_LIMIT) {
-		   pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
+		            pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] = 0;
                 }
-		pLocalEpics->epicsOutput.overflowAdc[jj][ii] = adcInfo.overflowAdc[jj][ii];
-		adcInfo.overflowAdc[jj][ii] = 0;
-
+		    pLocalEpics->epicsOutput.overflowAdc[jj][ii] = adcInfo.overflowAdc[jj][ii];
+		    adcInfo.overflowAdc[jj][ii] = 0;
+	        }
 	    }
-	  }
-	  for(jj=0;jj<cdsPciModules.dacCount;jj++)
-	  {
-	    if(dacOF[jj]) 
+	    for(jj=0;jj<cdsPciModules.dacCount;jj++)
 	    {
-	    	pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_OVERFLOW_BIT);
-		feStatus |= FE_ERROR_OVERFLOW;;
-	    }
- 	    else pLocalEpics->epicsOutput.statDac[jj] |= DAC_OVERFLOW_BIT;
-	    dacOF[jj] = 0;
-	    if(dacChanErr[jj]) 
-	    {
-	    	pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_TIMING_BIT);
-	    }
- 	    else pLocalEpics->epicsOutput.statDac[jj] |= DAC_TIMING_BIT;
-	    dacChanErr[jj] = 0;
-	    for(ii=0;ii<MAX_DAC_CHN_PER_MOD;ii++)
-	    {
-
+	        if(dacOF[jj]) 
+	        {
+	    	    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_OVERFLOW_BIT);
+		        feStatus |= FE_ERROR_OVERFLOW;;
+	        }
+ 	        else pLocalEpics->epicsOutput.statDac[jj] |= DAC_OVERFLOW_BIT;
+	        dacOF[jj] = 0;
+	        if(dacChanErr[jj]) 
+	        {
+	    	    pLocalEpics->epicsOutput.statDac[jj] &= ~(DAC_TIMING_BIT);
+	        }
+ 	        else pLocalEpics->epicsOutput.statDac[jj] |= DAC_TIMING_BIT;
+	        dacChanErr[jj] = 0;
+	        for(ii=0;ii<MAX_DAC_CHN_PER_MOD;ii++)
+	        {
                 if (pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] > OVERFLOW_CNTR_LIMIT) {
-		   pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] = 0;
-                }
-		pLocalEpics->epicsOutput.overflowDac[jj][ii] = dacInfo.overflowDac[jj][ii];
-		dacInfo.overflowDac[jj][ii] = 0;
-
-	    }
-	  }
+		        pLocalEpics->epicsOutput.overflowDacAcc[jj][ii] = 0;
+            }
+		    pLocalEpics->epicsOutput.overflowDac[jj][ii] = dacInfo.overflowDac[jj][ii];
+		    dacInfo.overflowDac[jj][ii] = 0;
+	        }
         }
+    }
+    // *********************************************************************
 	// Capture end of cycle time.
-         clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_CYCLE_END]);
+    // *********************************************************************
 
+    clock_gettime(CLOCK_MONOTONIC, &cpuClock[CPU_TIME_CYCLE_END]);
 	/// \> Compute code cycle time diag information.
-	cycleTime = BILLION * (cpuClock[CPU_TIME_CYCLE_END].tv_sec - cpuClock[CPU_TIME_CYCLE_START].tv_sec) + 
-			     cpuClock[CPU_TIME_CYCLE_END].tv_nsec - cpuClock[CPU_TIME_CYCLE_START].tv_nsec;
-	cycleTime /= 1000;
-	if (cycleTime > (1000000/CYCLE_PER_SECOND))  {
-		// printf("cycle %d time %d; adcWait %d; write1 %d; write2 %d; longest write2 %d\n", cycleNum, cycleTime, adcWait, (tempClock[1]-tempClock[0])/CPURATE, (tempClock[3]-tempClock[2])/CPURATE, longestWrite2);
-	}
-	// Hold the max cycle time over the last 1 second
-	if(cycleTime > timeHold)  timeHold = cycleTime;
-	// Hold the max cycle time since last diag reset
-	if(cycleTime > timeHoldMax) timeHoldMax = cycleTime;
+	timeinfo.cycleTime = BILLION * 
+        (cpuClock[CPU_TIME_CYCLE_END].tv_sec - 
+        cpuClock[CPU_TIME_CYCLE_START].tv_sec) + 
+	    cpuClock[CPU_TIME_CYCLE_END].tv_nsec - 
+        cpuClock[CPU_TIME_CYCLE_START].tv_nsec;
+	timeinfo.cycleTime /= 1000;
 	// BILLION
-	adcHoldTime = BILLION * (cpuClock[CPU_TIME_CYCLE_START].tv_sec - adcTime.tv_sec) + 
-			     cpuClock[CPU_TIME_CYCLE_START].tv_nsec - adcTime.tv_nsec;
-	adcHoldTime /= 1000;
-	// Avoid calculating the max hold time for the first few seconds
-	 pLocalEpics->epicsOutput.startgpstime = startGpsTime;
-	if (cycleNum != 0 && (startGpsTime+3) < cycle_gps_time) {
-		if(adcHoldTime > adcHoldTimeMax) adcHoldTimeMax = adcHoldTime;
-		if(adcHoldTime < adcHoldTimeMin) adcHoldTimeMin = adcHoldTime;
-		adcHoldTimeAvg += adcHoldTime;
-	}
+	adcinfo.adcHoldTime = BILLION * 
+        (cpuClock[CPU_TIME_CYCLE_START].tv_sec - adcTime.tv_sec) + 
+	    cpuClock[CPU_TIME_CYCLE_START].tv_nsec - adcTime.tv_nsec;
+	adcinfo.adcHoldTime /= 1000;
+	// Calc the max time of one cycle of the user code
+	timeinfo.usrTime = BILLION * 
+        (cpuClock[CPU_TIME_USR_END].tv_sec - 
+        cpuClock[CPU_TIME_CYCLE_START].tv_sec) + 
+	    cpuClock[CPU_TIME_USR_END].tv_nsec - 
+        cpuClock[CPU_TIME_CYCLE_START].tv_nsec;
+	timeinfo.usrTime /= 1000;
+
+    // Calculate timing max/mins/etc.
+    captureEocTiming(cycleNum, cycle_gps_time, &timeinfo, &adcinfo);
+
+	pLocalEpics->epicsOutput.startgpstime = timeinfo.startGpsTime;
 	adcTime.tv_sec = cpuClock[CPU_TIME_CYCLE_START].tv_sec;
 	adcTime.tv_nsec = cpuClock[CPU_TIME_CYCLE_START].tv_nsec;
-	// Calc the max time of one cycle of the user code
-	// For IOP, more interested in time to get thru ADC read code and send to slave apps
-	usrTime = BILLION * (cpuClock[CPU_TIME_USR_END].tv_sec - cpuClock[CPU_TIME_CYCLE_START].tv_sec) + 
-			     cpuClock[CPU_TIME_USR_END].tv_nsec - cpuClock[CPU_TIME_CYCLE_START].tv_nsec;
-	usrTime /= 1000;
-	if(usrTime > usrHoldTime) usrHoldTime = usrTime;
 
-        /// \> Update internal cycle counters
-          cycleNum += 1;
-          cycleNum %= CYCLE_PER_SECOND;
-	  clock1Min += 1;
-	  clock1Min %= CYCLE_PER_MINUTE;
-          if(subcycle == DAQ_CYCLE_CHANGE) 
-	  {
-		daqCycle = (daqCycle + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+    /// \> Update internal cycle counters
+    cycleNum += 1;
+    cycleNum %= CYCLE_PER_SECOND;
+    clock1Min += 1;
+    clock1Min %= CYCLE_PER_MINUTE;
+    if(subcycle == DAQ_CYCLE_CHANGE) 
+    {
+	    daqCycle = (daqCycle + 1) % DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 		if(!(daqCycle % 2)) pLocalEpics->epicsOutput.epicsSync = daqCycle;
-	  }
-          if(subcycle == END_OF_DAQ_BLOCK) /*we have reached the 16Hz second barrier*/
-            {
-              /* Reset the data cycle counter */
-              subcycle = 0;
-  
-            }
-          else{
-            /* Increment the internal cycle counter */
-            subcycle ++;                                                
-          }
+	}
+    if(subcycle == END_OF_DAQ_BLOCK) /*we have reached the 16Hz second barrier*/
+    {
+        /* Reset the data cycle counter */
+        subcycle = 0;
+    }
+    else{
+        /* Increment the internal cycle counter */
+        subcycle ++;                                                
+    }
 
 /// \> If not exit request, then continue INFINITE LOOP  *******
   }

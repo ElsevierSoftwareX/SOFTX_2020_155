@@ -4,6 +4,7 @@
 #include "gsc16ai64.h"
 #include "gsc16ao16.h"
 #include "gsc18ao8.h"
+#include "gsc20ao8.h"
 
 #ifdef OVERSAMPLE
 #ifdef SERVO2K

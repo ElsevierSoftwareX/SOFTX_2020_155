@@ -1,3 +1,42 @@
+adcInfo_t adcinfo;
+dacInfo_t dacinfo;
+timing_diag_t timeinfo;
+
+/// Maintains present cycle count within a one second period.
+int cycleNum = 0;
+unsigned int odcStateWord = 0xffff;
+/// Value of readback from DAC FIFO size registers; used in diags for FIFO overflow/underflow.
+int out_buf_size = 0; // test checking DAC buffer size
+unsigned int cycle_gps_time = 0; // Time at which ADCs triggered
+unsigned int cycle_gps_event_time = 0; // Time at which ADCs triggered
+unsigned int   cycle_gps_ns = 0;
+unsigned int   cycle_gps_event_ns = 0;
+unsigned int   gps_receiver_locked = 0; // Lock/unlock flag for GPS time card
+/// GPS time in GPS seconds
+unsigned int timeSec = 0;
+unsigned int timeSecDiag = 0;
+unsigned int ipcErrBits = 0;
+int cardCountErr = 0;
+struct rmIpcStr *daqPtr;
+int dacOF[MAX_DAC_MODULES];     /// @param dacOF[]  DAC overrange counters
+
+char daqArea[2*DAQ_DCU_SIZE];       // Space allocation for daqLib buffers
+int cpuId = 1;
+
+#ifdef DUAL_DAQ_DC
+    #define MX_OK   15
+#else
+    #define MX_OK   3
+#endif
+
+// Initial diag reset flag
+int initialDiagReset = 1;
+
+// Cache flushing mumbo jumbo suggested by Thomas Gleixner, it is probably useless
+// Did not see any effect
+char fp [64*1024];
+
+
 // The following bits define the EPICS STATE_WORD
 #define FE_ERROR_TIMING         0x2     // bit 1
 #define FE_ERROR_ADC            0x4     // bit 2
@@ -363,27 +402,6 @@ double dDacHistory[(MAX_DAC_MODULES * 16)][MAX_HISTRY];
 #define OVERSAMPLE_TIMES 1
 
 #endif
-// /proc epics channel interface
-struct proc_epics {
-	char *name;
-	unsigned long idx;
-	unsigned long mask_idx;
-	unsigned char type;
-	unsigned char in;
-	unsigned char nrow; /* matrix */
-	unsigned char ncol; /* matrix */
-};
 
-// Maximum number of setpoint futures
-#define MAX_PROC_FUTURES 256
-
-// Array of setpoint futures
-struct proc_futures {
-	struct proc_epics *proc_epics; // Pointer to the proc_epics array entry
-	unsigned long gps;	// GPS time of the setting in the future
-	unsigned long cycle;	// code cycle within "gps" second of the setting in the future
-	double val;		// New value
-	unsigned int idx;	// index (positive for matrix only)
-} proc_futures[MAX_PROC_FUTURES];
 
 

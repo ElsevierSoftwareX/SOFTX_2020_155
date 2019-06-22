@@ -2879,6 +2879,7 @@ if ($::rfmDelay) {
   print OUTM "#CFLAGS += -DRFM_DELAY=1\n";
 }
   print OUTM "CFLAGS += -DUSER_SPACE=1\n";
+  print OUTM "CFLAGS += -fno-builtin-sincos\n";
 
 
 print OUTM "\n";

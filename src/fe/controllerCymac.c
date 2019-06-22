@@ -81,10 +81,7 @@ TIMING_SIGNAL *pcieTimer;
 #endif
 
 
-adcInfo_t adcinfo;
-dacInfo_t dacinfo;
 duotone_diag_t dt_diag;
-timing_diag_t timeinfo;
 
 // Contec 64 input bits plus 64 output bits (Standard for aLIGO)
 /// Contec6464 input register values
@@ -105,25 +102,8 @@ unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
 int tdsControl[3];	// Up to 3 timing control modules allowed in case I/O chassis are daisy chained
 /// Total number of timing control modules found on bus
 int tdsCount = 0;
-
-
-/// Maintains present cycle count within a one second period.
-int cycleNum = 0;
 int adcCycleNum = 0;
-unsigned int odcStateWord = 0xffff;
-/// Value of readback from DAC FIFO size registers; used in diags for FIFO overflow/underflow.
-int out_buf_size = 0; // test checking DAC buffer size
-unsigned int cycle_gps_time = 0; // Time at which ADCs triggered
-unsigned int cycle_gps_event_time = 0; // Time at which ADCs triggered
-unsigned int   cycle_gps_ns = 0;
-unsigned int   cycle_gps_event_ns = 0;
-unsigned int   gps_receiver_locked = 0; // Lock/unlock flag for GPS time card
-/// GPS time in GPS seconds
-unsigned int timeSec = 0;
-unsigned int timeSecDiag = 0;
-/* 1 - error occured on shmem; 2 - RFM; 3 - Dolphin */
-unsigned int ipcErrBits = 0;
-int cardCountErr = 0;
+
 
 int ioClockDac = DAC_PRELOAD_CNT;
 int ioMemCntr = 0;
@@ -149,26 +129,8 @@ int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec);
 #include <drv/adc_info.c>
 #include <drv/dac_info.c>
 
-
-char daqArea[2*DAQ_DCU_SIZE];		// Space allocation for daqLib buffers
-int cpuId = 1;
-
-#ifdef DUAL_DAQ_DC
-	#define MX_OK	15
-#else
-	#define MX_OK	3
-#endif
-
 // Whether run on internal timer (when no ADC cards found)
 int run_on_timer = 0;
-
-// Initial diag reset flag
-int initialDiagReset = 1;
-
-// Cache flushing mumbo jumbo suggested by Thomas Gleixner, it is probably useless
-// Did not see any effect
-char fp [64*1024];
-
 
 //***********************************************************************
 // TASK: fe_start()	

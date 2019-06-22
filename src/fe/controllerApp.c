@@ -28,91 +28,7 @@
 ///<    GNU General Public License for more details.
 
 
-#include <linux/version.h>
-#include <linux/init.h>
-#undef printf
-#include <linux/module.h>
-#include <linux/kernel.h>
-#include <linux/kthread.h>
-#include <asm/delay.h>
-#include <asm/cacheflush.h>
-
-#include <linux/slab.h>
-/// Can't use printf in kernel module so redefine to use Linux printk function
-#define printf printk
-#include <drv/cdsHardware.h>
-#include "inlineMath.h"
-
-#include <asm/processor.h>
-#include <asm/cacheflush.h>
-
-#include "fm10Gen.h"		// CDS filter module defs and C code
-#include "feComms.h"		// Lvea control RFM network defs.
-#include "daqmap.h"		// DAQ network layout
-#include "cds_types.h"
-#include "controller.h"
-
-
-#ifndef NO_DAQ
-	#include "drv/fb.h"
-	#include "drv/daqLib.c"		// DAQ/GDS connection software
-#endif
-
-#include "drv/map.h"		// PCI hardware defs
-#include "drv/epicsXfer.c"	// User defined EPICS to/from FE data transfer function
-#include "timing.c"		// timing module / IRIG-B  functions
-
-#include "drv/inputFilterModule.h"		
-#include "drv/inputFilterModule1.h"		
-
-#ifdef DOLPHIN_TEST
-#include "dolphin.c"
-#endif
-
-// Contec 64 input bits plus 64 output bits (Standard for aLIGO)
-/// Contec6464 input register values
-unsigned int CDIO6464InputInput[MAX_DIO_MODULES]; // Binary input bits
-/// Contec6464 - Last output request sent to module.
-unsigned int CDIO6464LastOutState[MAX_DIO_MODULES]; // Current requested value of the BO bits
-/// Contec6464 values to be written to the output register
-unsigned int CDIO6464Output[MAX_DIO_MODULES]; // Binary output bits
-
-// This Contect 16 input / 16 output DIO card is used to control timing slave by IOP
-/// Contec1616 input register values
-unsigned int CDIO1616InputInput[MAX_DIO_MODULES]; // Binary input bits
-/// Contec1616 output register values read back from the module
-unsigned int CDIO1616Input[MAX_DIO_MODULES]; // Current value of the BO bits
-/// Contec1616 values to be written to the output register
-unsigned int CDIO1616Output[MAX_DIO_MODULES]; // Binary output bits
-/// Holds ID number of Contec1616 DIO card(s) used for timing control.
-int tdsControl[3];	// Up to 3 timing control modules allowed in case I/O chassis are daisy chained
-/// Total number of timing control modules found on bus
-int tdsCount = 0;
-
-
-/// Maintains present cycle count within a one second period.
-int cycleNum = 0;
-unsigned int odcStateWord = 0xffff;
-/// Value of readback from DAC FIFO size registers; used in diags for FIFO overflow/underflow.
-int out_buf_size = 0; // test checking DAC buffer size
-unsigned int cycle_gps_time = 0; // Time at which ADCs triggered
-unsigned int cycle_gps_event_time = 0; // Time at which ADCs triggered
-unsigned int cycle_gps_ns = 0;
-unsigned int cycle_gps_event_ns = 0;
-unsigned int gps_receiver_locked = 0; // Lock/unlock flag for GPS time card
-/// GPS time in GPS seconds
-unsigned int timeSec = 0;
-unsigned int timeSecDiag = 0;
-/* 1 - error occured on shmem; 2 - RFM; 3 - Dolphin */
-unsigned int ipcErrBits = 0;
-int startGpsTime = 0;
-int cardCountErr = 0;
-int cycleTime;			///< Current cycle time
-
-struct rmIpcStr *daqPtr;
-
-int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
-int dacOF[MAX_DAC_MODULES];
+#include "controllerko.h"
 
 // Include C code modules
 #include "moduleLoadApp.c"
@@ -122,26 +38,9 @@ int dacOF[MAX_DAC_MODULES];
 #include <drv/app_dio_routines.c>
 
 
-char daqArea[2*DAQ_DCU_SIZE];		// Space allocation for daqLib buffers
-int cpuId = 1;
-adcInfo_t adcinfo;
-dacInfo_t dacInfo;
-timing_diag_t timeinfo;
+int startGpsTime = 0;
+int getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
 int killipc = 0;
-
-
-#ifdef DUAL_DAQ_DC
-	#define MX_OK	15
-#else
-	#define MX_OK	3
-#endif
-
-// Initial diag reset flag
-int initialDiagReset = 1;
-
-// Cache flushing mumbo jumbo suggested by Thomas Gleixner, it is probably useless
-// Did not see any effect
-  char fp [64*1024];
 
 
 // Clear DAC channel shared memory map,
@@ -202,10 +101,7 @@ void *fe_start(void *arg)
   int ioClockDac = DAC_PRELOAD_CNT;
   int ioMemCntr = 0;
   int ioMemCntrDac = DAC_PRELOAD_CNT;
-  // int memCtr = 0;
   int ioClock = 0;
-  // double dac_in =  0.0;			/// @param dac_in DAC value after upsample filtering
-  // int dac_out = 0;			/// @param dac_out Integer value sent to DAC FIFO
 
   int feStatus = 0;
 
@@ -389,7 +285,7 @@ udelay(1000);
 
   timeSec = ioMemData->iodata[ll][0].timeSec;
   rdtscll(cpuClock[CPU_TIME_CYCLE_END]);
-  cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
+  timeinfo.cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
   // Get GPS seconds from MASTER
   timeSec = ioMemData->gpsSecond;
   pLocalEpics->epicsOutput.timeDiag = timeSec;
@@ -477,7 +373,7 @@ udelay(1000);
 /// START OF USER APP DAC WRITE *****************************************
  // Write out data to DAC modules
 // **********************************************************************
-	status = app_dac_write(ioMemCntrDac,ioClockDac, &dacInfo);
+	status = app_dac_write(ioMemCntrDac,ioClockDac, &dacinfo);
     /// \> Increment DAC memory block pointers for next cycle
     ioClockDac = (ioClockDac + OVERSAMPLE_TIMES) % IOP_IO_RATE;
     ioMemCntrDac = (ioMemCntrDac  + OVERSAMPLE_TIMES) % IO_MEMORY_SLOTS;
@@ -626,7 +522,7 @@ udelay(1000);
 	    {
 	    	for(ii=0;ii<MAX_DAC_CHN_PER_MOD;ii++)
 	    	{
-				pLocalEpics->epicsOutput.dacValue[jj][ii] = dacInfo.dacOutEpics[jj][ii];
+				pLocalEpics->epicsOutput.dacValue[jj][ii] = dacinfo.dacOutEpics[jj][ii];
 			}
 	    }
 	}
@@ -638,7 +534,7 @@ udelay(1000);
     {
 	  	pLocalEpics->epicsOutput.ovAccum = overflowAcc;
 		feStatus |= app_adc_status_update(&adcinfo);
-		feStatus |= app_dac_status_update(&dacInfo);
+		feStatus |= app_dac_status_update(&dacinfo);
 	}
 
     // *****************************************************************
