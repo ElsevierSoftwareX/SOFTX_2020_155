@@ -22,7 +22,11 @@
 #include <string.h>
 #include <signal.h>
 #include <iostream>
+#ifdef FAST_CRC
+#include "checksum_crc32.c"
+#else
 #include "../drv/crc.c"
+#endif
 #include "../daqd/stats/stats.hh"
 
 #define FILTER     0x12345
@@ -168,9 +172,17 @@ uint32_t filter = FILTER;
 unsigned int dq_block_size = 0;
 char *dataBuff;
 int sendLength = 0;
-unsigned int myCrc = 0;
 int mxStatBit[2];
+#ifdef FAST_CRC
+    uint32_t myCrc = 0;
+#else
+    unsigned int myCrc = 0;
+#endif
 
+
+#ifdef FAST_CRC
+crc32_init();
+#endif
 mx_set_error_handler(MX_ERRORS_RETURN);
 if(my_dcu == 0) {
 	 mxStatBit[0] = 1;
@@ -263,9 +275,15 @@ do {
 		  dataBuff = (char *)(shmDataPtr[i] + lastCycle * buf_size);
 		  memcpy((void *)&mxDataBlock.mxDataBlock[0],dataBuff,mxDataBlock.mxIpcData.dataBlockSize);
 		  /// Calculate CRC checksum on data
+#ifdef FAST_CRC
+          myCrc = crc32_calc((char *)&mxDataBlock.mxDataBlock[0], dq_block_size, 0);
+          myCrc = crc32_finish(dq_block_size, myCrc);
+          mxDataBlock.mxIpcData.bp[lastCycle].crc = myCrc;
+#else
 		  myCrc = crc_ptr((char *)&mxDataBlock.mxDataBlock[0],dq_block_size,0);
 		  myCrc = crc_len(shmIpcPtr[i]->bp[lastCycle].crc,myCrc);
 		  mxDataBlock.mxIpcData.bp[lastCycle].crc = myCrc;
+#endif
 
 		  sendLength = header_size + mxDataBlock.mxIpcData.dataBlockSize;
 		  if (do_verbose) 
