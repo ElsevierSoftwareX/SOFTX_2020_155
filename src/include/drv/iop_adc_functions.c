@@ -182,6 +182,7 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
         if (adcinfo->adcWait >= MAX_ADC_WAIT) {
             pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
             pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
+            pLocalEpics->epicsOutput.fe_status = ADC_TO_ERROR;
             stop_working_threads = 1;
             vmeDone = 1;
             // printf("timeout %d %d \n",jj,adcinfo->adcWait);

@@ -77,6 +77,7 @@ char fp [64*1024];
 
 
 // fe_state defs
+#define ADC_TO_ERROR		-7
 #define DAC_INIT_ERROR		-6
 #define BURT_RESTORE_ERROR	-5
 #define CHAN_HOP_ERROR		-4
