@@ -346,6 +346,7 @@ udelay(1000);
         {
 	  		pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
 	  		pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
+            pLocalEpics->epicsOutput.fe_status = ADC_TO_ERROR;
 			deallocate_dac_channels();
   			return (void *)-1;
         }
