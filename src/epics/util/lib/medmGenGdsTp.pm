@@ -13,7 +13,7 @@ require "lib/medmGen.pm";
 
 sub createGdsMedm
 {
-	my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dactype) = @_;
+	my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,$ioptype,@dactype) = @_;
  # Define colors to be sent to screen gen.
         my %ecolors = ( "white" => "0",
              "black" => "14",
@@ -267,7 +267,7 @@ sub createGdsMedm
     $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_BUILD_DATE",$ecolors{white},$ecolors{blue},"static");
 
 	# Following only for IOP
-	if($adcMaster == 1)
+	if($adcMaster == 1 and $ioptype != 4)
 	{
 		# Add ADC Duotone Diag label
 		$xpos = 18; $ypos = 240; $width = 50; $height = 15;
@@ -473,9 +473,14 @@ sub createGdsMedm
 			}
 		} else {
 			$medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"D$::dacCardNum[$ii]");
-			if($adcMaster == 1)
+			if($adcMaster == 1 and $ioptype != 4)
 			{
 			$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$bwidth,$bheight,"$site\:FEC-$dcuid\_DAC_STAT_$ii","0","3",$ecolors{green},$ecolors{red});
+			} elsif($adcMaster == 1 and $ioptype == 4)
+			{
+			$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,21,$bheight,"$site\:FEC-$dcuid\_DAC_STAT_$ii","0","2",$ecolors{green},$ecolors{red});
+            $bxpos2 = $bxpos + 21;
+			$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos2,$bypos,5,$bheight,"$site\:FEC-$dcuid\_DAC_STAT_$ii","7","7",$ecolors{red},$ecolors{green});
 			} else {
 				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$b1width,$bheight,"$site\:FEC-$dcuid\_DAC_STAT_$ii","1","2",$ecolors{green},$ecolors{red});
 			}

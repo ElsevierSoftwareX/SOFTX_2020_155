@@ -2157,7 +2157,7 @@ if($daq2dc == 0) {
 	my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
 	my $scriptTarget = "/opt/rtcds/$location/$lsite/chans/tmp/$sysname\.diff";
 	my $scriptArgs = "-s $location -i $lsite -m $skeleton -d $dcuId &"; 
-	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dacType);
+	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,$virtualiop,@dacType);
 }else {
 	require "lib/medmGenGdsTp2dc.pm";
 	my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
