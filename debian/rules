@@ -1,0 +1,54 @@
+#!/usr/bin/make -f
+
+#export DH_VERBOSE = t
+
+SVERSION := $(shell dpkg-parsechangelog --show-field=Version | rev | cut -d- -f2- | rev)
+
+%:
+	dh $@ --builddirectory=build --with dkms
+
+
+install-mbuf:
+	dh_installdirs -padvligorts-mbuf-dkms usr/src/mbuf-$(SVERSION)
+	dh_installdirs -padvligorts-mbuf-dkms lib/udev/rules.d
+	dh_installdirs -padvligorts-mbuf-dkms usr/lib/modules-load.d
+	install --mode=644 -t debian/advligorts-mbuf-dkms/usr/src/mbuf-$(SVERSION) src/drv/mbuf/*.c
+	install --mode=644 -t debian/advligorts-mbuf-dkms/usr/src/mbuf-$(SVERSION) src/drv/mbuf/*.h
+	install --mode=644 -t debian/advligorts-mbuf-dkms/usr/src/mbuf-$(SVERSION) src/drv/mbuf/Makefile
+	sed 's|__SHARE__|/usr/share/advligorts|' <support/udev/mbuf.rules >debian/advligorts-mbuf-dkms/lib/udev/rules.d/60-mbuf.rules
+	echo mbuf > debian/advligorts-mbuf-dkms/usr/lib/modules-load.d/mbuf.conf
+
+install-gpstime:
+	dh_installdirs -padvligorts-gpstime-dkms usr/src/gpstime-$(SVERSION)/drv/gpstime
+	dh_installdirs -padvligorts-gpstime-dkms usr/src/gpstime-$(SVERSION)/include/drv
+	dh_installdirs -padvligorts-gpstime-dkms lib/udev/rules.d
+	dh_installdirs -padvligorts-gpstime-dkms usr/lib/modules-load.d
+	dh_installdirs -padvligorts-gpstime-dkms usr/share/advligorts
+	install --mode=644 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION)/drv/gpstime src/drv/gpstime/*.c
+	install --mode=644 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION)/drv/gpstime src/drv/gpstime/*.h
+	install --mode=644 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION)/drv/gpstime src/drv/gpstime/Makefile
+	install --mode=644 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION)/include/drv src/include/drv/*
+	install --mode=644 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION)/include/ src/include/proc.h
+	sed 's|__SHARE__|/usr/share/advligorts|' <support/udev/gpstime.rules >debian/advligorts-gpstime-dkms/lib/udev/rules.d/60-gpstime.rules
+	echo gpstime > debian/advligorts-gpstime-dkms/usr/lib/modules-load.d/gpstime.conf
+
+install-rtcds:
+	dh_installdirs -padvligorts-rcg usr/bin
+	sed s/__VERSION__/$(SVERSION)/ <support/bin/rtcds.in >debian/advligorts-rcg/usr/bin/rtcds
+
+
+override_dh_auto_configure:
+	mkdir -p build
+	(cd build && cmake -DCMAKE_INSTALL_PREFIX=$(DESTDIR)/usr ..)
+
+override_dh_install: install-gpstime install-mbuf install-rtcds
+	dh_install
+
+override_dh_dkms:
+	dh_dkms -V $(SVERSION)
+
+override_dh_auto_test:
+	true
+
+override_dh_clean:
+	rm -rf build

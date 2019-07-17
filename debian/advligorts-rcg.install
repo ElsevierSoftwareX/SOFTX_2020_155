@@ -1,0 +1,14 @@
+Makefile.in usr/share/advligorts/src
+NEWS usr/share/advligorts/src
+config usr/share/advligorts/src
+configure usr/share/advligorts/src
+configure.in usr/share/advligorts/src
+doc usr/share/advligorts/src
+install usr/share/advligorts/src
+src/drv usr/share/advligorts/src/src
+src/epics usr/share/advligorts/src/src
+src/epics/util/iniChk.pl usr/bin
+src/fe usr/share/advligorts/src/src
+src/gds usr/share/advligorts/src/src
+src/include usr/share/advligorts/src/src
+src/util usr/share/advligorts/src/src
