@@ -1,0 +1,23 @@
+advligorts (4.0.0~dev0-1) unstable; urgency=medium
+
+  * New release
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Thu, 18 Jul 2019 16:56:43 -0700
+
+advligorts (3.4~rc1-1) unstable; urgency=medium
+
+  * add systemd support scripts/files
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Thu, 24 Aug 2017 15:25:31 -0700
+
+advligorts (3.4~rc0-2) unstable; urgency=medium
+
+  * Include RCG package
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Wed, 23 Aug 2017 08:40:32 -0700
+
+advligorts (3.4~rc0-1) unstable; urgency=medium
+
+  * Initial packaging.
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Tue, 22 Aug 2017 15:21:27 -0700
