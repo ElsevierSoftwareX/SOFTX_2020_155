@@ -29,7 +29,10 @@
 #include "zmq_daq.h"
 #include "zmq_transport.h"
 #include "dc_utils.h"
+#include "simple_pv.h"
 
+
+#define MAX_NSYS 24
 
 #define __CDECL
 
@@ -185,6 +188,8 @@ waitNextCycle2(	int nsys,
 	int ii;
 	int threads_rdy = 0;
 	int timeout = 0;
+    unsigned int expected_time_sec = 0;
+    unsigned int local_model_time_sec = 0;
 
 		// if reset, want to set IOP cycle to impossible number
 		if(reset) ipcPtr[0]->cycle = 50;
@@ -200,15 +205,18 @@ waitNextCycle2(	int nsys,
 						dataRdy[0] = 1;
 				}
 			    timeout += 1;
-			}while(!iopRunning && timeout < 500);
+			} while(!iopRunning && timeout < 500);
+
+			expected_time_sec = ipcPtr[0]->bp[cyclereq].timeSec;
 
             // Wait until data received from everyone or timeout
             timeout = 0;
             do {
              	usleep(100);
 				for(ii=1;ii<nsys;ii++) {
-             		if(ipcPtr[ii]->cycle == cyclereq && !dataRdy[ii]) threads_rdy ++;
-             		if(ipcPtr[ii]->cycle == cyclereq) dataRdy[ii] = 1;
+				    local_model_time_sec = ipcPtr[ii]->bp[cyclereq].timeSec;
+             		if(ipcPtr[ii]->cycle == cyclereq && local_model_time_sec == expected_time_sec && !dataRdy[ii]) threads_rdy ++;
+             		if(ipcPtr[ii]->cycle == cyclereq && local_model_time_sec == expected_time_sec) dataRdy[ii] = 1;
                 }
                 timeout += 1;
             }while(threads_rdy < nsys && timeout < 20);
@@ -321,7 +329,9 @@ int getmodelrate( int *rate, int *dcuid, char *modelname, char *gds_tp_dir) {
 int loadMessageBuffer(	int nsys, 
 						int lastCycle,
 						int status,
-						int dataRdy[]
+						int dataRdy[],
+						int *nsys_ready,
+						int *nsys_ready_mask
 					 )
 {
 	int sendLength = 0;
@@ -333,7 +343,10 @@ int loadMessageBuffer(	int nsys,
 	char *dataBuff;
 	int myCrc = 0;
 	int crcLength = 0;
+	int cur_mask = 1;
 
+		*nsys_ready = 0;
+		*nsys_ready_mask = 0;
 		// Set pointer to 0MQ message data block
 		zbuffer = (char *)&ixDataBlock->dataBlock[0];
 		// Initialize data send length to size of message header
@@ -344,6 +357,8 @@ int loadMessageBuffer(	int nsys,
 		// Loop thru all FE models
 		for (ii=0;ii<nsys;ii++) {
 			if(dataRdy[ii]) {
+				++(*nsys_ready);
+				*nsys_ready_mask = (*nsys_ready_mask) | cur_mask;
 				// Set heartbeat monitor for return to DAQ software
 				if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[0];
 				// Set DCU ID in header
@@ -398,13 +413,14 @@ int loadMessageBuffer(	int nsys,
 				if (lastCycle == 0) shmIpcPtr[ii]->reqAck ^= daqStatBit[1];
 				db ++;
 			}
+			cur_mask <<= 1;
 		}
 		ixDataBlock->header.dcuTotalModels = db;
 		return sendLength;
 }
 
 // **********************************************************************************************
-int send_to_local_memory(int nsys, int xmitData, int send_delay_ms)
+int send_to_local_memory(int nsys, int xmitData, int send_delay_ms, int pv_debug_pipe, char *pv_prefix)
 {
     int do_wait = 1;
     int daqStatBit[2];
@@ -419,15 +435,75 @@ int send_to_local_memory(int nsys, int xmitData, int send_delay_ms)
 
   	int sync2iop = 1;
 	int status = 0;
-	int dataRdy[10];
-	int msg_size;
+	int dataRdy[MAX_NSYS];
+	//int msg_size;
+	int sendLength = 0;
+	int time_delta = 0;
+	int expected_nsys = nsys;
+	int actual_nsys = 0;
+	int actual_nsys_mask = 0;
 
-	for(ii=0;ii<10;ii++) dataRdy[ii] = 0;
 
+	SimplePV pvs[] = {
+		{
+			"FE_EXPECTED_DCUS",
+			SIMPLE_PV_INT,
+				(void*)&expected_nsys,
+			nsys + 2,
+			0,
+			nsys + 1,
+			nsys-1,
+		},
+		{
+			"FE_ACTUAL_DCUS",
+			SIMPLE_PV_INT,
+			(void*)&actual_nsys,
+			nsys + 2,
+			0,
+			nsys + 1,
+			nsys-1,
+		},
+		{
+			"FE_DATA_SIZE",
+			SIMPLE_PV_INT,
+			(void *)&sendLength,
+			4*1024*1024,
+			0,
+			4*1024*1024,
+			0,
+		},
+		{
+			"FE_TIME_DELTA_MS",
+			SIMPLE_PV_INT,
+			(void *)&time_delta,
+			62,
+			0,
+			60,
+			1,
+		},
+		{
+			"FE_SYS_READY_MASK",
+			SIMPLE_PV_INT,
+				(void*)&actual_nsys_mask,
+				0x7fffffff,
+				0,
+				0x7fffffff,
+				0,
+		},
+	};
+
+
+	for(ii=0;ii<MAX_NSYS;ii++) dataRdy[ii] = 0;
+
+
+	//long cur_gps=0, cur_nano=0;
+	// seg_gps=0, seg_nano=0;
+	int dummy = 0;
 
     do {
         
 		for(ii=0;ii<nsys;ii++) dataRdy[ii] = 0;
+
 		status = waitNextCycle2(nsys,nextCycle,sync2iop,dataRdy,shmIpcPtr);
 		// status = waitNextCycle(nextCycle,sync2iop,shmIpcPtr[0]);
 		if(!status) {
@@ -444,7 +520,9 @@ int send_to_local_memory(int nsys, int xmitData, int send_delay_ms)
 		nextData = (char *)ifo_data;
 		nextData += cycle_data_size * nextCycle;
 		ixDataBlock = (daq_multi_dcu_data_t *)nextData;
-		int sendLength = loadMessageBuffer(nsys, nextCycle, status,dataRdy);
+		actual_nsys = 0;
+		actual_nsys_mask = 0;
+		sendLength = loadMessageBuffer(nsys, nextCycle, status, dataRdy, &actual_nsys, &actual_nsys_mask);
 		// Print diags in verbose mode
 		if(nextCycle == 0 && do_verbose) print_diags(nsys,lastCycle,sendLength,ixDataBlock);
 		// Write header info
@@ -453,15 +531,24 @@ int send_to_local_memory(int nsys, int xmitData, int send_delay_ms)
         ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
 		if(xmitData) {
-		// Copy data to 0mq message buffer
-		memcpy((void*)&msg_buffer,nextData,sendLength);
-		// Send Data
-        //msg_size = zmq_send(daq_publisher,(void*)&msg_buffer,sendLength,0);
-        usleep(send_delay_ms * 1000);
-        zmq_send_daq_multi_dcu_t(&msg_buffer, daq_publisher, 0);
-        // printf("Sending data size = %d\n",msg_size);
+			// Copy data to 0mq message buffer
+			memcpy((void*)&msg_buffer,nextData,sendLength);
+			// Send Data
+			//msg_size = zmq_send(daq_publisher,(void*)&msg_buffer,sendLength,0);
+			usleep(send_delay_ms * 1000);
+			zmq_send_daq_multi_dcu_t(&msg_buffer, daq_publisher, 0);
+			// printf("Sending data size = %d\n",msg_size);
 		}
+		//seg_gps = ixDataBlock->header.dcuheader[0].timeSec;
+		//seg_nano = ixDataBlock->header.dcuheader[0].timeNSec * 62500000;
+		//cur_gps = (long)symm_gps_time((unsigned long*)&cur_nano, &dummy);
+
 		
+		//time_delta = (cur_gps - seg_gps)*1000 + (cur_nano - seg_nano)/1000000;
+		/* fprintf(stderr, "cgps %d:%d seg_gps %d:%d delta_ms: %d\n", cur_gps, cur_nano, seg_gps, seg_nano, time_delta); */
+
+		send_pv_update(pv_debug_pipe, pv_prefix, pvs, sizeof(pvs)/sizeof(pvs[0]));
+
 		nextCycle = (nextCycle + 1) % 16;
             
     } while (keepRunning); /* do this until sighalt */
@@ -483,7 +570,7 @@ main(int argc,char *argv[])
 {
     int counter = 0;
     int nsys = 1;
-    int dcuId[10];
+    int dcuId[MAX_NSYS];
     int ii = 0;
     char *gds_tp_dir = 0;
 	int max_data_size_mb = 64;
@@ -498,14 +585,10 @@ main(int argc,char *argv[])
 	int sendViaZmq = 0;
 	char *buffer_name = "ifo";
 	int send_delay_ms = 0;
+	char *pv_prefix = 0;
+	char *pv_debug_pipe_name = 0;
+	int pv_debug_pipe = -1;
 
-    printf("\n %s compiled %s : %s\n\n",argv[0],__DATE__,__TIME__);
-   
-    printf("argc = %d\n", argc);
-    for (ii = 0; ii < argc; ++ii)
-    {
-    	printf("argv[%d] = %s\n", ii, argv[ii]);
-    }
     ii = 0;
     
     if (argc<3) {
@@ -514,7 +597,7 @@ main(int argc,char *argv[])
     }
 
     /* Get the parameters */
-     while ((counter = getopt(argc, argv, "b:e:m:h:v:s:d:D:")) != EOF)
+     while ((counter = getopt(argc, argv, "b:e:m:l:h:v:s:d:D:p:P:")) != EOF)
       switch(counter) {
         case 'b':
             buffer_name = optarg;
@@ -523,37 +606,57 @@ main(int argc,char *argv[])
         case 'm':
             max_data_size_mb = atoi(optarg);
             if (max_data_size_mb < 20){
-                printf("Min data block size is 20 MB\n");
                 return -1;
             }
             if (max_data_size_mb > 100){
-                printf("Max data block size is 100 MB\n");
                 return -1;
             }
             break;
 
         case 's':
 	    sysname = optarg;
-	    printf ("sysnames = %s\n",sysname);
             continue;
         case 'v':
 	    	do_verbose = atoi(optarg);
 			break;
 		case 'e':
 	        eport = optarg;
-	        printf ("eport = %s\n",eport);
 			sendViaZmq = 1;
 	        break;
-	    case 'd':
+  	case 'd':
 	    	gds_tp_dir = optarg;
 	    	break;
+ 	case 'l':
+        	if (0 == freopen(optarg, "w", stdout)) {
+			perror ("freopen");
+			exit (1);
+		}
+		setvbuf(stdout, NULL, _IOLBF, 0);
+		stderr = stdout;
+		break;
         case 'h':
             Usage();
             return(0);
         case 'D':
             send_delay_ms = atoi(optarg);
             break;
+     	case 'p':
+     		pv_prefix = optarg;
+     		break;
+     	case 'P':
+     		pv_debug_pipe_name = optarg;
+     		break;
     }
+    if (pv_debug_pipe_name)
+	{
+    	pv_debug_pipe = open(pv_debug_pipe_name, O_NONBLOCK | O_RDWR, 0);
+    	if (pv_debug_pipe < 0)
+		{
+    		fprintf(stderr, "Unable to open %s for writing (pv status)\n", pv_debug_pipe_name);
+    		exit(1);
+		}
+	}
+
     max_data_size = max_data_size_mb * 1024*1024;
 
 	if (sendViaZmq) printf("Writing DAQ data to local shared memory and sending out on ZMQ\n");
@@ -564,6 +667,11 @@ main(int argc,char *argv[])
         for(;;) {
         	char *s = strtok(0, " ");
 	        if (!s) break;
+	        if (nsys == (MAX_NSYS - 1))
+			{
+	        	fprintf(stderr, "Too many system names passed, max is %d\n", MAX_NSYS);
+	        	exit(1);
+			}
 	        sprintf(modelnames[nsys],"%s",s);
 	        dcuId[nsys] = 0;
 	        nsys++;
@@ -624,7 +732,7 @@ main(int argc,char *argv[])
 
 	// Enter infinite loop of reading control model data and writing to local shared memory
     do {
-	    error = send_to_local_memory(nsys, sendViaZmq, send_delay_ms);
+	    error = send_to_local_memory(nsys, sendViaZmq, send_delay_ms, pv_debug_pipe, pv_prefix);
     } while (error == 0 && keepRunning == 1);
 	if(sendViaZmq) {
 		printf("Closing out ZMQ and exiting\n");

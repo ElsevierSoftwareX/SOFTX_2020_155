@@ -64,7 +64,7 @@ int Verify;
 int do_verbose;
 int num_threads;
 volatile int threads_running;
-char *dcu_addr;
+unsigned char *dcu_addr;
 
 
 extern void *findSharedMemory(char *);
@@ -155,12 +155,11 @@ receiver(mx_endpoint_t ep, uint32_t match_val, uint32_t filter)
 
 	printf("waiting for someone to connect\n");
 	len = sizeof(struct daqMXdata);
-	len *= NUM_RREQ;
-	buffer = (char *)malloc(len);
+	buffer = malloc(len * NUM_RREQ);
 	if (buffer == NULL) {
 		fprintf(stderr, "Can't allocate buffers here\n");
 		exit(1);
-    }
+}
 
 
 
@@ -384,14 +383,18 @@ struct daqMXdata {
 			myErrorSignal = 1;
 			break;
 		}
+		// mx_isend(ep, &seg, 1, dest, 1, NULL, &req[cur_req]);
+
 		/* wait for the send to complete */
 		mx_wait(ep, &req[cur_req], 150, &stat, &result);
 		if (!result) {
 			fprintf(stderr, "mxWait failed with status %s\n", mx_strstatus(stat.code));
+			//exit(1);
 			myErrorSignal = 1;
 		}
 		if (stat.code != MX_STATUS_SUCCESS) {
 			fprintf(stderr, "isendxxx failed with status %s\n", mx_strstatus(stat.code));
+			//exit(1);
 			myErrorSignal = 1;
 		}
 		// if(lastCycle == 15) myErrorSignal = 1;
@@ -399,6 +402,7 @@ struct daqMXdata {
 			shmIpcPtr->status ^= 2;
 
 	} while(!myErrorSignal);
+	//mx_disconnect(ep, dest);
 	}
 // printf("test loop error\n");
 } while(1);
@@ -431,7 +435,7 @@ main(int argc, char **argv)
 	mx_debug_mask = 0xFFF;
 #endif
 	// So that openmx is not aborting on connection loss
-	// putenv("OMX_FATAL_ERRORS=0");
+	putenv("OMX_FATAL_ERRORS=0");
 
 	mx_init();
 	MX_MUTEX_INIT(&stream_mutex);
@@ -464,7 +468,7 @@ main(int argc, char **argv)
 		filter = atoi(optarg);
 		break;
 	case 'n':
-		sscanf(optarg, "%ld", &nic_id);
+		sscanf(optarg, "%"SCNx64, &nic_id);
 		mx_nic_id_to_board_number(nic_id, &board_id);
 		break;
 	case 'b':
@@ -527,7 +531,7 @@ main(int argc, char **argv)
 			fprintf(stderr, "-V ignored.  Verify must be set by sender\n");
 			Verify = 0;
 		}
-		dcu_addr = (char *)findSharedMemory(shmem_fname);
+		dcu_addr = findSharedMemory(shmem_fname);
 		if (dcu_addr <= 0) {
 			fprintf(stderr, "Can't map shmem\n");
 			exit(1);
@@ -550,7 +554,7 @@ main(int argc, char **argv)
 			       rem_host);
 		if (Verify) printf("Verifying results\n");
 
-		dcu_addr = (char *)findSharedMemory(shmem_fname);
+		dcu_addr = findSharedMemory(shmem_fname);
 
 		if (dcu_addr <= 0) {
 			fprintf(stderr, "Can't map shmem\n");

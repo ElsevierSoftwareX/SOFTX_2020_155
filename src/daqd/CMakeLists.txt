@@ -10,7 +10,8 @@ configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 set(__daqd_tmp_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
 set(CMAKE_REQUIRED_FLAGS ${CPP11_FLAG})
-check_cxx_source_compiles("int main() { char* tmp = nullptr; return 0; }" DAQD_CAN_BUILD_DAQD_SHMEM)
+check_cxx_source_compiles("#include<array>
+int main() { return 0; }" DAQD_CAN_BUILD_DAQD_SHMEM)
 set(CMAKE_REQUIRED_FLAGS ${__daqd_tmp_CMAKE_REQUIRED_FLAGS})
 
 # These sources are common to all daqd variants

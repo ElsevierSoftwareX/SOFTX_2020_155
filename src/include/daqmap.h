@@ -5,6 +5,8 @@
 #ifndef MAP_5565_H
 #define MAP_5565_H
 
+#include "daq_core_defs.h"
+
 #define DAQ_16K_SAMPLE_SIZE     1024    ///< Num values for 16K system in 1/16 second   
 #define DAQ_2K_SAMPLE_SIZE      128     ///< Num values for 2K system in 1/16 second 
 #define DAQ_CONNECT             0	///< Initialize DAQ flag
@@ -23,21 +25,21 @@
  * DAQ system inter-processor communication definitions.
  */
 
-#define DCU_COUNT 256		///< MAX number of real-time DAQ processes in single control system
+/* DCU_count defined in daq_core_defs.h */
+
 #define DAQ_BASE_ADDRESS	0x2000000			///< DAQ base offset from shared mem start
 #define DAQ_DATA_BASE_ADD	(DAQ_BASE_ADDRESS + 0x100000)	///< DAQ data location in shared mem
 #define GDS_DATA_ADDRESS	0x1000000
 
 /* Redefine this to change DAQ transmission size */
-#define DAQ_DCU_SIZE		0x400000	///< MAX data in bytes/sec allowed per process
+/* DAQ_DCU_SIZE defined in daq_core_defs.h */
 #define DAQ_EDCU_SIZE		0x400000	///< MAX epics data xfer size per process
 #define DAQ_EDCU_BLOCK_SIZE	0x20000
 
-#define DAQ_NUM_DATA_BLOCKS	16		///< Number of DAQ data blocks
+/* DAQ_NUM_DATA_BLOCKS  and DAQ_NUM_DATA_BLOCKS_PER_SECOND defined in daq_core_defs.h */
 #define DAQ_NUM_SWING_BUFFERS	2		///< Number of DAQ read/write swing buffers
-#define DAQ_NUM_DATA_BLOCKS_PER_SECOND	16	///< Number of DAQ data blocks to xfer each second
 
-#define DAQ_DCU_BLOCK_SIZE	(DAQ_DCU_SIZE/DAQ_NUM_DATA_BLOCKS)	///< Size of one DAQ data block
+/* DAQ_DCU_BLOCK_SIZE defined in daq_core_defs.h */
 
 #define DAQ_DCU_RATE_WARNING	3999	///< KByte to set warning DAQ rate is nearing max of 4MB/sec/model
 

@@ -58,6 +58,14 @@ if (FrameCPP_FOUND)
     target_include_directories(_framecpp_intl INTERFACE ${FrameCPP_INCLUDE_DIRS})
     target_link_libraries(_framecpp_intl INTERFACE ${_fcpp_lib_list})
 
+    # framecpp 2.6 uses boost/shared_ptr instead of ldastools::al::shared_ptr
+    if (${FrameCPP_VERSION} VERSION_LESS 2.6)
+        # cmake 3.0.2 (Debian 8) doesn't support VERSION_GREATER_EQUAL
+    else(${FrameCPP_VERSION} VERSION_LESS 2.6)
+        find_package(Boost REQUIRED)
+        target_include_directories(_framecpp_intl INTERFACE ${Boost_INCLUDE_DIRS})
+    endif(${FrameCPP_VERSION} VERSION_LESS 2.6)
+
     # Give the interface library a nice name for exporting
     add_library(ldastools::framecpp ALIAS _framecpp_intl)
 endif(FrameCPP_FOUND)

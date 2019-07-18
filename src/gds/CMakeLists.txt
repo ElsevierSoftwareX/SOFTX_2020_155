@@ -113,6 +113,7 @@ SET (GDS_HDR
         )
 
 set(GDS_CC_HDR
+        gdsstringcc.hh
         gmutex.hh
         testchn.hh
         testpointmgr.hh)
@@ -197,8 +198,20 @@ foreach (RPC_TEMPLATE ${RPC_BASE})
             )
 endforeach(RPC_TEMPLATE)
 
+set (GDS_GEN_RPC_HDRS_COPY "")
+foreach (GEN_HDR_CPY ${GDS_GEN_RPC_HDRS})
+    get_filename_component(GEN_HDR_CPY_NAME_ONLY "${GEN_HDR_CPY}" NAME)
+    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${GEN_HDR_CPY_NAME_ONLY}
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${GEN_HDR_CPY} ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${GEN_HDR_CPY_NAME_ONLY}
+            DEPENDS ${GEN_HDR_CPY}
+    )
+    list(APPEND GDS_GEN_RPC_HDRS_COPY ${CMAKE_CURRENT_BINARY_DIR}/gds_includes/${GEN_HDR_CPY_NAME_ONLY})
+endforeach (GEN_HDR_CPY)
+add_custom_target(_gds_rpc_gen_hdrs_cpy DEPENDS ${GDS_GEN_RPC_HDRS_COPY})
+
+message("_gds_rpc_gen_hdrs will depend on ${GDS_GEN_RPC_HDRS}")
 add_custom_target(_gds_rpc_gen_hdrs DEPENDS ${GDS_GEN_RPC_HDRS})
-add_dependencies(_gds_rpc_gen_hdrs _gds_incl_copy)
+add_dependencies(_gds_rpc_gen_hdrs _gds_incl_copy _gds_rpc_gen_hdrs_cpy)
 
 # we do this in two libraries, as the C files need -std=gnu99, the C++ compilers give warnings
 # when building with this, so split the C & C++ portions into seperate pieces
@@ -217,6 +230,7 @@ add_library(gds_cc OBJECT
     ${GDS_CC_SRC}
     )
 target_compile_definitions(gds_cc PRIVATE -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size})
+target_include_directories(gds_cc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/gds_includes)
 add_dependencies(gds_cc _gds_rpc_gen_hdrs)
 
 

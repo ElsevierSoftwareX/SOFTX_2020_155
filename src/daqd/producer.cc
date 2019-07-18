@@ -193,6 +193,7 @@ producer::frame_writer ()
 {
    unsigned char *read_dest;
    circ_buffer_block_prop_t prop;
+   int abort_on_glitch = daqd.parameters().get<int>("abort_on_glitch", 0);
 #if defined(USE_SYMMETRICOM) || defined(USE_LOCAL_TIME)
    unsigned long prev_gps, prev_frac;
    unsigned long gps, frac;
@@ -486,6 +487,7 @@ int cycle_delay = daqd.cycle_delay;
 
    if (daqd.dcu_status_check & 4) resync = 1;
 
+   fprintf(stderr, "## cycle_delay = %d\n", daqd.cycle_delay);
    for (unsigned long i = 0;;i++) { // timing
       tick(); // measure statistics
 #ifdef USE_SYMMETRICOM
@@ -539,7 +541,7 @@ int cycle_delay = daqd.cycle_delay;
 
 	  int lastStatus = dcuStatus[ifo][j];
 	  dcuStatus[ifo][j] = DAQ_STATE_FAULT;
-	
+
 	  /* Check if DCU running at all */
           if ( 1 /*dcm & (1 << j)*/) {
 	    if (dcuStatCycle[ifo][j] == 0) dcuStatus[ifo][j] = DAQ_STATE_SYNC_ERR;
@@ -566,7 +568,7 @@ int cycle_delay = daqd.cycle_delay;
 
 	  dcuCycleStatus[ifo][j] = 0;
 	  dcuStatCycle[ifo][j] = 0;
-	  ipc->status = ipc->status; 
+	  ipc->status = ipc->status;
 	}
 
 	{
@@ -647,13 +649,25 @@ int cycle_delay = daqd.cycle_delay;
 	  if (dcu_gps != mygps) {
 	    daqd.dcuStatus[0][j] |= 0x4000;
 	    system_log(5, "GPS MISS dcu %d (%s); dcu_gps=%d gps=%ld\n", j, daqd.dcuName[j], dcu_gps, mygps);
+        fprintf(stderr, "#@#@#@#@#@ 0x4000 on %d\n", j);
 	  }
+#if defined(USE_MX)
+//	  if (dcu_gps > 0 && (dcu_gps != mygps || gmDaqIpc[j].cycle != cblk))
+//      {
+//	    fprintf(stderr, "#@#@#@#@#@ Timing glitch found (%d).  expected %d:%d got %d:%d\n",
+//	            j, (int)mygps, (int)cblk, (int)dcu_gps, (int)gmDaqIpc[j].cycle);
+//        if (abort_on_glitch)
+//        {
+//            exit(1);
+//        }
+//      }
+#endif
 
 	  if (rfm_crc != crc) {
 	    system_log(5, "MISS dcu %d (%s); crc[%d]=%x; computed crc=%lx\n",
 		       j, daqd.dcuName[j], cblk, rfm_crc, crc);
 
-	    /* Set DCU status to BAD, all data will be marked as BAD 
+	    /* Set DCU status to BAD, all data will be marked as BAD
 	       because of the CRC mismatch */
 	    daqd.dcuStatus[0][j] |= 0x1000;
 	  } else {
@@ -697,9 +711,9 @@ int cycle_delay = daqd.cycle_delay;
 			// See if the EDCU thread is running and assign status
 			if (0x0 == (prop.dcu_data[j].status = daqd.edcu1.running? 0x0: 0xbad)) {
 				// If running calculate the CRC
-				
+
 	//memcpy(read_dest, (char *)(daqd.edcu1.channel_value + daqd.edcu1.fidx), daqd.dcuSize[ifo][j]);
-			
+
 			  unsigned int bytes = daqd.dcuSize[0][DCU_ID_EDCU];
               unsigned char *cp = move_buf; // The EDCU data is in front
 			  unsigned long crc = 0;

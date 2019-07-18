@@ -72,7 +72,6 @@ MX_MUTEX_T stream_mutex;
 #define MATCH_VAL_THREAD 1
 #define THREADS_PER_NIC     16
 #define IX_STOP_SEC     5
-
 static int xmitDataOffset[IX_BLOCK_COUNT];
 daq_multi_cycle_header_t *xmitHeader[IX_BLOCK_COUNT];
 
@@ -460,6 +459,7 @@ main(int argc, char **argv)
     int missed_nsys[MAX_FE_COMPUTERS];
     int64_t recv_time[MAX_FE_COMPUTERS];
     int64_t min_recv_time = 0;
+    int64_t cur_ref_time = 0;
     int recv_buckets[(MAX_DELAY_MS/5)+2];
     int festatus = 0;
     int pv_festatus = 0;
@@ -588,9 +588,6 @@ main(int argc, char **argv)
             }
             timeout += 1;
         }while(!any_rdy && timeout < 50);
-#ifndef TIME_INTERVAL_DIAG
-        mytime = s_clock();
-#endif
 
         // Wait up to delay_ms ms in 1/10ms intervals until data received from everyone or timeout
         timeout = 0;
@@ -603,22 +600,13 @@ main(int argc, char **argv)
             timeout += 1;
         }while(threads_rdy < nsys && timeout < delay_cycles);
         if(timeout >= 100) rcv_errors += (nsys - threads_rdy);
-#ifndef TIME_INTERVAL_DIAG
-        mylasttime = s_clock();
-#endif
 
         if(any_rdy) {
             int tbsize = 0;
-#ifdef TIME_INTERVAL_DIAG
-            // Timing diagnostics for time between cycles
+            // Timing diagnostics
             mytime = s_clock();
             myptime = mytime - mylasttime;
             mylasttime = mytime;
-#else
-            // Timing diagnostics for rcv window
-            myptime = mylasttime - mytime;
-#endif
-
             if (myptime < min_cycle_time) {
                 min_cycle_time = myptime;
             }
@@ -734,6 +722,7 @@ main(int argc, char **argv)
             // Calc IX message size
             sendLength = header_size + ifoDataBlock->header.fullDataBlockSize;
             for (ii = 0; ii < nsys; ++ii) {
+                cur_ref_time = 0;
                 recv_time[ii] -= min_recv_time;
             }
             datablock_size_running += dc_datablock_size;

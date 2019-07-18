@@ -120,3 +120,66 @@ int zmq_recv_daq_multi_dcu_t(daq_multi_dcu_data_t *dest, void *socket)
     zmq_msg_close(&message);
     return 1;
 }
+
+/**
+ * Receive a daq_multi_dcu_data_t structure over a zmq socket in a 'compressed' form
+ * @param dest Pointer to a daq_multi_dcu_data_t[buffer_count] structure to fill one entry in
+ * @param socket Socket to receive data on
+ * @param int buffer_count the length of dest
+ * @return The buffer that was used (cycle % buffer_count), -1 on error
+ *
+ * @note The 'compressed' stream just skips unneeded TP table entries and DCU entries.  The output is written
+ * into the destination buffer at offset (current input cycle % buffer_count)
+ */
+int zmq_recv_daq_multi_dcu_t_into_buffer(daq_multi_dcu_data_t *dest_buffers, pthread_spinlock_t *locks, void *socket, int buffer_count, unsigned int* dest_gps_sec, int *dest_cyle)
+{
+    zmq_msg_t message;
+    int size = 0;
+    int cur_model = 0;
+    int total_models = 0;
+    char *cur_data = 0;
+    int dest_index = 0;
+    daq_multi_dcu_data_t* dest = 0;
+    size_t header_size = 0;
+    size_t transfer_size = sizeof(unsigned int)*2;
+    daq_msg_header_abrev_t *cur_header = 0;
+    daq_multi_dcu_header_t *global_header = 0;
+
+    if (!dest_buffers || !socket) return -1;
+    zmq_msg_init(&message);
+    size = zmq_msg_recv(&message, socket, 0);
+
+    global_header = (daq_multi_dcu_header_t*)zmq_msg_data(&message);
+    dest_index = (global_header->dcuheader->cycle % buffer_count);
+    dest = dest_buffers + dest_index;
+
+
+    pthread_spin_lock(&locks[dest_index]);
+
+    total_models = dest->header.dcuTotalModels = global_header->dcuTotalModels;
+    dest->header.fullDataBlockSize = global_header->fullDataBlockSize;
+
+    /* Copy over the headers for the DCUs actually used */
+    cur_data = (char*)(&global_header->dcuheader[0]);
+    for (cur_model = 0; cur_model < total_models; ++cur_model)
+    {
+        cur_header = (daq_msg_header_abrev_t*)cur_data;
+        /* copy header, but only copy over the bits of the TP table that
+         * were sent
+         */
+        header_size = sizeof(daq_msg_header_abrev_t) + sizeof(unsigned int)*(cur_header->tpCount);
+        memcpy((void*)(&dest->header.dcuheader[cur_model]),
+               (void*)cur_data,
+               header_size
+        );
+        transfer_size += header_size;
+        cur_data += header_size;
+    }
+    /* now copy the remaining data as the data block */
+    memcpy((void*)(&dest->dataBlock[0]), (void*)cur_data, size - transfer_size);
+    *dest_gps_sec = dest->header.dcuheader[0].timeSec;
+    *dest_cyle = global_header->dcuheader->cycle;
+    pthread_spin_unlock(&locks[dest_index]);
+    zmq_msg_close(&message);
+    return dest_index;
+}
