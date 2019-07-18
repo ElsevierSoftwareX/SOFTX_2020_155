@@ -10,7 +10,6 @@
 extern void *kmalloc_area[16];
 extern int mbuf_allocate_area(char *name, int size, struct file *file);
 extern void *fe_start(void *arg);
-extern int run_on_timer;
 extern char daqArea[2*DAQ_DCU_SIZE];           // Space allocation for daqLib buffers
 struct task_struct *sthread;
 
@@ -188,8 +187,6 @@ int rt_iop_init (void)
 	// Print out all the I/O information
 	  print_io_info(&cdsPciModules);
 
-	// Code will run on internal timer if no ADC modules are found
-	if (cdsPciModules.adcCount == 0) run_on_timer = 1;
 
 	// Initialize buffer for daqLib.c code
 	daqBuffer = (long)&daqArea[0];
@@ -200,7 +197,7 @@ printk("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRest
 	for (cnt = 0;  cnt < 10 && pLocalEpics->epicsInput.burtRestore == 0; cnt++) {
         	msleep(1000);
 	}
-	if (cnt == 10) {
+	if (cnt == 10 || cdsPciModules.adcCount == 0) {
 		// Cleanup
 #ifdef DOLPHIN_TEST
 		finish_dolphin();

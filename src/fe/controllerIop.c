@@ -30,11 +30,6 @@
 
 #include "controllerko.h"
 
-// #include "fm10Gen.h"		// CDS filter module defs and C code
-// #include "feComms.h"		// Lvea control RFM network defs.
-// #include "daqmap.h"		// DAQ network layout
-// #include "cds_types.h"
-
 
 #ifdef DOLPHIN_TEST
 #include "dolphin.c"
@@ -47,25 +42,24 @@ TIMING_SIGNAL *pcieTimer;
 
 
 
+// Duotone diags struct
 duotone_diag_t dt_diag;
-
-
 
 /// Maintains present cycle count within a one second period.
 int adcCycleNum = 0;
-
-
+// Variables for setting IOP->APP I/O
 int ioClockDac = DAC_PRELOAD_CNT;
 int ioMemCntr = 0;
 int ioMemCntrDac = DAC_PRELOAD_CNT;
+// DAC variable
 int dacEnable = 0;
 int dacWriteEnable = 0;	/// @param dacWriteEnable  No DAC outputs until >4 times through code
 int dacTimingErrorPending[MAX_DAC_MODULES];
 static int dacTimingError = 0;
-int pBits[9] = {1,2,4,8,16,32,64,128,256};
-
 int dacWatchDog = 0;
 int dac_out = 0;
+
+int pBits[9] = {1,2,4,8,16,32,64,128,256};
 
 int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec); 
 
@@ -76,12 +70,6 @@ int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec);
 #include <drv/iop_dac_functions.c>
 #include <drv/dac_info.c>
 #include <drv/adc_info.c>
-
-
-
-// Whether run on internal timer (when no ADC cards found)
-int run_on_timer = 0;
-
 
 //***********************************************************************
 // TASK: fe_start()	
@@ -98,7 +86,6 @@ int run_on_timer = 0;
 ///	- 
 void *fe_start(void *arg)
 {
-  int tempClock[4];
   int ii,jj,kk,ll;			// Dummy loop counter variables
   static int clock1Min = 0;		///  @param clockMin Minute counter (Not Used??)
   static int cpuClock[CPU_TIMER_CNT];	///  @param cpuClock[] Code timing diag variables
@@ -137,7 +124,6 @@ void *fe_start(void *arg)
 /// **********************************************************************************************\n
 /// Start Initialization Process \n
 /// **********************************************************************************************\n
-  memset (tempClock, 0, sizeof(tempClock));
 
   /// \> Flush L1 cache
   memset (fp, 0, 64*1024);
@@ -290,7 +276,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 
 /// \> Find the code syncrhonization source. \n
 /// - Standard aLIGO Sync source is the Timing Distribution System (TDS) (SYNC_SRC_TDS). 
-  if (!run_on_timer) {
   switch(syncSource)
   {
     /// \>\> For SYNC_SRC_TDS, initialize system for synchronous start on 1PPS mark:
@@ -345,8 +330,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       break;
     }
   }
-  }
-
 
   pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;
 
@@ -450,11 +433,13 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     rdtscll(cpuClock[CPU_TIME_USR_END]);
 // **************************************************************************************
 //
+//
+// **************************************************************************************
     /// - ---- Reset ADC DMA Start Flag \n
     /// - --------- This allows ADC to dump next data set whenever it is ready
     for(jj=0;jj<cdsPciModules.adcCount;jj++) gsc16ai64DmaEnable(jj);
     odcStateWord = 0;
-
+//
 // ********************************************************************
 /// WRITE DAC OUTPUTS ***************************************** \n
 // ********************************************************************
@@ -712,7 +697,9 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       }
     }
 
+// *****************************************************************
 /// \> Cycle 20, Update latest DAC output values to EPICS
+// *****************************************************************
     if(subcycle == HKP_DAC_EPICS_UPDATES)
     {
       // Send DAC output values at 16Hzfb
