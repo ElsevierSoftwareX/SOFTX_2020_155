@@ -1,5 +1,5 @@
-///	@file moduleLoad.c
-///	@brief File contains startup routines for real-time code.
+///	@file rcguserIop.c
+///	@brief File contains startup routines for IOP running in user space.
 
 #include <unistd.h>
 #include <ctype.h>
@@ -19,7 +19,7 @@
 
 
 // These externs and "16" need to go to a header file (mbuf.h)
-extern int fe_start();
+extern int fe_start_iop_user();
 extern char daqArea[2*DAQ_DCU_SIZE];           // Space allocation for daqLib buffers
 extern char *addr;
 extern int cycleOffset;
@@ -429,7 +429,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 	}
 
         pLocalEpics->epicsInput.vmeReset = 0;
-	fe_start();
+	fe_start_iop_user();
 
         return 0;
 }

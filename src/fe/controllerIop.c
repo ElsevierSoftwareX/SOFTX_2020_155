@@ -72,7 +72,7 @@ int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec);
 #include <drv/adc_info.c>
 
 //***********************************************************************
-// TASK: fe_start()	
+// TASK: fe_start_iop()	
 // This routine is the skeleton for all front end code	
 //***********************************************************************
 /// This function is the main real-time sequencer or scheduler for all code built
@@ -84,7 +84,7 @@ int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec);
 /// loop is synchronized and triggered by the arrival of ADC data, the ADC module in turn
 /// is triggered to sample by the 64KHz clock provided by the Timing Distribution System.
 ///	- 
-void *fe_start(void *arg)
+void *fe_start_iop(void *arg)
 {
   int ii,jj,kk,ll;			// Dummy loop counter variables
   static int clock1Min = 0;		///  @param clockMin Minute counter (Not Used??)

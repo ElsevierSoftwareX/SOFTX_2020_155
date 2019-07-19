@@ -132,7 +132,7 @@ unsigned int getGpsTimeProc() {
  }
 
 //***********************************************************************
-// TASK: fe_start()	
+// TASK: fe_start_iop_user()	
 // This routine is the skeleton for all front end code	
 //***********************************************************************
 /// This function is the main real-time sequencer or scheduler for all code built
@@ -144,7 +144,7 @@ unsigned int getGpsTimeProc() {
 /// loop is synchronized and triggered by the arrival of ADC data, the ADC module in turn
 /// is triggered to sample by the 64KHz clock provided by the Timing Distribution System.
 ///	- 
-int fe_start()
+int fe_start_iop_user()
 {
   int longestWrite2 = 0;
   int tempClock[4];

@@ -4,14 +4,31 @@ This section provides a brief description of the various C code modules compiled
 \endverbatim
 \image html CcodeCompile.png "C Code Modules"
 	
+<b>Kernel Space Code Modules</b>
+
 <b>Module Initialization</b>
-- moduleLoad.c
-	- This file contains the main startup/initialization code. \n
+- These files contain the main startup/initialization code. \n
+    - moduleLoadIop.c   Code for production system IOP kernel object
+    - moduleLoadApp.c   Code for production system User App kernel object
+    - moduleLoadTS.c    Code for running IOP using Dolphin network timing
 
 <b>Scheduler</b>
-- controller.c
-	- This file contains the primary sequencer, or scheduler, code. \n
+- These files contain the primary sequencer, or scheduler, code. \n
+    - controllerIop.c   Code for production system IOP kernel object
+    - controllerApp.c   Code for production system User App kernel object
+    - controllerTS.c    Code for running IOP using Dolphin network timing
+    - controllerCymac.c Code for running a standalone test system
+    - controllerLR.c    Code for running with a long range PCIe extender
+
 Further information can be found at <a href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">LIGO T0900607 aLIGO CDS Realtime Sequencer Software</a>
+
+<b>User Space Code Modules</b>
+    - rcguserIop.c          Main code for initializing user space IOP software
+    - controllerIopUser.c   Main sequencer code for user space IOP
+
+    - rcguser.c             Main code for initializing user space app software
+    - controllerAppUser.c   Main sequencer code for user space app
+
 
 <b>Digital Filtering</b>
 - fm10Gen.c
@@ -41,8 +58,9 @@ Further information can be found at <a href="https://dcc.ligo.org/cgi-bin/privat
 - symmetricomGps.c \n
 - vmic5565.c \n
 
+
 <b>Real-time Networking </b>
-- commData2.c
+- commData3.c
 - dolphin.c
 
 

@@ -1,3 +1,8 @@
+/// @file dolphin.c
+/// @brief File containing the Dolphin functions. \n
+///     @detail This file contains Dolphin init and cleanup routines for kernel module code.
+/// @author R.Bork
+
 #include <genif.h>
 #include "commData3.h"
 
@@ -23,6 +28,7 @@ signed32 session_callback(session_cb_arg_t IN arg,
 			  session_cb_status_t IN status,
 			  unsigned32 IN target_node,
 			  unsigned32 IN local_adapter_number) {
+/// @brief This function contains the required Dolphin callback routine. \n
   printkl("Session callback reason=%d status=%d target_node=%d\n", reason, status, target_node);
   // if (reason == SR_OK) iop_rfm_valid = 1;
   if (reason == SR_OK || status == SR_OK) iop_rfm_valid = 1;
@@ -33,6 +39,7 @@ signed32 session_callback(session_cb_arg_t IN arg,
   return 0;
 }
 
+/// Function for Dolphin connection callback
 signed32 connect_callback(void IN *arg,
 			  sci_r_segment_handle_t IN remote_segment_handle,
 			  unsigned32 IN reason, unsigned32 IN status) {
