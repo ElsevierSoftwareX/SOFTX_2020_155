@@ -88,4 +88,4 @@ target_requires_cpp11(zmq_daq_test_data_firehose_recv PUBLIC)
 
 endif (${CXX_HAS_ATOMIC})
 
-install(TARGETS zmq_multi_stream zmq_dc DESTINATION bin)
+install(TARGETS zmq_fe zmq_multi_stream zmq_dc DESTINATION bin)

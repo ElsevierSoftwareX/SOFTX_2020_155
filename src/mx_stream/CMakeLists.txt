@@ -24,5 +24,5 @@ if (OPENMX_FOUND)
 	target_link_libraries(mx_fe PUBLIC openmx::openmx ${MAKE_THREAD_LIBS_INIT})
 	set_target_properties(mx_fe PROPERTIES LINKER_LANGUAGE CXX)
 
-    install(TARGETS mx_stream DESTINATION bin)
+    install(TARGETS mx_fe mx_stream DESTINATION bin)
 endif (OPENMX_FOUND)

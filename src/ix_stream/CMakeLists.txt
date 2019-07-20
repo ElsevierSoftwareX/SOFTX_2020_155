@@ -1,6 +1,7 @@
 
 add_executable(ix_fb_rcv ix_fb_rcv.c)
 target_link_libraries(ix_fb_rcv PUBLIC driver::shmem dolphin::sisci)
+install(TARGETS ix_fb_rcv DESTINATION bin)
 
 if (${LibZMQ_FOUND})
 #add_executable(zmq_rcv_ix_xmit zmq_rcv_ix_xmit.c ../zmq_stream/dc_utils.c)
@@ -26,6 +27,7 @@ target_link_libraries(zmq_rcv_ix_xmit_delay PUBLIC
         ${CMAKE_THREAD_LIBS_INIT}
         # -no-pie
         )
+install(TARGETS zmq_rcv_ix_xmit_delay DESTINATION bin)
 
 endif (${LibZMQ_FOUND})
 
@@ -54,3 +56,15 @@ target_link_libraries(mx_rcv_simple PUBLIC
 
 
 endif (${MX_FOUND})
+
+#if (${OPENMX_FOUND})
+#    add_executable(mx2ix mx2ix.c)
+#    target_link_libraries(mx2ix PUBLIC
+#            driver::shmem
+#            dolphin::sisci
+#            zmq::simple_pv
+#            openmx::openmx
+#            ${CMAKE_THREAD_LIBS_INIT}
+#            )
+#    install(TARGETS mx2ix DESTINATION bin)
+#endif (${OPENMX_FOUND})
