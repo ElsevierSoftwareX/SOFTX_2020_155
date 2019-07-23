@@ -21,9 +21,9 @@ endif (${HAS_CXX_11})
 
 
 macro(target_requires_cpp11 target mode)
-    if (${CMAKE_VERSION} VERSION_GREATER "3.0.99")
+    if (${CMAKE_VERSION} VERSION_GREATER "3.6.99")
         target_compile_features(${target} ${mode} cxx_auto_type)
-    else (${CMAKE_VERSION} VERSION_GREATER "3.0.99")
+    else (${CMAKE_VERSION} VERSION_GREATER "3.6.99")
         target_compile_options(${target} ${mode} ${CPP11_FLAG})
-    endif (${CMAKE_VERSION} VERSION_GREATER "3.0.99")
+    endif (${CMAKE_VERSION} VERSION_GREATER "3.6.99")
 endmacro()
