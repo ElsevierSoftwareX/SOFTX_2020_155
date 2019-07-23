@@ -1,4 +1,4 @@
-from __future__ import unicode_literals, print_function, division
+
 
 from unittest import TestCase, main
 
@@ -97,7 +97,7 @@ class TestSecondsInYear(TestCase):
             2400: leap_year,
             3000: regular,
         }
-        for year in test_cases.keys():
+        for year in list(test_cases.keys()):
             expected = test_cases[year]
             self.assertEqual(seconds_in_year(year), expected)
 

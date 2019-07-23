@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # post_build_script.py
 # This script is assumed to be run in the advLigoRTS directory and be given a model name.
 # The model is assumed to be a .mdl and lives in advLigoRTS/src/epics/simLink/
@@ -45,7 +45,7 @@ def find_file_in_path(env_path,file_name):
 simulink_reference=["dsparch4","simulink"]
 
 
-print ""
+print("")
 #Grab some basic env information to be able to set default paths
 try:
   site = os.environ['site']
@@ -134,15 +134,15 @@ def parse_block(data_lines,line_number,reference_name):
             library_lines = find_library(temp_block.data['SourceBlock'])
             scratch_block, scratch = parse_block(library_lines,0,temp_block.data['SourceBlock'])
             #Keep the farthest back reference description for screen generation as well - allows changes to just the library part
-            if ('Description' in scratch_block.data.keys()):
-              if not ('Reference_Descrip' in scratch_block.data.keys()):
+            if ('Description' in list(scratch_block.data.keys())):
+              if not ('Reference_Descrip' in list(scratch_block.data.keys())):
                 scratch_block.data['Reference_Descrip'] = [scratch_block.data['Description']]
               else:
                 scrach_block.data['Reference_Descrip'].append(scratch_block.data['Description'])
             #Overwrite reference block data with data from the calling block (i.e. 'Name', etc)
-            if not ('Description' in temp_block.data.keys()):
+            if not ('Description' in list(temp_block.data.keys())):
               temp_block.data['Description'] = ""
-            for data_key in temp_block.data.keys():
+            for data_key in list(temp_block.data.keys()):
               scratch_block.data[data_key] = temp_block.data[data_key]
             temp_block = scratch_block
         except KeyError:
@@ -304,7 +304,7 @@ def read_tree(node,name_so_far):
           new_adl_line.append(re.search('^ADL=(.*)',line).group(1))
         if (re.search('^NO DEFAULT',line) != None):
           make_library_screens = False  
-          print "No default screens"
+          print("No default screens")
 
     if ('Reference_Descrip' in node.data) and (make_library_screens):
       for x in range(len(node.data['Reference_Descrip'])):
@@ -354,7 +354,7 @@ def read_tree(node,name_so_far):
       script_name = script.split(' ')[0]
       script_location = find_file_in_path(cds_scripts_path,script_name)
       script_command = script_location + script[len(script_name):]
-      print script_command
+      print(script_command)
       os.system(script_command)
       
     for adl in adl_line:
@@ -407,7 +407,7 @@ def read_tree(node,name_so_far):
                 if not '--name' in before:
                   temp_lines[k] = string.replace(temp_lines[k],before,after)
 	    if quiet_mode == False:
-              print adl_target_name 
+              print(adl_target_name)
             output_medm_file = open(adl_target_name,'w')
             for k in range(len(temp_lines)):
               output_medm_file.write(temp_lines[k])
@@ -461,9 +461,9 @@ model_params = find_cdsParam(root_block)
 #Do something fancy with top names now
 read_tree(root_block,(model_name[2:5].upper(),))
 if os.path.isfile(epics_sdf_file):
-	print 'safe.snap exists '
+	print('safe.snap exists ')
 else:
-	print 'Creating safe.snap file'
+	print('Creating safe.snap file')
 	f = open(epics_burt_file,'r')
 	sdf = open(epics_sdf_file,'w')
 	for line in f:

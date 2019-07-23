@@ -65,17 +65,17 @@ class BasicStructure(object):
         try:
             assert (len(fields) == len(self.__fields))
         except:
-            print(len(fields))
+            print((len(fields)))
             print(fields)
-            print(len(self.__fields))
-            print(self.__fields)
+            print((len(self.__fields)))
+            print((self.__fields))
             raise
         for i in range(len(fields)):
             self.__fields[i].set(fields[i])
             field_names.append(self.__fields[i].name())
         self.__remaining_data = len(blob) - self.__size
 
-        for k in alias.keys():
+        for k in list(alias.keys()):
             name = alias[k]
             if not name in field_names:
                 raise Exception('bad field alias {0} {1}->{2}'.format(
@@ -264,8 +264,8 @@ class DataDumper(object):
                 len(buffer),
             ))
         if self.__format is None:
-            print(" ".join([hex(int.from_bytes(o, byteorder='little'))[2:] for o in
-                            buffer[self.__offset: self.__offset + self.__length]]))
+            print((" ".join([hex(int.from_bytes(o, byteorder='little'))[2:] for o in
+                            buffer[self.__offset: self.__offset + self.__length]])))
         else:
             format = "<" + self.__format
             offset = self.__offset
@@ -310,15 +310,15 @@ def handle_daq_multi_cycle(args, buffer):
     if args.dcu >= 0:
         dcu_text = str(args.dcu)
 
-    print('read in {0} bytes of data'.format(len(buffer)))
-    print('dumping cycle {0} and dcu {1}\n'.format(cur_cycle, dcu_text))
+    print(('read in {0} bytes of data'.format(len(buffer))))
+    print(('dumping cycle {0} and dcu {1}\n'.format(cur_cycle, dcu_text)))
 
-    print("{0}".format(multi_cycle_hdr.dump()))
+    print(("{0}".format(multi_cycle_hdr.dump())))
 
     cycle_offset = multi_cycle_hdr.offset_to_cycle(cur_cycle)
 
     cycle_header = daq_dc_data_t(buffer[cycle_offset:cycle_offset + multi_cycle_hdr.get('cycle_size')])
-    print("{0}".format(cycle_header.dump()))
+    print(("{0}".format(cycle_header.dump())))
 
     model_count = cycle_header.get('model_count')
     if cur_dcu >= 0 and model_count <= cur_dcu:
@@ -334,8 +334,8 @@ def handle_daq_multi_cycle(args, buffer):
         dcu = daq_msg_header_t(buffer[dcu_offset:])
         dcu_struct_size = len(dcu)
         if cur_dcu < 0 or cur_dcu == i:
-            print("dcu index {0}".format(i))
-            print(dcu.dump())
+            print(("dcu index {0}".format(i)))
+            print((dcu.dump()))
             if cur_dcu == i:
                 break
         cur_dcu_data_offset += dcu.get('dataBlockSize') + dcu.get('tpBlockSize')
@@ -345,7 +345,7 @@ def handle_daq_multi_cycle(args, buffer):
         return
 
     data_block_offset = cycle_offset + len(cycle_header) + dcu_struct_size * 128 + cur_dcu_data_offset
-    print("Offset {0}:".format(data_block_offset))
+    print(("Offset {0}:".format(data_block_offset)))
     dumper.dump(buffer[data_block_offset:])
 
 
@@ -357,18 +357,18 @@ def handle_rmipc(args, buffer):
     if args.cycle >= 0:
         cur_cycle = args.cycle
 
-    print('read in {0} bytes of data'.format(len(buffer)))
-    print('dumping cycle {0}\n'.format(cur_cycle))
+    print(('read in {0} bytes of data'.format(len(buffer))))
+    print(('dumping cycle {0}\n'.format(cur_cycle)))
 
-    print("{0}".format(rmipc.dump()))
+    print(("{0}".format(rmipc.dump())))
 
     tp_table = rmipc.get_tp_table()
-    print("Test Point Table:\n\tCount: {0}\n\t{1}\n".format(len(tp_table), tp_table))
+    print(("Test Point Table:\n\tCount: {0}\n\t{1}\n".format(len(tp_table), tp_table)))
 
-    print("{0}".format(rmipc.get_block_prop(cur_cycle).dump()))
+    print(("{0}".format(rmipc.get_block_prop(cur_cycle).dump())))
 
     data_block_offset = rmipc.offset_to_cycle(cur_cycle)
-    print("offset = {0}".format(data_block_offset))
+    print(("offset = {0}".format(data_block_offset)))
     if dumper.should_dump():
         dumper.dump(buffer[data_block_offset:])
 
@@ -378,7 +378,7 @@ def main(argv):
         'daq_multi_cycle_data_t': handle_daq_multi_cycle,
         'rmIpcStr': handle_rmipc,
     }
-    allowed_structs = struct_dispatch.keys()
+    allowed_structs = list(struct_dispatch.keys())
     parser = argparse.ArgumentParser(description="Dump data from zmq_daq_core.h structures")
     parser.add_argument('-i', '--input', default='probe_out.bin', dest='input_file',
                         help="Dump file to process")

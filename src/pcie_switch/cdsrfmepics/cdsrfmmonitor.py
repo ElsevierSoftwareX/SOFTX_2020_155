@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Code to interface cdsrfmswitch kernel module code and EPICS database
 
 import time
