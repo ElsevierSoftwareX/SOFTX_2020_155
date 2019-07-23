@@ -57,14 +57,14 @@ target_link_libraries(mx_rcv_simple PUBLIC
 
 endif (${MX_FOUND})
 
-#if (${OPENMX_FOUND})
-#    add_executable(mx2ix mx2ix.c)
-#    target_link_libraries(mx2ix PUBLIC
-#            driver::shmem
-#            dolphin::sisci
-#            zmq::simple_pv
-#            openmx::openmx
-#            ${CMAKE_THREAD_LIBS_INIT}
-#            )
-#    install(TARGETS mx2ix DESTINATION bin)
-#endif (${OPENMX_FOUND})
+if (${OPENMX_FOUND})
+    add_executable(mx2ix mx2ix.c)
+    target_link_libraries(mx2ix PUBLIC
+            driver::shmem
+            dolphin::sisci
+            zmq::simple_pv
+            openmx::openmx
+            ${CMAKE_THREAD_LIBS_INIT}
+            )
+    install(TARGETS mx2ix DESTINATION bin)
+endif (${OPENMX_FOUND})
