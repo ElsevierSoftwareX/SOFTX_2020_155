@@ -16,19 +16,19 @@ srcdir = .
 # rules to apply to Windows.
 TARGETS=mx_stream mx_multi_stream mx_mem_test
 
-mx_stream: mx_stream.o rfm.o
+#mx_stream: mx_stream.o rfm.o
 
-mx_multi_stream: mx_multi_stream.o rfm.o
+#mx_multi_stream: mx_multi_stream.o rfm.o
 
-mx_crc_only: mx_crc_only.o rfm.o
+#mx_crc_only: mx_crc_only.o rfm.o
 
-mx_mem_test: mx_mem_test.o rfm.o
+#mx_mem_test: mx_mem_test.o rfm.o
 
-mx_stream_single: mx_stream_single.o rfm.o
+#mx_stream_single: mx_stream_single.o rfm.o
 
-mx_fe: mx_fe.o rfm.o
+omx_xmit: mx_fe.o rfm.o
 
-mx_rcv: mx_rcv.o rfm.o
+#mx_rcv: mx_rcv.o rfm.o
 
 rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
@@ -62,7 +62,7 @@ LDFLAGS = -L${prefix}/lib -lmyriexpress -lpthread  -g
 
 .PHONY: clean
 clean:
-	rm -f *.o mx_stream mx_multi_stream mx_stream_single mx_fe mx_rcv
+	rm -f *.o mx_stream mx_multi_stream mx_stream_single mx_fe mx_rcv omx_xmit
 
 .PHONY: distclean
 distclean: clean

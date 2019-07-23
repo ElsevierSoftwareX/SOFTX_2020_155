@@ -10,17 +10,18 @@ srcdir = .
 
 #include ../common.mk
 
-TARGETS=zmq_multi_stream zmq_multi_rcvr zmq_proxy zmq_proxy_client zmq_threads zmq_rcv_from_dc.c gpstp_test.c zmqms zmq_fe
+#TARGETS=zmq_multi_stream zmq_multi_rcvr zmq_proxy zmq_proxy_client zmq_threads zmq_rcv_from_dc.c gpstp_test.c zmqms zmq_fe
+TARGETS=zmq_xmit
 
-zmq_multi_stream: zmq_multi_stream.o rfm.o
-zmqms: zmqms.o rfm.o
-zmq_fe: zmq_fe.o rfm.o zmq_transport.o dc_utils.o simple_pv.o
-gdstp_test: gdstp_test.o rfm.o
-zmq_multi_rcvr: zmq_multi_rcvr.o
-zmq_threads: zmq_threads.o rfm.o zmq_transport.o dc_utils.o
-zmq_rcv_from_dc: zmq_rcv_from_dc.o
-zmq_proxy: zmq_proxy.o
-zmq_proxy_client: zmq_proxy_client.o
+#zmq_multi_stream: zmq_multi_stream.o rfm.o
+#zmqms: zmqms.o rfm.o
+zmq_xmit: zmq_fe.o rfm.o zmq_transport.o dc_utils.o simple_pv.o
+#gdstp_test: gdstp_test.o rfm.o
+#zmq_multi_rcvr: zmq_multi_rcvr.o
+#zmq_threads: zmq_threads.o rfm.o zmq_transport.o dc_utils.o
+#zmq_rcv_from_dc: zmq_rcv_from_dc.o
+#zmq_proxy: zmq_proxy.o
+#zmq_proxy_client: zmq_proxy_client.o
 rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 zmq_transport.o: ../zmq_stream/zmq_transport.c
@@ -37,7 +38,7 @@ LDFLAGS = -L/usr/local/lib -lzmq -lpthread
 
 .PHONY: clean
 clean:
-	rm -r *.o zmq_multi_stream zmq_multi_rcvr zmqms zmq_fe
+	rm -r *.o zmq_multi_stream zmq_multi_rcvr zmqms zmq_fe zmq_xmit
 
 .PHONY: distclean
 distclean: clean

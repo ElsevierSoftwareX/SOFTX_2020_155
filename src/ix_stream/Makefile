@@ -32,7 +32,8 @@ endif
 
 
 
-all : ix_multi_stream ix_rcvr ix_rcvr_threads ix_dc_xmit ix_fb_rcv ix_convert zmq_rcv_ix_xmit
+#all : ix_multi_stream ix_rcvr ix_rcvr_threads ix_dc_xmit ix_fb_rcv ix_convert zmq_rcv_ix_xmit
+all : omx_recv zmq_recv ix_recv
 
 rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -43,32 +44,32 @@ param.o: ../drv/param.c
 crc.o: ../drv/crc.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-ix_rcvr: ix_rcvr.c 
-	$(CC) $(CFLAGS) ix_rcvr.c -c -o ix_rcvr.o 
-	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
-	$(CC) $(FLAGS) -o ix_rcvr  ix_rcvr.o  rfm.o -L $(API_LIB_PATH) -lsisci
-	sync
+#ix_rcvr: ix_rcvr.c
+#	$(CC) $(CFLAGS) ix_rcvr.c -c -o ix_rcvr.o
+#	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o
+#	$(CC) $(FLAGS) -o ix_rcvr  ix_rcvr.o  rfm.o -L $(API_LIB_PATH) -lsisci
+#	sync
 
-ix_rcvr_threads: ix_rcvr_threads.c 
-	$(CC) $(CFLAGS) ix_rcvr_threads.c -c -o ix_rcvr_threads.o 
-	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
-	$(CC) $(FLAGS) -o ix_rcvr_threads  ix_rcvr_threads.o  rfm.o -L $(API_LIB_PATH) -lsisci
-	sync
+#ix_rcvr_threads: ix_rcvr_threads.c
+#	$(CC) $(CFLAGS) ix_rcvr_threads.c -c -o ix_rcvr_threads.o
+#	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o
+#	$(CC) $(FLAGS) -o ix_rcvr_threads  ix_rcvr_threads.o  rfm.o -L $(API_LIB_PATH) -lsisci
+#	sync
 
-ix_dc_xmit: ix_dc_xmit.c 
-	$(CC) $(CFLAGS) ix_dc_xmit.c -c -o ix_dc_xmit.o 
-	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
-	$(CC) $(FLAGS) -o ix_dc_xmit  ix_dc_xmit.o  rfm.o -L $(API_LIB_PATH) -lsisci
-	sync
+#ix_dc_xmit: ix_dc_xmit.c
+#	$(CC) $(CFLAGS) ix_dc_xmit.c -c -o ix_dc_xmit.o
+#	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o
+#	$(CC) $(FLAGS) -o ix_dc_xmit  ix_dc_xmit.o  rfm.o -L $(API_LIB_PATH) -lsisci
+#	sync
 
-mx2ix: mx2ix.c 
+omx_recv: mx2ix.c
 	$(CC) $(CFLAGS) -I../zmq_stream -I/opt/open-mx/include mx2ix.c -c -o mx2ix.o
 	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
 	$(CC) $(CFLAGS) -I../zmq_stream ../zmq_stream/simple_pv.c -c -o simple_pv.o
 	$(CC) $(FLAGS) -o mx2ix  mx2ix.o  rfm.o simple_pv.o -L $(API_LIB_PATH) -L/opt/open-mx/lib -lsisci -lmyriexpress -lpthread
 	sync
 
-zmq_rcv_ix_xmit: zmq_rcv_ix_xmit.c 
+zmq_recv: zmq_rcv_ix_xmit.c
 	$(CC) $(CFLAGS) -I../zmq_stream zmq_rcv_ix_xmit.c -c -o zmq_rcv_ix_xmit.o
 	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o
 	$(CC) $(CFLAGS) -I../zmq_stream ../zmq_stream/simple_pv.c -c -o simple_pv.o
@@ -77,7 +78,7 @@ zmq_rcv_ix_xmit: zmq_rcv_ix_xmit.c
 	$(CC) $(FLAGS) -o zmq_rcv_ix_xmit  zmq_rcv_ix_xmit.o  rfm.o zmq_transport.o dc_utils.o simple_pv.o -L $(API_LIB_PATH) -lsisci -lzmq -lpthread
 	sync
 
-ix_fb_rcv: ix_fb_rcv.c 
+ix_recv: ix_fb_rcv.c
 	$(CC) $(CFLAGS) ix_fb_rcv.c -c -o ix_fb_rcv.o 
 	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
 	$(CC) $(FLAGS) -o ix_fb_rcv  ix_fb_rcv.o  rfm.o -L $(API_LIB_PATH) -lsisci
