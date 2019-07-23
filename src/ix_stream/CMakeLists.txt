@@ -1,10 +1,10 @@
 
 add_executable(dix_xmit ix_xmit.c)
-target_link_libraries(ix_xmit PUBLIC driver::shmem dolphin::sisci)
+target_link_libraries(dix_xmit PUBLIC driver::shmem dolphin::sisci)
 install(TARGETS dix_xmit DESTINATION bin)
 
 add_executable(dix_recv ix_fb_rcv.c)
-target_link_libraries(ix_recv PUBLIC driver::shmem dolphin::sisci)
+target_link_libraries(dix_recv PUBLIC driver::shmem dolphin::sisci)
 install(TARGETS dix_recv DESTINATION bin)
 
 if (${LibZMQ_FOUND})
