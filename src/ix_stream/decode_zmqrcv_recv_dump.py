@@ -25,5 +25,5 @@ for line in sys.stdin:
             min = entry
         if entry > max:
             max = entry
-    print("min is = {0}\nmax is = {1}\ndelta is = {2}".format(min, max, max - min))
-    print("mean is = {0}\nstddev is = {1}\n".format(statistics.mean(data), statistics.stdev(data)))
+    print(("min is = {0}\nmax is = {1}\ndelta is = {2}".format(min, max, max - min)))
+    print(("mean is = {0}\nstddev is = {1}\n".format(statistics.mean(data), statistics.stdev(data))))

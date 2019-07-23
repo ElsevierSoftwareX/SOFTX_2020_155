@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Automated test support classes
 
 import epics
@@ -44,7 +44,7 @@ filter_num_map = PV("{0}:FEC-{1}_SDF_FM_LINE_{2}".format(args.prefix, args.dcuid
 fmnum = filter_num_map.value
 
 if fmnum < 0:
-	print 'NOT A SWITCH CHANNEL'
+	print('NOT A SWITCH CHANNEL')
 else:
 	myargs = "FPREFIX={0},DCUID={1},FMNUM={2},FNAME={3}".format(args.prefix, args.dcuid,int(fmnum),basename)
 	medm_args = ['medm', '-attach', '-x', '-macro', str(myargs), str(display)]

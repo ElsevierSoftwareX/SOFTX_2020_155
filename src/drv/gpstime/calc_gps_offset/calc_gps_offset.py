@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from __future__ import unicode_literals, print_function, division
+
 
 import argparse
 import collections

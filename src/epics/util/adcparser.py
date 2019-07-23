@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Purpose: Produce a listing of all ADC inputs to their corresponding RCG part connections.
 # This script was added primarily to handle MUX/DEMUX connections, as these are not taken
@@ -63,7 +63,7 @@ bustype = 0
 #args = parser.parse_args()
 
 #f = open(args.fName,'r')
-print os.getcwd()
+print(os.getcwd())
 time.sleep(10)
 f = open('./diags.txt','r')
 

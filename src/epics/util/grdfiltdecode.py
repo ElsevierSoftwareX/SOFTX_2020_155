@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Automated test support classes
 
 import epics
@@ -41,4 +41,4 @@ if '_SW1S' in grdchan or '_SW2S' in grdchan:
 	#call(["medm","-x","-attach","-macro",myargs,filtalhdisplay])
 	call(["medm","-attach","-x","-macro",myargs,filtalhdisplay])
 else:
-	print 'NOT A SWITCH CHANNEL'
+	print('NOT A SWITCH CHANNEL')
