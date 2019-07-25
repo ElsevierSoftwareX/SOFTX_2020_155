@@ -340,7 +340,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
   timeSec = current_time_fe() -1;
 #endif
 
-  rdtscll(adcinfo.adcTime);
+  adcinfo.adcTime = rdtsc_ordered();
 
   /// ******************************************************************************\n
   /// Enter the infinite FE control loop  ******************************************\n
@@ -428,9 +428,9 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // **************************************************************************************
 /// \> Call the front end specific application  ******************\n
 /// - -- This is where the user application produced by RCG gets called and executed. \n\n
-    rdtscll(cpuClock[CPU_TIME_USR_START]);
+    cpuClock[CPU_TIME_USR_START] = rdtsc_ordered();
     iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
-    rdtscll(cpuClock[CPU_TIME_USR_END]);
+    cpuClock[CPU_TIME_USR_END] = rdtsc_ordered();
 // **************************************************************************************
 //
 //
@@ -831,7 +831,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // Update end of cycle information
 // *****************************************************************
     // Capture end of cycle time.
-    rdtscll(cpuClock[CPU_TIME_CYCLE_END]);
+    cpuClock[CPU_TIME_CYCLE_END] = rdtsc_ordered();
 
     /// \> Compute code cycle time diag information.
     captureEocTiming(cycleNum, cycle_gps_time, &timeinfo, &adcinfo);
