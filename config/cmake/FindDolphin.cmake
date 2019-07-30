@@ -10,7 +10,9 @@ find_path(dolphin_sisci_types_h sisci_types.h
 
 find_library(dolphin_sisci_so sisci
         hints /opt/DIS/lib64
+        /opt/DIS/lib
         ${DOLPHIN_PATH}/lib64
+        ${DOLPHIN_PATH}/lib
         )
 
 if (dolphin_sisci_types_h AND dolphin_sisci_so)
