@@ -273,6 +273,16 @@ GeneratorPtr create_generator(const std::string& channel_name)
             return GeneratorPtr(new Generators::GPSSecondWithOffset<float>(SimChannel(base, data_type, rate, 0), offset));
 
     }
+    else if (name == "gpssmd100koff1p" && arg_count == 1)
+    {
+        std::istringstream is(parts[2]);
+        int offset = 0;
+        is >> offset;
+        if (data_type == 2)
+            return GeneratorPtr(new Generators::GPSMod100kSecWithOffset<int>(SimChannel(base, data_type, rate, 0), offset));
+        else
+            return GeneratorPtr(new Generators::GPSMod100kSecWithOffset<float>(SimChannel(base, data_type, rate, 0), offset));
+    }
     else
     {
         throw std::runtime_error("Unknown generator type");

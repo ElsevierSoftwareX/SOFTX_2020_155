@@ -1,6 +1,8 @@
 project(daqd-trunk)
 cmake_minimum_required(VERSION 3.0)
 
+enable_testing()
+
 FIND_PROGRAM(BISON_PROG bison)
 FIND_PROGRAM(FLEX_PROG flex)
 
