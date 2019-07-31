@@ -1,7 +1,9 @@
 //
-///	@file zmq_recv.cc
-///	@brief  Receive zmq stream data and concentrate it in a shared memory buffer
+///	@file zmq_rcv_ix_xmitcc
+///	@brief  DAQ data concentrator code. Receives data via ZMQ and sends via Dolphin IX..
 //
+
+#include <iostream>
 
 #include <unistd.h>
 #include <ctype.h>
@@ -19,312 +21,1293 @@
 #include <string.h>
 #include <signal.h>
 #include "../drv/crc.c"
+#include <zmq.h>
 #include <assert.h>
 #include <time.h>
-#include "zmq_daq.h"
 #include "../include/daqmap.h"
-
-#include <sys/ioctl.h>
-#include "../drv/gpstime/gpstime.h"
-
-#include <zmq.hpp>
-
-#include "zmq_dc_recv.h"
-
-#include "drv/shmem.h"
-
+#include "../include/daq_core.h"
+#include "dc_utils.h"
 #include <algorithm>
-#include "recv_atomic.h"
-#include <iostream>
-#include <sstream>
-#include <string>
+#include <vector>
 
-unsigned int do_wait = 0; // Wait for this number of milliseconds before starting a cycle
+#include "zmq_transport.h"
+#include "simple_pv.h"
 
+#include <stdarg.h>
 
-//std::vector<zmq_dc::receiver_thread_info> thread_info;
+#include "recvr_utils.hh"
 
+#define __CDECL
 
-static volatile bool keep_running = true;
+#define DO_HANDSHAKE 0
 
-struct gps_time {
-    long sec;
-    long nanosec;
+const int delay_length = 4;
 
-    gps_time(): sec(0), nanosec(0) {}
-    explicit gps_time(long s): sec(s), nanosec(0) {}
-    gps_time(long s, long ns): sec(s), nanosec(ns) {}
-    gps_time(const gps_time& other): sec(other.sec), nanosec(other.nanosec) {}
+template <typename C>
+void shift_left_one_and_fill(C& cont, const typename C::value_type fill_value)
+{
+	std::copy(cont.begin() + 1, cont.end(), cont.begin());
+	cont.back() = fill_value;
+}
 
-    gps_time operator-(const gps_time& other)
-    {
+#define MIN_DELAY_MS 5
+#define MAX_DELAY_MS 40
 
-        gps_time result(sec - other.sec, nanosec - other.nanosec);
-        while (result.nanosec < 0) {
-            result.nanosec += 1000000000;
-            --result.sec;
-        }
-        return result;
-    }
+#define MAX_FE_COMPUTERS 64
+
+#define MAX_RECEIVE_BUFFERS 16
+
+extern "C" {
+extern volatile void *findSharedMemorySize(const char *, int);
+}
+
+int do_verbose = 0;
+int debug_zmq = 0;
+bool debug_wait_timings = false;
+
+struct thread_info {
+    int index;
+    char *src_iface;
+    void *zmq_ctx;
+};
+struct thread_mon_info {
+    int index;
+    void *ctx;
 };
 
-std::ostream& operator<<(std::ostream& os, const gps_time& gps)
+typedef struct mask_t {
+	int data[DCU_COUNT];
+} mask_t;
+
+/// \brief structure to hold when data has been received
+typedef struct receive_map_t
 {
-    os << gps.sec << ":" << gps.nanosec;
-    return os;
+    receive_map_entry_t data[MAX_RECEIVE_BUFFERS][MAX_FE_COMPUTERS];	/// indexed by cycle then machine
+} receive_map_t;
+
+pthread_spinlock_t receive_map_lock;
+receive_map_t receive_map;
+
+static inline void mask_clear(mask_t* mask)
+{
+	memset(mask->data, 0, sizeof(mask->data));
+}
+
+static inline void mask_set_entry(mask_t* mask, int index)
+{
+	const unsigned int MAX_INDEX = sizeof(mask->data)/sizeof(mask->data[0]);
+	if (((unsigned int)index) < MAX_INDEX)
+	{
+		mask->data[index] = 1;
+	}
+}
+
+static inline int mask_get_entry(mask_t* mask, int index)
+{
+    const unsigned int MAX_INDEX = sizeof(mask->data)/sizeof(mask->data[0]);
+    return (((unsigned int)index) < MAX_INDEX ? mask->data[index] : 0);
+}
+
+static inline int mask_diffs(mask_t* input1, mask_t* input2, mask_t* dest)
+{
+	const int MAX_INDEX = sizeof(input1->data)/sizeof(input1->data[0]);
+	int diffs = 0;
+	int i = 0;
+	for(; i < MAX_INDEX; ++i)
+	{
+		diffs += (dest->data[i] = (input1->data[i] != input2->data[i]));
+	}
+	return diffs;
+}
+
+static inline int mask_differs(mask_t* input1, mask_t* input2)
+{
+	const int MAX_INDEX = sizeof(input1->data)/sizeof(input1->data[0]);
+	int i = 0;
+	for (; i < MAX_INDEX; ++i)
+	{
+		if (input1->data[i] != input2->data[i])
+		{
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static inline void mask_dump(mask_t* mask, const char* description)
+{
+	printf("%s\n", description);
+	const int MAX_INDEX = sizeof(mask->data)/sizeof(mask->data[0]);
+	int i = 0;
+	for (; i < MAX_INDEX; ++i)
+	{
+		if (mask->data[i])
+		{
+			printf("(%d) ", i);
+		}
+	}
+	printf("\n");
+}
+
+static inline void mask_copy(mask_t* dest, const mask_t* src)
+{
+	memcpy(dest, src, sizeof(*dest));
+}
+
+static void dump_dcu_mask_diff(mask_t* prev, mask_t* cur, int dcu_endpoint_lookup[DCU_COUNT])
+{
+	const int MAX_INDEX = sizeof(cur->data)/sizeof(cur->data[0]);
+	if (!mask_differs(prev, cur))
+	{
+		return;
+	}
+	printf("\nDCU state change:\n");
+	int i = 0;
+	for (i = 0; i < MAX_INDEX; ++i)
+	{
+		if (prev->data[i] < cur->data[i])
+		{
+			printf("(+%d)e%d ", i, dcu_endpoint_lookup[i]);
+		}
+		else if (prev->data[i] > cur->data[i])
+		{
+			printf("(-%d)e%d ", i, dcu_endpoint_lookup[i]);
+		}
+	}
+}
+
+static void dump_endpoint_mask_diff(mask_t* prev, mask_t* cur)
+{
+	const int MAX_INDEX = sizeof(cur->data)/sizeof(cur->data[0]);
+	if (!mask_differs(prev, cur))
+	{
+		return;
+	}
+	printf("\nEndpoint state change:\n");
+	int i = 0;
+	for (i = 0; i < MAX_INDEX; ++i)
+	{
+		if (prev->data[i] < cur->data[i])
+		{
+			printf("(+%d) ", i);
+		}
+		else if (prev->data[i] > cur->data[i])
+		{
+			printf("(-%d) ", i);
+		}
+	}
+	printf("\n");
+}
+
+static void receive_map_init()
+{
+    memset(&receive_map, 0, sizeof(receive_map));
+    pthread_spin_init(&receive_map_lock, PTHREAD_PROCESS_PRIVATE);
+}
+
+static void receive_map_mark(int fe_index, long gps_sec, int64_t cycle, int64_t clock_val)
+{
+	int64_t gps_sec_and_cycle = 0;
+
+	int cycle_index = (int)(cycle % MAX_RECEIVE_BUFFERS);
+    gps_sec_and_cycle = calc_gps_sec_and_cycle(gps_sec, cycle);
+
+    lock_guard<pthread_spinlock_t> lock(receive_map_lock);
+    receive_map.data[cycle_index][fe_index].gps_sec_and_cycle = gps_sec_and_cycle;
+    receive_map.data[cycle_index][fe_index].s_clock = clock_val;
+}
+
+static void receive_map_copy_to_local(receive_map_t *dest)
+{
+	if (!dest)
+	{
+		return;
+	}
+	lock_guard<pthread_spinlock_t> lock_(receive_map_lock);
+	memcpy(dest, &receive_map, sizeof(receive_map));
+}
+
+static void dump_recv_mask(FILE *f, receive_map_t* local_map, int nsys, int64_t gps_sec, int block_index, mask_t* received_mask, int current_cycle, int64_t current_clock)
+{
+    int fe_index = 0, cycle_index = 0;
+    if (!f || !local_map || nsys < 1)
+    {
+        return;
+    }
+   // receive_map_copy_to_local(&local_map);
+    fprintf(f, "----------------------------------------------\n");
+    fprintf(f, "-- Sending Gps %ld:%d\n", (long int)gps_sec, (int)block_index);
+    fprintf(f, "-- Current receive cycle %d   system time %ld\n", current_cycle, (long int)current_clock);
+    fprintf(f, "----------------------------------------------\n");
+
+    block_index %= MAX_RECEIVE_BUFFERS;
+
+    for (cycle_index = MAX_RECEIVE_BUFFERS - 1; cycle_index >= 0 ; --cycle_index)
+    {
+        int64_t min_recv = static_cast<int64_t>(1)<<62;
+        int64_t max_recv = 0;
+
+        fprintf(f, "%2d) ", cycle_index);
+        for (fe_index = 0; fe_index < nsys; ++fe_index)
+        {
+            int64_t receive_time = local_map->data[cycle_index][fe_index].s_clock;
+            fprintf(f, "|%s%ld:%02d (%ld) ",
+                    (cycle_index != block_index ? " " :
+                    (mask_get_entry(received_mask, fe_index) ? " " : "*")),
+                    (long int) local_map->data[cycle_index][fe_index].gps_sec_and_cycle >> 4,
+                    0x0f & (int) local_map->data[cycle_index][fe_index].gps_sec_and_cycle,
+                    (long int) receive_time);
+            min_recv = (min_recv < receive_time ? min_recv : receive_time);
+            max_recv = (max_recv > receive_time ? max_recv : receive_time);
+        }
+        fprintf(f, "| (min=%ld, max=%ld delta=%ld)\n", (long int)min_recv, (long int)max_recv, (long int)(max_recv - min_recv));
+    }
+
+    fprintf(f, "----------------------------------------------\n\n");
+    fflush(f);
+}
+
+static void dump_local_recv_mask(receive_map_t& local_map, int nsys, int64_t expected_sec, int cycle)
+{
+    using std::cout;
+
+    cout << "----------------------------------------------\n";
+    cout << "-- cycle = " << cycle << " expected sec = "
+        << extract_gps(expected_sec) << ":" << extract_cycle(expected_sec) << "\n";
+    cout << "----------------------------------------------\n";
+
+    int cycle_index = cycle % MAX_RECEIVE_BUFFERS;
+
+    for (cycle_index = MAX_RECEIVE_BUFFERS - 1; cycle_index >= 0; --cycle_index)
+    {
+        cout << cycle_index << ") ";
+        for (int fe_index = 0; fe_index < nsys; ++fe_index)
+        {
+            cout << "| " << extract_gps(local_map.data[cycle_index][fe_index].gps_sec_and_cycle)
+                << ":" << extract_cycle(local_map.data[cycle_index][fe_index].gps_sec_and_cycle)
+                << " (" << local_map.data[cycle_index][fe_index].s_clock << ") ";
+        }
+        cout << "|\n";
+    }
 }
 
 
-class gps_clock {
-    int _offset;
-    int _fd;
-    bool _ok;
 
-    static bool symm_ok(int fd) {
-        if (fd < 0)
-            return false;
-        unsigned long req = 0;
-        ioctl(fd, IOCTL_SYMMETRICOM_STATUS, &req);
-        return req != 0;
-    }
-public:
-    explicit gps_clock(int offset): _offset(offset), _fd(open("/dev/symmetricom",O_RDWR | O_SYNC)), _ok(gps_clock::symm_ok(_fd)) {}
-    ~gps_clock() {
-        if (_fd >= 0) close(_fd);
-    }
-
-    gps_time now() const
-    {
-        gps_time result;
-
-        if (!_ok)
-            return result;
-        unsigned long t[3];
-        ioctl(_fd, IOCTL_SYMMETRICOM_TIME, &t);
-        result.sec = t[0] + _offset;
-        result.nanosec = t[1]*1000 + t[2];
-        return result;
-    }
-};
-
+struct thread_info thread_index[DCU_COUNT];
+void *daq_context[DCU_COUNT];
+void *daq_subscriber[DCU_COUNT];
+char *sname[DCU_COUNT];	// Names of FE computers serving DAQ data
+char *local_iface[MAX_FE_COMPUTERS];
+//daq_multi_dcu_data_t mxDataBlockSingle[MAX_FE_COMPUTERS][MAX_RECEIVE_BUFFERS];
+debug_array_2d<daq_multi_dcu_data_t, MAX_FE_COMPUTERS, MAX_RECEIVE_BUFFERS> mxDataBlockSingle;
+//pthread_spinlock_t mxDataBlockSingle_lock[MAX_FE_COMPUTERS][MAX_RECEIVE_BUFFERS];
+debug_array_2d<pthread_spinlock_t, MAX_FE_COMPUTERS, MAX_RECEIVE_BUFFERS> mxDataBlockSingle_lock;
+const int mc_header_size = sizeof(daq_multi_cycle_header_t);
+int stop_working_threads = 0;
+int start_acq = 0;
+static volatile int keepRunning = 1;
+//int thread_cycle[MAX_FE_COMPUTERS];
+//int thread_timestamp[MAX_FE_COMPUTERS];
+int rcv_errors = 0;
 
 void
 usage()
 {
-    std::cerr << "Usage: zmq_recv [args] -s server name" << std::endl;
-    std::cerr << "-t - use the LIGO timing drivers to check time on each received block of data" << std::endl;
-    std::cerr << "-g offset - offset to add to the gps, defaults to 0" << std::endl;
-    std::cerr << "-s - server name eg x1lsc0, x1susex, etc." << std::endl;
-    std::cerr << "-v - verbose prints cpu_meter test data" << std::endl;
-    std::cerr << "-b name - name of the shared memory buffer to write to, defaults to ifo" << std::endl;
-    std::cerr << "-m size (in mb) - size of the destination buffer in megabytes" << std::endl;
-    std::cerr << "-h - help" << std::endl;
+	fprintf(stderr, "Usage: zmq_recv [args] -s server names -m shared memory size\n");
+	fprintf(stderr, "-l filename - log file name\n");
+	fprintf(stderr, "-b buffername - name of the mbuf to write to\n");
+	fprintf(stderr, "-s - server names separated by spaces eg \"x1lsc0 x1susex etc.\"\n");
+	fprintf(stderr, "-v - verbose prints diag test data\n");
+	fprintf(stderr, "-p - Debug pv prefix, requires -P as well\n");
+	fprintf(stderr, "-P - Path to a named pipe to send PV debug information to\n");
+	fprintf(stderr, "-L ifaces - local interfaces to listen on [used for load balancing], eg \"eth0 eth1\"\n");
+    fprintf(stderr, "-z - output zmq debug information (state changes)\n");
+    fprintf(stderr, "-X path - output history of received data to given path\n");
+    fprintf(stderr, "-D - output debug information on the wait code\n");
+	fprintf(stderr, "-h - help\n");
 }
 
+// *************************************************************************
+// Timing Diagnostic Routine
+// *************************************************************************
 static int64_t
 s_clock (void)
 {
-    struct timeval tv;
+struct timeval tv;
     gettimeofday (&tv, NULL);
     return (int64_t) (tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }
 
+// *************************************************************************
+// Catch Control C to end cod in controlled manner
+// *************************************************************************
 void intHandler(int dummy) {
-    keep_running = false;
+	keepRunning = 0;
 }
 
-/// Parse a space separated list of names into a vector of char*
-/// \param sysname Space seperated null terminated ascii string
-/// \return std::vector<char*> of each of the entries in sysname
-std::vector<char*> parse_publisher_list(const char *sysname) {
-    std::vector<char*> sname;
-    sname.push_back(strtok(const_cast<char*>(sysname), " "));
-    for(;;) {
-        char *s = strtok(NULL, " ");
-        if (s == NULL) break;
-        sname.push_back(s);
+void sigpipeHandler(int dummy)
+{}
+
+// **********************************************************************************************
+void print_diags(int nsys, int lastCycle, int sendLength, daq_multi_dcu_data_t *ixDataBlock,int dbs[]) {
+// **********************************************************************************************
+	int ii = 0;
+		// Print diags in verbose mode
+		printf("Receive errors = %d\n",rcv_errors);
+		printf("Time = %d\t size = %d\n",ixDataBlock->header.dcuheader[0].timeSec,sendLength);
+		printf("DCU ID\tCycle \t TimeSec\tTimeNSec\tDataSize\tTPCount\tTPSize\tXmitSize\n");
+		for(ii=0;ii<nsys;ii++) {
+			printf("%d",ixDataBlock->header.dcuheader[ii].dcuId);
+			printf("\t%d",ixDataBlock->header.dcuheader[ii].cycle);
+			printf("\t%d",ixDataBlock->header.dcuheader[ii].timeSec);
+			printf("\t%d",ixDataBlock->header.dcuheader[ii].timeNSec);
+			printf("\t\t%d",ixDataBlock->header.dcuheader[ii].dataBlockSize);
+	   		printf("\t\t%d",ixDataBlock->header.dcuheader[ii].tpCount);
+	   		printf("\t%d",ixDataBlock->header.dcuheader[ii].tpBlockSize);
+	   		printf("\t%d",dbs[ii]);
+	   		printf("\n ");
+		}
+}
+
+const char *pevent_zmq(int event, char *buffer, size_t max_size)
+{
+    if (!buffer || max_size < 1) {
+        return "";
     }
-    return sname;
-}
-
-std::string create_debug_message(zmq_dc::data_block& block_info) {
-    std::string msg("");
-    std::ostringstream os;
-
-    daq_dc_data_t *block = block_info.full_data_block;
-    int dcuids = block->header.dcuTotalModels;
-    unsigned long ets = block->header.dcuheader[dcuids-1].timeSec;
-    os << ets << " ";
-    for (int i = 0; i < dcuids; ++i) {
-        daq_msg_header_t* cur_header = block->header.dcuheader + i;
-        os << cur_header->dcuId << " " << cur_header->status << " " << cur_header->dataBlockSize<< " ";
+    switch (event) {
+        default:
+            snprintf(buffer, max_size, "%d", event);
+            break;
+        case ZMQ_EVENT_CONNECTED:
+            strncpy(buffer, "CONNECTED", max_size);   
+            break;
+        case ZMQ_EVENT_CONNECT_DELAYED:
+            strncpy(buffer, "CONNECT_DELAYED", max_size);
+            break;
+        case ZMQ_EVENT_CONNECT_RETRIED:
+            strncpy(buffer, "CONNECT_RETRIED", max_size);
+            break;
+        case ZMQ_EVENT_LISTENING:
+            strncpy(buffer, "LISTENING", max_size);
+            break;
+        case ZMQ_EVENT_BIND_FAILED:
+            strncpy(buffer, "BIND_FAILED", max_size);
+            break;
+        case ZMQ_EVENT_ACCEPTED:
+            strncpy(buffer, "ACCEPTED", max_size);
+            break;
+        case ZMQ_EVENT_ACCEPT_FAILED:
+            strncpy(buffer, "ACCEPT_FAILED", max_size);
+            break;
+        case ZMQ_EVENT_CLOSED:
+            strncpy(buffer, "CLOSED", max_size);
+            break;
+        case ZMQ_EVENT_CLOSE_FAILED:
+            strncpy(buffer, "CLOSE_FAILED", max_size);
+            break;
+        case ZMQ_EVENT_DISCONNECTED:
+            strncpy(buffer, "DISCONNECTED", max_size);
+            break;
+        case ZMQ_EVENT_MONITOR_STOPPED:
+            strncpy(buffer, "MONITOR_STOPPED", max_size);
+            break;
     }
-    msg = os.str();
-    return msg;
+    buffer[max_size-1] = '\0';
+    return buffer;
 }
 
+// *****
+// monitoring thread callback
+// *****
+void *rcvr_thread_mon(void *args)
+{
+    int rc;
+    char msg_buf[100];
+    struct thread_mon_info *info = (struct thread_mon_info*)args;
+    
+    void *s = zmq_socket(info->ctx, ZMQ_PAIR);
+    rc = zmq_connect(s, "inproc://monitor.req");
+    while (1)
+    {
+        zmq_msg_t msg;
+        zmq_msg_init(&msg);
+        rc = zmq_recvmsg(s, &msg, 0);
+        if (rc == -1) break;
+        unsigned short *event = (unsigned short*)zmq_msg_data(&msg);
+        unsigned int *value = (unsigned int*)(event+1);
+        fprintf(stderr, "%s) %d - %s\n", pevent_zmq(*event, msg_buf, sizeof(msg_buf)), *value, sname[info->index]);
+        if (zmq_msg_more(&msg)) {
+            zmq_msg_init(&msg);
+            zmq_msg_recv(&msg, s, 0);
+        }
+    }
+    zmq_close(s);
+    delete info;
+    return NULL;
+}
+
+// *************************************************************************
+// Thread for receiving DAQ data via ZMQ
+// *************************************************************************
+void *rcvr_thread(void *arg) {
+    struct thread_mon_info* mon_info = 0;
+	struct thread_info* my_info = (struct thread_info*)arg;
+	int mt = my_info->index;
+	printf("myarg = %d on iface %s\n", mt, (my_info->src_iface ? my_info->src_iface : "default interface"));
+	int cycle = 0;
+	daq_multi_dcu_data_t *mxDataBlock;
+    char loc[256];
+
+//    void *zctx = 0;
+    void *zsocket = 0;
+    int rc = 0;
+    pthread_t mon_th_id;
+    int buffer_index = 0;
+
+
+//    zctx = zmq_ctx_new();
+    zsocket = zmq_socket(my_info->zmq_ctx, ZMQ_SUB);
+
+//    if (debug_zmq) {
+//        zmq_socket_monitor(zsocket, "inproc://monitor.req", ZMQ_EVENT_ALL);
+//        mon_info = new thread_mon_info; // calloc(1, sizeof(struct thread_mon_info));
+//        memset((void*)mon_info, 0, sizeof(*mon_info));
+//        if (!mon_info) {
+//            fprintf(stderr, "Unable to initialize monitoring thread for %s\n", sname[mt]);
+//        } else {
+//            mon_info->index = mt;
+//            mon_info->ctx = zctx;
+//            pthread_create(&mon_th_id, NULL, rcvr_thread_mon, mon_info);
+//        }
+//    }
+
+    rc = zmq_setsockopt(zsocket, ZMQ_SUBSCRIBE, "", 0);
+    assert(rc == 0);
+    if (!dc_generate_connection_string(loc, sname[mt], sizeof(loc), my_info->src_iface)) {
+    	fprintf(stderr, "Unable to create connection string for '%s'\n", sname[mt]);
+    	exit(1);
+    }
+	dc_set_zmq_options(zsocket);
+    rc = zmq_connect(zsocket, loc);
+    assert(rc == 0);
+
+
+	printf("Starting receive loop for thread %d %s\n", mt, loc);
+	char *daqbuffer = (char *)&mxDataBlockSingle[mt][0];
+	mxDataBlock = (daq_multi_dcu_data_t *)daqbuffer;
+	do {
+		unsigned int gps_sec = 0;
+        buffer_index = zmq_recv_daq_multi_dcu_t_into_buffer((daq_multi_dcu_data_t*)daqbuffer, mxDataBlockSingle_lock[mt], zsocket, MAX_RECEIVE_BUFFERS, &gps_sec, &cycle);
+
+		// Get the message DAQ cycle number
+		//cycle = mxDataBlock[buffer_index].header.dcuheader[0].cycle;
+		// Pass cycle and timestamp data back to main process
+		int64_t cur_time = s_clock();
+        //receive_map_mark(mt, mxDataBlock[buffer_index].header.dcuheader[0].timeSec, cycle, cur_time);
+        receive_map_mark(mt, gps_sec, cycle, cur_time);
+        //printf("#### thread %d wrote %ld:%d at %ld  ####\n", (int)mt, (long int)mxDataBlock[buffer_index].header.dcuheader[0].timeSec, (int)cycle, (long int)cur_time);
+	// Run until told to stop by main thread
+	} while(!stop_working_threads);
+	printf("Stopping thread %d\n",mt);
+	usleep(200000);
+
+    zmq_close(zsocket);
+//    zmq_ctx_destroy(zctx);
+	return(0);
+
+}
+
+void get_data_ready(int* data_ready, receive_map_t* data_ready_map, int nsys, int64_t target_gps_and_cycle)
+{
+	int index = static_cast<int>(extract_cycle(target_gps_and_cycle)) % MAX_RECEIVE_BUFFERS;
+
+	receive_map_copy_to_local(data_ready_map);
+
+	for (int i = 0; i < nsys; ++i)
+	{
+		data_ready[i] = data_ready_map->data[index][i].gps_sec_and_cycle >= target_gps_and_cycle;
+	}
+}
+
+/**
+ * Wait for the first system to provide data in the requested cycle, return its gps time + cycle
+ * @param nsys
+ * @param nextCycle
+ * @param prev_sec_and_cycle
+ * @param rcv_errors
+ * @return
+ */
+int64_t
+wait_for_first_system(int nsys, const int nextCycle, const int64_t prev_sec_and_cycle)
+{
+	int ii = 0;
+	int wait_count = 0;
+	int next_cycle = nextCycle;
+	int64_t expected_sec_and_cycle = prev_sec_and_cycle; // calc_gps_sec_and_cycle(extract_gps(*prev_sec_and_cycle + 1), next_cycle);
+	int64_t result = 0;
+	receive_map_t data_ready_map;
+
+	using namespace std;
+
+	if (prev_sec_and_cycle == 0)
+	{
+		expected_sec_and_cycle = 0;
+	}
+	if (debug_wait_timings)
+	{
+        cout << "\n----- wait_for_first_system nsys="<<nsys<<" nextCycle="<<nextCycle<<" prev_sec="<<prev_sec_and_cycle<<"\n";
+        cout << "expected_sec_and_cycle = " << expected_sec_and_cycle << "\n";
+    }
+
+    bool keep_waiting = true;
+	do {
+		receive_map_copy_to_local(&data_ready_map);
+
+		int cycle_index = next_cycle % MAX_RECEIVE_BUFFERS;
+
+		for (ii = 0; ii < nsys; ++ii) {
+			// FIXME: what to do if it is a different second?
+			// For the first time through expected_sec_and_cycle == 0, so this grabs
+			// the first entry.
+			// Otherwise we handle the case of ignoring old data (ie a front end dropped out)
+			// but what about something that is running fast, or where one FE is signifigantly
+			// off on its timing?
+			if (data_ready_map.data[cycle_index][ii].gps_sec_and_cycle >= expected_sec_and_cycle
+			&& data_ready_map.data[cycle_index][ii].gps_sec_and_cycle != 0
+			&& extract_cycle(data_ready_map.data[cycle_index][ii].gps_sec_and_cycle) == next_cycle)
+			{
+				result = data_ready_map.data[cycle_index][ii].gps_sec_and_cycle;
+				keep_waiting = false;
+                if (debug_wait_timings) {
+                    cout << "receivied system " << ii << " searching for cycle " << nextCycle << " prev = ";
+                    cout << extract_gps(prev_sec_and_cycle) << ":" << extract_cycle(prev_sec_and_cycle);
+                    cout << " found ";
+                    cout << extract_gps(data_ready_map.data[cycle_index][ii].gps_sec_and_cycle);
+                    cout << ":" << extract_cycle(data_ready_map.data[cycle_index][ii].gps_sec_and_cycle);
+                    cout << " (" << data_ready_map.data[cycle_index][ii].s_clock << ")";
+                    cout << "\n";
+                }
+                break;
+			}
+		}
+		if (keep_waiting) {
+			usleep(1000);       /* 1ms */
+			if (debug_wait_timings) {
+				cout << "<sleep 1ms>";
+				++wait_count;
+				if (wait_count > 0 && wait_count % 200 == 0) {
+					std::cout << "<--- dumping receive map info for overlong wait -->\n";
+					dump_local_recv_mask(data_ready_map, nsys, expected_sec_and_cycle, next_cycle);
+				}
+			}
+		}
+	} while (keep_waiting);
+    if (debug_wait_timings) {
+        cout << "exiting wait loop waited " << wait_count << "cycles\n---------------\n";
+        dump_local_recv_mask(data_ready_map, nsys, expected_sec_and_cycle, next_cycle);
+        cout << "\n\n";
+        cout.flush();
+    }
+	return result;
+}
+
+
+// *************************************************************************
+// Main Process
+// *************************************************************************
 int
 main(int argc, char **argv)
 {
-    pthread_t thread_id[DCU_COUNT];
-    unsigned int nsys = 1; // The number of mapped shared memories (number of data sources)
-    char *sysname = NULL;
-    int c;
-    bool timing_check = false;
-    int timing_offset = 0;
-    size_t max_data_size = (DAQ_TRANSIT_DC_DATA_BLOCK_SIZE*DAQ_NUM_DATA_BLOCKS_PER_SECOND);
-    std::string dest_buffer_name = "ifo";
+	pthread_t thread_id[MAX_FE_COMPUTERS];
+	unsigned int nsys = 1; // The number of mapped shared memories (number of data sources)
+	char *sysname;
+	const char *buffer_name = "ifo";
+	int c;
+	int ii, jj, kk;					// Loop counter
+	unsigned int niface = 0; // The number of local interfaces to split receives across.
+    char *local_iface_names = 0;
 
-    // Create DAQ message area in local memory
-    daq_multi_dcu_data_t mxDataBlock;
-    // Declare pointer to local memory message area
-    std::cout << "size of mxdata = " << sizeof(mxDataBlock) << std::endl;
+	extern char *optarg;	// Needed to get arguments to program
 
+	// PV/debug information
+	char *pv_prefix = 0;
+	char *pv_debug_pipe_name = 0;
+	int pv_debug_pipe = -1;
 
-    /* set up defaults */
-    sysname = NULL;
-    int ii;
+	// Declare shared memory data variables
+	daq_multi_cycle_header_t *ifo_header;
+	char *ifo;
+	char *ifo_data;
+	int cycle_data_size;
+	daq_multi_dcu_data_t *ifoDataBlock;
+	char *nextData = NULL;
+	int max_data_size_mb = 100;
+	int max_data_size = 0;
 
-    // Declare 0MQ message pointers
-    int rc;
-    bool do_verbose = false;
+	/* set up defaults */
+	sysname = NULL;
 
-    while ((c = getopt(argc, argv, "m:tg:hs:b:v")) != EOF) switch(c) {
-            case 'm':
-                {
-                    std::istringstream os(optarg);
-                    os >> max_data_size;
-                }
-                if (max_data_size < 1) {
-                    usage();
-                    exit(1);
-                }
-                max_data_size *= 1024*1024;
-                break;
-            case 't':
-                timing_check = true;
-                break;
-            case 'g':
-                {
-                    std::istringstream os(optarg);
-                    os >> timing_offset;
-                }
-                break;
-            case 's':
-                sysname = optarg;
-                break;
-            case 'v':
-                do_verbose = true;
-                break;
-            case 'w':
-                do_wait = atoi(optarg);
-                break;
-            case 'b':
-                dest_buffer_name = optarg;
-                break;
-            case 'h':
-            default:
-                usage();
-                exit(1);
+    receive_map_init();
+    for (ii = 0; ii < MAX_FE_COMPUTERS; ++ii)
+    {
+        for (jj = 0; jj < MAX_RECEIVE_BUFFERS; ++jj)
+        {
+            pthread_spin_init(&mxDataBlockSingle_lock[ii][jj], PTHREAD_PROCESS_PRIVATE);
         }
-
-    if (sysname == NULL) { usage(); exit(1); }
-
-    signal(SIGINT,intHandler);
-
-    gps_clock clock(timing_offset);
-
-    std::cout << "Server name: " << sysname << std::endl;
-
-    std::vector<char*> sname(parse_publisher_list(sysname));
-    nsys = sname.size();
-    // hard limits are to keep things inside of a signed 32bit integer type
-    // used as a bitfield
-    if (nsys < 1 || nsys >= std::min(DCU_COUNT,32)) {
-        std::cerr << "Please specify a set of nodes to subscribe to.  You must provide between 1 and ";
-        std::cerr << std::min(DCU_COUNT, 32) << " entries" << std::endl;
-        exit(1);
     }
 
-    std::cout << "nsys = " << nsys << "\n";
-    for(ii=0;ii<sname.size();ii++) {
-        std::cout << "sys " << ii << " =  " << sname[ii] << "\n";
-    }
+    FILE* receive_map_dump_file = 0;
+    int receive_map_dump_counter = 0;
 
-    sname.push_back(NULL);
-    zmq_dc::ZMQDCReceiver dc_receiver(&sname[0]);
-    int dataRdy = dc_receiver.data_mask();
-
-    // lookup the destination buffer
-    volatile void *dest_buffer = shmem_open_segment(
-            const_cast<char*>(dest_buffer_name.c_str()),
-            max_data_size
-    );
-    if (!dest_buffer) {
-        std::cerr << "Unable to open shmem buffer " << dest_buffer_name << " with a size of at least ";
-        std::cerr << max_data_size << " bytes." << std::endl;
-        exit(1);
-    }
-
-    int loop = 0;
-    dc_receiver.verbose(do_verbose);
-    dc_receiver.begin_acquiring();
-
-    size_t cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t))/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-	cycle_data_size -= (cycle_data_size % 8);
-
-    volatile daq_multi_cycle_data_t* multi_cycle_header = reinterpret_cast<volatile daq_multi_cycle_data_t*>(dest_buffer);
-    multi_cycle_header->header.maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-    multi_cycle_header->header.cycleDataSize = static_cast<unsigned int>(cycle_data_size);
-    volatile char *data_block_start = &(multi_cycle_header->dataBlock[0]);
-
-    //size_t msg_size = 0;
-    //char dcstatus[12*4*DCU_COUNT + 1];
-    //char dcs[12*4];
-
-    receiver::atomic<unsigned int>* cycle_ptr = reinterpret_cast<receiver::atomic<unsigned int> * >(
-            const_cast<unsigned int*>(&(multi_cycle_header->header.curCycle))
-    );
-    unsigned int prev_cylce = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-    do {
-        zmq_dc::data_block results = dc_receiver.receive_data();
-        unsigned int cur_cycle = results.full_data_block->header.dcuheader[0].cycle;
-		unsigned int num_dcus = results.full_data_block->header.dcuTotalModels;
-		if(do_verbose) {
-		std::cout << "Cycle " << cur_cycle << " dcuids " << num_dcus << " bytes " << results.send_length << std::endl;
-		std::cout << "Cycle data size " << cycle_data_size << " offset " << cur_cycle * cycle_data_size << std::endl;
+	// Get arguments sent to process
+	while ((c = getopt(argc, argv, "b:hs:m:vp:P:DL:zX:")) != EOF) switch(c) {
+	case 's':
+		sysname = optarg;
+		break;
+	case 'v':
+		do_verbose = 1;
+		break;
+    case 'z':
+        debug_zmq = 1;
+        break;
+	case 'm':
+		max_data_size_mb = atoi(optarg);
+    	if (max_data_size_mb < 20){
+        	printf("Min data block size is 20 MB\n");
+            return -1;
+        }
+        if (max_data_size_mb > 100){
+            printf("Max data block size is 100 MB\n");
+            return -1;
+        }
+        break;
+    case 'b':
+        buffer_name = optarg;
+        break;
+	case 'p':
+		pv_prefix = optarg;
+		break;
+	case 'P':
+		pv_debug_pipe_name = optarg;
+		break;
+    case 'h':
+    case 'L':
+        local_iface_names = optarg;
+        break;
+    case 'D':
+	    debug_wait_timings = true;
+	    break;
+    case 'X':
+        if (strcmp(optarg, "--") == 0)
+		{
+        	receive_map_dump_file = stderr;
 		}
+		else
+		{
+			receive_map_dump_file = fopen(optarg, "wt");
+		}
+        break;
+	default:
+		usage();
+		exit(1);
+	}
+	max_data_size = max_data_size_mb * 1024*1024;
 
-        // write the data out
-        std::copy(reinterpret_cast<char*>(results.full_data_block),
-                  reinterpret_cast<char*>(results.full_data_block) + results.send_length,
-                  const_cast<char*>(
-                          data_block_start + (cur_cycle*cycle_data_size)
-                  ));
-        *cycle_ptr = cur_cycle;
+	if (sysname == NULL) { usage(); exit(1); }
 
-        //std::string debug_message = create_debug_message(results);
-        //std::cout << results.full_data_block->header.dcuheader[0].cycle << ": tpcount " << results.full_data_block->header.dcuheader[0].tpCount << std::endl;
+	// set up to catch Control C
+	signal(SIGINT,intHandler);
+	// setup to ignore sig pipe
+	signal(SIGPIPE, sigpipeHandler);
 
-        if (timing_check) {
-            gps_time now = clock.now();
-            unsigned long nsec = results.full_data_block->header.dcuheader[0].timeNSec;
-            nsec *= (1000000000/16);
-            gps_time msg_time(
-                    results.full_data_block->header.dcuheader[0].timeSec,
-                    nsec);
-            gps_time delta = now - msg_time;
-            std::cout << "Now: " << now << " block: " << msg_time << " delta: " << delta << std::endl;
+	printf("Server name: %s\n", sysname);
+
+	// Parse names of data servers
+	sname[0] = strtok(sysname, " ");
+        for(;;) {
+                printf("%s\n", sname[nsys - 1]);
+                char *s = strtok(0, " ");
+                if (!s) break;
+				// do not overflow our fixed size buffers
+				assert(nsys < DCU_COUNT);
+                sname[nsys] = s;
+                nsys++;
         }
 
-    } while (keep_running);
+    // Parse local interface names
+    if (local_iface_names) {
+        local_iface[0] = strtok(local_iface_names, " ");
+        niface++;
+        for (;;) {
+            printf("local interface %s\n", local_iface[niface-1]);
+            char *s = strtok(0, " ");
+            if (!s) break;
+            assert(niface < MAX_FE_COMPUTERS);
+            local_iface[niface] = s;
+            niface++;
+        }
+    }
 
-    std::cout << "stopping threads " << nsys << std::endl;
-    dc_receiver.stop_threads();
+	// Get pointers to local DAQ mbuf
+    ifo = reinterpret_cast<char *>(const_cast<void*>(findSharedMemorySize(buffer_name,max_data_size_mb)));
+    ifo_header = (daq_multi_cycle_header_t *)ifo;
+    ifo_data = (char *)ifo + sizeof(daq_multi_cycle_header_t);
+	// Following line breaks daqd for some reason
+	// max_data_size *= 1024 * 1024;
+    cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t)) / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+    cycle_data_size -= (cycle_data_size % 8);
+	printf ("cycle data size = %d\t%d\n",cycle_data_size, max_data_size_mb);
+	sleep(3);
+	ifo_header->cycleDataSize = cycle_data_size;
+    ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
-    // Wait for threads to stop
-    sleep(2);
-    std::cout << "closing down" << std::endl;
+	printf("nsys = %d\n",nsys);
+	for(ii=0;ii<nsys;ii++) {
+		printf("sys %d = %s\n",ii,sname[ii]);
+	}
 
-    return 0;
+	void *zmq_ctx = zmq_ctx_new();
+	if (!zmq_ctx)
+    {
+	    fprintf(stderr, "Unable to create zmq context for receiving, aborting...\n");
+	    exit(1);
+    }
+    {
+        int io_threads = 4;
+        zmq_ctx_set(zmq_ctx, ZMQ_IO_THREADS, io_threads);
+    }
+
+	// Make 0MQ socket connections
+	for(ii=0;ii<nsys;ii++) {
+		// Create a thread to receive data from each data server
+		thread_index[ii].index = ii;
+		thread_index[ii].src_iface = (niface ? local_iface[ii % niface]: 0);
+		thread_index[ii].zmq_ctx = zmq_ctx;
+		pthread_create(&thread_id[ii],NULL,rcvr_thread,(void *)&thread_index[ii]);
+	}
+
+	//
+
+	int nextCycle = 0;
+	int64_t prev_sec_and_cycle = 0;
+	start_acq = 1;
+	int64_t mytime = 0;
+	int64_t mylasttime = 0;
+	int64_t myptime = 0;
+	int64_t n_cycle_time = 0;
+	int mytotaldcu = 0;
+	char *zbuffer;
+	size_t zbuffer_remaining = 0;
+	int dc_datablock_size = 0;
+    int datablock_size_running = 0;
+    int datablock_size_mb_s = 0;
+	static const int header_size = sizeof(daq_multi_dcu_header_t);
+	int edcuid[10];
+	int estatus[10];
+	int edbs[10];
+	unsigned long ets = 0;
+	int dataRdy[MAX_FE_COMPUTERS];
+	int sendLength = 0;
+
+	std::vector<int64_t> send_queue(delay_length, -1);
+
+	int min_cycle_time = 1 << 30;
+	int max_cycle_time = 0;
+	int mean_cycle_time = 0;
+	int pv_dcu_count = 0;
+	int pv_total_datablock_size = 0;
+	int endpoint_min_count = 1 << 30;
+	int endpoint_max_count = 0;
+	int endpoint_mean_count = 0;
+    int cur_endpoint_ready_count;
+	char endpoints_missed_buffer[256];
+	int endpoints_missed_remaining;
+	int missed_flag = 0;
+	int missed_nsys[MAX_FE_COMPUTERS];
+    //int64_t recv_time[MAX_FE_COMPUTERS];
+    //int64_t min_recv_time = 0;
+    int64_t cur_ref_time = 0;
+    int recv_buckets[(MAX_DELAY_MS/5)+2];
+    int entry_binned = 0;
+	daq_multi_dcu_data_t* mx_cur_datablock = 0;
+
+    mask_t dcu_received_mask;
+    mask_t dcu_received_prev_mask;
+    mask_t endpoint_received_mask;
+    mask_t endpoint_received_prev_mask;
+
+    int dcu_endpoint_lookup[DCU_COUNT];
+    memset(dcu_endpoint_lookup, 0, sizeof(dcu_endpoint_lookup));
+
+    mask_clear(&dcu_received_mask);
+    mask_clear(&dcu_received_prev_mask);
+    mask_clear(&endpoint_received_mask);
+    mask_clear(&endpoint_received_prev_mask);
+
+	SimplePV pvs[] = {
+            {
+                    "RECV_BIN_MISS",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[0],
+                    1,
+                    -1,
+                    1,
+                    -1,
+            },
+            {       
+                    "RECV_BIN_0",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[1],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,                                                                                  
+            },
+            {       
+                    "RECV_BIN_1",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[2],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
+            {       
+                    "RECV_BIN_2",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[3],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
+            {       
+                    "RECV_BIN_3",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[4],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
+            {
+                    "RECV_BIN_4",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[5],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
+            {       
+                    "RECV_BIN_5",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[6],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
+            {       
+                    "RECV_BIN_6",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[7],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
+            {      
+                    "RECV_BIN_7",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[8],
+                    (int)nsys,
+                    -1,
+                    (int)nsys,
+                    -1,
+            },
+            {
+                    "RECV_BIN_8",
+                    SIMPLE_PV_INT,
+                    &recv_buckets[9],
+                    1 << 30,
+                    -1,
+                    1 << 30,
+                    -1,
+            },
+			{
+					"RECV_MIN_MS",
+                    SIMPLE_PV_INT,
+					&min_cycle_time,
+
+					80,
+					45,
+					70,
+					54,
+			},
+			{
+					"RECV_MAX_MS",
+                    SIMPLE_PV_INT,
+					&max_cycle_time,
+
+					80,
+					45,
+					70,
+					54,
+			},
+			{
+					"RECV_MEAN_MS",
+                    SIMPLE_PV_INT,
+					&mean_cycle_time,
+
+					80,
+					45,
+					70,
+					54,
+			},
+			{
+					"DCU_COUNT",
+                    SIMPLE_PV_INT,
+					&pv_dcu_count,
+
+					120,
+					0,
+					115,
+					0,
+			},
+			{
+					"DATA_SIZE",
+                    SIMPLE_PV_INT,
+					&pv_total_datablock_size,
+
+					100*1024*1024,
+					0,
+					90*1024*1024,
+					1*1024*1024,
+			},
+			{
+					"ENDPOINT_MIN_COUNT",
+                    SIMPLE_PV_INT,
+					&endpoint_min_count,
+
+					MAX_FE_COMPUTERS,
+					0,
+					MAX_FE_COMPUTERS-2,
+					1,
+			},
+			{
+					"ENDPOINT_MAX_COUNT",
+                    SIMPLE_PV_INT,
+					&endpoint_max_count,
+
+					MAX_FE_COMPUTERS,
+					0,
+					MAX_FE_COMPUTERS-2,
+					1,
+			},
+			{
+					"ENDPOINT_MEAN_COUNT",
+                    SIMPLE_PV_INT,
+					&endpoint_mean_count,
+
+					MAX_FE_COMPUTERS,
+					0,
+					MAX_FE_COMPUTERS-2,
+					1,
+			},
+            {
+                    "DATA_BLOCK_SIZE",
+                    SIMPLE_PV_INT,
+                    &dc_datablock_size,
+
+                    DAQ_DCU_BLOCK_SIZE,
+                    0,
+                    (DAQ_DCU_BLOCK_SIZE*9)/10,
+                    1*1024*1024,
+
+            },
+            {
+                    "DATA_BLOCK_SIZE_MB_PER_S",
+                    SIMPLE_PV_INT,
+                    &datablock_size_mb_s,
+
+                    DAQ_TRANSIT_MAX_DC_BYTE_SEC/(1024*1024),
+                    0,
+                    (DAQ_TRANSIT_MAX_DC_BYTE_SEC/(1024*1024))*9/10,
+                    1,
+            },
+            {
+                "ENDPOINTS_MISSED",
+                        SIMPLE_PV_STRING,
+                        endpoints_missed_buffer,
+
+                        0, 0, 0, 0,
+            },
+	};
+	if (pv_debug_pipe_name)
+	{
+		pv_debug_pipe = open(pv_debug_pipe_name, O_NONBLOCK | O_RDWR, 0);
+		if (pv_debug_pipe < 0) {
+			fprintf(stderr, "Unable to open %s for writting (pv status)\n", pv_debug_pipe_name);
+			exit(1);
+		}
+	}
+
+	missed_flag = 1;
+	memset(&missed_nsys[0], 0, sizeof(missed_nsys));
+    memset(recv_buckets, 0, sizeof(recv_buckets));
+
+    receive_map_t receive_map;
+	do {
+		// reset masks
+		mask_copy(&dcu_received_prev_mask, &dcu_received_mask);
+		mask_copy(&endpoint_received_prev_mask, &endpoint_received_mask);
+		mask_clear(&dcu_received_mask);
+		mask_clear(&endpoint_received_mask);
+
+		send_queue.back() = wait_for_first_system(nsys, nextCycle, prev_sec_and_cycle);
+
+		if (send_queue.front() >= 0) {
+			int sending_cycle = static_cast<int>(extract_cycle(send_queue.front()));
+			int sending_index = sending_cycle % MAX_RECEIVE_BUFFERS;
+
+			get_data_ready(dataRdy, &receive_map, nsys, send_queue.front());
+
+			//std::cout << "sending " << send_queue.front() << " " << extract_gps(send_queue.front()) << " " << extract_cycle(send_queue.front());
+			//std::cout << " next cycle = " << nextCycle << "\n";
+			//std::cout << "data ready =";
+			//for (ii = 0; ii < nsys; ++ii)
+			//{
+			//	if (dataRdy[ii])
+			//	{
+			//		std::cout << " " << ii;
+			//	}
+			//}
+			//std::cout << std::endl;
+			// Timing diagnostics
+			mytime = s_clock();
+			myptime = mytime - mylasttime;
+			mylasttime = mytime;
+			if (myptime < min_cycle_time) {
+				min_cycle_time = myptime;
+			}
+			if (myptime > max_cycle_time) {
+				max_cycle_time = myptime;
+			}
+			mean_cycle_time += myptime;
+			++n_cycle_time;
+			if(do_verbose)printf("Data rdy for cycle = %d\t\t%ld\n",sending_cycle,myptime);
+
+			// Reset total DCU counter
+			mytotaldcu = 0;
+			// Reset total DC data size counter
+			dc_datablock_size = 0;
+			// Get pointer to next data block in shared memory
+			nextData = (char *)ifo_data;
+        	nextData += cycle_data_size * sending_cycle;
+        	ifoDataBlock = (daq_multi_dcu_data_t *)nextData;
+			zbuffer = (char *)nextData + header_size;
+			zbuffer_remaining = cycle_data_size - header_size;
+
+			cur_endpoint_ready_count = 0;
+			endpoints_missed_remaining = sizeof(endpoints_missed_buffer);
+			endpoints_missed_buffer[0] = '\0';
+            //min_recv_time = 0x7fffffffffffffff;
+			// Loop over all data buffers received from FE computers
+			for(ii=0;ii<nsys;ii++) {
+		  		//recv_time[ii] = -1;
+                if(dataRdy[ii]) {
+                	mask_set_entry(&endpoint_received_mask, ii);
+
+                    //recv_time[ii] = dataRecvTime[ii];
+                    //if (recv_time[ii] < min_recv_time) {
+                    //    min_recv_time = recv_time[ii];
+                    //}
+                    if (do_verbose && sending_cycle == 0) {
+                        fprintf(stderr, "+++%s\n", sname[ii]);
+                    }
+		  			++cur_endpoint_ready_count;
+                    mx_cur_datablock = &mxDataBlockSingle[ii][sending_index];
+
+                    lock_guard<pthread_spinlock_t> lock_(mxDataBlockSingle_lock[ii][sending_index]);
+                    {
+                        int myc = mx_cur_datablock->header.dcuTotalModels;
+                        // For each model, copy over data header information
+                        for (jj = 0; jj < myc; jj++) {
+                            // Copy data header information
+                            ifoDataBlock->header.dcuheader[mytotaldcu].dcuId = mx_cur_datablock->header.dcuheader[jj].dcuId;
+                            ifoDataBlock->header.dcuheader[mytotaldcu].fileCrc = mx_cur_datablock->header.dcuheader[jj].fileCrc;
+                            ifoDataBlock->header.dcuheader[mytotaldcu].status = mx_cur_datablock->header.dcuheader[jj].status;
+                            ifoDataBlock->header.dcuheader[mytotaldcu].cycle = mx_cur_datablock->header.dcuheader[jj].cycle;
+                            ifoDataBlock->header.dcuheader[mytotaldcu].timeSec = mx_cur_datablock->header.dcuheader[jj].timeSec;
+                            ifoDataBlock->header.dcuheader[mytotaldcu].timeNSec = mx_cur_datablock->header.dcuheader[jj].timeNSec;
+                            ifoDataBlock->header.dcuheader[mytotaldcu].dataCrc = mx_cur_datablock->header.dcuheader[jj].dataCrc;
+                            ifoDataBlock->header.dcuheader[mytotaldcu].dataBlockSize = mx_cur_datablock->header.dcuheader[jj].dataBlockSize;
+                            ifoDataBlock->header.dcuheader[mytotaldcu].tpBlockSize = mx_cur_datablock->header.dcuheader[jj].tpBlockSize;
+                            ifoDataBlock->header.dcuheader[mytotaldcu].tpCount = mx_cur_datablock->header.dcuheader[jj].tpCount;
+
+                            mask_set_entry(&dcu_received_mask, ifoDataBlock->header.dcuheader[mytotaldcu].dcuId);
+                            dcu_endpoint_lookup[ifoDataBlock->header.dcuheader[mytotaldcu].dcuId] = ii;
+
+                            for (kk = 0; kk < DAQ_GDS_MAX_TP_NUM; kk++)
+                                ifoDataBlock->header.dcuheader[mytotaldcu].tpNum[kk] = mx_cur_datablock->header.dcuheader[jj].tpNum[kk];
+                            edbs[mytotaldcu] = mx_cur_datablock->header.dcuheader[jj].tpBlockSize +
+                                               mx_cur_datablock->header.dcuheader[jj].dataBlockSize;
+                            // Get some diags
+                            if (ifoDataBlock->header.dcuheader[mytotaldcu].status != 0xbad)
+                                ets = mx_cur_datablock->header.dcuheader[jj].timeSec;
+                            estatus[mytotaldcu] = ifoDataBlock->header.dcuheader[mytotaldcu].status;
+                            edcuid[mytotaldcu] = ifoDataBlock->header.dcuheader[mytotaldcu].dcuId;
+                            // Increment total DCU count
+                            mytotaldcu++;
+                        }
+                        // Get the size of the data to transfer
+                        int mydbs = mx_cur_datablock->header.fullDataBlockSize;
+                        // Get pointer to data in receive data block
+                        char *mbuffer = (char *) &mx_cur_datablock->dataBlock[0];
+                        if (mydbs > zbuffer_remaining) {
+                            fprintf(stderr,
+                                    "Buffer overflow found.  Attempting to write %d bytes to zbuffer which has %d bytes remainging\n",
+                                    (int) mydbs, (int) zbuffer_remaining);
+                            abort();
+                        }
+                        // Copy data from receive buffer to shared memory
+                        memcpy(zbuffer, mbuffer, mydbs);
+                        // Increment shared memory data buffer pointer for next data set
+                        zbuffer += mydbs;
+                        // Calc total size of data block for this cycle
+                        dc_datablock_size += mydbs;
+                    }
+                } else {
+		  			missed_nsys[ii] |= missed_flag;
+                    if (do_verbose && sending_cycle == 0) {
+                        fprintf(stderr, "---%s\n", sname[ii]);
+                    }
+                    if (receive_map_dump_file)
+                    {
+                        receive_map_dump_counter = 3;
+                    }
+		  		}
+			}
+			if (cur_endpoint_ready_count < endpoint_min_count) {
+				endpoint_min_count = cur_endpoint_ready_count;
+			}
+			if (cur_endpoint_ready_count > endpoint_max_count) {
+				endpoint_max_count = cur_endpoint_ready_count;
+			}
+			endpoint_mean_count += cur_endpoint_ready_count;
+			// Write total data block size to shared memory header
+			ifoDataBlock->header.fullDataBlockSize = dc_datablock_size;
+			// Write total dcu count to shared memory header
+			ifoDataBlock->header.dcuTotalModels = mytotaldcu;
+			// Set multi_cycle head cycle to indicate data ready for this cycle
+			ifo_header->curCycle = sending_cycle;
+
+			// Calc IX message size
+			sendLength = header_size + ifoDataBlock->header.fullDataBlockSize;
+            if (sending_cycle == 0) {
+                memset(recv_buckets, 0, sizeof(recv_buckets));
+            }
+            /*for (ii = 0; ii < nsys; ++ii) {
+                cur_ref_time = 0;
+                recv_time[ii] -= min_recv_time;
+                entry_binned = 0;
+                for (jj = 0; jj < sizeof(recv_buckets)/sizeof(recv_buckets[0]); ++jj) {
+                    if (recv_time[ii] < cur_ref_time) {
+                        ++recv_buckets[jj];
+                        entry_binned = 1;
+                        break;
+                    }
+                    cur_ref_time += 5;
+                }
+                if (!entry_binned) {
+                    ++recv_buckets[sizeof(recv_buckets)/sizeof(recv_buckets[0])-1];
+                }
+            }*/
+            datablock_size_running += dc_datablock_size;
+            if (sending_cycle == 0) {
+                datablock_size_mb_s = datablock_size_running / (1024*1024);
+				pv_dcu_count = mytotaldcu;
+				pv_total_datablock_size = dc_datablock_size;
+				mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time / n_cycle_time : 1 << 31);
+				endpoint_mean_count = (n_cycle_time > 0 ? endpoint_mean_count/n_cycle_time :  1<<31);
+
+				endpoints_missed_remaining = sizeof(endpoints_missed_buffer)-1;
+				endpoints_missed_buffer[0] = '\0';
+				for (ii = 0; ii < sizeof(missed_nsys)/sizeof(missed_nsys[0]) && endpoints_missed_remaining > 0; ++ii) {
+					if (missed_nsys[ii]) {
+						char tmp[80];
+						int count = snprintf(tmp, sizeof(tmp), "%s(%x) ", sname[ii], missed_nsys[ii]);
+						if (count < sizeof(tmp)) {
+							strncat(endpoints_missed_buffer, tmp, count);
+							endpoints_missed_remaining -= count;
+						}
+					}
+					missed_nsys[ii] = 0;
+				}
+				send_pv_update(pv_debug_pipe, pv_prefix, pvs, sizeof(pvs)/sizeof(pvs[0]));
+
+				if (do_verbose) {
+					printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec\n", sending_cycle, myptime);
+					printf("Min/Max/Mean cylce time %ld/%ld/%ld msec over %ld cycles\n", (long int)min_cycle_time, (long int)max_cycle_time,
+                                               (long int)mean_cycle_time, (long int)n_cycle_time);
+					printf("Total DCU = %d\t\t\tBlockSize = %d\n", mytotaldcu, dc_datablock_size);
+					print_diags(mytotaldcu, sending_cycle, sendLength, ifoDataBlock, edbs);
+				}
+				n_cycle_time = 0;
+				min_cycle_time = 1 << 30;
+				max_cycle_time = 0;
+				mean_cycle_time = 0;
+
+                endpoint_min_count = nsys;
+                endpoint_max_count = 0;
+                endpoint_mean_count = 0;
+
+				missed_flag = 1;
+                datablock_size_running = 0;
+			} else {
+				missed_flag <<= 1;
+			}
+
+            if (receive_map_dump_counter)
+            {
+                dump_recv_mask(receive_map_dump_file, &receive_map, nsys, ifoDataBlock->header.dcuheader[0].timeSec, sending_cycle, &endpoint_received_mask, nextCycle, s_clock());
+                --receive_map_dump_counter;
+            }
+
+			dump_dcu_mask_diff(&dcu_received_prev_mask, &dcu_received_mask, dcu_endpoint_lookup);
+			dump_endpoint_mask_diff(&endpoint_received_prev_mask, &endpoint_received_mask);
+			//std::cout << "Total DCUS " << mytotaldcu << "\n";
+		}
+		prev_sec_and_cycle = send_queue.back();
+		shift_left_one_and_fill(send_queue, -1);
+
+		// Increment cycle count
+		nextCycle ++;
+		nextCycle %= 16;
+	}while (keepRunning);	// End of infinite loop
+
+	// Stop Rcv Threads
+	printf("stopping threads %d \n",nsys);
+	stop_working_threads = 1;
+
+	// Wait for threads to stop
+	sleep(2);
+
+	printf("closing out zmq\n");
+	// Cleanup the ZMQ connections
+	for(ii=0;ii<nsys;ii++) {
+		if (daq_subscriber[ii]) zmq_close(daq_subscriber[ii]);
+		if (daq_context[ii]) zmq_ctx_destroy(daq_context[ii]);
+	}
+
+	for (ii = 0; ii < MAX_FE_COMPUTERS; ++ii)
+    {
+	    for (jj = 0; jj < MAX_RECEIVE_BUFFERS; ++jj)
+        {
+	        pthread_spin_destroy(&mxDataBlockSingle_lock[ii][jj]);
+        }
+    }
+    zmq_ctx_destroy(zmq_ctx);
+	exit(0);
 }

@@ -7,34 +7,6 @@ add_executable(dix_recv ix_fb_rcv.c)
 target_link_libraries(dix_recv PUBLIC driver::shmem dolphin::sisci)
 install(TARGETS dix_recv DESTINATION bin)
 
-if (${LibZMQ_FOUND})
-#add_executable(zmq_rcv_ix_xmit zmq_rcv_ix_xmit.c ../zmq_stream/dc_utils.c)
-#target_link_libraries(zmq_rcv_ix_xmit PUBLIC
-#        zmq_transport
-#        driver::shmem
-#        dolphin::sisci
-#        zmq4::zmq
-#        zmq::simple_pv
-#        ${CMAKE_THREAD_LIBS_INIT})
-
-add_executable(zmq_recv zmq_rcv_ix_xmit_delay.cc dolphin_common.cc ../zmq_stream/dc_utils.c)
-# target_compile_options(zmq_rcv_ix_xmit_cxx PUBLIC -fsanitize=address)
-# target_compile_options(zmq_rcv_ix_xmit_cxx PUBLIC -fsanitize=thread -no-pie)
-target_link_libraries(zmq_recv PUBLIC
-        # asan
-        # tsan
-        zmq_transport
-        driver::shmem
-        dolphin::sisci
-        zmq4::zmq
-        zmq::simple_pv
-        ${CMAKE_THREAD_LIBS_INIT}
-        # -no-pie
-        )
-install(TARGETS zmq_recv DESTINATION bin)
-
-endif (${LibZMQ_FOUND})
-
 #if (${MX_FOUND})
 #
 #add_executable(mx_rcv mx_rcv.cc dolphin_common.cc)
