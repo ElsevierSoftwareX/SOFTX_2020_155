@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 import os
 import sys
@@ -8,16 +8,16 @@ SDF_LOAD = 1
 SDF_READONLY = 2
 
 def select_burt_dialog(burtdir, model):
-    import Tkinter
-    import tkFileDialog
+    import tkinter
+    import tkinter.filedialog
     options = {}
     options['title'] = 'Select BURT File to load on %s:' % model
     options['initialdir'] = burtdir
     options['defaultextension'] = '.snap'
     #options['filetypes'] = [('burt files', '.snap'), ('all files', '.*')]
     options['filetypes'] = [('burt files', '.snap')]
-    Tkinter.Tk().withdraw()
-    return tkFileDialog.askopenfilename(**options)
+    tkinter.Tk().withdraw()
+    return tkinter.filedialog.askopenfilename(**options)
 
 def get_model_dcuid(model, ifo=None):
     if ifo == None:
@@ -37,11 +37,11 @@ def fe_load_burt(model, burtfile, load=None, dcuid=None, ifo=os.getenv('IFO')):
     prefix = '%s:FEC-%s_SDF_' % (ifo.upper(), dcuid)
     channel = prefix + 'NAME'
     basefile, ext = os.path.splitext(burtfile)
-    print >>sys.stderr, "%s = %s" % (channel, basefile)
+    print("%s = %s" % (channel, basefile), file=sys.stderr)
     epics.caput(channel, basefile, wait=True)
     if load:
         channel = prefix + 'RELOAD'
-        print >>sys.stderr, "%s = %s" % (channel, load)
+        print("%s = %s" % (channel, load), file=sys.stderr)
         epics.caput(channel, load, wait=True)
 
 ##################################################
@@ -130,7 +130,7 @@ written to the <IFO>:FEC-<DCUID>_SDF_NAME channel, but not loaded.
         fullpath = select_burt_dialog(burt_dir, args.model)
         if fullpath == '':
             sys.exit(-1)
-        print >>sys.stderr, "selected: %s" % fullpath
+        print("selected: %s" % fullpath, file=sys.stderr)
 
     basename, ext = os.path.splitext(os.path.basename(fullpath))
     if ext != '.snap':
@@ -148,7 +148,7 @@ written to the <IFO>:FEC-<DCUID>_SDF_NAME channel, but not loaded.
     if not os.path.samefile(fullpath, calcpath):
         sys.exit("File not in model burt directory: %s" % burt_dir)
 
-    print >>sys.stderr, "loading file: %s" % calcpath
+    print("loading file: %s" % calcpath, file=sys.stderr)
 
     fe_load_burt(args.model, basename,
                  load=args.load, dcuid=args.dcuid, ifo=args.ifo)
