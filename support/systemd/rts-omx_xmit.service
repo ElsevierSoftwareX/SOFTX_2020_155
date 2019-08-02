@@ -1,11 +1,12 @@
 [Unit]
-Description=Advanced LIGO RTS front end mx stream
+Description=Advanced LIGO RTS OpenMX transmitter
 After=network-online.target
 
 [Service]
 User=controls
 Type=simple
-ExecStart=/etc/advligorts/mx_stream_exec
+EnvironmentFile=/etc/advligorts/env
+ExecStart=/usr/bin/omx_xmit $OMX_XMIT_ARGS
 StandardOutput=journal
 StandardError=journal
 Restart=always

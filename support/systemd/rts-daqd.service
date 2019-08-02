@@ -1,10 +1,10 @@
 [Unit]
-Description=Advanced LIGO RTS daqd_%i
+Description=Advanced LIGO RTS DAQD
 After=network-online.target
 
 [Service]
 User=controls
-ExecStart=/bin/sh -c "/usr/bin/daqd_%i -c /etc/advligorts/daqdrc.%i"
+ExecStart=/usr/bin/daqd_shmem -c /etc/advligorts/daqdrc
 Restart=always
 
 [Install]
