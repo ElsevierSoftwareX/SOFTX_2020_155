@@ -13,6 +13,15 @@ target_link_libraries(fe_stream_test
         fe_stream_generator
         rt)
 
+add_executable(fe_stream_check
+        fe_stream_check.cc
+        )
+target_link_libraries(fe_stream_check
+        PRIVATE
+        fe_stream_generator
+        rt
+        driver::shmem)
+
 if (${libNDS2Client_FOUND})
 
 #    add_executable(fe_stream_check
