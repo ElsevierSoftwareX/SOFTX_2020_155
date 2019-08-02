@@ -61,7 +61,6 @@ Architecture: any
 Depends:
  advligorts-gpstime-dkms,
  advligorts-mbuf-dkms,
- mx,
  ${misc:Depends},
  ${shlibs:Depends},
 Description: advLigoRTS daqd binaries
