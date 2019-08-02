@@ -7,6 +7,7 @@ Build-Depends:
  cmake,
  debhelper (>= 9),
  dkms,
+ dolphin-sisci-ix-devel,
  epics-dev,
  flex,
  grace,
@@ -14,8 +15,8 @@ Build-Depends:
  ldas-tools-framecpp-dev,
  libbz2-dev,
  libc-dev-bin,
- libmotif-dev,
  libfl-dev,
+ libmotif-dev,
  libtool,
  libxpm-dev,
  libxt-dev,
@@ -108,30 +109,19 @@ Description: advLigoRTS ZeroMQ network transport
  .
  ZeroMQ network transport for advLigoRTS DAQD structures.
 
-# Package: advligorts-omx
-# Architecture: any
-# Depends:
-#  advligorts-mbuf-dkms,
-#  ${misc:Depends},
-#  ${shlibs:Depends},
-# Description: advLigoRTS OpenMX network transport
-#  Core component of advLigoRTS.
-#  .
-#  OpenMX network transport for advLigoRTS DAQD structures.
-
-# Package: advligorts-dix
-# Architecture: any
-# Depends:
-#  advligorts-mbuf-dkms,
-#  dolphin-ix,
-#  dolphin-sisci-ix,
-#  ${misc:Depends},
-#  ${shlibs:Depends},
-# Description: advLigoRTS Dolphin IX PCI shared memory transport
-#  Core component of advLigoRTS.
-#  .
-#  Dolphin IS PCI shared memory transport for advLigoRTS DAQD
-#  structures.
+Package: advligorts-dix
+Architecture: any
+Depends:
+ advligorts-mbuf-dkms,
+ dolphin-ix,
+ dolphin-sisci-ix,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: advLigoRTS Dolphin IX PCI shared memory transport
+ Core component of advLigoRTS.
+ .
+ Dolphin IX PCI shared memory transport for advLigoRTS DAQD
+ structures.
 
 Package: advligorts-cymac
 Architecture: all
