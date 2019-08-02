@@ -1,3 +1,9 @@
+advligorts (4.0.0~dev0-2) unstable; urgency=medium
+
+  * Remove MX dependency.
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Thu, 01 Aug 2019 22:44:13 -0700
+
 advligorts (4.0.0~dev0-1) unstable; urgency=medium
 
   * New release
