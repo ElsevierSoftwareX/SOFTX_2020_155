@@ -308,7 +308,7 @@ int loadMessageBuffer(	int nsys,
       ixDataBlock->header.dcuheader[db].timeNSec = shmIpcPtr[ii]->bp[lastCycle].timeNSec;
       crcLength = shmIpcPtr[ii]->bp[lastCycle].crc;
       // Set Status -- as running
-      ixDataBlock->header.dcuheader[ii].status = 2;
+      ixDataBlock->header.dcuheader[db].status = 2;
       // Indicate size of data block
       // ********ixDataBlock->header.dcuheader[db].dataBlockSize = shmIpcPtr[ii]->dataBlockSize;
       ixDataBlock->header.dcuheader[db].dataBlockSize = crcLength;
@@ -317,7 +317,7 @@ int loadMessageBuffer(	int nsys,
         ixDataBlock->header.dcuheader[db].dataBlockSize = DAQ_DCU_BLOCK_SIZE;
       // Calculate TP data size
       ixDataBlock->header.dcuheader[db].tpCount = (unsigned int)shmTpTable[ii]->count & 0xff;
-      ixDataBlock->header.dcuheader[db].tpBlockSize = sizeof(float) * modelrates[ii] * ixDataBlock->header.dcuheader[ii].tpCount /  DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+      ixDataBlock->header.dcuheader[db].tpBlockSize = sizeof(float) * modelrates[ii] * ixDataBlock->header.dcuheader[db].tpCount /  DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
       // Copy GDSTP table to xmission buffer header
       memcpy(&(ixDataBlock->header.dcuheader[db].tpNum[0]),
