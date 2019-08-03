@@ -138,8 +138,15 @@ waitNextCycle2(	int nsys,
   int threads_rdy = 0;
   int timeout = 0;
 
-  // if reset, want to set IOP cycle to impossible number
-  if(reset) ipcPtr[0]->cycle = 50;
+  // if reset, want to set all models cycle counters to impossible number
+  // this takes care of uninitialized or stopped models
+  if(reset)
+  {
+    for (ii = 0; ii < nsys; ++ii)
+    {
+      ipcPtr[ii]->cycle = 50;
+    }
+  }
   usleep(1000);
   // Wait until received data from at least 1 FE or timeout
   do {
