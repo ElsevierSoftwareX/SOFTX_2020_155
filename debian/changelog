@@ -1,3 +1,9 @@
+advligorts (4.0.0~dev0-4) unstable; urgency=medium
+
+  * Fix shlibs.local to point to dolphin-ix package for libsisci
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Mon, 05 Aug 2019 16:42:29 -0700
+
 advligorts (4.0.0~dev0-3) unstable; urgency=medium
 
   * Build dolphin package.
