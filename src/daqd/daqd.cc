@@ -1827,6 +1827,7 @@ bool daqd_c::symm_ok() { return 1; }
 #endif
 #endif
 /// Server main function.
+int
 main (int argc, char *argv [])
 {
   int farg;
@@ -1992,6 +1993,7 @@ main (int argc, char *argv [])
 
   main_exit_status = 0;
   pthread_exit (&main_exit_status);
+  return 0;
 }
 
 /// Shutdown the daqd server, exit.

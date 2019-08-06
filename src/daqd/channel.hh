@@ -109,6 +109,7 @@ public:
      signal_slope = a.signal_slope;
      signal_offset = a.signal_offset;
      strcpy(signal_units, a.signal_units);
+     return *this;
   }
 };
 
