@@ -10,7 +10,6 @@
 
 import os, sys
 import re
-import string
 
 error = False
 if sys.argv[1] == "-q":
@@ -350,7 +349,7 @@ def read_tree(node,name_so_far):
     #Run through each line found and do the approriate thing
     for script in script_line:
       for before, after in default_subs:
-        script = string.replace(script,before,after)
+        script = str.replace(script,before,after)
       script_name = script.split(' ')[0]
       script_location = find_file_in_path(cds_scripts_path,script_name)
       script_command = script_location + script[len(script_name):]
@@ -393,7 +392,7 @@ def read_tree(node,name_so_far):
                 change_name = True
             if change_name:
               for before, after in default_subs:
-                adl_target_name = string.replace(adl_target_name,before,after)
+                adl_target_name = str.replace(adl_target_name,before,after)
               for before, after in custom_subs:
                 if not '--name' in before:
                   adl_target_name = string.repalce(adl_target_name,before,after) 
@@ -402,13 +401,13 @@ def read_tree(node,name_so_far):
 
             for k in range(len(temp_lines)):
               for before, after in default_subs:
-                temp_lines[k] = string.replace(temp_lines[k],before,after)
+                temp_lines[k] = str.replace(temp_lines[k],before,after)
               for before, after in custom_subs:
                 if not '--name' in before:
-                  temp_lines[k] = string.replace(temp_lines[k],before,after)
-                if quiet_mode == False:
-                  print(adl_target_name)
-                  output_medm_file = open(adl_target_name,'w')
+                  temp_lines[k] = str.replace(temp_lines[k],before,after)
+            if quiet_mode == False:
+              print(adl_target_name)
+            output_medm_file = open(adl_target_name,'w')
             for k in range(len(temp_lines)):
               output_medm_file.write(temp_lines[k])
             break
