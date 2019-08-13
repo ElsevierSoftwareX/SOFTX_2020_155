@@ -391,6 +391,7 @@ main(int argc, char **argv)
     ifo_header->cycleDataSize = cycle_data_size;
     ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
+#if 0
     if(xmitData) {
         // Connect to Dolphin
         error = dolphin_init();
@@ -405,6 +406,7 @@ main(int argc, char **argv)
             fprintf(stderr,"Dolphin at 0x%lx and 0x%lx",(long)xmitHeader[ii],(long)xmitDataOffset[ii]);
         }
     }
+#endif
 
     fprintf(stderr,"nsys = %d\n",nsys);
 
@@ -771,6 +773,7 @@ main(int argc, char **argv)
             } else {
                 missed_flag <<= 1;
             }
+#if 0
             if(xmitData && !ix_xmit_stop) {
                 if (sendLength > IX_BLOCK_SIZE)
                 {
@@ -800,6 +803,7 @@ main(int argc, char **argv)
                 // Have to flush the buffers to make data go onto Dolphin network
                 SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
             }
+#endif
             if(ix_xmit_stop)  {
                 ix_xmit_stop --;
                 if(ix_xmit_stop == 0) fprintf(stderr,"Restarting Dolphin Xmit\n");
