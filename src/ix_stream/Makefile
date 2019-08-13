@@ -69,6 +69,13 @@ omx_recv: mx2ix.c
 	$(CC) $(FLAGS) -o mx2ix  mx2ix.o  rfm.o simple_pv.o -L $(API_LIB_PATH) -L/opt/open-mx/lib -lsisci -lmyriexpress -lpthread
 	sync
 
+mx2rcv: mx2rcv.c 
+	$(CC) $(CFLAGS) -I../zmq_stream -I/opt/open-mx/include mx2rcv.c -c -o mx2rcv.o
+	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o 
+	$(CC) $(CFLAGS) -I../zmq_stream ../zmq_stream/simple_pv.c -c -o simple_pv.o
+	$(CC) $(FLAGS) -o mx2rcv  mx2rcv.o  rfm.o simple_pv.o -L $(API_LIB_PATH) -L/opt/open-mx/lib -lmyriexpress -lpthread
+	sync
+
 zmq_recv: zmq_rcv_ix_xmit.c
 	$(CC) $(CFLAGS) -I../zmq_stream zmq_rcv_ix_xmit.c -c -o zmq_rcv_ix_xmit.o
 	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o
