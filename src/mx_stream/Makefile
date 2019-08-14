@@ -66,5 +66,12 @@ LDFLAGS = -L${prefix}/lib -lmyriexpress -lpthread  -g
 clean:
 	rm -f *.o mx_stream mx_multi_stream mx_stream_single mx_fe mx_rcv omx_xmit
 
+omx_recv: omx_recv.c
+	$(CC) $(CFLAGS) -I../zmq_stream -I/opt/open-mx/include omx_recv.c -c -o omx_recv.o
+	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o
+	$(CC) $(CFLAGS) -I../zmq_stream ../zmq_stream/simple_pv.c -c -o simple_pv.o
+	$(CC) $(FLAGS) -o omx_recv  omx_recv.o  rfm.o simple_pv.o -L $(API_LIB_PATH) -L/opt/open-mx/lib -lmyriexpress -lpthread
+	sync
+
 .PHONY: distclean
 distclean: clean
