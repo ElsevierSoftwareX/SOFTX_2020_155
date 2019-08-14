@@ -29,7 +29,6 @@ if (OPENMX_FOUND)
 	add_executable(omx_recv omc_recv.c)
 	target_link_libraries(omx_recv PUBLIC
 			driver::shmem
-			dolphin::sisci
 			zmq::simple_pv
 			openmx::openmx
 			${CMAKE_THREAD_LIBS_INIT}

@@ -66,7 +66,7 @@ install(TARGETS zmq_recv DESTINATION bin)
 #target_link_libraries(zmq_recv PUBLIC zmq_dc_recv zmq4::zmq driver::shmem ${CMAKE_THREAD_LIBS_INIT})
 #if (${CXX_HAS_ATOMIC})
 #else (${CXX_HAS_ATOMIC})
-#    target_compile_definitions(zmq_recv PUBLIC "NO_STD_ATOMIC=1")
+#    target_compile_definitions(zmq_recv PUBLIC "NO_ STD_ATOMIC=1")
 #endif (${CXX_HAS_ATOMIC})
 #target_compile_options(zmq_recv PUBLIC ${CPP11_FLAG})
 

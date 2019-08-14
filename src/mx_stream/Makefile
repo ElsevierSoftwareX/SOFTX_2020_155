@@ -24,8 +24,6 @@ TARGETS=mx_stream mx_multi_stream mx_mem_test
 
 #mx_mem_test: mx_mem_test.o rfm.o
 
-mx2rcv: mx2rcv.o rfm.o
-
 #mx_stream_single: mx_stream_single.o rfm.o
 
 omx_xmit: mx_fe.o rfm.o

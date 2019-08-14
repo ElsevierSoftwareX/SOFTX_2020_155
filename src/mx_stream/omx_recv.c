@@ -1,6 +1,7 @@
 //
-/// @file mx2ix.c
-/// @brief  DAQ data concentrator code. Receives data via Open-MX and sends via Dolphin IX..
+/// @file omx_recv.c
+/// @brief  DAQ data concentrator code. Receives data via Open-MX and
+/// writes to local mbuf
 //
 
 #include "myriexpress.h"
@@ -101,16 +102,16 @@ int dataRdy[MAX_FE_COMPUTERS];
 void
 usage()
 {
-    fprintf(stderr, "Usage: mx2ix [args] -s server names -m shared memory size -g IX channel \n");
+    fprintf(stderr, "Usage: omx_recv [args] -s server names -m shared memory size\n");
     fprintf(stderr, "-l filename - log file name\n");
-    fprintf(stderr, "-s - number of FE computers to connect (1-32): Default = 32\n");
+    fprintf(stderr, "-s count - number of FE computers to connect (1-32): Default = 32\n");
     fprintf(stderr, "-v - verbose prints diag test data\n");
-    fprintf(stderr, "-g - Dolphin IX channel to xmit on (0-3)\n");
-    fprintf(stderr, "-p - Debug pv prefix, requires -P as well\n");
-    fprintf(stderr, "-P - Path to a named pipe to send PV debug information to\n");
-    fprintf(stderr, "-d - Max delay in milli seconds to wait for a FE to send data, defaults to 10\n");
-    fprintf(stderr, "-t - Number of rcvr threads per NIC: default = 16\n");
-    fprintf(stderr, "-n - Data Concentrator number (0 or 1) : default = 0\n");
+    fprintf(stderr, "-p prefix - Debug pv prefix, requires -P as well\n");
+    fprintf(stderr, "-P path to pipe - Path to a named pipe to send PV debug information to\n");
+    fprintf(stderr, "-d ms - Max delay in milli seconds to wait for a FE to send data, defaults to 10\n");
+    fprintf(stderr, "-t thread count - Number of rcvr threads per NIC: default = 16\n");
+    fprintf(stderr, "-b mbuf name - output mbuf name [defaults to local_dc]")
+    fprintf(stderr, "-m size in MB - Size of the output mbuf in MB [20-100]");
     fprintf(stderr, "-h - help\n");
 }
 
@@ -259,7 +260,7 @@ main(int argc, char **argv)
 {
     pthread_t thread_id[MAX_FE_COMPUTERS];
     unsigned int nsys = MAX_FE_COMPUTERS; // The number of mapped shared memories (number of data sources)
-    char *buffer_name = "ifo";
+    char *buffer_name = "local_dc";
     int c;
     int ii;                 // Loop counter
     int delay_ms = 10;
@@ -282,8 +283,7 @@ main(int argc, char **argv)
     int max_data_size_mb = 100;
     int max_data_size = 0;
     char *mywriteaddr;
-    int dc_number = 1;
-    
+
 
     /* set up defaults */
     int xmitData = 0;
@@ -292,7 +292,7 @@ main(int argc, char **argv)
 
 
     // Get arguments sent to process
-    while ((c = getopt(argc, argv, "b:hs:m:g:vp:P:d:l:t:n:")) != EOF) switch(c) {
+    while ((c = getopt(argc, argv, "b:hs:m:vp:P:d:l:t:n:")) != EOF) switch(c) {
     case 's':
         nsys = atoi(optarg);
         if(nsys > MAX_FE_COMPUTERS) {
@@ -303,15 +303,6 @@ main(int argc, char **argv)
         break;
     case 'v':
         do_verbose = 1;
-        break;
-    case 'n':
-        dc_number = atoi(optarg);
-        dc_number ++;
-        if(dc_number > 2) {
-            fprintf(stderr,"DC number must be 0 or 1\n");
-            usage();
-            exit(1);
-        }
         break;
     case 'm':
         max_data_size_mb = atoi(optarg);
@@ -380,23 +371,6 @@ main(int argc, char **argv)
     ifo_header->cycleDataSize = cycle_data_size;
     ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
-#if 0
-    if(xmitData) {
-        // Connect to Dolphin
-        error = dolphin_init();
-        fprintf(stderr,"Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
-
-        // Set pointer to xmit header in Dolphin xmit data area.
-        mywriteaddr = (char *)writeAddr;
-        for(ii=0;ii<IX_BLOCK_COUNT;ii++) {
-            xmitHeader[ii] = (daq_multi_cycle_header_t *)mywriteaddr;
-            mywriteaddr += IX_BLOCK_SIZE;
-            xmitDataOffset[ii] = IX_BLOCK_SIZE * ii + sizeof(struct daq_multi_cycle_header_t);
-            fprintf(stderr,"Dolphin at 0x%lx and 0x%lx",(long)xmitHeader[ii],(long)xmitDataOffset[ii]);
-        }
-    }
-#endif
-
     fprintf(stderr,"nsys = %d\n",nsys);
 
     // Make 0MQ socket connections
@@ -454,7 +428,7 @@ main(int argc, char **argv)
     int recv_buckets[(MAX_DELAY_MS/5)+2];
     int festatus = 0;
     int pv_festatus = 0;
-    int ix_xmit_stop = 0;
+
     SimplePV pvs[] = {
             {
                     "RECV_MIN_MS",
@@ -656,12 +630,12 @@ main(int argc, char **argv)
                                 mxDataBlockSingle[ii].header.dcuheader[jj].status;
                         ifoDataBlock->header.dcuheader[mytotaldcu].cycle = 
                                 mxDataBlockSingle[ii].header.dcuheader[jj].cycle;
-                        if(!ix_xmit_stop) {
+
                             ifoDataBlock->header.dcuheader[mytotaldcu].timeSec = 
                                 mxDataBlockSingle[ii].header.dcuheader[jj].timeSec;
                             ifoDataBlock->header.dcuheader[mytotaldcu].timeNSec = 
                                 mxDataBlockSingle[ii].header.dcuheader[jj].timeNSec;
-                        }
+
                         ifoDataBlock->header.dcuheader[mytotaldcu].dataCrc = 
                                 mxDataBlockSingle[ii].header.dcuheader[jj].dataCrc;
                         ifoDataBlock->header.dcuheader[mytotaldcu].dataBlockSize = 
@@ -671,15 +645,7 @@ main(int argc, char **argv)
                         ifoDataBlock->header.dcuheader[mytotaldcu].tpCount = 
                                 mxDataBlockSingle[ii].header.dcuheader[jj].tpCount;
 
-                        // Check for downstream DAQ reset request from EDCU
-                        if(mxDataBlockSingle[ii].header.dcuheader[jj].dcuId == 52 && 
-                            mxDataBlockSingle[ii].header.dcuheader[jj].tpCount == dc_number)
-                        {
-                            fprintf(stderr,"Got a DAQ Reset REQUEST %u\n",mxDataBlockSingle[ii].header.dcuheader[jj].timeSec);
-                            ifoDataBlock->header.dcuheader[mytotaldcu].tpCount = 0;
-                            ix_xmit_stop = 16 * IX_STOP_SEC;
-                        }
-                        for(kk=0;kk<DAQ_GDS_MAX_TP_NUM ;kk++)   
+                        for(kk=0;kk<DAQ_GDS_MAX_TP_NUM ;kk++)
                             ifoDataBlock->header.dcuheader[mytotaldcu].tpNum[kk] = mxDataBlockSingle[ii].header.dcuheader[jj].tpNum[kk];
                         edbs[mytotaldcu] = mxDataBlockSingle[ii].header.dcuheader[jj].tpBlockSize + mxDataBlockSingle[ii].header.dcuheader[jj].dataBlockSize;
                         // Get some diags
@@ -761,42 +727,6 @@ main(int argc, char **argv)
             } else {
                 missed_flag <<= 1;
             }
-#if 0
-            if(xmitData && !ix_xmit_stop) {
-                if (sendLength > IX_BLOCK_SIZE)
-                {
-                    fprintf(stderr, "Buffer overflow.  Sending %d bytes into a dolphin block that holds %d\n",
-                    (int)sendLength, (int)IX_BLOCK_SIZE);
-                    abort();
-                }
-                // WRITEDATA to Dolphin Network
-                SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset[xmitBlockNum],sendLength,memcpyFlag,&error);
-                error = SCI_ERR_OK;
-                if (error != SCI_ERR_OK) {
-                    fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
-                    fprintf(stderr,"For reference the expected error codes are:\n");
-                    fprintf(stderr,"SCI_ERR_OUT_OF_RANGE = 0x%x\n", SCI_ERR_OUT_OF_RANGE);
-                    fprintf(stderr,"SCI_ERR_SIZE_ALIGNMENT = 0x%x\n", SCI_ERR_SIZE_ALIGNMENT);
-                    fprintf(stderr,"SCI_ERR_OFFSET_ALIGNMENT = 0x%x\n", SCI_ERR_OFFSET_ALIGNMENT);
-                    fprintf(stderr,"SCI_ERR_TRANSFER_FAILED = 0x%x\n", SCI_ERR_TRANSFER_FAILED);
-                    return error;
-                }
-                // Set data header information
-                unsigned int maxCycle = ifo_header->maxCycle;
-                unsigned int curCycle = ifo_header->curCycle;
-                xmitHeader[xmitBlockNum]->maxCycle = maxCycle;
-                xmitHeader[xmitBlockNum]->cycleDataSize = sendLength;;
-                // Send cycle last as indication of data ready for receivers
-                xmitHeader[xmitBlockNum]->curCycle = curCycle;
-                // Have to flush the buffers to make data go onto Dolphin network
-                SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
-            }
-#endif
-            if(ix_xmit_stop)  {
-                ix_xmit_stop --;
-                if(ix_xmit_stop == 0) fprintf(stderr,"Restarting Dolphin Xmit\n");
-            }
-
         }
         sprintf(dcstatus,"%ld ",ets);
         for(ii=0;ii<mytotaldcu;ii++) {
