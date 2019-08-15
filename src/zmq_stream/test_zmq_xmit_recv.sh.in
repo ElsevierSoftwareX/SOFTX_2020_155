@@ -1,0 +1,124 @@
+#!/bin/bash
+
+CWD="@CMAKE_CURRENT_BINARY_DIR@"
+
+TDIR=""
+PID_STREAM0=0
+PID_STREAM1=0
+PID_STREAM2=0
+PID_LOCAL_DC=0
+PID_ZMQ_XMIT=0
+PID_ZMQ_RECV=0
+
+function kill_proc {
+    if [ $1 -gt 0 ]; then
+        echo "Closing process $1"
+        kill $1
+    fi
+}
+
+function cleanup {
+    if [ "x$TDIR" != "x" ]; then
+        if [ -d $TDIR ]; then
+            rm -rf "$TDIR"
+        fi
+    fi
+    kill_proc $PID_STREAM0
+    kill_proc $PID_STREAM1
+    kill_proc $PID_STREAM2
+    kill_proc $PID_LOCAL_DC
+    kill_proc $PID_ZMQ_XMIT
+    kill_proc $PID_ZMQ_RECV
+}
+
+LOCAL_DC="$CWD/../local_dc/local_dc"
+if [ ! -x "$LOCAL_DC" ]; then
+    echo "$LOCAL_DC"
+    exit 1
+fi
+
+ZMQ_XMIT="$CWD/zmq_xmit"
+if [ ! -x "$ZMQ_XMIT" ]; then
+    echo "zmq_emit is required"
+    exit 1
+fi
+
+ZMQ_RECV="$CWD/zmq_recv"
+if [ ! -x "$ZMQ_RECV" ]; then
+    echo "zmq_recv is required"
+    exit 1
+fi
+
+FE_STREAM_CHECK="$CWD/../fe_stream_test/fe_stream_check"
+if [ ! -x "$FE_STREAM_CHECK" ]; then
+  echo "fe_stream_check is required"
+  exit 1
+fi
+
+FE_STREAM_TEST="$CWD/../fe_stream_test/fe_stream_test"
+if [ ! -x "$FE_STREAM_TEST" ]; then
+  echo "fe_stream_test is required"
+  exit 1
+fi
+
+if [ ! -w /dev/gpstime ]; then
+  echo "the gpstime module must be loaded, configured, and accessible by this user"
+  exit 1
+fi
+
+if [ ! -w /dev/mbuf ]; then
+  echo "the mbuf module must be loaded, configured, and accessible by this user"
+  exit 1
+fi
+
+PYTHON=""
+which python > /dev/null
+if [ $? -eq 0 ]; then
+    PYTHON=`which python`
+else
+    which python3 > /dev/null
+    if [ $? -eq 0 ]; then
+        PYTHON=`which python3`
+    else
+        echo "Cannot find python or python3"
+        exit 1
+    fi
+fi
+
+trap cleanup EXIT
+
+TDIR=`$PYTHON -c "from __future__ import print_function; import tempfile; print(tempfile.mkdtemp())"`
+mkdir "$TDIR/ini_files"
+mkdir "$TDIR/logs"
+
+echo "Ini dir = $TDIR/ini_files"
+
+"$FE_STREAM_TEST" -d 50 -r 1 -s x1iop1 -i "$TDIR/ini_files" > "$TDIR/logs/iop1" &
+PID_STREAM0=$!
+"$FE_STREAM_TEST" -d 61 -r 3 -s x1mod1 -i "$TDIR/ini_files" > "$TDIR/logs/mod1" &
+PID_STREAM1=$!
+"$FE_STREAM_TEST" -d 70 -r 3 -s x1mod2 -i "$TDIR/ini_files" > "$TDIR/logs/mod2"  &
+PID_STREAM2=$!
+
+echo "Streamer PIDS = $PID_STREAM0 $PID_STREAM1 $PID_STREAM2"
+
+"$LOCAL_DC" -m 100 -s "x1iop1 x1mod1 x1mod2" -d "$TDIR/ini_files" -b "local_dc" > "$TDIR/logs/local_dc" &
+PID_LOCAL_DC=$!
+
+sleep 1
+
+"$ZMQ_XMIT" -b "local_dc" -m 100 -e lo > "$TDIR/logs/zmq_xmit.log" &
+PID_ZMQ_XMIT=$!
+
+"$ZMQ_RECV" -b "zmq_recv" -m 100 -s localhost > "$TDIR/logs/zmq_recv.log" &
+PID_ZMQ_RECV=$!
+
+"$FE_STREAM_CHECK" -m zmq_recv -s 100 -v -c "$TDIR/ini_files/x1iop1.ini" "$TDIR/ini_files/tpchn_x1iop1.par" \
+-c "$TDIR/ini_files/x1mod1.ini" "$TDIR/ini_files/tpchn_x1mod1.par" \
+-c "$TDIR/ini_files/x1mod2.ini" "$TDIR/ini_files/tpchn_x1mod2.par"
+RESULT=$?
+
+exit $?
+#echo "Press enter to continue..."
+#DUMMY=""
+#read DUMMY
