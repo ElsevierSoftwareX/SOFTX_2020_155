@@ -72,6 +72,12 @@ typedef struct daqd_c {
 	long epicsSync;
 } daqd_c;
 
+int num_chans_index = -1;
+int con_chans_index = -1;
+int nocon_chans_index = -1;
+int internal_channel_count = 0;
+
+
 daqd_c daqd_edcu1;
 static struct rmIpcStr *dipc;
 static struct rmIpcStr *sipc;
@@ -526,6 +532,13 @@ char errMsg[64];
 char line[128];
 char *newname;
 
+
+char *pref = getenv("PREFIX");
+char eccname[256]; sprintf(eccname, "%s_%s", pref, "EDCU_CHAN_CONN");
+char chcntname[256]; sprintf(chcntname, "%s_%s", pref, "EDCU_CHAN_CNT");
+char cnfname[256]; sprintf(cnfname, "%s_%s", pref, "EDCU_CHAN_NOCON"); 
+
+
 	// sprintf(daqfile, "%s%s", fdir, "EDCU.ini");
 	daqd_edcu1.num_chans = 0;
 	daqfileptr = fopen(daqfilename,"r");
@@ -563,11 +576,33 @@ char *newname;
 
 	     chid chid1;
 	ca_context_create(ca_enable_preemptive_callback);
+
+
      	for (i = 0; i < daqd_edcu1.num_chans; i++) {
-	     status = ca_create_channel(daqd_edcu1.channel_name[i], connectCallback, (void *)i, 0, &chid1);
-	     status = ca_create_subscription(DBR_FLOAT, 0, chid1, DBE_VALUE,
-			     subscriptionHandler, (void *)i, 0);
-	}
+            if (strcmp(daqd_edcu1.channel_name[i], chcntname) == 0) {
+                num_chans_index = i;
+                internal_channel_count = internal_channel_count + 1;
+                daqd_edcu1.channel_status[i] = 0;
+            }
+            else if (strcmp(daqd_edcu1.channel_name[i], eccname) == 0) {
+                con_chans_index = i;
+                internal_channel_count = internal_channel_count + 1;
+                daqd_edcu1.channel_status[i] = 0;
+            }
+            else if (strcmp(daqd_edcu1.channel_name[i], cnfname) == 0) {
+                nocon_chans_index = i;
+                internal_channel_count = internal_channel_count + 1;
+                daqd_edcu1.channel_status[i] = 0;
+            }
+            else {
+        	     status = ca_create_channel(daqd_edcu1.channel_name[i], connectCallback, (void *)i, 0, &chid1);
+	             status = ca_create_subscription(DBR_FLOAT, 0, chid1, DBE_VALUE,
+		    	     subscriptionHandler, (void *)i, 0);
+            }
+    	}
+
+    daqd_edcu1.con_chans = daqd_edcu1.con_chans + internal_channel_count;
+
 	timeIndex = 0;
 }
 
@@ -578,6 +613,22 @@ void edcuWriteData(int daqBlockNum, unsigned long cycle_gps_time, int dcuId, int
 float *daqData;
 int buf_size;
 int ii;
+
+
+
+    if (num_chans_index != -1) {
+        daqd_edcu1.channel_value[num_chans_index] = daqd_edcu1.num_chans;
+    }
+
+    if (con_chans_index != -1) {
+        daqd_edcu1.channel_value[con_chans_index] = daqd_edcu1.con_chans;
+    }
+
+    if (nocon_chans_index != -1) {
+        daqd_edcu1.channel_value[nocon_chans_index] = daqd_edcu1.num_chans - daqd_edcu1.con_chans;
+    }
+
+
 
 		
 	buf_size = DAQ_DCU_BLOCK_SIZE*DAQ_NUM_SWING_BUFFERS;
