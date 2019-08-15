@@ -1,7 +1,9 @@
 //
-///// @file fe_dc.c
-///// @brief  Front End data concentrator
-////
+/// @file zmq_xmit.c
+/// @brief Transmit data from a buffer containing a
+///  daq_multi_cycle_header_t structure out over
+///  a zmq publisher.
+///
 //
 #define _GNU_SOURCE
 #define _XOPEN_SOURCE 700
