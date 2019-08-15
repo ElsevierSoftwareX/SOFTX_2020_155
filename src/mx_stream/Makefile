@@ -24,7 +24,7 @@ mx_crc_only: mx_crc_only.o rfm.o
 
 mx_mem_test: mx_mem_test.o rfm.o
 
-mx2rcv: mx2rcv.o rfm.o
+omx_recv: omx_recv.o rfm.o
 
 mx_stream_single: mx_stream_single.o rfm.o
 
