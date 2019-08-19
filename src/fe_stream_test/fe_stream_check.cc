@@ -476,6 +476,12 @@ public:
         }
         int cycle = buffer_->header.curCycle;
         std::size_t data_stride = buffer_->header.cycleDataSize;
+        if (data_stride % 8 != 0)
+        {
+            std::cerr << "cycleDataSize is not 64bit aligned!\n";
+            std::cerr << "cycleDataSize = " << data_stride << "\n";
+            throw std::runtime_error("cycleDataSize is not 64bit aligned");
+        }
 
         const daq_multi_dcu_data_t* slice_header = (const daq_multi_dcu_data_t*)(&(buffer_->dataBlock[data_stride * cycle]));
         unsigned int dcu_data_offset = 0;
