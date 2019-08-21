@@ -9,7 +9,7 @@
 // These externs and "16" need to go to a header file (mbuf.h)
 extern void *kmalloc_area[16];
 extern int mbuf_allocate_area(char *name, int size, struct file *file);
-extern void *fe_start(void *arg);
+extern void *fe_start_v3(void *arg);
 extern int run_on_timer;
 extern char daqArea[2*DAQ_DCU_SIZE];           // Space allocation for daqLib buffers
 
@@ -1090,7 +1090,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
         pLocalEpics->epicsInput.vmeReset = 0;
 
 #ifdef NO_CPU_SHUTDOWN
-        sthread = kthread_create(fe_start, 0, "fe_start/%d", CPUID);
+        sthread = kthread_create(fe_start_v3, 0, "fe_start_v3/%d", CPUID);
         if (IS_ERR(sthread)){
                 printf("Failed to kthread_create()\n");
                 return -1;
@@ -1101,7 +1101,7 @@ printf("MASTER DAC SLOT %d %d\n",ii,cdsPciModules.dacConfig[ii]);
 
 
 #ifndef NO_CPU_SHUTDOWN
-        set_fe_code_idle(fe_start, CPUID);
+        set_fe_code_idle(fe_start_v3, CPUID);
         msleep(100);
 
 	cpu_down(CPUID);

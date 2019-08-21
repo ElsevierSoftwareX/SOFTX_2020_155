@@ -1,0 +1,8 @@
+These are the patches developed by Keith Thorne and
+Rolf Bork to create a stable 'cs' (CPU Shutdown) 
+linux kernel 4.9 for CDS real-time.  All patches are required.
+
+- Basic CDS patch - adds CPU Shutdown
+kernel-4.9-cs.patch
+
+

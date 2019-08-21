@@ -16,19 +16,21 @@ srcdir = .
 # rules to apply to Windows.
 TARGETS=mx_stream mx_multi_stream mx_mem_test
 
-#mx_stream: mx_stream.o rfm.o
+mx_stream: mx_stream.o rfm.o
 
-#mx_multi_stream: mx_multi_stream.o rfm.o
+mx_multi_stream: mx_multi_stream.o rfm.o
 
-#mx_crc_only: mx_crc_only.o rfm.o
+mx_crc_only: mx_crc_only.o rfm.o
 
-#mx_mem_test: mx_mem_test.o rfm.o
+mx_mem_test: mx_mem_test.o rfm.o
 
-#mx_stream_single: mx_stream_single.o rfm.o
+omx_recv: omx_recv.o rfm.o
 
-omx_xmit: mx_fe.o rfm.o
+mx_stream_single: mx_stream_single.o rfm.o
 
-#mx_rcv: mx_rcv.o rfm.o
+mx_fe: mx_fe.o rfm.o
+
+mx_rcv: mx_rcv.o rfm.o
 
 rfm.o: ../drv/rfm.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
@@ -36,7 +38,7 @@ rfm.o: ../drv/rfm.c
 CFLAGS = -I${prefix}/include -I.
 CFLAGS += -Wall -g -O2
 CFLAGS += $(OPTIM_CFLAGS)
-CPPFLAGS = -I../common -I$(top_srcdir)/common -I$(top_srcdir)/common/bsd -DNO_RTL  -D_XOPEN_SOURCE -D_BSD_SOURCE
+CPPFLAGS = -I../common -I$(top_srcdir)/common -I$(top_srcdir)/common/bsd -DNO_RTL  -D_XOPEN_SOURCE -D_DEFAULT_SOURCE
 #CPPFLAGS += -DMX_THREAD_SAFE=$(MX_THREAD_SAFE)
 
 LDFLAGS = -L${prefix}/lib -lmyriexpress -lpthread  -g
@@ -62,14 +64,7 @@ LDFLAGS = -L${prefix}/lib -lmyriexpress -lpthread  -g
 
 .PHONY: clean
 clean:
-	rm -f *.o mx_stream mx_multi_stream mx_stream_single mx_fe mx_rcv omx_xmit
-
-omx_recv: omx_recv.c
-	$(CC) $(CFLAGS) -I../zmq_stream -I/opt/open-mx/include omx_recv.c -c -o omx_recv.o
-	$(CC) $(CFLAGS) ../drv/rfm.c -c -o rfm.o
-	$(CC) $(CFLAGS) -I../zmq_stream ../zmq_stream/simple_pv.c -c -o simple_pv.o
-	$(CC) $(FLAGS) -o omx_recv  omx_recv.o  rfm.o simple_pv.o -L $(API_LIB_PATH) -L/opt/open-mx/lib -lmyriexpress -lpthread
-	sync
+	rm -f *.o mx_stream mx_multi_stream mx_stream_single mx_fe mx_rcv
 
 .PHONY: distclean
 distclean: clean

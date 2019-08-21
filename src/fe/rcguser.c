@@ -1,5 +1,5 @@
 ///	@file moduleLoad.c
-///	@brief File contains startup routines for real-time code.
+///	@brief File contains startup routines for running user app in user space.
 
 #include <unistd.h>
 #include <ctype.h>
@@ -20,7 +20,7 @@
 #include "moduleLoadCommon.c"
 
 // These externs and "16" need to go to a header file (mbuf.h)
-extern int fe_start();
+extern int fe_start_app_user();
 extern char daqArea[2*DAQ_DCU_SIZE];           // Space allocation for daqLib buffers
 extern char *addr;
 
@@ -374,7 +374,7 @@ int main (int argc, char **argv)
 	}
 
         pLocalEpics->epicsInput.vmeReset = 0;
-	fe_start();
+	fe_start_app_user();
 
         return 0;
 }

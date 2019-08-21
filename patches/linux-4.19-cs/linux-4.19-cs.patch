@@ -1,0 +1,45 @@
+diff -r -u -d linux-source-4.9.orig/arch/x86/kernel/smpboot.c linux-source-4.9.cs/arch/x86/kernel/smpboot.c
+--- linux-source-4.9.orig/arch/x86/kernel/smpboot.c	2019-04-05 15:29:15.000000000 -0500
++++ linux-source-4.9.cs/arch/x86/kernel/smpboot.c	2019-06-06 09:21:28.357716391 -0500
+@@ -1573,6 +1573,18 @@
+ 	common_cpu_die(cpu);
+ }
+ 
++static DEFINE_PER_CPU(void (*)(void), fe_code);
++
++int is_cpu_taken_by_rcg_model(unsigned int cpu) {
++        return 0 != per_cpu(fe_code, cpu);
++}
++EXPORT_SYMBOL(is_cpu_taken_by_rcg_model);
++
++void set_fe_code_idle(void (*ptr)(void), unsigned int cpu) {
++       per_cpu(fe_code, cpu) = ptr;
++}
++EXPORT_SYMBOL(set_fe_code_idle);
++
+ void play_dead_common(void)
+ {
+ 	idle_task_exit();
+@@ -1586,6 +1598,10 @@
+ 	 * With physical CPU hotplug, we should halt the cpu
+ 	 */
+ 	local_irq_disable();
++        if (per_cpu(fe_code, smp_processor_id())) {
++	       // Execute front-end code
++	       (*per_cpu(fe_code, smp_processor_id()))();
++	}
+ }
+ 
+ static bool wakeup_cpu0(void)
+diff -r -u -d linux-source-4.9.orig/kernel/cpu.c linux-source-4.9.cs/kernel/cpu.c
+--- linux-source-4.9.orig/kernel/cpu.c	2019-05-13 15:59:18.000000000 -0500
++++ linux-source-4.9.cs/kernel/cpu.c	2019-06-06 10:55:34.854916689 -0500
+@@ -1227,7 +1227,7 @@
+ {
+ 	return do_cpu_up(cpu, CPUHP_ONLINE);
+ }
+-EXPORT_SYMBOL_GPL(cpu_up);
++EXPORT_SYMBOL(cpu_up);
+ 
+ #ifdef CONFIG_PM_SLEEP_SMP
+ static cpumask_var_t frozen_cpus;
