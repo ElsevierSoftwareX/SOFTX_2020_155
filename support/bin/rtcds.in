@@ -12,7 +12,7 @@ source "$ENV_FILE" 2>/dev/null || true
 SITE=${SITE^^*}
 site=${SITE,,*}
 IFO=${IFO^^*}
-ifo=${ifo,,*}
+ifo=${IFO,,*}
 
 # search paths for C source code
 CDS_SRC=${CDS_SRC:-$RCG_LIB_PATH}
