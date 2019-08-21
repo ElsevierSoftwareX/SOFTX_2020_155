@@ -74,6 +74,7 @@ Package: advligorts-rcg
 Architecture: any
 Depends:
  autoconf,
+ libncurses5-dev,
  linux-headers-4.9.0-9-rtcds-amd64,
  make,
  python3,
