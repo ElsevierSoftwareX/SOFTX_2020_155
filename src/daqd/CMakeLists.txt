@@ -74,6 +74,7 @@ target_include_directories(dc_gds_shmem PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/../include
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_BINARY_DIR}
+		${RPC_INCLUDE_DIRS}
 		)
 target_compile_options(dc_gds_shmem PUBLIC
 		-fno-common
@@ -83,6 +84,7 @@ target_compile_options(dc_gds_shmem PUBLIC
 target_link_libraries(dc_gds_shmem PRIVATE
 		gds::daqd
 		ldastools::framecpp
+		${RPC_LIBRARIES}
 		)
 
 add_executable(daqd_shmem
@@ -120,6 +122,7 @@ target_include_directories(daqd_shmem PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/../include
 		${CMAKE_CURRENT_SOURCE_DIR}/../zmq_stream
+		${RPC_INCLUDE_DIRS}
 		)
 target_link_libraries(daqd_shmem PUBLIC
 		gds::daqd
@@ -133,6 +136,7 @@ target_link_libraries(daqd_shmem PUBLIC
 		driver::shmem
 		driver::ini_parsing
 		${CMAKE_THREAD_LIBS_INIT}
+		${RPC_LIBRARIES}
 		)
 
 install(TARGETS daqd_shmem DESTINATION bin)

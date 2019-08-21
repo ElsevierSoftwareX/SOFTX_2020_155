@@ -28,6 +28,7 @@ FIND_PACKAGE(Dolphin)
 FIND_PACKAGE(NDS2Client)
 FIND_PACKAGE(Boost COMPONENTS system)
 FIND_PACKAGE(RapidJSON)
+FIND_PACKAGE(RPC)
 
 CHECK_CXX_SOURCE_COMPILES("#include <iostream>
 #include <FlexLexer.h>

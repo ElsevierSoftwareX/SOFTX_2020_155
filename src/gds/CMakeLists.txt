@@ -234,8 +234,8 @@ target_include_directories(gds_cc PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/gds_include
 add_dependencies(gds_cc _gds_rpc_gen_hdrs)
 
 
-add_executable(awgtpman $<TARGET_OBJECTS:gds_c> $<TARGET_OBJECTS:gds_cc> ${CMAKE_CURRENT_BINARY_DIR}/gds_includes)
-target_link_libraries(awgtpman ${CMAKE_THREAD_LIBS_INIT})
+add_executable(awgtpman $<TARGET_OBJECTS:gds_c> $<TARGET_OBJECTS:gds_cc> ${CMAKE_CURRENT_BINARY_DIR}/gds_includes ${RPC_INCLUDE_DIRS})
+target_link_libraries(awgtpman ${CMAKE_THREAD_LIBS_INIT} ${RPC_LIBRARIES})
 
 
 #######
@@ -262,6 +262,7 @@ target_compile_definitions(gds_daqd_general PRIVATE
         -D_TESTPOINT_DIRECT=0)
 target_include_directories(gds_daqd_general PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
+        ${RPC_INCLUDE_DIRS}
         )
 add_dependencies(gds_daqd_general _gds_rpc_gen_hdrs)
 
@@ -271,6 +272,7 @@ target_compile_definitions(gds_daqd_testpoint PRIVATE
         -D_TP_DAQD -D_TESTPOINT_DIRECT=0 -D_NO_KEEP_ALIVE)
 target_include_directories(gds_daqd_testpoint PRIVATE
         ${CMAKE_CURRENT_BINARY_DIR}/gds_includes
+        ${RPC_INCLUDE_DIRS}
         )
 add_dependencies(gds_daqd_testpoint _gds_rpc_gen_hdrs)
 
