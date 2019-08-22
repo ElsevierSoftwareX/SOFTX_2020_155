@@ -1,3 +1,9 @@
+advligorts (4.0.0~dev1-1) unstable; urgency=medium
+
+  * New dev release
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Thu, 22 Aug 2019 16:32:15 -0700
+
 advligorts (4.0.0~dev0-4) unstable; urgency=medium
 
   * Fix shlibs.local to point to dolphin-ix package for libsisci
