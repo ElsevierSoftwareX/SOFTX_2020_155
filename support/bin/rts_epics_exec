@@ -6,6 +6,7 @@ if [ -z "$sys" ] ; then
     exit 1
 fi
 export EPICS_DB_INCLUDE_PATH=/usr/lib/epics/dbd
-TARGET=${OPTRTCDS}/target/${sys}/${sys}epics
-cd ${TARGET}
-exec ${TARGET}/${sys}epics ${sys}epics${IFO}.cmd
+TARGET=/opt/rtcds/${SITE,,*}/${IFO,,*}
+ETARGET=${TARGET}/target/${sys}/${sys}epics
+cd ${ETARGET}
+exec ./${sys}epics ${sys}epics${IFO}.cmd
