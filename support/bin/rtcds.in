@@ -50,47 +50,6 @@ check_env() {
     done
 }
 
-# FIXME: the RCG currently requires that the kernel source be at
-# /usr/src/linux.  this checks that /usr/src/linux is a symlink to the
-# header dir for the currently running kernel.  This shouldn't be
-# necessary once the RCG is fixed.
-check_linux_src() {
-    if [ "$RCG_IGNORE_KERNEL_RELEASE" ] ; then
-	return
-    fi
-    local target=$(readlink /usr/src/linux)
-    local msg=
-    if [ ! -d /usr/src/linux ] ; then
-	msg="Missing linux source."
-    elif [ -z "$target" ] ; then
-	msg="Unknown linux source."
-    fi
-    local release=$(uname -r | sed 's/-amd64$/-common/')
-    for ls in /usr/src/linux-headers-${release}{,-common} ; do
-	if [[ "$target" == "$ls" ]] ; then
-	    return
-	fi
-	if [ -d "$ls" ] ; then
-	    break
-	fi
-    done
-    if [ -z "$msg" ] ; then
-	msg="Linux source does not match currently running kernel."
-    fi
-    log "$msg
-
-The RCG expects the linux source to be at /usr/src/linux.  For modern
-distros this should be a symlink to the source installed as part of
-the kernel header package for the running kernel.  For this system:
-
-/usr/src/linux -> $ls
-
-Please create/update this link, or set the RCG_IGNORE_KERNEL_RELEASE
-environment variable to bypass this check."
-
-    exit 10
-}
-
 prep_target(){
     log "creating OPTRTCDS..."
     mkdir -p ${OPTRTCDS}/{target,chans}/tmp
@@ -274,7 +233,6 @@ case $cmd in
 	    log "You must specify at least one system to build."
 	    exit 2
 	fi
-	check_linux_src
 	check_env
 	prep_buildd
 	build_sys $@
