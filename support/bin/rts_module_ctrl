@@ -6,10 +6,10 @@ if [ -z "$sys" ] ; then
     echo "usage: $(basename $0) start|stop <sys>"
     exit 1
 fi
-TARGET=${OPTRTCDS}/target/${sys}
+TARGET=/opt/rtcds/${SITE,,*}/${IFO,,*}
 case $cmd in
     start)
-        /sbin/insmod "$TARGET"/bin/${sys}.ko
+        /sbin/insmod "$TARGET"/target/${sys}/bin/${sys}.ko
         ;;
     stop)
         /sbin/rmmod ${sys}
