@@ -63,8 +63,8 @@ int daqStatBit[ 2 ];
 void
 Usage( )
 {
-    fprintf( stderr, "Usage of mx_fe:\n" );
-    fprintf( stderr, "mx_fe  -s <models> <OPTIONS>\n" );
+    fprintf( stderr, "Usage of local_dc:\n" );
+    fprintf( stderr, "local_dc  -s <models> <OPTIONS>\n" );
     fprintf( stderr,
              " -b <buffer>    : Name of the mbuf to concentrate the data to "
              "locally (defaults to ifo)\n" );

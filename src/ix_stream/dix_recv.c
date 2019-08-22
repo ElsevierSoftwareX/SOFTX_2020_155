@@ -36,14 +36,14 @@ Usage( )
 {
     printf( "Usage of dix_recv:\n" );
     printf( "dix_recv -g <group>\n" );
-    printf( "-b <name>      : Destination buffer name (default local_dc)\n" );
-    printf( "-m <value>     : Size in MB of the destination buffer [20-100] "
+    printf( " -b <name>      : Destination buffer name (default local_dc)\n" );
+    printf( " -m <value>     : Size in MB of the destination buffer [20-100] "
             "(default=100)\n" );
     printf( " -a <value>     : Local adapter number (default %d)\n",
             localAdapterNo );
     printf( " -g <value>     : Reflective group identifier (0..5))\n" );
     printf( " -v <value>     : Diagnostics level (0..1) \n" );
-    printf( " -h             : This helpscreen\n" );
+    printf( " -h             : This help screen\n" );
     printf( "\n" );
 }
 

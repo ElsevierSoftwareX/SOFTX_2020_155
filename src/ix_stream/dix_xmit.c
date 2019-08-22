@@ -50,7 +50,7 @@ void
 usage( )
 {
     fprintf( stderr,
-             "Usage: dix_xmit [args] -m shared memory size -g IX "
+             "Usage: dix_ix_xmit [args] -m shared memory size -g IX "
              "channel \n" );
     fprintf( stderr, "-l filename - log file name\n" );
     fprintf( stderr, "-b buffer name - Input buffer [local_dc]\n" );
@@ -357,7 +357,7 @@ main( int argc, char** argv )
     int64_t  cur_ref_time = 0;
     int      festatus = 0;
     int      pv_festatus = 0;
-    int      ix_xmit_stop = 0;
+
     SimplePV pvs[] = {
         {
             "RECV_MIN_MS",
@@ -569,7 +569,7 @@ main( int argc, char** argv )
                 missed_flag <<= 1;
             }
 
-            if ( xmitData && !ix_xmit_stop )
+            if ( xmitData )
             {
                 if ( sendLength > IX_BLOCK_SIZE )
                 {
@@ -620,13 +620,6 @@ main( int argc, char** argv )
                 // Have to flush the buffers to make data go onto Dolphin
                 // network
                 SCIFlush( sequence, SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY );
-            }
-
-            if ( ix_xmit_stop )
-            {
-                ix_xmit_stop--;
-                if ( ix_xmit_stop == 0 )
-                    fprintf( stderr, "Restarting Dolphin Xmit\n" );
             }
         }
         sprintf( dcstatus, "%ld ", ets );
