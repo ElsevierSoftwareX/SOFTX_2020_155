@@ -122,7 +122,7 @@ build_sys() {
     cd $RCG_BUILDD
     for sys ; do
 	log "### building $sys..."
-	make $sys
+	sudo -u $RTS_USER -E make $sys
     done
 }
 
@@ -130,7 +130,7 @@ install_sys() {
     cd $RCG_BUILDD
     for sys ; do
 	log "### installing $sys..."
-	make install-$sys
+	sudo -u $RTS_USER -E make install-$sys
     done
 }
 
