@@ -294,7 +294,7 @@ void deallocate_dac_channels(void) {
 #endif
 
 //***********************************************************************
-// TASK: fe_start()	
+// TASK: fe_start_v3()	
 // This routine is the skeleton for all front end code	
 //***********************************************************************
 /// This function is the main real-time sequencer or scheduler for all code built
@@ -306,7 +306,7 @@ void deallocate_dac_channels(void) {
 /// loop is synchronized and triggered by the arrival of ADC data, the ADC module in turn
 /// is triggered to sample by the 64KHz clock provided by the Timing Distribution System.
 ///	- 
-void *fe_start(void *arg)
+void *fe_start_v3(void *arg)
 {
   int longestWrite2 = 0;
   int tempClock[4];

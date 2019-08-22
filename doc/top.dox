@@ -1,12 +1,12 @@
 /*!	\mainpage
-\Title RCG Version 2.8
+\Title RCG Version 4.0
 \tableofcontents
 
 This documentation is divided into the following sections:
 - \ref intro "CDS Overview Documentation"
 - \ref userguide "RCG User's Guide"
-- <a href="https://dcc.ligo.org/LIGO-T1300868">RCG V2.8 Release Notes</a>
 - <a href="https://dcc.ligo.org/LIGO-T1100625">RCG Runtime Diagnostics</a> 
+- <a href="https://awiki.ligo-wa.caltech.edu/wiki/CdsFrontEndDebian9">CDS Debian9 Build Instructions</a> 
 - \ref devguidetop "CDS Code Design and Development"
 	- \ref devguidercg "RCG Software"
 	- \ref devguidedaqd "CDS DAQ Data Concentrator/Framebuilder Software"

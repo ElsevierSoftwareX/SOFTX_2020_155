@@ -9,7 +9,7 @@
 // These externs and "16" need to go to a header file (mbuf.h)
 extern void *kmalloc_area[16];
 extern int mbuf_allocate_area(char *name, int size, struct file *file);
-extern void *fe_start(void *arg);
+extern void *fe_start_iop(void *arg);
 extern char daqArea[2*DAQ_DCU_SIZE];           // Space allocation for daqLib buffers
 struct task_struct *sthread;
 
@@ -44,7 +44,7 @@ int rt_iop_init (void)
 #endif
 
 #ifndef NO_CPU_SHUTDOWN
-	// See if our CPU core is free
+    /// Verify requested core is free.
     if (is_cpu_taken_by_rcg_model(CPUID)) {
 		printk(KERN_ALERT "Error: CPU %d already taken\n", CPUID);
 		return -1;
@@ -53,6 +53,7 @@ int rt_iop_init (void)
 
 
 #ifdef DOLPHIN_TEST
+    /// Initialize the Dolphin interface
 	status = init_dolphin(2);
 	if (status != 0) {
 		return -1;
@@ -62,7 +63,7 @@ int rt_iop_init (void)
 	jj = 0;
 
 
-// Allocate EPICS memory area
+    /// Allocate EPICS memory area
 	ret =  mbuf_allocate_area(SYSTEM_NAME_STRING_LOWER, 64*1024*1024, 0);
     if (ret < 0) {
 		printk("mbuf_allocate_area() failed; ret = %d\n", ret);
@@ -73,7 +74,7 @@ int rt_iop_init (void)
     pLocalEpics = (CDS_EPICS *)&((RFM_FE_COMMS *)_epics_shm)->epicsSpace;
     pLocalEpics->epicsOutput.fe_status = 0;
 
-	// Allocate IPC memory area
+	/// Allocate IPC memory area
 	ret =  mbuf_allocate_area("ipc", 16*1024*1024, 0);
     if (ret < 0) {
 		printk("mbuf_allocate_area(ipc) failed; ret = %d\n", ret);
@@ -81,11 +82,11 @@ int rt_iop_init (void)
 	}
     _ipc_shm = (unsigned char *)(kmalloc_area[ret]);
 
-// Assign pointer to IOP/USER app comms space
+    // Assign pointer to IOP/USER app comms space
   	ioMemData = (IO_MEM_DATA *)(_ipc_shm+ 0x4000);
 
 
-// Allocate DAQ memory area
+    /// Allocate DAQ memory area
 	sprintf(fname, "%s_daq", SYSTEM_NAME_STRING_LOWER);
     ret =  mbuf_allocate_area(fname, 64*1024*1024, 0);
     if (ret < 0) {
@@ -96,7 +97,7 @@ int rt_iop_init (void)
  	daqPtr = (struct rmIpcStr *) _daq_shm;
 
     pLocalEpics->epicsOutput.fe_status = 1;
-	// Find and initialize all PCI I/O modules **************************************************
+    /// Find and initialize all PCIe I/O modules
 	// Following I/O card info is from feCode
 	cards = sizeof(cards_used)/sizeof(cards_used[0]);
 	cdsPciModules.cards = cards;
@@ -106,7 +107,7 @@ int rt_iop_init (void)
 	cdsPciModules.dioCount = 0;
 	cdsPciModules.doCount = 0;
 
-	// Call PCI initialization routine in map.c file.
+	/// Call PCI initialization routine in map.c file.
 	status = mapPciModules(&cdsPciModules);
 	if(status < cards)
 	{
@@ -114,7 +115,7 @@ int rt_iop_init (void)
 		cardCountErr = 1;
 	}
 
-	// Master send module counds to SLAVE via ipc shm
+	/// Master send module counts to SLAVE via ipc shm
 	ioMemData->totalCards = status;
 	ioMemData->adcCount = cdsPciModules.adcCount;
 	ioMemData->dacCount = cdsPciModules.dacCount;
@@ -158,6 +159,7 @@ int rt_iop_init (void)
 // Slave units will perform I/O transactions with RFM directly ie MASTER does not do RFM I/O.
 // Master unit only maps the RFM I/O space and passes pointers to SLAVES.
 
+    /// Map VMIC RFM cards, if any
 	ioMemData->rfmCount = cdsPciModules.rfmCount;
 	for(ii=0;ii<cdsPciModules.rfmCount;ii++)
         {
@@ -166,6 +168,7 @@ int rt_iop_init (void)
 		ioMemData->pci_rfm_dma[ii] = cdsPciModules.pci_rfm_dma[ii];
 	}
 #ifdef DOLPHIN_TEST
+    /// Send Dolphin addresses to user app processes
 	// dolphinCount is number of segments
 	ioMemData->dolphinCount = cdsPciModules.dolphinCount;
 	// dolphin read/write 0 is for local PCIe network traffic
@@ -184,7 +187,7 @@ int rt_iop_init (void)
         ioMemData->dolphinWrite[1] = 0;
 #endif
 
-	// Print out all the I/O information
+	/// Print out all the I/O information to dmesg
 	  print_io_info(&cdsPciModules);
 
 
@@ -193,7 +196,7 @@ int rt_iop_init (void)
  
     pLocalEpics->epicsOutput.fe_status = 2;
 printk("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRestore);
-	// Ensure EPICS running else exit
+	/// Ensure EPICS running else exit
 	for (cnt = 0;  cnt < 10 && pLocalEpics->epicsInput.burtRestore == 0; cnt++) {
         	msleep(1000);
 	}
@@ -208,8 +211,9 @@ printk("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRest
 
         pLocalEpics->epicsInput.vmeReset = 0;
 
+    /// Start the controller thread
 #ifdef NO_CPU_SHUTDOWN
-        sthread = kthread_create(fe_start, 0, "fe_start/%d", CPUID);
+        sthread = kthread_create(fe_start_iop, 0, "fe_start_iop/%d", CPUID);
         if (IS_ERR(sthread)){
                 printk("Failed to kthread_create()\n");
                 return -1;
@@ -223,7 +227,7 @@ printk("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRest
     pLocalEpics->epicsOutput.fe_status = 3;
 	printk("" SYSTEM_NAME_STRING_LOWER ": Locking CPU core %d\n", CPUID);
 	// The code runs on the disabled CPU
-    set_fe_code_idle(fe_start, CPUID);
+    set_fe_code_idle(fe_start_iop, CPUID);
     msleep(100);
 	cpu_down(CPUID);
 
@@ -231,11 +235,12 @@ printk("Waiting for EPICS BURT Restore = %d\n", pLocalEpics->epicsInput.burtRest
         return 0;
 }
 
+/// Kernel module cleanup function
 void rt_iop_cleanup(void) {
 #ifndef NO_CPU_SHUTDOWN
 	extern int cpu_up(unsigned int cpu);
 
-	// Unset the code callback
+	/// Unset the code callback
         set_fe_code_idle(0, CPUID);
 #endif
 
@@ -249,11 +254,13 @@ void rt_iop_cleanup(void) {
         msleep(1000);
 
 #ifdef DOLPHIN_TEST
+    /// Cleanup Dolphin card connections
 	finish_dolphin();
 #endif
 
 #ifndef NO_CPU_SHUTDOWN
 
+    /// Bring the CPU core back on line
 	// Unset the code callback
         set_fe_code_idle(0, CPUID);
 	// printkl("Will bring back CPU %d\n", CPUID);

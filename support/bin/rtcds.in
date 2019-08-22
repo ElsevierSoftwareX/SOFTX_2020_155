@@ -1,35 +1,45 @@
 #!/bin/bash -e
 
+log() {
+    echo "$@" >&2
+}
+
 RTS_VERSION=${RTS_VERSION:-__VERSION__}
+if [[ "$RTS_VERSION" =~ ._VERSION_. ]] ; then
+    log RTS_VERSION variable not set.
+    exit 1
+fi
+
+# this should define all USER_VARS (see below)
 ENV_FILE=${RTS_ENV:-/etc/advligorts/env}
+source "$ENV_FILE" 2>/dev/null || true
+
 RCG_SRC=${RCG_SRC:-/usr/share/advligorts/src}
 RCG_BUILDD=${RCG_BUILDD:-/var/cache/advligorts/rcg-$RTS_VERSION}
 RTS_USER=${RTS_USER:-controls}
-RTSYSTAB=/etc/rtsystab
-
-source "$ENV_FILE" 2>/dev/null || true
+RTSYSTAB=${RTSYSTAB:-/etc/rtsystab}
 
 SITE=${SITE^^*}
 site=${SITE,,*}
 IFO=${IFO^^*}
-ifo=${ifo,,*}
+ifo=${IFO,,*}
+
+# FIXME: the RCG hard-codes /opt/rtcds as the root
+TARGET=/opt/rtcds/${site}/${ifo}
 
 # search paths for C source code
 CDS_SRC=${CDS_SRC:-$RCG_LIB_PATH}
 CDS_IFO_SRC=${CDS_IFO_SRC:-$CDS_SRC}
 
 # add RCG module source to lib path
+# FIXME: rename RCG_MOD_PATH
 RCG_LIB_PATH=$RCG_LIB_PATH:${RCG_SRC}/src/epics/simLink/:${RCG_SRC}/src/epics/simLink/lib
 
-USER_VARS=(SITE IFO OPTRTCDS RCG_LIB_PATH)
+USER_VARS=(SITE IFO RCG_LIB_PATH)
 LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RTS_USER RTSYSTAB)
 EXPORT_VARS=(${USER_VARS[@]} site ifo CDS_SRC CDS_IFO_SRC)
 
 ##################################################
-
-log() {
-    echo "$@" >&2
-}
 
 check_env() {
     for var in ${USER_VARS[*]} ; do
@@ -50,61 +60,25 @@ check_env() {
     done
 }
 
-# FIXME: the RCG currently requires that the kernel source be at
-# /usr/src/linux.  this checks that /usr/src/linux is a symlink to the
-# header dir for the currently running kernel.  This shouldn't be
-# necessary once the RCG is fixed.
-check_linux_src() {
-    if [ "$RCG_IGNORE_KERNEL_RELEASE" ] ; then
-	return
+prep_buildd() {
+    if [ ! -d "$RCG_BUILDD" ] ; then
+	log "creating RCG_BUILDD $RCG_BUILDD..."
+	sudo mkdir -p "$RCG_BUILDD"
+	sudo chown $RTS_USER:$RTS_USER "$RCG_BUILDD"
+
+	log "configuring RCG_BUILDD $RCG_BUILDD..."
+	cd "$RCG_BUILDD"
+	"$RCG_SRC"/configure
     fi
-    local target=$(readlink /usr/src/linux)
-    local msg=
-    if [ ! -d /usr/src/linux ] ; then
-	msg="Missing linux source."
-    elif [ -z "$target" ] ; then
-	msg="Unknown linux source."
-    fi
-    local release=$(uname -r | sed 's/-amd64$/-common/')
-    for ls in /usr/src/linux-headers-${release}{,-common} ; do
-	if [[ "$target" == "$ls" ]] ; then
-	    return
-	fi
-	if [ -d "$ls" ] ; then
-	    break
-	fi
-    done
-    if [ -z "$msg" ] ; then
-	msg="Linux source does not match currently running kernel."
-    fi
-    log "$msg
-
-The RCG expects the linux source to be at /usr/src/linux.  For modern
-distros this should be a symlink to the source installed as part of
-the kernel header package for the running kernel.  For this system:
-
-/usr/src/linux -> $ls
-
-Please create/update this link, or set the RCG_IGNORE_KERNEL_RELEASE
-environment variable to bypass this check."
-
-    exit 10
 }
 
 prep_target(){
-    log "creating OPTRTCDS..."
-    mkdir -p ${OPTRTCDS}/{target,chans}/tmp
-}
-
-prep_buildd() {
-    sudo mkdir -p "$RCG_BUILDD"
-    sudo chown "$RTS_USER" "$RCG_BUILDD"
-    if [ -e "$RCG_BUILDD"/Makefile ] ; then
-	return
+    if [ ! -d "$TARGET" ] ; then
+	log "creating TARGET $TARGET..."
+	sudo mkdir -p "$TARGET"
+	sudo chown -R $RTS_USER:$RTS_USER "$TARGET"
+	sudo -u $RTS_USER mkdir -p "${TARGET}/{target,chans}/tmp"
     fi
-    log "configuring RCG_BUILDD..."
-    cd "$RCG_BUILDD"
-    "$RCG_SRC"/configure
 }
 
 ########
@@ -147,7 +121,7 @@ build_sys() {
     for sys ; do
 	sys=$(tname "$sys")
 	log "### building $sys..."
-	make $sys
+	sudo -u $RTS_USER -E make $sys
     done
 }
 
@@ -156,7 +130,7 @@ install_sys() {
     for sys ; do
 	sys=$(tname "$sys")
 	log "### installing $sys..."
-	make install-$sys
+	sudo -u $RTS_USER -E make install-$sys
     done
 }
 
@@ -274,7 +248,6 @@ case $cmd in
 	    log "You must specify at least one system to build."
 	    exit 2
 	fi
-	check_linux_src
 	check_env
 	prep_buildd
 	build_sys $@
@@ -285,6 +258,7 @@ case $cmd in
 	    exit 2
 	fi
 	check_env
+	prep_target
 	install_sys $@
 	;;
     'start')

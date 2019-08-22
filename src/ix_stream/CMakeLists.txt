@@ -33,14 +33,4 @@ install(TARGETS dix_recv DESTINATION bin)
 #
 #endif (${MX_FOUND})
 
-if (${OPENMX_FOUND})
-    add_executable(omx_recv mx2ix.c)
-    target_link_libraries(omx_recv PUBLIC
-            driver::shmem
-            dolphin::sisci
-            zmq::simple_pv
-            openmx::openmx
-            ${CMAKE_THREAD_LIBS_INIT}
-            )
-    install(TARGETS omx_recv DESTINATION bin)
-endif (${OPENMX_FOUND})
+

@@ -25,5 +25,6 @@ epicsServer::epics_main ()
     pCAS->setDebugLevel(0);
     system_log(1, "Epics server started");
     for(;!server_is_shutting_down;) fileDescriptorManager.process(1000.0);
+    return (void*)0;
 }
 

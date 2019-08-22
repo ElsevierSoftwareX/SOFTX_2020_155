@@ -10,7 +10,6 @@
 
 import os, sys
 import re
-import string
 
 error = False
 if sys.argv[1] == "-q":
@@ -69,7 +68,7 @@ rcg_lib_path = os.path.join('/opt/rtcds',site,ifo.lower(),'core/release/src/epic
 
 medm_target = os.path.join('/opt/rtcds',site,ifo.lower(),'medm',model_name)
 
-cds_medm_path = '/'.join(['/opt/rtcds',site,ifo.lower(),'medm/templates/']) 
+cds_medm_path = '/'.join(['/opt/rtcds',site,ifo.lower(),'medm/templates/'])
 cds_scripts_path = '/'.join(['/opt/rtcds',site,ifo.lower(),'/scripts/post_build/'])
 
 tmp = model_name + 'epics/burt'
@@ -105,7 +104,7 @@ except KeyError:
     sys.stderr.write(medm_target + "\n\n")
 
 #Get the actual model file
-full_model_path = find_file_in_path(rcg_lib_path,model_name + '.mdl')  
+full_model_path = find_file_in_path(rcg_lib_path,model_name + '.mdl')
 
 #An object that contains all the Name "C1SY", Descrption "Blah, blah" in a dictionary
 #Also contains a subarray of blocks underneath it
@@ -113,7 +112,7 @@ class Block:
   def __init__(self):
     self.data = {}
     self.subblocks = []
-    
+
 #Parses a "block" of an .mdl file and returns the corresponding Block structure along with the last line number parsed
 def parse_block(data_lines,line_number,reference_name):
   new_block = Block()
@@ -148,7 +147,7 @@ def parse_block(data_lines,line_number,reference_name):
         except KeyError:
           pass
         new_block.subblocks.append(temp_block)
-      #We have just a line with data      
+      #We have just a line with data
       else:
         new_data_entry = data_lines[line_number]
         #Handle the case of descriptions/inputs which are multiple lines, with 2nd and later starting with '"'.
@@ -184,7 +183,7 @@ def parse_block(data_lines,line_number,reference_name):
     #Search the file (i.e. data_lines) for the names in order
     for name in reference_name_tree:
       for current_line_count in range(line_number,len(data_lines)):
-	current_line = data_lines[current_line_count]
+        current_line = data_lines[current_line_count]
         if (current_line.split()[0] == 'Name'):
           if (current_line.split('"')[1] == name):
             break
@@ -208,12 +207,12 @@ def parse_block(data_lines,line_number,reference_name):
     while data_lines[current_line_count].split()[-1] != '{':
       current_line_count += 1
       if current_line_count == len(data_lines):
-	sys.stderr.write("ERROR: For part: " + reference_name + "\n")
-	sys.stderr.write("Could not find the proper library reference.\n")
-	sys.stderr.write("Your model may be referencing a different source model than what is in the current library path.\n\n")
-	sys.stderr.write("Current path is: " + rcg_lib_path + "\n\n")
-  	sys.stderr.write("Exiting\n")
-  	sys.exit(1)
+        sys.stderr.write("ERROR: For part: " + reference_name + "\n")
+        sys.stderr.write("Could not find the proper library reference.\n")
+        sys.stderr.write("Your model may be referencing a different source model than what is in the current library path.\n\n")
+        sys.stderr.write("Current path is: " + rcg_lib_path + "\n\n")
+        sys.stderr.write("Exiting\n")
+        sys.exit(1)
 
     new_block,scratch = parse_block(data_lines,current_line_count,None)
     if description_present:
@@ -236,7 +235,7 @@ def find_library(library_name):
         sys.stderr.write("Could not open reference file: " + reference_file_name + "\n")
         sys.stderr.write("Exiting\n")
         sys.exit(1)
-      return reference_file.readlines()    
+      return reference_file.readlines()
   sys.stderr.write("ERROR: For part referencing: " + library_name + "\n")
   sys.stderr.write("Could not find reference file: " + reference_file_name + "\n")
   sys.stderr.write("Exiting\n")
@@ -270,7 +269,7 @@ def read_tree(node,name_so_far):
           name_so_far = name_so_far + (node.data['Name'].strip('"'),)
       else:
         name_so_far = name_so_far + (node.data['Name'].strip('"'),)
-    
+
     chan_name = ''
     part_name = ''
     if (len(name_so_far) == 0):
@@ -286,7 +285,7 @@ def read_tree(node,name_so_far):
       chan_name = '_'.join((temp_name,) + name_so_far[2:len(name_so_far)])
       temp_name = ifo.upper() + name_so_far[0]
       part_name = '_'.join((temp_name,) + name_so_far[1:len(name_so_far)])
-  
+
     #Arrays containing lines with keywords at the beginning of the line
     new_script_line = []
     new_adl_line = []
@@ -303,7 +302,7 @@ def read_tree(node,name_so_far):
         if (re.search('^ADL=',line) != None):
           new_adl_line.append(re.search('^ADL=(.*)',line).group(1))
         if (re.search('^NO DEFAULT',line) != None):
-          make_library_screens = False  
+          make_library_screens = False
           print("No default screens")
 
     if ('Reference_Descrip' in node.data) and (make_library_screens):
@@ -313,7 +312,7 @@ def read_tree(node,name_so_far):
             script_line.append(re.search('^SCRIPT=(.*)',line).group(1))
           if (re.search('^ADL=',line) != None):
             adl_line.append(re.search('^ADL=(.*)',line).group(1))
- 
+
     if new_script_line != []:
       for script_entry in new_script_line:
         script_line.append(script_entry)
@@ -324,7 +323,7 @@ def read_tree(node,name_so_far):
     dict_of_params = {}
     list_of_params = model_params.split('\\n')
     for param in list_of_params:
-      try: 
+      try:
         dict_of_params[param.split('=')[0]] = param.split('=')[1]
       except:
         pass
@@ -350,13 +349,13 @@ def read_tree(node,name_so_far):
     #Run through each line found and do the approriate thing
     for script in script_line:
       for before, after in default_subs:
-        script = string.replace(script,before,after)
+        script = str.replace(script,before,after)
       script_name = script.split(' ')[0]
       script_location = find_file_in_path(cds_scripts_path,script_name)
       script_command = script_location + script[len(script_name):]
       print(script_command)
       os.system(script_command)
-      
+
     for adl in adl_line:
       custom_subs = []
       adl_info = adl.strip().split(',')
@@ -393,7 +392,7 @@ def read_tree(node,name_so_far):
                 change_name = True
             if change_name:
               for before, after in default_subs:
-                adl_target_name = string.replace(adl_target_name,before,after)
+                adl_target_name = str.replace(adl_target_name,before,after)
               for before, after in custom_subs:
                 if not '--name' in before:
                   adl_target_name = string.repalce(adl_target_name,before,after) 
@@ -402,11 +401,11 @@ def read_tree(node,name_so_far):
 
             for k in range(len(temp_lines)):
               for before, after in default_subs:
-                temp_lines[k] = string.replace(temp_lines[k],before,after)
+                temp_lines[k] = str.replace(temp_lines[k],before,after)
               for before, after in custom_subs:
                 if not '--name' in before:
-                  temp_lines[k] = string.replace(temp_lines[k],before,after)
-	    if quiet_mode == False:
+                  temp_lines[k] = str.replace(temp_lines[k],before,after)
+            if quiet_mode == False:
               print(adl_target_name)
             output_medm_file = open(adl_target_name,'w')
             for k in range(len(temp_lines)):
@@ -423,7 +422,7 @@ def read_tree(node,name_so_far):
       read_tree(node, name_so_far)
 
 
-############################  
+############################
 #Start of the actual program
 
 #Very first block, which will have the system name associated with it.
@@ -461,33 +460,31 @@ model_params = find_cdsParam(root_block)
 #Do something fancy with top names now
 read_tree(root_block,(model_name[2:5].upper(),))
 if os.path.isfile(epics_sdf_file):
-	print('safe.snap exists ')
+  print('safe.snap exists ')
 else:
-	print('Creating safe.snap file')
-	f = open(epics_burt_file,'r')
-	sdf = open(epics_sdf_file,'w')
-	for line in f:
-		if '.HSV' in line or '.LSV' in line or '.HIGH' in line or '.LOW' in line or '.OSV' in line or '.ZSV' in line:
-			continue
-		word = line.split()
-		if word[0] == 'RO':
-			continue
-		elif '_SW1S' in word[0]:
-			tmp = word[0] + ' 1 4.000000000000000e+00 0xffffffff \n'  
-			sdf.write(tmp)
-		elif '_SW2S' in word[0]:
-			tmp = word[0] + ' 1 1.536000000000000e+03 0xffffffff \n'  
-			sdf.write(tmp)
-		elif '_BURT_RESTORE' in word[0]:
-			tmp = word[0] + ' 1 1.000000000000000e+00 1 \n'  
-			sdf.write(tmp)
-		elif '_DACDT_ENABLE' in word[0]:
-			tmp = word[0] + ' 1 OFF 1 \n'  
-			sdf.write(tmp)
-		else:
-			tmp = word[0] + ' 1 1.000000000000000e+00 1 \n'  
-			sdf.write(tmp)
-	f.close()
-	sdf.close()
-
-
+  print('Creating safe.snap file')
+  f = open(epics_burt_file,'r')
+  sdf = open(epics_sdf_file,'w')
+  for line in f:
+    if '.HSV' in line or '.LSV' in line or '.HIGH' in line or '.LOW' in line or '.OSV' in line or '.ZSV' in line:
+      continue
+    word = line.split()
+    if word[0] == 'RO':
+      continue
+    elif '_SW1S' in word[0]:
+      tmp = word[0] + ' 1 4.000000000000000e+00 0xffffffff \n'
+      sdf.write(tmp)
+    elif '_SW2S' in word[0]:
+      tmp = word[0] + ' 1 1.536000000000000e+03 0xffffffff \n'
+      sdf.write(tmp)
+    elif '_BURT_RESTORE' in word[0]:
+      tmp = word[0] + ' 1 1.000000000000000e+00 1 \n'
+      sdf.write(tmp)
+    elif '_DACDT_ENABLE' in word[0]:
+      tmp = word[0] + ' 1 OFF 1 \n'
+      sdf.write(tmp)
+    else:
+      tmp = word[0] + ' 1 1.000000000000000e+00 1 \n'
+      sdf.write(tmp)
+  f.close()
+  sdf.close()

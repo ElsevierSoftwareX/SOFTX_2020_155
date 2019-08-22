@@ -1,0 +1,86 @@
+set thread_stack_size=10240;
+#set cit_40m=1;
+set dcu_status_check=1;
+#set symm_gps_offset=-1;
+#set controller_dcu=22;
+set debug=0;
+set log=6;
+set zero_bad_data=0;
+set master_config="/etc/advligorts/master/master";
+configure channels begin end;
+tpconfig "/etc/advligorts/master/testpoint.par";
+
+status dcu;
+
+set gps_leaps = 820108813;
+set detector_name="TST";
+set detector_prefix="X5";
+set detector_longitude=-90.7742403889;
+set detector_latitude=30.5628943337;
+set detector_elevation=.0;
+set detector_azimuths=1.1,4.7123889804;
+set detector_altitudes=1.0,2.0;
+set detector_midpoints=2000.0, 2000.0;
+
+#enable frame_wiper;
+set num_dirs = 10;
+set frames_per_dir=225;
+set full_frames_per_file=1;
+set full_frames_blocks_per_frame=16;
+set frame_dir="/frames/full", "X-X5_R-", ".gwf";
+
+#enable trend_frame_wiper;
+set trend_num_dirs=10;
+set trend_frames_per_dir=1440;
+set trend_frame_dir= "/frames/trend/second", "X-X5_T-", ".gwf";
+
+set minute-trend-num-dirs=10;
+set minute-trend-frames-per-dir=24;
+set minute-trend-frame-dir="/frames/trend/minute", "X-X5_M-", ".gwf";
+
+#set raw-minute-trend-dir="/frames/trend/minute/raw";
+#set raw_minute_trend_saving_period=5;
+
+set nds-jobs-dir="/var/run/nds";
+
+set parameter "shmem_input" = "local_dc";
+set parameter "shmem_size" = "104857600";
+
+
+#enable minute-trend-frame-wiper;
+#set minute-trend-num-dirs=10;
+#set minute-trend-frames-per-dir=24;
+#set minute-trend-frame-dir="/frames/trend/minute", "M-M-", ".gwf";
+#
+#scan minute-trend-frames;
+#scan trend-frames;
+scan frames;
+
+start main 5;
+start profiler;
+
+# comment out this block to stop saving data
+
+# The raw frames
+start frame-saver;
+sync frame-saver;
+
+start trender 600 60;
+start trend profiler;
+start trend-frame-saver;
+sync trend-frame-saver;
+start minute-trend-frame-saver;
+sync minute-trend-frame-saver;
+#start raw-minute-trend-saver;
+
+#start fast-writer "127.255.255.255" broadcast="127.0.0.0" all;
+sleep 2;
+
+start producer;
+start epics dcu;
+start epics server "X5:DAQ-SHM0_" "X5:DAQ-SHM0_";
+
+start listener 8087;
+start listener 8088 1;
+sleep 60;
+clear crc;

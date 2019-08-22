@@ -23,22 +23,17 @@
 #include <time.h>
 #include "../include/daqmap.h"
 #include "../include/daq_core.h"
-#include "dc_utils.h"
+#include "../zmq_stream/dc_utils.h"
 
-#include "sisci_types.h"
-#include "sisci_api.h"
-#include "sisci_error.h"
-#include "sisci_demolib.h"
-#include "testlib.h"
+// #include "testlib.h"
 
-#include "simple_pv.h"
+#include "../zmq_stream/simple_pv.h"
 
 #define __CDECL
 
 #define DO_HANDSHAKE 0
 
 
-#include "./dolphin_common.c"
 
 #define MIN_DELAY_MS 5
 #define MAX_DELAY_MS 40
@@ -72,8 +67,8 @@ MX_MUTEX_T stream_mutex;
 #define MATCH_VAL_THREAD 1
 #define THREADS_PER_NIC     16
 #define IX_STOP_SEC     5
-static int xmitDataOffset[IX_BLOCK_COUNT];
-daq_multi_cycle_header_t *xmitHeader[IX_BLOCK_COUNT];
+
+// daq_multi_cycle_header_t *xmitHeader[IX_BLOCK_COUNT];
 
 extern void *findSharedMemorySize(char *,int);
 
@@ -110,9 +105,6 @@ usage()
     fprintf(stderr, "-l filename - log file name\n");
     fprintf(stderr, "-s - number of FE computers to connect (1-32): Default = 32\n");
     fprintf(stderr, "-v - verbose prints diag test data\n");
-    fprintf(stderr, "-g - Dolphin IX channel to xmit on (0-3)\n");
-    fprintf(stderr, "-p - Debug pv prefix, requires -P as well\n");
-    fprintf(stderr, "-P - Path to a named pipe to send PV debug information to\n");
     fprintf(stderr, "-d - Max delay in milli seconds to wait for a FE to send data, defaults to 10\n");
     fprintf(stderr, "-t - Number of rcvr threads per NIC: default = 16\n");
     fprintf(stderr, "-n - Data Concentrator number (0 or 1) : default = 0\n");
@@ -263,7 +255,7 @@ int
 main(int argc, char **argv)
 {
     pthread_t thread_id[MAX_FE_COMPUTERS];
-    unsigned int nsys = MAX_FE_COMPUTERS; // The number of mapped shared memories (number of data sources)
+    int nsys = MAX_FE_COMPUTERS; // The number of mapped shared memories (number of data sources)
     char *buffer_name = "ifo";
     int c;
     int ii;                 // Loop counter
@@ -271,11 +263,6 @@ main(int argc, char **argv)
     int delay_cycles = 0;
 
     extern char *optarg;    // Needed to get arguments to program
-
-    // PV/debug information
-    char *pv_prefix = 0;
-    char *pv_debug_pipe_name = 0;
-    int pv_debug_pipe = -1;
 
     // Declare shared memory data variables
     daq_multi_cycle_header_t *ifo_header;
@@ -287,18 +274,20 @@ main(int argc, char **argv)
     int max_data_size_mb = 100;
     int max_data_size = 0;
     char *mywriteaddr;
-    int xmitBlockNum = 0;
     int dc_number = 1;
     
 
     /* set up defaults */
-    int xmitData = 0;
     int tpn = THREADS_PER_NIC;
 
 
+    if (argc<3) {
+        usage();
+        return(-1);
+    }
 
     // Get arguments sent to process
-    while ((c = getopt(argc, argv, "b:hs:m:g:vp:P:d:l:t:n:")) != EOF) switch(c) {
+    while ((c = getopt(argc, argv, "b:hs:m:vp:d:l:t:n:")) != EOF) switch(c) {
     case 's':
         nsys = atoi(optarg);
         if(nsys > MAX_FE_COMPUTERS) {
@@ -330,21 +319,11 @@ main(int argc, char **argv)
             return -1;
         }
         break;
-    case 'g':
-            segmentId = atoi(optarg);
-            xmitData = 1;
-            break;
     case 't':
             tpn = atoi(optarg);
             break;
     case 'b':
         buffer_name = optarg;
-        break;
-    case 'p':
-        pv_prefix = optarg;
-        break;
-    case 'P':
-        pv_debug_pipe_name = optarg;
         break;
     case 'd':
         delay_ms = atoi(optarg);
@@ -366,6 +345,7 @@ main(int argc, char **argv)
         usage();
         exit(1);
     }
+
     max_data_size = max_data_size_mb * 1024*1024;
     delay_cycles = delay_ms * 10;
 
@@ -390,23 +370,6 @@ main(int argc, char **argv)
     ifo_header->cycleDataSize = cycle_data_size;
     ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
-#if 0
-    if(xmitData) {
-        // Connect to Dolphin
-        error = dolphin_init();
-        fprintf(stderr,"Read = 0x%lx \n Write = 0x%lx \n",(long)readAddr,(long)writeAddr);
-
-        // Set pointer to xmit header in Dolphin xmit data area.
-        mywriteaddr = (char *)writeAddr;
-        for(ii=0;ii<IX_BLOCK_COUNT;ii++) {
-            xmitHeader[ii] = (daq_multi_cycle_header_t *)mywriteaddr;
-            mywriteaddr += IX_BLOCK_SIZE;
-            xmitDataOffset[ii] = IX_BLOCK_SIZE * ii + sizeof(struct daq_multi_cycle_header_t);
-            fprintf(stderr,"Dolphin at 0x%lx and 0x%lx",(long)xmitHeader[ii],(long)xmitDataOffset[ii]);
-        }
-    }
-#endif
-
     fprintf(stderr,"nsys = %d\n",nsys);
 
     // Make 0MQ socket connections
@@ -430,7 +393,6 @@ main(int argc, char **argv)
     size_t zbuffer_remaining = 0;
     int dc_datablock_size = 0;
     int datablock_size_running = 0;
-    int datablock_size_mb_s = 0;
     static const int header_size = sizeof(daq_multi_dcu_header_t);
     char dcstatus[4096];
     char dcs[48];
@@ -445,131 +407,16 @@ main(int argc, char **argv)
     int sendLength = 0;
 
     int min_cycle_time = 1 << 30;
-    int pv_min_cycle_time = 0;
     int max_cycle_time = 0;
-    int pv_max_cycle_time = 0;
     int mean_cycle_time = 0;
-    int pv_mean_cycle_time = 0;
-    int pv_dcu_count = 0;
-    int pv_total_datablock_size = 0;
-    int pv_datablock_size_mb_s = 0;
     int uptime = 0;
-    int pv_uptime = 0;
-    int gps_time = 0;
-    int pv_gps_time = 0;
     int missed_flag = 0;
     int missed_nsys[MAX_FE_COMPUTERS];
     int64_t recv_time[MAX_FE_COMPUTERS];
     int64_t min_recv_time = 0;
-    int64_t cur_ref_time = 0;
     int recv_buckets[(MAX_DELAY_MS/5)+2];
     int festatus = 0;
-    int pv_festatus = 0;
     int ix_xmit_stop = 0;
-    SimplePV pvs[] = {
-            {
-                    "RECV_MIN_MS",
-                    SIMPLE_PV_INT,
-                    &pv_min_cycle_time,
-
-                    80,
-                    45,
-                    70,
-                    54,
-            },
-            {
-                    "RECV_MAX_MS",
-                    SIMPLE_PV_INT,
-                    &pv_max_cycle_time,
-
-                    80,
-                    45,
-                    70,
-                    54,
-            },
-            {
-                    "RECV_MEAN_MS",
-                    SIMPLE_PV_INT,
-                    &pv_mean_cycle_time,
-
-                    80,
-                    45,
-                    70,
-                    54,
-            },
-            {
-                    "DCU_COUNT",
-                    SIMPLE_PV_INT,
-                    &pv_dcu_count,
-
-                    120,
-                    0,
-                    115,
-                    0,
-            },
-            {
-                    "DATA_SIZE",
-                    SIMPLE_PV_INT,
-                    &pv_total_datablock_size,
-
-                    100*1024*1024,
-                    0,
-                    90*1024*1024,
-                    1*1024*1024,
-            },
-            {
-                    "DATA_RATE",
-                    SIMPLE_PV_INT,
-                    &pv_datablock_size_mb_s,
-
-                    100*1024*1024,
-                    0,
-                    90*1024*1024,
-                    1000000,
-            },
-            {
-                    "UPTIME_SECONDS",
-                    SIMPLE_PV_INT,
-                    &pv_uptime,
-
-                    100*1024*1024,
-                    0,
-                    90*1024*1024,
-
-                    1,
-            },
-            {
-                    "RCV_STATUS",
-                    SIMPLE_PV_INT,
-                    &pv_festatus,
-
-                    0xffffffff,
-                    0,
-                    0xfffffffe,
-
-                    1,
-            },
-            {
-                    "GPS",
-                    SIMPLE_PV_INT,
-                    &pv_gps_time,
-
-                    0xfffffff,
-                    0,
-                    0xfffffffe,
-
-                    1,
-            },
-
-    };
-    if (pv_debug_pipe_name)
-    {
-        pv_debug_pipe = open(pv_debug_pipe_name, O_NONBLOCK | O_RDWR, 0);
-        if (pv_debug_pipe < 0) {
-            fprintf(stderr, "Unable to open %s for writting (pv status)\n", pv_debug_pipe_name);
-            exit(1);
-        }
-    }
 
     missed_flag = 1;
     memset(&missed_nsys[0], 0, sizeof(missed_nsys));
@@ -590,6 +437,9 @@ main(int argc, char **argv)
             }
             timeout += 1;
         }while(!any_rdy && timeout < 50);
+#ifndef TIME_INTERVAL_DIAG
+        mytime = s_clock();
+#endif
 
         // Wait up to delay_ms ms in 1/10ms intervals until data received from everyone or timeout
         timeout = 0;
@@ -602,13 +452,22 @@ main(int argc, char **argv)
             timeout += 1;
         }while(threads_rdy < nsys && timeout < delay_cycles);
         if(timeout >= 100) rcv_errors += (nsys - threads_rdy);
+#ifndef TIME_INTERVAL_DIAG
+        mylasttime = s_clock();
+#endif
 
         if(any_rdy) {
             int tbsize = 0;
-            // Timing diagnostics
+#ifdef TIME_INTERVAL_DIAG
+            // Timing diagnostics for time between cycles
             mytime = s_clock();
             myptime = mytime - mylasttime;
             mylasttime = mytime;
+#else
+            // Timing diagnostics for rcv window
+            myptime = mylasttime - mytime;
+#endif
+
             if (myptime < min_cycle_time) {
                 min_cycle_time = myptime;
             }
@@ -719,30 +578,16 @@ main(int argc, char **argv)
             ifoDataBlock->header.dcuTotalModels = mytotaldcu;
             // Set multi_cycle head cycle to indicate data ready for this cycle
             ifo_header->curCycle = nextCycle;
-            xmitBlockNum = nextCycle % IX_BLOCK_COUNT;
 
             // Calc IX message size
             sendLength = header_size + ifoDataBlock->header.fullDataBlockSize;
             for (ii = 0; ii < nsys; ++ii) {
-                cur_ref_time = 0;
                 recv_time[ii] -= min_recv_time;
             }
             datablock_size_running += dc_datablock_size;
             if (nextCycle == 0) {
-                datablock_size_mb_s = datablock_size_running / 1024 ;
-                pv_datablock_size_mb_s = datablock_size_mb_s;
                 uptime ++;
-                pv_uptime = uptime;
-                gps_time = ifoDataBlock->header.dcuheader[0].timeSec;
-                pv_gps_time = gps_time;
-                pv_dcu_count = mytotaldcu;
-                pv_festatus = festatus;
                 mean_cycle_time = (n_cycle_time > 0 ? mean_cycle_time / n_cycle_time : 1 << 31);
-
-                pv_mean_cycle_time = mean_cycle_time;
-                pv_max_cycle_time = max_cycle_time;
-                pv_min_cycle_time = min_cycle_time;
-                send_pv_update(pv_debug_pipe, pv_prefix, pvs, sizeof(pvs)/sizeof(pvs[0]));
 
                 if (do_verbose) {
                     fprintf(stderr,"\nData rdy for cycle = %d\t\tTime Interval = %ld msec\n", nextCycle, myptime);
@@ -762,37 +607,6 @@ main(int argc, char **argv)
             } else {
                 missed_flag <<= 1;
             }
-#if 0
-            if(xmitData && !ix_xmit_stop) {
-                if (sendLength > IX_BLOCK_SIZE)
-                {
-                    fprintf(stderr, "Buffer overflow.  Sending %d bytes into a dolphin block that holds %d\n",
-                    (int)sendLength, (int)IX_BLOCK_SIZE);
-                    abort();
-                }
-                // WRITEDATA to Dolphin Network
-                SCIMemCpy(sequence,nextData, remoteMap,xmitDataOffset[xmitBlockNum],sendLength,memcpyFlag,&error);
-                error = SCI_ERR_OK;
-                if (error != SCI_ERR_OK) {
-                    fprintf(stderr,"SCIMemCpy failed - Error code 0x%x\n",error);
-                    fprintf(stderr,"For reference the expected error codes are:\n");
-                    fprintf(stderr,"SCI_ERR_OUT_OF_RANGE = 0x%x\n", SCI_ERR_OUT_OF_RANGE);
-                    fprintf(stderr,"SCI_ERR_SIZE_ALIGNMENT = 0x%x\n", SCI_ERR_SIZE_ALIGNMENT);
-                    fprintf(stderr,"SCI_ERR_OFFSET_ALIGNMENT = 0x%x\n", SCI_ERR_OFFSET_ALIGNMENT);
-                    fprintf(stderr,"SCI_ERR_TRANSFER_FAILED = 0x%x\n", SCI_ERR_TRANSFER_FAILED);
-                    return error;
-                }
-                // Set data header information
-                unsigned int maxCycle = ifo_header->maxCycle;
-                unsigned int curCycle = ifo_header->curCycle;
-                xmitHeader[xmitBlockNum]->maxCycle = maxCycle;
-                xmitHeader[xmitBlockNum]->cycleDataSize = sendLength;;
-                // Send cycle last as indication of data ready for receivers
-                xmitHeader[xmitBlockNum]->curCycle = curCycle;
-                // Have to flush the buffers to make data go onto Dolphin network
-                SCIFlush(sequence,SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY);
-            }
-#endif
             if(ix_xmit_stop)  {
                 ix_xmit_stop --;
                 if(ix_xmit_stop == 0) fprintf(stderr,"Restarting Dolphin Xmit\n");
@@ -819,11 +633,6 @@ main(int argc, char **argv)
     sleep(5);
     fprintf(stderr,"closing out MX\n");
     mx_finalize();
-    if(xmitData) {
-        fprintf(stderr,"closing out ix\n");
-        // Cleanup the Dolphin connections
-        error = dolphin_closeout();
-    }
   
     exit(0);
 }

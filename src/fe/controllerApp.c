@@ -57,7 +57,7 @@ void deallocate_dac_channels(void) {
 }
 
 //***********************************************************************
-// TASK: fe_start()	
+// TASK: fe_start_app()	
 // This routine is the skeleton for all front end code	
 //***********************************************************************
 /// This function is the main real-time sequencer or scheduler for all code built
@@ -69,7 +69,7 @@ void deallocate_dac_channels(void) {
 /// loop is synchronized and triggered by the arrival of ADC data, the ADC module in turn
 /// is triggered to sample by the 64KHz clock provided by the Timing Distribution System.
 ///	- 
-void *fe_start(void *arg)
+void *fe_start_app(void *arg)
 {
   int ii,jj,kk,ll;			// Dummy loop counter variables
   static int clock1Min = 0;		///  @param clockMin Minute counter (Not Used??)
@@ -274,7 +274,7 @@ udelay(1000);
   // SLAVE needs to sync with MASTER by looking for cycle 0 count in ipc memory
   // Find memory buffer of first ADC to be used in SLAVE application.
   ll = cdsPciModules.adcConfig[0];
-  rdtscll(cpuClock[CPU_TIME_CYCLE_START]);
+  cpuClock[CPU_TIME_CYCLE_START] = rdtsc_ordered();
 
   pLocalEpics->epicsOutput.fe_status = INIT_SYNC;
     // Spin until cycle 0 detected in first ADC buffer location.
@@ -284,7 +284,7 @@ udelay(1000);
   pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;
 
   timeSec = ioMemData->iodata[ll][0].timeSec;
-  rdtscll(cpuClock[CPU_TIME_CYCLE_END]);
+  cpuClock[CPU_TIME_CYCLE_END] = rdtsc_ordered();
   timeinfo.cycleTime = (cpuClock[CPU_TIME_CYCLE_END] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
   // Get GPS seconds from MASTER
   timeSec = ioMemData->gpsSecond;
@@ -299,7 +299,7 @@ udelay(1000);
   timeSec = current_time_fe() -1;
 #endif
 
-  rdtscll(adcinfo.adcTime);
+  adcinfo.adcTime = rdtsc_ordered();
 
   /// ******************************************************************************\n
   /// Enter the infinite FE control loop  ******************************************\n
@@ -354,7 +354,7 @@ udelay(1000);
 		/// \> Set counters for next read from ipc memory
         ioClock = (ioClock + 1) % IOP_IO_RATE;
         ioMemCntr = (ioMemCntr + 1) % IO_MEMORY_SLOTS;
-       	rdtscll(cpuClock[CPU_TIME_CYCLE_START]);
+  	cpuClock[CPU_TIME_CYCLE_START] = rdtsc_ordered();
 
 	}
 
@@ -364,9 +364,9 @@ udelay(1000);
 
 /// \> Call the front end specific application  ******************\n
 /// - -- This is where the user application produced by RCG gets called and executed. \n\n
-    rdtscll(cpuClock[CPU_TIME_USR_START]);
+    cpuClock[CPU_TIME_USR_START] = rdtsc_ordered();
  	iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
-    rdtscll(cpuClock[CPU_TIME_USR_END]);
+    cpuClock[CPU_TIME_USR_END] = rdtsc_ordered();
   	odcStateWord = 0;
 
 
@@ -542,7 +542,7 @@ udelay(1000);
     // // Update end of cycle information
     // // *****************************************************************
 	// Capture end of cycle time.
-    rdtscll(cpuClock[CPU_TIME_CYCLE_END]);
+    cpuClock[CPU_TIME_CYCLE_END] = rdtsc_ordered();
 
     captureEocTiming(cycleNum, cycle_gps_time, &timeinfo, &adcinfo);
 

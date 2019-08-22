@@ -25,4 +25,13 @@ if (OPENMX_FOUND)
 	set_target_properties(omx_xmit PROPERTIES LINKER_LANGUAGE CXX)
 
     install(TARGETS omx_xmit DESTINATION bin)
+
+	add_executable(omx_recv omc_recv.c)
+	target_link_libraries(omx_recv PUBLIC
+			driver::shmem
+			zmq::simple_pv
+			openmx::openmx
+			${CMAKE_THREAD_LIBS_INIT}
+			)
+	install(TARGETS omx_recv DESTINATION bin)
 endif (OPENMX_FOUND)

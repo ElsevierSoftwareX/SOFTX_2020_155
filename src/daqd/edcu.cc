@@ -79,6 +79,7 @@ edcu::edcu_main ()
                     (void *)&(daqd.edcu1.channel_value[i]), 0);
      }
      system_log(1, "EDCU has %d channels configured; first=%d\n", num_chans, fidx);
+     return (void*)0;
 }
 
 #endif /* if EPICS_EDCU != 1 */
