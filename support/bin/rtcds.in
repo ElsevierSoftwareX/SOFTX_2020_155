@@ -1,35 +1,45 @@
 #!/bin/bash -e
 
+log() {
+    echo "$@" >&2
+}
+
 RTS_VERSION=${RTS_VERSION:-__VERSION__}
+if [[ "$RTS_VERSION" =~ ._VERSION_. ]] ; then
+    log RTS_VERSION variable not set.
+    exit 1
+fi
+
+# this should define all USER_VARS (see below)
 ENV_FILE=${RTS_ENV:-/etc/advligorts/env}
+source "$ENV_FILE" 2>/dev/null || true
+
 RCG_SRC=${RCG_SRC:-/usr/share/advligorts/src}
 RCG_BUILDD=${RCG_BUILDD:-/var/cache/advligorts/rcg-$RTS_VERSION}
 RTS_USER=${RTS_USER:-controls}
-RTSYSTAB=/etc/rtsystab
-
-source "$ENV_FILE" 2>/dev/null || true
+RTSYSTAB=${RTSYSTAB:-/etc/rtsystab}
 
 SITE=${SITE^^*}
 site=${SITE,,*}
 IFO=${IFO^^*}
 ifo=${IFO,,*}
 
+# FIXME: the RCG hard-codes /opt/rtcds as the root
+TARGET=/opt/rtcds/${site}/${ifo}
+
 # search paths for C source code
 CDS_SRC=${CDS_SRC:-$RCG_LIB_PATH}
 CDS_IFO_SRC=${CDS_IFO_SRC:-$CDS_SRC}
 
 # add RCG module source to lib path
+# FIXME: rename RCG_MOD_PATH
 RCG_LIB_PATH=$RCG_LIB_PATH:${RCG_SRC}/src/epics/simLink/:${RCG_SRC}/src/epics/simLink/lib
 
-USER_VARS=(SITE IFO OPTRTCDS RCG_LIB_PATH)
+USER_VARS=(SITE IFO RCG_LIB_PATH)
 LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RTS_USER RTSYSTAB)
 EXPORT_VARS=(${USER_VARS[@]} site ifo CDS_SRC CDS_IFO_SRC)
 
 ##################################################
-
-log() {
-    echo "$@" >&2
-}
 
 check_env() {
     for var in ${USER_VARS[*]} ; do
@@ -50,20 +60,25 @@ check_env() {
     done
 }
 
-prep_target(){
-    log "creating OPTRTCDS..."
-    mkdir -p ${OPTRTCDS}/{target,chans}/tmp
+prep_buildd() {
+    if [ ! -d "$RCG_BUILDD" ] ; then
+	log "creating RCG_BUILDD $RCG_BUILDD..."
+	sudo mkdir -p "$RCG_BUILDD"
+	sudo chown $RTS_USER:$RTS_USER "$RCG_BUILDD"
+
+	log "configuring RCG_BUILDD $RCG_BUILDD..."
+	cd "$RCG_BUILDD"
+	"$RCG_SRC"/configure
+    fi
 }
 
-prep_buildd() {
-    sudo mkdir -p "$RCG_BUILDD"
-    sudo chown "$RTS_USER" "$RCG_BUILDD"
-    if [ -e "$RCG_BUILDD"/Makefile ] ; then
-	return
+prep_target(){
+    if [ ! -d "$TARGET" ] ; then
+	log "creating TARGET $TARGET..."
+	sudo mkdir -p "$TARGET"
+	sudo chown -R $RTS_USER:$RTS_USER "$TARGET"
+	sudo -u $RTS_USER mkdir -p "${TARGET}/{target,chans}/tmp"
     fi
-    log "configuring RCG_BUILDD..."
-    cd "$RCG_BUILDD"
-    "$RCG_SRC"/configure
 }
 
 ########
@@ -243,6 +258,7 @@ case $cmd in
 	    exit 2
 	fi
 	check_env
+	prep_target
 	install_sys $@
 	;;
     'start')
