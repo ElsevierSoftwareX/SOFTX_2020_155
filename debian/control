@@ -94,7 +94,7 @@ Depends:
  advligorts-mbuf-dkms,
  ${misc:Depends},
  ${shlibs:Depends},
-Conflicts: advligorts-rcg (<4.0.0~dev0)
+Conflicts: advligorts-rcg (<< 4.0.0~dev0)
 Recommends: advligorts-rcg
 Description: advLigoRTS front end support
  Core component of advLigoRTS.
