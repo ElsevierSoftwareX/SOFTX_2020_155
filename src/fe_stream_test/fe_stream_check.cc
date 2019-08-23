@@ -22,6 +22,11 @@
 
 #include "daq_core.h"
 
+extern "C" {
+
+#include "../drv/crc.c"
+}
+
 /*!
  * @brief Generic buffer typedef
  */
@@ -506,6 +511,7 @@ public:
         std::vector<char> tmp(model.meta_data.rate*8);
 
         const char* data = &(slice_header->dataBlock[dcu_data_offset]);
+        char* data_start = const_cast<char*>(data);
         for (int i = 0; i < model.channels.size(); ++i)
         {
             std::fill(tmp.begin(), tmp.end(), 1);
@@ -523,6 +529,15 @@ public:
 
             data += gen_size;
         }
+
+        int dcu_data_size = static_cast<int>(data - data_start);
+        unsigned int data_crc = crc_len(dcu_data_size, crc_ptr(data_start, dcu_data_size, 0));
+        if (data_crc != dcu_header->dataCrc)
+        {
+            std::cerr << "CRC mismatch on dcu id " << dcu_header->dcuId << "\n";
+            throw std::runtime_error("CRC Mismatch");
+        }
+
         for (int i = 0; i < dcu_header->tpCount; ++i)
         {
             int expected_len = (model.meta_data.rate * sizeof(float))/16;
@@ -623,5 +638,9 @@ main(int argc, char* argv[])
 
     CheckDCUData check_dcu_data(opts, header);
     std::for_each( models.begin(), models.end(), check_dcu_data);
+    if (opts.verbose)
+    {
+        std::cout << "Tests passed\n";
+    }
     return 0;
 }
