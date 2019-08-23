@@ -52,3 +52,4 @@ override_dh_auto_test:
 
 override_dh_clean:
 	rm -rf build
+	dh_clean
