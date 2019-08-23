@@ -48,7 +48,7 @@ output_ini_files( const std::string&          ini_dir,
                   std::vector< GeneratorPtr > channels,
                   std::vector< GeneratorPtr > tp_channels,
                   int                         dcuid,
-                  int                         model_rate)
+                  int                         model_rate )
 {
     using namespace std;
 
@@ -59,7 +59,8 @@ output_ini_files( const std::string&          ini_dir,
     ofstream os_par( fname_par.c_str( ) );
     os_ini << "[default]\ngain=1.0\nacquire=3\ndcuid=" << dcuid
            << "\nifoid=0\n";
-    os_ini << "datatype=2\ndatarate=" << model_rate << "\noffset=0\nslope=1.0\nunits=undef\n\n";
+    os_ini << "datatype=2\ndatarate=" << model_rate
+           << "\noffset=0\nslope=1.0\nunits=undef\n\n";
 
     vector< GeneratorPtr >::iterator cur = channels.begin( );
     for ( ; cur != channels.end( ); ++cur )
@@ -103,9 +104,13 @@ calculate_ini_crc( const std::string& ini_dir, const std::string& system_name )
 unsigned int
 calculate_crc( const void* buffer, size_t len )
 {
-    if (!buffer || len <= 0)
+    if ( !buffer || len <= 0 )
     {
         return 0;
     }
-    return crc_len(len, crc_ptr( reinterpret_cast<char*>(const_cast<void*>(buffer)), len, 0));
+    return crc_len(
+        len,
+        crc_ptr( reinterpret_cast< char* >( const_cast< void* >( buffer ) ),
+                 len,
+                 0 ) );
 }
