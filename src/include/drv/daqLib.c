@@ -1,7 +1,7 @@
 /*!	\file daqLib.c
  *	\brief File contains routines to support DAQ on realtime systems. \n
  *	\author R.Bork, A. Ivanov
-*/
+ */
 
 volatile DAQ_INFO_BLOCK *pInfo;   ///< Ptr to DAQ config in shmem.
 extern volatile char *_epics_shm; ///< Ptr to EPICS shmem block
@@ -47,25 +47,25 @@ inline double htond(double in) {
 /* ******************************************************************** */
 ///	@author R.Bork, A. Ivanov\n
 ///	@brief This function provides for reading GDS TP/EXC and writing DAQ
-///data. \n
+/// data. \n
 ///	@detail For additional information in LIGO DCC, see <a
-///href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=8037">T0900638
-///CDS Real-time DAQ Software</a>
+/// href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=8037">T0900638
+/// CDS Real-time DAQ Software</a>
 ///	@param[in] flag 		Initialization flag (1=Init call, 0 =
-///run)
-///	@param[in] dcuId		DAQ Data unit ID - unique within a control
-///system
-///	@param[in] daqRange		Struct defining fron end valid test point
-///and exc ranges.
+/// run)
+///	@param[in] dcuId		DAQ Data unit ID - unique within a
+///control system
+///	@param[in] daqRange		Struct defining fron end valid test
+///point and exc ranges.
 ///	@param[in] sysRate		Data rate of the code / 16
 ///	@param[in] *pFloatData[]	Pointer to TP data not associated with
-///filter modules.
+/// filter modules.
 ///	@param[in] *dspPtr		Pointer to array of filter module data.
 ///	@param[in] netStatus		Status of DAQ network
 ///	@param[out] gdsMonitor[]	Array to return values of GDS TP/EXC
-///selections.
-///	@param[out] excSignals[]	Array to write EXC signals not associated
-///with filter modules.
+/// selections.
+///	@param[out] excSignals[]	Array to write EXC signals not
+///associated with filter modules.
 ///	@return	Total size of data transmitted in KB/sec.
 
 int daqWrite(int flag, int dcuId, DAQ_RANGE daqRange, int sysRate,
@@ -77,14 +77,14 @@ int daqWrite(int flag, int dcuId, DAQ_RANGE daqRange, int sysRate,
   double dWord;               /* Temp value for storage of DAQ values */
   static int daqBlockNum;     /* 1-16, tracks DAQ cycle.		*/
   static int daqXmitBlockNum; /* 1-16, tracks shmem DAQ block to write to.
-                                 */
+                               */
   static int excBlockNum;     /* 1-16, tracks EXC block to read from.	*/
   static int excDataSize;
   static DAQ_XFER_INFO xferInfo;
   static DAQ_LKUP_TABLE localTable[DCU_MAX_CHANNELS];
   static DAQ_LKUP_TABLE excTable[DCU_MAX_CHANNELS];
   static volatile char *pWriteBuffer; /* Ptr to swing buff to write data
-                                         */
+                                       */
   static int phase;                   /* 0-1, switches swing buffers.		*/
   static int daqSlot;                 /* 0-sysRate, data slot to write data	*/
   static int excSlot;                 /* 0-sysRate, slot to read exc data	*/
@@ -98,9 +98,9 @@ int daqWrite(int flag, int dcuId, DAQ_RANGE daqRange, int sysRate,
   static int validEx;                  /* EXC signal set status indicator.	*/
   static int
       tpNum[DAQ_GDS_MAX_TP_ALLOWED]; /* TP/EXC selects to send to FB.	*/
-  static int tpNumNet
-      [DAQ_GDS_MAX_TP_ALLOWED]; /* TP/EXC selects to send to FB.	*/
-  static int totalChans;        /* DAQ + TP + EXC chans selected.	*/
+  static int tpNumNet[DAQ_GDS_MAX_TP_ALLOWED]; /* TP/EXC selects to send to FB.
+                                                */
+  static int totalChans; /* DAQ + TP + EXC chans selected.	*/
   int *statusPtr;
   volatile float *dataPtr; /* Ptr to excitation chan data.		*/
   int exChanOffset;        /* shmem offset to next EXC value.	*/
@@ -412,7 +412,7 @@ int daqWrite(int flag, int dcuId, DAQ_RANGE daqRange, int sysRate,
 
   /* ********************************************************************************
    */
-  /* Write Data to FB 			*******************************************
+  /* Write Data to FB *******************************************
    */
   /* ********************************************************************************
    */
@@ -1041,11 +1041,11 @@ int daqConfig(DAQ_INFO_BLOCK *dataInfo, DAQ_INFO_BLOCK *pInfo, char *pEpics) {
 ///	@brief This function populates the local DAQ/TP tables.
 ///	@param *pDxi	Pointer to struct with data transfer size information.
 ///	@param localTable[]	Table to be populated with data pointer
-///information
+/// information
 ///	@param sysRate			Number of code cycles in 1/16 second.
 ///	@param *dataInfo		DAQ configuration information
-///	@param *daqRange		Info on GDS TP number ranges which provides
-///type information
+///	@param *daqRange		Info on GDS TP number ranges which
+///provides type information
 ///	@return	0=OK or -1=FAIL
 // **************************************************************************************
 int loadLocalTable(DAQ_XFER_INFO *pDxi, DAQ_LKUP_TABLE localTable[],
@@ -1123,9 +1123,8 @@ int loadLocalTable(DAQ_XFER_INFO *pDxi, DAQ_LKUP_TABLE localTable[],
       localTable[ii].type = DAQ_SRC_NFM_TP;
       /* Mark the offset into the local data buffer */
       localTable[ii].sigNum = jj;
-    }
-    else if ((dataInfo->tp[ii].tpnum >= daqRange->xExMin) &&
-             (dataInfo->tp[ii].tpnum < daqRange->xExMax))
+    } else if ((dataInfo->tp[ii].tpnum >= daqRange->xExMin) &&
+               (dataInfo->tp[ii].tpnum < daqRange->xExMax))
     /* This exc testpoint is not part of a filter module */
     {
       jj = dataInfo->tp[ii].tpnum - daqRange->xExMin;
