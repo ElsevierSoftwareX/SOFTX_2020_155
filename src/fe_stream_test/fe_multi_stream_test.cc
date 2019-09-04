@@ -189,6 +189,8 @@ public:
         generators_.reserve( channel_num );
         tp_generators_.reserve( tp_table_.size( ) );
 
+        size_t mid_channel_boundary = fast_channel_num + mid_channel_num;
+
         ChNumDb chDb;
         ChNumDb tpDb;
 
@@ -203,7 +205,7 @@ public:
                     SimChannel( ss.str( ), 2, model_rate_, chnum ),
                     ( i + dcu_id_ ) % 21 ) ) );
         }
-        for ( size_t i = fast_channel_num; i < mid_channel_num; ++i )
+        for ( size_t i = fast_channel_num; i < mid_channel_boundary; ++i )
         {
             int chnum = chDb.next( 4 );
 
@@ -214,7 +216,7 @@ public:
                     SimChannel( ss.str( ), 2, mid_rate, chnum ),
                     ( i + dcu_id_ ) % 21 ) ) );
         }
-        for ( size_t i = mid_channel_num; i < channel_num; ++i )
+        for ( size_t i = mid_channel_boundary; i < channel_num; ++i )
         {
             int chnum = chDb.next( 4 );
 
