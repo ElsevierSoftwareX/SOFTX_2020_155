@@ -4,10 +4,10 @@ if (cds_find_nds2_client_included)
 endif(cds_find_nds2_client_included)
 set(cds_find_nds2_client_included TRUE)
 
-pkg_check_modules(libNDS2Client nds2-client>=0.14.3)
+pkg_check_modules(libNDS2Client libndscxx>=0.16.3)
 
 if (libNDS2Client_FOUND)
-    find_library(libNDS2Client_lib_path ndsxxwrap
+    find_library(libNDS2Client_lib_path ndscxx
             PATHS ${libNDS2Client_LIBRARY_DIRS})
 
     find_path(libNDS2client_include_path nds.hh

@@ -443,6 +443,17 @@ target_link_libraries(daqd_shmem PUBLIC
 
 install(TARGETS daqd_shmem DESTINATION bin)
 
+if (libNDS2Client_FOUND)
+
+	configure_file(tests/daqdrc_live_test ${CMAKE_CURRENT_BINARY_DIR}/daqdrc_live_test COPYONLY)
+	configure_file(tests/test_daqd_live_nds.sh.in ${CMAKE_CURRENT_BINARY_DIR}/test_daqd_live_nds.sh @ONLY)
+
+	add_test(NAME test_daqd_live_nds
+			COMMAND /bin/bash ./test_daqd_live_nds.sh
+			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+endif (libNDS2Client_FOUND)
+
 ##########
 ## DC with ZMQ
 ####

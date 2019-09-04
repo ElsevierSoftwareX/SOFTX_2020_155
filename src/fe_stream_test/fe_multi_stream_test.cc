@@ -359,6 +359,28 @@ generate_models( std::vector< ModelPtr >& models,
     }
 }
 
+std::vector< int >
+get_n_dcus( int count )
+{
+    std::vector< int > dcus;
+    dcus.reserve( 256 );
+
+    for ( int i = 5; i <= 12; ++i )
+    {
+        dcus.push_back( i );
+    }
+    for ( int i = 17; i < 256; ++i )
+    {
+        dcus.push_back( i );
+    }
+    if ( count > dcus.size( ) )
+    {
+        throw std::runtime_error( "Requested too many dcus" );
+    }
+    dcus.resize( count );
+    return dcus;
+}
+
 void
 usage( const char* progname )
 {
@@ -427,18 +449,20 @@ parse_arguments( int argc, char* argv[] )
                     "or data rate" );
             }
             opts.models.reserve( count );
-            int dcuid = 5;
-            for ( int i = 0; i < count; ++i )
+            std::vector< int > model_dcus = get_n_dcus( count );
+            for ( int i = 0; i < model_dcus.size( ); ++i )
             {
+                int         rate = 2048;
+                int         data_rate = model_data_size;
+                int         dcuid = model_dcus[ i ];
                 ModelParams params;
                 params.dcuid = dcuid;
-                params.model_rate = 2048;
-                params.data_rate = model_data_size;
+                params.model_rate = rate;
+                params.data_rate = data_rate;
                 std::ostringstream os;
                 os << "mod" << dcuid;
                 params.name = os.str( );
                 opts.models.push_back( params );
-                ++dcuid;
             }
         }
         break;
