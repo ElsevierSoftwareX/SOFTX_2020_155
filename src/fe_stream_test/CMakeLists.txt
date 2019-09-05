@@ -9,16 +9,6 @@ add_library(fe_generator_support STATIC
         fe_generator_support.hh
         fe_generator_support.cc)
 
-add_executable(fe_stream_test
-        fe_stream_test.cc
-        gps.hh
-        )
-target_link_libraries(fe_stream_test
-        PRIVATE
-        fe_stream_generator
-        fe_generator_support
-        rt)
-
 add_executable(fe_multi_stream_test
         fe_multi_stream_test.cc
         gps.hh)

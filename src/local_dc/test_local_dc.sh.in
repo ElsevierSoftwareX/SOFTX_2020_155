@@ -3,9 +3,7 @@
 CWD="@CMAKE_CURRENT_BINARY_DIR@"
 
 TDIR=""
-PID_STREAM0=0
-PID_STREAM1=0
-PID_STREAM2=0
+PID_STREAM=0
 PID_LOCAL_DC=0
 
 function kill_proc {
@@ -21,9 +19,7 @@ function cleanup {
             rm -rf "$TDIR"
         fi
     fi
-    kill_proc $PID_STREAM0
-    kill_proc $PID_STREAM1
-    kill_proc $PID_STREAM2
+    kill_proc $PID_STREAM
     kill_proc $PID_LOCAL_DC
 }
 
@@ -39,9 +35,9 @@ if [ ! -x "$FE_STREAM_CHECK" ]; then
   exit 1
 fi
 
-FE_STREAM_TEST="$CWD/../fe_stream_test/fe_stream_test"
-if [ ! -x "$FE_STREAM_TEST" ]; then
-  echo "fe_stream_test is required"
+FE_MULTI_STREAM_TEST="$CWD/../fe_stream_test/fe_multi_stream_test"
+if [ ! -x "$FE_MULTI_STREAM_TEST" ]; then
+  echo "fe_multi_stream_test is required"
   exit 1
 fi
 
@@ -77,23 +73,19 @@ mkdir "$TDIR/logs"
 
 echo "Ini dir = $TDIR/ini_files"
 
-"$FE_STREAM_TEST" -d 50 -r 1 -s x1iop1 -i "$TDIR/ini_files" > "$TDIR/logs/iop1" &
-PID_STREAM0=$!
-"$FE_STREAM_TEST" -d 61 -r 3 -s x1mod1 -i "$TDIR/ini_files" > "$TDIR/logs/mod1" &
-PID_STREAM1=$!
-"$FE_STREAM_TEST" -d 70 -r 3 -s x1mod2 -i "$TDIR/ini_files" > "$TDIR/logs/mod2"  &
-PID_STREAM2=$!
+"$FE_MULTI_STREAM_TEST" -S -i "$TDIR/ini_files" -M "$TDIR/ini_files/master" -R 3 -k 2048 > "$TDIR/logs/models" &
+PID_STREAM=$!
 
-echo "Streamer PIDS = $PID_STREAM0 $PID_STREAM1 $PID_STREAM2"
+echo "Streamer PID = $PID_STREAM"
 
-"$LOCAL_DC" -m 100 -s "x1iop1 x1mod1 x1mod2" -d "$TDIR/ini_files" -b "local_dc" > "$TDIR/logs/local_dc" &
+"$LOCAL_DC" -m 100 -s "mod5 mod6 mod7" -d "$TDIR/ini_files" -b "local_dc" > "$TDIR/logs/local_dc" &
 PID_LOCAL_DC=$!
 
 echo "Local_dc PID = $PID_LOCAL_DC"
 
-"$FE_STREAM_CHECK" -m local_dc -s 100 -v -c "$TDIR/ini_files/x1iop1.ini" "$TDIR/ini_files/tpchn_x1iop1.par" \
--c "$TDIR/ini_files/x1mod1.ini" "$TDIR/ini_files/tpchn_x1mod1.par" \
--c "$TDIR/ini_files/x1mod2.ini" "$TDIR/ini_files/tpchn_x1mod2.par"
+"$FE_STREAM_CHECK" -m local_dc -s 100 -v -c "$TDIR/ini_files/mod5.ini" "$TDIR/ini_files/tpchn_mod5.par" \
+-c "$TDIR/ini_files/mod6.ini" "$TDIR/ini_files/tpchn_mod6.par" \
+-c "$TDIR/ini_files/mod7.ini" "$TDIR/ini_files/tpchn_mod7.par"
 RESULT=$?
 
 exit $?
