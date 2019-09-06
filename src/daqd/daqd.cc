@@ -27,15 +27,12 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#if __GNUC__ >= 4
-#ifdef DAQD_CPP11
+
+#ifndef DAQD_CPP11
+#error DAQD_CPP11 must be defined
+#endif
 #include <unordered_map>
-#else
-#include <ext/hash_map>
-#endif
-#else
-#include <hash_map>
-#endif
+
 #include <fstream>
 #include <vector>
 #include <memory>
@@ -66,13 +63,6 @@ using namespace std;
 
 #include "epics_pvs.hh"
 #include "work_queue.hh"
-
-#ifdef USE_SYMMETRICOM
-#ifndef USE_IOP
-//#include <bcuser.h>
-#include <../drv/gpstime/gpstime.h>
-#endif
-#endif
 
 namespace {
     struct framer_buf {
@@ -269,11 +259,6 @@ daqd_c::configure_channels_files ()
     if (strlen(buf) > 4) {
 	testpoint = !strcmp(buf + strlen(buf) - 4, ".par");
     }
-#ifndef GDS_TESTPOINTS
-    // Skip GDS config files
-    if (testpoint) continue;
-    if (!strcmp(buf + strlen(buf) - 7, "GDS.ini")) continue;
-#endif
 
     ini_file_dcu_id = 0;
     if (0 == parseConfigFile(buf, &crc, chanConfigCallback, testpoint, 0, 0)) {
@@ -330,10 +315,10 @@ daqd_c::configure_channels_files ()
 	  buf[strlen(buf) - 4] = 0;
           sprintf(daqd.dcuName[ini_file_dcu_id], "%.31s", slp);
           sprintf(daqd.fullDcuName[ini_file_dcu_id], "%.31s", slp-2);
-#ifdef EPICS_EDCU
+
 	  extern char epicsDcuName[DCU_COUNT][40];
           sprintf(epicsDcuName[ini_file_dcu_id], "%.39s", slp-2);
-#endif
+
 	  buf[strlen(buf) - 4] = '.';
 	}
       }
@@ -343,15 +328,8 @@ daqd_c::configure_channels_files ()
 
   // See if we have duplicate names
   {
-#if __GNUC__ >= 4
-#if DAQD_CPP11
+
      std::unordered_map<char *, int> m;
-#else
-     __gnu_cxx::hash_map<char *, int, __gnu_cxx::hash<char *>, cmp_struct> m;
-#endif
-#else
-     hash_map<char *, int, hash<char *>, cmp_struct> m;
-#endif
 
      for (int i = 0; i < daqd.num_channels; i++) {
 	if (m[daqd.channels[i].name]) {
@@ -368,24 +346,18 @@ daqd_c::configure_channels_files ()
   /* Update sequence number */
   for (int i = 0; i < daqd.num_channels; i++) daqd.channels[i].seq_num = i;
 
-#if EPICS_EDCU == 1
   /* Epics display */
   {
     int chan_count_total = daqd.num_channels
-#ifdef GDS_TESTPOINTS
 	 - daqd.num_gds_channel_aliases
-#endif
 	- daqd.num_epics_channels;
     PV::set_pv(PV::PV_TOTAL_CHANS, chan_count_total);
 
     int chan_count_science = daqd.num_science_channels
-#ifdef GDS_TESTPOINTS
 	 - daqd.num_gds_channel_aliases
-#endif
         - daqd.num_epics_channels;
     PV::set_pv(PV::PV_SCIENCE_TOTAL_CHANS, chan_count_science);
   }
-#endif
   system_log(1, "finished configuring data channels");
   return 0;
 }
@@ -449,7 +421,7 @@ chanConfigCallback(char *channel_name, struct CHAN_PARAM *params, void *user)
 
   ccd -> group_num = 0;
 
-#ifdef GDS_TESTPOINTS
+
   //  ccd -> rm_dinfo = (dataInfoStr *) dinfo;
   // GDS_CHANNEL --> 1
   // GDS_ALIAS   --> 2
@@ -470,10 +442,6 @@ chanConfigCallback(char *channel_name, struct CHAN_PARAM *params, void *user)
     if (IS_GDS_SIGNAL(*ccd))
       daqd.num_gds_channels++;
   }
-#else
-  // ccd -> active = 1;
-  ccd -> trend = ccd -> active; // Trend all active channels;
-#endif
   if (IS_EPICS_DCU(ccd -> dcu_id)) {
     daqd.num_epics_channels++;
     if (ccd -> data_type != DAQ_DATATYPE_FLOAT) {
@@ -706,9 +674,8 @@ daqd_c::framer_io(int science)
    const int STATE_BROADCAST = 2;
    bool shmem_bcast_frame = true;
 
-#ifdef DAQD_BUILD_SHMEM
    shmem_bcast_frame = parameters().get<int>("GDS_BROADCAST", 0) == 1;
-#endif
+
    framer_work_queue *_work_queue = 0;
    if (science) {
        daqd_c::set_thread_priority("Science frame saver IO","dqscifrio",SAVER_THREAD_PRIORITY,SCIENCE_SAVER_IO_CPUAFFINITY);
@@ -837,7 +804,6 @@ daqd_c::framer_io(int science)
                   PV::set_pv(PV::PV_SCIENCE_CHANS_SAVED, cur_buf->nac);
                }
 
-  #ifndef NO_BROADCAST
                if (shmem_bcast_frame) {
                    // We are compiled to be a DMT broadcaster
                    //
@@ -871,7 +837,6 @@ daqd_c::framer_io(int science)
                    close(fd);
                    unlink(cur_buf->tmpf);
                }
-  #endif
            } /*catch (...) {
         system_log(1, "failed to write full frame out");
         fsd.report_lost_frame ();
@@ -1074,24 +1039,10 @@ daqd_c::framer (int science)
 				continue; // Skip it, it is not active
 			}
           unsigned char *fast_adc_ptr = cur_buf->dptr[nac].first;
-#ifdef USE_BROADCAST
-		  // Tested at the 40m on 11 jun 08
-		  // Short data needed to be sample swapped
-		  if (channels [j].bps == 2) {
-		    short *dest = (short *)(fast_adc_ptr + bnum*channels [j].bytes);
-		    short *src = (short*)(buf + channels [j].offset);
-		    unsigned int samples = channels [j].bytes / 2;
-		    for (int k = 0; k < samples; k++) dest[k] = src[k^1];
-		  } else {
-		    memcpy (fast_adc_ptr + bnum*channels [j].bytes,
-			  buf + channels [j].offset,
-			  channels [j].bytes);
-		  }
-#else
+
 		  memcpy (fast_adc_ptr + bnum*channels [j].bytes,
 			  buf + channels [j].offset,
 			  channels [j].bytes);
-#endif
 		  // Status is ORed blocks_per_frame times
 #define	 memor2(dest, tgt) \
  *((unsigned char *)(dest)) |= *((unsigned char *)(tgt)); \
@@ -1146,10 +1097,9 @@ daqd_c::framer (int science)
 	}
 
       /* finish CRC calculation for the fast data */
-#if EPICS_EDCU == 1
+
       /* Send fast data CRC to Epics for display and checking */
     PV::set_pv(PV::PV_FAST_DATA_CRC, crc_len (fast_data_length, fast_data_crc));
-#endif
 
       if (eof_flag)
 	break;
@@ -1298,7 +1248,6 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
     return 1;
   }
 
-#if EPICS_EDCU == 1
   /* Epics display (Kb/Sec) */
 
   {
@@ -1313,12 +1262,9 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
   }
   /* Epics display: memory buffer look back */
   PV::set_pv(PV::PV_LOOKBACK_RAM, main_buffer_size);
-#endif
 
   return 0;
 }
-
-#if EPICS_EDCU == 1
 
 /// Start Epics DCU thread.
 int
@@ -1377,7 +1323,6 @@ daqd_c::start_epics_server (ostream *yyout, char *prefix, char *prefix1, char *p
   return 0;
 }
 
-#endif
 
 /// Start the producer thread. Its purpose is to extract the data from the 
 /// receiver buffers and put it into the main circular buffer.
@@ -1474,12 +1419,6 @@ void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_
 
     int s = daqd.block_size / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
     if (s < 128*1024) s = 128*1024;
-  #ifdef USE_BROADCAST
-    // Broadcast has 4096 byte header, so we allocate space for it here
-    s += BROADCAST_HEADER_SIZE;
-    // Broadcast needs extra room for its own header
-    s += 100*1024;
-  #endif
     move_buf = (unsigned char *) malloc (s);
     if (! move_buf) {
       system_log(1,"out of memory allocating move buffer");
@@ -1487,37 +1426,8 @@ void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_
     }
     memset (move_buf, 255, s);
     printf("Allocated move buffer size %d bytes\n", s);
-  #ifdef USE_BROADCAST
-    move_buf += BROADCAST_HEADER_SIZE; // Keep broadcast header space in front of data space
-  #endif
 
     unsigned long  status_ptr = block_size - 17 * sizeof(int) * num_channels;   // Index to the start of signal status memory area
-
-#ifdef EDCU_SHMEM
-  key_t shmak = ftok("/tmp/foo",0);
-  if (shmak == -1) {
-    system_log(1,"couldn't do ftok(); errno=%d", errno);
-    exit(1);
-  }
-
-  int shmid = shmget(shmak, edcu_chan_idx[1] - edcu_chan_idx[0] + 8, IPC_CREAT);
-  if (shmid == -1) {
-    system_log(1,"couldn't do shmget(); errno=%d", errno);
-    exit(1);
-  }
-
-  edcu_shptr = (unsigned char *)shmat(shmid, 0,0);
-  if (edcu_shptr == (unsigned char *)-1) {
-    system_log(1,"couldn't do shmat(); errno=%d", errno);
-    exit(1);
-  }
-
-  /* Set bad status for all EDCU channels in the shared memory */
-  for (int i = 0; i < (edcu_chan_idx[1] - edcu_chan_idx[0])/8 + 1; i+=2) {
-    ((unsigned int *) edcu_shptr)[i] = 0xbad;
-  }
-
-#endif
 
   int cur_dcu = -1;
   for (int i = 0; i < num_channels + 1; i++) {
@@ -1526,28 +1436,6 @@ void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_
     else t = cur_dcu != -1 && cur_dcu != channels[i].dcu_id;
 
     // Finished with cur_dcu: channels sorted by dcu_id
-#ifdef USE_BROADCAST
-    if (IS_MYRINET_DCU(cur_dcu) && t) {
-        int rate = 4 * dcuRate[0][cur_dcu];
-        int tp_size = rate/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-        int n_add = DAQ_GDS_MAX_TP_ALLOWED;
-
-        int actual = 2*DAQ_DCU_BLOCK_SIZE / tp_size;
-        if (actual < n_add) n_add = actual;
-
-        for (int j = 0; j < n_add; j++) {
-          vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + dcuTPOffsetRmem[0][cur_dcu] + j*tp_size;
-          vmic_pv [vmic_pv_len].dest_vec_idx = dcuTPOffset[0][cur_dcu] + j*tp_size*DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-          vmic_pv [vmic_pv_len].dest_status_idx = 0xffffffff;
-          static unsigned int zero = 0;
-          vmic_pv [vmic_pv_len].src_status_addr = &zero;
-          vmic_pv [vmic_pv_len].vec_len = tp_size;
-          DEBUG(10, cerr << "Myrinet testpoint " << j << endl);
-          DEBUG(10, cerr << "vmic_pv: " << hex << (unsigned long) vmic_pv [vmic_pv_len].src_pvec_addr << dec << "\t" << vmic_pv [vmic_pv_len].dest_vec_idx << "\t" << vmic_pv [vmic_pv_len].vec_len << endl);
-          vmic_pv_len++;
-        }
-    }
-#else
     if (IS_MYRINET_DCU(cur_dcu) && t) {
         // Add testpoints
         int rate = 4 * dcuRate[0][cur_dcu];
@@ -1566,25 +1454,14 @@ void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_
           vmic_pv_len++;
         }
     }
-#endif
     if (i == num_channels) continue;
     cur_dcu = channels[i].dcu_id;
 
-#ifdef GDS_TESTPOINTS
     // Skip alias channels, they are not physical signals
     if (channels [i].gds & 2) {
       continue;
     }
-#endif
 
-#ifdef EDCU_SHMEM
-    if (channels [i].dcu_id == ADCU_PMC_40_ID) {
-      /* Slow channels point into shared memory partition */
-      vmic_pv [vmic_pv_len].src_pvec_addr = edcu_shptr + channels [i].rm_offset - edcu_chan_idx[0];
-    } else {
-      vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + channels [i].rm_offset;
-    }
-#else
     vmic_pv [vmic_pv_len].src_pvec_addr = move_buf  + channels [i].rm_offset;
     vmic_pv [vmic_pv_len].dest_vec_idx = channels [i].offset;
     vmic_pv [vmic_pv_len].dest_status_idx = status_ptr + 17 * sizeof(int) * i;
@@ -1593,20 +1470,13 @@ void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_
         move_addr->start[cur_dcu] = vmic_pv [vmic_pv_len].src_pvec_addr;
     }
 
-#if EPICS_EDCU == 1
     if (IS_EPICS_DCU(channels [i].dcu_id)) {
       vmic_pv [vmic_pv_len].src_status_addr = edcu1.channel_status + i;
     } else
-#endif
-#ifdef USE_BROADCAST
-    // Zero out the EXC status as well
-    if (IS_TP_DCU(channels [i].dcu_id) || IS_EXC_DCU(channels [i].dcu_id))
-#else
     if (IS_EXC_DCU(channels [i].dcu_id)) {
       /* The AWG DCUs are using older data format with status word included in front of the data */
       vmic_pv [vmic_pv_len].src_status_addr = (unsigned int *)(vmic_pv[vmic_pv_len].src_pvec_addr - 4);
     } else if (IS_TP_DCU(channels [i].dcu_id))
-#endif
     {
       /* :TODO: need to pass real DCU status depending on the current test point selection */
       static unsigned int zero = 0;
@@ -1614,7 +1484,6 @@ void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_
     } else {
       vmic_pv [vmic_pv_len].src_status_addr = dcuStatus[channels [i].ifoid] + channels [i].dcu_id;
     }
-#endif
     vmic_pv [vmic_pv_len].vec_len = channels [i].bytes/16;
     // Byteswap all Myrinet data on Sun
     vmic_pv [vmic_pv_len].bsw = 0;
@@ -1625,23 +1494,6 @@ void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_
   *_move_buf = move_buf;
   *_vmic_pv_len = vmic_pv_len;
 }
-
-#if 0
-void *
-drain (void *a)
-{
-  int nb;
-  int ai = (int) a;
-  do {
-    nb = daqd.b1 -> get (ai);
-    basic_io::writen (daqd.files [ai], daqd.b1 -> block_ptr (nb), daqd.b1 -> block_prop (nb) -> bytes);
-    daqd.b1 -> unlock (ai);
-  } while (daqd.b1 -> block_prop (nb) -> bytes);
-
-  return NULL;
-}
-#endif
-
 
 void daqd_c::set_thread_priority (char *thread_name, char *thread_abbrev, int rt_priority, int cpu_affinity) {
     // get thread ID, thread label (limit to 16 characters)
@@ -1786,49 +1638,6 @@ shandler (int a) {
         int error = system (p);
 }
 
-#ifdef USE_SYMMETRICOM
-
-#ifndef USE_IOP
-
-int symmetricom_fd = -1;
-
-/// Get current GPS time from the symmetricom IRIG-B card
-unsigned long
-daqd_c::symm_gps(unsigned long *frac, int *stt) {
-    unsigned long t[3];
-    ioctl (symmetricom_fd, IOCTL_SYMMETRICOM_TIME, &t);
-    t[1] *= 1000;
-    t[1] += t[2];
-    if (frac) *frac = t[1];
-    if (stt) *stt = 0;
-    return  t[0] + daqd.symm_gps_offset;
-}
-
-/// See if the GPS card is locked.
-bool
-daqd_c::symm_ok() {
-  unsigned long req = 0;
-  ioctl (symmetricom_fd, IOCTL_SYMMETRICOM_STATUS, &req);
-  printf("Symmetricom status: %s\n", req? "LOCKED": "UNCLOCKED");
-  return req;
-}
-
-#else // ifdef USE_IOP
-
-/// Get current GPS time from the IOP
-unsigned long
-daqd_c::symm_gps(unsigned long *frac, int *stt) {
-	 if (stt) *stt = 0;
-	 extern volatile unsigned int *ioMemDataCycle;
-	 extern volatile unsigned int *ioMemDataGPS;
-	 unsigned long l = *ioMemDataCycle;
-	 if (frac) *frac = l * (1000000000 / (64*1024));
-	 //printf("%d %d %d\n", *ioMemDataGPS, *frac, l );
-	 return  *ioMemDataGPS;
-}
-bool daqd_c::symm_ok() { return 1; }
-#endif
-#endif
 /// Server main function.
 int
 main (int argc, char *argv [])
@@ -1840,18 +1649,6 @@ main (int argc, char *argv [])
   char startup_fname [filesys_c::filename_max];
   // error message buffer
   char errmsgbuf[80];
-
-#ifdef USE_SYMMETRICOM
-#ifndef USE_IOP
-  symmetricom_fd =  open ("/dev/gpstime", O_RDWR | O_SYNC);
-  if (symmetricom_fd < 0) {
-	perror("/dev/gpstime");
-	exit(1);
-  }
-
-#endif
-#endif
-
 
   // see if `/bin/gcore' command has setuid flag
   // give warning if it doesn't
@@ -1919,13 +1716,6 @@ main (int argc, char *argv [])
     setrlimit (RLIMIT_CORE, &ulmt);
 #endif
   }
-#ifdef DAEMONIC
-  {
-
-
-    openlog (programname, LOG_PID, LOG_USER);
-  }
-#endif
 
   signal (SIGPIPE, SIG_IGN);
 
@@ -1933,11 +1723,6 @@ main (int argc, char *argv [])
   fflush (stdout);
 
   pthread_mutex_init (&framelib_lock, NULL);
-
-#ifdef USE_MX
-  unsigned int max_mx_end;
-  max_mx_end = open_mx();
-#endif
 
   /* Process startup file */
 
@@ -1952,19 +1737,6 @@ main (int argc, char *argv [])
 
   if ((stf = open (startup_fname, O_RDONLY)) >= 0)
     {
-#ifdef USE_GM
-      cerr << "daqd built with USE_GM" << endl;
-#endif
-#ifdef USE_MX
-      cerr << "daqd built with USE_MX" << endl;
-#endif
-#ifdef USE_UDP
-      cerr << "daqd built with USE_UDP" << endl;
-#endif
-#ifdef USE_BROADCAST
-      cerr << "daqd built with USE_BROADCAST" << endl;
-#endif
-
       pthread_attr_t attr;
       pthread_attr_init (&attr);
       pthread_attr_setstacksize (&attr, daqd.thread_stack_size);

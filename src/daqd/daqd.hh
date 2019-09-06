@@ -47,24 +47,9 @@ using namespace std;
 #include "broadcast_daqd.h"
 
 #include "../../src/include/daqmap.h"
-#ifdef USE_GM
-#include "../../src/include/drv/gmnet.h"
-#include "gm_rcvr.hh"
-#endif
-#ifdef USE_MX
-#include "mx_rcvr.hh"
-#endif
-#ifdef USE_UDP
-#include "udp_rcvr.hh"
-#endif
 
-#if !defined(NO_BROADCAST) || defined(USE_BROADCAST)
 #include <framexmit.hh>
-#endif
-
-#ifdef GDS_TESTPOINTS
 #include "gds.hh"
-#endif
 
 #include "profiler.hh"
 #include "channel.hh"
@@ -73,11 +58,10 @@ using namespace std;
 #include "producer.hh"
 #include "../../src/include/param.h"
 #include "parameter_set.hh"
-#if EPICS_EDCU == 1
+
 #include "edcu.hh"
 #include "epicsServer.hh"
 #include "epics_pvs.hh"
-#endif
 
 /// Define real-time thread priorities (mx receiver highest, producer next, frame savers lowest)
 #define MX_THREAD_PRIORITY 10
@@ -215,15 +199,11 @@ class daqd_c {
     num_channel_groups (0),
     num_epics_channels (0),
 
-#if EPICS_EDCU == 1
     edcu1 (0),
     epics1 (),
-#endif
 
-#ifdef GDS_TESTPOINTS
     num_gds_channels (0),
     num_gds_channel_aliases (0),
-#endif
 
     frame_saver_tid(0),
     science_frame_saver_tid(0),
@@ -292,12 +272,10 @@ class daqd_c {
 
       compile_regexp();
 
-#if EPICS_EDCU == 1
       extern unsigned int epicsDcuStatus[3][2][DCU_COUNT];
       dcuStatus = epicsDcuStatus[0];
       dcuCrcErrCntPerSecond = epicsDcuStatus[1];
       dcuCrcErrCnt = epicsDcuStatus[2];
-#endif
 
       for (int i = 0; i < 2; i++) { // Ifo number
 	for (int j = 0; j < DCU_COUNT; j++) {
@@ -319,10 +297,9 @@ class daqd_c {
 
 	  dcuName[j][0] = 0;
 	  fullDcuName[j][0] = 0;
-#ifdef EPICS_EDCU
+
           extern char epicsDcuName[DCU_COUNT][40];
           epicsDcuName[j][0] = 0;
-#endif
 	}
       }
     }
@@ -352,10 +329,8 @@ class daqd_c {
   /// The producer thread object.
   producer producer1;
 
-#if EPICS_EDCU == 1
   edcu edcu1;
   epicsServer epics1;
-#endif
 
   /* Some generic consumer data --
      probably will be factored out later on */
@@ -379,10 +354,9 @@ class daqd_c {
                             FrameCPP::Common::MD5SumFilter &md5sum);
   /// Retrieve a checksum entry from the checksum queue if one is available.
   bool dequeue_frame_checksum(std::string& filename, std::string& checksum);
-#ifdef GDS_TESTPOINTS
+
   int num_gds_channels;
   int num_gds_channel_aliases;
-#endif
 
   char frame_fname [filesys_c::filename_max]; ///< Name of input frame file 
 
@@ -401,10 +375,8 @@ class daqd_c {
   int start_main (int, ostream *);
   int start_producer (ostream *);
   int start_frame_saver (ostream *, int science);
-#if EPICS_EDCU == 1
   int start_edcu (ostream *);
   int start_epics_server (ostream *, char *, char *, char *);
-#endif
 
   parameter_set &parameters() { return _params; }
 
@@ -506,28 +478,18 @@ class daqd_c {
     return MIN_DATA_TYPE <= tin && MAX_DATA_TYPE >= tin;
   }
 
-#ifdef GDS_TESTPOINTS
   // GDS server
   gds_c gds;
-#endif // defined GDS_TESTPOINTS
 
   void set_fault () { 
-#if EPICS_EDCU == 1
     PV::set_pv(PV::PV_FAULT, 1);
-#endif
 	_exit(1);
   }
   void clear_fault () {
-#if EPICS_EDCU == 1
     PV::set_pv(PV::PV_FAULT, 0);
-#endif
   }
   int is_fault () {
-#if EPICS_EDCU == 1
     return PV::pv(PV::PV_FAULT);
-#else
-	return 0;
-#endif
   }
 
   // set if the scanners should read frame
@@ -627,31 +589,19 @@ class daqd_c {
   /// Indicates whether the DCU is configured or not; holds DCU data size. One for each ifo.
   unsigned int dcuSize[2][DCU_COUNT];
 
-#if EPICS_EDCU == 1
   /// DCU status; for each ifo
   /// Points to a static array in exServer.cc
   unsigned int (*dcuStatus)[DCU_COUNT];
-#else
-  unsigned int dcuStatus[2][DCU_COUNT];
-#endif
 
   /// Array of EDCU file status flags; one for each DCU
   /// "true" indicates detected EDCU .ini file mismatch
   bool edcuFileStatus[DCU_COUNT];
 
-#if EPICS_EDCU == 1
   /// DCU CRC error counter; for each ifo
   unsigned int (*dcuCrcErrCnt)[DCU_COUNT];
-#else
-  unsigned int dcuCrcErrCnt[2][DCU_COUNT];
-#endif
 
-#if EPICS_EDCU == 1
   /// DCU CRC error count per second; for each ifo
   unsigned int (*dcuCrcErrCntPerSecond)[DCU_COUNT];
-#else
-  unsigned int dcuCrcErrCntPerSecond[2][DCU_COUNT];
-#endif
 
   /// DCU CRC error running counter
   /// This one is not tied to the Epics
@@ -731,14 +681,6 @@ class daqd_c {
   /// Set if want to ignore tpman connection failure on startup
   /// Default is not to start if one of the test point mangers is not there
   int allow_tpman_connect_failure;
-
-#ifdef USE_SYMMETRICOM
-  /// Read GPS time from the symmetricom board
-  unsigned long symm_gps(unsigned long *frac = 0, int *stt = 0);
-
-  /// See if the symmetricon IRIG-B board is synchronized
-  bool symm_ok();
-#endif
 
   /// Set if we do not want to compress frames
   int no_compression;

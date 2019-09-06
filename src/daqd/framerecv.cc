@@ -609,26 +609,17 @@ int drop_seq = 0; // sequence to drop (for debugging)
 	       if (diff != 0) 
                   cout << "have to skip (" << (int)diff << ")" << endl;
             #endif
-#ifndef USE_UDP
+
 	       //abort();
 	        server_is_shutting_down = true;
 		exit(1);
 //#error
-#endif
                continue;
             }
          
             // reject negative sequence difference (i.e. old packets)
             while (!pkts.empty() && (diff < 0)) {
                // skip old packets
-#if 0
-               if (logison) {
-                  char buf[512];
-                  sprintf (buf, "Skip packet %li of out-of-order sequence %lu",
-                          pkts[0]->header.pktNum, pkts[0]->header.seq);
-                  addLog (buf);
-               }
-#endif
                pkts.pop_front();
                diff = calcDiff (pkts, newseq);
             }

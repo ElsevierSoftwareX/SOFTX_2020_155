@@ -42,7 +42,6 @@ namespace comm_impl {
                 int dcu_size = daqd.dcuSize[daqd.channels[i-1].ifoid][cur_dcu];
                 daqd.dcuDAQsize[daqd.channels[i-1].ifoid][cur_dcu] = dcu_size;
 
-#ifndef USE_BROADCAST
                 // When compiled with USE_BROADCAST we do not allocate contigious memory
                 // in the move buffer for the test points. We allocate this memory later
                 // at the end of the buffer.
@@ -59,7 +58,6 @@ namespace comm_impl {
                 DEBUG1(cerr << "Configured MYRINET DCU, block size=" << tp_buf_size << endl);
                 DEBUG1(cerr << "Myrinet DCU size " << dcu_size << endl);
                 daqd.dcuSize[daqd.channels[i-1].ifoid][cur_dcu] = 2*DAQ_DCU_BLOCK_SIZE;
-#endif
             }
             if (!IS_MYRINET_DCU(cur_dcu) && t) {
                 daqd.dcuDAQsize[daqd.channels[i-1].ifoid][cur_dcu] = daqd.dcuSize[daqd.channels[i-1].ifoid][cur_dcu];
@@ -70,32 +68,10 @@ namespace comm_impl {
 
             daqd.channels [i].bytes = daqd.channels [i].sample_rate * daqd.channels [i].bps;
 
-#ifdef USE_BROADCAST
 
-            #ifndef GDS_TESTPOINTS
-		// Skip testpoints
-		if (IS_TP_DCU(cur_dcu)) continue;
-#else
-		// We want to keep TP/EXC DCU data at the very end of the buffer
-		// so we an receive the broadcast into the move buffer directly
-		if (IS_TP_DCU(cur_dcu) && !IS_GDS_ALIAS (daqd.channels [i])) {
-		  daqd.dcuSize[daqd.channels[i].ifoid][cur_dcu]
-			      += daqd.channels [i].bytes / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-		  printf("ifo %d dcu %d channel %d size %d\n",
-			daqd.channels[i].ifoid, cur_dcu, i, daqd.channels [i].bytes);
-		  if (IS_EXC_DCU(cur_dcu))
-			  daqd.dcuSize[daqd.channels[i].ifoid][cur_dcu] += 4;
-		  continue;
-		}
-#endif
-#endif
-
-
-#ifdef GDS_TESTPOINTS
             if (IS_GDS_ALIAS (daqd.channels [i])) {
 			daqd.channels [i].offset = 0;
 		} else {
-#endif
             daqd.channels [i].offset = offs;
 
             offs += daqd.channels [i].bytes;
@@ -112,9 +88,7 @@ namespace comm_impl {
                 daqd.channels [i].rm_offset += 4;
             }
 
-#ifdef GDS_TESTPOINTS
             }
-#endif
 
             if (!daqd.broadcast_set.empty()) {
                 // Activate configured DMT broadcast channels
@@ -131,73 +105,13 @@ namespace comm_impl {
                         /* Change data type from complex to float but leave bps field at 8 */
                         /* Trend loop function checks bps variable to detect complex data */
                         daqd.trender.channels[daqd.trender.num_channels].data_type = _32bit_float;
-#if 0
-                        daqd.trender.channels[daqd.trender.num_channels].bps /= 2;
-				  daqd.trender.channels[daqd.trender.num_channels].bytes /= 2;
-#endif
+
                     }
 
                     daqd.trender.num_channels++;
                 }
             }
         }
-
-
-#ifdef USE_BROADCAST
-        for (int ifo = 0; ifo < daqd.data_feeds; ifo++) {
-	 for (int mdcu = 0; mdcu < DCU_COUNT; mdcu++) {
-	  printf("ifo %d dcu %d size %d\n", ifo, mdcu, daqd.dcuSize[ifo][mdcu]);
-	  if (0 == daqd.dcuSize[ifo][mdcu]) continue;
-	  if (IS_TP_DCU(mdcu) || IS_MYRINET_DCU(mdcu)) {
-
-	    // Save testpoint data offset, at the end of the buffer
-	    daqd.dcuTPOffset[ifo][mdcu] = daqd.block_size;
-
-	    // Allocate memory for the test points' buffers at the end of a move buffer
-	    daqd.dcuTPOffsetRmem[ifo][mdcu] = rm_offs;
-
-	    // One test point data size
-	    int tp_size = daqd.dcuRate[ifo][mdcu] * 4 / DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-	    int tp_buf_size = 0;
-	    if (IS_TP_DCU(mdcu)) {
-#if 0
-	      int tp_index = mdcu - DCU_ID_FIRST_GDS;
-              int tp_table_len = daqGdsTpNum[tp_index];
-              if (tp_table_len > DAQ_GDS_MAX_TP_ALLOWED)  {
-                	tp_table_len = DAQ_GDS_MAX_TP_ALLOWED;
-              }
-	      tp_buf_size = tp_size * tp_table_len;
-#endif
-	      tp_buf_size = daqd.dcuSize[ifo][mdcu];
-	      cerr << "Legacy TP DCU " << mdcu <<" tp data size " << tp_buf_size << endl;
-
-	      // Now set the correct offsets for each channel within this DCU
-	      int dcu_chnum = 0;
-	      for (int chnum = 0; chnum < daqd.num_channels; chnum++) {
-		if (daqd.channels[chnum].dcu_id == mdcu && daqd.channels[chnum].ifoid == ifo) {
-		   daqd.channels [chnum].offset = daqd.block_size
-			+ dcu_chnum * tp_size * DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-		   daqd.channels [chnum].rm_offset = rm_offs
-			+ dcu_chnum * tp_size;
-		   dcu_chnum++;
-		}
-	      }
-	    } else {
-	      // Allocate testpoint data buffer for this DCU
-	      tp_buf_size = DAQ_GDS_MAX_TP_ALLOWED * tp_size;
-	      if (tp_buf_size > 2*DAQ_DCU_BLOCK_SIZE) {
-		// Limit the number of testpoints for this DCU
-		tp_buf_size = 2*DAQ_DCU_BLOCK_SIZE;
-	      }
-	      cerr << "Myrinet DCU " << mdcu <<" tp data size " << tp_buf_size << endl;
-	    }
-	    rm_offs += tp_buf_size;
-	    daqd.block_size += tp_buf_size * DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-	  }
-	 }
-	}
-#endif
-
 
         // Calculate memory size needed for channels status storage in the main buffer
         // and increment main block size
