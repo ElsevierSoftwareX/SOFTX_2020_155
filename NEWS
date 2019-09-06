@@ -1,6 +1,15 @@
 ==================================================================================================
 Changes for 4.0  (NOT YET RELEASED)
 ==================================================================================================
+- Removing all daqd variants except daqd_shmem.
+- Renaming and reworking the streamer processes
+   - local_dc (takes input from models and concentrates it into one memory buffer)
+   - omx_xmit/omx_recv
+      - still needs work to consume the buffer from local_dc
+   - zmq_xmit/zmq_recv (takes the buffer from local_dc and transmits it over zmq pub/sub)
+   - dix_xmit/dix_recv (takes the buffer from local_dc and transmits it over IX dolphin)
+- Improved FE/IFO data simulation code for daqd and streamer testing
+   - This provides properly formated data, not a plant model of an IFO
 ==================================================================================================
 Changes for 3.6  (NOT YET RELEASED)
 ==================================================================================================
