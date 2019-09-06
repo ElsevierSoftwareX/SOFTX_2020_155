@@ -195,8 +195,8 @@ main( int argc, char* argv[] )
     std::vector< std::shared_ptr< NDS::buffers_type > > data_from_nds;
     NDS::parameters                                     params(
         cfg.hostname, cfg.port, NDS::connection::PROTOCOL_ONE );
-    auto stream =
-        NDS::iterate( params, NDS::request_period( 0, 1 ), cfg.channels );
+    auto stream = NDS::iterate(
+        params, NDS::request_period( cfg.gps, cfg.gps + 1 ), cfg.channels );
     for ( const auto& bufs : stream )
     {
         data_from_nds.push_back( bufs );
@@ -206,6 +206,7 @@ main( int argc, char* argv[] )
     {
         std::cerr
             << "This is unexpected, more buffer segments than anticipated\n";
+        std::cerr << data_from_nds.size( ) << " buffer segments\n";
         exit( 1 );
     }
 

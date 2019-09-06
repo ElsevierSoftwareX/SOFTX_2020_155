@@ -1,0 +1,124 @@
+#!/bin/bash
+
+CWD="@CMAKE_CURRENT_BINARY_DIR@"
+
+TDIR=""
+PID_MULTI_STREAM=0
+PID_DAQD=0
+PID_NDS=0
+
+function kill_proc {
+    if [ $1 -gt 0 ]; then
+        echo "Closing process $1"
+        kill $1
+    fi
+}
+
+function cleanup {
+    rm -rf daqdrc_live_test_final
+    if [ "x$TDIR" != "x" ]; then
+        if [ -d $TDIR ]; then
+            rm -rf "$TDIR"
+        fi
+    fi
+    kill_proc $PID_MULTI_STREAM
+    kill_proc $PID_DAQD
+    kill_proc $PID_NDS
+}
+
+MUTLI_STREAM="$CWD/../fe_stream_test/fe_multi_stream_test"
+if [ ! -x "$MUTLI_STREAM" ]; then
+    echo "cannot find $MULTI_STREAM"
+    exit 1
+fi
+
+DAQD="$CWD/../daqd/daqd_shmem"
+if [ ! -x "$DAQD" ]; then
+    echo "cannot find $DAQD"
+    exit 1
+fi
+
+NDS="$CWD/../nds/nds"
+if [ ! -x "$DAQD" ]; then
+    echo "cannot find $NDS"
+    exit 1
+fi
+
+FE_STREAM_CHECK_NDS="$CWD/../fe_stream_test/fe_stream_check_nds"
+if [ ! -x "$FE_STREAM_CHECK_NDS" ]; then
+  echo "cannot find $FE_STREAM_CHECK_NDS"
+  exit 1
+fi
+
+if [ ! -w /dev/gpstime ]; then
+  echo "the gpstime module must be loaded, configured, and accessible by this user"
+  exit 1
+fi
+
+if [ ! -w /dev/mbuf ]; then
+  echo "the mbuf module must be loaded, configured, and accessible by this user"
+  exit 1
+fi
+
+PYTHON=""
+which python > /dev/null
+if [ $? -eq 0 ]; then
+    PYTHON=`which python`
+else
+    which python3 > /dev/null
+    if [ $? -eq 0 ]; then
+        PYTHON=`which python3`
+    else
+        echo "Cannot find python or python3"
+        exit 1
+    fi
+fi
+
+trap cleanup EXIT
+
+TDIR=`$PYTHON -c "from __future__ import print_function; import tempfile; print(tempfile.mkdtemp())"`
+mkdir "$TDIR/ini_files"
+mkdir "$TDIR/logs"
+mkdir "$TDIR/frames"
+mkdir "$TDIR/frames/full"
+mkdir "$TDIR/frames/nds"
+mkdir "$TDIR/frames/nds/jobs"
+
+echo "Ini dir = $TDIR/ini_files"
+
+"$MUTLI_STREAM" -i "$TDIR/ini_files" -M "$TDIR/ini_files/master" -b local_dc -m 100 -k 700 -R 100 > "$TDIR/logs/multi_stream" &
+PID_MULTI_STREAM=$!
+
+echo "Streamer PID = PID_MULTI_STREAM"
+
+sleep 1
+
+MASTER_FILE="$TDIR/ini_files/master"
+TESTPOINT_FILE=""
+FRAMES_DIR="$TDIR/frames"
+cat daqdrc_nds_test | sed s\|MASTER\|$MASTER_FILE\| | sed s\|TESTPOINT\|$TESTPOINT_FILE\| | sed s\|FRAMES\|$FRAMES_DIR\|  > daqdrc_nds_test_final
+"$DAQD" -c daqdrc_nds_test_final &> "$TDIR/logs/daqd" &
+PID_DAQD=$!
+
+sleep 5
+echo "Starting the nds service"
+
+"$NDS" "$TDIR/frames/nds/pipe" > "$TDIR/logs/nds" &
+PID_NDS=$!
+
+echo "Sleeping to allow the daq to finish startup"
+sleep 20
+
+GPS=`cat /proc/gps | cut -d\. -f 1`
+
+echo "Sleeping to allow frames to be written"
+sleep 30
+
+"$FE_STREAM_CHECK_NDS" -c 30 -t $GPS
+RESULT=$?
+
+echo "Testing return $RESULT (0 = success)"
+exit $RESULT
+#echo "Press enter to continue..."
+#DUMMY=""
+#read DUMMY
