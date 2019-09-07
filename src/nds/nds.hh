@@ -122,7 +122,11 @@ public:
   /// Offset into the image.
   unsigned long image_offs;
   /// Copy the data span and zero out the offset.
-  inline mapping_data_span &operator=(const data_span &ds) {*(data_span *)this = ds; image_offs = 0;};
+  inline mapping_data_span &operator=(const data_span &ds) {
+      *(data_span *)this = ds;
+      image_offs = 0;
+      return *this;
+  };
 };
 
 } // namespace

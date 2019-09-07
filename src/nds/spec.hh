@@ -37,6 +37,7 @@ public:
   /// Get the data type string
   inline static const std::string dataTypeString( DataTypeType d ) {
     switch (d) {
+    default:
     case  _undefined: return "unknown";
     case  _16bit_integer: return "_16bit_integer";
     case _32bit_integer: return "_32bit_integer";
@@ -45,6 +46,7 @@ public:
     case _64bit_double: return "_64bit_double";
     case _32bit_complex: return "_32bit_complex";
     }
+    return "unknown";
   }
 
   /// Default constructor.

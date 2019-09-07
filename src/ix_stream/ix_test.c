@@ -79,7 +79,7 @@ do_client( char* buffer, int buffer_size, int do_dump )
     int i = 0;
     while (!done)
     {
-        memcpy(buffer, readAddr, buffer_size);
+        memcpy(buffer, (const void*)readAddr, buffer_size);
 
         if (do_dump)
         {

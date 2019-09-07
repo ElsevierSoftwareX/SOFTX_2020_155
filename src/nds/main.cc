@@ -52,6 +52,7 @@ parse_args (int argc, char *argv [])
   return optind;
 }
 
+int
 main (int argc, char *argv[])
 {
   programname = Nds::basename(argv [0]);

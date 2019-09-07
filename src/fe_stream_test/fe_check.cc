@@ -34,6 +34,7 @@ struct model
         name = other.name;
         mbuf_name = other.mbuf_name;
         data = other.data;
+        return *this;
     }
 
     volatile char*

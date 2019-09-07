@@ -515,7 +515,7 @@ int main(int argc, char *argv[])
     crc32_init();
     std::cout << "static const uint32_t crctab_8byte[8][256] = {\n";
     for (int i = 0; i < 8; ++i) {
-        char* tab = "    ";
+        const char* tab = "    ";
         std::cout << tab << "{\n";
         for (int j = 0; j < 256; ++j) {
             const int ENTRIES_PER_LINE = 8;

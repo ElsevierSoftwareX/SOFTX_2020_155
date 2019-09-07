@@ -9,7 +9,7 @@ extern "C" {
 #define SIMPLE_PV_STRING 1
 
 typedef struct SimplePV {
-    char *name;
+    const char *name;
     int pv_type;        /// SIMPLE_PV_INT or SIMPLE_PV_STRING
     void *data;
 

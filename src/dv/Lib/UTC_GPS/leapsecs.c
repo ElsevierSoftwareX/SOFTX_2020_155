@@ -10,7 +10,8 @@
 
 char line[100];
 
-main()
+int
+main(int argc, char* argv[])
 {
   struct caldate cd;
   struct tai t;

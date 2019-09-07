@@ -268,7 +268,7 @@ static int prompt_lineno;
 %type <y_int>  ChannelNames1
 %type <y_int>  WriterType
 %type <y_int>  allOrNothing
-%pure_parser
+%pure-parser
 
 %%
 

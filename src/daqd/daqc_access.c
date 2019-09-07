@@ -7,6 +7,7 @@
 #ifndef VXWORKS
 #include <pthread.h>
 #endif
+#include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -217,33 +218,6 @@ listener (void * a)
   pthread_cleanup_push (listener_cleanup, (void *) &listenerArgs);
 */
 
-#if 0
-  {
-    // const int max_allowed = 64 * 1024; /* 64K seems to be system imposed limit on Solaris */
-    //      int sendbuf_size = (ssize && ssize < max_allowed)? ssize: max_allowed;
-    int rcvbuf_size = 1024 * 10;
-    
-    if (setsockopt (listenfd, SOL_SOCKET, SO_RCVBUF, (const char *) &rcvbuf_size, sizeof (rcvbuf_size)))
-#ifdef DAQC_ACCESS_VERBOSE_ERRORS
-      fprintf (stderr, "setsockopt(%d, %d); errno=%d\n", listenfd, rcvbuf_size, errno);
-#endif
-
-    {
-      int rcvbuf_size_len = 4;
-      rcvbuf_size = -1;
-      if (getsockopt (listenfd, SOL_SOCKET, SO_RCVBUF, (const char *) &rcvbuf_size, &rcvbuf_size_len))
-#ifdef DAQC_ACCESS_VERBOSE_ERRORS
-	fprintf (stderr, "getsockopt(%d, %d); errno=%d\n", listenfd, rcvbuf_size, errno);
-#endif
-      else
-#ifdef DAQC_ACCESS_VERBOSE_ERRORS
-	printf ("RCVBUF size is %d\n", rcvbuf_size);
-#endif
-    }
-
-  }
-#endif
-
   /* This helps to avoid waitings for dead socket to drain */
   {
     int on = 1;
@@ -277,33 +251,6 @@ listener (void * a)
 	return NULL;
       }
     }
-
-#if 0
-  {
-    //      const int max_allowed = 64 * 1024; /* 64K seems to be system imposed limit on Solaris */
-    //      int sendbuf_size = (ssize && ssize < max_allowed)? ssize: max_allowed;
-    int rcvbuf_size = 1024 * 10;
-    
-    if (setsockopt (listenfd, SOL_SOCKET, SO_RCVBUF, (const char *) &rcvbuf_size, sizeof (rcvbuf_size)))
-#ifdef DAQC_ACCESS_VERBOSE_ERRORS
-      fprintf (stderr, "setsockopt(%d, %d); errno=%d\n", listenfd, rcvbuf_size, errno);
-#endif
-
-    {
-      int rcvbuf_size_len = 4;
-      rcvbuf_size = -1;
-      if (getsockopt (listenfd, 6, SO_RCVBUF, (const char *) &rcvbuf_size, &rcvbuf_size_len))
-#ifdef DAQC_ACCESS_VERBOSE_ERRORS
-	fprintf (stderr, "getsockopt(%d, %d); errno=%d\n", listenfd, rcvbuf_size, errno);
-#endif
-      else
-#ifdef DAQC_ACCESS_VERBOSE_ERRORS
-	printf ("RCVBUF size is %d\n", rcvbuf_size);
-#endif
-    }
-
-  }
-#endif
 
   if (listen (listenfd, 2) < 0)
     {
@@ -340,31 +287,9 @@ listener (void * a)
 	    }
       }
 
-#if 0
-    {
-      int rcvbuf_size_len = 4;
-
-      int rcvbuf_size = 1024 * 10;
-
-#if 0
-      if (setsockopt (connfd, SOL_SOCKET, SO_RCVBUF, (const char *) &rcvbuf_size, sizeof (rcvbuf_size)))
-	fprintf (stderr, "setsockopt(%d, %d); errno=%d\n", connfd, rcvbuf_size, errno);
-#endif
-
-      rcvbuf_size = -1;
-      if (getsockopt (connfd, SOL_SOCKET, SO_RCVBUF, (const char *) &rcvbuf_size, &rcvbuf_size_len))
-	fprintf (stderr, "getsockopt(%d, %d); errno=%d\n", connfd, rcvbuf_size, errno);
-      else
-	printf ("connfd RCVBUF size is %d\n", rcvbuf_size);
-    }
-#endif
-
     /* Spawn working thread */
     {
       int err_no;
-#if 0
-      fprintf (stderr, "#connfd=%d\n", connfd);
-#endif
       daq -> datafd = connfd;
 
       if (err_no = pthread_create (&daq -> interpreter_tid, NULL, (void *(*)(void *))daq -> interpreter, (void *) daq))
@@ -375,9 +300,6 @@ listener (void * a)
 	}
       else
 	{
-#if 0
-	  fprintf (stderr, "#interpreter started; tid=%d\n", daq -> interpreter_tid);
-#endif
 	  pthread_join (daq -> interpreter_tid, NULL);
 	}
     }
@@ -716,10 +638,6 @@ daq_recv_block (daq_t *daq)
   if (! (block_len = read_long (daq -> datafd)))
     return -1;
 
-#if 0
-  fprintf (stderr, "#block length is %d\n", block_len);
-#endif
-
   seconds = read_long (daq -> datafd);
 
   /* channel reconfiguration block (special block that's not data) */
@@ -811,17 +729,9 @@ daq_recv_block (daq_t *daq)
 
   daq -> tb -> secs = seconds;
 
-#if 0
-  fprintf (stderr, "#block length is %d seconds\n", daq -> tb -> secs);
-#endif
-
   daq -> tb -> gps = read_long (daq -> datafd);
   daq -> tb -> gpsn = read_long (daq -> datafd);
   daq -> tb -> seq_num = read_long (daq -> datafd);
-
-#if 0
-  fprintf (stderr, "seq_num=%d\n", daq -> tb -> seq_num);
-#endif
 
   /* block length does not include the length of itself while the header length does */
   block_len -= HEADER_LEN;
@@ -979,11 +889,6 @@ daq_recv_channels (daq_t *daq, daq_channel_t *channel,
 
 
       if ((channel [i].rate = daq_recv_id (daq)) <= 0) return DAQD_ERROR;
-
-#if 0
-      if (channel[i].rate > 16384)
-	printf("%s rate=%d\n", channel[i].name, channel[i].rate);
-#endif
 
       if ((channel [i].tpnum = daq_recv_id (daq)) < 0) return DAQD_ERROR;
 

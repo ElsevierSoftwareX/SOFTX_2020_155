@@ -65,6 +65,10 @@ double ntohd(double in) {
 #endif
 
 
+/* forward declaration */
+int SearchChList(const char* chName, daq_channel_t chList[], int listLength);
+int getBlockLength(int datatype, int trend);
+
 /* int DataConnect(char* serverName, int serverPort, int lPort, void* read_data()) */ /* JCB */
 int DataConnect(char* serverName, int serverPort, int lPort, void* (*read_data)())
 {
