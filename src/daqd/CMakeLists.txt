@@ -95,7 +95,6 @@ add_executable(daqd_shmem
 		circ.cc
 		framesend.cc
 		gdsmutex.cc
-		edcu.cc
 		epicsServer.cc
 		exServer.cc
 		exScalarPV.cc

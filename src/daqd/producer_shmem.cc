@@ -370,15 +370,7 @@ void *producer::frame_writer() {
             dcuSeenLastCycle[j] = true;
             read_dest = dcu_move_addresses.start[j];
             long read_size = daqd.dcuDAQsize[0][j];
-            if (IS_EPICS_DCU(j)) {
-
-                memcpy((void *)read_dest,
-                       (char *)(daqd.edcu1.channel_value + daqd.edcu1.fidx),
-                       read_size);
-                daqd.dcuStatus[0][j] = 0;
-
-                read_dest += read_size;
-            } else if (IS_MYRINET_DCU(j)) {
+            if (IS_MYRINET_DCU(j)) {
                 dcu_cycle = i % DAQ_NUM_DATA_BLOCKS;
 
                 // dcu_cycle = gmDaqIpc[j].cycle;
@@ -603,34 +595,6 @@ void *producer::frame_writer() {
                     // receivers
                     prop.dcu_data[j].status =
                         daqd.dcuStatus[0 /* IFO */][j] & ~0x8000;
-                } else
-                    // EDCU is "attached" to H1, not H2
-                    if (j == DCU_ID_EDCU && ifo == 0) {
-                    // See if the EDCU thread is running and assign status
-                    if (0x0 == (prop.dcu_data[j].status =
-                                    daqd.edcu1.running ? 0x0 : 0xbad)) {
-                        // If running calculate the CRC
-
-                        // memcpy(read_dest, (char *)(daqd.edcu1.channel_value +
-                        // daqd.edcu1.fidx), daqd.dcuSize[ifo][j]);
-
-                        unsigned int bytes = daqd.dcuSize[0][DCU_ID_EDCU];
-                        unsigned char *cp =
-                            move_buf; // The EDCU data is in front
-                        unsigned long crc = 0;
-                        while (bytes--) {
-                            crc = (crc << 8) ^
-                                  crctab[((crc >> 24) ^ *(cp++)) & 0xFF];
-                        }
-                        bytes = daqd.dcuDAQsize[0][DCU_ID_EDCU];
-                        while (bytes > 0) {
-                            crc = (crc << 8) ^
-                                  crctab[((crc >> 24) ^ bytes) & 0xFF];
-                            bytes >>= 8;
-                        }
-                        crc = ~crc & 0xFFFFFFFF;
-                        prop.dcu_data[j].crc = crc;
-                    }
                 } else {
                     prop.dcu_data[j + ifo * DCU_COUNT].crc = ipc->bp[cblk].crc;
                     prop.dcu_data[j + ifo * DCU_COUNT].status =

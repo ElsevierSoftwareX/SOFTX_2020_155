@@ -1266,33 +1266,6 @@ daqd_c::start_main (int pmain_buffer_size, ostream *yyout)
   return 0;
 }
 
-/// Start Epics DCU thread.
-int
-daqd_c::start_edcu (ostream *yyout)
-{
-  // error message buffer
-  char errmsgbuf[80];
-  pthread_attr_t attr;
-  pthread_attr_init (&attr);
-  pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
-  pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-  //  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
-
-  int err_no;
-  if (err_no = pthread_create (&edcu1.tid, &attr,
-			       (void *(*)(void *))edcu1.edcu_static,
-			       (void *) &edcu1)) {
-    strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
-    pthread_attr_destroy (&attr);
-    system_log(1, "EDCU pthread_create() err=%s", errmsgbuf);
-    return 1;
-  }
-  pthread_attr_destroy (&attr);
-  DEBUG(2, cerr << "EDCU thread created; tid=" <<  edcu1.tid << endl);
-  edcu1.running = 1;
-  return 0;
-}
-
 /// Start Epics IOC server. This one serves the daqd status Epics channels.
 int
 daqd_c::start_epics_server (ostream *yyout, char *prefix, char *prefix1, char *prefix2)
@@ -1470,9 +1443,6 @@ void daqd_c::initialize_vmpic(unsigned char **_move_buf, int *_vmic_pv_len, put_
         move_addr->start[cur_dcu] = vmic_pv [vmic_pv_len].src_pvec_addr;
     }
 
-    if (IS_EPICS_DCU(channels [i].dcu_id)) {
-      vmic_pv [vmic_pv_len].src_status_addr = edcu1.channel_status + i;
-    } else
     if (IS_EXC_DCU(channels [i].dcu_id)) {
       /* The AWG DCUs are using older data format with status word included in front of the data */
       vmic_pv [vmic_pv_len].src_status_addr = (unsigned int *)(vmic_pv[vmic_pv_len].src_pvec_addr - 4);

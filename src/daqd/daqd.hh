@@ -59,7 +59,6 @@ using namespace std;
 #include "../../src/include/param.h"
 #include "parameter_set.hh"
 
-#include "edcu.hh"
 #include "epicsServer.hh"
 #include "epics_pvs.hh"
 
@@ -199,7 +198,6 @@ class daqd_c {
     num_channel_groups (0),
     num_epics_channels (0),
 
-    edcu1 (0),
     epics1 (),
 
     num_gds_channels (0),
@@ -329,7 +327,6 @@ class daqd_c {
   /// The producer thread object.
   producer producer1;
 
-  edcu edcu1;
   epicsServer epics1;
 
   /* Some generic consumer data --
@@ -375,7 +372,6 @@ class daqd_c {
   int start_main (int, ostream *);
   int start_producer (ostream *);
   int start_frame_saver (ostream *, int science);
-  int start_edcu (ostream *);
   int start_epics_server (ostream *, char *, char *, char *);
 
   parameter_set &parameters() { return _params; }
