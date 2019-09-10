@@ -537,11 +537,6 @@ void *producer::frame_writer() {
                     //if (cblk > (15 - cycle_delay))
                     //    mygps--;
 
-                    if (daqd.edcuFileStatus[j]) {
-                        daqd.dcuStatus[0][j] |= 0x8000;
-                        system_log(5, "EDCU .ini FILE CRC MISS dcu %d (%s)", j,
-                                   daqd.dcuName[j]);
-                    }
                     if (dcu_gps != mygps) {
                         daqd.dcuStatus[0][j] |= 0x4000;
                         system_log(5,

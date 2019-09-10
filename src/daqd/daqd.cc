@@ -271,41 +271,6 @@ daqd_c::configure_channels_files ()
       daqd.dcuConfigCRC[daqd.channels[daqd.num_channels - 1].ifoid][daqd.channels[daqd.num_channels - 1].dcu_id] = crc;
     }
 
-    if (enable_fckrs) {
-    // Data concentrator needs to check on the EDCU .ini files periodically
-    // to see if they were changed from the underneath by a recompilation of a model.
-    // Save edcu file and CRC info for future checking
-    if (ini_file_dcu_id == DCU_ID_EDCU) {
-    	// Find the corresponding DCU id.
-	// For this to work the EDCU file name needs to come in the master config after the DCU file.
-	char *slp = strrchr(buf,'/'); // Find the last backslash; master file has only fully-qualified names.
-	// This assumes EDCU file names of the format
-	// /some/file/path/X1EDCU_ATS.ini
-	// This +8 puts the pointer to ATS.ini
-	if (slp && strlen(slp) > (8 + 5)) { // 8 of "X1EDCU" and 5 of ".ini" + at least one character
-	  slp += 8;
-	  char save_c = buf[strlen(buf) - 4];
-	  buf[strlen(buf) - 4] = 0;
-	  DEBUG1(cerr << "Registering CRC checker for " << slp << endl);
-	  // Find the needed DCU number
-	  int dcu_id;
-	  for (dcu_id = 0; dcu_id < DCU_COUNT; dcu_id++) {
-		if (!strcmp(dcuName[dcu_id], slp)) break;
-	  }
-	  if (dcu_id == DCU_COUNT) {
-    	    system_log(1, "Failed to find corr. DCU for %s, did not register the checker", buf);
-	  } else {
-	    DEBUG1(cerr << "Registered CRC checker for " << slp << " at DCU id " << dcu_id << endl);
-	    buf[strlen(buf)] = save_c; // Restore the cleared character
-	    file_checker f(buf, crc, dcu_id);
-    	    daqd.edcu_ini_fckrs.push_back(f);
-	  }
-	} else {
-    	  system_log(1, "Did not register CRC checker for %s", buf);
-	}
-    }
-    }
-
     if (ini_file_dcu_id > 0 && ini_file_dcu_id < DCU_COUNT) {
       // only set DCU name if this is an INI file (*.ini)
       if (!strcmp(buf + strlen(buf) - 4, ".ini")) {

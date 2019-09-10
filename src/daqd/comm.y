@@ -974,10 +974,6 @@ CommandLine: /* Nothing */
 		AUTH_CHECK(((my_lexer *)lexer));
 		daqd.offline_disabled = 0;
 	}
-	| ENABLE FCKRS {
-		AUTH_CHECK(((my_lexer *)lexer));
-		daqd.enable_fckrs = true;
-	}
 	| HELP {
 		print_command_help (((my_lexer *)lexer)->get_yyout ());
 	}

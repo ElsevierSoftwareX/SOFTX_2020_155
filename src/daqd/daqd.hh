@@ -247,7 +247,7 @@ class daqd_c {
     , do_fsync(0), do_directio(0)
     , controller_dcu(DCU_ID_SUS_1), avoid_reconnect(0)
     , tp_allow(-1), no_myrinet(0), allow_tpman_connect_failure(0), no_compression(0)
-    , symm_gps_offset(0), cycle_delay(4), old_raw_minute_trend_dirs(""), enable_fckrs(false)
+    , symm_gps_offset(0), cycle_delay(4), old_raw_minute_trend_dirs("")
     , _checksum_file_transform_initted(false)
 
     {
@@ -277,7 +277,6 @@ class daqd_c {
 
       for (int i = 0; i < 2; i++) { // Ifo number
 	for (int j = 0; j < DCU_COUNT; j++) {
-  	  edcuFileStatus[j] = false;
 	  dcuStatus[i][j] = 1;
 	  dcuCrcErrCnt[i][j] = 0;
 	  dcuCrcErrCntPerSecond[i][j] = 0;
@@ -589,10 +588,6 @@ class daqd_c {
   /// Points to a static array in exServer.cc
   unsigned int (*dcuStatus)[DCU_COUNT];
 
-  /// Array of EDCU file status flags; one for each DCU
-  /// "true" indicates detected EDCU .ini file mismatch
-  bool edcuFileStatus[DCU_COUNT];
-
   /// DCU CRC error counter; for each ifo
   unsigned int (*dcuCrcErrCnt)[DCU_COUNT];
 
@@ -692,12 +687,6 @@ class daqd_c {
   /// Space separated list of directories where old raw minute trend is kept
   /// They need to be in temporal order, oldest first.
   string old_raw_minute_trend_dirs;
-
-  /// EDCU init file checkers
-  vector<file_checker>	edcu_ini_fckrs;
-
-  /// Enable/disable file checkers
-  bool enable_fckrs;
 }; // class daqd_c
 
 #endif
