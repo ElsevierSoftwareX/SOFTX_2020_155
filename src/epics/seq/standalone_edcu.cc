@@ -554,7 +554,11 @@ edcuCreateChanList( const char* daqfilename, const char* edculogfilename )
     printf( "CRC data length = %d\n", xferInfo.crcLength );
 
     chid chid1;
-    ca_context_create( ca_enable_preemptive_callback );
+    if (ca_context_create( ca_enable_preemptive_callback ) != ECA_NORMAL)
+    {
+        fprintf(stderr, "Error creating the EPCIS CA context\n");
+        exit(1);
+    }
 
     for ( i = 0; i < daqd_edcu1.num_chans; i++ )
     {
@@ -583,6 +587,11 @@ edcuCreateChanList( const char* daqfilename, const char* edculogfilename )
                                         (void*)&(daqd_edcu1.channel_status[i]),
                                         0,
                                         &chid1 );
+            if (status != ECA_NORMAL)
+            {
+                fprintf(stderr, "Error creating connection to %s\n",
+                        daqd_edcu1.channel_name[ i ]);
+            }
             status = ca_create_subscription( DBR_FLOAT,
                                              0,
                                              chid1,
@@ -590,6 +599,11 @@ edcuCreateChanList( const char* daqfilename, const char* edculogfilename )
                                              subscriptionHandler,
                                              (void*)&(daqd_edcu1.channel_value[i]),
                                              0 );
+            if (status != ECA_NORMAL)
+            {
+                fprintf(stderr, "Error creating subscription for %s\n",
+                        daqd_edcu1.channel_name[ i ]);
+            }
         }
     }
 
