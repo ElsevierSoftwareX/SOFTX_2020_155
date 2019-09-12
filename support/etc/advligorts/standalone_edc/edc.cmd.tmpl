@@ -1,0 +1,18 @@
+dbLoadDatabase "base.dbd"
+registerRecordDeviceDriver(pdbbase)
+dbLoadRecords "/var/lib/standalone_edc/db/edc.db"
+epicsEnvSet DAQ_FILE /var/lib/standalone_edc/EDC.ini
+epicsEnvSet DAQ_DIR /var/lib/standalone_edc/
+epicsEnvSet FOTON_FILE /var/lib/standalone_edc/EDC.txt
+epicsEnvSet FOTON_DIFF_FILE /var/lib/standalone_edc/tmp/EDC.diff
+epicsEnvSet COEFF_FILE /var/lib/standalone_edc/tmp/EDC.txt
+epicsEnvSet LOG_DIR /var/lib/standalone_edc/log
+epicsEnvSet SDF_DIR /var/lib/standalone_edc/burt/
+epicsEnvSet SDF_FILE safe
+epicsEnvSet SDF_MODEL @ifo@@sys@
+epicsEnvSet MODEL_SITE @site@
+epicsEnvSet MODEL_IFO @ifo@
+epicsEnvSet SYNC_SRC @SYNCSRC@
+epicsEnvSet PREFIX @IFO@:FEC-@DCUID@
+iocInit
+seq &edc,("ifo=@ifo@, site=@site@, sys=@SYS@, sysnum=@DCUID@, sysfile=@IFO@@SYS@ ")
