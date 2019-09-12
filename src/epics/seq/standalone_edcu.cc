@@ -29,15 +29,18 @@ of this distribution.
 
 #include <daqmap.h>
 #include <param.h>
+extern "C" {
 #include "findSharedMemory.h"
+}
 #include "cadef.h"
 #include "fb.h"
 #include "../../drv/gpstime/gpstime.h"
+#include "gps.hh"
 
 #define EDCU_MAX_CHANS 50000
 // Gloabl variables
 // ****************************************************************************************
-unsigned char naughtyList[ EDCU_MAX_CHANS ][ 64 ];
+char naughtyList[ EDCU_MAX_CHANS ][ 64 ];
 
 // Function prototypes
 // ****************************************************************************************
@@ -76,9 +79,9 @@ static float         dataBuffer[ 2 ][ EDCU_MAX_CHANS ];
 static int           timeIndex;
 static int           cycleIndex;
 static int           symmetricom_fd = -1;
-int timemarks[ 16 ] = { 1000,   63500,  126000, 188500, 251000, 313500,
-                        376000, 438500, 501000, 563500, 626000, 688500,
-                        751000, 813500, 876000, 938500 };
+int timemarks[ 16 ] = { 1000*1000,   63500*1000,  126000*1000, 188500*1000, 251000*1000, 313500*1000,
+                        376000*1000, 438500*1000, 501000*1000, 563500*1000, 626000*1000, 688500*1000,
+                        751000*1000, 813500*1000, 876000*1000, 938500*1000 };
 int nextTrig = 0;
 
 // End Header ************************************************************
@@ -125,26 +128,31 @@ waitNewCycleGps( long* gps_sec )
     static int    sync21pps = 1;
     unsigned long lastSec;
 
-    unsigned long gpsSec, gpsuSec;
+    unsigned long startTime = 0;
+    unsigned long gpsSec, gpsNano;
 
     if ( sync21pps )
     {
-        gpsSec = symm_gps_time( &gpsuSec, 0 );
-        for ( ;gpsuSec > timemarks[0]; )
+        startTime = gpsSec = symm_gps_time( &gpsNano, 0 );
+        printf("\n%ld:%ld  (%d)\n", (long int)gpsSec, (long int)gpsNano, (long int)timemarks[0]);
+        for ( ;startTime == gpsSec || gpsNano < timemarks[0]; )
         {
-            usleep( 500 );
-            gpsSec = symm_gps_time( &gpsuSec, 0 );
+            printf("%ld:%ld  (%d)\n", (long int)gpsSec, (long int)gpsNano, (long int)timemarks[0]);
+
+            usleep( 1000 );
+            gpsSec = symm_gps_time( &gpsNano, 0 );
         }
-        printf( "Found Sync at %ld %ld\n",
+        printf( "Found Sync at %ld %ld\nFrom start time of %ld\n",
                 gpsSec,
-                gpsuSec);
+                gpsNano,
+                startTime);
         sync21pps = 0;
     }
-    gpsSec = symm_gps_time( &gpsuSec, 0 );
-    while (gpsuSec < timemarks[cycle])
+    gpsSec = symm_gps_time( &gpsNano, 0 );
+    while (gpsNano < timemarks[cycle])
     {
         usleep( 500 );
-        gpsSec = symm_gps_time( &gpsuSec, 0 );
+        gpsSec = symm_gps_time( &gpsNano, 0 );
     }
     *gps_sec = gpsSec;
     last_cycle = cycle;
@@ -153,6 +161,7 @@ waitNewCycleGps( long* gps_sec )
     // printf("new cycle %d %ld\n",newCycle,*gps_sec);
     return last_cycle;
 }
+
 
 // **************************************************************************
 long
@@ -745,24 +754,26 @@ main( int argc, char* argv[] )
     int         send_daq_reset = 0;
 
     const char* daqsharedmemname = "edc_daq";
-    const char* syncsharedmemname = "-";
+    //const char* syncsharedmemname = "-";
     const char* logdir = "logs";
     const char* daqFile = "edc.ini";
     int         mydcuid = 52;
     char        logfilename[ 256 ] = "";
     char        edculogfilename[ 256 ] = "";
 
+    int         delay_multiplier = 0;
+
     int cur_arg = 0;
-    while ( ( cur_arg = getopt( argc, argv, "b:t:l:d:i:" ) ) != EOF )
+    while ( ( cur_arg = getopt( argc, argv, "b:l:d:i:w:" ) ) != EOF )
     {
         switch ( cur_arg )
         {
         case 'b':
             daqsharedmemname = optarg;
             break;
-        case 't':
-            syncsharedmemname = optarg;
-            break;
+        //case 't':
+        //    syncsharedmemname = optarg;
+        //    break;
         case 'l':
             logdir = optarg;
             break;
@@ -771,6 +782,9 @@ main( int argc, char* argv[] )
             break;
         case 'i':
             daqFile = optarg;
+            break;
+        case 'w':
+            delay_multiplier = atoi( optarg );
             break;
         }
     }
@@ -791,7 +805,7 @@ main( int argc, char* argv[] )
     sprintf( edculogfilename, "%s%s", logdir, "/edcu.log" );
     for ( ii = 0; ii < EDCU_MAX_CHANS; ii++ )
         daqd_edcu1.channel_status[ ii ] = 0xbad;
-    edcuInitialize( daqsharedmemname, syncsharedmemname );
+    edcuInitialize( daqsharedmemname, "-");
     // edcuCreateChanFile(daqDir,daqFile,pref);
     edcuCreateChanList( daqFile, edculogfilename );
     int datarate = daqd_edcu1.num_chans * 64 / 1000;
@@ -817,12 +831,32 @@ main( int argc, char* argv[] )
              daqFileCrc,
              "Chan Cnt",
              daqd_edcu1.num_chans );
+
+    GPS::gps_clock clock(0);
+    GPS::gps_time time_step = GPS::gps_time(0, 1000000000 / 16 );
+    GPS::gps_time transmit_time = clock.now( );
+    ++transmit_time.sec;
+    transmit_time.nanosec = 0;
+
+    int cyle = 0;
+
     // Start Infinite Loop
     // *******************************************************************************
     for ( ;; )
     {
         dropout = 0;
-        daqd_edcu1.epicsSync = waitNewCycle( &daqd_edcu1.gpsTime );
+        //daqd_edcu1.epicsSync = waitNewCycle( &daqd_edcu1.gpsTime );
+        GPS::gps_time now = clock.now( );
+        while (now < transmit_time )
+        {
+            usleep( 1 );
+            now = clock.now( );
+        }
+        usleep( delay_multiplier * 1000 );
+
+        daqd_edcu1.gpsTime = now.sec;
+        daqd_edcu1.epicsSync = cycle;
+
         edcuWriteData(
             daqd_edcu1.epicsSync, daqd_edcu1.gpsTime, mydcuid, send_daq_reset );
         send_daq_reset = 0;
@@ -865,6 +899,9 @@ main( int argc, char* argv[] )
         Change to DAQ Config file.");
                 }
         }*/
+
+        cycle = (cycle + 1) % 16;
+        transmit_time = transmit_time + time_step;
     }
 
     return ( 0 );
