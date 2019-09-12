@@ -1,5 +1,5 @@
 add_executable(standalone_edc
-        standalone_edcu.c
+        standalone_edcu.cc
         ${CMAKE_CURRENT_SOURCE_DIR}/../../drv/rfm.c)
 target_include_directories(standalone_edc PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/../../include"
