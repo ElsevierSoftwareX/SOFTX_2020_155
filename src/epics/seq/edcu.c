@@ -75,6 +75,12 @@ typedef struct daqd_c {
 	long epicsSync;
 } daqd_c;
 
+typedef struct check_crc_params {
+    char *ini_filename;
+    int   orig_crc;
+    dbAddr message_dest;
+} check_crc_params;
+
 int num_chans_index = -1;
 int con_chans_index = -1;
 int nocon_chans_index = -1;
@@ -742,7 +748,6 @@ int main(int argc,char *argv[])
 	int rdstatus = 0;
 	char timestring[128];
 	int ii;
-	int fivesectimer = 0;
 	long coeffFileCrc;
 	char modfilemsg[] = "Modified File Detected ";
 	struct stat st = {0};
@@ -755,8 +760,13 @@ int main(int argc,char *argv[])
     char *dcuid;
     int send_daq_reset = 0;
 
+    check_crc_params crc_params;
+
     if(argc>=2) {
         iocsh(argv[1]);
+
+    memset(&crc_params, 0, sizeof(crc_params));
+
 	// printf("Executing post script commands\n");
 	// Get environment variables from startup command to formulate EPICS record names.
 	char *pref = getenv("PREFIX");
@@ -857,7 +867,11 @@ sleep(2);
 	logFileEntry(logmsg);
 	edcuClearSdf(pref);
 
-    pthread_create(&check_crc_thread, NULL, check_crc, NULL);
+    crc_params.message_dest = daqmsgaddr;
+    crc_params.ini_filename = daqFile;
+    crc_params.orig_crc = daqFileCrc;
+
+    pthread_create(&check_crc_thread, NULL, check_crc, &crc_params);
 	// Start Infinite Loop 		*******************************************************************************
 	for(;;) {
 		dropout = 0;
@@ -886,18 +900,6 @@ sleep(2);
 			numReport = edcuReportUnconnChannels(pref,numDC,pageNumDisp);
 		}
 		status = dbPutField(&chnotfoundaddr,DBR_LONG,&numDC,1);
-
-		fivesectimer = (fivesectimer + 1) % 50;		// Increment 5 second timer for triggering CRC checks.
-		// Check file CRCs every 5 seconds.
-		// DAQ and COEFF file checking was moved from skeleton.st to here RCG V2.9.
-		if(!fivesectimer) {
-			status = checkFileCrc(daqFile);
-			if(status != daqFileCrc) {
-				daqFileCrc = status;
-				status = dbPutField(&daqmsgaddr,DBR_STRING,modfilemsg,1);
-				logFileEntry("Detected Change to DAQ Config file.");
-			}
-		}
 	}
 	sleep(0xfffffff);
     } else
@@ -907,25 +909,37 @@ sleep(2);
 
 
 void* check_crc(void* arg) {
-    char *daqFile = getenv("DAQ_FILE");
-    long status;
-    char *pref = getenv("PREFIX");
-    dbAddr daqmsgaddr;
-    char moddaqfilemsg[256];
+    check_crc_params* crc_params = (check_crc_params*)arg;
+    char okfilemsg[] = "";
     char modfilemsg[] = "Modified File Detected ";
+    int cur_crc = 0;
+    int was_ok = 1;
 
-    sprintf(moddaqfilemsg, "%s_%s", pref, "MSGDAQ");    // Record to write if DAQ file changed.
-    status = dbNameToAddr(moddaqfilemsg,&daqmsgaddr);
+
+    if (!crc_params)
+    {
+        logFileEntry("Unable to check the ini file");
+        return 0;
+    }
 
     while (1) {
-        status = checkFileCrc(daqFile);
+        sleep(5);
+        cur_crc = checkFileCrc(daqFile);
 
-        if (status != daqFileCrc) {
-           // daqFileCrc = status;
-            status = dbPutField(&daqmsgaddr,DBR_STRING,modfilemsg,1);
-            logFileEntry("Detected Change to DAQ Config file.");
+        if (cur_crc != crc_params->orig_crc) {
+            dbPutField(&daqmsgaddr,DBR_STRING,modfilemsg,1);
+            if (was_ok) {
+                logFileEntry("Detected Change to DAQ Config file.");
+            }
+            was_ok = 0;
+        } else {
+            dbPutField(&(crc_params->message_dest), DBR_STRING, okfilemsg, 1);
+            if (!was_ok) {
+                logFileEntry("DAQ config file restored to its expected state.");
+            }
+            was_ok = 1;
         }
-        sleep(1);
     }
+    return 0;
 }
 
