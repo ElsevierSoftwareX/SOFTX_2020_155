@@ -45,6 +45,8 @@ of this distribution.
 #include "fb.h"
 #include "../../drv/gpstime/gpstime.h"
 
+#include <pthread.h>
+
 #define EDCU_MAX_CHANS	50000
 // Gloabl variables		****************************************************************************************
 char timechannel[256];		///< Name of the GPS time channel for timestamping.
@@ -58,6 +60,7 @@ unsigned char naughtyList[EDCU_MAX_CHANS][64];
 int checkFileCrc(char *);
 void getSdfTime(char *);
 void logFileEntry(char *);
+void* check_crc(void* arg);
 
 unsigned long daqFileCrc;
 typedef struct daqd_c {
@@ -76,7 +79,7 @@ int num_chans_index = -1;
 int con_chans_index = -1;
 int nocon_chans_index = -1;
 int internal_channel_count = 0;
-
+pthread_t check_crc_thread;
 
 daqd_c daqd_edcu1;
 static struct rmIpcStr *dipc;
@@ -853,6 +856,8 @@ sleep(2);
 	sprintf(logmsg,"%s\n%s = %u\n%s = %d","EDCU code restart","File CRC",daqFileCrc,"Chan Cnt",daqd_edcu1.num_chans);
 	logFileEntry(logmsg);
 	edcuClearSdf(pref);
+
+    pthread_create(&check_crc_thread, NULL, check_crc, NULL);
 	// Start Infinite Loop 		*******************************************************************************
 	for(;;) {
 		dropout = 0;
@@ -899,3 +904,28 @@ sleep(2);
     	iocsh(NULL);
     return(0);
 }
+
+
+void* check_crc(void* arg) {
+    char *daqFile = getenv("DAQ_FILE");
+    long status;
+    char *pref = getenv("PREFIX");
+    dbAddr daqmsgaddr;
+    char moddaqfilemsg[256];
+    char modfilemsg[] = "Modified File Detected ";
+
+    sprintf(moddaqfilemsg, "%s_%s", pref, "MSGDAQ");    // Record to write if DAQ file changed.
+    status = dbNameToAddr(moddaqfilemsg,&daqmsgaddr);
+
+    while (1) {
+        status = checkFileCrc(daqFile);
+
+        if (status != daqFileCrc) {
+           // daqFileCrc = status;
+            status = dbPutField(&daqmsgaddr,DBR_STRING,modfilemsg,1);
+            logFileEntry("Detected Change to DAQ Config file.");
+        }
+        sleep(1);
+    }
+}
+
