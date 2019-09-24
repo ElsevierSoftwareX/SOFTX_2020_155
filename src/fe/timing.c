@@ -128,7 +128,7 @@ inline void sendTimingDiags2Epics(CDS_EPICS *pLocalEpics,
     timeinfo->timeHoldWhenHold = timeinfo->timeHoldWhen;
     timeinfo->usrHoldTime = 0;
 
-    pLocalEpics->epicsOutput.adcWaitTime = adcinfo->adcHoldTimeAvg/CYCLE_PER_SECOND;
+    pLocalEpics->epicsOutput.adcWaitTime = adcinfo->adcHoldTimeAvg/(CYCLE_PER_SECOND / UNDERSAMPLE);
     pLocalEpics->epicsOutput.adcWaitMin = adcinfo->adcHoldTimeMin;
     pLocalEpics->epicsOutput.adcWaitMax = adcinfo->adcHoldTimeMax;
 

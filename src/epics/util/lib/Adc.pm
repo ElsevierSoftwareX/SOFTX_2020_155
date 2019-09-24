@@ -13,7 +13,7 @@ require "lib/medmGen.pm";
 # ADC cards we support
 %board_types = (
 	GSC_16AI64SSA => 1, # Slow General Standards board
-        GSC_18AISS6C => 1 # 18-bit 6 channel General Standards board
+        GSC_18AI32SSC1M => 1 # 18-bit 8/16/24/32 channel General Standards board
 );
 
 # default board type (if none specified with type=<type> in block Description)

@@ -43,12 +43,12 @@ int ii;
 unsigned long ipcMemOffset;
 
 
-printf("size of data block = 0x%x\n", sizeof(CDS_IPC_COMMS));
-printf("Dolphin num = %d \n",cdsPciModules.dolphinCount);
-printf("\tLocal at 0x%x and 0x%x \n",cdsPciModules.dolphinRead[0],cdsPciModules.dolphinWrite[0]);
-printf("\tRFM   at 0x%x and 0x%x \n",cdsPciModules.dolphinRead[1],cdsPciModules.dolphinWrite[1]);
+// printf("size of data block = 0x%x\n", sizeof(CDS_IPC_COMMS));
+// printf("Dolphin num = %d \n",cdsPciModules.dolphinCount);
+// printf("\tLocal at 0x%x and 0x%x \n",cdsPciModules.dolphinRead[0],cdsPciModules.dolphinWrite[0]);
+// printf("\tRFM   at 0x%x and 0x%x \n",cdsPciModules.dolphinRead[1],cdsPciModules.dolphinWrite[1]);
 #ifdef RFM_DELAY
-printf("Model compiled with RFM DELAY !!\n");
+// printf("Model compiled with RFM DELAY !!\n");
 #endif
   for(ii=0;ii<connects;ii++)
   {
@@ -157,9 +157,9 @@ printf("Model compiled with RFM DELAY !!\n");
   for(ii=0;ii<connects;ii++)
   {
 	if(ipcInfo[ii].mode == ISND && ipcInfo[ii].netType != ISHME) {
-        printf("IPC Name = %s \t%d\t%d\t%lx\t%lx\n",ipcInfo[ii].name,ipcInfo[ii].netType,ipcInfo[ii].ipcNum,
-		(unsigned long)&ipcInfo[ii].pIpcDataWrite[0]->dBlock[0][ipcInfo[ii].ipcNum].data,
-		(unsigned long)&ipcInfo[ii].pIpcDataWrite[0]->dBlock[63][ipcInfo[ii].ipcNum].timestamp);
+        // printf("IPC Name = %s \t%d\t%d\t%lx\t%lx\n",ipcInfo[ii].name,ipcInfo[ii].netType,ipcInfo[ii].ipcNum,
+		// (unsigned long)&ipcInfo[ii].pIpcDataWrite[0]->dBlock[0][ipcInfo[ii].ipcNum].data,
+		// (unsigned long)&ipcInfo[ii].pIpcDataWrite[0]->dBlock[63][ipcInfo[ii].ipcNum].timestamp);
 	}
   }
 }
@@ -190,13 +190,13 @@ INLINE void commData3Send(int connects,  	 	// Total number of IPC connections i
 #ifdef RFM_DELAY
 // Need to write ahead one extra block
   int mycycle = (cycle + 1);
-  sendBlock = ((mycycle + 1) * (IPC_MAX_RATE / FE_RATE)) % IPC_BLOCKS;
+  sendBlock = ((mycycle + 1) * (IPC_MAX_RATE / IPC_RATE)) % IPC_BLOCKS;
   dataCycle = ((mycycle + 1) * ipcInfo[0].sendCycle) % IPC_MAX_RATE;
   if(dataCycle == 0 || dataCycle == ipcInfo[0].sendCycle) syncWord = timeSec + 1;
   else syncWord = timeSec;
   syncWord = (syncWord << 32) + dataCycle;
 #else
-  sendBlock = ((cycle + 1) * (IPC_MAX_RATE / FE_RATE)) % IPC_BLOCKS;
+  sendBlock = ((cycle + 1) * (IPC_MAX_RATE / IPC_RATE)) % IPC_BLOCKS;
 // Calculate the SYNC word to be sent with all data.
 // Determine the cycle count to be sent with the data
   dataCycle = ((cycle + 1) * ipcInfo[0].sendCycle) % IPC_MAX_RATE;
@@ -241,7 +241,7 @@ INLINE void commData3Send(int connects,  	 	// Total number of IPC connections i
 #ifdef RFM_DELAY
 // We don't want to delay SHMEM or PCIe writes, so calc block as usual,
 // so need to recalc send block and syncWord.
-  sendBlock = ((cycle + 1) * (IPC_MAX_RATE / FE_RATE)) % IPC_BLOCKS;
+  sendBlock = ((cycle + 1) * (IPC_MAX_RATE / IPC_RATE)) % IPC_BLOCKS;
 // Calculate the SYNC word to be sent with all data.
 // Determine the cycle count to be sent with the data
   dataCycle = ((cycle + 1) * ipcInfo[0].sendCycle) % IPC_MAX_RATE;
@@ -304,7 +304,7 @@ double tmp;			// Temp location for data for checking NaN
 // static unsigned long nskipped = 0;	// number of skipped error messages (couldn't print that fast)
 
   // Determine which block to read, based on present code cycle
-  rcvBlock = ((cycle) * (IPC_MAX_RATE / FE_RATE)) % IPC_BLOCKS;
+  rcvBlock = ((cycle) * (IPC_MAX_RATE / IPC_RATE)) % IPC_BLOCKS;
   for(ii=0;ii<connects;ii++)
   {
         if(ipcInfo[ii].mode == IRCV) // Zero = Rcv and One = Send

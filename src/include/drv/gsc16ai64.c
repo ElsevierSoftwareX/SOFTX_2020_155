@@ -131,11 +131,13 @@ int gsc16ai64WaitDmaDone(int module, int *data)
 ///< the timing slave are turned OFF ie during initialization process.
 ///	@param[in] adcCount Total number of ADC modules to start DMA.
 // *****************************************************************************
-int gsc16ai64Enable(int adcCount)
+int gsc16ai64Enable(CDS_HARDWARE *pHardware)
 {
   int ii;
-  for(ii=0;ii<adcCount;ii++)
+  for(ii=0;ii<pHardware->adcCount;ii++)
   {
+    if(pHardware->adcType[ii] == GSC_16AI64SSA)
+    {
 	  /// Enable demand DMA mode ie auto DMA data to computer memory when 
 	  ///< GSAI_THRESHOLD data points in ADC FIFO.
           adcPtr[ii]->BCR &= ~(GSAI_DMA_DEMAND_MODE);
@@ -147,6 +149,7 @@ int gsc16ai64Enable(int adcCount)
           adcPtr[ii]->IDBC = (GSAI_CLEAR_BUFFER | GSAI_THRESHOLD);
 	  /// Enable sync via external clock input.
           adcPtr[ii]->BCR |= GSAI_ENABLE_X_SYNC;
+    }
   }
   return(0);
 }

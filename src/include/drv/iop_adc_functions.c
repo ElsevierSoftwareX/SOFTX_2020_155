@@ -12,14 +12,20 @@ inline int iop_adc_init(adcInfo_t *adcinfo)
   for(jj=0;jj<cdsPciModules.adcCount;jj++)
   {
 	  // Setup the DMA registers
+      if (cdsPciModules.adcType[jj] == GSC_18AI32SSC1M)  
+      {
+	    status = gsc18ai32DmaSetup(jj);
+      } else {
 	  status = gsc16ai64DmaSetup(jj);
+      }
 	  // Preload input memory with dummy variables to test that new ADC data has arrived.
 	  adcDummyData = (int *)cdsPciModules.pci_adc[jj];
 	  // Write a dummy 0 to first ADC channel location
 	  // This location should never be zero when the ADC writes data as it should always
 	  // have an upper bit set indicating channel 0.
           *adcDummyData = 0x0;
-          if (cdsPciModules.adcType[jj] == GSC_18AISS6C)  adcDummyData += 5;
+          // if (cdsPciModules.adcType[jj] == GSC_18AI32SSC1M)  adcDummyData += 63;
+          if (cdsPciModules.adcType[jj] == GSC_18AI32SSC1M)  adcDummyData += GSAF_8_OFFSET;
           else adcDummyData += 31;
 	  // Write a number into the last channel which the ADC should never write ie no
 	  // upper bits should be set in channel 31.
@@ -125,7 +131,7 @@ inline int sync_adc_2_1pps() {
 // ADC Read *****************************************************************
 inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
 {
-    int ii,jj;
+    int kk;
     volatile int *packedData;
     int limit;
     int mask;
@@ -133,14 +139,17 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
     int num_outs;
     int ioMemCntr = 0;
     int adcStat = 0;
+    int card;
+    int chan;
 
     // Read ADC data
-    for(jj=0;jj<cdsPciModules.adcCount;jj++)
+    for(card=0;card<cdsPciModules.adcCount;card++)
     {
     /// - ---- ADC DATA RDY is detected when last channel in memory no longer contains the
     /// dummy variable written during initialization and reset after the read.
-        packedData = (int *)cdsPciModules.pci_adc[jj];
-        packedData += 31;
+        packedData = (int *)cdsPciModules.pci_adc[card];
+        if (cdsPciModules.adcType[card] == GSC_18AI32SSC1M)  packedData += GSAF_8_OFFSET;
+        else packedData += 31;
 		
 	cpuClk[CPU_TIME_RDY_ADC] = rdtsc_ordered();
         do {
@@ -153,42 +162,44 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
 
 
         /// - ---- Added ADC timing diagnostics to verify timing consistent and all rdy together.
-        if(jj==0) {
-            adcinfo->adcRdTime[jj] = (cpuClk[CPU_TIME_ADC_WAIT] - cpuClk[CPU_TIME_CYCLE_START]) / CPURATE;
-	    if(adcinfo->adcRdTime[jj] > 1000) adcStat = ADC_BUS_DELAY;
-	    if(adcinfo->adcRdTime[jj] < 13) adcStat = ADC_SHORT_CYCLE;
+        if(card==0) {
+            adcinfo->adcRdTime[card] = (cpuClk[CPU_TIME_ADC_WAIT] - cpuClk[CPU_TIME_CYCLE_START]) / CPURATE;
+	    if(adcinfo->adcRdTime[card] > 1000) adcStat = ADC_BUS_DELAY;
+	    if(adcinfo->adcRdTime[card] < 13) adcStat = ADC_SHORT_CYCLE;
 #ifdef TIME_MASTER
             pcieTimer->gps_time = timeSec;
             pcieTimer->cycle = cycleNum;
             clflush_cache_range(&pcieTimer->gps_time,16);
 #endif
         } else {
-            adcinfo->adcRdTime[jj] = adcinfo->adcWait;
+            adcinfo->adcRdTime[card] = adcinfo->adcWait;
         }
 
-        if(adcinfo->adcRdTime[jj] > adcinfo->adcRdTimeMax[jj]) adcinfo->adcRdTimeMax[jj] = 
-            adcinfo->adcRdTime[jj];
+        if(adcinfo->adcRdTime[card] > adcinfo->adcRdTimeMax[card]) adcinfo->adcRdTimeMax[card] = 
+            adcinfo->adcRdTime[card];
 
-        if((jj==0) && (adcinfo->adcRdTimeMax[jj] > MAX_ADC_WAIT_CARD_0)) 
-            adcinfo->adcRdTimeErr[jj] ++;
+        // if((card==0) && (adcinfo->adcRdTimeMax[card] > MAX_ADC_WAIT_CARD_0)) 
+        if((card==0) && (adcinfo->adcRdTime[card] > 20)) 
+            adcinfo->adcRdTimeErr[card] ++;
 
-        if((jj!=0) && (adcinfo->adcRdTimeMax[jj] > MAX_ADC_WAIT_CARD_S)) 
-            adcinfo->adcRdTimeErr[jj] ++;
+        if((card!=0) && (adcinfo->adcRdTimeMax[card] > MAX_ADC_WAIT_CARD_S)) 
+            adcinfo->adcRdTimeErr[card] ++;
 
         /// - --------- If data not ready in time, abort.
         /// Either the clock is missing or code is running too slow and ADC FIFO
         /// is overflowing.
         if (adcinfo->adcWait >= MAX_ADC_WAIT) {
+            // printk("timeout %d %d \n",jj,adcinfo->adcWait);
             pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
             pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
             pLocalEpics->epicsOutput.fe_status = ADC_TO_ERROR;
             stop_working_threads = 1;
             vmeDone = 1;
-            // printf("timeout %d %d \n",jj,adcinfo->adcWait);
             continue;
+            // return 0;
         }
 
-        if(jj == 0) 
+        if(card == 0) 
         {
         // Capture cpu clock for cpu meter diagnostics
 	    cpuClk[CPU_TIME_CYCLE_START] = rdtsc_ordered();
@@ -210,14 +221,17 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
         }
 
         /// \> Read adc data
-        packedData = (int *)cdsPciModules.pci_adc[jj];
+        packedData = (int *)cdsPciModules.pci_adc[card];
         /// - ---- First, and only first, channel should have upper bit marker set.
         /// If not, have a channel hopping error.
-        if(!(*packedData & ADC_1ST_CHAN_MARKER)) 
+        if((unsigned int)*packedData  > 65535) 
+        // if(!((unsigned int)*packedData & ADC_1ST_CHAN_MARKER)) 
         {
-            adcinfo->adcChanErr[jj] = 1;
+            // adcinfo->adcChanErr[jj] = 1;
+            adcinfo->chanHop = 0;
+            // pLocalEpics->epicsOutput.stateWord |= FE_ERROR_ADC;
+        } else {
             adcinfo->chanHop = 1;
-            pLocalEpics->epicsOutput.stateWord |= FE_ERROR_ADC;
         }	
 
         limit = OVERFLOW_LIMIT_16BIT;
@@ -225,55 +239,75 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
        	offset = GSAI_DATA_CODE_OFFSET;
         mask = GSAI_DATA_MASK;
         num_outs = GSAI_CHAN_COUNT;
+        if (cdsPciModules.adcType[card] == GSC_18AI32SSC1M) 
+        {
+            num_outs = 8;
+        }
         /// - ---- Determine next ipc memory location to load ADC data
         ioMemCntr = (cycleNum % IO_MEMORY_SLOTS);
 
         /// - ----  Read adc data from PCI mapped memory into local variables
-        for(ii=0;ii<num_outs;ii++)
+        for(kk=0;kk<UNDERSAMPLE;kk++)
+        {
+        for(chan=0;chan<num_outs;chan++)
         {
         // adcData is the integer representation of the ADC data
-            adcinfo->adcData[jj][ii] = (*packedData & mask);
-            adcinfo->adcData[jj][ii]  -= offset;
+            adcinfo->adcData[card][chan] = (*packedData & mask);
+            adcinfo->adcData[card][chan]  -= offset;
 #ifdef DEC_TEST
-            if(ii==0)
+            if(chan==0)
             {
-                adcinfo->adcData[jj][ii] = dspPtr[0]->data[0].exciteInput;
+                adcinfo->adcData[card][chan] = dspPtr[0]->data[0].exciteInput;
             }
 #endif
             // dWord is the double representation of the ADC data
             // This is the value used by the rest of the code calculations.
-            dWord[jj][ii] = adcinfo->adcData[jj][ii];
+            dWord[card][chan][kk] = adcinfo->adcData[card][chan];
             /// - ----  Load ADC value into ipc memory buffer
-            ioMemData->iodata[jj][ioMemCntr].data[ii] = adcinfo->adcData[jj][ii];
+            ioMemData->iodata[card][ioMemCntr].data[chan] = adcinfo->adcData[card][chan];
+        /// - ---- Check for ADC overflows
+            if((adcinfo->adcData[card][chan] > limit) || (adcinfo->adcData[card][chan] < -limit))
+            {
+                adcinfo->overflowAdc[card][chan] ++;
+                pLocalEpics->epicsOutput.overflowAdcAcc[card][chan] ++;
+                overflowAcc ++;
+                adcinfo->adcOF[card] = 1;
+                odcStateWord |= ODC_ADC_OVF;
+            }
             packedData ++;
         }
 
         /// - ---- Write GPS time and cycle count as indicator to slave that adc data is ready
-        ioMemData->gpsSecond = timeSec;;
-        ioMemData->iodata[jj][ioMemCntr].timeSec = timeSec;;
-        ioMemData->iodata[jj][ioMemCntr].cycle = cycleNum;
+        ioMemData->gpsSecond = timeSec;
+        ioMemData->iodata[card][ioMemCntr].timeSec = timeSec;
+        ioMemData->iodata[card][ioMemCntr].cycle = cycleNum + kk;
+        ioMemCntr ++;
 
+#if 0
         /// - ---- Check for ADC overflows
-        for(ii=0;ii<num_outs;ii++)
+        for(chan=0;chan<num_outs;chan++)
         {
-            if((adcinfo->adcData[jj][ii] > limit) || (adcinfo->adcData[jj][ii] < -limit))
+            if((adcinfo->adcData[card][chan] > limit) || (adcinfo->adcData[card][chan] < -limit))
             {
-                adcinfo->overflowAdc[jj][ii] ++;
-                pLocalEpics->epicsOutput.overflowAdcAcc[jj][ii] ++;
+                adcinfo->overflowAdc[card][chan] ++;
+                pLocalEpics->epicsOutput.overflowAdcAcc[card][chan] ++;
                 overflowAcc ++;
-                adcinfo->adcOF[jj] = 1;
+                adcinfo->adcOF[card] = 1;
                 odcStateWord |= ODC_ADC_OVF;
             }
         }
+#endif
+        }
 
         /// - ---- Clear out last ADC data read for test on next cycle
-        packedData = (int *)cdsPciModules.pci_adc[jj];
+        packedData = (int *)cdsPciModules.pci_adc[card];
         *packedData = 0x0;
 
-        if (cdsPciModules.adcType[jj] == GSC_18AISS6C) packedData += GSAF_CHAN_COUNT_M1;
+        if (cdsPciModules.adcType[card] == GSC_18AI32SSC1M) packedData += GSAF_8_OFFSET;
         else packedData += GSAI_CHAN_COUNT_M1;
 
         *packedData = DUMMY_ADC_VAL;
+         gsc18ai32DmaEnable(card);
 
 #ifdef DIAG_TEST
 // For DIAGS ONLY !!!!!!!!
@@ -282,7 +316,7 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
 // -- Less than normal will result in ADC timeout.
 // In both cases, real-time kernel code should exit with errors to dmesg
         if(pLocalEpics->epicsInput.bumpAdcRd != 0) {
-            gsc16ai64DmaBump(jj,pLocalEpics->epicsInput.bumpAdcRd);
+            gsc16ai64DmaBump(card,pLocalEpics->epicsInput.bumpAdcRd);
             pLocalEpics->epicsInput.bumpAdcRd = 0;
         }
 #endif
@@ -415,7 +449,7 @@ inline int iop_adc_read_32 (adcInfo_t *adcinfo,int cpuClk[])
             adcinfo->adcData[jj][ii]  -= offset;
             // dWord is the double representation of the ADC data
             // This is the value used by the rest of the code calculations.
-            dWord[jj][ii] = adcinfo->adcData[jj][ii];
+            dWord[jj][ii][nn] = adcinfo->adcData[jj][ii];
             /// - ----  Load ADC value into ipc memory buffer
             ioMemData->iodata[jj][ioMemCntr].data[ii] = adcinfo->adcData[jj][ii];
             packedData ++;

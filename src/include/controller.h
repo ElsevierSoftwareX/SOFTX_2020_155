@@ -94,6 +94,32 @@ char fp [64*1024];
 #define NORMAL_RUN			7
 
 // Define standard values based on code rep rate **************************************
+#ifdef SERVO1024K
+    #define CYCLE_PER_MINUTE        (8*7864320)
+    #define DAQ_CYCLE_CHANGE        (32*8000)
+    #define END_OF_DAQ_BLOCK        65535
+	#define DAQ_RATE	(DAQ_16K_SAMPLE_SIZE*4)
+	#define NET_SEND_WAIT		    (32*81920)
+    #define CYCLE_TIME_ALRM         15
+	#define CYCLE_TIME_ALRM_HI	    25
+	#define CYCLE_TIME_ALRM_LO	    10
+	#define EPICS_128_SYNC		    2048
+	#define DAC_PRELOAD_CNT		    0
+    #define UNDERSAMPLE             16
+#endif
+#ifdef SERVO512K
+    #define CYCLE_PER_MINUTE        (4*7864320)
+    #define DAQ_CYCLE_CHANGE        (32*8000)
+    #define END_OF_DAQ_BLOCK        65535
+	#define DAQ_RATE	(DAQ_16K_SAMPLE_SIZE*4)
+	#define NET_SEND_WAIT		    (32*81920)
+    #define CYCLE_TIME_ALRM         15
+	#define CYCLE_TIME_ALRM_HI	    25
+	#define CYCLE_TIME_ALRM_LO	    10
+	#define EPICS_128_SYNC		    2048
+	#define DAC_PRELOAD_CNT		    0
+    #define UNDERSAMPLE             8
+#endif
 #ifdef SERVO256K
         #define CYCLE_PER_MINUTE        (2*7864320)
         #define DAQ_CYCLE_CHANGE        (2*8000)
@@ -126,6 +152,7 @@ char fp [64*1024];
 	#define CYCLE_TIME_ALRM_HI	25
 	#define CYCLE_TIME_ALRM_LO	10
 	#define EPICS_128_SYNC		512
+    #define UNDERSAMPLE         1
 #ifdef ADC_SLAVE
 	#define DAC_PRELOAD_CNT		1
 #else
@@ -296,7 +323,7 @@ VME_COEF *pCoeff[NUM_SYSTEMS];                                  // Ptr to SFM co
 
 // ADC Variables
 /// Array of ADC values
-double dWord[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];             // ADC read values
+double dWord[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD][16];             // ADC read values
 /// List of ADC channels used by this app. Used to determine if downsampling required.
 unsigned int dWordUsed[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];   // ADC chans used by app code
 

@@ -55,7 +55,7 @@ const UINT32 fltrConst[17] = {16, 64, 256, 1024, 4096, 16384,
 				     0x2000000,0x8000000
 				     };
 
-#if defined(SERVO16K) || defined(SERVO32K) || defined(SERVO64K) || defined(SERVO128K) || defined(SERVO256K)
+#if defined(SERVO16K) || defined(SERVO512K) || defined(SERVO32K) || defined(SERVO64K) || defined(SERVO128K) || defined(SERVO256K) || defined(SERVO1024K)
 double sixteenKAvgCoeff[9] = {1.9084759e-12,
 				     -1.99708675982420, 0.99709029700517, 2.00000005830747, 1.00000000739582,
 				     -1.99878510620232, 0.99879373895648, 1.99999994169253, 0.99999999260419};
@@ -69,7 +69,11 @@ double twoKAvgCoeff[9] = {7.705446e-9,
 
 #ifdef SERVO16K
 #define avgCoeff sixteenKAvgCoeff
-#elif defined(SERVO32K) || defined(SERVO64K) || defined(SERVO128K) || defined(SERVO256K)
+#elif defined(SERVO32K) || defined(SERVO64K) || defined(SERVO128K) || defined(SERVO256K) 
+#define avgCoeff sixteenKAvgCoeff
+#elif defined(SERVO1024K)
+#define avgCoeff sixteenKAvgCoeff
+#elif defined(SERVO512K)
 #define avgCoeff sixteenKAvgCoeff
 #elif defined(SERVO2K)
 #define avgCoeff twoKAvgCoeff
@@ -80,6 +84,12 @@ double twoKAvgCoeff[9] = {7.705446e-9,
 #error need to define 2k or 16k or mixed
 #endif
 
+#ifdef SERVO1024K
+  #define FE_RATE	1048576
+#endif
+#ifdef SERVO512K
+  #define FE_RATE	524288
+#endif
 #ifdef SERVO256K
   #define FE_RATE	262144
 #endif
@@ -245,6 +255,10 @@ const int rate = (2*32768);
 const int rate = (4*32768);
 #elif defined(SERVO256K)
 const int rate = (8*32768);
+#elif defined(SERVO512K)
+const int rate = (16*32768);
+#elif defined(SERVO1024K)
+const int rate = (32*32768);
 #endif
 
 /* Convert opSwitchE bits into the 16-bit FiltCtrl2 Ctrl output format */
@@ -289,7 +303,7 @@ inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_C
 #ifdef FIR_FILTERS
 	if (filtC->coeffs[ii].filterType[jj] < 0 || filtC->coeffs[ii].filterType[jj] > MAX_FIR_MODULES) {
 		filtC->coeffs[ii].filterType[jj] = 0;
-		printf("Corrupted data coming from Epics: module=%d filter=%d filterType=%d\n", 
+		// printk("Corrupted data coming from Epics: module=%d filter=%d filterType=%d\n", 
 			ii, jj, pRfmCoeff->vmeCoeffs[ii].filterType[jj]);
 		return 1;
 	}
@@ -301,9 +315,9 @@ inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_C
 
 	if (filtC->coeffs[ii].filterType[jj] == 0) {
 	  if (filtC->coeffs[ii].filtSections[jj] > 10) {
-		printf("Corrupted Epics data:  module=%d filter=%d filterType=%d filtSections=%d\n",
-			ii, jj, pRfmCoeff->vmeCoeffs[ii].filterType[jj],
-			filtC->coeffs[ii].filtSections[jj]);
+		// printk("Corrupted Epics data:  module=%d filter=%d filterType=%d filtSections=%d\n",
+			// ii, jj, pRfmCoeff->vmeCoeffs[ii].filterType[jj],
+			// filtC->coeffs[ii].filtSections[jj]);
 		return 1;
 	  }
           for(kk=0;kk<filtC->coeffs[ii].filtSections[jj]*4+1;kk++) {
@@ -351,7 +365,7 @@ int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int cycle,
 
 #ifdef FIR_FILTERS
   if (type < 0 || type > MAX_FIR_MODULES) {
-	printf("Vme2 bad Epics filter type: module=%d filter=%d filterType=%d\n", 
+	// printk("Vme2 bad Epics filter type: module=%d filter=%d filterType=%d\n", 
 	modNum1, filtNum, type);
   }
 #endif
@@ -438,7 +452,7 @@ int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int cycle,
 	if (filtNum == 9) { /* Last filter loaded in this filter bank */
 	    unsigned int vme_crc =  pRfmCoeff->vmeCoeffs[modNum1].crc;
 	    if (localCoeff.crc != vme_crc) {
-	      printf("vme_crc = 0x%x; local crc = 0x%x\n", vme_crc, localCoeff.crc);
+	      // printk("vme_crc = 0x%x; local crc = 0x%x\n", vme_crc, localCoeff.crc);
 	      // return -1;
 	    }
 	}
@@ -727,6 +741,7 @@ filterModuleD2(FILT_MOD *pFilt,     /* Filter module data  */
   double output;
   double fmInput;
   int id = 0;                  /* System number (HEPI) */
+      extern int cycleNum;
 
   /* Do the shift to match the bits in the the opSwitchE variable so I can do "==" comparisons */
   UINT32 opSwitchP = pFilt->inputs[modNum].opSwitchP >> 1;
@@ -848,7 +863,7 @@ filterModuleD2(FILT_MOD *pFilt,     /* Filter module data  */
 	  pC->prevFirOutput[filterType] = filtData;
 	} else {
 	  filtData = filterType;
-	  printf("module %d; filter %d; filterType = %d\n", modNum, ii, filterType);
+	  // printk("module %d; filter %d; filterType = %d\n", modNum, ii, filterType);
 	}
       }
     } else

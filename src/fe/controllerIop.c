@@ -49,7 +49,7 @@ duotone_diag_t dt_diag;
 int adcCycleNum = 0;
 // Variables for setting IOP->APP I/O
 int ioClockDac = DAC_PRELOAD_CNT;
-int ioMemCntr = 0;
+// int ioMemCntr = 0;
 int ioMemCntrDac = DAC_PRELOAD_CNT;
 // DAC variable
 int dacEnable = 0;
@@ -119,13 +119,17 @@ void *fe_start_iop(void *arg)
   float duotoneTimeDac;
   float duotoneTime;
 
+  int ploop=1;
+  double adcval[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];
+  
+
 
 
 /// **********************************************************************************************\n
 /// Start Initialization Process \n
 /// **********************************************************************************************\n
 
-  /// \> Flush L1 cache
+/// \> Flush L1 cache
   memset (fp, 0, 64*1024);
   memset (fp, 1, 64*1024);
   clflush_cache_range ((void *)fp, 64*1024);
@@ -255,7 +259,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
   vmeDone = 0;
 
   /// \> Call user application software initialization routine.
-  iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0], (struct CDS_EPICS *)pLocalEpics,1);
+  iopDacEnable = feCode(cycleNum,adcval,dacOut,dspPtr[0],&dspCoeff[0], (struct CDS_EPICS *)pLocalEpics,1);
 
   // Initialize timing info variables
   initializeTimingDiags(&timeinfo);
@@ -289,7 +293,8 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       udelay(MAX_UDELAY);
       udelay(MAX_UDELAY);
       /// - ---- Arm ADC modules
-      gsc16ai64Enable(cdsPciModules.adcCount);
+      gsc16ai64Enable(&cdsPciModules);
+      gsc18ai32Enable(&cdsPciModules);
       /// - ----  Arm DAC outputs
       gsc18ao8Enable(&cdsPciModules);
       gsc20ao8Enable(&cdsPciModules);
@@ -318,19 +323,25 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       break;
     case SYNC_SRC_1PPS:
 #ifndef NO_DAC_PRELOAD
+      gsc16ai64Enable(&cdsPciModules);
       status = iop_dac_preload(dacPtr);
 #endif
       // Arm ADC modules
       // This has to be done sequentially, one at a time.
-      status = sync_adc_2_1pps();
+      // status = sync_adc_2_1pps();
+      sync21pps = 1;
+      gsc18ai32Enable(&cdsPciModules);
       break;
     default: {
       // IRIG-B card not found, so use CPU time to get close to 1PPS on startup
       // Pause until this second ends
+      gsc18ai32Enable(&cdsPciModules);
+      sync21pps = 1;
       break;
     }
   }
 
+    for(jj=0;jj<cdsPciModules.adcCount;jj++) gsc18ai32DmaEnable(jj);
   pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;
 
   onePpsTime = cycleNum;
@@ -352,7 +363,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 
 
 #ifdef NO_CPU_SHUTDOWN
-  while(!kthread_should_stop()){
+  while(!kthread_should_stop() && !vmeDone){
 #else
   while(!vmeDone){ 	// Run forever until user hits reset
 #endif
@@ -390,12 +401,14 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       cycle_gps_time = timeSec;
     }
 #ifdef NO_CPU_SHUTDOWN
-    if((cycleNum % 2048) == 0) usleep_range(2,4);
+    if((cycleNum % 65536) == 0)  {
+        usleep_range(1,3);
+        printk("cycleNum = %d\n",cycleNum);
+    }
 #endif
 // Start of ADC Read **********************************************************************
     // Read ADC data
     status = iop_adc_read (padcinfo, cpuClock);
-
     // Try synching to 1PPS on ADC[0][31] if not using IRIG-B or TDS
     // Only try for 1 sec.
     if(!sync21pps)
@@ -423,13 +436,22 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     }
 
 
-
+for(ploop=0;ploop<UNDERSAMPLE;ploop++)
+{
 
 // **************************************************************************************
 /// \> Call the front end specific application  ******************\n
 /// - -- This is where the user application produced by RCG gets called and executed. \n\n
+    // 
+    for(ii=0;ii<cdsPciModules.adcCount;ii++)
+    {
+        for(jj=0;jj<32;jj++)
+        {
+            adcval[ii][jj] = dWord[ii][jj][ploop];
+        }
+    }
     cpuClock[CPU_TIME_USR_START] = rdtsc_ordered();
-    iopDacEnable = feCode(cycleNum,dWord,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
+    iopDacEnable = feCode(cycleNum,adcval,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
     cpuClock[CPU_TIME_USR_END] = rdtsc_ordered();
 // **************************************************************************************
 //
@@ -437,8 +459,11 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // **************************************************************************************
     /// - ---- Reset ADC DMA Start Flag \n
     /// - --------- This allows ADC to dump next data set whenever it is ready
-    for(jj=0;jj<cdsPciModules.adcCount;jj++) gsc16ai64DmaEnable(jj);
+    // for(jj=0;jj<cdsPciModules.adcCount;jj++) gsc16ai64DmaEnable(jj);
+    // for(jj=0;jj<cdsPciModules.adcCount;jj++) gsc18ai32DmaEnable(jj);
     odcStateWord = 0;
+// for(ploop=0;ploop<UNDERSAMPLE;ploop++)
+// {
 //
 // ********************************************************************
 /// WRITE DAC OUTPUTS ***************************************** \n
@@ -449,8 +474,10 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     // COMMENT OUT NEXT LINE FOR TEST STAND w/bad DAC cards. 
     if(dacTimingError) iopDacEnable = 0;
 #endif
+#if 0
     // Write out data to DAC modules
     dkiTrip = iop_dac_write();
+#endif
 
 
 // ***********************************************************************
@@ -500,11 +527,12 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       }
     }
 
+#if 0
 /// \> Update duotone diag information
-    dt_diag.dac[(cycleNum + DT_SAMPLE_OFFSET) % CYCLE_PER_SECOND] = dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN];
-    dt_diag.totalDac += dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN];
-    dt_diag.adc[(cycleNum + DT_SAMPLE_OFFSET) % CYCLE_PER_SECOND] = dWord[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN];
-    dt_diag.totalAdc += dWord[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN];
+    dt_diag.dac[(cycleNum + DT_SAMPLE_OFFSET) % CYCLE_PER_SECOND] = dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN][ploop];
+    dt_diag.totalDac += dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN][ploop];
+    dt_diag.adc[(cycleNum + DT_SAMPLE_OFFSET) % CYCLE_PER_SECOND] = dWord[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN][ploop];
+    dt_diag.totalAdc += dWord[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN][ploop];
 
 // *****************************************************************
 /// \> Cycle 16, perform duotone diag calcs.
@@ -534,6 +562,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
         CDIO1616Input[0] = contec1616WriteOutputRegister(&cdsPciModules, tdsControl[0], CDIO1616Output[0]);
       }
     }
+#endif
 
 // *****************************************************************
 /// \> Cycle 18, Send timing info to EPICS at 1Hz
@@ -568,6 +597,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       }
       pLocalEpics->epicsOutput.diagWord = diagWord;
       for(jj=0;jj<cdsPciModules.adcCount;jj++) {
+        pLocalEpics->epicsOutput.irigbTime = adcinfo.adcRdTimeErr[0];
         if(adcinfo.adcRdTimeErr[jj] > MAX_ADC_WAIT_ERR_SEC)
           pLocalEpics->epicsOutput.stateWord |= FE_ERROR_ADC;
           adcinfo.adcRdTimeErr[jj] = 0;
@@ -596,6 +626,8 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     /// \> Check if code exit is requested
     if(cycleNum == MAX_MODULES) 
       vmeDone = stop_working_threads | checkEpicsReset(cycleNum, (struct CDS_EPICS *)pLocalEpics);
+
+#if 0
 // *****************************************************************
 	// If synced to 1PPS on startup, continue to check that code
 	// is still in sync with 1PPS.
@@ -615,6 +647,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       // If not, set sync error flag
       if(onePpsTime > 1) pLocalEpics->epicsOutput.timeErr |= TIME_ERR_1PPS;
     }
+#endif
 
 // Following is only used on automated test system
 #ifdef DIAG_TEST
@@ -641,6 +674,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // *****************************************************************
 #ifndef NO_DAQ
 		
+  if(ploop == 0) {
     // Call daqLib
     pLocalEpics->epicsOutput.daqByteCnt = 
     daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],0,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
@@ -652,6 +686,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     else odcStateWord &= ~(ODC_EXC_SET);
     if(pLocalEpics->epicsOutput.daqByteCnt > DAQ_DCU_RATE_WARNING) 
       feStatus |= FE_ERROR_DAQ;
+    }
 #endif
 
 // *****************************************************************
@@ -724,10 +759,14 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       // from the RT code ie loops would be working with wrong input data.
       if (adcinfo.chanHop) {
         pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
+        pLocalEpics->epicsOutput.fe_status = CHAN_HOP_ERROR;
+#if 0
         stop_working_threads = 1;
         vmeDone = 1;
-        pLocalEpics->epicsOutput.fe_status = CHAN_HOP_ERROR;
         continue;    
+#endif
+      } else {
+        pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;
       }
     }
 
@@ -830,6 +869,8 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 // *****************************************************************
 // Update end of cycle information
 // *****************************************************************
+if(ploop == 0)
+{
     // Capture end of cycle time.
     cpuClock[CPU_TIME_CYCLE_END] = rdtsc_ordered();
 
@@ -842,6 +883,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     // For IOP, more interested in time to get thru ADC read code and send to slave apps
     timeinfo.usrTime = (cpuClock[CPU_TIME_USR_START] - cpuClock[CPU_TIME_CYCLE_START])/CPURATE;
     if(timeinfo.usrTime > timeinfo.usrHoldTime) timeinfo.usrHoldTime = timeinfo.usrTime;
+}
 
     /// \> Update internal cycle counters
     cycleNum += 1;
@@ -867,6 +909,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       /* Increment the internal cycle counter */
       subcycle ++;                                                
     }
+  }
 
 /// \> If not exit request, then continue INFINITE LOOP  *******
   }

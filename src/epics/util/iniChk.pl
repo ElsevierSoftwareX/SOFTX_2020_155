@@ -179,7 +179,7 @@ sub processDataRate  {
    my $correctDataRate = -1;
    my $dataRateHelp = 16;
 
-   for (my $i = 0; $i < 13; $i++)  {
+   for (my $i = 0; $i < 24; $i++)  {
       if ($rate == $dataRateHelp)  {
          $correctDataRate = $i;
          last;
@@ -269,7 +269,7 @@ foreach $value (@inData)  {
 #           $acquireCount[$defaultAcquireValue]++;
 #        }
 
-         for (my $i = 0; $i < 9; $i++)  {
+         for (my $i = 0; $i < 20; $i++)  {
             $rateCount[$i] = 0;
          }
       }
@@ -317,7 +317,7 @@ print "\nTotal count of \'acquire={0,1,3}\' is $acquireTotal\n";
 $dataRateHelp = 16;
 $totalByteCount = 0;
 
-for ($i = 0; $i < 13; $i++)  {
+for ($i = 0; $i < 17; $i++)  {
    $totalBytes = $dataRateHelp * $rateCount[$i];
    print "\nCounted $rateCount[$i] entries of datarate=$dataRateHelp \tfor a total of $totalBytes";
 
@@ -332,7 +332,7 @@ print "\n\nTotal data rate is $totalByteCount bytes - ";
 #  Check that the total datarate is 4M bytes or less.
 #  Print a warning message if it is not.
 #
-if ($totalByteCount <= 4194304)  {
+if ($totalByteCount <= 8194304)  {
    print "OK\n";
 }
 else  {

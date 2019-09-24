@@ -211,6 +211,10 @@ if (@ARGV > 4) {
 		$rate = 15;
 	} elsif ($param_speed eq "256K") {
 		$rate = 4;
+	} elsif ($param_speed eq "512K") {
+		$rate = 2;
+	} elsif ($param_speed eq "1024K") {
+		$rate = 1;
 	} else  { die "Invalid speed $param_speed specified\n"; }
 }
 
@@ -1551,7 +1555,11 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print EPICS "sdf_flavor_ca\n";
 	}
 	#//		- Add GDS info.
-	print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site " . get_freq() . " $dcuId $ifoid\n";
+    $gdsrate = get_freq();
+    if($gdsrate > 65536) {
+        $gdsrate = 65536;
+    }
+	print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site $gdsrate $dcuId $ifoid\n";
 	print EPICS "\n\n";
 	close EPICS;
 
@@ -1563,6 +1571,12 @@ for($ii=0;$ii<$partCnt;$ii++)
 // ******* DO NOT HAND EDIT ************************
 #include "fe.h"
 
+#ifdef SERVO1024K
+	#define FE_RATE	1048576
+#endif
+#ifdef SERVO512K
+	#define FE_RATE	524288
+#endif
 #ifdef SERVO256K
 	#define FE_RATE	262144
 #endif
@@ -2262,6 +2276,10 @@ sub get_freq {
 		return 64*1024;
 	} elsif ($rate == 4) {
 		return 256*1024;
+	} elsif ($rate == 2) {
+		return 512*1024;
+	} elsif ($rate == 1) {
+		return 1024*1024;
 	}
 }
 
@@ -2487,6 +2505,9 @@ elsif($rate == 30) { print OUTM "EXTRA_CFLAGS += -DSERVO32K\n"; }
 elsif($rate == 15) { print OUTM "EXTRA_CFLAGS += -DSERVO64K\n"; }
 elsif($rate == 7) { print OUTM "EXTRA_CFLAGS += -DSERVO128K\n"; }
 elsif($rate == 4) { print OUTM "EXTRA_CFLAGS += -DSERVO256K\n"; }
+elsif($rate == 2) { print OUTM "EXTRA_CFLAGS += -DSERVO512K\n"; }
+elsif($rate == 1) { print OUTM "EXTRA_CFLAGS += -DSERVO1024K\n"; }
+
 
 print OUTM "EXTRA_CFLAGS += -D";
 print OUTM "\U$skeleton";
@@ -2707,6 +2728,8 @@ elsif($rate == 30) { print OUTM "CFLAGS += -DSERVO32K\n"; }
 elsif($rate == 15) { print OUTM "CFLAGS += -DSERVO64K\n"; }
 elsif($rate == 7) { print OUTM "CFLAGS += -DSERVO128K\n"; }
 elsif($rate == 4) { print OUTM "CFLAGS += -DSERVO256K\n"; }
+elsif($rate == 2) { print OUTM "CFLAGS += -DSERVO512K\n"; }
+elsif($rate == 1) { print OUTM "CFLAGS += -DSERVO1024K\n"; }
 
 print OUTM "CFLAGS += -D";
 print OUTM "\U$skeleton";

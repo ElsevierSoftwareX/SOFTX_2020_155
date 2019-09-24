@@ -27,7 +27,7 @@
 #include <drv/vmic5565.c>
 #include <drv/symmetricomGps.c>
 #include <drv/spectracomGPS.c>
-#include <drv/gsc18ai6.c>
+#include <drv/gsc18ai32.c>
 
 
 
@@ -66,8 +66,8 @@ int mapPciModules(CDS_HARDWARE *pCds)
   int status;
   int i;
   int modCount = 0;
-//  int fast_adc_cnt = 0;
 #ifndef ADC_SLAVE
+  int fast_adc_cnt = 0;
   int adc_cnt = 0;
 #endif
   int dac_cnt = 0;
@@ -190,19 +190,17 @@ int mapPciModules(CDS_HARDWARE *pCds)
 		}
 		adc_cnt++;
 	}
-#endif
         // if found, check if it is a Fast ADC module
     	// TODO: for the time of testing of the 18-bit board, it returned same PCI device number as the 16-bit fast GS board
 	// This number will most likely change in the future.
-	#if 0
-        if((dacdev->subsystem_device == FADC_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
+        if((dacdev->subsystem_device == ADC_18AI32_SS_ID) && (dacdev->subsystem_vendor == PLX_VID))
         {
 		use_it = 0;
 		if (pCds->cards) {
 			use_it = 0;
 			/* See if ought to use this one or not */
 			for (i = 0; i < pCds->cards; i++) {
-				if (pCds->cards_used[i].type == GSC_18AISS6C
+				if (pCds->cards_used[i].type == GSC_18AI32SSC1M
 				    && pCds->cards_used[i].instance == fast_adc_cnt) {
 					use_it = 1;
 					break;
@@ -213,13 +211,13 @@ int mapPciModules(CDS_HARDWARE *pCds)
                    printk("fast adc card on bus %x; device %x\n",
                         dacdev->bus->number,
 			PCI_SLOT(dacdev->devfn));
-                   status = mapFadc(pCds, dacdev);
+                   status = gsc18ai32Init(pCds, dacdev);
                    modCount ++;
 		}
 		fast_adc_cnt++;
         }
-	#endif
   }
+#endif
 
   dacdev = NULL;
   status = 0;

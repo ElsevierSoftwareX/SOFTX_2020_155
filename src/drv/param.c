@@ -283,7 +283,7 @@ parseConfigFile(char *fname, unsigned long *crc,
           }
 	  return 0; 
 	}
-	if (current.datarate < 16 || current.datarate > (256*1024)) {
+	if (current.datarate < 16 || current.datarate > (512*1024)) {
 	  system_log(1, "data rate out of range in %s:%d", fname, linenum);
 	  fclose(fp);
           if (afp) {
