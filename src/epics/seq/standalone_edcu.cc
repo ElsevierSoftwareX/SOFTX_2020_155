@@ -488,7 +488,7 @@ done:
 
 // **************************************************************************
 void
-edcuCreateChanList( const char* daqfilename, const char* edculogfilename )
+edcuCreateChanList( const char* pref, const char* daqfilename, const char* edculogfilename )
 {
     // **************************************************************************
     int   i;
@@ -500,7 +500,6 @@ edcuCreateChanList( const char* daqfilename, const char* edculogfilename )
     char  line[ 128 ];
     char* newname;
 
-    char* pref = getenv( "PREFIX" );
     char  eccname[ 256 ];
     sprintf( eccname, "%s_%s", pref, "EDCU_CHAN_CONN" );
     char chcntname[ 256 ];
@@ -771,6 +770,7 @@ main( int argc, char* argv[] )
     //const char* syncsharedmemname = "-";
     const char* logdir = "logs";
     const char* daqFile = "edc.ini";
+    const char* prefix = "";
     int         mydcuid = 52;
     char        logfilename[ 256 ] = "";
     char        edculogfilename[ 256 ] = "";
@@ -778,7 +778,7 @@ main( int argc, char* argv[] )
     int         delay_multiplier = 0;
 
     int cur_arg = 0;
-    while ( ( cur_arg = getopt( argc, argv, "b:l:d:i:w:" ) ) != EOF )
+    while ( ( cur_arg = getopt( argc, argv, "b:l:d:i:w:p:" ) ) != EOF )
     {
         switch ( cur_arg )
         {
@@ -799,6 +799,9 @@ main( int argc, char* argv[] )
             break;
         case 'w':
             delay_multiplier = atoi( optarg );
+            break;
+        case 'p':
+            prefix = optarg;
             break;
         }
     }
@@ -821,7 +824,7 @@ main( int argc, char* argv[] )
         daqd_edcu1.channel_status[ ii ] = 0xbad;
     edcuInitialize( daqsharedmemname, "-");
     // edcuCreateChanFile(daqDir,daqFile,pref);
-    edcuCreateChanList( daqFile, edculogfilename );
+    edcuCreateChanList( prefix, daqFile, edculogfilename );
     int datarate = daqd_edcu1.num_chans * 64 / 1000;
 
     // Start SPECT
