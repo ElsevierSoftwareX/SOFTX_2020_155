@@ -501,11 +501,11 @@ edcuCreateChanList( const char* pref, const char* daqfilename, const char* edcul
     char* newname;
 
     char  eccname[ 256 ];
-    sprintf( eccname, "%s_%s", pref, "EDCU_CHAN_CONN" );
+    sprintf( eccname, "%s%s", pref, "EDCU_CHAN_CONN" );
     char chcntname[ 256 ];
-    sprintf( chcntname, "%s_%s", pref, "EDCU_CHAN_CNT" );
+    sprintf( chcntname, "%s%s", pref, "EDCU_CHAN_CNT" );
     char cnfname[ 256 ];
-    sprintf( cnfname, "%s_%s", pref, "EDCU_CHAN_NOCON" );
+    sprintf( cnfname, "%s%s", pref, "EDCU_CHAN_NOCON" );
 
     // sprintf(daqfile, "%s%s", fdir, "EDCU.ini");
     daqd_edcu1.num_chans = 0;
