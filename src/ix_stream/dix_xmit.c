@@ -23,7 +23,6 @@
 #include <time.h>
 #include "../include/daqmap.h"
 #include "../include/daq_core.h"
-#include "dc_utils.h"
 
 #include "sisci_types.h"
 #include "sisci_api.h"

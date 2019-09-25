@@ -3,7 +3,7 @@ add_executable(ix_test ix_test.c)
 target_link_libraries(ix_test PUBLIC dolphin::sisci)
 
 add_executable(dix_xmit dix_xmit.c)
-target_link_libraries(dix_xmit PUBLIC driver::shmem dolphin::sisci zmq::simple_pv)
+target_link_libraries(dix_xmit PUBLIC driver::shmem dolphin::sisci pv::simple_pv)
 install(TARGETS dix_xmit DESTINATION bin)
 
 add_executable(dix_recv dix_recv.c)

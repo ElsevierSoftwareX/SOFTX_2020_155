@@ -27,7 +27,7 @@
 
 // #include "testlib.h"
 
-#include "../zmq_stream/simple_pv.h"
+#include "simple_pv.h"
 
 #define __CDECL
 

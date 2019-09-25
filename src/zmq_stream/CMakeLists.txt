@@ -8,10 +8,6 @@ include(Cpp11Atomic)
 include(FindThreads)
 find_package(ZMQ4 REQUIRED)
 
-add_library(simple_pv STATIC simple_pv.c)
-target_include_directories(simple_pv PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-add_library(zmq::simple_pv ALIAS simple_pv)
-
 add_library(zmq_transport STATIC zmq_transport.c)
 target_include_directories(zmq_transport PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_include_directories(zmq_transport PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -29,7 +25,7 @@ target_link_libraries(zmq_recv PUBLIC
         zmq_transport
         driver::shmem
         zmq4::zmq
-        zmq::simple_pv
+        pv::simple_pv
         ${CMAKE_THREAD_LIBS_INIT}
         # -no-pie
         )
