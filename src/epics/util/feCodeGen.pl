@@ -161,6 +161,9 @@ $remoteGpsPart = 0;
 $remoteGPS = 0;
 $daq2dc = 0;
 $requireIOcnt = 0;
+$adcclock = 64;
+$adcrate = 64;
+$adc_std_rate = 64;
 
 # Normally, ARGV !> 2, so the following are not invoked in a standard make
 # This is legacy.
@@ -212,11 +215,12 @@ if (@ARGV > 4) {
 	} elsif ($param_speed eq "256K") {
 		$rate = 4;
 	} elsif ($param_speed eq "512K") {
-		$rate = 2;
+		$rate = 2; 
 	} elsif ($param_speed eq "1024K") {
 		$rate = 1;
 	} else  { die "Invalid speed $param_speed specified\n"; }
 }
+
 
 
 # Load model name without .mdl extension.
@@ -354,6 +358,11 @@ die unless CDS::Parser::process();
 die unless CDS::Parser::sortDacs();
 
 close(IN);
+
+if(($adcMaster == 1) and ($adcrate > $adcclock)) 
+{
+	die "Error:\nModel rate $adcrate > ADC clock $adcclock\nFix adcclock in Param Block\n*****\n";
+}
 
 #//	
 #// Model now consists of top level parts and single level subsystem(s). <em>Parser3.pm</em> has taken care of all part
@@ -1204,27 +1213,29 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_TP_CNT epicsOutput.tpCnt int ao 0\n";
 
 print OUTH "\tint cpuMeter;\n";
 $frate = $rate;
-if($frate == 15)
+if($frate <= 15)
 {
 	$brate =  13;
+	$mrate = 15;
 } else {
 	$frate =  $rate * .85;
 	$brate = $frate;
+	$mrate = $rate;
 }
 $cpuM = $site . ":FEC-" . $dcuId . "_CPU_METER";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\") field(EGU,\"usec\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$mrate\") field(LOPR,\"0\") field(HIHI,\"$mrate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\") field(EGU,\"usec\")\n";
 
 print OUTH "\tint cpuMeterMax;\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER_MAX epicsOutput.cpuMeterMax int ao 0 field(HOPR,\"$rate\") field(LOPR,\"0\") field(HIHI,\"$rate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(EGU,\"usec\") field(HSV,\"MINOR\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER_MAX epicsOutput.cpuMeterMax int ao 0 field(HOPR,\"$mrate\") field(LOPR,\"0\") field(HIHI,\"$mrate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(EGU,\"usec\") field(HSV,\"MINOR\")\n";
 
 print OUTH "\tint adcWaitTime;\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT epicsOutput.adcWaitTime int ao 0 field(HOPR,\"$rate\") field(EGU,\"usec\") field(LOPR,\"0\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT epicsOutput.adcWaitTime int ao 0 field(HOPR,\"$mrate\") field(EGU,\"usec\") field(LOPR,\"0\")\n";
 
 print OUTH "\tint adcWaitMin;\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT_MIN epicsOutput.adcWaitMin int ao 0 field(HOPR,\"$rate\") field(EGU,\"usec\") field(LOPR,\"0\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT_MIN epicsOutput.adcWaitMin int ao 0 field(HOPR,\"$mrate\") field(EGU,\"usec\") field(LOPR,\"0\")\n";
 
 print OUTH "\tint adcWaitMax;\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT_MAX epicsOutput.adcWaitMax int ao 0 field(HOPR,\"$rate\") field(EGU,\"usec\") field(LOPR,\"0\")\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_ADC_WAIT_MAX epicsOutput.adcWaitMax int ao 0 field(HOPR,\"$mrate\") field(EGU,\"usec\") field(LOPR,\"0\")\n";
 
 print OUTH "\tint timeErr;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIME_ERR epicsOutput.timeErr int ao 0\n";
@@ -1556,8 +1567,8 @@ for($ii=0;$ii<$partCnt;$ii++)
 	}
 	#//		- Add GDS info.
     $gdsrate = get_freq();
-    if($gdsrate > 65536) {
-        $gdsrate = 65536;
+    if($gdsrate > 524768) {
+        $gdsrate = 524768;
     }
 	print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site $gdsrate $dcuId $ifoid\n";
 	print EPICS "\n\n";
@@ -1573,30 +1584,39 @@ for($ii=0;$ii<$partCnt;$ii++)
 
 #ifdef SERVO1024K
 	#define FE_RATE	1048576
+	#define IPC_RATE	65536
 #endif
 #ifdef SERVO512K
 	#define FE_RATE	524288
+	#define IPC_RATE	65536
 #endif
 #ifdef SERVO256K
 	#define FE_RATE	262144
+	#define IPC_RATE	65536
 #endif
 #ifdef SERVO128K
 	#define FE_RATE	131072
+	#define IPC_RATE	65536
 #endif
 #ifdef SERVO64K
 	#define FE_RATE	65536
+	#define IPC_RATE	FE_RATE
 #endif
 #ifdef SERVO32K
 	#define FE_RATE	32768
+	#define IPC_RATE	FE_RATE
 #endif
 #ifdef SERVO16K
 	#define FE_RATE	16384
+	#define IPC_RATE	FE_RATE
 #endif
 #ifdef SERVO4K
 	#define FE_RATE	4096
+	#define IPC_RATE	FE_RATE
 #endif
 #ifdef SERVO2K
 	#define FE_RATE	2048
+	#define IPC_RATE	FE_RATE
 #endif
 
 
@@ -2495,8 +2515,6 @@ print OUTM "# CPU-Shutdown Real Time Linux\n";
 print OUTM "KBUILD_EXTRA_SYMBOLS=$rcg_src_dir/src/drv/ExtraSymbols.symvers\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
 print OUTM "EXTRA_CFLAGS += -O -w -I../../include\n";
-print OUTM "EXTRA_CFLAGS += -I/opt/gm/include\n";
-print OUTM "EXTRA_CFLAGS += -I/opt/mx/include\n";
 
 if($rate == 480) { print OUTM "EXTRA_CFLAGS += -DSERVO2K\n"; }
 elsif($rate == 240) { print OUTM "EXTRA_CFLAGS += -DSERVO4K\n"; }
@@ -2578,6 +2596,12 @@ if ($adcMaster > -1) {
   if($diagTest > -1) {
   print OUTM "EXTRA_CFLAGS += -DDIAG_TEST\n";
   }
+  if($adcclock > $adc_std_clock) {
+  	$undersample = $adcclock/$adc_std_rate;
+  } else {
+  	$undersample = $adcclock/$adcrate;
+  }
+  print OUTM "EXTRA_CFLAGS += -DUNDERSAMPLE=$undersample\n";
   if($dacWdOverride > -1) {
   print OUTM "EXTRA_CFLAGS += -DDAC_WD_OVERRIDE\n";
   }

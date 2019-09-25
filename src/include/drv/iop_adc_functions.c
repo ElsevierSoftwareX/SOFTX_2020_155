@@ -151,7 +151,7 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
         if (cdsPciModules.adcType[card] == GSC_18AI32SSC1M)  packedData += GSAF_8_OFFSET;
         else packedData += 31;
 		
-	cpuClk[CPU_TIME_RDY_ADC] = rdtsc_ordered();
+	    cpuClk[CPU_TIME_RDY_ADC] = rdtsc_ordered();
         do {
             /// - ---- Need to delay if not ready as constant banging of the input register
             /// will slow down the ADC DMA.
@@ -251,7 +251,7 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
         {
         for(chan=0;chan<num_outs;chan++)
         {
-        // adcData is the integer representation of the ADC data
+            // adcData is the integer representation of the ADC data
             adcinfo->adcData[card][chan] = (*packedData & mask);
             adcinfo->adcData[card][chan]  -= offset;
 #ifdef DEC_TEST
@@ -265,7 +265,7 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
             dWord[card][chan][kk] = adcinfo->adcData[card][chan];
             /// - ----  Load ADC value into ipc memory buffer
             ioMemData->iodata[card][ioMemCntr].data[chan] = adcinfo->adcData[card][chan];
-        /// - ---- Check for ADC overflows
+            /// - ---- Check for ADC overflows
             if((adcinfo->adcData[card][chan] > limit) || (adcinfo->adcData[card][chan] < -limit))
             {
                 adcinfo->overflowAdc[card][chan] ++;
@@ -276,28 +276,13 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
             }
             packedData ++;
         }
+        }
 
-        /// - ---- Write GPS time and cycle count as indicator to slave that adc data is ready
+       	/// - ---- Write GPS time and cycle count as indicator to slave that adc data is ready
         ioMemData->gpsSecond = timeSec;
         ioMemData->iodata[card][ioMemCntr].timeSec = timeSec;
-        ioMemData->iodata[card][ioMemCntr].cycle = cycleNum + kk;
-        ioMemCntr ++;
+        ioMemData->iodata[card][ioMemCntr].cycle = cycleNum;
 
-#if 0
-        /// - ---- Check for ADC overflows
-        for(chan=0;chan<num_outs;chan++)
-        {
-            if((adcinfo->adcData[card][chan] > limit) || (adcinfo->adcData[card][chan] < -limit))
-            {
-                adcinfo->overflowAdc[card][chan] ++;
-                pLocalEpics->epicsOutput.overflowAdcAcc[card][chan] ++;
-                overflowAcc ++;
-                adcinfo->adcOF[card] = 1;
-                odcStateWord |= ODC_ADC_OVF;
-            }
-        }
-#endif
-        }
 
         /// - ---- Clear out last ADC data read for test on next cycle
         packedData = (int *)cdsPciModules.pci_adc[card];
@@ -305,9 +290,11 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
 
         if (cdsPciModules.adcType[card] == GSC_18AI32SSC1M) packedData += GSAF_8_OFFSET;
         else packedData += GSAI_CHAN_COUNT_M1;
-
+        // Set dummy value to last channel
         *packedData = DUMMY_ADC_VAL;
-         gsc18ai32DmaEnable(card);
+        // Enable the ADC Demand DMA for next read
+        if (cdsPciModules.adcType[card] == GSC_18AI32SSC1M) gsc18ai32DmaEnable(card);
+        else gsc16ai64DmaEnable(card);
 
 #ifdef DIAG_TEST
 // For DIAGS ONLY !!!!!!!!

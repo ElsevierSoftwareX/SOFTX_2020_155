@@ -170,6 +170,10 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
   if(cdsPciModules.cDio1616lCount) syncSource = SYNC_SRC_TDS;
   else syncSource = SYNC_SRC_1PPS;
 
+#ifdef NO_SYNC
+  syncSource = SYNC_SRC_NONE;
+#endif
+
 
 #ifdef TIME_MASTER
   pcieTimer = (TIMING_SIGNAL *) ((volatile char *)(cdsPciModules.dolphinWrite[0]) + IPC_PCIE_TIME_OFFSET);
@@ -330,18 +334,25 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       // This has to be done sequentially, one at a time.
       // status = sync_adc_2_1pps();
       sync21pps = 1;
+      gsc16ai64Enable(&cdsPciModules);
       gsc18ai32Enable(&cdsPciModules);
+      break;
+    case SYNC_SRC_NONE:
+      gsc16ai64Enable(&cdsPciModules);
+      gsc18ai32Enable(&cdsPciModules);
+      sync21pps = 1;
       break;
     default: {
       // IRIG-B card not found, so use CPU time to get close to 1PPS on startup
       // Pause until this second ends
+      gsc16ai64Enable(&cdsPciModules);
       gsc18ai32Enable(&cdsPciModules);
       sync21pps = 1;
       break;
     }
   }
 
-    for(jj=0;jj<cdsPciModules.adcCount;jj++) gsc18ai32DmaEnable(jj);
+//     for(jj=0;jj<cdsPciModules.adcCount;jj++) gsc18ai32DmaEnable(jj);
   pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;
 
   onePpsTime = cycleNum;
@@ -674,7 +685,8 @@ for(ploop=0;ploop<UNDERSAMPLE;ploop++)
 // *****************************************************************
 #ifndef NO_DAQ
 		
-  if(ploop == 0) {
+  // if(ploop == 0) {
+  if((ploop % 1)== 0) {
     // Call daqLib
     pLocalEpics->epicsOutput.daqByteCnt = 
     daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],0,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
