@@ -42,4 +42,10 @@ target_link_libraries(fe_stream_check_nds
         fe_stream_generator
         nds2client::cxx)
 
+add_executable(fe_stream_check_edcu_nds fe_stream_check_edcu_nds.cc)
+target_link_libraries(fe_stream_check_edcu_nds
+        PRIVATE
+        fe_stream_generator
+        nds2client::cxx)
+
 endif (libNDS2Client_FOUND)
