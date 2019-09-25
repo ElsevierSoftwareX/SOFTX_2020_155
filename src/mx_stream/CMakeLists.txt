@@ -26,7 +26,7 @@ if (OPENMX_FOUND)
 
     install(TARGETS omx_xmit DESTINATION bin)
 
-	add_executable(omx_recv omc_recv.c)
+	add_executable(omx_recv omx_recv.c)
 	target_link_libraries(omx_recv PUBLIC
 			driver::shmem
 			zmq::simple_pv
