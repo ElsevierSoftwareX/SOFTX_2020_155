@@ -486,6 +486,50 @@ done:
     }
 }
 
+int
+veto_line_due_to_datarate(const char* line)
+{
+    const int datarate_eq_len = 9;
+
+    if (!line)
+    {
+        return 0;
+    }
+    if (strncmp("datarate=", line, datarate_eq_len) != 0)
+    {
+        return 0;
+    }
+
+    if (strcmp("16\n", line + datarate_eq_len) == 0 ||
+    strcmp("16", line + datarate_eq_len) == 0)
+    {
+        return 0;
+    }
+    return 1;
+}
+
+int
+veto_line_due_to_datatype(const char* line)
+{
+    const int datatype_eq_len = 9;
+
+    if (!line)
+    {
+        return 0;
+    }
+    if (strncmp("datatype=", line, datatype_eq_len) != 0)
+    {
+        return 0;
+    }
+
+    if (strcmp("4\n", line + datatype_eq_len) == 0 ||
+        strcmp("4", line + datatype_eq_len) == 0)
+    {
+        return 0;
+    }
+    return 1;
+}
+
 // **************************************************************************
 void
 edcuCreateChanList( const char* pref, const char* daqfilename, const char* edculogfilename )
@@ -543,6 +587,19 @@ edcuCreateChanList( const char* pref, const char* daqfilename, const char* edcul
                          "%s",
                          newname );
                 daqd_edcu1.num_chans++;
+            }
+        }
+        else
+        {
+            if (veto_line_due_to_datarate(line))
+            {
+                fprintf(stderr, "Invalid data rate found, all entries must be 16Hz\n");
+                exit(1);
+            }
+            if (veto_line_due_to_datatype(line))
+            {
+                fprintf(stderr, "Invalid data type found, all entries must be 4 (float)\n");
+                exit(1);
             }
         }
     }
