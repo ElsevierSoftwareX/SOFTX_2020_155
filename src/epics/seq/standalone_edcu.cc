@@ -37,6 +37,8 @@ extern "C" {
 #include "../../drv/gpstime/gpstime.h"
 #include "gps.hh"
 
+#include <iostream>
+
 #define EDCU_MAX_CHANS 50000
 // Gloabl variables
 // ****************************************************************************************
@@ -814,6 +816,37 @@ checkFileCrc( const char* fName )
 //    }
 //}
 
+void
+usage( const char* prog )
+{
+    std::cout << "Usage:\n\t" << prog << " <options>\n\n";
+    std::cout
+        << "-b <mbuf name> - The name of the mbuf to write to [edc_daq]\n";
+    std::cout << "-l <log dir> - Directory to output logs to [logs]\n";
+    std::cout << "-d <dcu id> - The dcu id number to use [52]\n";
+    std::cout << "-i <ini file name> - The ini file to read [edc.ini]\n";
+    std::cout << "-w <wait time in ms> - Number of ms to wait after each 16Hz "
+                 "segment has starts [0]\n";
+    std::cout << "-p <prefix> - Prefix to add to the connection stats channel "
+                 "names\n";
+    std::cout << "-h - this help\n";
+    std::cout << "\nThe standalone edcu is used to record epics data and put "
+                 "it into a memory buffer which can ";
+    std::cout << "be consumed by the daqd tools.\n";
+    std::cout << "Channels to record are listed in the input ini file.  They "
+                 "must be floats (datatype=4) and 16Hz, ";
+    std::cout << "datarate=16.\n";
+    std::cout << "\nThe standalone daq requires the LIGO mbuf and gpstime "
+                 "modules to be loaded.\n";
+    std::cout << "\nSome special channels are produced by the standalone_edcu, "
+                 "and may be send in the data stream.\n";
+    std::cout << "\n\t<prefix>EDCU_CHAN_CONN\n\t<prefix>EDCU_CHAN_NOCON\n\t<"
+                 "prefix>EDCU_CHAN_CNT\n";
+    std::cout << "\nIn a typical setup standalone_edcu, local_dc, and "
+                 "daqd_shmem would be run.\n";
+    std::cout << "\n";
+}
+
 /// Called on EPICS startup; This is generic EPICS provided function, modified
 /// for LIGO use.
 int
@@ -853,7 +886,7 @@ main( int argc, char* argv[] )
     int delay_multiplier = 0;
 
     int cur_arg = 0;
-    while ( ( cur_arg = getopt( argc, argv, "b:l:d:i:w:p:" ) ) != EOF )
+    while ( ( cur_arg = getopt( argc, argv, "b:l:d:i:w:p:h" ) ) != EOF )
     {
         switch ( cur_arg )
         {
@@ -877,6 +910,11 @@ main( int argc, char* argv[] )
             break;
         case 'p':
             prefix = optarg;
+            break;
+        case 'h':
+        default:
+            usage( argv[ 0 ] );
+            exit( 1 );
             break;
         }
     }
