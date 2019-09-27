@@ -119,7 +119,7 @@ void *fe_start_iop(void *arg)
   float duotoneTimeDac;
   float duotoneTime;
 
-  int ploop=1;
+  int usloop=1;
   double adcval[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];
   
 
@@ -447,7 +447,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
     }
 
 
-for(ploop=0;ploop<UNDERSAMPLE;ploop++)
+for(usloop=0;usloop<UNDERSAMPLE;usloop++)
 {
 
 // **************************************************************************************
@@ -458,7 +458,7 @@ for(ploop=0;ploop<UNDERSAMPLE;ploop++)
     {
         for(jj=0;jj<32;jj++)
         {
-            adcval[ii][jj] = dWord[ii][jj][ploop];
+            adcval[ii][jj] = dWord[ii][jj][usloop];
         }
     }
     cpuClock[CPU_TIME_USR_START] = rdtsc_ordered();
@@ -473,8 +473,6 @@ for(ploop=0;ploop<UNDERSAMPLE;ploop++)
     // for(jj=0;jj<cdsPciModules.adcCount;jj++) gsc16ai64DmaEnable(jj);
     // for(jj=0;jj<cdsPciModules.adcCount;jj++) gsc18ai32DmaEnable(jj);
     odcStateWord = 0;
-// for(ploop=0;ploop<UNDERSAMPLE;ploop++)
-// {
 //
 // ********************************************************************
 /// WRITE DAC OUTPUTS ***************************************** \n
@@ -485,10 +483,8 @@ for(ploop=0;ploop<UNDERSAMPLE;ploop++)
     // COMMENT OUT NEXT LINE FOR TEST STAND w/bad DAC cards. 
     if(dacTimingError) iopDacEnable = 0;
 #endif
-#if 0
     // Write out data to DAC modules
-    dkiTrip = iop_dac_write();
-#endif
+    if(usloop == 0) dkiTrip = iop_dac_write();
 
 
 // ***********************************************************************
@@ -540,10 +536,10 @@ for(ploop=0;ploop<UNDERSAMPLE;ploop++)
 
 #if 0
 /// \> Update duotone diag information
-    dt_diag.dac[(cycleNum + DT_SAMPLE_OFFSET) % CYCLE_PER_SECOND] = dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN][ploop];
-    dt_diag.totalDac += dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN][ploop];
-    dt_diag.adc[(cycleNum + DT_SAMPLE_OFFSET) % CYCLE_PER_SECOND] = dWord[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN][ploop];
-    dt_diag.totalAdc += dWord[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN][ploop];
+    dt_diag.dac[(cycleNum + DT_SAMPLE_OFFSET) % CYCLE_PER_SECOND] = dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN][usloop];
+    dt_diag.totalDac += dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN][usloop];
+    dt_diag.adc[(cycleNum + DT_SAMPLE_OFFSET) % CYCLE_PER_SECOND] = dWord[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN][usloop];
+    dt_diag.totalAdc += dWord[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN][usloop];
 
 // *****************************************************************
 /// \> Cycle 16, perform duotone diag calcs.
@@ -685,8 +681,6 @@ for(ploop=0;ploop<UNDERSAMPLE;ploop++)
 // *****************************************************************
 #ifndef NO_DAQ
 		
-  // if(ploop == 0) {
-  if((ploop % 1)== 0) {
     // Call daqLib
     pLocalEpics->epicsOutput.daqByteCnt = 
     daqWrite(1,dcuId,daq,DAQ_RATE,testpoint,dspPtr[0],0,(int *)(pLocalEpics->epicsOutput.gdsMon),xExc,pEpicsDaq);
@@ -698,7 +692,6 @@ for(ploop=0;ploop<UNDERSAMPLE;ploop++)
     else odcStateWord &= ~(ODC_EXC_SET);
     if(pLocalEpics->epicsOutput.daqByteCnt > DAQ_DCU_RATE_WARNING) 
       feStatus |= FE_ERROR_DAQ;
-    }
 #endif
 
 // *****************************************************************
@@ -881,7 +874,7 @@ for(ploop=0;ploop<UNDERSAMPLE;ploop++)
 // *****************************************************************
 // Update end of cycle information
 // *****************************************************************
-if(ploop == 0)
+if(usloop == 0)
 {
     // Capture end of cycle time.
     cpuClock[CPU_TIME_CYCLE_END] = rdtsc_ordered();
