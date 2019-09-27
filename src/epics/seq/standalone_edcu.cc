@@ -1,8 +1,8 @@
 ///	@file /src/epics/seq/edcu.c
 ///	@brief Contains required 'main' function to startup EPICS sequencers,
-///along with supporting routines.
+/// along with supporting routines.
 ///<		This code is taken from EPICS example included in the EPICS
-///<distribution and modified for LIGO use.
+///< distribution and modified for LIGO use.
 
 /********************COPYRIGHT NOTIFICATION**********************************
 This software was developed under a United States Government license
@@ -44,8 +44,7 @@ char naughtyList[ EDCU_MAX_CHANS ][ 64 ];
 
 // Function prototypes
 // ****************************************************************************************
-int  checkFileCrc( const char* );
-
+int checkFileCrc( const char* );
 
 unsigned long daqFileCrc;
 typedef struct daqd_c
@@ -79,9 +78,12 @@ static float         dataBuffer[ 2 ][ EDCU_MAX_CHANS ];
 static int           timeIndex;
 static int           cycleIndex;
 static int           symmetricom_fd = -1;
-int timemarks[ 16 ] = { 1000*1000,   63500*1000,  126000*1000, 188500*1000, 251000*1000, 313500*1000,
-                        376000*1000, 438500*1000, 501000*1000, 563500*1000, 626000*1000, 688500*1000,
-                        751000*1000, 813500*1000, 876000*1000, 938500*1000 };
+int timemarks[ 16 ] = { 1000 * 1000,   63500 * 1000,  126000 * 1000,
+                        188500 * 1000, 251000 * 1000, 313500 * 1000,
+                        376000 * 1000, 438500 * 1000, 501000 * 1000,
+                        563500 * 1000, 626000 * 1000, 688500 * 1000,
+                        751000 * 1000, 813500 * 1000, 876000 * 1000,
+                        938500 * 1000 };
 int nextTrig = 0;
 
 // End Header ************************************************************
@@ -123,7 +125,7 @@ waitGpsTrigger( unsigned long gpssec, int cycle )
 long
 waitNewCycleGps( long* gps_sec )
 {
-    long last_cycle = 0;
+    long          last_cycle = 0;
     static long   cycle = 0;
     static int    sync21pps = 1;
     unsigned long lastSec;
@@ -134,10 +136,16 @@ waitNewCycleGps( long* gps_sec )
     if ( sync21pps )
     {
         startTime = gpsSec = symm_gps_time( &gpsNano, 0 );
-        printf("\n%ld:%ld  (%d)\n", (long int)gpsSec, (long int)gpsNano, (long int)timemarks[0]);
-        for ( ;startTime == gpsSec || gpsNano < timemarks[0]; )
+        printf( "\n%ld:%ld  (%d)\n",
+                (long int)gpsSec,
+                (long int)gpsNano,
+                (long int)timemarks[ 0 ] );
+        for ( ; startTime == gpsSec || gpsNano < timemarks[ 0 ]; )
         {
-            printf("%ld:%ld  (%d)\n", (long int)gpsSec, (long int)gpsNano, (long int)timemarks[0]);
+            printf( "%ld:%ld  (%d)\n",
+                    (long int)gpsSec,
+                    (long int)gpsNano,
+                    (long int)timemarks[ 0 ] );
 
             usleep( 1000 );
             gpsSec = symm_gps_time( &gpsNano, 0 );
@@ -145,11 +153,11 @@ waitNewCycleGps( long* gps_sec )
         printf( "Found Sync at %ld %ld\nFrom start time of %ld\n",
                 gpsSec,
                 gpsNano,
-                startTime);
+                startTime );
         sync21pps = 0;
     }
     gpsSec = symm_gps_time( &gpsNano, 0 );
-    while (gpsNano < timemarks[cycle])
+    while ( gpsNano < timemarks[ cycle ] )
     {
         usleep( 500 );
         gpsSec = symm_gps_time( &gpsNano, 0 );
@@ -162,7 +170,6 @@ waitNewCycleGps( long* gps_sec )
     return last_cycle;
 }
 
-
 // **************************************************************************
 long
 waitNewCycle( long* gps_sec )
@@ -173,7 +180,7 @@ waitNewCycle( long* gps_sec )
     static int    sync21pps = 1;
     unsigned long lastSec;
 
-    if (!sipc)
+    if ( !sipc )
     {
         return waitNewCycleGps( gps_sec );
     }
@@ -260,7 +267,7 @@ subscriptionHandler( struct event_handler_args args )
     if ( args.type == DBR_FLOAT )
     {
         float val = *( (float*)args.dbr );
-        * ((float*)(args.usr)) = val;
+        *( (float*)( args.usr ) ) = val;
     }
     else
     {
@@ -409,8 +416,8 @@ edcuCreateChanFile( char* fdir, char* edcuinifilename, char* fecid )
     {
         sprintf(
             errMsg, "DAQ FILE ERROR: FILE %s DOES NOT EXIST\n", masterfile );
-        fprintf(stderr, "%s", errMsg);
-        //logFileEntry( errMsg );
+        fprintf( stderr, "%s", errMsg );
+        // logFileEntry( errMsg );
         goto done;
     }
     // Open the file to write the composite channel list.
@@ -420,8 +427,8 @@ edcuCreateChanFile( char* fdir, char* edcuinifilename, char* fecid )
         sprintf( errMsg,
                  "DAQ FILE ERROR: FILE %s DOES NOT EXIST\n",
                  edcuinifilename );
-        fprintf(stderr, "%s", errMsg);
-        //logFileEntry( errMsg );
+        fprintf( stderr, "%s", errMsg );
+        // logFileEntry( errMsg );
         goto done;
     }
 
@@ -487,21 +494,21 @@ done:
 }
 
 int
-veto_line_due_to_datarate(const char* line)
+veto_line_due_to_datarate( const char* line )
 {
     const int datarate_eq_len = 9;
 
-    if (!line)
+    if ( !line )
     {
         return 0;
     }
-    if (strncmp("datarate=", line, datarate_eq_len) != 0)
+    if ( strncmp( "datarate=", line, datarate_eq_len ) != 0 )
     {
         return 0;
     }
 
-    if (strcmp("16\n", line + datarate_eq_len) == 0 ||
-    strcmp("16", line + datarate_eq_len) == 0)
+    if ( strcmp( "16\n", line + datarate_eq_len ) == 0 ||
+         strcmp( "16", line + datarate_eq_len ) == 0 )
     {
         return 0;
     }
@@ -509,21 +516,21 @@ veto_line_due_to_datarate(const char* line)
 }
 
 int
-veto_line_due_to_datatype(const char* line)
+veto_line_due_to_datatype( const char* line )
 {
     const int datatype_eq_len = 9;
 
-    if (!line)
+    if ( !line )
     {
         return 0;
     }
-    if (strncmp("datatype=", line, datatype_eq_len) != 0)
+    if ( strncmp( "datatype=", line, datatype_eq_len ) != 0 )
     {
         return 0;
     }
 
-    if (strcmp("4\n", line + datatype_eq_len) == 0 ||
-        strcmp("4", line + datatype_eq_len) == 0)
+    if ( strcmp( "4\n", line + datatype_eq_len ) == 0 ||
+         strcmp( "4", line + datatype_eq_len ) == 0 )
     {
         return 0;
     }
@@ -532,7 +539,9 @@ veto_line_due_to_datatype(const char* line)
 
 // **************************************************************************
 void
-edcuCreateChanList( const char* pref, const char* daqfilename, const char* edculogfilename )
+edcuCreateChanList( const char* pref,
+                    const char* daqfilename,
+                    const char* edculogfilename )
 {
     // **************************************************************************
     int   i;
@@ -544,7 +553,7 @@ edcuCreateChanList( const char* pref, const char* daqfilename, const char* edcul
     char  line[ 128 ];
     char* newname;
 
-    char  eccname[ 256 ];
+    char eccname[ 256 ];
     sprintf( eccname, "%s%s", pref, "EDCU_CHAN_CONN" );
     char chcntname[ 256 ];
     sprintf( chcntname, "%s%s", pref, "EDCU_CHAN_CNT" );
@@ -556,8 +565,8 @@ edcuCreateChanList( const char* pref, const char* daqfilename, const char* edcul
     daqfileptr = fopen( daqfilename, "r" );
     if ( daqfileptr == NULL )
     {
-        fprintf(stderr,
-            "DAQ FILE ERROR: FILE %s DOES NOT EXIST\n", daqfilename );
+        fprintf(
+            stderr, "DAQ FILE ERROR: FILE %s DOES NOT EXIST\n", daqfilename );
     }
     edculog = fopen( edculogfilename, "w" );
     if ( daqfileptr == NULL )
@@ -591,15 +600,19 @@ edcuCreateChanList( const char* pref, const char* daqfilename, const char* edcul
         }
         else
         {
-            if (veto_line_due_to_datarate(line))
+            if ( veto_line_due_to_datarate( line ) )
             {
-                fprintf(stderr, "Invalid data rate found, all entries must be 16Hz\n");
-                exit(1);
+                fprintf(
+                    stderr,
+                    "Invalid data rate found, all entries must be 16Hz\n" );
+                exit( 1 );
             }
-            if (veto_line_due_to_datatype(line))
+            if ( veto_line_due_to_datatype( line ) )
             {
-                fprintf(stderr, "Invalid data type found, all entries must be 4 (float)\n");
-                exit(1);
+                fprintf( stderr,
+                         "Invalid data type found, all entries must be 4 "
+                         "(float)\n" );
+                exit( 1 );
             }
         }
     }
@@ -610,10 +623,10 @@ edcuCreateChanList( const char* pref, const char* daqfilename, const char* edcul
     printf( "CRC data length = %d\n", xferInfo.crcLength );
 
     chid chid1;
-    if (ca_context_create( ca_enable_preemptive_callback ) != ECA_NORMAL)
+    if ( ca_context_create( ca_enable_preemptive_callback ) != ECA_NORMAL )
     {
-        fprintf(stderr, "Error creating the EPCIS CA context\n");
-        exit(1);
+        fprintf( stderr, "Error creating the EPCIS CA context\n" );
+        exit( 1 );
     }
 
     for ( i = 0; i < daqd_edcu1.num_chans; i++ )
@@ -638,27 +651,31 @@ edcuCreateChanList( const char* pref, const char* daqfilename, const char* edcul
         }
         else
         {
-            status = ca_create_channel( daqd_edcu1.channel_name[ i ],
-                                        connectCallback,
-                                        (void*)&(daqd_edcu1.channel_status[i]),
-                                        0,
-                                        &chid1 );
-            if (status != ECA_NORMAL)
+            status =
+                ca_create_channel( daqd_edcu1.channel_name[ i ],
+                                   connectCallback,
+                                   (void*)&( daqd_edcu1.channel_status[ i ] ),
+                                   0,
+                                   &chid1 );
+            if ( status != ECA_NORMAL )
             {
-                fprintf(stderr, "Error creating connection to %s\n",
-                        daqd_edcu1.channel_name[ i ]);
+                fprintf( stderr,
+                         "Error creating connection to %s\n",
+                         daqd_edcu1.channel_name[ i ] );
             }
-            status = ca_create_subscription( DBR_FLOAT,
-                                             0,
-                                             chid1,
-                                             DBE_VALUE,
-                                             subscriptionHandler,
-                                             (void*)&(daqd_edcu1.channel_value[i]),
-                                             0 );
-            if (status != ECA_NORMAL)
+            status = ca_create_subscription(
+                DBR_FLOAT,
+                0,
+                chid1,
+                DBE_VALUE,
+                subscriptionHandler,
+                (void*)&( daqd_edcu1.channel_value[ i ] ),
+                0 );
+            if ( status != ECA_NORMAL )
             {
-                fprintf(stderr, "Error creating subscription for %s\n",
-                        daqd_edcu1.channel_name[ i ]);
+                fprintf( stderr,
+                         "Error creating subscription for %s\n",
+                         daqd_edcu1.channel_name[ i ] );
             }
         }
     }
@@ -738,7 +755,7 @@ edcuInitialize( const char* shmem_fname, const char* sync_source )
     shmTpTable = (struct cdsDaqNetGdsTpNum*)( (char*)dcu_addr +
                                               CDS_DAQ_NET_GDS_TP_TABLE_OFFSET );
 
-    if (sync_source && strcmp(sync_source, "-") != 0)
+    if ( sync_source && strcmp( sync_source, "-" ) != 0 )
     {
         // Find Sync source
         sync_addr = (void*)findSharedMemory( (char*)sync_source );
@@ -773,8 +790,8 @@ checkFileCrc( const char* fName )
 
 /// Routine for logging messages to ioc.log file.
 /// 	@param[in] message Ptr to string containing message to be logged.
-//void
-//logFileEntry( char* message )
+// void
+// logFileEntry( char* message )
 //{
 //    FILE*  log;
 //    char   timestring[ 256 ];
@@ -786,13 +803,14 @@ checkFileCrc( const char* fName )
 //    if ( log == NULL )
 //    {
 //        status = dbNameToAddr( reloadtimechannel, &paddr );
-//        status = dbPutField( &paddr, DBR_STRING, "ERR - NO LOG FILE FOUND", 1 );
+//        status = dbPutField( &paddr, DBR_STRING, "ERR - NO LOG FILE FOUND", 1
+//        );
 //    }
 //    else
 //    {
 //        fprintf( log, "%s\n%s\n", timestring, message );
-//        fprintf( log, "***************************************************\n" );
-//        fclose( log );
+//        fprintf( log, "***************************************************\n"
+//        ); fclose( log );
 //    }
 //}
 
@@ -824,7 +842,7 @@ main( int argc, char* argv[] )
     int         send_daq_reset = 0;
 
     const char* daqsharedmemname = "edc_daq";
-    //const char* syncsharedmemname = "-";
+    // const char* syncsharedmemname = "-";
     const char* logdir = "logs";
     const char* daqFile = "edc.ini";
     const char* prefix = "";
@@ -832,7 +850,7 @@ main( int argc, char* argv[] )
     char        logfilename[ 256 ] = "";
     char        edculogfilename[ 256 ] = "";
 
-    int         delay_multiplier = 0;
+    int delay_multiplier = 0;
 
     int cur_arg = 0;
     while ( ( cur_arg = getopt( argc, argv, "b:l:d:i:w:p:" ) ) != EOF )
@@ -842,7 +860,7 @@ main( int argc, char* argv[] )
         case 'b':
             daqsharedmemname = optarg;
             break;
-        //case 't':
+        // case 't':
         //    syncsharedmemname = optarg;
         //    break;
         case 'l':
@@ -879,7 +897,7 @@ main( int argc, char* argv[] )
     sprintf( edculogfilename, "%s%s", logdir, "/edcu.log" );
     for ( ii = 0; ii < EDCU_MAX_CHANS; ii++ )
         daqd_edcu1.channel_status[ ii ] = 0xbad;
-    edcuInitialize( daqsharedmemname, "-");
+    edcuInitialize( daqsharedmemname, "-" );
     // edcuCreateChanFile(daqDir,daqFile,pref);
     edcuCreateChanList( prefix, daqFile, edculogfilename );
     int datarate = daqd_edcu1.num_chans * 64 / 1000;
@@ -906,9 +924,9 @@ main( int argc, char* argv[] )
              "Chan Cnt",
              daqd_edcu1.num_chans );
 
-    GPS::gps_clock clock(0);
-    GPS::gps_time time_step = GPS::gps_time(0, 1000000000 / 16 );
-    GPS::gps_time transmit_time = clock.now( );
+    GPS::gps_clock clock( 0 );
+    GPS::gps_time  time_step = GPS::gps_time( 0, 1000000000 / 16 );
+    GPS::gps_time  transmit_time = clock.now( );
     ++transmit_time.sec;
     transmit_time.nanosec = 0;
 
@@ -919,9 +937,9 @@ main( int argc, char* argv[] )
     for ( ;; )
     {
         dropout = 0;
-        //daqd_edcu1.epicsSync = waitNewCycle( &daqd_edcu1.gpsTime );
+        // daqd_edcu1.epicsSync = waitNewCycle( &daqd_edcu1.gpsTime );
         GPS::gps_time now = clock.now( );
-        while (now < transmit_time )
+        while ( now < transmit_time )
         {
             usleep( 1 );
             now = clock.now( );
@@ -934,30 +952,33 @@ main( int argc, char* argv[] )
         edcuWriteData(
             daqd_edcu1.epicsSync, daqd_edcu1.gpsTime, mydcuid, send_daq_reset );
         send_daq_reset = 0;
-//        status = dbPutField( &gpstimedisplayaddr,
-//                             DBR_LONG,
-//                             &daqd_edcu1.gpsTime,
-//                             1 ); // Init to zero.
-//        status = dbPutField( &daqbyteaddr, DBR_LONG, &datarate, 1 );
+        //        status = dbPutField( &gpstimedisplayaddr,
+        //                             DBR_LONG,
+        //                             &daqd_edcu1.gpsTime,
+        //                             1 ); // Init to zero.
+        //        status = dbPutField( &daqbyteaddr, DBR_LONG, &datarate, 1 );
         int conChans = daqd_edcu1.con_chans;
-//        status = dbPutField( &eccaddr, DBR_LONG, &conChans, 1 );
+        //        status = dbPutField( &eccaddr, DBR_LONG, &conChans, 1 );
         // Check unconnected channels once per second
         if ( daqd_edcu1.epicsSync == 0 )
         {
-//            status = dbGetField(
-//                &daqresetaddr, DBR_LONG, &daqreset, &ropts, &nvals, NULL );
-//            if ( daqreset )
-//            {
-//                status = dbPutField(
-//                    &daqresetaddr, DBR_LONG, &ropts, 1 ); // Init to zero.
-//                send_daq_reset = 1;
-//            }
+            //            status = dbGetField(
+            //                &daqresetaddr, DBR_LONG, &daqreset, &ropts,
+            //                &nvals, NULL );
+            //            if ( daqreset )
+            //            {
+            //                status = dbPutField(
+            //                    &daqresetaddr, DBR_LONG, &ropts, 1 ); // Init
+            //                    to zero.
+            //                send_daq_reset = 1;
+            //            }
             numDC = edcuFindUnconnChannels( );
             if ( numDC < ( pageNumDisp * 40 ) )
                 pageNumDisp--;
-//            numReport = edcuReportUnconnChannels( pref, numDC, pageNumDisp );
+            //            numReport = edcuReportUnconnChannels( pref, numDC,
+            //            pageNumDisp );
         }
-//        status = dbPutField( &chnotfoundaddr, DBR_LONG, &numDC, 1 );
+        //        status = dbPutField( &chnotfoundaddr, DBR_LONG, &numDC, 1 );
 
         fivesectimer = ( fivesectimer + 1 ) %
             50; // Increment 5 second timer for triggering CRC checks.
@@ -974,7 +995,7 @@ main( int argc, char* argv[] )
                 }
         }*/
 
-        cycle = (cycle + 1) % 16;
+        cycle = ( cycle + 1 ) % 16;
         transmit_time = transmit_time + time_step;
     }
 
