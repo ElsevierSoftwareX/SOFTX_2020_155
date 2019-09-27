@@ -40,9 +40,6 @@ extern "C" {
 #include <iostream>
 
 #define EDCU_MAX_CHANS 50000
-// Gloabl variables
-// ****************************************************************************************
-char naughtyList[ EDCU_MAX_CHANS ][ 64 ];
 
 // Function prototypes
 // ****************************************************************************************
@@ -76,17 +73,15 @@ static const int                 buf_size = DAQ_DCU_BLOCK_SIZE * 2;
 static const int                 header_size =
     sizeof( struct rmIpcStr ) + sizeof( struct cdsDaqNetGdsTpNum );
 static DAQ_XFER_INFO xferInfo;
-static float         dataBuffer[ 2 ][ EDCU_MAX_CHANS ];
-static int           timeIndex;
-static int           cycleIndex;
-static int           symmetricom_fd = -1;
-int timemarks[ 16 ] = { 1000 * 1000,   63500 * 1000,  126000 * 1000,
+
+static int symmetricom_fd = -1;
+int        timemarks[ 16 ] = { 1000 * 1000,   63500 * 1000,  126000 * 1000,
                         188500 * 1000, 251000 * 1000, 313500 * 1000,
                         376000 * 1000, 438500 * 1000, 501000 * 1000,
                         563500 * 1000, 626000 * 1000, 688500 * 1000,
                         751000 * 1000, 813500 * 1000, 876000 * 1000,
                         938500 * 1000 };
-int nextTrig = 0;
+int        nextTrig = 0;
 
 // End Header ************************************************************
 //
@@ -275,25 +270,6 @@ subscriptionHandler( struct event_handler_args args )
     {
         printf( "Arg type unknown\n" );
     }
-}
-
-// **************************************************************************
-int
-edcuFindUnconnChannels( )
-// **************************************************************************
-{
-    int ii;
-    int dcc = 0;
-
-    for ( ii = 0; ii < daqd_edcu1.num_chans; ii++ )
-    {
-        if ( daqd_edcu1.channel_status[ ii ] != 0 )
-        {
-            sprintf( naughtyList[ dcc ], "%s", daqd_edcu1.channel_name[ ii ] );
-            dcc++;
-        }
-    }
-    return ( dcc );
 }
 
 /**
@@ -541,15 +517,12 @@ veto_line_due_to_datatype( const char* line )
 
 // **************************************************************************
 void
-edcuCreateChanList( const char* pref,
-                    const char* daqfilename,
-                    const char* edculogfilename )
+edcuCreateChanList( const char* pref, const char* daqfilename )
 {
     // **************************************************************************
     int   i;
     int   status;
     FILE* daqfileptr;
-    FILE* edculog;
     char  errMsg[ 64 ];
     // char daqfile[64];
     char  line[ 128 ];
@@ -570,16 +543,8 @@ edcuCreateChanList( const char* pref,
         fprintf(
             stderr, "DAQ FILE ERROR: FILE %s DOES NOT EXIST\n", daqfilename );
     }
-    edculog = fopen( edculogfilename, "w" );
-    if ( daqfileptr == NULL )
-    {
-        fprintf( stderr,
-                 "DAQ FILE ERROR: FILE %s DOES NOT EXIST\n",
-                 edculogfilename );
-    }
     while ( fgets( line, sizeof line, daqfileptr ) != NULL )
     {
-        fprintf( edculog, "%s", line );
         status = strlen( line );
         if ( strncmp( line, "[", 1 ) == 0 && status > 0 )
         {
@@ -619,7 +584,6 @@ edcuCreateChanList( const char* pref,
         }
     }
     fclose( daqfileptr );
-    fclose( edculog );
 
     xferInfo.crcLength = 4 * daqd_edcu1.num_chans;
     printf( "CRC data length = %d\n", xferInfo.crcLength );
@@ -683,8 +647,6 @@ edcuCreateChanList( const char* pref,
     }
 
     daqd_edcu1.con_chans = daqd_edcu1.con_chans + internal_channel_count;
-
-    timeIndex = 0;
 }
 
 // **************************************************************************
@@ -790,39 +752,12 @@ checkFileCrc( const char* fName )
     return ( -1 );
 }
 
-/// Routine for logging messages to ioc.log file.
-/// 	@param[in] message Ptr to string containing message to be logged.
-// void
-// logFileEntry( char* message )
-//{
-//    FILE*  log;
-//    char   timestring[ 256 ];
-//    long   status;
-//    dbAddr paddr;
-//
-//    getSdfTime( timestring );
-//    log = fopen( logfilename, "a" );
-//    if ( log == NULL )
-//    {
-//        status = dbNameToAddr( reloadtimechannel, &paddr );
-//        status = dbPutField( &paddr, DBR_STRING, "ERR - NO LOG FILE FOUND", 1
-//        );
-//    }
-//    else
-//    {
-//        fprintf( log, "%s\n%s\n", timestring, message );
-//        fprintf( log, "***************************************************\n"
-//        ); fclose( log );
-//    }
-//}
-
 void
 usage( const char* prog )
 {
     std::cout << "Usage:\n\t" << prog << " <options>\n\n";
     std::cout
         << "-b <mbuf name> - The name of the mbuf to write to [edc_daq]\n";
-    std::cout << "-l <log dir> - Directory to output logs to [logs]\n";
     std::cout << "-d <dcu id> - The dcu id number to use [52]\n";
     std::cout << "-i <ini file name> - The ini file to read [edc.ini]\n";
     std::cout << "-w <wait time in ms> - Number of ms to wait after each 16Hz "
@@ -876,7 +811,6 @@ main( int argc, char* argv[] )
 
     const char* daqsharedmemname = "edc_daq";
     // const char* syncsharedmemname = "-";
-    const char* logdir = "logs";
     const char* daqFile = "edc.ini";
     const char* prefix = "";
     int         mydcuid = 52;
@@ -886,18 +820,12 @@ main( int argc, char* argv[] )
     int delay_multiplier = 0;
 
     int cur_arg = 0;
-    while ( ( cur_arg = getopt( argc, argv, "b:l:d:i:w:p:h" ) ) != EOF )
+    while ( ( cur_arg = getopt( argc, argv, "b:d:i:w:p:h" ) ) != EOF )
     {
         switch ( cur_arg )
         {
         case 'b':
             daqsharedmemname = optarg;
-            break;
-        // case 't':
-        //    syncsharedmemname = optarg;
-        //    break;
-        case 'l':
-            logdir = optarg;
             break;
         case 'd':
             mydcuid = atoi( optarg );
@@ -919,12 +847,7 @@ main( int argc, char* argv[] )
         }
     }
 
-    if ( stat( logdir, &st ) == -1 )
-        mkdir( logdir, 0777 );
-
     printf( "My dcuid is %d\n", mydcuid );
-    sprintf( logfilename, "%s%s", logdir, "/ioc.log" );
-    printf( "LOG FILE = %s\n", logfilename );
     sleep( 2 );
     // **********************************************
     //
@@ -932,12 +855,11 @@ main( int argc, char* argv[] )
     // EDCU STUFF
     // ********************************************************************************************************
 
-    sprintf( edculogfilename, "%s%s", logdir, "/edcu.log" );
     for ( ii = 0; ii < EDCU_MAX_CHANS; ii++ )
         daqd_edcu1.channel_status[ ii ] = 0xbad;
     edcuInitialize( daqsharedmemname, "-" );
     // edcuCreateChanFile(daqDir,daqFile,pref);
-    edcuCreateChanList( prefix, daqFile, edculogfilename );
+    edcuCreateChanList( prefix, daqFile );
     int datarate = daqd_edcu1.num_chans * 64 / 1000;
 
     // Start SPECT
@@ -989,49 +911,6 @@ main( int argc, char* argv[] )
 
         edcuWriteData(
             daqd_edcu1.epicsSync, daqd_edcu1.gpsTime, mydcuid, send_daq_reset );
-        send_daq_reset = 0;
-        //        status = dbPutField( &gpstimedisplayaddr,
-        //                             DBR_LONG,
-        //                             &daqd_edcu1.gpsTime,
-        //                             1 ); // Init to zero.
-        //        status = dbPutField( &daqbyteaddr, DBR_LONG, &datarate, 1 );
-        int conChans = daqd_edcu1.con_chans;
-        //        status = dbPutField( &eccaddr, DBR_LONG, &conChans, 1 );
-        // Check unconnected channels once per second
-        if ( daqd_edcu1.epicsSync == 0 )
-        {
-            //            status = dbGetField(
-            //                &daqresetaddr, DBR_LONG, &daqreset, &ropts,
-            //                &nvals, NULL );
-            //            if ( daqreset )
-            //            {
-            //                status = dbPutField(
-            //                    &daqresetaddr, DBR_LONG, &ropts, 1 ); // Init
-            //                    to zero.
-            //                send_daq_reset = 1;
-            //            }
-            numDC = edcuFindUnconnChannels( );
-            if ( numDC < ( pageNumDisp * 40 ) )
-                pageNumDisp--;
-            //            numReport = edcuReportUnconnChannels( pref, numDC,
-            //            pageNumDisp );
-        }
-        //        status = dbPutField( &chnotfoundaddr, DBR_LONG, &numDC, 1 );
-
-        fivesectimer = ( fivesectimer + 1 ) %
-            50; // Increment 5 second timer for triggering CRC checks.
-        // Check file CRCs every 5 seconds.
-        // DAQ and COEFF file checking was moved from skeleton.st to here RCG
-        // V2.9.
-        /*if(!fivesectimer) {
-                status = checkFileCrc(daqFile);
-                if(status != daqFileCrc) {
-                        daqFileCrc = status;
-                        status =
-        dbPutField(&daqmsgaddr,DBR_STRING,modfilemsg,1); logFileEntry("Detected
-        Change to DAQ Config file.");
-                }
-        }*/
 
         cycle = ( cycle + 1 ) % 16;
         transmit_time = transmit_time + time_step;
