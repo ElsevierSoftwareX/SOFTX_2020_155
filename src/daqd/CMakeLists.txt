@@ -438,6 +438,7 @@ target_link_libraries(daqd_shmem PUBLIC
 		#${EPICS_BASE_CA_LIBS} ${EPICS_BASE_CAS_LIBS}
 		ldastools::framecpp
 		driver::shmem
+		driver::ini_parsing
 		${CMAKE_THREAD_LIBS_INIT}
 		)
 

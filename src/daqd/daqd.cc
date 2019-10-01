@@ -42,6 +42,11 @@
 
 #include "framecpp/Common/MD5SumFilter.hh"
 #include "run_number_client.hh"
+#include "daqmap.h"
+extern "C" {
+#include "crc.h"
+#include "param.h"
+}
 
 using namespace std;
 
@@ -53,8 +58,6 @@ using namespace std;
 #include "daqd.hh"
 #include "sing_list.hh"
 #include "net_writer.hh"
-
-#include "../../src/drv/crc.c"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -178,7 +181,7 @@ int _debug = 10;
 /// Controls volume of log messages
 int _log_level;
 
-#include "../../src/drv/param.c"
+//#include "../../src/drv/param.c"
 
 struct cmp_struct {bool operator()(char *a, char *b) { return !strcmp(a,b); }};
 

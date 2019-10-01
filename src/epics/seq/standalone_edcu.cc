@@ -25,12 +25,12 @@ of this distribution.
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-#include "crc.h"
-
 #include <daqmap.h>
-#include <param.h>
+
 extern "C" {
 #include "findSharedMemory.h"
+#include "crc.h"
+#include "param.h"
 }
 #include "cadef.h"
 #include "fb.h"
@@ -272,261 +272,48 @@ subscriptionHandler( struct event_handler_args args )
     }
 }
 
-/**
- * Scan the input text for the first non-whitespace character and return a
- * pointer to that location.
- * @param line NULL terminated string to check.
- * @return Pointer to the the first non whitespace (space, tab, nl, cr)
- * character.  Returns NULL iff line is NULL.
- */
-const char*
-skip_whitespace( const char* line )
+int
+channel_parse_callback(char *channel_name, struct CHAN_PARAM* params, void *user)
 {
-    const char* cur = line;
-    char        ch = 0;
-    if ( !line )
-    {
-        return NULL;
-    }
-    ch = *cur;
-    while ( ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n' )
-    {
-        ++cur;
-        ch = *cur;
-    }
-    return cur;
-}
+    daqd_c* edc = reinterpret_cast<daqd_c*>(user);
 
-/**
- * Given a line with an comment denoted by '#' terminate
- * the line at the start of the comment.
- * @param line The line to modify, a NULL terminated string
- * @note This may modify the string pointed to by line.
- * This is safe to call with a NULL pointer.
- */
-void
-remove_line_comments( char* line )
-{
-    char ch = 0;
-
-    if ( !line )
+    if (!edc || !channel_name || !params)
     {
-        return;
+        return 0;
     }
-    while ( ( ch = *line ) )
+    if (edc->num_chans >= 50000)
     {
-        if ( ch == '#' )
-        {
-            *line = '\0';
-            return;
-        }
-        ++line;
+        std::cerr << "Too many channels, aborting\n";
+        exit(1);
     }
-}
-
-/**
- * Given a NULL terminated string remove any trailing whitespace
- * @param line The line to modify, a NULL terminated string
- * @note This may modify the string pointed to by line.
- * This is safe to call with a NULL pointer.
- */
-void
-remove_trailing_whitespace( char* newname )
-{
-    char* cur = newname;
-    char* last_non_ws = NULL;
-    char  ch = 0;
-
-    if ( !newname )
+    if (strlen(channel_name) >= sizeof(edc->channel_name[edc->num_chans]))
     {
-        return;
+        std::cerr << "Channel name is too long '" << channel_name << "'\n";
+        exit(1);
     }
-    ch = *cur;
-    while ( ch )
+    if (params->datarate != 16)
     {
-        if ( ch != ' ' && ch != '\t' && ch != '\r' && ch != '\n' )
-        {
-            last_non_ws = cur;
-        }
-        ++cur;
-        ch = *cur;
+        std::cerr << "EDC channels may only be 16Hz\n";
+        exit(1);
     }
-    if ( !last_non_ws )
+    if (params->datatype != 4)
     {
-        *newname = '\0';
+        std::cerr << "EDC channels may only be floats\n";
+        exit(1);
     }
-    else
-    {
-        last_non_ws++;
-        *last_non_ws = '\0';
-    }
+    strncpy(edc->channel_name[edc->num_chans], channel_name, sizeof(edc->channel_name[edc->num_chans]));
+    ++(edc->num_chans);
+    return 1;
 }
 
 // **************************************************************************
 void
-edcuCreateChanFile( char* fdir, char* edcuinifilename, char* fecid )
+edcuCreateChanList( const char* pref, const char* daqfilename, unsigned long* crc )
 {
     // **************************************************************************
-    int   ok = 0;
     int   i = 0;
     int   status = 0;
-    char  errMsg[ 64 ] = "";
-    FILE* daqfileptr = NULL;
-    FILE* edcuini = NULL;
-    FILE* edcumaster = NULL;
-    char  masterfile[ 64 ] = "";
-    char  edcuheaderfilename[ 64 ] = "";
-    char  line[ 128 ] = "";
-    char* newname = 0;
-    char  edcufilename[ 64 ] = "";
-    char* dcuid = 0;
-
-    sprintf( errMsg, "%s", fecid );
-    dcuid = strtok( errMsg, "-" );
-    dcuid = strtok( NULL, "-" );
-    sprintf( masterfile, "%s%s", fdir, "edcumaster.txt" );
-    sprintf( edcuheaderfilename, "%s%s", fdir, "edcuheader.txt" );
-
-    // Open the master file which contains list of EDCU files to read channels
-    // from.
-    edcumaster = fopen( masterfile, "r" );
-    if ( edcumaster == NULL )
-    {
-        sprintf(
-            errMsg, "DAQ FILE ERROR: FILE %s DOES NOT EXIST\n", masterfile );
-        fprintf( stderr, "%s", errMsg );
-        // logFileEntry( errMsg );
-        goto done;
-    }
-    // Open the file to write the composite channel list.
-    edcuini = fopen( edcuinifilename, "w" );
-    if ( edcuini == NULL )
-    {
-        sprintf( errMsg,
-                 "DAQ FILE ERROR: FILE %s DOES NOT EXIST\n",
-                 edcuinifilename );
-        fprintf( stderr, "%s", errMsg );
-        // logFileEntry( errMsg );
-        goto done;
-    }
-
-    // Write standard header into .ini file
-    fprintf( edcuini, "%s", "[default] \n" );
-    fprintf( edcuini, "%s", "gain=1.00 \n" );
-    fprintf( edcuini, "%s", "datatype=4 \n" );
-    fprintf( edcuini, "%s", "ifoid=0 \n" );
-    fprintf( edcuini, "%s", "slope=1 \n" );
-    fprintf( edcuini, "%s", "acquire=3 \n" );
-    fprintf( edcuini, "%s", "offset=0 \n" );
-    fprintf( edcuini, "%s", "units=undef \n" );
-    fprintf( edcuini, "%s%s%s", "dcuid=", dcuid, " \n" );
-    fprintf( edcuini, "%s", "datarate=16 \n\n" );
-
-    // Read the master file entries.
-    while ( fgets( line, sizeof line, edcumaster ) != NULL )
-    {
-        newname = strtok( line, "\n" );
-        if ( !newname )
-        {
-            continue;
-        }
-        newname = (char*)skip_whitespace( newname );
-        remove_line_comments( newname );
-        remove_trailing_whitespace( newname );
-
-        if ( *newname == '\0' )
-        {
-            continue;
-        }
-        strcpy( edcufilename, fdir );
-        strcat( edcufilename, newname );
-        printf( "File in master = %s\n", edcufilename );
-        daqfileptr = fopen( edcufilename, "r" );
-        if ( daqfileptr == NULL )
-        {
-            fprintf(
-                stderr,
-                "DAQ FILE ERROR: FILE %s DOES NOT EXIST OR CANNOT BE READ!\n",
-                edcufilename );
-            goto done;
-        }
-        while ( fgets( line, sizeof line, daqfileptr ) != NULL )
-        {
-            fprintf( edcuini, "%s", line );
-        }
-        fclose( daqfileptr );
-        daqfileptr = NULL;
-    }
-    ok = 1;
-done:
-    if ( daqfileptr )
-        fclose( daqfileptr );
-    if ( edcuini )
-        fclose( edcuini );
-    if ( edcumaster )
-        fclose( edcumaster );
-    if ( !ok )
-    {
-        exit( 1 );
-    }
-}
-
-int
-veto_line_due_to_datarate( const char* line )
-{
-    const int datarate_eq_len = 9;
-
-    if ( !line )
-    {
-        return 0;
-    }
-    if ( strncmp( "datarate=", line, datarate_eq_len ) != 0 )
-    {
-        return 0;
-    }
-
-    if ( strcmp( "16\n", line + datarate_eq_len ) == 0 ||
-         strcmp( "16", line + datarate_eq_len ) == 0 )
-    {
-        return 0;
-    }
-    return 1;
-}
-
-int
-veto_line_due_to_datatype( const char* line )
-{
-    const int datatype_eq_len = 9;
-
-    if ( !line )
-    {
-        return 0;
-    }
-    if ( strncmp( "datatype=", line, datatype_eq_len ) != 0 )
-    {
-        return 0;
-    }
-
-    if ( strcmp( "4\n", line + datatype_eq_len ) == 0 ||
-         strcmp( "4", line + datatype_eq_len ) == 0 )
-    {
-        return 0;
-    }
-    return 1;
-}
-
-// **************************************************************************
-void
-edcuCreateChanList( const char* pref, const char* daqfilename )
-{
-    // **************************************************************************
-    int   i;
-    int   status;
-    FILE* daqfileptr;
-    char  errMsg[ 64 ];
-    // char daqfile[64];
-    char  line[ 128 ];
-    char* newname;
+    unsigned long dummy_crc = 0;
 
     char eccname[ 256 ];
     sprintf( eccname, "%s%s", pref, "EDCU_CHAN_CONN" );
@@ -535,55 +322,13 @@ edcuCreateChanList( const char* pref, const char* daqfilename )
     char cnfname[ 256 ];
     sprintf( cnfname, "%s%s", pref, "EDCU_CHAN_NOCON" );
 
-    // sprintf(daqfile, "%s%s", fdir, "EDCU.ini");
+    if (!crc)
+    {
+        crc = &dummy_crc;
+    }
     daqd_edcu1.num_chans = 0;
-    daqfileptr = fopen( daqfilename, "r" );
-    if ( daqfileptr == NULL )
-    {
-        fprintf(
-            stderr, "DAQ FILE ERROR: FILE %s DOES NOT EXIST\n", daqfilename );
-    }
-    while ( fgets( line, sizeof line, daqfileptr ) != NULL )
-    {
-        status = strlen( line );
-        if ( strncmp( line, "[", 1 ) == 0 && status > 0 )
-        {
-            newname = strtok( line, "]" );
-            // printf("status = %d New name = %s and %s\n",status,line,newname);
-            newname = strtok( line, "[" );
-            // printf("status = %d New name = %s and %s\n",status,line,newname);
-            if ( strcmp( newname, "default" ) == 0 )
-            {
-                printf( "DEFAULT channel = %s\n", newname );
-            }
-            else
-            {
-                // printf("NEW channel = %s\n", newname);
-                sprintf( daqd_edcu1.channel_name[ daqd_edcu1.num_chans ],
-                         "%s",
-                         newname );
-                daqd_edcu1.num_chans++;
-            }
-        }
-        else
-        {
-            if ( veto_line_due_to_datarate( line ) )
-            {
-                fprintf(
-                    stderr,
-                    "Invalid data rate found, all entries must be 16Hz\n" );
-                exit( 1 );
-            }
-            if ( veto_line_due_to_datatype( line ) )
-            {
-                fprintf( stderr,
-                         "Invalid data type found, all entries must be 4 "
-                         "(float)\n" );
-                exit( 1 );
-            }
-        }
-    }
-    fclose( daqfileptr );
+
+    parseConfigFile(const_cast<char*>(daqfilename), crc, channel_parse_callback, -1, (char*)0, reinterpret_cast<void*>(&daqd_edcu1));
 
     xferInfo.crcLength = 4 * daqd_edcu1.num_chans;
     printf( "CRC data length = %d\n", xferInfo.crcLength );
@@ -859,7 +604,7 @@ main( int argc, char* argv[] )
         daqd_edcu1.channel_status[ ii ] = 0xbad;
     edcuInitialize( daqsharedmemname, "-" );
     // edcuCreateChanFile(daqDir,daqFile,pref);
-    edcuCreateChanList( prefix, daqFile );
+    edcuCreateChanList( prefix, daqFile, &daqFileCrc );
     int datarate = daqd_edcu1.num_chans * 64 / 1000;
 
     // Start SPECT
@@ -873,8 +618,6 @@ main( int argc, char* argv[] )
     int cycle = 0;
     int numReport = 0;
 
-    // Initialize DAQ and COEFF file CRC checksums for later compares.
-    daqFileCrc = checkFileCrc( daqFile );
     printf( "DAQ file CRC = %u \n", daqFileCrc );
     fprintf( stderr,
              "%s\n%s = %u\n%s = %d",

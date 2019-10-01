@@ -7,7 +7,10 @@
 #include <string>
 #include <unistd.h>
 #include <daqmap.h>
-#include <param.h>
+
+extern "C" {
+#include "param.h"
+}
 
 /// noop callback we need here; local to this source code file
 static int noop(char *channel_name, struct CHAN_PARAM *params, void *user){ return 1;};
