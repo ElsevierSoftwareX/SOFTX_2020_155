@@ -273,46 +273,53 @@ subscriptionHandler( struct event_handler_args args )
 }
 
 int
-channel_parse_callback(char *channel_name, struct CHAN_PARAM* params, void *user)
+channel_parse_callback( char*              channel_name,
+                        struct CHAN_PARAM* params,
+                        void*              user )
 {
-    daqd_c* edc = reinterpret_cast<daqd_c*>(user);
+    daqd_c* edc = reinterpret_cast< daqd_c* >( user );
 
-    if (!edc || !channel_name || !params)
+    if ( !edc || !channel_name || !params )
     {
         return 0;
     }
-    if (edc->num_chans >= 50000)
+    if ( edc->num_chans >= 50000 )
     {
         std::cerr << "Too many channels, aborting\n";
-        exit(1);
+        exit( 1 );
     }
-    if (strlen(channel_name) >= sizeof(edc->channel_name[edc->num_chans]))
+    if ( strlen( channel_name ) >=
+         sizeof( edc->channel_name[ edc->num_chans ] ) )
     {
         std::cerr << "Channel name is too long '" << channel_name << "'\n";
-        exit(1);
+        exit( 1 );
     }
-    if (params->datarate != 16)
+    if ( params->datarate != 16 )
     {
         std::cerr << "EDC channels may only be 16Hz\n";
-        exit(1);
+        exit( 1 );
     }
-    if (params->datatype != 4)
+    if ( params->datatype != 4 )
     {
         std::cerr << "EDC channels may only be floats\n";
-        exit(1);
+        exit( 1 );
     }
-    strncpy(edc->channel_name[edc->num_chans], channel_name, sizeof(edc->channel_name[edc->num_chans]));
-    ++(edc->num_chans);
+    strncpy( edc->channel_name[ edc->num_chans ],
+             channel_name,
+             sizeof( edc->channel_name[ edc->num_chans ] ) );
+    ++( edc->num_chans );
     return 1;
 }
 
 // **************************************************************************
 void
-edcuCreateChanList( const char* pref, const char* daqfilename, unsigned long* crc )
+edcuCreateChanList( const char*    pref,
+                    const char*    daqfilename,
+                    unsigned long* crc )
 {
     // **************************************************************************
-    int   i = 0;
-    int   status = 0;
+    int           i = 0;
+    int           status = 0;
     unsigned long dummy_crc = 0;
 
     char eccname[ 256 ];
@@ -322,13 +329,18 @@ edcuCreateChanList( const char* pref, const char* daqfilename, unsigned long* cr
     char cnfname[ 256 ];
     sprintf( cnfname, "%s%s", pref, "EDCU_CHAN_NOCON" );
 
-    if (!crc)
+    if ( !crc )
     {
         crc = &dummy_crc;
     }
     daqd_edcu1.num_chans = 0;
 
-    parseConfigFile(const_cast<char*>(daqfilename), crc, channel_parse_callback, -1, (char*)0, reinterpret_cast<void*>(&daqd_edcu1));
+    parseConfigFile( const_cast< char* >( daqfilename ),
+                     crc,
+                     channel_parse_callback,
+                     -1,
+                     (char*)0,
+                     reinterpret_cast< void* >( &daqd_edcu1 ) );
 
     xferInfo.crcLength = 4 * daqd_edcu1.num_chans;
     printf( "CRC data length = %d\n", xferInfo.crcLength );
