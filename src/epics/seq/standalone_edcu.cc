@@ -18,6 +18,7 @@ of this distribution.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdarg.h>
 #include <unistd.h>
 #include <time.h>
@@ -26,6 +27,22 @@ of this distribution.
 #include <fcntl.h>
 
 #include <daqmap.h>
+
+/* taken from channel.h in the daqd source
+ * find a way to do this better
+ */
+/* numbering must be contiguous */
+typedef enum
+{
+    _undefined = 0,
+    _16bit_integer = 1,
+    _32bit_integer = 2,
+    _64bit_integer = 3,
+    _32bit_float = 4,
+    _64bit_double = 5,
+    _32bit_complex = 6,
+    _32bit_uint = 7
+} daq_data_t;
 
 extern "C" {
 #include "findSharedMemory.h"
@@ -45,18 +62,29 @@ extern "C" {
 // ****************************************************************************************
 int checkFileCrc( const char* );
 
+typedef union edc_data_t
+{
+    int16_t data_int16;
+    int32_t data_int32;
+    float   data_float32;
+    double  data_float64;
+} edc_data_t;
+
 unsigned long daqFileCrc;
 typedef struct daqd_c
 {
-    int   num_chans;
-    int   con_chans;
-    int   val_events;
-    int   con_events;
-    float channel_value[ EDCU_MAX_CHANS ];
-    char  channel_name[ EDCU_MAX_CHANS ][ 64 ];
-    int   channel_status[ EDCU_MAX_CHANS ];
-    long  gpsTime;
-    long  epicsSync;
+    int        num_chans;
+    int        con_chans;
+    int        val_events;
+    int        con_events;
+    daq_data_t channel_type[ EDCU_MAX_CHANS ];
+    edc_data_t channel_value[ EDCU_MAX_CHANS ];
+    char       channel_name[ EDCU_MAX_CHANS ][ 64 ];
+    int        channel_status[ EDCU_MAX_CHANS ];
+    long       gpsTime;
+    long       epicsSync;
+    char*      prefix;
+    int        dcuid;
 } daqd_c;
 
 int num_chans_index = -1;
@@ -261,15 +289,96 @@ subscriptionHandler( struct event_handler_args args )
     {
         return;
     }
-    if ( args.type == DBR_FLOAT )
+    switch ( args.type )
+    {
+    case DBR_SHORT:
+    {
+        int16_t val = *( (int16_t*)args.dbr );
+        ( (edc_data_t*)( args.usr ) )->data_int16 = val;
+    }
+    break;
+    case DBR_LONG:
+    {
+        int32_t val = *( (int32_t*)args.dbr );
+        ( (edc_data_t*)( args.usr ) )->data_int32 = val;
+    }
+    break;
+    case DBR_FLOAT:
     {
         float val = *( (float*)args.dbr );
-        *( (float*)( args.usr ) ) = val;
+        ( (edc_data_t*)( args.usr ) )->data_float32 = val;
     }
-    else
+    break;
+    case DBR_DOUBLE:
     {
-        printf( "Arg type unknown\n" );
+        double val = *( (double*)args.dbr );
+        ( (edc_data_t*)( args.usr ) )->data_float64 = val;
     }
+    break;
+    default:
+        printf( "Arg type unknown\n" );
+        break;
+    }
+}
+
+bool
+valid_data_type( daq_data_t datatype )
+{
+    switch ( datatype )
+    {
+    case _undefined:
+    case _32bit_complex:
+    case _32bit_uint:
+    case _64bit_integer:
+    default:
+        return false;
+    case _16bit_integer:
+    case _32bit_integer:
+    case _32bit_float:
+    case _64bit_double:
+        return true;
+    }
+    return true;
+}
+
+int
+daq_data_t_to_epics( daq_data_t datatype )
+{
+    switch ( datatype )
+    {
+    case _16bit_integer:
+        return DBR_SHORT;
+    case _32bit_integer:
+        return DBR_LONG;
+    case _32bit_float:
+        return DBR_FLOAT;
+    case _64bit_double:
+        return DBR_DOUBLE;
+    default:
+        throw std::runtime_error( "Unexpected data type given" );
+    }
+}
+
+bool
+channel_is_edcu_special_chan( daqd_c* edc, const char* channel_name )
+{
+    const char* dummy_prefix = "";
+    const char* prefix = ( edc->prefix ? prefix : dummy_prefix );
+    size_t      pref_len = strlen( prefix );
+    size_t      name_len = strlen( channel_name );
+
+    if ( name_len <= pref_len )
+    {
+        return false;
+    }
+    if ( strncmp( prefix, channel_name, pref_len ) != 0 )
+    {
+        return false;
+    }
+    const char* remainder = channel_name + pref_len;
+    return ( strcmp( remainder, "EDCU_CHAN_CONN" ) == 0 ||
+             strcmp( remainder, "EDCU_CHAN_CNT" ) == 0 ||
+             strcmp( remainder, "EDCU_CHAN_NOCON" ) == 0 );
 }
 
 int
@@ -299,9 +408,27 @@ channel_parse_callback( char*              channel_name,
         std::cerr << "EDC channels may only be 16Hz\n";
         exit( 1 );
     }
-    if ( params->datatype != 4 )
+    if ( params->dcuid != edc->dcuid && edc->dcuid >= 0 )
     {
-        std::cerr << "EDC channels may only be floats\n";
+        std::cerr << "The edc can only have a single dcuid in its file\n";
+        exit( 1 );
+    }
+    if ( edc->dcuid < 0 )
+    {
+        edc->dcuid = params->dcuid;
+    }
+    daq_data_t daq_data_type = static_cast< daq_data_t >( params->datatype );
+    if ( !valid_data_type( daq_data_type ) )
+    {
+        std::cerr << "Invalid data type given for " << channel_name << "\n";
+        exit( 1 );
+    }
+    if ( channel_is_edcu_special_chan( edc, channel_name ) &&
+         daq_data_type != _32bit_integer )
+    {
+        std::cerr << "The edcu special variables (EDCU_CHAN_CONN/CNT/NOCON) "
+                     "must be 32 bit ints ("
+                  << static_cast< int >( _32bit_integer ) << ")\n";
         exit( 1 );
     }
     strncpy( edc->channel_name[ edc->num_chans ],
@@ -335,12 +462,18 @@ edcuCreateChanList( const char*    pref,
     }
     daqd_edcu1.num_chans = 0;
 
+    daqd_edcu1.dcuid = -1;
     parseConfigFile( const_cast< char* >( daqfilename ),
                      crc,
                      channel_parse_callback,
                      -1,
                      (char*)0,
                      reinterpret_cast< void* >( &daqd_edcu1 ) );
+    if ( daqd_edcu1.num_chans < 1 )
+    {
+        std::cerr << "No channels to record, aborting\n";
+        exit( 1 );
+    }
 
     xferInfo.crcLength = 4 * daqd_edcu1.num_chans;
     printf( "CRC data length = %d\n", xferInfo.crcLength );
@@ -387,7 +520,7 @@ edcuCreateChanList( const char*    pref,
                          daqd_edcu1.channel_name[ i ] );
             }
             status = ca_create_subscription(
-                DBR_FLOAT,
+                daq_data_t_to_epics( daqd_edcu1.channel_type[ i ] ),
                 0,
                 chid1,
                 DBE_VALUE,
@@ -414,31 +547,71 @@ edcuWriteData( int           daqBlockNum,
                int           daqreset )
 // **************************************************************************
 {
-    float* daqData;
-    int    buf_size;
-    int    ii;
+    char* daqData;
+    int   buf_size;
+    int   ii;
 
     if ( num_chans_index != -1 )
     {
-        daqd_edcu1.channel_value[ num_chans_index ] = daqd_edcu1.num_chans;
+        daqd_edcu1.channel_value[ num_chans_index ].data_int32 =
+            daqd_edcu1.num_chans;
     }
 
     if ( con_chans_index != -1 )
     {
-        daqd_edcu1.channel_value[ con_chans_index ] = daqd_edcu1.con_chans;
+        daqd_edcu1.channel_value[ con_chans_index ].data_int32 =
+            daqd_edcu1.con_chans;
     }
 
     if ( nocon_chans_index != -1 )
     {
-        daqd_edcu1.channel_value[ nocon_chans_index ] =
+        daqd_edcu1.channel_value[ nocon_chans_index ].data_int32 =
             daqd_edcu1.num_chans - daqd_edcu1.con_chans;
     }
 
     buf_size = DAQ_DCU_BLOCK_SIZE * DAQ_NUM_SWING_BUFFERS;
-    daqData = (float*)( shmDataPtr + ( buf_size * daqBlockNum ) );
-    memcpy( daqData,
-            daqd_edcu1.channel_value,
-            daqd_edcu1.num_chans * sizeof( float ) );
+    daqData = (char*)( shmDataPtr + ( buf_size * daqBlockNum ) );
+    for ( ii = 0; ii < daqd_edcu1.num_chans; ++ii )
+    {
+        switch ( daqd_edcu1.channel_type[ ii ] )
+        {
+        case _16bit_integer:
+        {
+            *reinterpret_cast< int16_t* >( daqData ) =
+                daqd_edcu1.channel_value[ ii ].data_int16;
+            daqData += sizeof( int16_t );
+            break;
+        }
+        case _32bit_integer:
+        {
+            *reinterpret_cast< int32_t* >( daqData ) =
+                daqd_edcu1.channel_value[ ii ].data_int32;
+            daqData += sizeof( int32_t );
+            break;
+        }
+        case _32bit_float:
+        {
+            *reinterpret_cast< float* >( daqData ) =
+                daqd_edcu1.channel_value[ ii ].data_float32;
+            daqData += sizeof( float );
+            break;
+        }
+        case _64bit_double:
+        {
+            *reinterpret_cast< double* >( daqData ) =
+                daqd_edcu1.channel_value[ ii ].data_float64;
+            daqData += sizeof( double );
+            break;
+        }
+        default:
+            std::cerr << "Unknown data type found, the edc does not know how "
+                         "to layout the data, aborting\n";
+            exit( 1 );
+        }
+    }
+    // memcpy( daqData,
+    //        daqd_edcu1.channel_value,
+    //        daqd_edcu1.num_chans * sizeof( float ) );
     dipc->dcuId = dcuId;
     dipc->crc = daqFileCrc;
     dipc->dataBlockSize = xferInfo.crcLength;
@@ -546,46 +719,22 @@ main( int argc, char* argv[] )
 {
     // Addresses for SDF EPICS records.
     // Initialize request for file load on startup.
-    long        status;
-    int         request;
-    int         daqTrigger;
-    long        ropts = 0;
-    long        nvals = 1;
-    int         rdstatus = 0;
-    char        timestring[ 128 ];
-    int         ii;
-    int         fivesectimer = 0;
-    long        coeffFileCrc;
-    char        modfilemsg[] = "Modified File Detected ";
-    struct stat st = { 0 };
-    char        filemsg[ 128 ];
-    char        logmsg[ 256 ];
-    int         pageNum = 0;
-    int         pageNumDisp = 0;
-    int         daqreset = 0;
-    char        errMsg[ 64 ];
-    int         send_daq_reset = 0;
+    int send_daq_reset = 0;
 
     const char* daqsharedmemname = "edc_daq";
     // const char* syncsharedmemname = "-";
     const char* daqFile = "edc.ini";
     const char* prefix = "";
-    int         mydcuid = 52;
-    char        logfilename[ 256 ] = "";
-    char        edculogfilename[ 256 ] = "";
 
     int delay_multiplier = 0;
 
     int cur_arg = 0;
-    while ( ( cur_arg = getopt( argc, argv, "b:d:i:w:p:h" ) ) != EOF )
+    while ( ( cur_arg = getopt( argc, argv, "b:i:w:p:h" ) ) != EOF )
     {
         switch ( cur_arg )
         {
         case 'b':
             daqsharedmemname = optarg;
-            break;
-        case 'd':
-            mydcuid = atoi( optarg );
             break;
         case 'i':
             daqFile = optarg;
@@ -604,19 +753,21 @@ main( int argc, char* argv[] )
         }
     }
 
-    printf( "My dcuid is %d\n", mydcuid );
-    sleep( 2 );
+    memset( (void*)&daqd_edcu1, 0, sizeof( daqd_edcu1 ) );
+
     // **********************************************
     //
 
     // EDCU STUFF
     // ********************************************************************************************************
 
-    for ( ii = 0; ii < EDCU_MAX_CHANS; ii++ )
+    for ( int ii = 0; ii < EDCU_MAX_CHANS; ii++ )
+    {
         daqd_edcu1.channel_status[ ii ] = 0xbad;
+    }
     edcuInitialize( daqsharedmemname, "-" );
-    // edcuCreateChanFile(daqDir,daqFile,pref);
     edcuCreateChanList( prefix, daqFile, &daqFileCrc );
+    std::cout << "The edc dcuid = " << daqd_edcu1.dcuid << "\n";
     int datarate = daqd_edcu1.num_chans * 64 / 1000;
 
     // Start SPECT
@@ -664,8 +815,10 @@ main( int argc, char* argv[] )
         daqd_edcu1.gpsTime = now.sec;
         daqd_edcu1.epicsSync = cycle;
 
-        edcuWriteData(
-            daqd_edcu1.epicsSync, daqd_edcu1.gpsTime, mydcuid, send_daq_reset );
+        edcuWriteData( daqd_edcu1.epicsSync,
+                       daqd_edcu1.gpsTime,
+                       daqd_edcu1.dcuid,
+                       send_daq_reset );
 
         cycle = ( cycle + 1 ) % 16;
         transmit_time = transmit_time + time_step;
