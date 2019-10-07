@@ -576,11 +576,23 @@ connectCallback( struct connection_handler_args args )
 {
     // **************************************************************************
     int* channel_status = (int*)ca_puser( args.chid );
-    *channel_status = args.op == CA_OP_CONN_UP ? 0 : 0xbad;
-    if ( args.op == CA_OP_CONN_UP )
-        daqd_edcu1.con_chans++;
-    else
-        daqd_edcu1.con_chans--;
+    int  new_status = ( args.op == CA_OP_CONN_UP ? 0 : 0xbad );
+    /* In practice we have seen multiple disconnect events in a row w/o a
+     * connect event. So only update when there is a change.  Otherwise this
+     * code cannot count well.
+     */
+    if ( *channel_status != new_status )
+    {
+        *channel_status = new_status;
+        if ( args.op == CA_OP_CONN_UP )
+        {
+            daqd_edcu1.con_chans++;
+        }
+        else
+        {
+            daqd_edcu1.con_chans--;
+        }
+    }
     daqd_edcu1.con_events++;
 }
 
