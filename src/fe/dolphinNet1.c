@@ -18,11 +18,11 @@ R_OK,
        SR_HEARTBEAT_RECEIVED
       } session_cb_reason_t;
 */
-signed32 session_callback(session_cb_arg_t IN arg,
+int32_t session_callback(session_cb_arg_t IN arg,
 			  session_cb_reason_t IN reason,
 			  session_cb_status_t IN status,
-			  unsigned32 IN target_node,
-			  unsigned32 IN local_adapter_number) {
+			  uint32_t IN target_node,
+			  uint32_t IN local_adapter_number) {
   printkl("Session callback reason=%d status=%d target_node=%d\n", reason, status, target_node);
   if (reason == SR_OK) iop_rfm_valid = 1;
   // This is being called when the one of the other nodes is prepared for shutdown
@@ -31,9 +31,9 @@ signed32 session_callback(session_cb_arg_t IN arg,
   return 0;
 }
 
-signed32 connect_callback(void IN *arg,
+int32_t connect_callback(void IN *arg,
 			  sci_r_segment_handle_t IN remote_segment_handle,
-			  unsigned32 IN reason, unsigned32 IN status) {
+			  uint32_t IN reason, uint32_t IN status) {
   printkl("Connect callback reason=%d status=%d\n", reason, status);
   if (reason == 1) iop_rfm_valid = 1;
   if (reason == 3) iop_rfm_valid = 0;
@@ -41,11 +41,11 @@ signed32 connect_callback(void IN *arg,
   return 0;
 }
 
-signed32 create_segment_callback(void IN *arg,
+int32_t create_segment_callback(void IN *arg,
 				 sci_l_segment_handle_t IN local_segment_handle,
-				 unsigned32 IN reason,
-				 unsigned32 IN source_node,
-				 unsigned32 IN local_adapter_number)  {
+				 uint32_t IN reason,
+				 uint32_t IN source_node,
+				 uint32_t IN local_adapter_number)  {
   printkl("Create segment callback reason=%d source_node=%d\n", reason, source_node);
   return 0;
 }

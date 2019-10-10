@@ -36,7 +36,7 @@
 #endif
 
 
-#ifdef TIME_MASTER
+#if defined (TIME_MASTER) || defined (TIME_SLAVE)
 TIMING_SIGNAL *pcieTimer;
 #endif
 
@@ -65,9 +65,16 @@ int  getGpsTime(unsigned int *tsyncSec, unsigned int *tsyncUsec);
 
 // Include C code modules
 #include "moduleLoadIop.c"
+
+#ifdef TIME_SLAVE
+#include "mapVirtual.c"
+#include <drv/time_slave_io.c>
+#else
 #include "map.c"
 #include <drv/iop_adc_functions.c>
 #include <drv/iop_dac_functions.c>
+#endif
+
 #include <drv/dac_info.c>
 #include <drv/adc_info.c>
 
@@ -282,6 +289,10 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 
   pLocalEpics->epicsOutput.fe_status = INIT_SYNC;
 
+#ifdef TIME_SLAVE
+syncSource = SYNC_SRC_DOLPHIN;
+#else
+
 /// \> Find the code syncrhonization source. \n
 /// - Standard aLIGO Sync source is the Timing Distribution System (TDS) (SYNC_SRC_TDS). 
   switch(syncSource)
@@ -311,9 +322,10 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       /// - --------- Code runs intrinsically slower first few cycle after startup, so new DAC
       /// values not written until a few cycle into run. \n
       /// - --------- DAC timing diags will later check FIFO sizes to verify synchrounous timing.
-      #ifndef NO_DAC_PRELOAD
+      // #ifndef NO_DAC_PRELOAD
+#if !defined  (NO_DAC_PRELOAD) && !defined (TIME_SLAVE)
       status = iop_dac_preload(dacPtr);
-      #endif
+#endif
       /// - ---- Start the timing clocks\n
       /// - --------- Send start command to TDS slave.\n
       /// - --------- TDS slave will begin sending 64KHz clocks synchronous to next 1PPS mark.
@@ -326,7 +338,8 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       }
       break;
     case SYNC_SRC_1PPS:
-#ifndef NO_DAC_PRELOAD
+// #ifndef NO_DAC_PRELOAD
+#if !defined  (NO_DAC_PRELOAD) && !defined (TIME_SLAVE)
       gsc16ai64Enable(&cdsPciModules);
       status = iop_dac_preload(dacPtr);
 #endif
@@ -342,6 +355,9 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       gsc18ai32Enable(&cdsPciModules);
       sync21pps = 1;
       break;
+    case SYNC_SRC_DOLPHIN:
+      sync21pps = 1;
+      break;
     default: {
       // IRIG-B card not found, so use CPU time to get close to 1PPS on startup
       // Pause until this second ends
@@ -351,6 +367,7 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       break;
     }
   }
+#endif
 
 //     for(jj=0;jj<cdsPciModules.adcCount;jj++) gsc18ai32DmaEnable(jj);
   pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;
@@ -358,6 +375,9 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
   onePpsTime = cycleNum;
 #ifdef REMOTE_GPS
   timeSec = remote_time((struct CDS_EPICS *)pLocalEpics);
+#elif TIME_SLAVE
+  timeSec = sync2master(pcieTimer);
+  sync21pps = 1;
 #else
   timeSec = current_time_fe() -1;
 #endif
@@ -403,7 +423,9 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
       if(!iopDacEnable || dkiTrip) feStatus |= FE_ERROR_DAC_ENABLE;
 
       /// - ---- If IOP, Increment GPS second
+#ifndef TIME_SLAVE
       timeSec ++;
+#endif
       pLocalEpics->epicsOutput.timeDiag = timeSec;
       if (cycle_gps_time == 0) {
         timeinfo.startGpsTime = timeSec;
@@ -862,7 +884,8 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
 /// code must set a proper FIFO size in map.c code.
 // This code runs once per second.
 // *****************************************************************
-#ifndef NO_DAC_PRELOAD
+// #ifndef NO_DAC_PRELOAD
+#if !defined (NO_DAC_PRELOAD) && !defined (TIME_SLAVE)
    if (cycleNum >= HKP_DAC_FIFO_CHK && cycleNum < (HKP_DAC_FIFO_CHK + cdsPciModules.dacCount)) 
    {
       status = check_dac_buffers(cycleNum);

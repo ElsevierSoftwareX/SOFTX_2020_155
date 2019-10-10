@@ -14,31 +14,6 @@ inline unsigned long current_time_fe(void) {
         return t.tv_sec;
 }
 
-#ifdef TIME_SLAVE
-//***********************************************************************
-/// \brief Test Mode - allows computer w/o IOC to run on timer from MASTER on
-///< 		Dolphin RFM network.
-//***********************************************************************
-inline void waitDolphinTime(void)
-{
-unsigned long d = cdsPciModules.dolphin[0][1];
-
-     if (boot_cpu_has(X86_FEATURE_MWAIT)) {
-	     for (;;) {
-             	if (cdsPciModules.dolphin[0][1] != d) break;
-	        __monitor((void *)&cdsPciModules.dolphin[0][1], 0, 0);
-	        if (cdsPciModules.dolphin[0][1] != d) break;
-	        __mwait(0, 0);
-		}
-	} else {
-	     do {
-	        udelay(1);
-	     } while(cdsPciModules.dolphin[0][1] != d);
-	}
-
-}
-#endif
-
 //***********************************************************************
 /// \brief Calculate ADC/DAC duotone offset for diagnostics. \n
 ///< Code should only run on IOP

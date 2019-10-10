@@ -58,7 +58,7 @@ char fp [64*1024];
 #define CPURATE (cpu_khz/1000)
 #define ONE_PPS_THRESH 2000
 #define SYNC_SRC_NONE           0
-#define SYNC_SRC_IRIG_B         1
+#define SYNC_SRC_DOLPHIN         1
 #define SYNC_SRC_1PPS           2
 #define SYNC_SRC_TDS            4
 #define SYNC_SRC_MASTER         8
