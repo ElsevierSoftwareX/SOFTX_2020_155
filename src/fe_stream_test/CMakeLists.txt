@@ -3,11 +3,12 @@ add_library(fe_stream_generator STATIC
         fe_stream_generator.hh
         str_split.cc
         str_split.hh)
-target_include_directories(fe_stream_generator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(fe_stream_generator PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
 add_library(fe_generator_support STATIC
         fe_generator_support.hh
         fe_generator_support.cc)
+target_include_directories(fe_generator_support PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
 add_executable(fe_multi_stream_test
         fe_multi_stream_test.cc
@@ -43,6 +44,7 @@ target_link_libraries(fe_stream_check_nds
         nds2client::cxx)
 
 add_executable(fe_stream_check_edcu_nds fe_stream_check_edcu_nds.cc)
+target_include_directories(fe_stream_check_edcu_nds PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 target_link_libraries(fe_stream_check_edcu_nds
         PRIVATE
         fe_stream_generator

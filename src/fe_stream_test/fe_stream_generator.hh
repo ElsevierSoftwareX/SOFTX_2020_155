@@ -10,8 +10,10 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-
 #include <stdexcept>
+#include <utility>
+
+#include <daq_data_types.h>
 
 #include "str_split.hh"
 
@@ -55,8 +57,6 @@ public:
 class Generator
 {
 protected:
-    virtual int data_type() const = 0;
-    virtual int data_rate() const = 0;
     virtual const std::string& channel_base_name() const = 0;
 
     virtual std::string other_params() const { return ""; }
@@ -75,6 +75,9 @@ public:
 
     virtual void output_ini_entry(std::ostream& os) = 0;
     virtual void output_par_entry(std::ostream& os) = 0;
+
+    virtual int data_type() const = 0;
+    virtual int data_rate() const = 0;
 };
 
 typedef std::tr1::shared_ptr<Generator> GeneratorPtr;
@@ -84,8 +87,6 @@ namespace Generators {
     protected:
         SimChannel ch_;
 
-        virtual int data_type() const { return ch_.data_type(); };
-        virtual int data_rate() const { return ch_.data_rate(); };
         virtual const std::string& channel_base_name() const { return ch_.name(); };
     public:
         SimChannelGenerator(const SimChannel& ch):
@@ -120,6 +121,9 @@ namespace Generators {
             os << "datatype = " << data_type() << "\n";
             os << "datarate = " << data_rate() << "\n";
         }
+
+        virtual int data_type() const { return ch_.data_type(); };
+        virtual int data_rate() const { return ch_.data_rate(); };
     };
 
     
@@ -206,6 +210,36 @@ namespace Generators {
     };
 
     template <typename T>
+    class GPSMod30kSecWithOffset: public SimChannelGenerator
+    {
+        int offset_;
+    public:
+        GPSMod30kSecWithOffset(const SimChannel& ch, int offset):
+                SimChannelGenerator(ch), offset_(offset) {}
+
+        std::string generator_name() const { return "gpssmd30koff1p"; }
+
+        std::string other_params() const
+        {
+            std::ostringstream os;
+            os << "--" << offset_;
+            return os.str();
+        }
+
+        char* generate(int gps_sec, int gps_nano, char* out)
+        {
+            int rate = data_rate() / 16;
+            T *out_ = reinterpret_cast<T*>(out);
+            for (int i = 0; i < rate; ++i)
+            {
+                *out_ = static_cast<T>((gps_sec%30000) + offset_);
+                ++out_;
+            }
+            return reinterpret_cast<char*>(out_);
+        }
+    };
+
+    template <typename T>
     class StaticValue: public SimChannelGenerator
     {
         T value_;
@@ -230,6 +264,32 @@ namespace Generators {
             return reinterpret_cast<char*>(out_ + rate);
         }
     };
+}
+
+template <template<class> class GenClass, typename... Args>
+GeneratorPtr
+create_generic_generator(int data_type, Args&&... args)
+{
+    switch (static_cast<daq_data_t>(data_type))
+    {
+        case _16bit_integer:
+            return GeneratorPtr(new GenClass<std::int16_t>(std::forward<Args>(args)...));
+        case _32bit_integer:
+            return GeneratorPtr(new GenClass<std::int32_t>(std::forward<Args>(args)...));
+        case _64bit_integer:
+            return GeneratorPtr(new GenClass<std::int64_t>(std::forward<Args>(args)...));
+        case _32bit_float:
+            return GeneratorPtr(new GenClass<float>(std::forward<Args>(args)...));
+        case _64bit_double:
+            return GeneratorPtr(new GenClass<double>(std::forward<Args>(args)...));
+        case _32bit_complex:
+            break;
+        case _32bit_uint:
+            return GeneratorPtr(new GenClass<std::uint32_t>(std::forward<Args>(args)...));
+        default:
+            break;
+    }
+    throw std::runtime_error("Unknown data type found, cannot create a generator");
 }
 
 GeneratorPtr

@@ -3,6 +3,25 @@
 //
 #include "fe_stream_generator.hh"
 
+bool
+is_data_type_valid(int data_type)
+{
+    switch (static_cast<daq_data_t>(data_type))
+    {
+        case _16bit_integer:
+        case _32bit_integer:
+        case _64bit_integer:
+        case _32bit_float:
+        case _64bit_double:
+        case _32bit_uint:
+            return true;
+        case _32bit_complex:
+        default:
+            break;
+    }
+    return false;
+}
+
 GeneratorPtr
 create_generator(const std::string& generator, const SimChannel& ch)
 {
@@ -30,7 +49,7 @@ create_generator(const std::string& channel_name)
     std::istringstream is (parts[parts.size()-1]);
     is >> rate;
   }
-  if (!(data_type == 2 || data_type == 4) || rate < 16)
+  if (!is_data_type_valid(data_type) || rate < 16)
     throw std::runtime_error("Invalid data type or rate found");
   std::string& base = parts[0];
   std::string& name = parts[1];
@@ -40,21 +59,21 @@ create_generator(const std::string& channel_name)
     std::istringstream is(parts[2]);
     int offset = 0;
     is >> offset;
-    if (data_type == 2)
-      return GeneratorPtr(new Generators::GPSSecondWithOffset<int>(SimChannel(base, data_type, rate, 0), offset));
-    else
-      return GeneratorPtr(new Generators::GPSSecondWithOffset<float>(SimChannel(base, data_type, rate, 0), offset));
-
+    return create_generic_generator<Generators::GPSSecondWithOffset>(data_type, SimChannel(base, data_type, rate, 0), offset);
   }
   else if (name == "gpssmd100koff1p" && arg_count == 1)
   {
     std::istringstream is(parts[2]);
     int offset = 0;
     is >> offset;
-    if (data_type == 2)
-      return GeneratorPtr(new Generators::GPSMod100kSecWithOffset<int>(SimChannel(base, data_type, rate, 0), offset));
-    else
-      return GeneratorPtr(new Generators::GPSMod100kSecWithOffset<float>(SimChannel(base, data_type, rate, 0), offset));
+    return create_generic_generator<Generators::GPSMod100kSecWithOffset>(data_type, SimChannel(base, data_type, rate, 0), offset);
+  }
+  else if (name == "gpssmd30koff1p" && arg_count == 1)
+  {
+      std::istringstream is(parts[2]);
+      int offset = 0;
+      is >> offset;
+      return create_generic_generator<Generators::GPSMod30kSecWithOffset>(data_type, SimChannel(base, data_type, rate, 0), offset);
   }
   else
   {

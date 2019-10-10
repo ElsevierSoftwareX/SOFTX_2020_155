@@ -1,0 +1,139 @@
+#!/bin/bash
+
+CWD="@CMAKE_CURRENT_BINARY_DIR@"
+
+TDIR=""
+PID_EPICS_IOC=0
+PID_STANDALONE_EDC=0
+PID_LOCAL_DC=0
+PID_DAQD=0
+
+function kill_proc {
+    if [ $1 -gt 0 ]; then
+        echo "Closing process $1"
+        kill $1
+    fi
+}
+
+function cleanup {
+    rm -rf daqdrc_live_test_final
+    if [ "x$TDIR" != "x" ]; then
+        if [ -d $TDIR ]; then
+            rm -rf "$TDIR"
+        fi
+    fi
+    kill_proc $PID_EPICS_IOC
+    kill_proc $PID_STANDALONE_EDC
+    kill_proc $PID_LOCAL_DC
+    kill_proc $PID_DAQD
+}
+
+EPICS_IOC="$CWD/epics_test.py"
+if [ ! -f "$EPICS_IOC" ]; then
+    echo "cannot find $EPICS_IOC"
+    exit 1
+fi
+
+STANDALONE_EDC="$CWD/standalone_edc"
+if [ ! -x "$STANDALONE_EDC" ]; then
+    echo "cannot find $STANDALONE_EDC"
+    exit 1
+fi
+
+LOCAL_DC="$CWD/../../local_dc/local_dc"
+if [ ! -x "$LOCAL_DC" ]; then
+    echo "cannot find $LOCAL_DC"
+    exit 1
+fi
+
+DAQD="$CWD/../../daqd/daqd_shmem"
+if [ ! -x "$DAQD" ]; then
+    echo "cannot find $DAQD"
+    exit 1
+fi
+
+FE_STREAM_CHECK_NDS="$CWD/../../fe_stream_test/fe_stream_check_edcu_nds"
+if [ ! -x "$FE_STREAM_CHECK_NDS" ]; then
+  echo "cannot find $FE_STREAM_CHECK_NDS"
+  exit 1
+fi
+
+if [ ! -w /dev/gpstime ]; then
+  echo "the gpstime module must be loaded, configured, and accessible by this user"
+  exit 1
+fi
+
+if [ ! -w /dev/mbuf ]; then
+  echo "the mbuf module must be loaded, configured, and accessible by this user"
+  exit 1
+fi
+
+PYTHON=""
+which python > /dev/null
+if [ $? -eq 0 ]; then
+    PYTHON=`which python`
+else
+    which python3 > /dev/null
+    if [ $? -eq 0 ]; then
+        PYTHON=`which python3`
+    else
+        echo "Cannot find python or python3"
+        exit 1
+    fi
+fi
+
+trap cleanup EXIT
+
+TDIR=`$PYTHON -c "from __future__ import print_function; import tempfile; print(tempfile.mkdtemp())"`
+mkdir "$TDIR/ini_files"
+mkdir "$TDIR/logs"
+
+echo "Ini dir = $TDIR/ini_files"
+
+pushd "$TDIR/ini_files"
+$PYTHON $EPICS_IOC &> "$TDIR/logs/epics_ioc" &
+PID_EPICS_IOC=$!
+popd
+
+echo "$TDIR/ini_files/edcu.ini" > $TDIR/ini_files/master
+
+echo "[X6:EDCU-EXC_1]" > "$TDIR/ini_files/tpchn_edc.par"
+echo "ifoid = 1" >> "$TDIR/ini_files/tpchn_edc.par"
+echo "rmid = 52" >> "$TDIR/ini_files/tpchn_edc.par"
+echo "dcuid = 52" >> "$TDIR/ini_files/tpchn_edc.par"
+echo "chnnum = 1" >> "$TDIR/ini_files/tpchn_edc.par"
+echo "datatype = 4" >> "$TDIR/ini_files/tpchn_edc.par"
+echo "datarate = 16" >> "$TDIR/ini_files/tpchn_edc.par"
+
+sleep 1
+
+"$STANDALONE_EDC" -b edc_daq -i "$TDIR/ini_files/edcu.ini" -p X6: -l 127.0.0.1:9000 &> "$TDIR/logs/standalone_edc" &
+PID_STANDALONE_EDC=$!
+
+"$LOCAL_DC" -b local_dc -m 100 -s edc -d "$TDIR/ini_files" &> "$TDIR/logs/local_dc" &
+PID_LOCAL_DC=$!
+
+echo "Streamer PID = PID_LOCAL_DC"
+
+sleep 1
+
+MASTER_FILE="$TDIR/ini_files/master"
+TESTPOINT_FILE=""
+cat daqdrc_standalone_edc_live_test | sed s\|MASTER\|$MASTER_FILE\| | sed s\|TESTPOINT\|$TESTPOINT_FILE\| > daqdrc_standalone_edc_live_test_final
+"$DAQD" -c daqdrc_standalone_edc_live_test_final &> "$TDIR/logs/daqd" &
+PID_DAQD=$!
+
+echo "Sleeping to allow the daq to start"
+sleep 15
+
+DUMMY=""
+read DUMMY
+
+"$FE_STREAM_CHECK_NDS" -c 30 --live
+RESULT=$?
+
+echo "Testing return $RESULT (0 = success)"
+exit $RESULT
+#echo "Press enter to continue..."
+#DUMMY=""
+#read DUMMY

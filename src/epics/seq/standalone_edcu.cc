@@ -18,6 +18,7 @@ of this distribution.
 #include <algorithm>
 #include <array>
 #include <iterator>
+#include <numeric>
 #include <string>
 #include <thread>
 #include <utility>
@@ -35,6 +36,7 @@ of this distribution.
 #include <fcntl.h>
 
 #include <daqmap.h>
+#include <daq_data_types.h>
 
 #define BOOST_ASIO_USE_BOOST_DATE_TIME_FOR_SOCKET_IOSTREAM
 #include <boost/asio.hpp>
@@ -44,21 +46,6 @@ of this distribution.
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
-/* taken from channel.h in the daqd source
- * find a way to do this better
- */
-/* numbering must be contiguous */
-typedef enum
-{
-    _undefined = 0,
-    _16bit_integer = 1,
-    _32bit_integer = 2,
-    _64bit_integer = 3,
-    _32bit_float = 4,
-    _64bit_double = 5,
-    _32bit_complex = 6,
-    _32bit_uint = 7
-} daq_data_t;
 
 extern "C" {
 #include "findSharedMemory.h"
@@ -118,22 +105,42 @@ typedef union edc_data_t
     double  data_float64;
 } edc_data_t;
 
-unsigned long daqFileCrc;
-typedef struct daqd_c
+struct edc_timestamped_data_t
 {
+    edc_timestamped_data_t(): data(), timestamp() {
+        timestamp.secPastEpoch = 0;
+        timestamp.nsec = 0;
+    }
+    edc_data_t data;
+    epicsTimeStamp timestamp;
+};
+
+unsigned long daqFileCrc;
+class daqd_c
+{
+public:
+    daqd_c():
+    num_chans(0), con_chans(0), val_events(0), con_events(0),
+    channel_type(), channel_value(), channel_name(), channel_status(),
+    gpsTime(0),
+    epicsSync(0),
+    prefix(nullptr),
+    dcuid(0)
+    {}
+
     int                num_chans;
-    std::atomic< int > con_chans;
+    int con_chans;
     int                val_events;
     int                con_events;
     daq_data_t         channel_type[ EDCU_MAX_CHANS ];
-    edc_data_t         channel_value[ EDCU_MAX_CHANS ];
+    edc_timestamped_data_t         channel_value[ EDCU_MAX_CHANS ];
     char               channel_name[ EDCU_MAX_CHANS ][ 64 ];
     int                channel_status[ EDCU_MAX_CHANS ];
     long               gpsTime;
     long               epicsSync;
     char*              prefix;
     int                dcuid;
-} daqd_c;
+};
 
 int num_chans_index = -1;
 int con_chans_index = -1;
@@ -148,7 +155,6 @@ static struct cdsDaqNetGdsTpNum* shmTpTable;
 static const int                 buf_size = DAQ_DCU_BLOCK_SIZE * 2;
 static const int                 header_size =
     sizeof( struct rmIpcStr ) + sizeof( struct cdsDaqNetGdsTpNum );
-static DAQ_XFER_INFO xferInfo;
 
 static int symmetricom_fd = -1;
 int        timemarks[ 16 ] = { 1000 * 1000,   63500 * 1000,  126000 * 1000,
@@ -596,6 +602,20 @@ connectCallback( struct connection_handler_args args )
     daqd_edcu1.con_events++;
 }
 
+inline
+bool operator>(const epicsTimeStamp t1, const epicsTimeStamp t2)
+{
+    if (t1.secPastEpoch > t2.secPastEpoch)
+    {
+        return true;
+    }
+    if (t1.secPastEpoch < t2.secPastEpoch)
+    {
+        return false;
+    }
+    return t1.nsec > t2.nsec;
+}
+
 // **************************************************************************
 void
 subscriptionHandler( struct event_handler_args args )
@@ -606,30 +626,65 @@ subscriptionHandler( struct event_handler_args args )
     {
         return;
     }
+
     switch ( args.type )
     {
-    case DBR_SHORT:
+    case DBR_TIME_SHORT:
     {
-        int16_t val = *( (int16_t*)args.dbr );
-        ( (edc_data_t*)( args.usr ) )->data_int16 = val;
+
+        dbr_time_short* dbr = (dbr_time_short*)(args.dbr);
+
+        edc_timestamped_data_t* edc_data = ((edc_timestamped_data_t *) (args.usr));
+        int i = edc_data - &(daqd_edcu1.channel_value[0]);
+        if (dbr->stamp > edc_data->timestamp)
+        {
+//            if (strcmp(daqd_edcu1.channel_name[i], "X6:EDC-1571--gpssmd30koff1p--20--1--16") == 0)
+//            {
+//                std::cout << edc_data->data.data_int16 << " " << edc_data->timestamp.secPastEpoch << ":"
+//                << edc_data->timestamp.nsec << "    -> "
+//                << dbr->value << " " << dbr->stamp.secPastEpoch << ":"
+//                << dbr->stamp.nsec << std::endl;
+//            }
+            edc_data->data.data_int16 = dbr->value;
+            edc_data->timestamp.secPastEpoch = dbr->stamp.secPastEpoch;
+            edc_data->timestamp.nsec = dbr->stamp.nsec;
+        }
     }
     break;
-    case DBR_LONG:
+    case DBR_TIME_LONG:
     {
-        int32_t val = *( (int32_t*)args.dbr );
-        ( (edc_data_t*)( args.usr ) )->data_int32 = val;
+        dbr_time_long* dbr = (dbr_time_long*)(args.dbr);
+        edc_timestamped_data_t* edc_data = ((edc_timestamped_data_t *) (args.usr));
+        if (dbr->stamp > edc_data->timestamp)
+        {
+            edc_data->data.data_int32 = dbr->value;
+            edc_data->timestamp.secPastEpoch = dbr->stamp.secPastEpoch;
+            edc_data->timestamp.nsec = dbr->stamp.nsec;
+        }
     }
     break;
-    case DBR_FLOAT:
+    case DBR_TIME_FLOAT:
     {
-        float val = *( (float*)args.dbr );
-        ( (edc_data_t*)( args.usr ) )->data_float32 = val;
+        dbr_time_float* dbr = (dbr_time_float*)(args.dbr);
+        edc_timestamped_data_t* edc_data = ((edc_timestamped_data_t *) (args.usr));
+        if (dbr->stamp > edc_data->timestamp)
+        {
+            edc_data->data.data_float32 = dbr->value;
+            edc_data->timestamp.secPastEpoch = dbr->stamp.secPastEpoch;
+            edc_data->timestamp.nsec = dbr->stamp.nsec;
+        }
     }
     break;
-    case DBR_DOUBLE:
+    case DBR_TIME_DOUBLE:
     {
-        double val = *( (double*)args.dbr );
-        ( (edc_data_t*)( args.usr ) )->data_float64 = val;
+        dbr_time_double* dbr = (dbr_time_double*)(args.dbr);
+        edc_timestamped_data_t* edc_data = ((edc_timestamped_data_t *) (args.usr));
+        if (dbr->stamp > edc_data->timestamp)
+        {
+            edc_data->data.data_float64 = dbr->value;
+            edc_data->timestamp.secPastEpoch = dbr->stamp.secPastEpoch;
+            edc_data->timestamp.nsec = dbr->stamp.nsec;
+        }
     }
     break;
     default:
@@ -664,23 +719,35 @@ daq_data_t_to_epics( daq_data_t datatype )
     switch ( datatype )
     {
     case _16bit_integer:
-        return DBR_SHORT;
+        return DBR_TIME_SHORT;
     case _32bit_integer:
-        return DBR_LONG;
+        return DBR_TIME_LONG;
     case _32bit_float:
-        return DBR_FLOAT;
+        return DBR_TIME_FLOAT;
     case _64bit_double:
-        return DBR_DOUBLE;
+        return DBR_TIME_DOUBLE;
     default:
         throw std::runtime_error( "Unexpected data type given" );
     }
+}
+
+std::size_t
+accumulte_daq_sizes(std::size_t cur, daq_data_t data_type)
+{
+    return cur + data_type_size(data_type);
+}
+
+std::size_t
+calculate_data_size(const daqd_c& edc)
+{
+    return std::accumulate(&(edc.channel_type[0]), &(edc.channel_type[0]) + edc.num_chans, 0, accumulte_daq_sizes);
 }
 
 bool
 channel_is_edcu_special_chan( daqd_c* edc, const char* channel_name )
 {
     const char* dummy_prefix = "";
-    const char* prefix = ( edc->prefix ? prefix : dummy_prefix );
+    const char* prefix = ( edc->prefix ? edc->prefix : dummy_prefix );
     size_t      pref_len = strlen( prefix );
     size_t      name_len = strlen( channel_name );
 
@@ -740,13 +807,17 @@ channel_parse_callback( char*              channel_name,
         std::cerr << "Invalid data type given for " << channel_name << "\n";
         exit( 1 );
     }
-    if ( channel_is_edcu_special_chan( edc, channel_name ) &&
-         daq_data_type != _32bit_integer )
+    if ( channel_is_edcu_special_chan( edc, channel_name ) )
     {
-        std::cerr << "The edcu special variables (EDCU_CHAN_CONN/CNT/NOCON) "
-                     "must be 32 bit ints ("
-                  << static_cast< int >( _32bit_integer ) << ")\n";
-        exit( 1 );
+        if ( daq_data_type != _32bit_integer && daq_data_type != _32bit_float )
+        {
+            std::cerr
+                << "The edcu special variables (EDCU_CHAN_CONN/CNT/NOCON) "
+                   "must be 32 bit ints ("
+                << static_cast< int >( _32bit_integer ) << ") or 32 bit floats("
+                << static_cast< int >( _32bit_float ) << "\n";
+            exit( 1 );
+        }
     }
     edc->channel_type[ edc->num_chans ] = daq_data_type;
     strncpy( edc->channel_name[ edc->num_chans ],
@@ -758,9 +829,7 @@ channel_parse_callback( char*              channel_name,
 
 // **************************************************************************
 void
-edcuCreateChanList( const char*    pref,
-                    const char*    daqfilename,
-                    unsigned long* crc )
+edcuCreateChanList( daqd_c& daq, const char* daqfilename, unsigned long* crc )
 {
     // **************************************************************************
     int           i = 0;
@@ -768,33 +837,32 @@ edcuCreateChanList( const char*    pref,
     unsigned long dummy_crc = 0;
 
     char eccname[ 256 ];
-    sprintf( eccname, "%s%s", pref, "EDCU_CHAN_CONN" );
+    sprintf( eccname, "%s%s", daq.prefix, "EDCU_CHAN_CONN" );
     char chcntname[ 256 ];
-    sprintf( chcntname, "%s%s", pref, "EDCU_CHAN_CNT" );
+    sprintf( chcntname, "%s%s", daq.prefix, "EDCU_CHAN_CNT" );
     char cnfname[ 256 ];
-    sprintf( cnfname, "%s%s", pref, "EDCU_CHAN_NOCON" );
+    sprintf( cnfname, "%s%s", daq.prefix, "EDCU_CHAN_NOCON" );
 
     if ( !crc )
     {
         crc = &dummy_crc;
     }
-    daqd_edcu1.num_chans = 0;
+    daq.num_chans = 0;
 
-    daqd_edcu1.dcuid = -1;
+    daq.dcuid = -1;
     parseConfigFile( const_cast< char* >( daqfilename ),
                      crc,
                      channel_parse_callback,
                      -1,
                      (char*)0,
-                     reinterpret_cast< void* >( &daqd_edcu1 ) );
-    if ( daqd_edcu1.num_chans < 1 )
+                     reinterpret_cast< void* >( &daq ) );
+    if ( daq.num_chans < 1 )
     {
         std::cerr << "No channels to record, aborting\n";
         exit( 1 );
     }
 
-    xferInfo.crcLength = 4 * daqd_edcu1.num_chans;
-    printf( "CRC data length = %d\n", xferInfo.crcLength );
+    std::cout << "CRC data length = " << calculate_data_size(daqd_edcu1) << "\n";
 
     chid chid1;
     if ( ca_context_create( ca_enable_preemptive_callback ) != ECA_NORMAL )
@@ -803,59 +871,75 @@ edcuCreateChanList( const char*    pref,
         exit( 1 );
     }
 
-    for ( i = 0; i < daqd_edcu1.num_chans; i++ )
+    for ( i = 0; i < daq.num_chans; i++ )
     {
-        if ( strcmp( daqd_edcu1.channel_name[ i ], chcntname ) == 0 )
+        if ( strcmp( daq.channel_name[ i ], chcntname ) == 0 )
         {
             num_chans_index = i;
             internal_channel_count = internal_channel_count + 1;
-            daqd_edcu1.channel_status[ i ] = 0;
+            daq.channel_status[ i ] = 0;
         }
-        else if ( strcmp( daqd_edcu1.channel_name[ i ], eccname ) == 0 )
+        else if ( strcmp( daq.channel_name[ i ], eccname ) == 0 )
         {
             con_chans_index = i;
             internal_channel_count = internal_channel_count + 1;
-            daqd_edcu1.channel_status[ i ] = 0;
+            daq.channel_status[ i ] = 0;
         }
-        else if ( strcmp( daqd_edcu1.channel_name[ i ], cnfname ) == 0 )
+        else if ( strcmp( daq.channel_name[ i ], cnfname ) == 0 )
         {
             nocon_chans_index = i;
             internal_channel_count = internal_channel_count + 1;
-            daqd_edcu1.channel_status[ i ] = 0;
+            daq.channel_status[ i ] = 0;
         }
         else
         {
-            status =
-                ca_create_channel( daqd_edcu1.channel_name[ i ],
-                                   connectCallback,
-                                   (void*)&( daqd_edcu1.channel_status[ i ] ),
-                                   0,
-                                   &chid1 );
+            status = ca_create_channel( daq.channel_name[ i ],
+                                        connectCallback,
+                                        (void*)&( daq.channel_status[ i ] ),
+                                        0,
+                                        &chid1 );
             if ( status != ECA_NORMAL )
             {
                 fprintf( stderr,
                          "Error creating connection to %s\n",
-                         daqd_edcu1.channel_name[ i ] );
+                         daq.channel_name[ i ] );
             }
             status = ca_create_subscription(
-                daq_data_t_to_epics( daqd_edcu1.channel_type[ i ] ),
+                daq_data_t_to_epics( daq.channel_type[ i ] ),
                 0,
                 chid1,
                 DBE_VALUE,
                 subscriptionHandler,
-                (void*)&( daqd_edcu1.channel_value[ i ] ),
+                (void*)&( daq.channel_value[ i ] ),
                 0 );
             if ( status != ECA_NORMAL )
             {
                 fprintf( stderr,
                          "Error creating subscription for %s\n",
-                         daqd_edcu1.channel_name[ i ] );
+                         daq.channel_name[ i ] );
             }
         }
     }
 
-    daqd_edcu1.con_chans = daqd_edcu1.con_chans + internal_channel_count;
+    daq.con_chans = daq.con_chans + internal_channel_count;
 }
+
+void edcuLoadSpecial(int index, int value)
+{
+    if (index >= 0) {
+        switch (daqd_edcu1.channel_type[index]) {
+            case _32bit_integer:
+                daqd_edcu1.channel_value[index].data.data_int32 = value;
+                break;
+            case _32bit_float:
+                daqd_edcu1.channel_value[index].data.data_float32 = static_cast<float>(value);
+                break;
+        }
+    }
+}
+
+
+
 
 // **************************************************************************
 void
@@ -869,55 +953,55 @@ edcuWriteData( int           daqBlockNum,
     int   buf_size;
     int   ii;
 
-    if ( num_chans_index != -1 )
-    {
-        daqd_edcu1.channel_value[ num_chans_index ].data_int32 =
-            daqd_edcu1.num_chans;
-    }
-
-    if ( con_chans_index != -1 )
-    {
-        daqd_edcu1.channel_value[ con_chans_index ].data_int32 =
-            daqd_edcu1.con_chans;
-    }
-
-    if ( nocon_chans_index != -1 )
-    {
-        daqd_edcu1.channel_value[ nocon_chans_index ].data_int32 =
-            daqd_edcu1.num_chans - daqd_edcu1.con_chans;
-    }
+    edcuLoadSpecial(num_chans_index, daqd_edcu1.num_chans);
+    edcuLoadSpecial(con_chans_index, daqd_edcu1.con_chans);
+    edcuLoadSpecial(nocon_chans_index, daqd_edcu1.num_chans - daqd_edcu1.con_chans);
 
     buf_size = DAQ_DCU_BLOCK_SIZE * DAQ_NUM_SWING_BUFFERS;
     daqData = (char*)( shmDataPtr + ( buf_size * daqBlockNum ) );
+    char *data_start = daqData;
+
+    static std::int16_t data_16 = 0;
     for ( ii = 0; ii < daqd_edcu1.num_chans; ++ii )
     {
         switch ( daqd_edcu1.channel_type[ ii ] )
         {
         case _16bit_integer:
         {
+            if (strcmp(daqd_edcu1.channel_name[ii], "X6:EDC-99--gpssmd30koff1p--0--1--16") == 0)
+            {
+                std::int16_t tmp = daqd_edcu1.channel_value[ ii ].data.data_int16;
+                std::cout << tmp;
+                if (tmp < data_16)
+                {
+                    std::cout << " **";
+                }
+                std::cout << std::endl;
+                data_16 = tmp;
+            }
             *reinterpret_cast< int16_t* >( daqData ) =
-                daqd_edcu1.channel_value[ ii ].data_int16;
+                daqd_edcu1.channel_value[ ii ].data.data_int16;
             daqData += sizeof( int16_t );
             break;
         }
         case _32bit_integer:
         {
             *reinterpret_cast< int32_t* >( daqData ) =
-                daqd_edcu1.channel_value[ ii ].data_int32;
+                daqd_edcu1.channel_value[ ii ].data.data_int32;
             daqData += sizeof( int32_t );
             break;
         }
         case _32bit_float:
         {
             *reinterpret_cast< float* >( daqData ) =
-                daqd_edcu1.channel_value[ ii ].data_float32;
+                daqd_edcu1.channel_value[ ii ].data.data_float32;
             daqData += sizeof( float );
             break;
         }
         case _64bit_double:
         {
             *reinterpret_cast< double* >( daqData ) =
-                daqd_edcu1.channel_value[ ii ].data_float64;
+                daqd_edcu1.channel_value[ ii ].data.data_float64;
             daqData += sizeof( double );
             break;
         }
@@ -932,9 +1016,10 @@ edcuWriteData( int           daqBlockNum,
     //        daqd_edcu1.num_chans * sizeof( float ) );
     dipc->dcuId = dcuId;
     dipc->crc = daqFileCrc;
-    dipc->dataBlockSize = xferInfo.crcLength;
+    dipc->dataBlockSize = daqData - data_start;
+    dipc->channelCount = daqd_edcu1.num_chans;
     dipc->bp[ daqBlockNum ].cycle = daqBlockNum;
-    dipc->bp[ daqBlockNum ].crc = xferInfo.crcLength;
+    dipc->bp[ daqBlockNum ].crc = daqData - data_start;
     dipc->bp[ daqBlockNum ].timeSec = (unsigned int)cycle_gps_time;
     dipc->bp[ daqBlockNum ].timeNSec = (unsigned int)daqBlockNum;
     if ( daqreset )
@@ -1065,9 +1150,11 @@ main( int argc, char* argv[] )
     const char* daqsharedmemname = "edc_daq";
     // const char* syncsharedmemname = "-";
     const char* daqFile = "edc.ini";
-    const char* prefix = "";
+    // const char* prefix = "";
 
     int delay_multiplier = 0;
+
+    memset( (void*)&daqd_edcu1, 0, sizeof( daqd_edcu1 ) );
 
     diag_thread_args diag_args( diag_msg_queue, diag_free_queue );
 
@@ -1086,7 +1173,7 @@ main( int argc, char* argv[] )
             delay_multiplier = atoi( optarg );
             break;
         case 'p':
-            prefix = optarg;
+            daqd_edcu1.prefix = optarg;
             break;
         case 'l':
             diag_args.address = parse_address( optarg );
@@ -1099,8 +1186,6 @@ main( int argc, char* argv[] )
         }
     }
 
-    memset( (void*)&daqd_edcu1, 0, sizeof( daqd_edcu1 ) );
-
     // **********************************************
     //
 
@@ -1112,7 +1197,7 @@ main( int argc, char* argv[] )
         daqd_edcu1.channel_status[ ii ] = 0xbad;
     }
     edcuInitialize( daqsharedmemname, "-" );
-    edcuCreateChanList( prefix, daqFile, &daqFileCrc );
+    edcuCreateChanList( daqd_edcu1, daqFile, &daqFileCrc );
     std::cout << "The edc dcuid = " << daqd_edcu1.dcuid << "\n";
     int datarate = daqd_edcu1.num_chans * 64 / 1000;
 

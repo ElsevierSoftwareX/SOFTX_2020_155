@@ -13,6 +13,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include <daq_data_types.h>
+
 #include <nds.hh>
 
 #include "fe_stream_generator.hh"
@@ -46,6 +48,7 @@ usage( const char* progname )
     cout << "If -c is specified a the random number generator can be seeded\n";
     cout << "manually with the -s option.  If not specified it will be\n";
     cout << "randomly seeded.\n";
+    cout << "\nTo read live data, specify a start time of 0 and use stop as a duration\n";
 
     exit( 1 );
 }
@@ -150,8 +153,13 @@ is_generated_channel(const NDS::channel& chan)
 {
     static const std::string slow("--16");
     static const std::string spacer("--");
-    return ((chan.Name().size() > slow.size())
-    && (std::equal(slow.begin(), slow.end(), chan.Name().begin() + chan.Name().size() - slow.size())));
+
+    auto pos = chan.Name().rfind(slow);
+    if (pos == std::string::npos)
+    {
+        return false;
+    }
+    return pos == chan.Name().size() - slow.size();
 }
 
 std::vector< GeneratorPtr >
@@ -208,6 +216,16 @@ contains_only(It it1, It it2, T val)
     return true;
 }
 
+bool
+buffer_contains_only(const NDS::buffer& buf, float value)
+{
+    if (buf.DataType() == NDS::channel::DATA_TYPE_FLOAT32)
+    {
+        return contains_only(buf.cbegin<float>(), buf.cend<float>(), value);
+    }
+    return contains_only(buf.cbegin<std::int32_t>(), buf.cend<std::int32_t>(), static_cast<std::int32_t>(value));
+}
+
 template <typename It1, typename It2>
 bool
 blended_compare(It1 begin1, It1 end1, It1 begin2, It2 begin3)
@@ -244,19 +262,17 @@ blended_compare(It1 begin1, It1 end1, It1 begin2, It2 begin3)
     return true;
 }
 
+template<typename T>
 void
-test_channel(const NDS::buffer& buf, GeneratorPtr& gen)
+test_channel_by_type(const NDS::buffer& buf, GeneratorPtr& gen, T tag)
 {
     NDS::buffer::gps_second_type start = buf.Start();
     NDS::buffer::gps_second_type end = buf.Stop();
 
-    std::array<float, 16> buf1{};
-    std::array<float, 16> buf2{};
-
     for (NDS::buffer::gps_second_type cur = start; cur != end; ++cur)
     {
-        std::array<float, 16> buf1{};
-        std::array<float, 16> buf2{};
+        std::array<T, 16> buf1{};
+        std::array<T, 16> buf2{};
 
         char* ptr1 = reinterpret_cast<char*>(buf1.data());
         char* ptr2 = reinterpret_cast<char*>(buf2.data());
@@ -269,10 +285,10 @@ test_channel(const NDS::buffer& buf, GeneratorPtr& gen)
             ptr2 = gen->generate( cur, nano,  ptr2);
         }
 
-        const float* ptr3 = buf.cbegin<float>() + (16*(cur-start));
+        const T* ptr3 = buf.cbegin<T>() + (16*(cur-start));
         if (!blended_compare(buf1.begin(), buf1.end(), buf2.begin(), ptr3))
         {
-            std::cerr << "Unexpected data found\n";
+            std::cerr << "Unexpected data found on " << buf.Name() << "\n";
             std::cerr << "prev: ";
             for (int j = 0; j < buf1.size(); ++j)
             {
@@ -290,6 +306,41 @@ test_channel(const NDS::buffer& buf, GeneratorPtr& gen)
             }
             exit(1);
         }
+    }
+}
+
+void
+require_channel_type(daq_data_t req_type, GeneratorPtr gen)
+{
+    if (static_cast<int>(req_type) != gen->data_type())
+    {
+        throw std::runtime_error("Mismatch of channel and generator types");
+    }
+}
+
+void
+test_channel(const NDS::buffer& buf, GeneratorPtr& gen)
+{
+    switch (buf.DataType())
+    {
+        case NDS::channel::DATA_TYPE_FLOAT64:
+            require_channel_type(_64bit_double, gen);
+            test_channel_by_type<double>(buf, gen, 0.);
+            break;
+        case NDS::channel::DATA_TYPE_FLOAT32:
+            require_channel_type(_32bit_float, gen);
+            test_channel_by_type<float>(buf, gen, 0.f);
+            break;
+        case NDS::channel::DATA_TYPE_INT32:
+            require_channel_type(_32bit_integer, gen);
+            test_channel_by_type<std::int32_t>(buf, gen, 0);
+            break;
+        case NDS::channel::DATA_TYPE_INT16:
+            require_channel_type(_16bit_integer, gen);
+            test_channel_by_type<std::int16_t>(buf, gen, 0);
+            break;
+        default:
+            throw std::runtime_error("Unsupported channel type");
     }
 }
 
@@ -354,32 +405,50 @@ test_channel_counts( NDS::parameters&             params,
     channels.push_back(chan_conn);
     channels.push_back(chan_nocon);
     channels.push_back(chan_cnt);
+    std::cout << "Channels:\n\t";
+    std::copy(channels.begin(), channels.end(), std::ostream_iterator<std::string>(std::cout, "\n\t"));
+    std::cout << "\n";
 
-    NDS::buffers_type bufs = NDS::fetch( params, gps_start, gps_stop, channels );
-    if (bufs.size() != 3)
-    {
-        std::cerr << "size is wrong " << bufs.size() << "\n";
-    }
-    std::cerr << "sample count = " << bufs[2].Samples() << "\n";
+    float expected_count = -1;
 
-    float expected_count = bufs[2].at<float>(0);
-    if (!contains_only(bufs[2].cbegin<float>(), bufs[2].cend<float>(), expected_count))
+    auto stream = NDS::iterate(params, NDS::request_period(gps_start, gps_stop), channels);
+    for (const auto& bufs:stream)
     {
-        std::cout << "The channel count changed during the test timespan, it was not always " << expected_count << "\n";
-        exit(1);
+        if (bufs->size() != 3)
+        {
+            std::cerr << "size is wrong " << bufs->size() << "\n";
+        }
+        std::cerr << "sample count = " << bufs->at(2).Samples() << "\n";
+
+        if (expected_count < 0.0)
+        {
+            if (bufs->at(2).DataType() == NDS::channel::DATA_TYPE_FLOAT32) {
+                expected_count = bufs->at(2).at<float>(0);
+            } else {
+                expected_count = static_cast<float>(bufs->at(2).at<std::int32_t>(0));
+            }
+            std::cerr << "Expected count == " << expected_count << "\n";
+        }
+
+        if (!buffer_contains_only(bufs->at(2), expected_count))
+        {
+            std::cout << "The channel count changed during the test timespan, it was not always " << expected_count << "\n";
+            exit(1);
+        }
+
+        if ( ! buffer_contains_only( bufs->at(1), 0.0f ) )
+        {
+            std::cout << "The channel noconn count changed during the test timespan, it was not always 0.\n";
+            exit(1);
+        }
+
+        if (!buffer_contains_only(bufs->at(0), expected_count))
+        {
+            std::cout << "The connected count changed during the test timespan, it was not always " << expected_count << "\n";
+            exit(1);
+        }
     }
 
-    if ( ! contains_only( bufs[1].cbegin<float>(), bufs[1].cend<float>(), 0.0f ) )
-    {
-        std::cout << "The channel noconn count changed during the test timespan, it was not always 0.\n";
-        exit(1);
-    }
-
-    if (!contains_only(bufs[0].cbegin<float>(), bufs[0].cend<float>(), expected_count))
-    {
-        std::cout << "The connected count changed during the test timespan, it was not always " << expected_count << "\n";
-        exit(1);
-    }
 }
 
 int
