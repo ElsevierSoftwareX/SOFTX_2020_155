@@ -240,12 +240,20 @@ public:
         size_t mid_channel_num =
             mid_data_bytes / ( sizeof( float ) * mid_rate );
         size_t slow_channel_num = slow_data_bytes / ( sizeof( float ) * 16 );
-        size_t channel_num = fast_channel_num + slow_channel_num;
+        size_t slow_16i_channel_num = 0;
+        if ( slow_channel_num > 2 )
+        {
+            slow_channel_num -= 1;
+            slow_16i_channel_num = 2;
+        }
+        size_t channel_num = fast_channel_num + mid_channel_num +
+            slow_channel_num + slow_16i_channel_num;
 
         generators_.reserve( channel_num );
         tp_generators_.reserve( tp_table_.size( ) );
 
         size_t mid_channel_boundary = fast_channel_num + mid_channel_num;
+        size_t slow_channel_boundary = mid_channel_boundary + slow_channel_num;
 
         ChNumDb chDb;
         ChNumDb tpDb;
@@ -272,7 +280,7 @@ public:
                     SimChannel( ss.str( ), 2, mid_rate, chnum ),
                     ( i + dcu_id_ ) % 21 ) ) );
         }
-        for ( size_t i = mid_channel_boundary; i < channel_num; ++i )
+        for ( size_t i = mid_channel_boundary; i < slow_channel_boundary; ++i )
         {
             int chnum = chDb.next( 4 );
 
@@ -281,6 +289,17 @@ public:
             generators_.push_back(
                 GeneratorPtr( new Generators::GPSSecondWithOffset< int >(
                     SimChannel( ss.str( ), 2, 16, chnum ),
+                    ( i + dcu_id_ ) % 21 ) ) );
+        }
+        for ( size_t i = slow_channel_boundary; i < channel_num; ++i )
+        {
+            int chnum = chDb.next( 4 );
+
+            std::ostringstream ss;
+            ss << name_ << "-" << i;
+            generators_.push_back(
+                GeneratorPtr( new Generators::GPSMod30kSecWithOffset< short >(
+                    SimChannel( ss.str( ), 1, 16, chnum ),
                     ( i + dcu_id_ ) % 21 ) ) );
         }
 

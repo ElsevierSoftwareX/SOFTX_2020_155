@@ -132,6 +132,28 @@ get_nds_channels( Config& cfg )
         NDS::channel_predicate( "*", NDS::channel::CHANNEL_TYPE_ONLINE ) );
 }
 
+bool
+is_16bit_int_channel( const NDS::channel& ch )
+{
+    return ch.DataType( ) == NDS::channel::DATA_TYPE_INT16;
+}
+
+void
+add_16bit_int_channel( const NDS::channels_type& channels,
+                       std::vector< int >&       indexes )
+{
+    for ( int i = 0; i < channels.size( ); ++i )
+    {
+        if ( is_16bit_int_channel( channels[ i ] ) &&
+             std::find( indexes.begin( ), indexes.end( ), i ) ==
+                 indexes.end( ) )
+        {
+            indexes.push_back( i );
+            break;
+        }
+    }
+}
+
 std::vector< GeneratorPtr >
 load_generators( Config& cfg )
 {
@@ -147,7 +169,13 @@ load_generators( Config& cfg )
                   << cfg.seed << "\n";
         std::vector< int > indexes{};
         indexes.reserve( cfg.random_channels );
-        for ( int i = 0; i < cfg.random_channels; ++i )
+        add_16bit_int_channel( channels, indexes );
+        add_16bit_int_channel( channels, indexes );
+        for ( int i = 0; i < indexes.size( ); ++i )
+        {
+            cfg.channels.push_back( channels[ indexes[ i ] ].Name( ) );
+        }
+        for ( int i = indexes.size( ); i < cfg.random_channels; ++i )
         {
             int index = 0;
             do
@@ -195,6 +223,10 @@ main( int argc, char* argv[] )
     std::vector< std::shared_ptr< NDS::buffers_type > > data_from_nds;
     NDS::parameters                                     params(
         cfg.hostname, cfg.port, NDS::connection::PROTOCOL_ONE );
+
+    std::cout << "Requesting data from " << cfg.gps << " to " << cfg.gps + 1
+              << "\n";
+
     auto stream = NDS::iterate(
         params, NDS::request_period( cfg.gps, cfg.gps + 1 ), cfg.channels );
     for ( const auto& bufs : stream )
