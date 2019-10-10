@@ -198,7 +198,7 @@ parse_options( int argc, char* argv[] )
         else
         {
             std::map< std::string, MBufCommands >::iterator it;
-            it = command_lookup.find( args.front( ) );
+            it = command_lookup.find( arg );
             if ( it == command_lookup.end( ) )
             {
                 std::ostringstream os;
