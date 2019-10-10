@@ -30,115 +30,131 @@
 #include <drv/gsc18ai6.c>
 
 // *****************************************************************************
-/// \brief Patch to properly handle PEX PCIe chip for newer (PCIe) General Standards
+/// \brief Patch to properly handle PEX PCIe chip for newer (PCIe) General
+/// Standards
 ///< DAC modules ie those that are integrated PCIe boards vs. earlier versions
 ///< built with carrier boards. \n This is extracted from code provided by GSC..
 // *****************************************************************************
-void set_8111_prefetch(struct pci_dev *dacdev) {
-    struct pci_dev *dev = dacdev->bus->self;
+void
+set_8111_prefetch( struct pci_dev* dacdev )
+{
+    struct pci_dev* dev = dacdev->bus->self;
 
-    printk("set_8111_prefetch: subsys=0x%x; vendor=0x%x\n", dev->device, dev->vendor);
-    if ((dev->device == 0x8111) && (dev->vendor == PLX_VID)) {
+    printk( "set_8111_prefetch: subsys=0x%x; vendor=0x%x\n",
+            dev->device,
+            dev->vendor );
+    if ( ( dev->device == 0x8111 ) && ( dev->vendor == PLX_VID ) )
+    {
         unsigned int reg;
         // Handle PEX 8111 setup, enable prefetch, set pref size to 64
         // These numbers come from reverse engineering the GSC pxe8111 driver
-        // and using their prefetch program to enable the prefetch and set pref size to 64
-        pci_write_config_dword(dev,132, 72);
-        pci_read_config_dword(dev,136, &reg);
-        pci_write_config_dword(dev,136, reg);
-        pci_write_config_dword(dev,132, 72);
-        pci_read_config_dword(dev,136, &reg);
-        pci_write_config_dword(dev,136, reg | 1);
-        pci_write_config_dword(dev,132, 12);
-        pci_read_config_dword(dev,136, &reg);
-        pci_write_config_dword(dev,136, reg | 0x8000000);
+        // and using their prefetch program to enable the prefetch and set pref
+        // size to 64
+        pci_write_config_dword( dev, 132, 72 );
+        pci_read_config_dword( dev, 136, &reg );
+        pci_write_config_dword( dev, 136, reg );
+        pci_write_config_dword( dev, 132, 72 );
+        pci_read_config_dword( dev, 136, &reg );
+        pci_write_config_dword( dev, 136, reg | 1 );
+        pci_write_config_dword( dev, 132, 12 );
+        pci_read_config_dword( dev, 136, &reg );
+        pci_write_config_dword( dev, 136, reg | 0x8000000 );
     }
 }
 
-
 // *****************************************************************************
-/// Routine to find PCI modules and call the appropriate driver initialization software.
+/// Routine to find PCI modules and call the appropriate driver initialization
+/// software.
 // *****************************************************************************
-int mapPciModules(CDS_HARDWARE *pCds)
+int
+mapPciModules( CDS_HARDWARE* pCds )
 {
-  static struct pci_dev *dacdev;
-  int status;
-  int i;
-  int ret;
-  int modCount = 0;
+    static struct pci_dev* dacdev;
+    int                    status;
+    int                    i;
+    int                    ret;
+    int                    modCount = 0;
 //  int fast_adc_cnt = 0;
 #ifndef ADC_SLAVE
-  int adc_cnt = 0;
+    int adc_cnt = 0;
 #endif
-  int dac_cnt = 0;
-  int dac_18bit_cnt = 0;
-  int dac_20bit_cnt = 0;
-  int bo_cnt = 0;
-  int use_it;
-  char fname[128];
-  unsigned char *_device_shm;
-  int *data;
+    int            dac_cnt = 0;
+    int            dac_18bit_cnt = 0;
+    int            dac_20bit_cnt = 0;
+    int            bo_cnt = 0;
+    int            use_it;
+    char           fname[ 128 ];
+    unsigned char* _device_shm;
+    int*           data;
 
-  dacdev = NULL;
-  status = 0;
+    dacdev = NULL;
+    status = 0;
 
-
-	for (i = 0; i < pCds->cards; i++) {
-		if (pCds->cards_used[i].type == GSC_18AO8) {
-			sprintf(fname,"%s_%d\n","IO_DEV_",i);
-			ret = mbuf_allocate_area(fname, 8*4*65536, 0);
-			if (ret < 0) {
-		    	printf("mbuf_allocate_area() failed; ret = %d\n", ret);
-		        return -1;
-		    }
-	        _device_shm = (unsigned char *)(kmalloc_area[ret]);
-			pCds->pci_dac[dac_cnt] = (long)_device_shm;
-			pCds->dacType[dac_cnt] = GSC_18AO8;
-			pCds->dacCount ++;
-			dac_cnt ++;
-			dac_18bit_cnt++;
-		}
-		if (pCds->cards_used[i].type == GSC_16AO16) {
-			sprintf(fname,"%s_%d\n","IO_DEV_",i);
-			ret = mbuf_allocate_area(fname, 16*4*65536, 0);
-			if (ret < 0) {
-		    	printf("mbuf_allocate_area() failed; ret = %d\n", ret);
-		        return -1;
-		    }
-	        _device_shm = (unsigned char *)(kmalloc_area[ret]);
-			pCds->pci_dac[dac_cnt] = (long)_device_shm;
-			pCds->dacType[dac_cnt] = GSC_16AO16;
-			pCds->dacCount ++;
-			dac_cnt ++;
-		}
-		if (pCds->cards_used[i].type == GSC_20AO8) {
-			sprintf(fname,"%s_%d\n","IO_DEV_",i);
-			ret = mbuf_allocate_area(fname, 8*4*65536, 0);
-			if (ret < 0) {
-		    	printf("mbuf_allocate_area() failed; ret = %d\n", ret);
-		        return -1;
-		    }
-	        _device_shm = (unsigned char *)(kmalloc_area[ret]);
-			pCds->pci_dac[dac_cnt] = (long)_device_shm;
-			pCds->dacType[dac_cnt] = GSC_20AO8;
-			pCds->dacCount ++;
-			dac_cnt ++;
-			dac_20bit_cnt++;
-		}
-		if (pCds->cards_used[i].type == GSC_16AI64SSA) {
-			sprintf(fname,"%s_%d\n","IO_DEV_",i);
-			ret = mbuf_allocate_area(fname, 32*4*65536, 0);
-			if (ret < 0) {
-		    	printf("mbuf_allocate_area() failed; ret = %d\n", ret);
-		        return -1;
-		    }
-	        _device_shm = (unsigned char *)(kmalloc_area[ret]);
-			pCds->pci_adc[adc_cnt] = (long)_device_shm;
-			pCds->adcType[adc_cnt] = GSC_16AI64SSA;
-			pCds->adcCount ++;
-			adc_cnt ++;
-		}
-	  	modCount ++;
-	}
-	return(modCount);
+    for ( i = 0; i < pCds->cards; i++ )
+    {
+        if ( pCds->cards_used[ i ].type == GSC_18AO8 )
+        {
+            sprintf( fname, "%s_%d\n", "IO_DEV_", i );
+            ret = mbuf_allocate_area( fname, 8 * 4 * 65536, 0 );
+            if ( ret < 0 )
+            {
+                printf( "mbuf_allocate_area() failed; ret = %d\n", ret );
+                return -1;
+            }
+            _device_shm = (unsigned char*)( kmalloc_area[ ret ] );
+            pCds->pci_dac[ dac_cnt ] = (long)_device_shm;
+            pCds->dacType[ dac_cnt ] = GSC_18AO8;
+            pCds->dacCount++;
+            dac_cnt++;
+            dac_18bit_cnt++;
+        }
+        if ( pCds->cards_used[ i ].type == GSC_16AO16 )
+        {
+            sprintf( fname, "%s_%d\n", "IO_DEV_", i );
+            ret = mbuf_allocate_area( fname, 16 * 4 * 65536, 0 );
+            if ( ret < 0 )
+            {
+                printf( "mbuf_allocate_area() failed; ret = %d\n", ret );
+                return -1;
+            }
+            _device_shm = (unsigned char*)( kmalloc_area[ ret ] );
+            pCds->pci_dac[ dac_cnt ] = (long)_device_shm;
+            pCds->dacType[ dac_cnt ] = GSC_16AO16;
+            pCds->dacCount++;
+            dac_cnt++;
+        }
+        if ( pCds->cards_used[ i ].type == GSC_20AO8 )
+        {
+            sprintf( fname, "%s_%d\n", "IO_DEV_", i );
+            ret = mbuf_allocate_area( fname, 8 * 4 * 65536, 0 );
+            if ( ret < 0 )
+            {
+                printf( "mbuf_allocate_area() failed; ret = %d\n", ret );
+                return -1;
+            }
+            _device_shm = (unsigned char*)( kmalloc_area[ ret ] );
+            pCds->pci_dac[ dac_cnt ] = (long)_device_shm;
+            pCds->dacType[ dac_cnt ] = GSC_20AO8;
+            pCds->dacCount++;
+            dac_cnt++;
+            dac_20bit_cnt++;
+        }
+        if ( pCds->cards_used[ i ].type == GSC_16AI64SSA )
+        {
+            sprintf( fname, "%s_%d\n", "IO_DEV_", i );
+            ret = mbuf_allocate_area( fname, 32 * 4 * 65536, 0 );
+            if ( ret < 0 )
+            {
+                printf( "mbuf_allocate_area() failed; ret = %d\n", ret );
+                return -1;
+            }
+            _device_shm = (unsigned char*)( kmalloc_area[ ret ] );
+            pCds->pci_adc[ adc_cnt ] = (long)_device_shm;
+            pCds->adcType[ adc_cnt ] = GSC_16AI64SSA;
+            pCds->adcCount++;
+            adc_cnt++;
+        }
+        modCount++;
+    }
+    return ( modCount );
 }
