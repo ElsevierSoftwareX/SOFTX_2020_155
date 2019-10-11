@@ -290,6 +290,47 @@ namespace Generators
     };
 
     template < typename T >
+    class GPSMod100kSecWithOffsetAndCycle : public SimChannelGenerator
+    {
+        int offset_;
+
+    public:
+        GPSMod100kSecWithOffsetAndCycle( const SimChannel& ch, int offset )
+            : SimChannelGenerator( ch ), offset_( offset )
+        {
+        }
+
+        std::string
+        generator_name( ) const
+        {
+            return "gpssmd100koffc1p";
+        }
+
+        std::string
+        other_params( ) const
+        {
+            std::ostringstream os;
+            os << "--" << offset_;
+            return os.str( );
+        }
+
+        char*
+        generate( int gps_sec, int gps_nano, char* out )
+        {
+            int rate = data_rate( ) / 16;
+            T*  out_ = reinterpret_cast< T* >( out );
+            for ( int i = 0; i < rate; ++i )
+            {
+                *out_ =
+                    static_cast< T >( ( gps_sec % 100000 ) + offset_ ) * 100 +
+                    gps_nano;
+                ++out_;
+            }
+            return reinterpret_cast< char* >( out_ );
+        }
+    };
+
+    template < typename T >
     class GPSMod30kSecWithOffset : public SimChannelGenerator
     {
         int offset_;
@@ -322,6 +363,50 @@ namespace Generators
             for ( int i = 0; i < rate; ++i )
             {
                 *out_ = static_cast< T >( ( gps_sec % 30000 ) + offset_ );
+                ++out_;
+            }
+            return reinterpret_cast< char* >( out_ );
+        }
+    };
+
+    template < typename T >
+    class GPSMod100SecWithOffsetAndCycle : public SimChannelGenerator
+    {
+        int offset_;
+
+    public:
+        GPSMod100SecWithOffsetAndCycle( const SimChannel& ch, int offset )
+            : SimChannelGenerator( ch ), offset_( offset )
+        {
+        }
+
+        std::string
+        generator_name( ) const
+        {
+            return "gpssmd100offc1p";
+        }
+
+        std::string
+        other_params( ) const
+        {
+            std::ostringstream os;
+            os << "--" << offset_;
+            return os.str( );
+        }
+
+        char*
+        generate( int gps_sec, int gps_nano, char* out )
+        {
+            int rate = data_rate( ) / 16;
+            T*  out_ = reinterpret_cast< T* >( out );
+            if ( gps_nano > 15 )
+            {
+                gps_nano /= 62500000;
+            }
+            for ( int i = 0; i < rate; ++i )
+            {
+                *out_ = static_cast< T >( ( gps_sec % 100 ) + offset_ ) * 100 +
+                    gps_nano;
                 ++out_;
             }
             return reinterpret_cast< char* >( out_ );

@@ -24,97 +24,9 @@
 #include "drv/shmem.h"
 #include "mbuf.h"
 
-enum MBufCommands
-{
-    INVALID,
-    CREATE,
-    LIST,
-    COPY,
-    DELETE,
-};
-
-struct ConfigOpts
-{
-    ConfigOpts( )
-        : action( INVALID ), buffer_size( 0 ), buffer_name( "" ),
-          output_fname( "probe_out.bin" ), error_msg( "" )
-    {
-    }
-    MBufCommands action;
-    std::size_t  buffer_size;
-    std::string  buffer_name;
-    std::string  output_fname;
-    std::string  error_msg;
-
-    bool
-    select_action( MBufCommands selected_action )
-    {
-        if ( action != INVALID )
-        {
-            set_error( "Please only select one action" );
-            return false;
-        }
-        action = selected_action;
-        return true;
-    }
-
-    void
-    set_error( const std::string& msg )
-    {
-        action = INVALID;
-        error_msg = msg;
-    }
-
-    void
-    validate_options( )
-    {
-        if ( !error_msg.empty( ) )
-        {
-            return;
-        }
-        switch ( action )
-        {
-        case CREATE:
-            if ( buffer_name.empty( ) || buffer_size == 0 )
-            {
-                set_error( "Both a buffer name and buffer size are required to "
-                           "create a buffer" );
-            }
-            break;
-        case LIST:
-            break;
-        case COPY:
-            if ( buffer_name.empty( ) || buffer_size == 0 ||
-                 output_fname.empty( ) )
-            {
-                set_error( "To copy a buffer a buffer name, size, and output "
-                           "filename must be provided" );
-            }
-            break;
-        case DELETE:
-            if ( buffer_name.empty( ) )
-            {
-                set_error( "To delete a buffer you must specify its name" );
-            }
-            break;
-        case INVALID:
-        default:
-            set_error( "Please select a valid action" );
-        }
-    }
-
-    bool
-    should_show_help( )
-    {
-        return action == INVALID;
-    }
-
-    bool
-    is_in_error( )
-    {
-        return ( should_show_help( ) ? !error_msg.empty( ) : false );
-    }
-};
+#include "mbuf_probe.hh"
+#include "analyze_daq_multi_dc.hh"
+#include "analyze_rmipc.hh"
 
 void
 usage( const char* progname )
@@ -126,6 +38,7 @@ usage( const char* progname )
     std::cout << "\tcreate - create a mbuf\n";
     std::cout << "\tcopy - copy a mbuf to a file\n";
     std::cout << "\tdelete - decrement the usage count of an mbuf\n";
+    std::cout << "\tanalyze - continually read the mbuf and do some analysis\n";
     std::cout << "\t-b <buffer name> - The name of the buffer to act on\n";
     std::cout
         << "\t-m <buffer size in MB> - The size of the buffer in megabytes\n";
@@ -133,8 +46,22 @@ usage( const char* progname )
                  "multiple of 4k)\n";
     std::cout << "\t-o <filename> - Output file for the copy operation "
                  "(defaults to probe_out.bin)\n";
+    std::cout
+        << "\t--struct <type> - Type of structure to analyze [rmIpcStr]\n";
+    std::cout << "\t--dcu <dcuid> - Optional DCU id used to select a dcu for "
+                 "analysis\n";
+    std::cout << "\t\twhen analyzing daq_multi_cycle buffers.\n";
+    std::cout << "\t-d <offset:format> - Decode the data section, optional\n";
+    std::cout
+        << "\t\tPart of the analyze command.  Decode a specified stretch\n";
+    std::cout << "\t\tof data, with a given format specifier (same as python "
+                 "struct)\n";
     std::cout << "\t-h|--help - This help\n";
     std::cout << "\n";
+    std::cout << "Analysis modes:\n";
+    std::cout << "\trmIpcStr (or rmipcstr) Analyze a models output buffer\n";
+    std::cout
+        << "\tdaq_multi_cycle Analyze the output of a streamer/local_dc\n";
 }
 
 ConfigOpts
@@ -147,6 +74,14 @@ parse_options( int argc, char* argv[] )
     command_lookup.insert( std::make_pair( "create", CREATE ) );
     command_lookup.insert( std::make_pair( "copy", COPY ) );
     command_lookup.insert( std::make_pair( "delete", DELETE ) );
+    command_lookup.insert( std::make_pair( "analyze", ANALYZE ) );
+
+    std::map< std::string, MBufStructures > struct_lookup;
+    struct_lookup.insert( std::make_pair( "rmIpcStr", MBUF_RMIPC ) );
+    struct_lookup.insert( std::make_pair( "rmipcstr", MBUF_RMIPC ) );
+    struct_lookup.insert(
+        std::make_pair( "daq_multi_cycle", MBUF_DAQ_MULTI_DC ) );
+
     std::deque< std::string > args;
     for ( int i = 1; i < argc; ++i )
     {
@@ -176,7 +111,7 @@ parse_options( int argc, char* argv[] )
         {
             if ( args.empty( ) )
             {
-                opts.set_error( "You must specify a size when using -m or -S");
+                opts.set_error( "You must specify a size when using -m or -S" );
                 return opts;
             }
             std::size_t        multiplier = ( arg == "-m" ? 1024 * 1024 : 1 );
@@ -193,6 +128,58 @@ parse_options( int argc, char* argv[] )
                 return opts;
             }
             opts.output_fname = args.front( );
+            args.pop_front( );
+        }
+        else if ( arg == "-d" )
+        {
+            if ( args.empty( ) )
+            {
+                opts.set_error(
+                    "You must specify a format string when using -d" );
+                return opts;
+            }
+            std::string format = args.front( );
+            args.pop_front( );
+            std::string::size_type split = format.find( ':' );
+            if ( split == std::string::npos )
+            {
+                opts.set_error( "You must have a format strip when using -d" );
+                return opts;
+            }
+            std::string        offset_str = format.substr( 0, split );
+            std::string        format_spec = format.substr( split + 1 );
+            std::istringstream is( offset_str );
+            std::size_t        offset = 0;
+            is >> offset;
+            opts.decoder = DataDecoder( offset, format_spec );
+        }
+        else if ( arg == "--struct" )
+        {
+            if ( args.empty( ) )
+            {
+                opts.set_error(
+                    "You must specify a structure type when using --struct" );
+                return opts;
+            }
+            std::map< std::string, MBufStructures >::iterator it;
+            it = struct_lookup.find( args.front( ) );
+            if ( it == struct_lookup.end( ) )
+            {
+                opts.set_error( "Invalid structure type passed to --struct" );
+                return opts;
+            }
+            opts.analysis_type = it->second;
+            args.pop_front( );
+        }
+        else if ( arg == "--dcu" )
+        {
+            if ( args.empty( ) )
+            {
+                opts.set_error( "You must specify a dcu id when using --dcu" );
+                return opts;
+            }
+            std::istringstream is( args.front( ) );
+            is >> opts.dcu_id;
             args.pop_front( );
         }
         else
@@ -332,6 +319,29 @@ list_shmem_segments( )
 }
 
 int
+handle_analyze( const ConfigOpts& opts )
+{
+    const int OK = 0;
+    const int ERROR = 1;
+
+    volatile void* buffer =
+        shmem_open_segment( opts.buffer_name.c_str( ), opts.buffer_size );
+    switch ( opts.analysis_type )
+    {
+    case MBUF_RMIPC:
+        analyze::analyze_rmipc( buffer, opts.buffer_size, opts );
+        break;
+    case MBUF_DAQ_MULTI_DC:
+        analyze::analyze_multi_dc( buffer, opts.buffer_size, opts );
+        break;
+    default:
+        std::cout << "Unknown analysis type\n";
+        return ERROR;
+    }
+    return OK;
+}
+
+int
 main( int argc, char* argv[] )
 {
     ConfigOpts opts = parse_options( argc, argv );
@@ -372,6 +382,8 @@ main( int argc, char* argv[] )
     case DELETE:
         shmem_dec_segment_count( opts.buffer_name.c_str( ) );
         break;
+    case ANALYZE:
+        return handle_analyze( opts );
     }
     return 0;
 }

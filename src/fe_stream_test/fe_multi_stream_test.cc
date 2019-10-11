@@ -286,8 +286,8 @@ public:
 
             std::ostringstream ss;
             ss << name_ << "-" << i;
-            generators_.push_back(
-                GeneratorPtr( new Generators::GPSSecondWithOffset< int >(
+            generators_.push_back( GeneratorPtr(
+                new Generators::GPSMod100kSecWithOffsetAndCycle< int >(
                     SimChannel( ss.str( ), 2, 16, chnum ),
                     ( i + dcu_id_ ) % 21 ) ) );
         }
@@ -297,8 +297,8 @@ public:
 
             std::ostringstream ss;
             ss << name_ << "-" << i;
-            generators_.push_back(
-                GeneratorPtr( new Generators::GPSMod30kSecWithOffset< short >(
+            generators_.push_back( GeneratorPtr(
+                new Generators::GPSMod100SecWithOffsetAndCycle< short >(
                     SimChannel( ss.str( ), 1, 16, chnum ),
                     ( i + dcu_id_ ) % 21 ) ) );
         }
@@ -310,8 +310,8 @@ public:
             std::ostringstream ss;
             ss << name_ << "-TP" << i;
             // TP need truncated
-            tp_generators_.push_back(
-                GeneratorPtr( new Generators::GPSMod100kSecWithOffset< float >(
+            tp_generators_.push_back( GeneratorPtr(
+                new Generators::GPSMod100kSecWithOffsetAndCycle< float >(
                     SimChannel( ss.str( ), 4, model_rate_, chnum, dcu_id_ ),
                     ( i + dcu_id_ ) % 21 ) ) );
         }
