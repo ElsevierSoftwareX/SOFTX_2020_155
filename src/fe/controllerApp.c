@@ -32,7 +32,7 @@
 
 // Include C code modules
 #include "moduleLoadApp.c"
-#include "map.c"
+#include <drv/mapVirtual.h>
 #include <drv/app_adc_read.c>
 #include <drv/app_dac_functions.c>
 #include <drv/app_dio_routines.c>

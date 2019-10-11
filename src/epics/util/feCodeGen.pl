@@ -2616,6 +2616,7 @@ if ($adcMaster > -1) {
 }
 if ($adcSlave > -1) {
   print OUTM "EXTRA_CFLAGS += -DADC_SLAVE\n";
+  print OUTM "EXTRA_CFLAGS += -DUNDERSAMPLE=1\n";
   $modelType = "SLAVE";
 } else {
   print OUTM "#Uncomment to run on an I/O slave process\n";

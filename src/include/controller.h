@@ -320,7 +320,11 @@ VME_COEF *pCoeff[NUM_SYSTEMS];                                  // Ptr to SFM co
 
 // ADC Variables
 /// Array of ADC values
+#ifdef ADC_MASTER
 double dWord[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD][16];             // ADC read values
+#else
+double dWord[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];             // ADC read values
+#endif
 /// List of ADC channels used by this app. Used to determine if downsampling required.
 unsigned int dWordUsed[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];   // ADC chans used by app code
 
