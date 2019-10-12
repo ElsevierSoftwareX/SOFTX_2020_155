@@ -662,7 +662,15 @@ net_writer_c::consumer ()
 	  if (dec_vec [i].vec_bps == 8) {
             for (int j = 0; j < dec_vec [i].vec_len/8; j++)
               ((double *)bptr) [j] = htond(((double *)bptr) [j]);
-          } else {
+      }
+	  else if (dec_vec [i].vec_bps == 2)
+	  {
+          fprintf(stderr,"byte swapping for 16bit int - line 668\n");
+          for (int j = 0; j < dec_vec [i].vec_len/2; j++)
+              ((unsigned short *)bptr) [j] = htons(((unsigned short *)bptr) [j]);
+	  }
+	  else
+      {
 	    //printf("Byteswaping data as integers\n");
 	    for (int j = 0; j < dec_vec [i].vec_len/4; j++)
 	      ((unsigned int *)bptr) [j] = htonl(((unsigned int *)bptr) [j]);
@@ -696,7 +704,15 @@ net_writer_c::consumer ()
 	  if (dec_vec [i].vec_bps == 8) {
             for (int j = 0; j < dec_vec [i].vec_len/8; j++)
               ((double *)bptr) [j] = htond(((double *)bptr) [j]);
-          } else {
+      }
+      else if (dec_vec [i].vec_bps == 2)
+      {
+          fprintf(stderr,"byte swapping for 16bit int - line 710\n");
+          for (int j = 0; j < dec_vec [i].vec_len/2; j++)
+              ((unsigned short *)bptr) [j] = htons(((unsigned short *)bptr) [j]);
+      }
+	  else
+      {
 	    //printf("Byteswaping data as integers\n");
 	    for (int j = 0; j < dec_vec [i].vec_len/4; j++)
 	      ((unsigned int *)bptr) [j] = htonl(((unsigned int *)bptr) [j]);
@@ -871,23 +887,26 @@ net_writer_c::consumer ()
 	// Byteswap to network order
 	char *data = buffptr -> block_ptr (nb);
 	for (int i = 0; i < num_channels; i++) {
-		//printf("Byteswap %s rate=%d type=%d\n", channels[i].name, channels[i].sample_rate, channels[i].data_type);
-	        if (channels[i].bps == 4) {
-		   for (int j = 0; j < channels[i].sample_rate; j++) {
-			*((int *)data) = htonl(*((int *)data));
-			data += 4;
-		   }
+		    printf("Byteswap %s rate=%d type=%d\n", channels[i].name, channels[i].sample_rate, channels[i].data_type);
+
+		    if (channels[i].bps == 4)
+	        {
+                   for (int j = 0; j < channels[i].sample_rate; j++) {
+                    *((int *)data) = htonl(*((int *)data));
+                    data += 4;
+                   }
 	        } else if (channels[i].bps == 2) {
-		   for (int j = 0; j < channels[i].sample_rate; j++) {
-			*((short *)data) = htons(*((short *)data));
-			data += 2;
-		   }
+                fprintf(stderr,"byte swapping for 16bit int - line 899\n");
+                   for (int j = 0; j < channels[i].sample_rate; j++) {
+                    *((short *)data) = htons(*((short *)data));
+                    data += 2;
+                   }
 	        } else if (channels[i].bps == 8) {
-		   for (int j = 0; j < channels[i].sample_rate; j++) {
-			*((double *)data) = htond(*((double *)data));
-			data += 8;
-		   }
-		}
+               for (int j = 0; j < channels[i].sample_rate; j++) {
+                *((double *)data) = htond(*((double *)data));
+                data += 8;
+               }
+		    }
 	}
 
 	if (send_to_client (buffptr -> block_ptr (nb), bytes,
