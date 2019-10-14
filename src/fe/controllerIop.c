@@ -626,7 +626,6 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
       }
       pLocalEpics->epicsOutput.diagWord = diagWord;
       for(jj=0;jj<cdsPciModules.adcCount;jj++) {
-        pLocalEpics->epicsOutput.irigbTime = adcinfo.adcRdTimeErr[0];
         if(adcinfo.adcRdTimeErr[jj] > MAX_ADC_WAIT_ERR_SEC)
           pLocalEpics->epicsOutput.stateWord |= FE_ERROR_ADC;
           adcinfo.adcRdTimeErr[jj] = 0;
