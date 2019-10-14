@@ -665,7 +665,6 @@ net_writer_c::consumer ()
       }
 	  else if (dec_vec [i].vec_bps == 2)
 	  {
-          fprintf(stderr,"byte swapping for 16bit int - line 668\n");
           for (int j = 0; j < dec_vec [i].vec_len/2; j++)
               ((unsigned short *)bptr) [j] = htons(((unsigned short *)bptr) [j]);
 	  }
@@ -707,7 +706,6 @@ net_writer_c::consumer ()
       }
       else if (dec_vec [i].vec_bps == 2)
       {
-          fprintf(stderr,"byte swapping for 16bit int - line 710\n");
           for (int j = 0; j < dec_vec [i].vec_len/2; j++)
               ((unsigned short *)bptr) [j] = htons(((unsigned short *)bptr) [j]);
       }
@@ -896,7 +894,6 @@ net_writer_c::consumer ()
                     data += 4;
                    }
 	        } else if (channels[i].bps == 2) {
-                fprintf(stderr,"byte swapping for 16bit int - line 899\n");
                    for (int j = 0; j < channels[i].sample_rate; j++) {
                     *((short *)data) = htons(*((short *)data));
                     data += 2;

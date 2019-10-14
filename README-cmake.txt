@@ -20,9 +20,8 @@ via pkg-config
 5. make -j 8
 
 * Note on Boost.
-FrameCPP 2.6+ uses the boost libraries shared_ptr.  To install boost see (https://www.boost.org/doc/libs/1_69_0/more/getting_started/unix-variants.html)
+FrameCPP 2.6+ and the standalone_edc uses the boost libraries.  Boost is a hard requirement for the daqd.  To install boost see (https://www.boost.org/doc/libs/1_69_0/more/getting_started/unix-variants.html)
 You may need to pass a parameter to cmake -DBOOST_ROOT=<boost install prefix> to help cmake find boost.
-This is not required for FrameCPP < 2.6.
 
 
 You can make specific targets in cmake.  One useful command is 'make help' from the build directory.  This lists all the targets that are available. Another method is to go to the appropariate location
@@ -35,12 +34,6 @@ RelWithDebInfo does a release build with debug.  On gcc this means -O -g.
 The following components will be built:
 
 awgtpman
-daqd_fw
-daqd_dc_mx
-daqd_rcv
-daqd_mx_symm
-daqd_standiop
-daqd_bcst
 daqd_shmem (if the compiler is new enough)
 nds
 dataviewer (in its many pieces)
@@ -49,7 +42,7 @@ run_number_server
 the zmq_stream components
 zmq_fe
 zmq_rcv_ix_xmit_delay
-
+standalone_edc
 
 If you need to install a copy of cmake you can retrieve the source from kitware.
 

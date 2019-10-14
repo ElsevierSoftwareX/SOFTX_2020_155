@@ -10,6 +10,11 @@ Changes for 4.0  (NOT YET RELEASED)
    - dix_xmit/dix_recv (takes the buffer from local_dc and transmits it over IX dolphin)
 - Improved FE/IFO data simulation code for daqd and streamer testing
    - This provides properly formated data, not a plant model of an IFO
+- Improved the diagnostic tool mbuf_probe
+   - Allow for simple streaming and limited analysis of some of the shared memory buffers used in the codebase.
+- Implemented a standalone_edc.
+   - An edcu as a regular program, not a non-rt model.
+   - Can record data into multiple types (short, int, float, double)
 ==================================================================================================
 Changes for 3.6  (NOT YET RELEASED)
 ==================================================================================================
