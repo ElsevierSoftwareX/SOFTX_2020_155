@@ -39,7 +39,7 @@ usage( const char* progname )
     cout << "\t-n <hostname> - server hostname [localhost]\n";
     cout << "\t-p <port>     - server port [8088]\n";
     cout << "\t-start <time>     - a gps start time [0]\n";
-    cout << "\t-end <time>     - a gps end time [0]\n";
+    cout << "\t-stop <time>     - a gps end time [0]\n";
     cout << "\t-c <number>   - number of random channels to sample [10]\n";
     cout << "\t-C <channels> - 1 or more channel names to test, optional\n";
     cout << "\t-s <seed>     - seed to use for channel selection, optional\n";
