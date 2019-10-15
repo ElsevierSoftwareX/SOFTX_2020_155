@@ -556,7 +556,6 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
       }
     }
 
-#if 0
 /// \> Update duotone diag information
     dt_diag.dac[(cycleNum + DT_SAMPLE_OFFSET) % CYCLE_PER_SECOND] = dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN][usloop];
     dt_diag.totalDac += dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN][usloop];
@@ -591,7 +590,6 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
         CDIO1616Input[0] = contec1616WriteOutputRegister(&cdsPciModules, tdsControl[0], CDIO1616Output[0]);
       }
     }
-#endif
 
 // *****************************************************************
 /// \> Cycle 18, Send timing info to EPICS at 1Hz
@@ -655,7 +653,6 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
     if(cycleNum == MAX_MODULES) 
       vmeDone = stop_working_threads | checkEpicsReset(cycleNum, (struct CDS_EPICS *)pLocalEpics);
 
-#if 0
 // *****************************************************************
 	// If synced to 1PPS on startup, continue to check that code
 	// is still in sync with 1PPS.
@@ -675,7 +672,6 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
       // If not, set sync error flag
       if(onePpsTime > 1) pLocalEpics->epicsOutput.timeErr |= TIME_ERR_1PPS;
     }
-#endif
 
 // Following is only used on automated test system
 #ifdef DIAG_TEST
@@ -786,11 +782,9 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
       if (adcinfo.chanHop) {
         pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
         pLocalEpics->epicsOutput.fe_status = CHAN_HOP_ERROR;
-#if 0
         stop_working_threads = 1;
         vmeDone = 1;
         continue;    
-#endif
       } else {
         pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;
       }
