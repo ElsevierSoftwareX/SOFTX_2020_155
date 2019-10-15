@@ -1835,7 +1835,8 @@ print "\tPart number is $remoteGpsPart\n";
 if($virtualiop == 1) {
 print OUT "#include \"$rcg_src_dir/src/fe/controllerVirtual.c\"\n";
 } elsif ($virtualiop == 2) {
-print OUT "#include \"$rcg_src_dir/src/fe/controllerTS.c\"\n";
+  print OUTM "EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
+  print OUT "#include \"$rcg_src_dir/src/fe/controllerIop.c\"\n";
 } elsif ($virtualiop == 3) {
 print OUT "#include \"$rcg_src_dir/src/fe/controllerLR.c\"\n";
 } elsif ($virtualiop == 4) {
