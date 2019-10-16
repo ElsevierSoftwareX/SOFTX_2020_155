@@ -304,7 +304,7 @@ inline int readCoefVme(COEF *filtC,FILT_MOD *fmt, int bF, int sF, volatile VME_C
 	if (filtC->coeffs[ii].filterType[jj] < 0 || filtC->coeffs[ii].filterType[jj] > MAX_FIR_MODULES) {
 		filtC->coeffs[ii].filterType[jj] = 0;
 		// printk("Corrupted data coming from Epics: module=%d filter=%d filterType=%d\n", 
-			ii, jj, pRfmCoeff->vmeCoeffs[ii].filterType[jj]);
+		//	ii, jj, pRfmCoeff->vmeCoeffs[ii].filterType[jj]);
 		return 1;
 	}
 #endif
@@ -366,7 +366,7 @@ int readCoefVme2(COEF *filtC,FILT_MOD *fmt, int modNum1, int filtNum, int cycle,
 #ifdef FIR_FILTERS
   if (type < 0 || type > MAX_FIR_MODULES) {
 	// printk("Vme2 bad Epics filter type: module=%d filter=%d filterType=%d\n", 
-	modNum1, filtNum, type);
+	// modNum1, filtNum, type);
   }
 #endif
 
