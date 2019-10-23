@@ -474,10 +474,17 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
     // 
     for(ii=0;ii<cdsPciModules.adcCount;ii++)
     {
+      if (cdsPciModules.adcType[ii] == GSC_18AI32SSC1M) {
         for(jj=0;jj<32;jj++)
         {
             adcval[ii][jj] = dWord[ii][jj][usloop];
         }
+      } else {
+        for(jj=0;jj<32;jj++)
+        {
+            adcval[ii][jj] = dWord[ii][jj][0];
+        }
+      }
     }
     cpuClock[CPU_TIME_USR_START] = rdtsc_ordered();
     iopDacEnable = feCode(cycleNum,adcval,dacOut,dspPtr[0],&dspCoeff[0],(struct CDS_EPICS *)pLocalEpics,0);
@@ -552,6 +559,7 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
       }
     }
 
+#if 0
 /// \> Update duotone diag information
     if(syncSource == SYNC_SRC_TDS) 
     {
@@ -589,6 +597,7 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
         CDIO1616Input[0] = contec1616WriteOutputRegister(&cdsPciModules, tdsControl[0], CDIO1616Output[0]);
       }
     }
+#endif
 
 // *****************************************************************
 /// \> Cycle 18, Send timing info to EPICS at 1Hz
