@@ -267,7 +267,7 @@ sub createGdsMedm
     $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_BUILD_DATE",$ecolors{white},$ecolors{blue},"static");
 
 	# Following only for IOP
-	if($adcMaster == 1 and $ioptype != 4)
+	if($adcMaster == 1 and $ioptype != 4 and $ioptype != 2)
 	{
 		# Add ADC Duotone Diag label
 		$xpos = 18; $ypos = 240; $width = 50; $height = 15;

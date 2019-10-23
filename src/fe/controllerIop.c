@@ -182,8 +182,12 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 #endif
 
 
-#ifdef TIME_MASTER
+#ifdef TIME_MASTER 
   pcieTimer = (TIMING_SIGNAL *) ((volatile char *)(cdsPciModules.dolphinWrite[0]) + IPC_PCIE_TIME_OFFSET);
+#endif
+#ifdef TIME_SLAVE 
+  pcieTimer = (TIMING_SIGNAL *) ((volatile char *)(cdsPciModules.dolphinRead[0]) + IPC_PCIE_TIME_OFFSET);
+syncSource = SYNC_SRC_DOLPHIN;
 #endif
 
 /// < Read in all Filter Module EPICS coeff settings
@@ -289,10 +293,6 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 
   pLocalEpics->epicsOutput.fe_status = INIT_SYNC;
 
-#ifdef TIME_SLAVE
-syncSource = SYNC_SRC_DOLPHIN;
-#else
-
 /// \> Find the code syncrhonization source. \n
 /// - Standard aLIGO Sync source is the Timing Distribution System (TDS) (SYNC_SRC_TDS). 
   switch(syncSource)
@@ -367,7 +367,6 @@ syncSource = SYNC_SRC_DOLPHIN;
       break;
     }
   }
-#endif
 
 //     for(jj=0;jj<cdsPciModules.adcCount;jj++) gsc18ai32DmaEnable(jj);
   pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;
@@ -423,9 +422,7 @@ syncSource = SYNC_SRC_DOLPHIN;
       if(!iopDacEnable || dkiTrip) feStatus |= FE_ERROR_DAC_ENABLE;
 
       /// - ---- If IOP, Increment GPS second
-#ifndef TIME_SLAVE
       timeSec ++;
-#endif
       pLocalEpics->epicsOutput.timeDiag = timeSec;
       if (cycle_gps_time == 0) {
         timeinfo.startGpsTime = timeSec;
@@ -434,9 +431,8 @@ syncSource = SYNC_SRC_DOLPHIN;
       cycle_gps_time = timeSec;
     }
 #ifdef NO_CPU_SHUTDOWN
-    if((cycleNum % 65536) == 0)  {
+    if((cycleNum % 2048) == 0)  {
         usleep_range(1,3);
-        printk("cycleNum = %d\n",cycleNum);
     }
 #endif
 // Start of ADC Read **********************************************************************
@@ -557,15 +553,18 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
     }
 
 /// \> Update duotone diag information
+    if(syncSource == SYNC_SRC_TDS) 
+    {
     dt_diag.dac[(cycleNum + DT_SAMPLE_OFFSET) % CYCLE_PER_SECOND] = dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN][usloop];
     dt_diag.totalDac += dWord[ADC_DUOTONE_BRD][DAC_DUOTONE_CHAN][usloop];
     dt_diag.adc[(cycleNum + DT_SAMPLE_OFFSET) % CYCLE_PER_SECOND] = dWord[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN][usloop];
     dt_diag.totalAdc += dWord[ADC_DUOTONE_BRD][ADC_DUOTONE_CHAN][usloop];
+    }
 
 // *****************************************************************
 /// \> Cycle 16, perform duotone diag calcs.
 // *****************************************************************
-    if(cycleNum == HKP_DT_CALC)
+    if(cycleNum == HKP_DT_CALC && syncSource == SYNC_SRC_TDS)
     {
       duotoneTime = duotime(DT_SAMPLE_CNT, dt_diag.meanAdc, dt_diag.adc);
       pLocalEpics->epicsOutput.dtTime = duotoneTime;
@@ -579,7 +578,7 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
 // *****************************************************************
 /// \> Cycle 17, set/reset DAC duotone switch if request has changed.
 // *****************************************************************
-    if(cycleNum == HKP_DAC_DT_SWITCH)
+    if(cycleNum == HKP_DAC_DT_SWITCH && syncSource == SYNC_SRC_TDS)
     {
       if(dt_diag.dacDuoEnable != pLocalEpics->epicsInput.dacDuoSet)
       {
@@ -843,6 +842,7 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
 // Check once per second on code cycle HKP_DAC_WD_CHK to dac count
 // Only one read per code cycle to reduce time
 // *****************************************************************
+#ifndef TIME_SLAVE
     if (cycleNum >= HKP_DAC_WD_CHK && cycleNum < (HKP_DAC_WD_CHK + cdsPciModules.dacCount)) 
     {
       jj = cycleNum - HKP_DAC_WD_CHK;
@@ -869,6 +869,7 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
           pLocalEpics->epicsOutput.statDac[jj] |= DAC_WD_BIT;
       }
     }
+#endif
 
 // *****************************************************************
 /// \> Cycle 600 to 600 + numDacModules, Check DAC FIFO Sizes to determine if DAC modules are synched to code 

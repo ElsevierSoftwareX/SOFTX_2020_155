@@ -358,6 +358,7 @@ udelay(1000);
 
 	}
 
+
 	// After first synced ADC read, must set code to read number samples/cycle
     sampleCount = OVERSAMPLE_TIMES;
 
@@ -387,6 +388,13 @@ udelay(1000);
 // **********************************************************************
 
     pLocalEpics->epicsOutput.cycle = cycleNum;
+
+#ifdef NO_CPU_SHUTDOWN
+    if((cycleNum % 2048) == 0)  {
+        usleep_range(1,3);
+        printk("cycleNum = %d\n",cycleNum);
+    }
+#endif
 
 // **********************************************************************
 /// \> Cycle 18, Send timing info to EPICS at 1Hz

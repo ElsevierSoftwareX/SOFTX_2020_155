@@ -25,9 +25,11 @@ sync2master( TIMING_SIGNAL* timePtr )
         loop++;
     } while ( timePtr->cycle != cycle && loop < 1000000 );
     if ( loop >= 1000000 )
+    {
         return ( -1 );
-    else
+    } else {
         return ( timePtr->gps_time );
+    }
 }
 
 inline int

@@ -1835,7 +1835,6 @@ print "\tPart number is $remoteGpsPart\n";
 if($virtualiop == 1) {
 print OUT "#include \"$rcg_src_dir/src/fe/controllerVirtual.c\"\n";
 } elsif ($virtualiop == 2) {
-  print OUTM "EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
   print OUT "#include \"$rcg_src_dir/src/fe/controllerIop.c\"\n";
 } elsif ($virtualiop == 3) {
 print OUT "#include \"$rcg_src_dir/src/fe/controllerLR.c\"\n";
@@ -2629,7 +2628,7 @@ if ($timeMaster > -1) {
   print OUTM "#Uncomment to build a time master\n";
   print OUTM "#EXTRA_CFLAGS += -DTIME_MASTER=1\n";
 }
-if ($timeSlave > -1) {
+if ($timeSlave > -1 or $virtualiop == 2) {
   print OUTM "EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
 } else {
   print OUTM "#Uncomment to build a time slave\n";
