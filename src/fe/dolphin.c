@@ -29,7 +29,7 @@ int32_t session_callback(session_cb_arg_t IN arg,
 			  uint32_t IN target_node,
 			  uint32_t IN local_adapter_number) {
 /// @brief This function contains the required Dolphin callback routine. \n
-  printkl("Session callback reason=%d status=%d target_node=%d\n", reason, status, target_node);
+  // printkl("Session callback reason=%d status=%d target_node=%d\n", reason, status, target_node);
   // if (reason == SR_OK) iop_rfm_valid = 1;
   if (reason == SR_OK || status == SR_OK) iop_rfm_valid = 1;
   else iop_rfm_valid = 0;
@@ -43,7 +43,7 @@ int32_t session_callback(session_cb_arg_t IN arg,
 int32_t connect_callback(void IN *arg,
 			  sci_r_segment_handle_t IN remote_segment_handle,
 			  uint32_t IN reason, uint32_t IN status) {
-  printkl("Connect callback reason=%d status=%d\n", reason, status);
+  // printkl("Connect callback reason=%d status=%d\n", reason, status);
   if (reason == 1) iop_rfm_valid = 1;
   if (reason == 3) iop_rfm_valid = 0;
   if (reason == 5) iop_rfm_valid = 1;
@@ -55,7 +55,7 @@ int32_t create_segment_callback(void IN *arg,
 				 uint32_t IN reason,
 				 uint32_t IN source_node,
 				 uint32_t IN local_adapter_number)  {
-  printkl("Create segment callback reason=%d source_node=%d\n", reason, source_node);
+  // printkl("Create segment callback reason=%d source_node=%d\n", reason, source_node);
   return 0;
 }
 
@@ -75,18 +75,18 @@ init_dolphin(int modules) {
 		       create_segment_callback,
 		       0,
 		       &segment[ii]);
-  printk("DIS segment alloc status %d\n", err);
+  // printk("DIS segment alloc status %d\n", err);
   if (err) return -1;
 
   err = sci_set_local_segment_available(segment[ii], 0);
-  printk("DIS segment making available status %d\n", err);
+  // printk("DIS segment making available status %d\n", err);
   if (err) {
     sci_remove_segment(&segment[ii], 0);
     return -1;
   }
   
   err = sci_export_segment(segment[ii], 0, DIS_BROADCAST);
-  printk("DIS segment export status %d\n", err);
+  // printk("DIS segment export status %d\n", err);
   if (err) {
     sci_remove_segment(&segment[ii], 0);
     return -1;
@@ -94,11 +94,11 @@ init_dolphin(int modules) {
   
   read_addr = sci_local_kernel_virtual_address(segment[ii]);
   if (read_addr == 0) {
-    printk("DIS sci_local_kernel_virtual_address returned 0\n");
+    // printk("DIS sci_local_kernel_virtual_address returned 0\n");
     sci_remove_segment(&segment[ii], 0);
     return -1;
   } else {
-    printk("Dolphin memory read at 0x%p\n", read_addr);
+    // printk("Dolphin memory read at 0x%p\n", read_addr);
     cdsPciModules.dolphinRead[ii] = (volatile unsigned long *)read_addr;
   }
   udelay(MAX_UDELAY);
@@ -113,7 +113,7 @@ init_dolphin(int modules) {
 			    connect_callback, 
 			    0,
 			    &remote_segment_handle[ii]);
-  printk("DIS connect segment status %d\n", err);
+  // printk("DIS connect segment status %d\n", err);
   if (err) {
     sci_remove_segment(&segment[ii], 0);
     return -1;
@@ -127,7 +127,7 @@ init_dolphin(int modules) {
 			0,
 			IPC_TOTAL_ALLOC_SIZE,
 			&client_map_handle[ii]);
-  printk("DIS segment mapping status %d\n", err);
+  // printk("DIS segment mapping status %d\n", err);
   if (err) {
     sci_disconnect_segment(&remote_segment_handle[ii], 0);
     sci_remove_segment(&segment[ii], 0);
@@ -136,12 +136,12 @@ init_dolphin(int modules) {
   
   addr = sci_kernel_virtual_address_of_mapping(client_map_handle[ii]);
   if (addr == 0) {
-    printk ("Got zero pointer from sci_kernel_virtual_address_of_mapping\n");
+    // printk ("Got zero pointer from sci_kernel_virtual_address_of_mapping\n");
     sci_disconnect_segment(&remote_segment_handle[ii], 0);
     sci_remove_segment(&segment[ii], 0);
     return -1;
   } else {
-    printk ("Dolphin memory write at 0x%p\n", addr);
+    // printk ("Dolphin memory write at 0x%p\n", addr);
     cdsPciModules.dolphinWrite[ii] = (volatile unsigned long *)addr;
   }
 
