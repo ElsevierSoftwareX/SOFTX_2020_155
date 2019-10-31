@@ -141,6 +141,7 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
     int adcStat = 0;
     int card;
     int chan;
+    int loops = 1;
 
     // Read ADC data
     for(card=0;card<cdsPciModules.adcCount;card++)
@@ -239,15 +240,17 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
        	offset = GSAI_DATA_CODE_OFFSET;
         mask = GSAI_DATA_MASK;
         num_outs = GSAI_CHAN_COUNT;
+        loops = 1;
         if (cdsPciModules.adcType[card] == GSC_18AI32SSC1M) 
         {
             num_outs = 8;
+            loops = UNDERSAMPLE;
         }
         /// - ---- Determine next ipc memory location to load ADC data
-        ioMemCntr = (cycleNum % IO_MEMORY_SLOTS);
+        ioMemCntr = ((cycleNum / UNDERSAMPLE) % IO_MEMORY_SLOTS);
 
         /// - ----  Read adc data from PCI mapped memory into local variables
-        for(kk=0;kk<UNDERSAMPLE;kk++)
+        for(kk=0;kk<loops;kk++)
         {
         for(chan=0;chan<num_outs;chan++)
         {
@@ -281,8 +284,7 @@ inline int iop_adc_read (adcInfo_t *adcinfo,int cpuClk[])
        	/// - ---- Write GPS time and cycle count as indicator to slave that adc data is ready
         ioMemData->gpsSecond = timeSec;
         ioMemData->iodata[card][ioMemCntr].timeSec = timeSec;
-        ioMemData->iodata[card][ioMemCntr].cycle = cycleNum;
-
+        ioMemData->iodata[card][ioMemCntr].cycle = cycleNum / UNDERSAMPLE;
 
         /// - ---- Clear out last ADC data read for test on next cycle
         packedData = (int *)cdsPciModules.pci_adc[card];

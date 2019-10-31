@@ -1577,7 +1577,7 @@ sub process {
 
   my %hash   = map { $_, 1 } @adc_card_nums;
   my @unique = keys %hash;
-  die "ADC card numbers must be unique\n" unless $#adc_card_nums == $#unique;
+  # die "ADC card numbers must be unique\n" unless $#adc_card_nums == $#unique;
 
   # Go through the array and see if the numbers are all consequtive for ADC names
   @adc_names = sort { $a <=> $b } @adc_names;

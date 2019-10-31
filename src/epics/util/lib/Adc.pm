@@ -27,9 +27,11 @@ sub initAdc {
         $::adcPartNum[$::adcCnt] = $::partCnt;
 	# Set ADC type and number
 	my $desc = ${$node->{FIELDS}}{"Description"};
+printf "desc type is $desc\n";
 	my $src = ${$node->{FIELDS}}{"SourceBlock"};
 	my $name = ${$node->{FIELDS}}{"Name"};
 	my ($type) = $desc =~ m/type=([^,]+)/g;
+printf "board type is $type\n";
 	my ($num) = $desc =~ m/card_num=([^,]+)/g;
 	my ($srcnum) = $src =~ m/ADC([^,]+)/g;
 	my ($namenum) = $name =~ m/ADC([^,]+)/g;
@@ -187,7 +189,8 @@ sub createAdcMedm
 
 	my $ii=0;
 
-        my $fname = "$mdlName\_MONITOR_ADC$::adcCardNum[$adcNum].adl";
+        #my $fname = "$mdlName\_MONITOR_ADC$::adcCardNum[$adcNum].adl";
+        my $fname = "$mdlName\_MONITOR_ADC$adcNum.adl";
         # Create MEDM File
         print "creating file $medmDir\/$fname \n";
         open(OUTMEDM, ">$medmDir/$fname") || die "cannot open $medmDir/$fname for writing ";
@@ -201,7 +204,8 @@ sub createAdcMedm
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{blue},"","","");
         # Add Display Name
         $xpos = 445; $ypos = 4; $width = 120; $height = 15;        
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$mdlName\_MONITOR_ADC$::adcCardNum[$adcNum]",$ecolors{white});
+	#$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$mdlName\_MONITOR_ADC$::adcCardNum[$adcNum]",$ecolors{white});
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$mdlName\_MONITOR_ADC$adcNum",$ecolors{white});
         # Add time string to banner
         $xpos = 730; $ypos = 4; $width = 200; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_TIME_STRING",$ecolors{white},$ecolors{blue},"static");
