@@ -169,7 +169,7 @@ sub frontEndInitCode {
 
 	# Need to call commData3.c during initialization only once.
         if ($::ipcxInitDone eq $::ipcxCnt) {
-           $calcExp .= "\ncommData3Init(myIpcCount, FE_RATE, ipcInfo);\n\n";
+           $calcExp .= "\ncommData3Init(myIpcCount, IPC_RATE, ipcInfo);\n\n";
         }
         return $calcExp;
 }

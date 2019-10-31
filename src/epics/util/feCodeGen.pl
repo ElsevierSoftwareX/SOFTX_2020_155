@@ -1711,7 +1711,8 @@ END
 	#//			- All IPCx data receives are to occur first in the processing loop
 	#
 	if ($ipcxCnt > 0 ) {
-	   print OUT "\ncommData3Receive(myIpcCount, ipcInfo, timeSec , cycle);\n\n";
+	   #print OUT "\ncommData3Receive(myIpcCount, ipcInfo, timeSec , cycle);\n\n";
+	   print OUT "\nif((cycle % UNDERSAMPLE) == 0)commData3Receive(myIpcCount, ipcInfo, timeSec , (cycle / UNDERSAMPLE));\n\n";
 	}
 	# END IPCx PART CODE
 
@@ -1814,7 +1815,8 @@ print OUT "$feTailCode";
 #
 if ($ipcxCnt > 0) {
    print OUT "      if(!cycle && pLocalEpics->epicsInput.ipcDiagReset) pLocalEpics->epicsInput.ipcDiagReset = 0;\n";
-   print OUT "\n    commData3Send(myIpcCount, ipcInfo, timeSec, cycle);\n\n";
+   #print OUT "\n    commData3Send(myIpcCount, ipcInfo, timeSec, cycle);\n\n";
+   print OUT "\n    if((cycle % UNDERSAMPLE) == 0) commData3Send(myIpcCount, ipcInfo, timeSec, (cycle / UNDERSAMPLE));\n\n";
 }
 # END IPCx PART CODE
 
