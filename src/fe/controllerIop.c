@@ -345,10 +345,7 @@ syncSource = SYNC_SRC_DOLPHIN;
 #endif
       // Arm ADC modules
       // This has to be done sequentially, one at a time.
-      // status = sync_adc_2_1pps();
-      sync21pps = 1;
-      gsc16ai64Enable(&cdsPciModules);
-      gsc18ai32Enable(&cdsPciModules);
+      status = sync_adc_2_1pps();
       break;
     case SYNC_SRC_NONE:
       gsc16ai64Enable(&cdsPciModules);
