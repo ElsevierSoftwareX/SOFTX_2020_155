@@ -121,8 +121,8 @@ parseConfigFile(char *fname, unsigned long *crc,
 		int (*callback)(char *channel_name, struct CHAN_PARAM *params, void *user),
 		int testpoint, char *arch_file, void *user)
 {
-  unsigned long crc_ptr(char* cp, unsigned int bytes, unsigned int crc);
-  unsigned long crc_len(unsigned int bytes, unsigned int crc);
+  unsigned int crc_ptr(char* cp, unsigned int bytes, unsigned int crc);
+  unsigned int crc_len(unsigned int bytes, unsigned int crc);
 
   CHAN_PARAM deflt;
   CHAN_PARAM current;

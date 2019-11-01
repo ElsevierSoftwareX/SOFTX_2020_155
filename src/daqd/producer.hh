@@ -40,7 +40,7 @@ public:
   static void *frame_writer_crc_static (void *a) { return ((producer *)a) -> frame_writer_crc();}
   void *grabIfoData (int, int, unsigned char *);
   void grabIfoDataThread (void);
-  static void *grabIfoData_static(void *a) { ((producer *)a) -> grabIfoDataThread();};
+  static void *grabIfoData_static(void *a) { ((producer *)a) -> grabIfoDataThread(); return 0; };
 
   pthread_t tid;
   pthread_t tid1; ///< Parallel producer thread
