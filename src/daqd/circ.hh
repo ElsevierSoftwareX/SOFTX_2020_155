@@ -160,15 +160,16 @@ public:
         locker mon( this );
 
         for ( int i = 0; i < MAX_CONSUMERS; i++ )
-            if ( pbuffer->cmask & 1 << i )
+            if ( pbuffer->cmask.get( i ) )
             {
                 int b = pbuffer->next_block_in - pbuffer->next_block_out[ i ];
                 if ( b < 0 )
                     fb = -b;
                 else if ( b == 0 )
-                    fb = pbuffer->block[ pbuffer->next_block_out[ i ] ].busy
-                        ? 0
-                        : blocks( );
+                    fb = pbuffer->block[ pbuffer->next_block_out[ i ] ]
+                             .busy.empty( )
+                        ? blocks( )
+                        : 0;
                 else
                     fb = blocks( ) - b;
 
@@ -238,17 +239,17 @@ public:
 
         // Find next available `0' in `pbuffer -> tcmask', starting from the low
         // end
-        for ( i = 0; pbuffer->tcmask & 1 << i; i++ )
+        for ( i = 0; pbuffer->tcmask.get( i ); i++ )
             ;
-        pbuffer->cmask |= 1 << i;
-        pbuffer->tcmask |= 1 << i;
+        pbuffer->cmask.set( i );
+        pbuffer->tcmask.set( i );
         pbuffer->consumers++;
 
         pbuffer->next_block_out[ i ] = pbuffer->next_block_in;
 
         if ( fast )
         {
-            pbuffer->cmask16th |= 1 << i;
+            pbuffer->cmask16th.set( i );
             pbuffer->next_block_out_16th[ i ] = pbuffer->next_block_in_16th;
             pbuffer->fast_consumers++;
         }
@@ -286,7 +287,7 @@ public:
             return -2;
 
         // Find next available `0' in `pbuffer -> tcmask', starting from low end
-        for ( cons_num = 0; pbuffer->tcmask & 1 << cons_num; cons_num++ )
+        for ( cons_num = 0; pbuffer->tcmask.get( cons_num ); cons_num++ )
             ;
 
         // If `delta' = 0, `gps' represents playback offset
@@ -330,7 +331,7 @@ public:
                        std::cerr << "block " << i << " marked; gps="
                                  << pbuffer->block[ i ].prop.gps << std::endl );
                 blocks_marked++;
-                pbuffer->block[ i ].busy |= 1 << cons_num;
+                pbuffer->block[ i ].busy.set( cons_num );
                 if ( first_block < 0 )
                 {
                     first_block = i;
@@ -350,7 +351,7 @@ public:
         if ( first_block < 0 )
             return -2;
 
-        pbuffer->tcmask |= 1 << cons_num;
+        pbuffer->tcmask.set( cons_num );
         pbuffer->consumers++;
         pbuffer->transient_consumers++;
 
@@ -370,21 +371,21 @@ public:
         assert( cnumber < MAX_CONSUMERS );
 
         // See if this is fast cincumer
-        if ( pbuffer->cmask16th & 1 << cnumber )
+        if ( pbuffer->cmask16th.get( cnumber ) )
         {
             fast_consumer = 1;
             pbuffer->fast_consumers--;
-            pbuffer->cmask16th &= ~( 1 << cnumber );
+            pbuffer->cmask16th.clear( cnumber );
         }
 
         // See if this is transient consumer
-        if ( !( pbuffer->cmask & 1 << cnumber ) )
+        if ( !( pbuffer->cmask.get( cnumber ) ) )
             pbuffer->transient_consumers--;
         else
-            pbuffer->cmask &= ~( 1 << cnumber ); // Clear signing off consumer
-                                                 // off the consumer mask
+            pbuffer->cmask.clear(
+                cnumber ); // Clear signing off consumer off the consumer mask
 
-        pbuffer->tcmask &= ~( 1 << cnumber );
+        pbuffer->tcmask.clear( cnumber );
         pbuffer->consumers--;
 
         // Clean `busy' bits in all blocks for the consumer
@@ -393,13 +394,13 @@ public:
             pthread_mutex_lock( &pbuffer->block[ i ].lock );
             {
                 for ( int j = 0; j < 16; j++ )
-                    pbuffer->block[ i ].busy16th[ j ] &= ~( 1 << cnumber );
+                    pbuffer->block[ i ].busy16th[ j ].clear( cnumber );
 
-                unsigned int sbusy = pbuffer->block[ i ].busy;
-                pbuffer->block[ i ].busy &= ~( 1 << cnumber );
+                bool was_empty = pbuffer->block[ i ].busy.empty( );
+                pbuffer->block[ i ].busy.clear( cnumber );
+                bool now_empty = pbuffer->block[ i ].busy.empty( );
                 // Signal `notfull' only if we cleared the block
-                if ( !pbuffer->block[ i ].busy &&
-                     pbuffer->block[ i ].busy != sbusy )
+                if ( now_empty && !was_empty )
                     pthread_cond_broadcast( &pbuffer->block[ i ].notfull );
             }
             pthread_mutex_unlock( &pbuffer->block[ i ].lock );
@@ -497,7 +498,7 @@ public:
         {
             unsigned int consumers = pbuffer->consumers;
             for ( i = 0; i < MAX_CONSUMERS; i++ )
-                if ( pbuffer->cmask & 1 << i )
+                if ( pbuffer->cmask.get( i ) )
                 {
                     consumers--;
                     if ( pbuffer->next_block_out[ i ] < 0 ||
@@ -542,16 +543,17 @@ public:
             for ( i = 0; i < pbuffer->blocks; i++ )
                 if ( pbuffer->block[ i ].bytes < 0 ||
                      pbuffer->block[ i ].bytes > pbuffer->block_size ||
-                     pbuffer->block[ i ].busy &
-                         ~pbuffer->tcmask ) // checking if `busy' has any bits
-                                            // set outside the `tcmask'
+                     !( pbuffer->block[ i ]
+                            .busy.difference_with( pbuffer->tcmask )
+                            .empty( ) ) ) // checking if `busy' has any bits set
+                                          // outside the `tcmask'
                 {
                     std::cerr
                         << "invariant(): invalid `block[" << i
                         << "]' properties; bytes=" << pbuffer->block[ i ].bytes
-                        << "; busy=" << pbuffer->block[ i ].busy
+                        << "; busy=" << !pbuffer->block[ i ].busy.empty( )
                         << "; transient consumers mask (tcmask) = "
-                        << pbuffer->tcmask
+                        << pbuffer->tcmask.empty( )
                         << "; block_size=" << pbuffer->block_size << std::endl;
                     return 0;
                 }

@@ -52,22 +52,27 @@ circ_buffer::buffer_malloc( int    consumers,
     {
         //      pbuffer -> block [i].datai = i * block_size;
         pthread_mutex_init( &pbuffer->block[ i ].lock, NULL );
-        pbuffer->block[ i ].busy = 0;
+        pbuffer->block[ i ].busy.clear_all( );
         for ( int j = 0; j < 16; j++ )
-            pbuffer->block[ i ].busy16th[ j ] = 0;
+            pbuffer->block[ i ].busy16th[ j ].clear_all( );
         pthread_cond_init( &pbuffer->block[ i ].notfull, NULL );
         pthread_cond_init( &pbuffer->block[ i ].notempty, NULL );
         pthread_cond_init( &pbuffer->block[ i ].notempty16th, NULL );
     }
     pbuffer->producers = 1;
     pbuffer->consumers = consumers;
+    pbuffer->tcmask.clear_all( );
+    pbuffer->cmask.clear_all( );
     if ( consumers )
-        pbuffer->tcmask = pbuffer->cmask = UINT_MAX >>
-            ( sizeof( unsigned int ) * CHAR_BIT - pbuffer->consumers );
-    else
-        pbuffer->tcmask = pbuffer->cmask = 0;
+    {
+        for ( int j = 0; j < consumers; ++j )
+        {
+            pbuffer->tcmask.set( j );
+        }
+        pbuffer->cmask = pbuffer->tcmask;
+    }
 
-    pbuffer->cmask16th = 0;
+    pbuffer->cmask16th.clear_all( );
     DEBUG1( cerr << "circ buffer constructed; blocks=" << blocks
                  << " block_size=" << block_size << "\n" );
     return 0;
@@ -160,7 +165,7 @@ circ_buffer::put16th_dpscattered_lost( struct put_dpvec*         pv,
             assert( invariant( ) );
 #endif
 
-        while ( pbuffer->block[ nbi ].busy )
+        while ( !pbuffer->block[ nbi ].busy.empty( ) )
             pthread_cond_wait( &pbuffer->block[ nbi ].notfull,
                                &pbuffer->block[ nbi ].lock );
 
@@ -236,7 +241,7 @@ circ_buffer::put16th_dpscattered( struct put_dpvec*         pv,
             assert( invariant( ) );
 #endif
 
-        while ( pbuffer->block[ nbi ].busy )
+        while ( !pbuffer->block[ nbi ].busy.empty( ) )
             pthread_cond_wait( &pbuffer->block[ nbi ].notfull,
                                &pbuffer->block[ nbi ].lock );
 
@@ -385,7 +390,7 @@ circ_buffer::put( char* data, int dlen, circ_buffer_block_prop_t* prop )
         assert( invariant( ) );
 
         nbi = pbuffer->next_block_in;
-        while ( pbuffer->block[ nbi ].busy )
+        while ( !pbuffer->block[ nbi ].busy.empty( ) )
             pthread_cond_wait( &pbuffer->block[ nbi ].notfull,
                                &pbuffer->block[ nbi ].lock );
 
@@ -430,7 +435,7 @@ circ_buffer::put_pscattered( struct put_pvec*          pv,
         assert( invariant( ) );
 
         nbi = pbuffer->next_block_in;
-        while ( pbuffer->block[ nbi ].busy )
+        while ( !pbuffer->block[ nbi ].busy.empty( ) )
             pthread_cond_wait( &pbuffer->block[ nbi ].notfull,
                                &pbuffer->block[ nbi ].lock );
 
@@ -482,7 +487,7 @@ circ_buffer::put_nowait( char* data, int dlen, circ_buffer_block_prop_t* prop )
     assert( dlen <= pbuffer->block_size && dlen >= 0 );
     assert( invariant( ) );
 
-    if ( !pbuffer->block[ ret = nbi = pbuffer->next_block_in ].busy )
+    if ( pbuffer->block[ ret = nbi = pbuffer->next_block_in ].busy.empty( ) )
     {
         memcpy( pbuffer->data_space + nbi * pbuffer->block_size, data, dlen );
         pbuffer->block[ nbi ].bytes = dlen;
@@ -538,7 +543,7 @@ circ_buffer::put_nowait_scattered( char*                     data,
 
     assert( invariant( ) );
 
-    if ( !pbuffer->block[ ret = nbi = pbuffer->next_block_in ].busy )
+    if ( pbuffer->block[ ret = nbi = pbuffer->next_block_in ].busy.empty( ) )
     {
         char*         dst = pbuffer->data_space + nbi * pbuffer->block_size;
         unsigned long dlen = 0;
@@ -590,7 +595,7 @@ circ_buffer::get16th( int cnum )
 
     nbo = pbuffer->next_block_out[ cnum ];
     nbo16th = pbuffer->next_block_out_16th[ cnum ];
-    while ( !( pbuffer->block[ nbo ].busy16th[ nbo16th ] & ( 1 << cnum ) ) )
+    while ( !( pbuffer->block[ nbo ].busy16th[ nbo16th ].get( cnum ) ) )
         pthread_cond_wait( &pbuffer->block[ nbo ].notempty16th,
                            &pbuffer->block[ nbo ].lock );
     pbuffer->next_block_out_16th[ cnum ]++;
@@ -626,7 +631,7 @@ circ_buffer::get( int cnum )
     assert( invariant( ) );
 
     nbo = pbuffer->next_block_out[ cnum ];
-    while ( !( pbuffer->block[ nbo ].busy & ( 1 << cnum ) ) )
+    while ( !( pbuffer->block[ nbo ].busy.get( cnum ) ) )
         pthread_cond_wait( &pbuffer->block[ nbo ].notempty,
                            &pbuffer->block[ nbo ].lock );
     pthread_mutex_unlock( &pbuffer->block[ nbo ].lock );
@@ -649,7 +654,7 @@ circ_buffer::get_nowait( int cnum )
     assert( invariant( ) );
 
     nbo = pbuffer->next_block_out[ cnum ];
-    if ( pbuffer->block[ nbo ].busy & ( 1 << cnum ) )
+    if ( pbuffer->block[ nbo ].busy.get( cnum ) )
         ret = nbo;
     else
         ret = -1;
@@ -665,18 +670,17 @@ circ_buffer::get_nowait( int cnum )
 void
 circ_buffer::unlock16th( int cnum )
 {
-    int busy, nbo;
-
     pthread_mutex_lock(
         &pbuffer->block[ pbuffer->next_block_out[ cnum ] ].lock );
 
     assert( invariant( ) );
 
-    busy = ( pbuffer->block[ nbo = pbuffer->next_block_out[ cnum ] ].busy &=
-             ~( 1 << cnum ) );
+    int nbo = pbuffer->next_block_out[ cnum ];
+    pbuffer->block[ nbo ].busy.clear( cnum );
+    bool busy = !pbuffer->block[ nbo ].busy.empty( );
 
     for ( int i = 0; i < 16; i++ )
-        pbuffer->block[ nbo ].busy16th[ i ] &= ~( 1 << cnum );
+        pbuffer->block[ nbo ].busy16th[ i ].clear( cnum );
 
     pthread_mutex_unlock( &pbuffer->block[ nbo ].lock );
 
@@ -695,15 +699,14 @@ circ_buffer::unlock16th( int cnum )
 void
 circ_buffer::unlock( int cnum )
 {
-    int busy, nbo;
-
     pthread_mutex_lock(
         &pbuffer->block[ pbuffer->next_block_out[ cnum ] ].lock );
 
     assert( invariant( ) );
 
-    busy = ( pbuffer->block[ nbo = pbuffer->next_block_out[ cnum ] ].busy &=
-             ~( 1 << cnum ) );
+    int nbo = pbuffer->next_block_out[ cnum ];
+    pbuffer->block[ nbo ].busy.clear( cnum );
+    bool busy = !pbuffer->block[ nbo ].busy.empty( );
 
     pthread_mutex_unlock( &pbuffer->block[ nbo ].lock );
 
@@ -722,19 +725,18 @@ circ_buffer::unlock( int cnum )
 int
 circ_buffer::noop( int cnum )
 {
-    int busy, nbo;
-
     pthread_mutex_lock(
         &pbuffer->block[ pbuffer->next_block_out[ cnum ] ].lock );
 
     assert( invariant( ) );
 
-    nbo = pbuffer->next_block_out[ cnum ];
-    while ( !( pbuffer->block[ nbo ].busy & ( 1 << cnum ) ) )
+    int nbo = pbuffer->next_block_out[ cnum ];
+    while ( !( pbuffer->block[ nbo ].busy.get( cnum ) ) )
         pthread_cond_wait( &pbuffer->block[ nbo ].notempty,
                            &pbuffer->block[ nbo ].lock );
 
-    busy = ( pbuffer->block[ nbo ].busy &= ~( 1 << cnum ) );
+    pbuffer->block[ nbo ].busy.clear( cnum );
+    bool busy = !pbuffer->block[ nbo ].busy.empty( );
 
     pthread_mutex_unlock( &pbuffer->block[ nbo ].lock );
 
