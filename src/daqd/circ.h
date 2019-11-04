@@ -6,18 +6,15 @@
 #include <limits.h>
 #include <assert.h>
 #include "config.h"
+#include "cmask_t.h"
 
-/* 
+/*
   Raise limit of blocks in circular buffer to 2000 for longer trend frames
     2000 should allow for 30-minute second trend frames (1800 blocks) + cushion
 */ 
 #define MAX_BLOCKS 2000
-
-/*
-  There is one bit allocated for each consumer
-*/
-#define MAX_CONSUMERS (sizeof (unsigned int) * CHAR_BIT - 1)
 #define MAX_PRODUCERS 2
+/* MAX_CONSUMERS now defined in cmask_t.h */
 
 /// Circ buffer properties
 typedef struct {
@@ -59,8 +56,8 @@ typedef struct {
   //  long datai;                    /* Index into the circ_buffer_t.data_space[] */
 
   pthread_mutex_t lock;
-  unsigned int busy;                        ///< Bitmask of comsumer busy flags 
-  unsigned int busy16th [16];
+  cmask_t busy;                        ///< Bitmask of comsumer busy flags
+  cmask_t busy16th [16];
   pthread_cond_t notfull;                   ///< consumer will signal notfull after it gets the block 
   pthread_cond_t notempty;                ///< producer broadcasts this after it has filled in new block 
   pthread_cond_t notempty16th;           ///< producer broadcasts this after it has filled in new 1/16 of a block 
@@ -109,7 +106,7 @@ typedef struct {
   int next_block_out_16th [MAX_CONSUMERS];
 
   pthread_mutex_t lock;            /* Locked to protect this buffer integrity */
-  int next_block_in;  /* index of the next blocks to be filled in by producer */ 
+  int next_block_in;  /* index of the next blocks to be filled in by producer */
   int next_block_in_16th;  /* index of the next 16th part of a block to be
 			      filled in by producer                           */ 
 
@@ -121,13 +118,13 @@ typedef struct {
   /*
     Bitmask, has bit set foreach consumer
   */
-  unsigned int cmask;
-  unsigned int cmask16th;
+  cmask_t cmask;
+  cmask_t cmask16th;
 
   /*
     This bitmask is `cmask' | <transient consumers>
   */
-  unsigned int tcmask;
+  cmask_t tcmask;
 
   circ_buffer_block_t block [MAX_BLOCKS];
 
