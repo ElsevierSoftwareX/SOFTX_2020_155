@@ -33,9 +33,11 @@ void
 thread_loop( int                  index,
              const std::string&   channel_name,
              std::atomic< bool >* done_flag,
-             std::atomic< int >*  success_counter )
+             std::atomic< int >*  success_counter,
+             std::atomic< int >*  error_counter )
 {
     bool                                first = true;
+    bool                                quiting = false;
     NDS::request_period                 period;
     NDS::connection::channel_names_type channels;
     channels.push_back( channel_name );
@@ -51,12 +53,17 @@ thread_loop( int                  index,
             }
             if ( done_flag->load( ) )
             {
+                quiting = true;
                 break;
             }
         }
     }
     catch ( ... )
     {
+        if ( !quiting )
+        {
+            ( *error_counter )++;
+        }
     }
 }
 
@@ -67,6 +74,7 @@ main( int argc, char* argv[] )
 
     std::atomic< bool > done{ false };
     std::atomic< int >  success{ 0 };
+    std::atomic< int >  error{ 0 };
 
     const int                  THREADS = 80;
     std::vector< std::string > selected_chans;
@@ -80,12 +88,15 @@ main( int argc, char* argv[] )
     for ( int i = 0; i < THREADS; ++i )
     {
         thread_objs.emplace_back(
-            thread_loop, i, selected_chans[ i ], &done, &success );
+            thread_loop, i, selected_chans[ i ], &done, &success, &error );
     }
     std::this_thread::sleep_for( std::chrono::seconds( 10 ) );
     done = true;
     std::for_each( thread_objs.begin( ), thread_objs.end( ), join_thread );
+    std::cout << std::endl;
     std::cout << "We had " << success.load( ) << " successful threads."
               << std::endl;
+    std::cout << "We had " << error.load( )
+              << " unexpected errors in the threads." << std::endl;
     return 0;
 }
