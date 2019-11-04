@@ -1926,7 +1926,7 @@ CommandLine: /* Nothing */
 
 		*yyout << "number\t|busy\t|bytes\t|gps\t\t|gps_n\t\t|run" << endl;
 		for (i = 0; i < ((my_lexer *)lexer)->cb -> blocks; i++) {
-			*yyout << i << "\t" << ((my_lexer *)lexer)->cb -> block [i].busy
+			*yyout << i << "\t" << !((my_lexer *)lexer)->cb -> block [i].busy.empty()
 				<< "\t" << ((my_lexer *)lexer)->cb -> block [i].bytes 
 				<< "\t" << ((my_lexer *)lexer)->cb -> block [i].prop.gps
 				<< "\t" << ((my_lexer *)lexer)->cb -> block [i].prop.gps_n
@@ -3232,7 +3232,7 @@ print_block_stats (ostream *yyout, circ_buffer_t *cb)
 
   *yyout << "consumer\t|next_block_out\t|next_block_out_16th" << endl;
   for (i = 0; i < MAX_CONSUMERS; i++)
-    if (cb -> cmask & 1 << i)
+    if (cb -> cmask.get(i))
       *yyout << i << "\t\t|" << cb -> next_block_out [i] << "\t\t|" << cb -> next_block_out_16th [i] << endl;
 
   //  yyout -> flush ();
