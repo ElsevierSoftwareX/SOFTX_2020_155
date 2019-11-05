@@ -1577,53 +1577,23 @@ for($ii=0;$ii<$partCnt;$ii++)
 	#//	- Write C source code file.
 	# Start process of writing .c file. **********************************************************************
 	#//		- Standard opening information.
-	print OUT <<END;
-// ******* This is a computer generated file *******
-// ******* DO NOT HAND EDIT ************************
-#include "fe.h"
+    print OUT <<END;
+    // ******* This is a computer generated file *******
+    // ******* DO NOT HAND EDIT ************************
 
-#ifdef SERVO1024K
-	#define FE_RATE	1048576
-	#define IPC_RATE	65536
-#endif
-#ifdef SERVO512K
-	#define FE_RATE	524288
-	#define IPC_RATE	65536
-#endif
-#ifdef SERVO256K
-	#define FE_RATE	262144
-	#define IPC_RATE	65536
-#endif
-#ifdef SERVO128K
-	#define FE_RATE	131072
-	#define IPC_RATE	65536
-#endif
-#ifdef SERVO64K
-	#define FE_RATE	65536
-	#define IPC_RATE	FE_RATE
-#endif
-#ifdef SERVO32K
-	#define FE_RATE	32768
-	#define IPC_RATE	FE_RATE
-#endif
-#ifdef SERVO16K
-	#define FE_RATE	16384
-	#define IPC_RATE	FE_RATE
-#endif
-#ifdef SERVO4K
-	#define FE_RATE	4096
-	#define IPC_RATE	FE_RATE
-#endif
-#ifdef SERVO2K
-	#define FE_RATE	2048
-	#define IPC_RATE	FE_RATE
-#endif
-
+    #include "fe.h"
 
 END
 
+    # Define the code cycle rate
+    print OUT "#define FE_RATE\t$gdsrate\n";
+    if($gdsrate > 65536) {
+        print OUT "#define IPC_RATE\t65536\n\n";
+	} else {
+        print OUT "#define IPC_RATE\t$gdsrate\n\n";
+    }
 
-;
+
 	@adcCardNum;
 	@dacCardNum;
 	$adcCCtr=0;
@@ -2534,7 +2504,7 @@ print OUTM "\U$skeleton";
 print OUTM "_CODE\n";
 print OUTM "EXTRA_CFLAGS += -DFE_SRC=\\\"\L$skeleton/\L$skeleton.c\\\"\n";
 print OUTM "EXTRA_CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
-print OUTM "EXTRA_CFLAGS += -DFE_PROC_FILE=\\\"\L${skeleton}_proc.h\\\"\n";
+#print OUTM "EXTRA_CFLAGS += -DFE_PROC_FILE=\\\"\L${skeleton}_proc.h\\\"\n";
 
 if($systemName eq "sei" || $useFIRs)
 {
@@ -2764,7 +2734,7 @@ print OUTM "\U$skeleton";
 print OUTM "_CODE\n";
 print OUTM "CFLAGS += -DFE_SRC=\\\"\L$skeleton/\L$skeleton.c\\\"\n";
 print OUTM "CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
-print OUTM "CFLAGS += -DFE_PROC_FILE=\\\"\L${skeleton}_proc.h\\\"\n";
+#print OUTM "CFLAGS += -DFE_PROC_FILE=\\\"\L${skeleton}_proc.h\\\"\n";
 
 print OUTM "EXTRA_CFLAGS += -g\n";
 
