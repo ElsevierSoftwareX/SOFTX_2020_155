@@ -307,9 +307,9 @@ public:
 
 
 	  bool was_empty = pbuffer->block[i].busy.empty();
-	  bool now_empty = pbuffer->block[i].busy.empty();
 	  pbuffer -> block [i].busy.clear(cnumber);
-	  // Signal `notfull' only if we cleared the block
+      bool now_empty = pbuffer->block[i].busy.empty();
+        // Signal `notfull' only if we cleared the block
 	  if (now_empty && !was_empty)
 	    pthread_cond_broadcast (&pbuffer -> block [i].notfull);
 	}
@@ -423,7 +423,7 @@ public:
 	    || !(pbuffer -> block [i].busy.difference_with(pbuffer -> tcmask).empty())) // checking if `busy' has any bits set outside the `tcmask'
 	  {
 	    std::cerr << "invariant(): invalid `block[" << i << "]' properties; bytes=" << pbuffer -> block [i].bytes
-		 << "; busy=" << pbuffer -> block [i].busy.empty() << "; transient consumers mask (tcmask) = " << pbuffer -> tcmask.empty()
+		 << "; busy=" << !pbuffer -> block [i].busy.empty() << "; transient consumers mask (tcmask) = " << pbuffer -> tcmask.empty()
 		 << "; block_size=" << pbuffer -> block_size << std::endl;
 	    return 0;
 	  }
