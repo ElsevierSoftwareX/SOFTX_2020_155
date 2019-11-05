@@ -161,7 +161,6 @@ int rt_fe_init (void)
                 if(cdsPciModules.cards_used[jj].type == GSC_20AO8  &&
                        (cdsPciModules.cards_used[jj].instance == dac20Cnt))
                 {
-                    printf("Found DAC at %d %d\n",jj,ioMemData->ipc[ii]);
                     kk = cdsPciModules.dacCount;
                     cdsPciModules.dacType[kk] = GSC_20AO8;
                     cdsPciModules.dacConfig[kk] = ioMemData->ipc[ii];
@@ -322,6 +321,7 @@ int rt_fe_init (void)
 	}
 
         pLocalEpics->epicsInput.vmeReset = 0;
+udelay(2000);
 
 #ifdef NO_CPU_SHUTDOWN
         sthread = kthread_create(fe_start_app, 0, "fe_start_app/%d", CPUID);
@@ -369,7 +369,7 @@ void rt_fe_cleanup (void) {
 
 	// Unset the code callback
         set_fe_code_idle(0, CPUID);
-//	printkl("Will bring back CPU %d\n", CPUID);
+        // printk("Will bring back CPU %d\n", CPUID);
         msleep(1000);
 	// Bring the CPU back up
         cpu_up(CPUID);
