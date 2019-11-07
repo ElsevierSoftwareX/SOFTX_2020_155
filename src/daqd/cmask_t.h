@@ -1,6 +1,7 @@
 #ifndef DAQD_CMASK_T_H
 #define DAQD_CMASK_T_H
 
+#include <stdint.h>
 #include <limits.h>
 
 #ifdef __cplusplus
@@ -86,8 +87,10 @@ private:
 #define MAX_CONSUMERS (sizeof (cmask_t) * CHAR_BIT - 1)
 
 #ifdef __cplusplus
+#ifdef __cpp_static_assert
 static_assert(sizeof(cmask_t) == CMASK_T_INTERNAL_WORD_COUNT*sizeof(uint64_t), "cmask_t must be the right size");
 static_assert(sizeof(uint64_t)*CHAR_BIT == 64, "64 bit ints should have 64 bits");
+#endif
 
 inline std::ostream& operator<<(std::ostream& os, const cmask_t& m)
 {
