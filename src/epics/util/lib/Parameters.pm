@@ -174,6 +174,8 @@ sub parseParams {
 				$::optimizeIO = $spp[1];
 			} elsif ($spp[0] eq "no_zero_pad") { 
 				$::noZeroPad = $spp[1];
+			} elsif ($spp[0] eq "ipc_rate") { 
+				$::ipcrate = $spp[1];
 			}
 		}
 	}

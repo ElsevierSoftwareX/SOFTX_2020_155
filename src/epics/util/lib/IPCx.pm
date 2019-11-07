@@ -621,7 +621,11 @@ $ipcxRcvrCnt = 0;
 
             print IPCOUT "\[$signalName\]\n";
             print IPCOUT "ipcType=$ipcxType[$ipcxTypeIndex]\n";
+            if($::ipcrate > 0) {
+            print IPCOUT "ipcRate=$::ipcrate\n";
+            } else {
             print IPCOUT "ipcRate=$ipcxRate\n";
+            }
             print IPCOUT "ipcHost=$::targetHost\n";
             print IPCOUT "ipcModel=$::skeleton\n";
             print IPCOUT "ipcNum=$ipcxMaxNum[$ipcxTypeIndex]\n";

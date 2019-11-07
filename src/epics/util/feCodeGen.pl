@@ -137,6 +137,8 @@ $iopTimeSlave = -1;
 $rfmTimeSlave = -1;
 $diagTest = -1;
 $flipSignals = 0;
+$ipcrate = 0;
+$ipccycle = 0;
 $virtualiop = 0;
 $no_cpu_shutdown = 0;
 $edcu = 0;
@@ -1589,6 +1591,9 @@ END
     print OUT "#define FE_RATE\t$gdsrate\n";
     if($gdsrate > 65536) {
         print OUT "#define IPC_RATE\t65536\n\n";
+    } elsif ($ipcrate > 0) {
+        print OUT "#define IPC_RATE\t$ipcrate\n\n";
+        $ipccycle = $gdsrate / $ipcrate;
 	} else {
         print OUT "#define IPC_RATE\t$gdsrate\n\n";
     }
@@ -1785,8 +1790,12 @@ print OUT "$feTailCode";
 #
 if ($ipcxCnt > 0) {
    print OUT "      if(!cycle && pLocalEpics->epicsInput.ipcDiagReset) pLocalEpics->epicsInput.ipcDiagReset = 0;\n";
-   #print OUT "\n    commData3Send(myIpcCount, ipcInfo, timeSec, cycle);\n\n";
+
+   if($ipccycle > 0) {
+   print OUT "\n    if((cycle % $ipccycle) == 0) commData3Send(myIpcCount, ipcInfo, timeSec, (cycle / $ipccycle));\n\n";
+   } else {
    print OUT "\n    if((cycle % UNDERSAMPLE) == 0) commData3Send(myIpcCount, ipcInfo, timeSec, (cycle / UNDERSAMPLE));\n\n";
+    }
 }
 # END IPCx PART CODE
 
