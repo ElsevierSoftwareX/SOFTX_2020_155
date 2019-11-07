@@ -13,8 +13,6 @@
 #include <linux/slab.h>
 #include <linux/delay.h>
 #include <linux/string.h>
-#include </usr/src/linux/arch/x86/include/asm/processor.h>
-#include </usr/src/linux/arch/x86/include/asm/cacheflush.h>
 #include <linux/timer.h>
 #include <linux/ctype.h>
 
@@ -76,7 +74,7 @@ static int mysysstatus;
 //
 //
 // ************************************************************************
-inline unsigned long current_time(void) {
+inline unsigned long my_current_time(void) {
 // ************************************************************************
     struct timespec t;
         extern struct timespec current_kernel_time(void);
@@ -133,7 +131,7 @@ int monitorActiveConnections(void *data)
 		}
 		// Get current GPS time
 		// Sent to EPICS as indicator switch code running
-		mycounter[9] = current_time();
+		mycounter[9] = my_current_time();
 		// Check traffic for all data xfer threads
 		// and set thread status bits.
 		swstatus = 0;
@@ -310,13 +308,13 @@ void *copyRfmDataEY2CS1(void *arg)
 // ************************************************************************
 // Following 3 routines are required Dolphin connection callbacks.
 // ************************************************************************
-signed32 session_callback(session_cb_arg_t IN arg,
+int32_t session_callback(session_cb_arg_t IN arg,
 			  session_cb_reason_t IN reason,
 			  session_cb_status_t IN status,
-			  unsigned32 IN target_node,
-			  unsigned32 IN local_adapter_number) {
+			  uint32_t IN target_node,
+			  uint32_t IN local_adapter_number) {
 // ************************************************************************
-  printkl("Session callback reason=%d status=%d target_node=%d\n", reason, status, target_node);
+  printk("Session callback reason=%d status=%d target_node=%d\n", reason, status, target_node);
   // if (reason == SR_OK) iop_rfm_valid = 1;
   // This is being called when the one of the other nodes is prepared for shutdown
   // :TODO: may need to check target_node == <our local node>
@@ -325,22 +323,22 @@ signed32 session_callback(session_cb_arg_t IN arg,
 }
 
 // ************************************************************************
-signed32 connect_callback(void IN *arg,
+int32_t connect_callback(void IN *arg,
 			  sci_r_segment_handle_t IN remote_segment_handle,
-			  unsigned32 IN reason, unsigned32 IN status) {
+			  uint32_t IN reason, uint32_t IN status) {
 // ************************************************************************
-  printkl("Connect callback reason=%d status=%d\n", reason, status);
+  printk("Connect callback reason=%d status=%d\n", reason, status);
   return 0;
 }
 
 // ************************************************************************
-signed32 create_segment_callback(void IN *arg,
+int32_t create_segment_callback(void IN *arg,
 				 sci_l_segment_handle_t IN local_segment_handle,
-				 unsigned32 IN reason,
-				 unsigned32 IN source_node,
-				 unsigned32 IN local_adapter_number)  {
+				 uint32_t IN reason,
+				 uint32_t IN source_node,
+				 uint32_t IN local_adapter_number)  {
 // ************************************************************************
-  printkl("Create segment callback reason=%d source_node=%d\n", reason, source_node);
+  printk("Create segment callback reason=%d source_node=%d\n", reason, source_node);
   return 0;
 }
 
@@ -502,7 +500,7 @@ int cdsrfm_proc_open(struct inode *sp_inode,struct file *sp_file) {
 // ************************************************************************
 	// printk("proc called open \n");
 	read_p = 1;
-	message = kmalloc(sizeof(char)*128,__GFP_WAIT|__GFP_IO|__GFP_FS);
+	message = kmalloc(sizeof(char)*128,__GFP_RECLAIM|__GFP_IO|__GFP_FS);
 	if(message == NULL) {
 		printk("ERROR counter proc open\n");
 		return -ENOMEM;
@@ -594,25 +592,25 @@ static int __init lr_switch_init(void)
 
 	// Starting data switching threads   *****************************************************
 	// Start thread which moves data for RFM0 IPC channels 0 - 31
-	printk("Shutting down CPU 3 at %ld\n",current_time());
+	printk("Shutting down CPU 3 at %ld\n",my_current_time());
 	set_fe_code_idle(copyRfmDataEX2CS0,3);
 	msleep(100);
 	cpu_down(3);
 
 	// Start thread which moves data for RFM0 IPC channels 32 -63 
-	printk("Shutting down CPU 4 at %ld\n",current_time());
+	printk("Shutting down CPU 4 at %ld\n",my_current_time());
 	set_fe_code_idle(copyRfmDataEX2CS1,4);
 	msleep(100);
 	cpu_down(4);
 
 	// Start thread which moves data for RFM1 IPC channels 0 - 31
-	printk("Shutting down CPU 5 at %ld\n",current_time());
+	printk("Shutting down CPU 5 at %ld\n",my_current_time());
 	set_fe_code_idle(copyRfmDataEY2CS0,5);
 	msleep(100);
 	cpu_down(5);
 
 	// Start thread which moves data for RFM1 IPC channels 32 - 63
-	printk("Shutting down CPU 6 at %ld\n",current_time());
+	printk("Shutting down CPU 6 at %ld\n",my_current_time());
 	set_fe_code_idle(copyRfmDataEY2CS1,6);
 	msleep(100);
 	cpu_down(6);
@@ -639,7 +637,7 @@ static void __exit lr_switch_exit(void)
 // ************************************************************************
 {
   int ret;
-  extern int __cpuinit cpu_up(unsigned int cpu);
+  extern int cpu_up(unsigned int cpu);
 	printk(KERN_INFO "Goodbye, cdsrfmswitch 3 is shutting down\n");
 
 	// Stop the Active Channel monitor thread
@@ -665,31 +663,31 @@ static void __exit lr_switch_exit(void)
 
 	// Bring CPU 3 back on line
 	set_fe_code_idle(0, 3);
-	printkl("Will bring back CPU %d\n", 3);
+	printk("Will bring back CPU %d\n", 3);
 	msleep(1000);
 	cpu_up(3);
-	printkl("Brought CPU 3 back up\n");
+	printk("Brought CPU 3 back up\n");
 
 	// Bring CPU 4 back on line
 	set_fe_code_idle(0, 4);
-	printkl("Will bring back CPU %d\n", 4);
+	printk("Will bring back CPU %d\n", 4);
 	msleep(1000);
 	cpu_up(4);
-	printkl("Brought CPU 4 back up\n");
+	printk("Brought CPU 4 back up\n");
 
 	// Bring CPU 5 back on line
 	set_fe_code_idle(0, 5);
-	printkl("Will bring back CPU %d\n", 5);
+	printk("Will bring back CPU %d\n", 5);
 	msleep(1000);
 	cpu_up(5);
-	printkl("Brought CPU 5 back up\n");
+	printk("Brought CPU 5 back up\n");
 
 	// Bring CPU 6 back on line
 	set_fe_code_idle(0, 6);
-	printkl("Will bring back CPU %d\n", 6);
+	printk("Will bring back CPU %d\n", 6);
 	msleep(1000);
 	cpu_up(6);
-	printkl("Brought CPU 6 back up\n");
+	printk("Brought CPU 6 back up\n");
 	msleep(1000);
 
 	// Remove /proc file entries
