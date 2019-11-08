@@ -556,7 +556,6 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
       }
     }
 
-#if 0
 /// \> Update duotone diag information
     if(syncSource == SYNC_SRC_TDS) 
     {
@@ -594,7 +593,6 @@ for(usloop=0;usloop<UNDERSAMPLE;usloop++)
         CDIO1616Input[0] = contec1616WriteOutputRegister(&cdsPciModules, tdsControl[0], CDIO1616Output[0]);
       }
     }
-#endif
 
 // *****************************************************************
 /// \> Cycle 18, Send timing info to EPICS at 1Hz
