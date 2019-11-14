@@ -1,5 +1,5 @@
 inline int
-waitPcieTimingSignal( TIMING_SIGNAL* timePtr, int cycle )
+waitPcieTimingSignal( volatile TIMING_SIGNAL* timePtr, int cycle )
 {
     int loop = 0;
 
@@ -14,7 +14,7 @@ waitPcieTimingSignal( TIMING_SIGNAL* timePtr, int cycle )
         return ( 0 );
 }
 inline unsigned int
-sync2master( TIMING_SIGNAL* timePtr )
+sync2master( volatile TIMING_SIGNAL* timePtr )
 {
     int loop = 0;
     int cycle = 0;
@@ -234,12 +234,11 @@ iop_dac_init( int errorPend[] )
 }
 
 inline int
-iop_dac_write( )
+iop_dac_write( void )
 {
     unsigned int* pDacData;
     int           ii, jj, mm;
     int           limit;
-    int           mask;
     int           num_outs;
     int           status = 0;
 

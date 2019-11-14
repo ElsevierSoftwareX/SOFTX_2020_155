@@ -5,6 +5,9 @@
 
 #define ADC_SS_ID       0x3101  ///< Subsystem ID to identify and locate module on PCI bus
 
+int gsc16ai64AdcStop(void);
+int gsc16ai64CheckAdcBuffer(int);
+int gsc16ai64Init(CDS_HARDWARE *, struct pci_dev *);
 
 /// Structure defining ADC module PCI register layout as per user manual
 typedef struct GSA_ADC_REG{

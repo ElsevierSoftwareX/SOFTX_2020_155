@@ -10,20 +10,20 @@ extern char *_daq_shm; ///< Pointer to DAQ base address in shared memory.
 struct rmIpcStr *dipc; ///< Pointer to DAQ IPC data in shared memory.
 struct cdsDaqNetGdsTpNum *tpPtr; ///< Pointer to TP table in shared memory.
 char *daqShmPtr;                 ///< Pointer to DAQ data in shared memory.
-char *pEpicsIntData; ///< Pointer to EPICS integer type data in shared memory.
-char *pEpicsDblData; ///< Pointer to EPICS double type data in shared memory.
+volatile char *pEpicsIntData; ///< Pointer to EPICS integer type data in shared memory.
+volatile char *pEpicsDblData; ///< Pointer to EPICS double type data in shared memory.
 unsigned int curDaqBlockSize; ///< Total DAQ data rate diag
 // Added to get EPICS data for RCG V2.8
-char *pEpicsInt; // Pointer to current DAQ data in shared memory.
-char *pEpicsInt1;
-float *pEpicsFloat; // Pointer to current DAQ data in shared memory.
-double *pEpicsDblData1;
+volatile char *pEpicsInt; // Pointer to current DAQ data in shared memory.
+volatile char *pEpicsInt1;
+volatile float *pEpicsFloat; // Pointer to current DAQ data in shared memory.
+volatile double *pEpicsDblData1;
 
-int daqConfig(struct DAQ_INFO_BLOCK *, struct DAQ_INFO_BLOCK *, char *);
+int daqConfig(volatile  DAQ_INFO_BLOCK *, volatile DAQ_INFO_BLOCK *, volatile char *);
 int loadLocalTable(DAQ_XFER_INFO *, DAQ_LKUP_TABLE[], int, DAQ_INFO_BLOCK *,
                    DAQ_RANGE *);
 int daqWrite(int, int, struct DAQ_RANGE, int, double *[], struct FILT_MOD *,
-             int, int[], double[], char *);
+             int, int[], double[], volatile char *);
 
 inline double htond(double in) {
   double retVal;
@@ -70,7 +70,7 @@ inline double htond(double in) {
 
 int daqWrite(int flag, int dcuId, DAQ_RANGE daqRange, int sysRate,
              double *pFloatData[], FILT_MOD *dspPtr, int netStatus,
-             int gdsMonitor[], double excSignal[], char *pEpics) {
+             int gdsMonitor[], double excSignal[], volatile char *pEpics) {
   int ii, jj, kk; /* Loop counters.			*/
   int status;     /* Return value from called routines.	*/
   unsigned int mydatatype;
@@ -536,13 +536,13 @@ int daqWrite(int flag, int dcuId, DAQ_RANGE daqRange, int sysRate,
       /// - ----  Write EPICS integer values to beginning of local write buffer
 
       if (dataInfo.cpyepics2times) {
-        memcpy((void *)pWriteBuffer, pEpicsIntData, dataInfo.cpyIntSize[0]);
+        memcpy((void *)pWriteBuffer, (void *)pEpicsIntData, dataInfo.cpyIntSize[0]);
         pEpicsInt = (char *)pWriteBuffer;
         pEpicsInt += dataInfo.cpyIntSize[0];
         pEpicsInt1 = pEpicsIntData + dataInfo.cpyIntSize[0] + 4;
-        memcpy(pEpicsInt, pEpicsInt1, dataInfo.cpyIntSize[1]);
+        memcpy((void *)pEpicsInt, (void *)pEpicsInt1, dataInfo.cpyIntSize[1]);
       } else {
-        memcpy((void *)pWriteBuffer, pEpicsIntData, dataInfo.cpyIntSize[0]);
+        memcpy((void *)pWriteBuffer, (void *)pEpicsIntData, dataInfo.cpyIntSize[0]);
       }
     }
     if (daqSlot == DAQ_XFER_CYCLE_DBL) {
@@ -921,7 +921,7 @@ int daqWrite(int flag, int dcuId, DAQ_RANGE daqRange, int sysRate,
 ///	@param[in] pEpics	Pointer to beginning of EPICS data.
 ///	@return	Size, in bytes, of DAQ data.
 // **************************************************************************************
-int daqConfig(DAQ_INFO_BLOCK *dataInfo, DAQ_INFO_BLOCK *pInfo, char *pEpics) {
+int daqConfig(volatile DAQ_INFO_BLOCK *dataInfo, volatile DAQ_INFO_BLOCK *pInfo, volatile char *pEpics) {
   int ii, jj;               // Loop counters
   int epicsIntXferSize = 0; // Size, in bytes, of EPICS integer type data.
   int dataLength = 0;       // Total size, in bytes, of data to be sent

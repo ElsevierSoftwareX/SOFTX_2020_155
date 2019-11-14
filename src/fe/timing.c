@@ -91,7 +91,7 @@ inline void initializeTimingDiags(timing_diag_t *timeinfo)
     timeinfo->cycleTime = 0;
 
 }
-inline void sendTimingDiags2Epics(CDS_EPICS *pLocalEpics, 
+inline void sendTimingDiags2Epics(volatile CDS_EPICS *pLocalEpics, 
                                   timing_diag_t *timeinfo,
                                   adcInfo_t *adcinfo)
 {

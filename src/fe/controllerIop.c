@@ -37,7 +37,7 @@
 
 
 #if defined (TIME_MASTER) || defined (TIME_SLAVE)
-TIMING_SIGNAL *pcieTimer;
+volatile TIMING_SIGNAL *pcieTimer;
 #endif
 
 
@@ -98,7 +98,7 @@ void *fe_start_iop(void *arg)
   static int cpuClock[CPU_TIMER_CNT];	///  @param cpuClock[] Code timing diag variables
 
   int sync21ppsCycles = 0;		/// @param sync32ppsCycles Number of attempts to sync to 1PPS
-  RFM_FE_COMMS *pEpicsComms;		/// @param *pEpicsComms Pointer to EPICS shared memory space
+  volatile RFM_FE_COMMS *pEpicsComms;		/// @param *pEpicsComms Pointer to EPICS shared memory space
   int status;				/// @param status Typical function return value
   float onePps;				/// @param onePps Value of 1PPS signal, if used, for diagnostics
   int onePpsHi = 0;			/// @param onePpsHi One PPS diagnostic check
@@ -128,6 +128,7 @@ void *fe_start_iop(void *arg)
 
   int usloop=1;
   double adcval[MAX_ADC_MODULES][MAX_ADC_CHN_PER_MOD];
+  adcInfo_t *padcinfo;
   
 
 
@@ -144,11 +145,11 @@ void *fe_start_iop(void *arg)
   fz_daz(); /// \> Kill the denorms!
 
   /// \> Init comms with EPICS processor */
-  pEpicsComms = (RFM_FE_COMMS *)_epics_shm;
-  pLocalEpics = (CDS_EPICS *)&pEpicsComms->epicsSpace;
-  pEpicsDaq = (char *)&(pLocalEpics->epicsOutput);
+  pEpicsComms = (volatile RFM_FE_COMMS *)_epics_shm;
+  pLocalEpics = (volatile CDS_EPICS *)&pEpicsComms->epicsSpace;
+  pEpicsDaq = (volatile char *)&(pLocalEpics->epicsOutput);
 
-adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
+  padcinfo = (adcInfo_t *)&adcinfo;
 #ifdef OVERSAMPLE
   /// \> Zero out filter histories
   memset(dHistory, 0, sizeof(dHistory));
@@ -183,10 +184,10 @@ adcInfo_t *padcinfo = (adcInfo_t *)&adcinfo;
 
 
 #ifdef TIME_MASTER 
-  pcieTimer = (TIMING_SIGNAL *) ((volatile char *)(cdsPciModules.dolphinWrite[0]) + IPC_PCIE_TIME_OFFSET);
+  pcieTimer = (volatile TIMING_SIGNAL *) ((volatile char *)(cdsPciModules.dolphinWrite[0]) + IPC_PCIE_TIME_OFFSET);
 #endif
 #ifdef TIME_SLAVE 
-  pcieTimer = (TIMING_SIGNAL *) ((volatile char *)(cdsPciModules.dolphinRead[0]) + IPC_PCIE_TIME_OFFSET);
+  pcieTimer = (volatile TIMING_SIGNAL *) ((volatile char *)(cdsPciModules.dolphinRead[0]) + IPC_PCIE_TIME_OFFSET);
 syncSource = SYNC_SRC_DOLPHIN;
 #endif
 

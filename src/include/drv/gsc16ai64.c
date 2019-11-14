@@ -115,7 +115,7 @@ int gsc16ai64CheckDmaDone(int module)
 ///	@return ADC DMA Status (0=not complete, 16=complete
 /// Note: This function not presently used.
 // *****************************************************************************
-int gsc16ai64WaitDmaDone(int module, int *data)
+int gsc16ai64WaitDmaDone(int module, volatile int *data)
 {
         do{
         }while((adcDma[module]->DMA_CSR & GSAI_DMA_DONE) == 0);

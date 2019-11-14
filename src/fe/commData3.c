@@ -322,7 +322,7 @@ INLINE void commData3Send(
     if ( lastPcie >= 0 )
     {
         clflush_cache_range(
-            &( ipcInfo[ lastPcie ]
+            (void *)&( ipcInfo[ lastPcie ]
                    .pIpcDataWrite[ 0 ]
                    ->dBlock[ sendBlock ][ ipcInfo[ lastPcie ].ipcNum ]
                    .data ),
@@ -381,7 +381,7 @@ INLINE void commData3Send(
     if ( lastPcie >= 0 )
     {
         clflush_cache_range(
-            &( ipcInfo[ lastPcie ]
+            (void *)&( ipcInfo[ lastPcie ]
                    .pIpcDataWrite[ 0 ]
                    ->dBlock[ sendBlock ][ ipcInfo[ lastPcie ].ipcNum ]
                    .data ),
