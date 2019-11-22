@@ -4389,6 +4389,7 @@ Organization of generating waveforms:
       double		dt;		/* dt */
       double		t;		/* t of ramp */
       double		dur;		/* duration of ramp */
+      double        r;          /* ramp weight.  fraction of old gain to use in current gain */
    
       gain = &AWG[ID].gain;
    
@@ -4423,12 +4424,16 @@ Organization of generating waveforms:
       t = (double)((time * _ONESEC + epoch * _EPOCH) - 
                   gain->rampstart) / __ONESEC;
       dur = (double)(gain->ramptime) / __ONESEC;
-      g = gain->current;
-      dg = (gain->value - gain->old) / dur;
+
+
+
       /* compute ramp */
       for (i = 0; i < imax; ++i) {
-         g = (t <= 0 ? gain->old : 
-             (t >= dur ? gain->value : gain->old + t * dg));
+          double q = t/ dur;  /* fraction of ramp time that has transpired */
+          q = q * q;  /* square it, because the ramp formula only uses q^4 and q^2 terms */
+         r = (t <= 0 ? 1.0 :
+             (t >= dur ? 0.0 : (-q*q + 2 * q))); /* formula taken from awgPhaseIn() in awgfunc.c */
+         g = (1-r) * gain->old + r * gain->value;
          vp[i] *= g;
          t += dt;
       }

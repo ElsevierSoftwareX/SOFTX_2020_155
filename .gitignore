@@ -7,6 +7,9 @@
 *.o
 *.a
 
+#auto generated files
+*modules.order
+
 # build areas
 cmake-build-*
 
@@ -28,3 +31,6 @@ src/daqd/config/install-sh
 src/daqd/config/ltmain.sh
 src/daqd/m4
 src/daqd/autom4te.cache
+
+# some project files
+advligorts.src*
