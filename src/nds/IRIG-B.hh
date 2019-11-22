@@ -10,18 +10,18 @@ class ostream;
 //
 //    IRIG-B class.
 //
-class IrigB : public DatEnv {
+class IrigB : public DatEnv
+{
 public:
-    int MaxFrame;                         //  Number of frames to process
-    
-    IrigB(int argc, const char *argv[]);  // Constructor
+    int MaxFrame; //  Number of frames to process
 
-    ~IrigB();                             // Destructor
+    IrigB( int argc, const char* argv[] ); // Constructor
 
-    void ProcessData(void);
+    ~IrigB( ); // Destructor
+
+    void ProcessData( void );
 
 private:
-
 };
 
-#endif     //  IRIGB_HH
+#endif //  IRIGB_HH

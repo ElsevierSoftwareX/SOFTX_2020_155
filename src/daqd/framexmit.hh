@@ -76,7 +76,7 @@
     The main features are:
     \begin{verbatim}
     - UDP/IP broadcast protocol using propritary packets
-    - optmized for high speed links and bulk data transfer 
+    - optmized for high speed links and bulk data transfer
     - reliable; uses UDP/IP retransmission packets
     - quality of service implemented in the receiver
     - simple buffer management
@@ -89,7 +89,6 @@
     @author Written August 1999, by Daniel Sigg
     @version 3.0
 ************************************************************************/
-
 
 /*@{*/
 

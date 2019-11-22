@@ -3,17 +3,22 @@
 #include <string>
 
 /// Epics soft IOC Channel Server
-class epicsServer {
+class epicsServer
+{
 public:
-  epicsServer () : running (0), prefix(""), prefix1(""), prefix2("") {};
-  void *epics_main ();
-  static void *epics_static (void *a) { return ((epicsServer *)a) -> epics_main ();};
+    epicsServer( ) : running( 0 ), prefix( "" ), prefix1( "" ), prefix2( "" ){};
+    void* epics_main( );
+    static void*
+    epics_static( void* a )
+    {
+        return ( (epicsServer*)a )->epics_main( );
+    };
 
-  pthread_t tid;
-  bool running;
-  std::string prefix;
-  std::string prefix1;
-  std::string prefix2;
+    pthread_t   tid;
+    bool        running;
+    std::string prefix;
+    std::string prefix1;
+    std::string prefix2;
 };
 
 #endif

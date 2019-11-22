@@ -50,54 +50,55 @@ do_server( char* buffer, int buffer_size )
         SCIMemCpy(
             sequence, buffer, remoteMap, 0, buffer_size, memcpyFlag, &error );
         SCIFlush( sequence, SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY );
-        printf("%d\n", i);
+        printf( "%d\n", i );
         sleep( 1 );
     }
 }
 
 char
-to_hex_nibble(int ch)
+to_hex_nibble( int ch )
 {
     ch = ch & 0x0f;
-    if (ch < 10)
+    if ( ch < 10 )
     {
         return '0' + ch;
     }
-    return 'a' + (ch - 10);
+    return 'a' + ( ch - 10 );
 }
 
 void
-print_hex(int ch)
+print_hex( int ch )
 {
-    printf("%c%c", to_hex_nibble( (ch&0x0f0) >> 4) , to_hex_nibble( ch &0x0f ));
+    printf( "%c%c",
+            to_hex_nibble( ( ch & 0x0f0 ) >> 4 ),
+            to_hex_nibble( ch & 0x0f ) );
 }
-
 
 void
 do_client( char* buffer, int buffer_size, int do_dump )
 {
     int i = 0;
-    while (!done)
+    while ( !done )
     {
-        memcpy(buffer, (const void*)readAddr, buffer_size);
+        memcpy( buffer, (const void*)readAddr, buffer_size );
 
-        if (do_dump)
+        if ( do_dump )
         {
-            printf("\n");
-            for (i = 0; i < 64; ++i)
+            printf( "\n" );
+            for ( i = 0; i < 64; ++i )
             {
-                if (i%4 == 0 && (i != 0 && i != 32))
+                if ( i % 4 == 0 && ( i != 0 && i != 32 ) )
                 {
-                    printf(" ");
+                    printf( " " );
                 }
-                if (i == 32)
+                if ( i == 32 )
                 {
-                    printf("\n");
+                    printf( "\n" );
                 }
-                printf(" ");
-                print_hex((int)(buffer[i]));
+                printf( " " );
+                print_hex( (int)( buffer[ i ] ) );
             }
-            printf("\n");
+            printf( "\n" );
         }
         else
         {
@@ -111,7 +112,7 @@ do_client( char* buffer, int buffer_size, int do_dump )
                 }
             }
         }
-        usleep(1000*250);
+        usleep( 1000 * 250 );
     }
 }
 
@@ -122,7 +123,7 @@ usage( const char* prog_name )
     printf( "\t-g <num> - dolphin group number\n" );
     printf( "\t-s - server side of the test\n" );
     printf( "\t-c - client side of the test\n" );
-    printf( "\t-d - client side, dump data instead of checking buffer\n");
+    printf( "\t-d - client side, dump data instead of checking buffer\n" );
     printf( "\n" );
 }
 

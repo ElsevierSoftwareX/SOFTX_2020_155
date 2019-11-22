@@ -42,93 +42,113 @@
 
 #ifndef __CINT__
 
-namespace gdsbase {
+namespace gdsbase
+{
 
+    /** @name Smart pointer which implements reference counting.
+        This pointer can be copied and used as an object for standard
+        containers. This smart pointer adopts the object and will free
+        it when the last pointer to it gets destroyed.
 
-/** @name Smart pointer which implements reference counting. 
-    This pointer can be copied and used as an object for standard
-    containers. This smart pointer adopts the object and will free
-    it when the last pointer to it gets destroyed.
-   
-    @memo Smart pointer with reference counting
-    @author Written November 2001 by Daniel Sigg
-    @version 1.0
- ************************************************************************/
-template <class T>
-   class ref_ptr {
-   public:
-      /// Value type
-      typedef T value_type;
-      /// Pointer type
-      typedef T* pointer_type;
-      /// Const pointer type
-      typedef const T* const_pointer_type;
-      /// Reference type
-      typedef T& reference_type;
-      /// Const reference type
-      typedef const T& const_reference_type;
-      /// Reference counter
-      typedef dynamic_ref_counter<T> ref_counter;
-   
-      /** Creates a NULL pointer.
-          @memo Default constructor
-       ******************************************************************/
-      ref_ptr() : fPtr (0) {
-      }
-      /** Creates an pointer and adopts the object.
-          @memo Constructor
-          @param obj Object to be adopted
-          @param array Set true if array delete has to be used
-       ******************************************************************/
-      explicit ref_ptr (T* obj, bool array = false) : fPtr (0) {
-         reset (obj, array); }
-   
-      /** Dereference operator.
-          @memo Dereference oprator
-       ******************************************************************/
-      reference_type operator*() {
-         return *get(); }
-      /** Dereference operator.
-          @memo Dereference oprator
-       ******************************************************************/
-      const_reference_type operator*() const {
-         return *get(); }
-      /** Member access oprator.
-          @memo Member access oprator
-       ******************************************************************/
-      pointer_type operator->() {
-         return get(); }
-      /** Member access oprator.
-          @memo Member access oprator
-       ******************************************************************/
-      const_pointer_type operator->() const {
-         return get(); }
-      /** Get a pointer.
-          @memo Get
-       ******************************************************************/
-      pointer_type get() {
-         return fPtr; }
-      /** Get a pointer.
-          @memo Get
-       ******************************************************************/
-      const_pointer_type get() const {
-         return fPtr; }
-      /** Set pointer.
-          @memo Reset
-       ******************************************************************/
-      void reset (T* obj = 0, bool array = false) {
-         fPtr = obj; fCount = ref_counter (obj, array); }
-   
-   private:
-      /// Pointer to object
-      T*		fPtr;
-      /// Reference count
-      ref_counter	fCount;
-   };
+        @memo Smart pointer with reference counting
+        @author Written November 2001 by Daniel Sigg
+        @version 1.0
+     ************************************************************************/
+    template < class T >
+    class ref_ptr
+    {
+    public:
+        /// Value type
+        typedef T value_type;
+        /// Pointer type
+        typedef T* pointer_type;
+        /// Const pointer type
+        typedef const T* const_pointer_type;
+        /// Reference type
+        typedef T& reference_type;
+        /// Const reference type
+        typedef const T& const_reference_type;
+        /// Reference counter
+        typedef dynamic_ref_counter< T > ref_counter;
 
+        /** Creates a NULL pointer.
+            @memo Default constructor
+         ******************************************************************/
+        ref_ptr( ) : fPtr( 0 )
+        {
+        }
+        /** Creates an pointer and adopts the object.
+            @memo Constructor
+            @param obj Object to be adopted
+            @param array Set true if array delete has to be used
+         ******************************************************************/
+        explicit ref_ptr( T* obj, bool array = false ) : fPtr( 0 )
+        {
+            reset( obj, array );
+        }
 
-}
+        /** Dereference operator.
+            @memo Dereference oprator
+         ******************************************************************/
+        reference_type operator*( )
+        {
+            return *get( );
+        }
+        /** Dereference operator.
+            @memo Dereference oprator
+         ******************************************************************/
+        const_reference_type operator*( ) const
+        {
+            return *get( );
+        }
+        /** Member access oprator.
+            @memo Member access oprator
+         ******************************************************************/
+        pointer_type operator->( )
+        {
+            return get( );
+        }
+        /** Member access oprator.
+            @memo Member access oprator
+         ******************************************************************/
+        const_pointer_type operator->( ) const
+        {
+            return get( );
+        }
+        /** Get a pointer.
+            @memo Get
+         ******************************************************************/
+        pointer_type
+        get( )
+        {
+            return fPtr;
+        }
+        /** Get a pointer.
+            @memo Get
+         ******************************************************************/
+        const_pointer_type
+        get( ) const
+        {
+            return fPtr;
+        }
+        /** Set pointer.
+            @memo Reset
+         ******************************************************************/
+        void
+        reset( T* obj = 0, bool array = false )
+        {
+            fPtr = obj;
+            fCount = ref_counter( obj, array );
+        }
+
+    private:
+        /// Pointer to object
+        T* fPtr;
+        /// Reference count
+        ref_counter fCount;
+    };
+
+} // namespace gdsbase
 
 #endif // __CINT__
 #endif // _LIGO_REF_PTR_H
-

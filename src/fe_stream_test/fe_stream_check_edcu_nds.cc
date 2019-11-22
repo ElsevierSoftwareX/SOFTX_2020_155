@@ -48,7 +48,8 @@ usage( const char* progname )
     cout << "If -c is specified a the random number generator can be seeded\n";
     cout << "manually with the -s option.  If not specified it will be\n";
     cout << "randomly seeded.\n";
-    cout << "\nTo read live data, specify a start time of 0 and use stop as a duration\n";
+    cout << "\nTo read live data, specify a start time of 0 and use stop as a "
+            "duration\n";
 
     exit( 1 );
 }
@@ -149,17 +150,17 @@ get_nds_channels( Config& cfg )
 }
 
 bool
-is_generated_channel(const NDS::channel& chan)
+is_generated_channel( const NDS::channel& chan )
 {
-    static const std::string slow("--16");
-    static const std::string spacer("--");
+    static const std::string slow( "--16" );
+    static const std::string spacer( "--" );
 
-    auto pos = chan.Name().rfind(slow);
-    if (pos == std::string::npos)
+    auto pos = chan.Name( ).rfind( slow );
+    if ( pos == std::string::npos )
     {
         return false;
     }
-    return pos == chan.Name().size() - slow.size();
+    return pos == chan.Name( ).size( ) - slow.size( );
 }
 
 std::vector< GeneratorPtr >
@@ -184,7 +185,8 @@ load_generators( Config& cfg )
             {
                 index = dist( robj );
             } while ( std::find( indexes.begin( ), indexes.end( ), index ) !=
-                      indexes.end( ) && is_generated_channel(channels[i]) );
+                          indexes.end( ) &&
+                      is_generated_channel( channels[ i ] ) );
             indexes.push_back( index );
             cfg.channels.push_back( channels[ index ].Name( ) );
         }
@@ -202,13 +204,14 @@ load_generators( Config& cfg )
     return generators;
 }
 
-template <typename It, typename T= typename std::iterator_traits<It>::value_type>
+template < typename It,
+           typename T = typename std::iterator_traits< It >::value_type >
 bool
-contains_only(It it1, It it2, T val)
+contains_only( It it1, It it2, T val )
 {
-    for (; it1 != it2; ++it1 )
+    for ( ; it1 != it2; ++it1 )
     {
-        if (*it1 != val)
+        if ( *it1 != val )
         {
             return false;
         }
@@ -217,38 +220,41 @@ contains_only(It it1, It it2, T val)
 }
 
 bool
-buffer_contains_only(const NDS::buffer& buf, float value)
+buffer_contains_only( const NDS::buffer& buf, float value )
 {
-    if (buf.DataType() == NDS::channel::DATA_TYPE_FLOAT32)
+    if ( buf.DataType( ) == NDS::channel::DATA_TYPE_FLOAT32 )
     {
-        return contains_only(buf.cbegin<float>(), buf.cend<float>(), value);
+        return contains_only(
+            buf.cbegin< float >( ), buf.cend< float >( ), value );
     }
-    return contains_only(buf.cbegin<std::int32_t>(), buf.cend<std::int32_t>(), static_cast<std::int32_t>(value));
+    return contains_only( buf.cbegin< std::int32_t >( ),
+                          buf.cend< std::int32_t >( ),
+                          static_cast< std::int32_t >( value ) );
 }
 
-template <typename It1, typename It2>
+template < typename It1, typename It2 >
 bool
-blended_compare(It1 begin1, It1 end1, It1 begin2, It2 begin3)
+blended_compare( It1 begin1, It1 end1, It1 begin2, It2 begin3 )
 {
     It1 cur1 = begin1;
     It1 cur2 = begin2;
     It2 cur3 = begin3;
 
-    It1 cur = cur1;
+    It1  cur = cur1;
     bool switched = false;
 
-    for (;cur1 != end1; )
+    for ( ; cur1 != end1; )
     {
-        if (*cur != *cur3)
+        if ( *cur != *cur3 )
         {
-            if (switched)
+            if ( switched )
             {
                 return false;
             }
             switched = true;
             cur = cur2;
 
-            if (*cur != *cur3)
+            if ( *cur != *cur3 )
             {
                 return false;
             }
@@ -262,101 +268,107 @@ blended_compare(It1 begin1, It1 end1, It1 begin2, It2 begin3)
     return true;
 }
 
-template<typename T>
+template < typename T >
 void
-test_channel_by_type(const NDS::buffer& buf, GeneratorPtr& gen, T tag)
+test_channel_by_type( const NDS::buffer& buf, GeneratorPtr& gen, T tag )
 {
-    NDS::buffer::gps_second_type start = buf.Start();
-    NDS::buffer::gps_second_type end = buf.Stop();
+    NDS::buffer::gps_second_type start = buf.Start( );
+    NDS::buffer::gps_second_type end = buf.Stop( );
 
-    for (NDS::buffer::gps_second_type cur = start; cur != end; ++cur)
+    for ( NDS::buffer::gps_second_type cur = start; cur != end; ++cur )
     {
-        std::array<T, 16> buf1{};
-        std::array<T, 16> buf2{};
+        std::array< T, 16 > buf1{};
+        std::array< T, 16 > buf2{};
 
-        char* ptr1 = reinterpret_cast<char*>(buf1.data());
-        char* ptr2 = reinterpret_cast<char*>(buf2.data());
+        char* ptr1 = reinterpret_cast< char* >( buf1.data( ) );
+        char* ptr2 = reinterpret_cast< char* >( buf2.data( ) );
 
         int nano = 0;
-        int   step = 1000000000 / 16;
-        for (int i = 0; i < 16; ++i)
+        int step = 1000000000 / 16;
+        for ( int i = 0; i < 16; ++i )
         {
-            ptr1 = gen->generate( cur-1, nano,  ptr1);
-            ptr2 = gen->generate( cur, nano,  ptr2);
+            ptr1 = gen->generate( cur - 1, nano, ptr1 );
+            ptr2 = gen->generate( cur, nano, ptr2 );
         }
 
-        const T* ptr3 = buf.cbegin<T>() + (16*(cur-start));
-        if (!blended_compare(buf1.begin(), buf1.end(), buf2.begin(), ptr3))
+        const T* ptr3 = buf.cbegin< T >( ) + ( 16 * ( cur - start ) );
+        if ( !blended_compare(
+                 buf1.begin( ), buf1.end( ), buf2.begin( ), ptr3 ) )
         {
-            std::cerr << "Unexpected data found on " << buf.Name() << "\n";
+            std::cerr << "Unexpected data found on " << buf.Name( ) << "\n";
             std::cerr << "prev: ";
-            for (int j = 0; j < buf1.size(); ++j)
+            for ( int j = 0; j < buf1.size( ); ++j )
             {
-                std::cerr << buf1[j] << " ";
+                std::cerr << buf1[ j ] << " ";
             }
             std::cerr << "\ncur: ";
-            for (int j = 0; j < buf2.size(); ++j)
+            for ( int j = 0; j < buf2.size( ); ++j )
             {
-                std::cerr << buf2[j] << " ";
+                std::cerr << buf2[ j ] << " ";
             }
             std::cerr << "\nact: ";
-            for (int j = 0; j < buf2.size(); ++j)
+            for ( int j = 0; j < buf2.size( ); ++j )
             {
-                std::cerr << ptr3[j] << " ";
+                std::cerr << ptr3[ j ] << " ";
             }
-            exit(1);
+            exit( 1 );
         }
     }
 }
 
 void
-require_channel_type(daq_data_t req_type, GeneratorPtr gen)
+require_channel_type( daq_data_t req_type, GeneratorPtr gen )
 {
-    if (static_cast<int>(req_type) != gen->data_type())
+    if ( static_cast< int >( req_type ) != gen->data_type( ) )
     {
-        throw std::runtime_error("Mismatch of channel and generator types");
+        throw std::runtime_error( "Mismatch of channel and generator types" );
     }
 }
 
 void
-test_channel(const NDS::buffer& buf, GeneratorPtr& gen)
+test_channel( const NDS::buffer& buf, GeneratorPtr& gen )
 {
-    switch (buf.DataType())
+    switch ( buf.DataType( ) )
     {
-        case NDS::channel::DATA_TYPE_FLOAT64:
-            require_channel_type(_64bit_double, gen);
-            test_channel_by_type<double>(buf, gen, 0.);
-            break;
-        case NDS::channel::DATA_TYPE_FLOAT32:
-            require_channel_type(_32bit_float, gen);
-            test_channel_by_type<float>(buf, gen, 0.f);
-            break;
-        case NDS::channel::DATA_TYPE_INT32:
-            require_channel_type(_32bit_integer, gen);
-            test_channel_by_type<std::int32_t>(buf, gen, 0);
-            break;
-        case NDS::channel::DATA_TYPE_INT16:
-            require_channel_type(_16bit_integer, gen);
-            test_channel_by_type<std::int16_t>(buf, gen, 0);
-            break;
-        default:
-            throw std::runtime_error("Unsupported channel type");
+    case NDS::channel::DATA_TYPE_FLOAT64:
+        require_channel_type( _64bit_double, gen );
+        test_channel_by_type< double >( buf, gen, 0. );
+        break;
+    case NDS::channel::DATA_TYPE_FLOAT32:
+        require_channel_type( _32bit_float, gen );
+        test_channel_by_type< float >( buf, gen, 0.f );
+        break;
+    case NDS::channel::DATA_TYPE_INT32:
+        require_channel_type( _32bit_integer, gen );
+        test_channel_by_type< std::int32_t >( buf, gen, 0 );
+        break;
+    case NDS::channel::DATA_TYPE_INT16:
+        require_channel_type( _16bit_integer, gen );
+        test_channel_by_type< std::int16_t >( buf, gen, 0 );
+        break;
+    default:
+        throw std::runtime_error( "Unsupported channel type" );
     }
 }
 
 void
-test_channels( Config& cfg, NDS::parameters& params, std::vector< GeneratorPtr >& generators)
+test_channels( Config&                      cfg,
+               NDS::parameters&             params,
+               std::vector< GeneratorPtr >& generators )
 {
-    if (cfg.channels.size() != generators.size())
+    if ( cfg.channels.size( ) != generators.size( ) )
     {
         std::cerr << "Mismatch between the channels and the generators\n";
     }
-    auto stream = NDS::iterate( params, NDS::request_period(cfg.gps_start, cfg.gps_stop), cfg.channels );
-    for (const auto& bufs: stream)
+    auto stream =
+        NDS::iterate( params,
+                      NDS::request_period( cfg.gps_start, cfg.gps_stop ),
+                      cfg.channels );
+    for ( const auto& bufs : stream )
     {
         for ( int i = 0; i < generators.size( ); ++i )
         {
-            test_channel(bufs->at(i), generators[i]);
+            test_channel( bufs->at( i ), generators[ i ] );
         }
     }
 }
@@ -372,83 +384,106 @@ test_channel_counts( NDS::parameters&             params,
                      NDS::buffer::gps_second_type gps_stop )
 {
 
-    NDS::channels_type chans = NDS::find_channels( params, NDS::channel_predicate("*EDCU_CHAN_CONN", NDS::channel::CHANNEL_TYPE_ONLINE));
-    if (chans.size() != 1)
+    NDS::channels_type chans = NDS::find_channels(
+        params,
+        NDS::channel_predicate( "*EDCU_CHAN_CONN",
+                                NDS::channel::CHANNEL_TYPE_ONLINE ) );
+    if ( chans.size( ) != 1 )
     {
-        std::cerr << "Unexpected channel count when looking up chan_conn channel\n";
-        for (const auto& entry:chans)
+        std::cerr
+            << "Unexpected channel count when looking up chan_conn channel\n";
+        for ( const auto& entry : chans )
         {
-            std::cerr << "\n" << entry.NameLong();
+            std::cerr << "\n" << entry.NameLong( );
         }
         std::cerr << "\n";
-        exit(1);
+        exit( 1 );
     }
-    std::string chan_conn = chans[0].Name();
+    std::string chan_conn = chans[ 0 ].Name( );
 
-    chans = NDS::find_channels( params, NDS::channel_predicate("*EDCU_CHAN_NOCON", NDS::channel::CHANNEL_TYPE_ONLINE));
-    if (chans.size() != 1)
+    chans = NDS::find_channels(
+        params,
+        NDS::channel_predicate( "*EDCU_CHAN_NOCON",
+                                NDS::channel::CHANNEL_TYPE_ONLINE ) );
+    if ( chans.size( ) != 1 )
     {
-        std::cerr << "Unexpected channel count when looking up chan_nocon channel\n";
-        exit(1);
+        std::cerr
+            << "Unexpected channel count when looking up chan_nocon channel\n";
+        exit( 1 );
     }
-    std::string chan_nocon = chans[0].Name();
+    std::string chan_nocon = chans[ 0 ].Name( );
 
-    chans = NDS::find_channels( params, NDS::channel_predicate("*EDCU_CHAN_CNT", NDS::channel::CHANNEL_TYPE_ONLINE));
-    if (chans.size() != 1)
+    chans = NDS::find_channels(
+        params,
+        NDS::channel_predicate( "*EDCU_CHAN_CNT",
+                                NDS::channel::CHANNEL_TYPE_ONLINE ) );
+    if ( chans.size( ) != 1 )
     {
-        std::cerr << "Unexpected channel count when looking up chan_cnt channel\n";
-        exit(1);
+        std::cerr
+            << "Unexpected channel count when looking up chan_cnt channel\n";
+        exit( 1 );
     }
-    std::string chan_cnt = chans[0].Name();
+    std::string chan_cnt = chans[ 0 ].Name( );
 
     NDS::connection::channel_names_type channels;
-    channels.push_back(chan_conn);
-    channels.push_back(chan_nocon);
-    channels.push_back(chan_cnt);
+    channels.push_back( chan_conn );
+    channels.push_back( chan_nocon );
+    channels.push_back( chan_cnt );
     std::cout << "Channels:\n\t";
-    std::copy(channels.begin(), channels.end(), std::ostream_iterator<std::string>(std::cout, "\n\t"));
+    std::copy( channels.begin( ),
+               channels.end( ),
+               std::ostream_iterator< std::string >( std::cout, "\n\t" ) );
     std::cout << "\n";
 
     float expected_count = -1;
 
-    auto stream = NDS::iterate(params, NDS::request_period(gps_start, gps_stop), channels);
-    for (const auto& bufs:stream)
+    auto stream = NDS::iterate(
+        params, NDS::request_period( gps_start, gps_stop ), channels );
+    for ( const auto& bufs : stream )
     {
-        if (bufs->size() != 3)
+        if ( bufs->size( ) != 3 )
         {
-            std::cerr << "size is wrong " << bufs->size() << "\n";
+            std::cerr << "size is wrong " << bufs->size( ) << "\n";
         }
-        std::cerr << "sample count = " << bufs->at(2).Samples() << "\n";
+        std::cerr << "sample count = " << bufs->at( 2 ).Samples( ) << "\n";
 
-        if (expected_count < 0.0)
+        if ( expected_count < 0.0 )
         {
-            if (bufs->at(2).DataType() == NDS::channel::DATA_TYPE_FLOAT32) {
-                expected_count = bufs->at(2).at<float>(0);
-            } else {
-                expected_count = static_cast<float>(bufs->at(2).at<std::int32_t>(0));
+            if ( bufs->at( 2 ).DataType( ) == NDS::channel::DATA_TYPE_FLOAT32 )
+            {
+                expected_count = bufs->at( 2 ).at< float >( 0 );
+            }
+            else
+            {
+                expected_count = static_cast< float >(
+                    bufs->at( 2 ).at< std::int32_t >( 0 ) );
             }
             std::cerr << "Expected count == " << expected_count << "\n";
         }
 
-        if (!buffer_contains_only(bufs->at(2), expected_count))
+        if ( !buffer_contains_only( bufs->at( 2 ), expected_count ) )
         {
-            std::cout << "The channel count changed during the test timespan, it was not always " << expected_count << "\n";
-            exit(1);
+            std::cout << "The channel count changed during the test timespan, "
+                         "it was not always "
+                      << expected_count << "\n";
+            exit( 1 );
         }
 
-        if ( ! buffer_contains_only( bufs->at(1), 0.0f ) )
+        if ( !buffer_contains_only( bufs->at( 1 ), 0.0f ) )
         {
-            std::cout << "The channel noconn count changed during the test timespan, it was not always 0.\n";
-            exit(1);
+            std::cout << "The channel noconn count changed during the test "
+                         "timespan, it was not always 0.\n";
+            exit( 1 );
         }
 
-        if (!buffer_contains_only(bufs->at(0), expected_count))
+        if ( !buffer_contains_only( bufs->at( 0 ), expected_count ) )
         {
-            std::cout << "The connected count changed during the test timespan, it was not always " << expected_count << "\n";
-            exit(1);
+            std::cout << "The connected count changed during the test "
+                         "timespan, it was not always "
+                      << expected_count << "\n";
+            exit( 1 );
         }
     }
-
 }
 
 int
@@ -469,7 +504,8 @@ main( int argc, char* argv[] )
 
     int status = 0;
 
-    std::cout << "Checking data over " << cfg.gps_start << " - " << cfg.gps_stop << std::endl;
+    std::cout << "Checking data over " << cfg.gps_start << " - " << cfg.gps_stop
+              << std::endl;
 
     std::vector< std::shared_ptr< NDS::buffers_type > > data_from_nds;
     NDS::parameters                                     params(
@@ -477,7 +513,7 @@ main( int argc, char* argv[] )
 
     test_channel_counts( params, cfg.gps_start, cfg.gps_stop );
 
-    test_channels( cfg, params,  generators);
+    test_channels( cfg, params, generators );
 
     return status;
 }

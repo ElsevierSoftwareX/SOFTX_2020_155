@@ -1,2 +1,1 @@
-volatile void * findSharedMemory(char *);
-
+volatile void* findSharedMemory( char* );

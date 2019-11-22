@@ -338,24 +338,24 @@ main( int argc, char** argv )
     int              jj, kk;
     int              sendLength = 0;
 
-    int      min_cycle_time = 1 << 30;
-    int      pv_min_cycle_time = 0;
-    int      max_cycle_time = 0;
-    int      pv_max_cycle_time = 0;
-    int      mean_cycle_time = 0;
-    int      pv_mean_cycle_time = 0;
-    int      pv_dcu_count = 0;
-    int      pv_total_datablock_size = 0;
-    int      pv_datablock_size_mb_s = 0;
-    int      uptime = 0;
-    int      pv_uptime = 0;
-    int      gps_time = 0;
-    int      pv_gps_time = 0;
-    int      missed_flag = 0;
-    int64_t  min_recv_time = 0;
-    int64_t  cur_ref_time = 0;
-    int      festatus = 0;
-    int      pv_festatus = 0;
+    int     min_cycle_time = 1 << 30;
+    int     pv_min_cycle_time = 0;
+    int     max_cycle_time = 0;
+    int     pv_max_cycle_time = 0;
+    int     mean_cycle_time = 0;
+    int     pv_mean_cycle_time = 0;
+    int     pv_dcu_count = 0;
+    int     pv_total_datablock_size = 0;
+    int     pv_datablock_size_mb_s = 0;
+    int     uptime = 0;
+    int     pv_uptime = 0;
+    int     gps_time = 0;
+    int     pv_gps_time = 0;
+    int     missed_flag = 0;
+    int64_t min_recv_time = 0;
+    int64_t cur_ref_time = 0;
+    int     festatus = 0;
+    int     pv_festatus = 0;
 
     SimplePV pvs[] = {
         {

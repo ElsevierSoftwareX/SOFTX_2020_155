@@ -3,11 +3,12 @@
 
 #include <stats.hh>
 
-class producer_stats : public stats {
+class producer_stats : public stats
+{
 public:
-	~producer_stats();
+    ~producer_stats( );
 };
 
-producer_stats::~producer_stats() {};
+producer_stats::~producer_stats( ){};
 
 #endif

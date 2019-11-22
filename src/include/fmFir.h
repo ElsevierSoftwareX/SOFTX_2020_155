@@ -1,24 +1,24 @@
 #ifndef FM_FIR_HEADER_INCLUDED
 #define FM_FIR_HEADER_INCLUDED
 
-#define FIR_TAPS	512
+#define FIR_TAPS 512
 
-
-typedef struct PP_FIR{
-	int input;
-	float gain;
-	float limit;
-	float offset;
-	int limitSw;
-	int offsetSw;
-	int clearHistory;
-	int onOffSw;
-	int status;
-	double output;
-	int dsFiltNum;
-	int cmpFiltNum;
-	int usFiltNum;
-}PP_FIR;
+typedef struct PP_FIR
+{
+    int    input;
+    float  gain;
+    float  limit;
+    float  offset;
+    int    limitSw;
+    int    offsetSw;
+    int    clearHistory;
+    int    onOffSw;
+    int    status;
+    double output;
+    int    dsFiltNum;
+    int    cmpFiltNum;
+    int    usFiltNum;
+} PP_FIR;
 
 #if 0
 float firCoeff[FIR_TAPS] = {

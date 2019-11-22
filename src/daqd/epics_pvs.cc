@@ -6,4 +6,4 @@
  */
 #include "epics_pvs.hh"
 
-daqd_atomic_uint pvValue[PV::MAX_PV];
+daqd_atomic_uint pvValue[ PV::MAX_PV ];

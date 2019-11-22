@@ -5,7 +5,7 @@
 *     Operator of Los Alamos National Laboratory.
 * EPICS BASE Versions 3.13.7
 * and higher are distributed subject to a Software License Agreement found
-* in file LICENSE that is included with this distribution. 
+* in file LICENSE that is included with this distribution.
 \*************************************************************************/
 
 //
@@ -17,15 +17,17 @@
 //
 // exChannel::setOwner ()
 //
-void exChannel::setOwner(const char * const /* pUserName */, 
-        const char * const /* pHostName */)
+void
+exChannel::setOwner( const char* const /* pUserName */,
+                     const char* const /* pHostName */ )
 {
 }
 
 //
 // exChannel::readAccess ()
 //
-bool exChannel::readAccess () const
+bool
+exChannel::readAccess( ) const
 {
     return true;
 }
@@ -33,9 +35,8 @@ bool exChannel::readAccess () const
 //
 // exChannel::writeAccess ()
 //
-bool exChannel::writeAccess () const
+bool
+exChannel::writeAccess( ) const
 {
     return false;
 }
-
-

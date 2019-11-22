@@ -5,57 +5,61 @@
 #ifndef BASIC_IO_H
 #define BASIC_IO_H
 
-class basic_io {
- public:
-static ssize_t						/* Read "n" bytes from a descriptor. */
-readn(int fd, void *vptr, size_t n)
+class basic_io
 {
-	size_t	nleft;
-	ssize_t	nread;
-	char	*ptr;
+public:
+    static ssize_t /* Read "n" bytes from a descriptor. */
+    readn( int fd, void* vptr, size_t n )
+    {
+        size_t  nleft;
+        ssize_t nread;
+        char*   ptr;
 
-	ptr = (char *) vptr;
-	nleft = n;
-	while (nleft > 0) {
-		if ( (nread = read(fd, ptr, nleft)) < 0) {
-			if (errno == EINTR)
-				nread = 0;		/* and call read() again */
-			else
-				return(-1);
-		} else if (nread == 0)
-			break;				/* EOF */
+        ptr = (char*)vptr;
+        nleft = n;
+        while ( nleft > 0 )
+        {
+            if ( ( nread = read( fd, ptr, nleft ) ) < 0 )
+            {
+                if ( errno == EINTR )
+                    nread = 0; /* and call read() again */
+                else
+                    return ( -1 );
+            }
+            else if ( nread == 0 )
+                break; /* EOF */
 
-		nleft -= nread;
-		ptr   += nread;
-	}
-	return(n - nleft);		/* return >= 0 */
-}
-/* end readn */
+            nleft -= nread;
+            ptr += nread;
+        }
+        return ( n - nleft ); /* return >= 0 */
+    }
+    /* end readn */
 
-static ssize_t						/* Write "n" bytes to a descriptor. */
-writen(int fd, const void *vptr, size_t n)
-{
-	size_t		nleft;
-	ssize_t		nwritten;
-	const char	*ptr;
+    static ssize_t /* Write "n" bytes to a descriptor. */
+    writen( int fd, const void* vptr, size_t n )
+    {
+        size_t      nleft;
+        ssize_t     nwritten;
+        const char* ptr;
 
-	ptr = (char *) vptr;
-	nleft = n;
-	while (nleft > 0) {
-		if ( (nwritten = write(fd, ptr, nleft)) <= 0) {
-			if (errno == EINTR)
-				nwritten = 0;		/* and call write() again */
-			else
-				return(-1);			/* error */
-		}
+        ptr = (char*)vptr;
+        nleft = n;
+        while ( nleft > 0 )
+        {
+            if ( ( nwritten = write( fd, ptr, nleft ) ) <= 0 )
+            {
+                if ( errno == EINTR )
+                    nwritten = 0; /* and call write() again */
+                else
+                    return ( -1 ); /* error */
+            }
 
-		nleft -= nwritten;
-		ptr   += nwritten;
-	}
-	return(n);
-}
-/* end writen */
-
-
+            nleft -= nwritten;
+            ptr += nwritten;
+        }
+        return ( n );
+    }
+    /* end writen */
 };
 #endif

@@ -37,261 +37,305 @@ using namespace std;
 #include "sing_list.hh"
 #include "MyLexer.hh"
 
-void *interpreter_no_prompt (void *);
-void *interpreter (void *);
-void *strict_interpreter (void *);
-void *listener (void *);
+void* interpreter_no_prompt( void* );
+void* interpreter( void* );
+void* strict_interpreter( void* );
+void* listener( void* );
 
 extern daqd_c daqd;
 
 int
-net_listener::start_listener (ostream *yyout, int port, int pstrict)
+net_listener::start_listener( ostream* yyout, int port, int pstrict )
 {
-  listener_port = port;
-  this -> strict = pstrict;
-  // error message buffer
-  char errmsgbuf[80]; 
+    listener_port = port;
+    this->strict = pstrict;
+    // error message buffer
+    char errmsgbuf[ 80 ];
 
-  srvr_addr.sin_family = AF_INET;
-  srvr_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  srvr_addr.sin_port = htons (port);
-  pthread_attr_t attr;
-  pthread_attr_init (&attr);
-  pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-  pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
-  //  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
-  int err_no;
-  if (err_no = pthread_create (&tid, &attr, (void *(*)(void *))listener_static, (void *) this)) {
-    strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
-    pthread_attr_destroy (&attr);
-    system_log(1, "couldn't create listener thread; pthread_create() err = %s", errmsgbuf);    
-    return 1;
-  }
-  pthread_attr_destroy (&attr);
-  system_log(3, "listener created; port=%d strict=%d tid=%lx", port, pstrict, (long)tid);
-  return 0;
+    srvr_addr.sin_family = AF_INET;
+    srvr_addr.sin_addr.s_addr = htonl( INADDR_ANY );
+    srvr_addr.sin_port = htons( port );
+    pthread_attr_t attr;
+    pthread_attr_init( &attr );
+    pthread_attr_setscope( &attr, PTHREAD_SCOPE_SYSTEM );
+    pthread_attr_setstacksize( &attr, daqd.thread_stack_size );
+    //  pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+    int err_no;
+    if ( err_no = pthread_create(
+             &tid, &attr, (void* (*)(void*))listener_static, (void*)this ) )
+    {
+        strerror_r( err_no, errmsgbuf, sizeof( errmsgbuf ) );
+        pthread_attr_destroy( &attr );
+        system_log(
+            1,
+            "couldn't create listener thread; pthread_create() err = %s",
+            errmsgbuf );
+        return 1;
+    }
+    pthread_attr_destroy( &attr );
+    system_log( 3,
+                "listener created; port=%d strict=%d tid=%lx",
+                port,
+                pstrict,
+                (long)tid );
+    return 0;
 }
 
-void *
-net_listener::listener ()
-//listener (void * a)
+void*
+net_listener::listener( )
+// listener (void * a)
 {
-  // error message buffer
-  char errmsgbuf[80]; 
+    // error message buffer
+    char errmsgbuf[ 80 ];
 
-  const int on = 1;
-  int onlen = sizeof (on);
-  int srvr_addr_len;
-  // Set thread parameters
-  char my_thr_label[16];
-  int lport = ntohs (srvr_addr.sin_port);
-  sprintf(my_thr_label,"dql%.4d",lport);
-  char my_thr_name[80];
-  sprintf (my_thr_name,"listener port %.4d",lport);
-  daqd_c::set_thread_priority(my_thr_name,my_thr_label,0,0); 
+    const int on = 1;
+    int       onlen = sizeof( on );
+    int       srvr_addr_len;
+    // Set thread parameters
+    char my_thr_label[ 16 ];
+    int  lport = ntohs( srvr_addr.sin_port );
+    sprintf( my_thr_label, "dql%.4d", lport );
+    char my_thr_name[ 80 ];
+    sprintf( my_thr_name, "listener port %.4d", lport );
+    daqd_c::set_thread_priority( my_thr_name, my_thr_label, 0, 0 );
 
-  if ((listenfd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
+    if ( ( listenfd = socket( AF_INET, SOCK_STREAM, 0 ) ) < 0 )
     {
-      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
-      system_log(1, "listener: socket(); err=%s", errmsgbuf);
-      return NULL;
+        strerror_r( errno, errmsgbuf, sizeof( errmsgbuf ) );
+        system_log( 1, "listener: socket(); err=%s", errmsgbuf );
+        return NULL;
     }
-  setsockopt (listenfd, SOL_SOCKET, SO_REUSEADDR, (const char *) &on, sizeof (on));
+    setsockopt(
+        listenfd, SOL_SOCKET, SO_REUSEADDR, (const char*)&on, sizeof( on ) );
 
-  srvr_addr_len = sizeof (srvr_addr);
-  if (::bind (listenfd, (struct sockaddr *) &(srvr_addr), srvr_addr_len) < 0)
+    srvr_addr_len = sizeof( srvr_addr );
+    if ( ::bind( listenfd, (struct sockaddr*)&( srvr_addr ), srvr_addr_len ) <
+         0 )
     {
-      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
-      system_log(1, "listener: bind(%d); err=%s", srvr_addr.sin_port, errmsgbuf);
-      return NULL;
+        strerror_r( errno, errmsgbuf, sizeof( errmsgbuf ) );
+        system_log(
+            1, "listener: bind(%d); err=%s", srvr_addr.sin_port, errmsgbuf );
+        return NULL;
     }
-  if (listen (listenfd, 2) < 0)
+    if ( listen( listenfd, 2 ) < 0 )
     {
-      strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));
-      system_log(1, "listen(2); err=%s", errmsgbuf);
-      return NULL;
+        strerror_r( errno, errmsgbuf, sizeof( errmsgbuf ) );
+        system_log( 1, "listen(2); err=%s", errmsgbuf );
+        return NULL;
     }
-  for (;;) {
-    int connfd;
-    struct sockaddr_in raddr;
-    socklen_t len = sizeof (raddr);
+    for ( ;; )
+    {
+        int                connfd;
+        struct sockaddr_in raddr;
+        socklen_t          len = sizeof( raddr );
 
-    if (daqd.shutting_down)
-      return NULL;
+        if ( daqd.shutting_down )
+            return NULL;
 
-    if ( (connfd = accept (listenfd, (struct sockaddr *) &raddr, &len)) < 0) {
-#ifdef	EPROTO
-      if (errno == EPROTO || errno == ECONNABORTED)
+        if ( ( connfd = accept( listenfd, (struct sockaddr*)&raddr, &len ) ) <
+             0 )
+        {
+#ifdef EPROTO
+            if ( errno == EPROTO || errno == ECONNABORTED )
 #else
-	if (errno == ECONNABORTED)
+            if ( errno == ECONNABORTED )
 #endif
-	  {
-	    DEBUG1(cerr << "accept() aborted\n" << endl);
-	    continue;
-	  }
-	else
-	  {
-            strerror_r(errno, errmsgbuf, sizeof(errmsgbuf));            
-	    system_log(1, "accept(); err=%s", errmsgbuf);
-	    return NULL;
-	  }
-    }
-    {
-      pthread_attr_t attr;
-      pthread_t iprt;
+            {
+                DEBUG1( cerr << "accept() aborted\n" << endl );
+                continue;
+            }
+            else
+            {
+                strerror_r( errno, errmsgbuf, sizeof( errmsgbuf ) );
+                system_log( 1, "accept(); err=%s", errmsgbuf );
+                return NULL;
+            }
+        }
+        {
+            pthread_attr_t attr;
+            pthread_t      iprt;
 
-      //      cerr << "connfd=" << connfd << endl;
+            //      cerr << "connfd=" << connfd << endl;
 
-      pthread_attr_init (&attr); /* initialize attr with default attributes */
-      pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-      pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED); /* run the interpreter as the detached thread */
-      pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
-      int err_no;
-      long connfd_long = (long) connfd;
-      if (err_no = pthread_create (&iprt, &attr,
-				       (void *(*)(void *))(strict? strict_interpreter: interpreter),
-				       (void *) (connfd_long << 16 | dup(connfd_long)))) {
-        strerror_r(err_no, errmsgbuf, sizeof(errmsgbuf));
-	system_log(1, "couldn't create interpreter thread; pthread_create() err = %s", errmsgbuf);
-	char buf [256];
-	system_log(1, "connection dropped on port %d from %s; fd=%d", srvr_addr.sin_port, net_writer_c::ip_fd_ntoa (connfd, buf), connfd);
-	pthread_attr_destroy (&attr);
-	close (connfd);
-      } else {
-	pthread_attr_destroy (&attr);
-	DEBUG(2, cerr << "interpreter started; tid=" << iprt << endl);
-	char buf [256];
-	system_log(1, "connection on port %d from %s; fd=%d", srvr_addr.sin_port, net_writer_c::ip_fd_ntoa (connfd, buf), connfd);
-      }
+            pthread_attr_init(
+                &attr ); /* initialize attr with default attributes */
+            pthread_attr_setscope( &attr, PTHREAD_SCOPE_SYSTEM );
+            pthread_attr_setdetachstate(
+                &attr, PTHREAD_CREATE_DETACHED ); /* run the interpreter as the
+                                                     detached thread */
+            pthread_attr_setstacksize( &attr, daqd.thread_stack_size );
+            int  err_no;
+            long connfd_long = (long)connfd;
+            if ( err_no = pthread_create(
+                     &iprt,
+                     &attr,
+                     ( void* (*)(void*))( strict ? strict_interpreter
+                                                 : interpreter ),
+                     (void*)( connfd_long << 16 | dup( connfd_long ) ) ) )
+            {
+                strerror_r( err_no, errmsgbuf, sizeof( errmsgbuf ) );
+                system_log( 1,
+                            "couldn't create interpreter thread; "
+                            "pthread_create() err = %s",
+                            errmsgbuf );
+                char buf[ 256 ];
+                system_log( 1,
+                            "connection dropped on port %d from %s; fd=%d",
+                            srvr_addr.sin_port,
+                            net_writer_c::ip_fd_ntoa( connfd, buf ),
+                            connfd );
+                pthread_attr_destroy( &attr );
+                close( connfd );
+            }
+            else
+            {
+                pthread_attr_destroy( &attr );
+                DEBUG( 2, cerr << "interpreter started; tid=" << iprt << endl );
+                char buf[ 256 ];
+                system_log( 1,
+                            "connection on port %d from %s; fd=%d",
+                            srvr_addr.sin_port,
+                            net_writer_c::ip_fd_ntoa( connfd, buf ),
+                            connfd );
+            }
+        }
     }
-  }
 }
 
-void *
-interpreter_no_prompt (void *a)
+void*
+interpreter_no_prompt( void* a )
 {
-  const int ai1 = ((long) a) & 0xffff;
-  const int ai2 = ((long) a) >> 16;
-  my_lexer* lexer;
+    const int ai1 = ( (long)a ) & 0xffff;
+    const int ai2 = ( (long)a ) >> 16;
+    my_lexer* lexer;
 
-  {
+    {
 
 #if __GNUC__ >= 3
-    ofstream my_yyout;
+        ofstream my_yyout;
 
-//__gnu_cxx::stdio_filebuf
+        //__gnu_cxx::stdio_filebuf
 
-    FILE *cfile = fdopen(ai2,"w");
-    std::ofstream::__filebuf_type* outbuf
-        = new __gnu_cxx::stdio_filebuf<char> (cfile, std::ios_base::out);
-    std::ofstream::__streambuf_type* oldoutbuf
-        = ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (outbuf);
-    //delete oldoutbuf;
+        FILE*                          cfile = fdopen( ai2, "w" );
+        std::ofstream::__filebuf_type* outbuf =
+            new __gnu_cxx::stdio_filebuf< char >( cfile, std::ios_base::out );
+        std::ofstream::__streambuf_type* oldoutbuf =
+            ( (std::ofstream::__ios_type*)&my_yyout )->rdbuf( outbuf );
+        // delete oldoutbuf;
 
 #else
-    ofstream my_yyout (ai2);
+        ofstream my_yyout( ai2 );
 #endif
 
-    extern int yyparse (void *);
+        extern int yyparse( void* );
 
-  //  pthread_detach (pthread_self ());
+        //  pthread_detach (pthread_self ());
 
-    void *mptr = malloc (sizeof(my_lexer));
-    if (!mptr) {
-      system_log(1,"couldn't construct lexer, memory exhausted");
-      close (ai1);
-      return NULL;
-    }
+        void* mptr = malloc( sizeof( my_lexer ) );
+        if ( !mptr )
+        {
+            system_log( 1, "couldn't construct lexer, memory exhausted" );
+            close( ai1 );
+            return NULL;
+        }
 
-    lexer = new (mptr) my_lexer (0, &my_yyout, ai1, ai2, 0, 0);
-    if (daqd.b1)
-      lexer -> cb = daqd.b1 -> buffer_ptr ();
-    else
-      lexer -> cb = NULL;
+        lexer = new ( mptr ) my_lexer( 0, &my_yyout, ai1, ai2, 0, 0 );
+        if ( daqd.b1 )
+            lexer->cb = daqd.b1->buffer_ptr( );
+        else
+            lexer->cb = NULL;
 
-    lexer -> auth_ok = 1; // Set privilege to use all commands
-    DEBUG(2, cerr << "calling yyparse(" << ai1 << ", " << ai2 << ")" << endl);
-    my_yyout.flush ();
-    yyparse ((void *) lexer);
-    DEBUG(2, my_yyout << "lexer stopped at line " << lexer -> lineno () << endl);
+        lexer->auth_ok = 1; // Set privilege to use all commands
+        DEBUG( 2,
+               cerr << "calling yyparse(" << ai1 << ", " << ai2 << ")"
+                    << endl );
+        my_yyout.flush( );
+        yyparse( (void*)lexer );
+        DEBUG( 2,
+               my_yyout << "lexer stopped at line " << lexer->lineno( )
+                        << endl );
 
-    // cerr << "out of lexer" << endl;
+        // cerr << "out of lexer" << endl;
 #if __GNUC__ >= 3
-    ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (oldoutbuf);
-    delete outbuf;
+        ( (std::ofstream::__ios_type*)&my_yyout )->rdbuf( oldoutbuf );
+        delete outbuf;
 #endif
-    my_yyout.flush ();
-  }
-  close (ai1);
-  if (ai2 != ai1)
-    close (ai2);
-  lexer -> ~my_lexer ();
-  free ((void *) lexer);
-  return NULL;
+        my_yyout.flush( );
+    }
+    close( ai1 );
+    if ( ai2 != ai1 )
+        close( ai2 );
+    lexer->~my_lexer( );
+    free( (void*)lexer );
+    return NULL;
 }
 
-
-void *
-interpreter (void *a)
+void*
+interpreter( void* a )
 {
-  const int ai1 = ((long) a) & 0xffff;
-  const int ai2 = ((long) a) >> 16;
-  my_lexer* lexer;
+    const int ai1 = ( (long)a ) & 0xffff;
+    const int ai2 = ( (long)a ) >> 16;
+    my_lexer* lexer;
 
-  {
+    {
 
-#if  __GNUC__ >= 3
-    ofstream my_yyout;
-    FILE *cfile = fdopen(ai2,"w");
-    std::ofstream::__filebuf_type* outbuf
-        = new __gnu_cxx::stdio_filebuf<char> (cfile, std::ios_base::out);
-    std::ofstream::__streambuf_type* oldoutbuf
-        = ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (outbuf);
-    //delete oldoutbuf;
-    
+#if __GNUC__ >= 3
+        ofstream                       my_yyout;
+        FILE*                          cfile = fdopen( ai2, "w" );
+        std::ofstream::__filebuf_type* outbuf =
+            new __gnu_cxx::stdio_filebuf< char >( cfile, std::ios_base::out );
+        std::ofstream::__streambuf_type* oldoutbuf =
+            ( (std::ofstream::__ios_type*)&my_yyout )->rdbuf( outbuf );
+        // delete oldoutbuf;
+
 #else
-    ofstream my_yyout (ai2);
+        ofstream my_yyout( ai2 );
 #endif
 
-    extern int yyparse (void *);
+        extern int yyparse( void* );
 
-  //  pthread_detach (pthread_self ());
+        //  pthread_detach (pthread_self ());
 
-    void *mptr = malloc (sizeof(my_lexer));
-    if (!mptr) {
-      system_log(1,"couldn't construct lexer, memory exhausted");
-      close (ai1);
-      if (ai2 != ai1)
-	close (ai2);
-      return NULL;
+        void* mptr = malloc( sizeof( my_lexer ) );
+        if ( !mptr )
+        {
+            system_log( 1, "couldn't construct lexer, memory exhausted" );
+            close( ai1 );
+            if ( ai2 != ai1 )
+                close( ai2 );
+            return NULL;
+        }
+
+        lexer = new ( mptr ) my_lexer( 0, &my_yyout, ai1, ai2, 0, 1 );
+        if ( daqd.b1 )
+            lexer->cb = daqd.b1->buffer_ptr( );
+        else
+            lexer->cb = NULL;
+
+        DEBUG( 2,
+               cerr << "calling yyparse(" << ai1 << ", " << ai2 << ")"
+                    << endl );
+        my_yyout.flush( );
+        yyparse( (void*)lexer );
+        DEBUG( 2,
+               my_yyout << "lexer stopped at line " << lexer->lineno( )
+                        << endl );
+        system_log( 1, "connection on fd %d closed", ai2 );
+
+        // cerr << "out of lexer" << endl;
+#if __GNUC__ >= 3
+        ( (std::ofstream::__ios_type*)&my_yyout )->rdbuf( oldoutbuf );
+        delete outbuf;
+#endif
+        my_yyout.flush( );
     }
 
-    lexer = new (mptr) my_lexer (0, &my_yyout, ai1, ai2, 0, 1);
-    if (daqd.b1)
-      lexer -> cb = daqd.b1 -> buffer_ptr ();
-    else
-      lexer -> cb = NULL;
-
-    DEBUG(2, cerr << "calling yyparse(" << ai1 << ", " << ai2 << ")" << endl);
-    my_yyout.flush ();
-    yyparse ((void *) lexer);
-    DEBUG(2, my_yyout << "lexer stopped at line " << lexer -> lineno () << endl);
-    system_log(1, "connection on fd %d closed", ai2);
-
-  // cerr << "out of lexer" << endl;
-#if __GNUC__ >= 3
-    ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (oldoutbuf);
-    delete outbuf;
-#endif
-    my_yyout.flush ();
-  }
-
-  close (ai1);
-  if (ai2 != ai1)
-    close (ai2);
-  lexer -> ~my_lexer ();
-  free ((void *) lexer);
-  return NULL;
+    close( ai1 );
+    if ( ai2 != ai1 )
+        close( ai2 );
+    lexer->~my_lexer( );
+    free( (void*)lexer );
+    return NULL;
 }
 
 /*
@@ -299,95 +343,103 @@ interpreter (void *a)
   This interpreter must have predetermined answers, so
   that the client's library won't be confused.
 */
-void *
-strict_interpreter (void *a)
+void*
+strict_interpreter( void* a )
 {
-  const int ai1 = ((long) a) & 0xffff;
-  const int ai2 = ((long) a) >> 16;
-  my_lexer* lexer;
+    const int ai1 = ( (long)a ) & 0xffff;
+    const int ai2 = ( (long)a ) >> 16;
+    my_lexer* lexer;
 
-  {
+    {
 
 #if __GNUC__ >= 3
-    ofstream my_yyout;
-    FILE *cfile = fdopen(ai2,"w");
-    std::ofstream::__filebuf_type* outbuf
-        = new __gnu_cxx::stdio_filebuf<char> (cfile, std::ios_base::out);
-    std::ofstream::__streambuf_type* oldoutbuf
-        = ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (outbuf);
-    //delete oldoutbuf;
+        ofstream                       my_yyout;
+        FILE*                          cfile = fdopen( ai2, "w" );
+        std::ofstream::__filebuf_type* outbuf =
+            new __gnu_cxx::stdio_filebuf< char >( cfile, std::ios_base::out );
+        std::ofstream::__streambuf_type* oldoutbuf =
+            ( (std::ofstream::__ios_type*)&my_yyout )->rdbuf( outbuf );
+        // delete oldoutbuf;
 
 #else
-    ofstream my_yyout (ai2);
+        ofstream my_yyout( ai2 );
 #endif
 
-    extern int yyparse (void *);
-    
-    //  pthread_detach (pthread_self ());
+        extern int yyparse( void* );
 
-    void *mptr = malloc (sizeof(my_lexer));
-    if (!mptr) {
-      system_log(1,"couldn't construct lexer, memory exhausted");
-      close (ai1);
-      if (ai2 != ai1)
-	close (ai2);
-      return NULL;
-    }
+        //  pthread_detach (pthread_self ());
 
-    lexer = new (mptr) my_lexer (0, &my_yyout, ai1, ai2, 1, 0);
-    if (daqd.b1)
-      lexer -> cb = daqd.b1 -> buffer_ptr ();
-    else
-      lexer -> cb = NULL;
+        void* mptr = malloc( sizeof( my_lexer ) );
+        if ( !mptr )
+        {
+            system_log( 1, "couldn't construct lexer, memory exhausted" );
+            close( ai1 );
+            if ( ai2 != ai1 )
+                close( ai2 );
+            return NULL;
+        }
 
-    //  my_yyout << "calling yyparse(" << ai1 << ", " << ai2 << ")" << endl << flush;
-    yyparse ((void *) lexer);
-    //  my_yyout << "lexer stopped at line " << lexer -> lineno () << endl << flush;
+        lexer = new ( mptr ) my_lexer( 0, &my_yyout, ai1, ai2, 1, 0 );
+        if ( daqd.b1 )
+            lexer->cb = daqd.b1->buffer_ptr( );
+        else
+            lexer->cb = NULL;
 
-    DEBUG(2, cerr << "out of lexer" << endl << flush);
+        //  my_yyout << "calling yyparse(" << ai1 << ", " << ai2 << ")" << endl
+        //  << flush;
+        yyparse( (void*)lexer );
+        //  my_yyout << "lexer stopped at line " << lexer -> lineno () << endl
+        //  << flush;
+
+        DEBUG( 2, cerr << "out of lexer" << endl << flush );
 #if __GNUC__ >= 3
-    ((std::ofstream::__ios_type* )&my_yyout)->rdbuf (oldoutbuf);
-    delete outbuf;
+        ( (std::ofstream::__ios_type*)&my_yyout )->rdbuf( oldoutbuf );
+        delete outbuf;
 #endif
-    my_yyout.flush ();
-  }
-
-#if defined(NETWORK_PRODUCER)
-  // Use this connection to receive data from the controller
-  if (lexer -> used_by_controller) {
-    // Will not need the parser any more on this connection
-    lexer -> ~my_lexer ();
-    free ((void *) lexer);
-
-    if (ai2 != ai1)
-      close (ai2);
-
-
-    if (lexer -> connection_num) {
-      system_log(1, "secondary producer connected on fd %d", ai1);
-      sem_post (&daqd.producer1.netp_sem1); // Signal the producer that the second connection is ready
-      daqd.producer1.fd1 = ai1;
-      return NULL; // End this thread
+        my_yyout.flush( );
     }
 
-    system_log(1, "primary producer connected on fd %d", ai1);
-    daqd.producer1.receive_cb (ai1);
-    close (ai1);
-    system_log(1, "producer connection on fd %d closed", ai1);
-  } else {
+#if defined( NETWORK_PRODUCER )
+    // Use this connection to receive data from the controller
+    if ( lexer->used_by_controller )
+    {
+        // Will not need the parser any more on this connection
+        lexer->~my_lexer( );
+        free( (void*)lexer );
+
+        if ( ai2 != ai1 )
+            close( ai2 );
+
+        if ( lexer->connection_num )
+        {
+            system_log( 1, "secondary producer connected on fd %d", ai1 );
+            sem_post(
+                &daqd.producer1.netp_sem1 ); // Signal the producer that the
+                                             // second connection is ready
+            daqd.producer1.fd1 = ai1;
+            return NULL; // End this thread
+        }
+
+        system_log( 1, "primary producer connected on fd %d", ai1 );
+        daqd.producer1.receive_cb( ai1 );
+        close( ai1 );
+        system_log( 1, "producer connection on fd %d closed", ai1 );
+    }
+    else
+    {
 
 #endif
 
-    close (ai1);
-    if (ai2 != ai1)
-      close (ai2);
-    system_log(1, "connection on fd %d closed", ai2);
-    lexer -> ~my_lexer ();
-    free ((void *) lexer);
+        close( ai1 );
+        if ( ai2 != ai1 )
+            close( ai2 );
+        system_log( 1, "connection on fd %d closed", ai2 );
+        lexer->~my_lexer( );
+        free( (void*)lexer );
 
-#if defined(NETWORK_PRODUCER)
-  }
+#if defined( NETWORK_PRODUCER )
+    }
 #endif
 
-  return NULL;
+    return NULL;
 }

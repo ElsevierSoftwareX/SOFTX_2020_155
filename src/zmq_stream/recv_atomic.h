@@ -7,40 +7,53 @@
 #ifndef NO_STD_ATOMIC
 #include <atomic>
 
-namespace receiver {
+namespace receiver
+{
     using std::atomic;
 }
 
 #else
 
-namespace receiver {
+namespace receiver
+{
 
-    template <typename T>
-    class atomic {
+    template < typename T >
+    class atomic
+    {
         volatile T data_;
-        public:
-        atomic() {}
-        atomic(const T& other): data_(other) {}
 
-        operator bool() const {
-            return (data_ ? true : false);
+    public:
+        atomic( )
+        {
+        }
+        atomic( const T& other ) : data_( other )
+        {
         }
 
-        bool operator !() const {
-            return (data_ ? false: true);
+        operator bool( ) const
+        {
+            return ( data_ ? true : false );
         }
 
-        T load() const {
+        bool operator!( ) const
+        {
+            return ( data_ ? false : true );
+        }
+
+        T
+        load( ) const
+        {
             return data_;
         }
 
-        atomic<T>& operator |=(const T& other)
+        atomic< T >&
+        operator|=( const T& other )
         {
             data_ |= other;
             return *this;
         }
     };
-}
+} // namespace receiver
 
 #endif
 
