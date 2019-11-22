@@ -27,7 +27,9 @@ sync2master( volatile TIMING_SIGNAL* timePtr )
     if ( loop >= 1000000 )
     {
         return ( -1 );
-    } else {
+    }
+    else
+    {
         return ( timePtr->gps_time );
     }
 }

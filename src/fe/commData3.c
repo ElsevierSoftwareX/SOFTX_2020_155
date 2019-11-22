@@ -1,6 +1,6 @@
 /// 	@file commData3.c
 ///	@brief This is the generic software for communicating realtime data
-///between CDS applications.
+/// between CDS applications.
 ///	@detail This software supports data communication via: \n
 ///		1) Shared memory, between two processes on the same computer \n
 ///		2) GE Fanuc 5565 Reflected Memory PCIe hardware \n
@@ -29,7 +29,7 @@
 #endif
 
 ///	This function is called from the user application to initialize
-///communications structures 	and pointers.
+/// communications structures 	and pointers.
 ///	@param[in] connects = total number of IPC connections in the application
 ///	@param[in] rate = Sample rate of the calling application eg 2048
 ///	@param[in,out] ipcInfo[] = Stucture to hold information about each IPC
@@ -233,12 +233,12 @@ commData3Init(
 
 // *************************************************************************************************
 ///	This function is called from the user application to send data via IPC
-///connections.
+/// connections.
 ///	@param[in] connects = total number of IPC connections in the application
 ///	@param[in,out] ipcInfo[] = Stucture to hold information about each IPC
 ///	@param[in] timeSec = Present GPS time in GPS seconds
 ///	@param[in] cycle = Present cycle of the user application making this
-///call.
+/// call.
 INLINE void commData3Send(
     int          connects, // Total number of IPC connections in the application
     CDS_IPC_INFO ipcInfo[], // IPC information structure
@@ -322,10 +322,10 @@ INLINE void commData3Send(
     if ( lastPcie >= 0 )
     {
         clflush_cache_range(
-            (void *)&( ipcInfo[ lastPcie ]
-                   .pIpcDataWrite[ 0 ]
-                   ->dBlock[ sendBlock ][ ipcInfo[ lastPcie ].ipcNum ]
-                   .data ),
+            (void*)&( ipcInfo[ lastPcie ]
+                          .pIpcDataWrite[ 0 ]
+                          ->dBlock[ sendBlock ][ ipcInfo[ lastPcie ].ipcNum ]
+                          .data ),
             16 );
     }
     lastPcie = -1;
@@ -381,22 +381,22 @@ INLINE void commData3Send(
     if ( lastPcie >= 0 )
     {
         clflush_cache_range(
-            (void *)&( ipcInfo[ lastPcie ]
-                   .pIpcDataWrite[ 0 ]
-                   ->dBlock[ sendBlock ][ ipcInfo[ lastPcie ].ipcNum ]
-                   .data ),
+            (void*)&( ipcInfo[ lastPcie ]
+                          .pIpcDataWrite[ 0 ]
+                          ->dBlock[ sendBlock ][ ipcInfo[ lastPcie ].ipcNum ]
+                          .data ),
             16 );
     }
 }
 
 // *************************************************************************************************
 ///	This function is called from the user application to receive data via
-///IPC connections.
+/// IPC connections.
 ///	@param[in] connects = total number of IPC connections in the application
 ///	@param[in,out] ipcInfo[] = Stucture to hold information about each IPC
 ///	@param[in] timeSec = Present GPS time in GPS seconds
 ///	@param[in] cycle = Present cycle of the user application making this
-///call.
+/// call.
 INLINE void commData3Receive(
     int          connects, // Total number of IPC connections in the application
     CDS_IPC_INFO ipcInfo[], // IPC information structure
@@ -417,8 +417,8 @@ INLINE void commData3Receive(
     int    rcvBlock; // Which of the IPC_BLOCKS IPC data blocks to read from
     double tmp; // Temp location for data for checking NaN
     // static unsigned long ptim = 0;	// last printing time
-    // static unsigned long nskipped = 0;	// number of skipped error messages
-    // (couldn't print that fast)
+    // static unsigned long nskipped = 0;	// number of skipped error
+    // messages (couldn't print that fast)
 
     // Determine which block to read, based on present code cycle
     rcvBlock = ( ( cycle ) * ( IPC_MAX_RATE / IPC_RATE ) ) % IPC_BLOCKS;
