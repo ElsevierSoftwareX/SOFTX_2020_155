@@ -77,8 +77,7 @@ void Usage()
 {
     fprintf(stderr,"Usage of omx_xmit:\n");
     fprintf(stderr,"mx_fe  -s <models> <OPTIONS>\n");
-    fprintf(stderr," -b <buffer>    : Name of the mbuf to concentrate the data to locally (defaults to ifo)\n");
-    fprintf(stderr," -s <value>     : Name of FE control models\n");
+    fprintf(stderr," -b <buffer>    : Name of the mbuf to read local data from (defaults to local_dc)\n");
     fprintf(stderr," -m <value>     : Local memory buffer size in megabytes\n");
     fprintf(stderr," -l <filename>  : log file name\n");
     fprintf(stderr," -v 1           : Enable verbose output\n");
@@ -299,7 +298,7 @@ main(int argc,char *argv[])
 	int max_data_size_mb = 64;
 	int max_data_size = 0;
 	int error = 0;
-	char *buffer_name = "ifo";
+	char *buffer_name = "local_dc";
 	int send_delay_ms = 0;
 
 	mx_endpoint_t ep;
@@ -333,13 +332,15 @@ main(int argc,char *argv[])
     }
 
     /* Get the parameters */
-     while ((counter = getopt(argc, argv, "b:e:m:h:v:s:r:t:d:l:D:")) != EOF)
+    while ((counter = getopt(argc, argv, "b:e:m:h:v:r:t:d:l:D:")) != EOF)
+    {
       switch(counter) {
         case 't':
 			rem_host = optarg;
         break;
         case 'b':
             buffer_name = optarg;
+            fprintf(stderr, "Buffer name = '%s'\n", buffer_name);
         break;
 
         case 'm':
@@ -364,6 +365,7 @@ main(int argc,char *argv[])
             break;
 		case 'r':
 			his_eid = atoi(optarg);
+            fprintf  (stderr, "remoteeid = %d\n", his_eid);
             break;
         case 'v':
 		    do_verbose = atoi(optarg);
@@ -381,6 +383,9 @@ main(int argc,char *argv[])
         case 'D':
             send_delay_ms = atoi(optarg);
             break;
+        default:
+            fprintf(stderr, "Not handling argument '%c'\n", counter);
+        }
     }
 
 
@@ -410,6 +415,8 @@ main(int argc,char *argv[])
 	ifo_data = (char *)ifo + sizeof(daq_multi_cycle_header_t);
 	cycle_data_size = (max_data_size - sizeof(daq_multi_cycle_header_t))/DAQ_NUM_DATA_BLOCKS_PER_SECOND;
     cycle_data_size -= (cycle_data_size % 8);
+
+    fprintf(stderr, "ifo mapped to %p\n", ifo);
 
     // Setup signal handler to catch Control C
     signal(SIGINT,intHandler);
