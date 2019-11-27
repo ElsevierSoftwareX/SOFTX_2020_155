@@ -199,6 +199,13 @@ iop_dac_write( )
                     else
                         dac_out = 0;
                 }
+                if ( ( ii == 0 ) && ( jj == 1 ) )
+                {
+                    if ( cycleNum < 100 )
+                        dac_out = limit / 20;
+                    else
+                        dac_out = 0;
+                }
                 if ( ( ii == 0 ) && ( jj == 2 ) )
                 {
                     if ( cycleNum < 100 )
