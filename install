@@ -112,12 +112,6 @@ echo /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
 cat > /opt/rtcds/$site/${lower_ifo}/scripts/kill${system} << EOF
 #!/bin/bash
 #
-if [ "x\`ps h -C ${system}epics\`" != x ]; then
-	cur_date=\`date +%y%m%d_%H%M%S\`
-	mkdir -p /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/burt
-	burtrb -f /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/autoBurt.req -o /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/burt/${system}_burt_\${cur_date}.snap -l /opt/rtcds/${site}/${lower_ifo}/target/${system}/${system}epics/burt/${system}_burt_\${cur_date}.log -v
-	sleep 1
-fi
 
 sudo killall ${system}
 sudo killall ${system}epics
