@@ -1,7 +1,7 @@
 ==================================================================================================
 Changes for 4.0  (NOT YET RELEASED)
 ==================================================================================================
-- Removing all daqd variants except daqd_shmem.
+- Removing all daqd variants except daqd_shmem which is now named daqd.
 - Renaming and reworking the streamer processes
    - local_dc (takes input from models and concentrates it into one memory buffer)
    - omx_xmit/omx_recv

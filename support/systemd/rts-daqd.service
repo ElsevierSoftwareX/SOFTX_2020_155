@@ -4,7 +4,7 @@ After=network-online.target
 
 [Service]
 User=controls
-ExecStart=/usr/bin/daqd_shmem -c /etc/advligorts/daqdrc
+ExecStart=/usr/bin/daqd -c /etc/advligorts/daqdrc
 Restart=always
 
 [Install]

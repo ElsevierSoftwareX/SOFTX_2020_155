@@ -1112,7 +1112,7 @@ usage( const char* prog )
     std::cout << "\n\t<prefix>EDCU_CHAN_CONN\n\t<prefix>EDCU_CHAN_NOCON\n\t<"
                  "prefix>EDCU_CHAN_CNT\n";
     std::cout << "\nIn a typical setup standalone_edcu, local_dc, and "
-                 "daqd_shmem would be run.\n";
+                 "daqd would be run.\n";
     std::cout << "\n";
 }
 

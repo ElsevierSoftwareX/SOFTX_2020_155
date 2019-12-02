@@ -34,7 +34,7 @@ RelWithDebInfo does a release build with debug.  On gcc this means -O -g.
 The following components will be built:
 
 awgtpman
-daqd_shmem (if the compiler is new enough)
+daqd (if the compiler is new enough)
 nds
 dataviewer (in its many pieces)
 mx_stream
@@ -102,13 +102,13 @@ the gentoo systems.
 
 ZMQ/Dolphin IX transport
 
-The transport layer to be used with daqd_shmem is in flux.  Currently the following components are used:
+The transport layer to be used with daqd is in flux.  Currently the following components are used:
 
 zmq_fe on the FE computers
 zmq_rcv_ix_xmit_delay on the data concentrator
 ix_fb_recv on the daqd machines
 
-We also have a rebuild of the mx_streamer to work with the daqd_shmem system.  This is NOT ready yet.
+We also have a rebuild of the mx_streamer to work with the daqd system.  This is NOT ready yet.
 
 mx_stream on the FE computers
 mx_rcv on the data concentrator (eventually mx_rcv_ix_xmit)
@@ -148,9 +148,9 @@ ix_fb_rcv -g 0 -b ifo
 
 Tell it which dolphin group to listen to, and where to put the data.
 
-Configuring daqd_shmem
+Configuring daqd
 
-Daqd_shmem needs to know which mbuf to read from and its size.
+Daqd needs to know which mbuf to read from and its size.
 
 set parameter "shmem_input" = "ifo";
 set parameter "shmem_size" = "104857600";

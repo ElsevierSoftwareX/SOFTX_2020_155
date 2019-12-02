@@ -46,7 +46,7 @@ if [ ! -x "$LOCAL_DC" ]; then
     exit 1
 fi
 
-DAQD="$CWD/../../daqd/daqd_shmem"
+DAQD="$CWD/../../daqd/daqd"
 if [ ! -x "$DAQD" ]; then
     echo "cannot find $DAQD"
     exit 1

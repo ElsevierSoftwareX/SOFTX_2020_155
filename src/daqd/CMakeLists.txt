@@ -60,7 +60,7 @@ set(DAQD_GDS_SRC
 
 if (${DAQD_CAN_BUILD_DAQD_SHMEM})
 ##########
-## generic daq with shmem (new standiop)
+## generic daq with shmem
 ####
 add_library(dc_gds_shmem STATIC gds.cc)
 target_compile_definitions(dc_gds_shmem PRIVATE
@@ -87,7 +87,7 @@ target_link_libraries(dc_gds_shmem PRIVATE
 		${RPC_LIBRARIES}
 		)
 
-add_executable(daqd_shmem
+add_executable(daqd
 		archive.cc
 		profiler.cc
 		filesys.cc
@@ -112,19 +112,19 @@ add_executable(daqd_shmem
 		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc
 		producer_shmem.cc)
 
-target_compile_definitions(daqd_shmem PUBLIC
+target_compile_definitions(daqd PUBLIC
 		${DAQD_BUILD_INFO_DEFINES} -DUNIX -Dlinux -DUNIX -Dlinux
 		-D_REENTRANT -DNO_RTL=1 -DDAQD_CPP11 -DUSE_FRAMECPP_VERSION
 		-DDAQD_BUILD_SHMEM
 		)
-target_include_directories(daqd_shmem PUBLIC
+target_include_directories(daqd PUBLIC
 		${CMAKE_CURRENT_BINARY_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/../include
 		${CMAKE_CURRENT_SOURCE_DIR}/../zmq_stream
 		${RPC_INCLUDE_DIRS}
 		)
-target_link_libraries(daqd_shmem PUBLIC
+target_link_libraries(daqd PUBLIC
 		gds::daqd
 		dc_gds_shmem
 		run_number::run_number
@@ -139,7 +139,7 @@ target_link_libraries(daqd_shmem PUBLIC
 		${RPC_LIBRARIES}
 		)
 
-install(TARGETS daqd_shmem DESTINATION bin)
+install(TARGETS daqd DESTINATION bin)
 
 
 add_executable(test_daqd_cmask_t tests/test_main.cc
