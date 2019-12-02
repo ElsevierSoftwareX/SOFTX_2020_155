@@ -98,5 +98,9 @@ main( int argc, char* argv[] )
               << std::endl;
     std::cout << "We had " << error.load( )
               << " unexpected errors in the threads." << std::endl;
-    return 0;
+    if ( error.load( ) == 0 )
+    {
+        return 0;
+    }
+    return 1;
 }

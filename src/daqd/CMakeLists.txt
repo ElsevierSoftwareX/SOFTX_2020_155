@@ -145,6 +145,9 @@ install(TARGETS daqd_shmem DESTINATION bin)
 add_executable(test_daqd_cmask_t tests/test_main.cc
 		tests/test_daqd_cmask_t.cc)
 target_include_directories(test_daqd_cmask_t PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(NAME test_daqd_cmask_t
+		COMMAND test_daqd_cmask_t
+		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 if (libNDS2Client_FOUND)
 
@@ -166,6 +169,12 @@ if (libNDS2Client_FOUND)
 	add_executable(test_nds1_connections tests/test_nds1_connections.cc)
 	target_link_libraries(test_nds1_connections PUBLIC nds2client::cxx
 		${CMAKE_THREAD_LIBS_INIT})
+
+	configure_file(tests/test_daqd_nds_connections.sh.in ${CMAKE_CURRENT_BINARY_DIR}/test_daqd_nds_connections.sh @ONLY)
+
+	add_test(NAME test_daqd_nds_connections
+			COMMAND /bin/bash ./test_daqd_nds_connections.sh
+			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 endif (libNDS2Client_FOUND)
 
