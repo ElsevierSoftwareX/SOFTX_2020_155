@@ -15,6 +15,9 @@ Changes for 4.0  (NOT YET RELEASED)
 - Implemented a standalone_edc.
    - An edcu as a regular program, not a non-rt model.
    - Can record data into multiple types (short, int, float, double)
+- Implemented fix for FRX 13791
+   - Increase the number of connections allowed on a daqd circular buffer past 32.
+   - Generalize the data structure to allow changing the max number easier.  Currently set to 128.
 ==================================================================================================
 Changes for 3.6  (NOT YET RELEASED)
 ==================================================================================================
