@@ -1,8 +1,12 @@
-These are the patches developed by Keith Thorne and
-Rolf Bork to create a stable 'cs' (CPU Shutdown) 
-linux kernel 4.9 for CDS real-time.  All patches are required.
+These are the patches and config files developed by Gerrit Kuehn, 
+Keith Thorne and Rolf Bork to create a stable 'cs' (CPU Shutdown) 
+linux kernel 4.19 for CDS real-time.  Both the patch and config file are needed
 
 - Basic CDS patch - adds CPU Shutdown
-kernel-4.9-cs.patch
+kernel-4.19-cs.patch
+
+- Custom kernel 4.19 config file - creates monolithic kernel with a minimum of drivers
+kernel-4.19.37-aei-cs
+
 
 
