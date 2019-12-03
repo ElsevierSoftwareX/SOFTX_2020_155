@@ -95,6 +95,15 @@ typedef General::SharedPtr< FrameCPP::Version::FrameH > ldas_frame_h_type;
 #if !defined( FRAMECPP_VERSION )
 #define FRAMECPP_VERSION "2.5.1"
 #endif
+
+#if FRAMECPP_VERSION_NUMBER + 0 == 0
+/* There is a bug in FrameCPP 2.7.0 where FRAMECPP_VERSION_NUMBER is
+ * defined as an empty value.  Try to check for this, and work around.
+ */
+#undef FRAMECPP_VERSION_NUMBER
+#define FRAMECPP_VERSION_NUMBER 207000
+#endif
+
 #if FRAMECPP_VERSION_NUMBER >= 206000
 #include <boost/shared_ptr.hpp>
 typedef boost::shared_ptr< FrameCPP::Version::FrameH > ldas_frame_h_type;
