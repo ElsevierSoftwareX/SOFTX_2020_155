@@ -127,7 +127,7 @@ extern "C" {
     @author DS, September 98
     @see Testpoint Definition
 ************************************************************************/
-#define TP_MAX_NODE             128
+#define TP_MAX_NODE        256
 
 /** Maximum number of test point interfaces. This number is currently 4
     (LSC/ASC excitation and LSC/ASC test point readout).
