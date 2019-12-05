@@ -2,11 +2,16 @@ These are the patches and config files developed by Gerrit Kuehn,
 Keith Thorne and Rolf Bork to create a stable 'cs' (CPU Shutdown) 
 linux kernel 4.19 for CDS real-time.  Both the patch and config file are needed
 
-- Basic CDS patch - adds CPU Shutdown
+- For LIGO CDS, use the final -cs files (not -aei-cs)   
+
+- Basic CDS patch - adds CPU Shutdown, cpu_up EXPORT_SYMBOL
 kernel-4.19-cs.patch
 
-- Custom kernel 4.19 config file - creates monolithic kernel with a minimum of drivers
-kernel-4.19.37-aei-cs
+- Custom kernel config file for Gentoo at AEI - creates monolithic kernel with a minimum of drivers
+config-4.19.37-aei-cs
 
+- Custom kernel config file for Debian 10 - derived from AEI work but updated to newer kernel
+-- Has fix for nomodeset on AST VGA chips
+config-4.19.67-cs
 
 
