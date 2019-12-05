@@ -779,6 +779,7 @@ usage( const char* progname )
     std::cout << "\t-m size_mb - Size in MB of the output mbuf [100]\n";
     std::cout << "\t-k size_kb - Default data rate of each model in kB\n";
     std::cout << "\t-R num - number of models to simulate [1-247]\n";
+    std::cout << "\t-D dcu,dcu,dcu,... - Simulate the given dcus\n";
     std::cout << "\t-t dcu:tp#,tp#,tp#,... - enable the given testpoints on "
                  "the given dcu\n";
     std::cout << "\t-f dcu,dcu,dcu,... - fail the given dcu's (write configs, "
@@ -792,6 +793,71 @@ usage( const char* progname )
     std::cout << "-t/-f options must come after the -R call\n";
 }
 
+/*!
+ * @brief Given a set of dcuids and model data sizes, initialize a set of model
+ * parameters
+ * @tparam Cont The input dcuid container type
+ * @tparam OutIt The type of the output iterator
+ * @param model_dcus The dcuids to use
+ * @param out_it Output iterator to push model params to
+ * @param model_data_size The data size for each model
+ * @param max_size_mb The total data size
+ */
+template < typename Cont, typename OutIt >
+void
+initialize_model_params( const Cont& model_dcus,
+                         OutIt       out_it,
+                         int         model_data_size,
+                         int         max_size_mb )
+{
+    int count = model_dcus.size( );
+    if ( count > 247 || count < 1 )
+    {
+        throw std::runtime_error( "Must specify [1-247] models" );
+    }
+    if ( model_data_size * count >= ( max_size_mb * 1024 * 1024 ) )
+    {
+        throw std::runtime_error(
+            "Too much data, increase the buffer size or reduce models "
+            "or data rate" );
+    }
+    std::transform( model_dcus.begin( ),
+                    model_dcus.end( ),
+                    out_it,
+                    [model_data_size]( int dcuid ) -> ModelParams {
+                        int         rate = 2048;
+                        int         data_rate = model_data_size;
+                        ModelParams params;
+                        params.dcuid = dcuid;
+                        params.model_rate = rate;
+                        params.data_rate = data_rate;
+                        std::ostringstream os;
+                        os << "mod" << dcuid;
+                        params.name = os.str( );
+                        return params;
+                    } );
+}
+
+/*!
+ * @brief given a ',' seperated set of integers, return the list of integers
+ * @param str input string, comma seperated ints
+ * @return a vector of intergers
+ */
+std::vector< int >
+parse_dcu_id_list( const char* str )
+{
+    std::vector< int > dcuids;
+    auto dcu_strings = split( str, ",", split_type::EXCLUDE_EMPTY_STRING );
+    dcuids.reserve( dcu_strings.size( ) );
+    std::transform( dcu_strings.begin( ),
+                    dcu_strings.end( ),
+                    std::back_inserter( dcuids ),
+                    []( const std::string& dcuid_str ) -> int {
+                        return std::atoi( dcuid_str.c_str( ) );
+                    } );
+    return dcuids;
+}
+
 Options
 parse_arguments( int argc, char* argv[] )
 {
@@ -799,7 +865,7 @@ parse_arguments( int argc, char* argv[] )
     int     c;
     int     model_data_size = 700 * 1024;
 
-    while ( ( c = getopt( argc, argv, "i:M:b:m:R:k:h:St:f:" ) ) != -1 )
+    while ( ( c = getopt( argc, argv, "i:M:b:m:D:R:k:h:St:f:" ) ) != -1 )
     {
         switch ( c )
         {
@@ -824,40 +890,33 @@ parse_arguments( int argc, char* argv[] )
             }
             model_data_size *= 1024;
             break;
-        case 'R':
+        case 'D':
         {
-            int count = std::atoi( optarg );
-            if ( count > 247 || count < 1 )
-            {
-                throw std::runtime_error( "Must specify [1-250] models" );
-            }
+            std::vector< int > model_dcus = parse_dcu_id_list( optarg );
             if ( !opts.models.empty( ) )
             {
                 throw std::runtime_error( "Models already specified" );
             }
-            if ( model_data_size * count >=
-                 ( opts.mbuf_size_mb * 1024 * 1024 ) )
+            opts.models.reserve( model_dcus.size( ) );
+            initialize_model_params( model_dcus,
+                                     std::back_inserter( opts.models ),
+                                     model_data_size,
+                                     opts.mbuf_size_mb );
+            break;
+        }
+        case 'R':
+        {
+            int count = std::atoi( optarg );
+            if ( !opts.models.empty( ) )
             {
-                throw std::runtime_error(
-                    "Too much data, increase the buffer size or reduce models "
-                    "or data rate" );
+                throw std::runtime_error( "Models already specified" );
             }
             opts.models.reserve( count );
             std::vector< int > model_dcus = get_n_dcus( count );
-            for ( int i = 0; i < model_dcus.size( ); ++i )
-            {
-                int         rate = 2048;
-                int         data_rate = model_data_size;
-                int         dcuid = model_dcus[ i ];
-                ModelParams params;
-                params.dcuid = dcuid;
-                params.model_rate = rate;
-                params.data_rate = data_rate;
-                std::ostringstream os;
-                os << "mod" << dcuid;
-                params.name = os.str( );
-                opts.models.push_back( params );
-            }
+            initialize_model_params( model_dcus,
+                                     std::back_inserter( opts.models ),
+                                     model_data_size,
+                                     opts.mbuf_size_mb );
         }
         break;
         case 'S':
