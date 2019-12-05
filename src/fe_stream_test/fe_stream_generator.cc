@@ -40,8 +40,11 @@ create_generator( const std::string& channel_name )
 {
     std::vector< std::string > parts = split( channel_name, "--" );
     if ( parts.size( ) < 4 )
+    {
+        std::cerr << "channel_name = " << channel_name << std::endl;
         throw std::runtime_error(
             "Generator name has too few parts, invalid input" );
+    }
     int data_type = 0;
     {
         std::istringstream is( parts[ parts.size( ) - 2 ] );

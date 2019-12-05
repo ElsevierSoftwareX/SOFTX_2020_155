@@ -185,8 +185,8 @@ load_generators( Config& cfg )
             {
                 index = dist( robj );
             } while ( std::find( indexes.begin( ), indexes.end( ), index ) !=
-                          indexes.end( ) &&
-                      is_generated_channel( channels[ i ] ) );
+                          indexes.end( ) ||
+                      !is_generated_channel( channels[ index ] ) );
             indexes.push_back( index );
             cfg.channels.push_back( channels[ index ].Name( ) );
         }

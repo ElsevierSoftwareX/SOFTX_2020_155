@@ -74,7 +74,7 @@ mkdir "$TDIR/logs"
 
 echo "Ini dir = $TDIR/ini_files"
 
-"$MUTLI_STREAM" -i "$TDIR/ini_files" -M "$TDIR/ini_files/master" -b local_dc -m 100 -k 700 -R 100 > "$TDIR/logs/multi_stream" &
+"$MUTLI_STREAM" -i "$TDIR/ini_files" -M "$TDIR/ini_files/master" -b local_dc -m 100 -k 300 -R 247 > "$TDIR/logs/multi_stream" &
 PID_MULTI_STREAM=$!
 
 echo "Streamer PID = PID_MULTI_STREAM"
@@ -90,8 +90,7 @@ PID_DAQD=$!
 echo "Sleeping to allow the daq to start"
 sleep 15
 
-
-"$FE_STREAM_CHECK_NDS" -c 30
+"$FE_STREAM_CHECK_NDS" -c 1000
 RESULT=$?
 
 echo "Testing return $RESULT (0 = success)"

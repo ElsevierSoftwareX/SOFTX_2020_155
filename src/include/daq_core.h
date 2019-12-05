@@ -29,7 +29,7 @@ extern "C" {
 #define DAQ_DATA_PORT 5555
 #define DAQ_GDS_DATA_PORT 5556
 #define DAQ_PROXY_PORT 5557
-#define DAQ_TRANSIT_MAX_DCU 128
+#define DAQ_TRANSIT_MAX_DCU 256
 
 //
 //

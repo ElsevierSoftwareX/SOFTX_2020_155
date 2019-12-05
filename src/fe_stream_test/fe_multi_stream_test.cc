@@ -778,7 +778,7 @@ usage( const char* progname )
     std::cout << "\t-b name - Name of the output mbuf [local_dc]\n";
     std::cout << "\t-m size_mb - Size in MB of the output mbuf [100]\n";
     std::cout << "\t-k size_kb - Default data rate of each model in kB\n";
-    std::cout << "\t-R num - number of models to simulate [1-120]\n";
+    std::cout << "\t-R num - number of models to simulate [1-247]\n";
     std::cout << "\t-t dcu:tp#,tp#,tp#,... - enable the given testpoints on "
                  "the given dcu\n";
     std::cout << "\t-f dcu,dcu,dcu,... - fail the given dcu's (write configs, "
@@ -827,9 +827,9 @@ parse_arguments( int argc, char* argv[] )
         case 'R':
         {
             int count = std::atoi( optarg );
-            if ( count > 120 || count < 1 )
+            if ( count > 247 || count < 1 )
             {
-                throw std::runtime_error( "Must specify [1-128] models" );
+                throw std::runtime_error( "Must specify [1-250] models" );
             }
             if ( !opts.models.empty( ) )
             {

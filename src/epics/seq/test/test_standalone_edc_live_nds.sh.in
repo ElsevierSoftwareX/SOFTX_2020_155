@@ -126,7 +126,7 @@ PID_DAQD=$!
 echo "Sleeping to allow the daq to start"
 sleep 15
 
-"$FE_STREAM_CHECK_NDS" -c 30 -start 0 -stop 5
+"$FE_STREAM_CHECK_NDS" -c 100 -start 0 -stop 5
 RESULT=$?
 
 echo "Testing return $RESULT (0 = success)"
