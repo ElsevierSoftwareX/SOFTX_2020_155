@@ -521,19 +521,24 @@ generate_models( std::vector< ModelPtr >& models,
                  int                      cycle,
                  const GPS::gps_time&     cur_time )
 {
-    dest.header.dcuTotalModels = models.size( );
+    dest.header.dcuTotalModels = 0;
     dest.header.fullDataBlockSize = 0;
     char* data = dest.dataBlock;
     char* data_end = data + max_data_size;
+    auto header_it = std::begin(dest.header.dcuheader);
+    auto header_end = std::end(dest.header.dcuheader);
+
     for ( int i = 0; i < models.size( ); ++i )
     {
         char*     start = data;
         ModelPtr& mp = models[ i ];
-        if ( mp->status( ) == MODEL_STATUS::STOPPED )
+        if ( mp->status( ) == MODEL_STATUS::STOPPED || header_it == header_end )
         {
             continue;
         }
-        daq_msg_header_t& dcu_header = dest.header.dcuheader[ i ];
+        ++dest.header.dcuTotalModels;
+        daq_msg_header_t& dcu_header = *header_it;
+        header_it++;
         dcu_header.dcuId = mp->dcu_id( );
         dcu_header.fileCrc = mp->config_crc( );
         dcu_header.status = 2;
@@ -838,26 +843,6 @@ initialize_model_params( const Cont& model_dcus,
                     } );
 }
 
-/*!
- * @brief given a ',' seperated set of integers, return the list of integers
- * @param str input string, comma seperated ints
- * @return a vector of intergers
- */
-std::vector< int >
-parse_dcu_id_list( const char* str )
-{
-    std::vector< int > dcuids;
-    auto dcu_strings = split( str, ",", split_type::EXCLUDE_EMPTY_STRING );
-    dcuids.reserve( dcu_strings.size( ) );
-    std::transform( dcu_strings.begin( ),
-                    dcu_strings.end( ),
-                    std::back_inserter( dcuids ),
-                    []( const std::string& dcuid_str ) -> int {
-                        return std::atoi( dcuid_str.c_str( ) );
-                    } );
-    return dcuids;
-}
-
 Options
 parse_arguments( int argc, char* argv[] )
 {
@@ -892,7 +877,7 @@ parse_arguments( int argc, char* argv[] )
             break;
         case 'D':
         {
-            std::vector< int > model_dcus = parse_dcu_id_list( optarg );
+            std::vector< int > model_dcus = parse_int_list( optarg );
             if ( !opts.models.empty( ) )
             {
                 throw std::runtime_error( "Models already specified" );
