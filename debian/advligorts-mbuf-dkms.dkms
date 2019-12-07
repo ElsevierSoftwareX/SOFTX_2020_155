@@ -3,3 +3,11 @@ PACKAGE_VERSION="#MODULE_VERSION#"
 BUILT_MODULE_NAME="mbuf"
 DEST_MODULE_LOCATION=/extra
 AUTOINSTALL=yes
+POST_BUILD="dkms_install_files
+  ${PACKAGE_NAME}
+  ${PACKAGE_VERSION}
+  ${kernelver}
+  ${arch}
+  ${dkms_tree}
+  Module.symvers
+"

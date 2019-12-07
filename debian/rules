@@ -15,6 +15,7 @@ install-mbuf:
 	install --mode=644 -t debian/advligorts-mbuf-dkms/usr/src/mbuf-$(SVERSION) src/drv/mbuf/*.c
 	install --mode=644 -t debian/advligorts-mbuf-dkms/usr/src/mbuf-$(SVERSION) src/drv/mbuf/*.h
 	install --mode=644 -t debian/advligorts-mbuf-dkms/usr/src/mbuf-$(SVERSION) src/drv/mbuf/Makefile
+	install --mode=755 -t debian/advligorts-mbuf-dkms/usr/src/mbuf-$(SVERSION) support/bin/dkms_install_files
 	sed 's|__SHARE__|/usr/share/advligorts|' <support/udev/mbuf.rules >debian/advligorts-mbuf-dkms/lib/udev/rules.d/60-mbuf.rules
 	echo mbuf > debian/advligorts-mbuf-dkms/usr/lib/modules-load.d/mbuf.conf
 
@@ -29,6 +30,7 @@ install-gpstime:
 	install --mode=644 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION)/drv/gpstime src/drv/gpstime/Makefile
 	install --mode=644 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION)/include/drv src/include/drv/*
 	install --mode=644 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION)/include/ src/include/proc.h
+	install --mode=755 -t debian/advligorts-gpstime-dkms/usr/src/gpstime-$(SVERSION) support/bin/dkms_install_files
 	sed 's|__SHARE__|/usr/share/advligorts|' <support/udev/gpstime.rules >debian/advligorts-gpstime-dkms/lib/udev/rules.d/60-gpstime.rules
 	echo gpstime > debian/advligorts-gpstime-dkms/usr/lib/modules-load.d/gpstime.conf
 
