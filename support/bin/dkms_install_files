@@ -1,0 +1,19 @@
+#!/bin/sh
+
+PROG=$0
+pkgname="$1"
+pkgver="$2"
+kernelver="$3"
+arch="$4"
+dkms_tree="$5"
+shift 5
+if [ -z "$@" ] ; then
+    echo "Usage: $PROG <pkgname> <pkgver> <kernalver> <arch> <dkms_tree> path [...]"
+    exit 1
+fi
+
+for file ; do
+    cp \
+        "${dkms_tree}/${pkgname}/${pkgver}/build/${file}" \
+        "${dkms_tree}/${pkgname}/${pkgver}/${kernelver}/${arch}/"
+done
