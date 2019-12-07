@@ -75,7 +75,7 @@ Architecture: any
 Depends:
  autoconf,
  libncurses5-dev,
- linux-headers-4.9.0-9-rtcds-amd64,
+ linux-headers-4.19.0-6-rtcds-amd64,
  make,
  python3,
  sudo,
@@ -132,7 +132,7 @@ Depends:
  advligorts-daqd,
  advligorts-fe,
  advligorts-rcg,
- linux-image-4.9.0-9-rtcds-amd64,
+ linux-headers-4.19.0-6-rtcds-amd64,
  ${misc:Depends},
 Description: advLigoRTS stand-alone "CYMAC" metapackage
  Advanced LIGO data acquisition system, stand-alone version.

@@ -1,3 +1,9 @@
+advligorts (4.0.0~dev2-1) unstable; urgency=medium
+
+  * New dev release
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Fri, 06 Dec 2019 16:13:24 -0800
+
 advligorts (4.0.0~dev1-2) unstable; urgency=medium
 
   * Add dh_clean
