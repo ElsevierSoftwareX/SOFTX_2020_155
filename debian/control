@@ -74,10 +74,12 @@ Package: advligorts-rcg
 Architecture: any
 Depends:
  autoconf,
+ epics-seq-dev,
  libncurses5-dev,
  linux-headers-4.19.0-6-rtcds-amd64,
  make,
  python3,
+ subversion,
  sudo,
  tcsh,
  ${misc:Depends},
