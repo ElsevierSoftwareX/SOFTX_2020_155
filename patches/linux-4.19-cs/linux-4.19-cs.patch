@@ -1,6 +1,6 @@
-diff -r -u -d linux-source-4.19.orig/arch/x86/kernel/smpboot.c linux-source-4.19.cs/arch/x86/kernel/smpboot.c
---- linux-source-4.19.orig/arch/x86/kernel/smpboot.c	2019-04-27 02:36:41.000000000 -0500
-+++ linux-source-4.19.cs/arch/x86/kernel/smpboot.c	2019-09-04 10:44:14.997185804 -0500
+diff -Naur linux-source-4.19.orig/arch/x86/kernel/smpboot.c linux-source-4.19.cs/arch/x86/kernel/smpboot.c
+--- linux-source-4.19.orig/arch/x86/kernel/smpboot.c	2019-08-16 03:12:54.000000000 -0500
++++ linux-source-4.19.cs/arch/x86/kernel/smpboot.c	2019-12-02 15:39:56.407306004 -0600
 @@ -1559,6 +1559,18 @@
  	common_cpu_die(cpu);
  }
@@ -31,15 +31,3 @@ diff -r -u -d linux-source-4.19.orig/arch/x86/kernel/smpboot.c linux-source-4.19
  }
  
  static bool wakeup_cpu0(void)
-diff -r -u -d linux-source-4.19.orig/kernel/cpu.c linux-source-4.19.cs/kernel/cpu.c
---- linux-source-4.19.orig/kernel/cpu.c	2019-08-07 21:02:38.000000000 -0500
-+++ linux-source-4.19.cs/kernel/cpu.c	2019-09-04 10:44:14.997185804 -0500
-@@ -1160,7 +1160,7 @@
- {
- 	return do_cpu_up(cpu, CPUHP_ONLINE);
- }
--EXPORT_SYMBOL_GPL(cpu_up);
-+EXPORT_SYMBOL(cpu_up);
- 
- #ifdef CONFIG_PM_SLEEP_SMP
- static cpumask_var_t frozen_cpus;

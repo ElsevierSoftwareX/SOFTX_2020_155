@@ -4,7 +4,7 @@ linux kernel 4.19 for CDS real-time.  Both the patch and config file are needed
 
 - For LIGO CDS, use the final -cs files (not -aei-cs)   
 
-- Basic CDS patch - adds CPU Shutdown, cpu_up EXPORT_SYMBOL
+- Basic CDS patch - adds CPU Shutdown only
 kernel-4.19-cs.patch
 
 - Custom kernel config file for Gentoo at AEI - creates monolithic kernel with a minimum of drivers
