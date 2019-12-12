@@ -23,8 +23,10 @@ PERFORMANCEFLAGS=-DNDEBUG -g -O5
 RELEASEFLAGS=-DNDEBUG -DNPROBE -g -O5
 #DEBUGFLAGS=-DNDEBUG -O5 -unroll=16
 DEVFLAGS=@DEVFLAGS@
+mbuf_sym_file=@MBUFSYMBOLPATH@
+gps_sym_file=@GPSSYMBOLPATH@
 
 %:
-	env RCG_SRC_DIR=$(top_srcdir) PERL5LIB=$(srcdir) $(srcdir)/feCodeGen.pl $@.mdl $@
+	env RCG_SRC_DIR=$(top_srcdir) PERL5LIB=$(srcdir) MBUFSYM=$(mbuf_sym_file) GPSSYM=$(gps_sym_file) $(srcdir)/feCodeGen.pl $@.mdl $@
 
 all: 

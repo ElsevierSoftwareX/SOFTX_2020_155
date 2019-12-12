@@ -12,6 +12,7 @@ config-4.19.37-aei-cs
 
 - Custom kernel config file for Debian 10 - derived from AEI work but updated to newer kernel
 -- Has fix for nomodeset on AST VGA chips
+-- Re-enables kernel module versioning
 config-4.19.67-cs
 
 

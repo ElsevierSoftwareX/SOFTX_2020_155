@@ -47,7 +47,14 @@ DEVFLAGS=@DEVFLAGS@
 	@/bin/mv -f build/$@epics-config build/$@epics/config
 	@echo Building front-end Linux kernel module $@...
 	@make -sC src/fe/$@ clean
-#	@cp $(srcdir)/src/drv/gpstime/Module.symvers src/fe/$@
+# copy IOP symbol file to build area if found
+	@cp src/fe/ModuleIOP.symvers src/fe/$@ > /dev/null 2>&1 || /bin/true
+# build it
+	@make -C src/fe/$@ >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
+# save IOP symbol to file
+	@grep IOP src/fe/$@/Module.symvers > /tmp/tmp.symvers
+	@awk -vOFS='\t' '{$$3 = "/"; print}' /tmp/tmp.symvers > src/fe/ModuleIOP.symvers
+	@rm /tmp/tmp.symvers
 	@make -C src/fe/$@ >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@$(srcdir)/src/epics/util/checkUndefined.pl $@_error.log >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@echo Done

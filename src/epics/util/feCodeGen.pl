@@ -72,6 +72,8 @@ $lrpciefile = $rcg_src_dir . "/src/include/USE_LR_PCIE";
 $pciegenfile = $rcg_src_dir . "/src/include/USE_DOLPHIN_GEN2";
 $zmqfile = $rcg_src_dir . "/src/include/USE_ZMQ";
 $usezmq = 0;
+$mbufsymfile = $ENV{"MBUFSYM"};
+$gpssymfile = $ENV{"GPSSYM"};
 
 if (-e "$zmqfile") {
         print "Using ZMQ for DAQ\n";
@@ -2494,6 +2496,9 @@ open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 
 print OUTM "# CPU-Shutdown Real Time Linux\n";
 print OUTM "KBUILD_EXTRA_SYMBOLS=$rcg_src_dir/src/drv/ExtraSymbols.symvers\n";
+print OUTM "KBUILD_EXTRA_SYMBOLS += $mbufsymfile\n";
+print OUTM "KBUILD_EXTRA_SYMBOLS += $gpssymfile\n";
+print OUTM "KBUILD_EXTRA_SYMBOLS += \$(PWD)/ModuleIOP.symvers\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
 print OUTM "EXTRA_CFLAGS += -O -w -I../../include\n";
 

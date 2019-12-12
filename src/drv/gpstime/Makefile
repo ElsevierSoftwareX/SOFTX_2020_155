@@ -22,6 +22,8 @@ CC		:= gcc -Wall -g
 TARGET		:= gpstime.ko
 INSTDIR		:= /lib/modules/$(KVER)/extra
 
+SYMVERSDIR	:= /var/cache/$(MODULENAME)
+
 ifeq ($(KERNELRELEASE),)
 #all:	$(MODULENAME)_test
 all:
@@ -48,7 +50,10 @@ install:
 	    rm -f /dev/$(MODULENAME) ; \
 	fi
 	mknod /dev/$(MODULENAME) c `grep $(MODULENAME) /proc/devices|awk '{print $$1}'` 0
-	chown controls /dev/$(MODULENAME) 
+	chown controls /dev/$(MODULENAME)
+	# save Module.symvers if possible
+	mkdir -p $(SYMVERSDIR) || true
+	if [ -w $(SYMVERSDIR) ]; then cp Module.symvers $(SYMVERSDIR); fi
 
 uninstall:
 	/sbin/rmmod $(MODULENAME) || true
