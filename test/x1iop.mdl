@@ -1,0 +1,3148 @@
+Model {
+  Name			  "x1iop"
+  Version		  9.1
+  SavedCharacterEncoding  "UTF-8"
+  GraphicalInterface {
+    NumRootInports	    0
+    NumRootOutports	    0
+    ParameterArgumentNames  ""
+    ComputedModelVersion    "1.168"
+    NumModelReferences	    0
+    NumTestPointedSignals   0
+    NumProvidedFunctions    0
+    NumRequiredFunctions    0
+    NumResetEvents	    0
+    HasInitializeEvent	    0
+    HasTerminateEvent	    0
+    IsExportFunctionModel   0
+    NumParameterArguments   0
+    NumExternalFileReferences 35
+    ExternalFileReference {
+      Reference		      "cdsAdcx0/ADC0"
+      Path		      "x1iop/ADC0"
+      SID		      "931"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "dac/Subsystem"
+      Path		      "x1iop/DAC_0"
+      SID		      "947"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM0"
+      SID		      "941"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM1"
+      SID		      "942"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM10"
+      SID		      "956"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM11"
+      SID		      "957"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM12"
+      SID		      "958"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM13"
+      SID		      "959"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM14"
+      SID		      "960"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM15"
+      SID		      "961"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM16"
+      SID		      "980"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM17"
+      SID		      "981"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM18"
+      SID		      "982"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM19"
+      SID		      "983"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM2"
+      SID		      "948"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM20"
+      SID		      "984"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM21"
+      SID		      "985"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM22"
+      SID		      "986"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM23"
+      SID		      "987"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM24"
+      SID		      "988"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM25"
+      SID		      "989"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM26"
+      SID		      "990"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM27"
+      SID		      "991"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM28"
+      SID		      "992"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM29"
+      SID		      "993"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM3"
+      SID		      "949"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM30"
+      SID		      "994"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM31"
+      SID		      "995"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM4"
+      SID		      "950"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM5"
+      SID		      "951"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM6"
+      SID		      "952"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM7"
+      SID		      "953"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM8"
+      SID		      "954"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsFilt/Subsystem"
+      Path		      "x1iop/FM9"
+      SID		      "955"
+      Type		      "LIBRARY_BLOCK"
+    }
+    ExternalFileReference {
+      Reference		      "cdsParameters/Subsystem"
+      Path		      "x1iop/host=@HOSTNAME@ site=X1 rate=16K dcuid=1 shmem_daq=1 adcMaster=1 specific_cpu=2 no_rfm_dma=1"
+      SID		      "927"
+      Type		      "LIBRARY_BLOCK"
+    }
+    OrderedModelArguments   1
+  }
+  DiagnosticSuppressor	  "on"
+  SuppressorTable	  "22 serialization::archive 11 0 6 0 0 0 1 0"
+  Notes			  ""
+  NotesPlugin		  "on"
+  LogicAnalyzerGraphicalSettings ""
+  LogicAnalyzerPlugin	  "on"
+  LogicAnalyzerSignalOrdering ""
+  CustomCodeFunctionData  ""
+  SLCCPlugin		  "on"
+  ScopeRefreshTime	  0.035000
+  OverrideScopeRefreshTime on
+  DisableAllScopes	  off
+  DataTypeOverride	  "UseLocalSettings"
+  DataTypeOverrideAppliesTo "AllNumericTypes"
+  MinMaxOverflowLogging	  "UseLocalSettings"
+  MinMaxOverflowArchiveMode "Overwrite"
+  FPTRunName		  "Run 1"
+  MaxMDLFileLineLength	  120
+  LastSavedArchitecture	  "glnxa64"
+  Object {
+    $PropName		    "BdWindowsInfo"
+    $ObjectID		    1
+    $ClassName		    "Simulink.BDWindowsInfo"
+    Object {
+      $PropName		      "WindowsInfo"
+      $ObjectID		      2
+      $ClassName	      "Simulink.WindowInfo"
+      IsActive		      [1]
+      Location		      [0.0, 0.0, 1600.0, 900.0]
+      Object {
+	$PropName		"ModelBrowserInfo"
+	$ObjectID		3
+	$ClassName		"Simulink.ModelBrowserInfo"
+	Visible			[0]
+	DockPosition		"Left"
+	Width			[50]
+	Height			[50]
+	Filter			[9]
+      }
+      Object {
+	$PropName		"ExplorerBarInfo"
+	$ObjectID		4
+	$ClassName		"Simulink.ExplorerBarInfo"
+	Visible			[1]
+      }
+      Object {
+	$PropName		"EditorsInfo"
+	$ObjectID		5
+	$ClassName		"Simulink.EditorInfo"
+	IsActive		[1]
+	ViewObjType		"SimulinkTopLevel"
+	LoadSaveID		"0"
+	Extents			[1560.0, 741.0]
+	ZoomFactor		[1.0]
+	Offset			[-543.41015625, -163.99999999999989]
+      }
+      Object {
+	$PropName		"DockComponentsInfo"
+	$ObjectID		6
+	$ClassName		"Simulink.DockComponentInfo"
+	Type			"GLUE2:PropertyInspector"
+	ID			"Property Inspector"
+	Visible			[0]
+	CreateCallback		""
+	UserData		""
+	Floating		[0]
+	DockPosition		"Right"
+	Width			[640]
+	Height			[480]
+      }
+      WindowState	      "AAAA/wAAAAD9AAAAAgAAAAAAAAC9AAAB+PwCAAAAA/sAAAAWAEQAbwBjAGsAVwBpAGQAZwBlAHQAMwEAAAAxAAAB+AAAA"
+      "AAAAAAA+wAAABYARABvAGMAawBXAGkAZABnAGUAdAA0AAAAAAD/////AAAAAAAAAAD7AAAAUgBHAEwAVQBFADIAIAB0AHIAZQBlACAAYwBvAG0Ac"
+      "ABvAG4AZQBuAHQALwBHAEwAVQBFADIAIAB0AHIAZQBlACAAYwBvAG0AcABvAG4AZQBuAHQAAAAAAP////8AAABjAP///wAAAAEAAAAAAAAAAPwCA"
+      "AAAAfsAAABUAEcATABVAEUAMgA6AFAAcgBvAHAAZQByAHQAeQBJAG4AcwBwAGUAYwB0AG8AcgAvAFAAcgBvAHAAZQByAHQAeQAgAEkAbgBzAHAAZ"
+      "QBjAHQAbwByAAAAAAD/////AAAALQD///8AAAY+AAADJgAAAAEAAAACAAAAAQAAAAL8AAAAAQAAAAIAAAAP/////wAAAAAA/////wAAAAAAAAAA/"
+      "////wEAAAAA/////wAAAAAAAAAA/////wAAAAAA/////wAAAAAAAAAA/////wAAAAAA/////wAAAAAAAAAA/////wAAAAAA/////wAAAAAAAAAA/"
+      "////wEAAACA/////wAAAAAAAAAA/////wEAAADo/////wAAAAAAAAAA/////wAAAAAA/////wAAAAAAAAAA/////wEAAAFo/////wAAAAAAAAAA/"
+      "////wAAAAAA/////wAAAAAAAAAA/////wAAAAAA/////wAAAAAAAAAA/////wAAAAAA/////wAAAAAAAAAA/////wEAAANn/////wAAAAAAAAAA/"
+      "////wAAAAAA/////wAAAAAAAAAA/////wAAAAAA/////wAAAAAAAAAA"
+    }
+  }
+  HideAutomaticNames	  on
+  Created		  "Thu Oct 12 11:42:19 2006"
+  Creator		  "rolf"
+  UpdateHistory		  "UpdateHistoryNever"
+  ModifiedByFormat	  "%<Auto>"
+  LastModifiedBy	  "jrollins"
+  ModifiedDateFormat	  "%<Auto>"
+  LastModifiedDate	  "Mon Dec 23 16:28:08 2019"
+  RTWModifiedTimeStamp	  499019287
+  ModelVersionFormat	  "1.%<AutoIncrement:168>"
+  SampleTimeColors	  off
+  SampleTimeAnnotations	  off
+  LibraryLinkDisplay	  "none"
+  WideLines		  off
+  ShowLineDimensions	  off
+  ShowPortDataTypes	  off
+  PortDataTypeDisplayFormat "AliasTypeOnly"
+  ShowEditTimeErrors	  on
+  ShowEditTimeWarnings	  on
+  ShowEditTimeAdvisorChecks off
+  ShowPortUnits		  off
+  ShowDesignRanges	  off
+  ShowLoopsOnError	  on
+  IgnoreBidirectionalLines off
+  ShowStorageClass	  off
+  ShowTestPointIcons	  on
+  ShowSignalResolutionIcons on
+  ShowViewerIcons	  on
+  SortedOrder		  off
+  VariantCondition	  off
+  ShowSubsystemDomainSpec off
+  ExecutionContextIcon	  off
+  ShowLinearizationAnnotations on
+  ShowVisualizeInsertedRTB on
+  ShowMarkup		  on
+  BlockNameDataTip	  off
+  BlockParametersDataTip  off
+  BlockDescriptionStringDataTip	off
+  BlockVariantConditionDataTip off
+  ToolBar		  on
+  StatusBar		  on
+  BrowserShowLibraryLinks off
+  FunctionConnectors	  off
+  BrowserLookUnderMasks	  off
+  MultiThreadCoSim	  on
+  SimulationMode	  "normal"
+  VisualizeLoggedSignalsWhenLoggingToFile off
+  PauseTimes		  "5"
+  NumberOfSteps		  1
+  SnapshotBufferSize	  10
+  SnapshotInterval	  10
+  NumberOfLastSnapshots	  0
+  EnablePacing		  off
+  PacingRate		  1
+  LinearizationMsg	  "none"
+  Profile		  off
+  ParamWorkspaceSource	  "MATLABWorkspace"
+  AccelSystemTargetFile	  "accel.tlc"
+  AccelTemplateMakefile	  "accel_default_tmf"
+  AccelMakeCommand	  "make_rtw"
+  TryForcingSFcnDF	  off
+  Object {
+    $PropName		    "DataLoggingOverride"
+    $ObjectID		    7
+    $ClassName		    "Simulink.SimulationData.ModelLoggingInfo"
+    model_		    "x1iop"
+    Array {
+      Type		      "Cell"
+      Dimension		      1
+      Cell		      "x1iop"
+      PropName		      "logAsSpecifiedByModels_"
+    }
+    Array {
+      Type		      "Cell"
+      Dimension		      1
+      Cell		      ""
+      PropName		      "logAsSpecifiedByModelsSSIDs_"
+    }
+  }
+  ExtModeBatchMode	  off
+  ExtModeEnableFloating	  on
+  ExtModeTrigType	  "manual"
+  ExtModeTrigMode	  "normal"
+  ExtModeTrigPort	  "1"
+  ExtModeTrigElement	  "any"
+  ExtModeTrigDuration	  1000
+  ExtModeTrigDurationFloating "auto"
+  ExtModeTrigHoldOff	  0
+  ExtModeTrigDelay	  0
+  ExtModeTrigDirection	  "rising"
+  ExtModeTrigLevel	  0
+  ExtModeArchiveMode	  "off"
+  ExtModeAutoIncOneShot	  off
+  ExtModeIncDirWhenArm	  off
+  ExtModeAddSuffixToVar	  off
+  ExtModeWriteAllDataToWs off
+  ExtModeArmWhenConnect	  on
+  ExtModeSkipDownloadWhenConnect off
+  ExtModeLogAll		  on
+  ExtModeAutoUpdateStatusClock off
+  ShowModelReferenceBlockVersion off
+  ShowModelReferenceBlockIO off
+  OrderedModelArguments	  on
+  Array {
+    Type		    "Handle"
+    Dimension		    1
+    Simulink.ConfigSet {
+      $ObjectID		      8
+      Version		      "1.18.0"
+      DisabledProps	      []
+      Description	      ""
+      Array {
+	Type			"Handle"
+	Dimension		9
+	Simulink.SolverCC {
+	  $ObjectID		  9
+	  Version		  "1.18.0"
+	  DisabledProps		  []
+	  Description		  ""
+	  StartTime		  "0.0"
+	  StopTime		  "10.0"
+	  AbsTol		  "auto"
+	  AutoScaleAbsTol	  "on"
+	  FixedStep		  "auto"
+	  InitialStep		  "auto"
+	  MaxOrder		  5
+	  ZcThreshold		  "auto"
+	  ConsecutiveZCsStepRelTol "10*128*eps"
+	  MaxConsecutiveZCs	  "1000"
+	  ExtrapolationOrder	  4
+	  NumberNewtonIterations  1
+	  MaxStep		  "auto"
+	  MinStep		  "auto"
+	  MaxConsecutiveMinStep	  "1"
+	  RelTol		  "1e-3"
+	  EnableMultiTasking	  on
+	  ConcurrentTasks	  off
+	  Solver		  "ode45"
+	  SolverName		  "ode45"
+	  SolverJacobianMethodControl "auto"
+	  ShapePreserveControl	  "DisableAll"
+	  ZeroCrossControl	  "UseLocalSettings"
+	  ZeroCrossAlgorithm	  "Nonadaptive"
+	  AlgebraicLoopSolver	  "TrustRegion"
+	  SolverInfoToggleStatus  off
+	  IsAutoAppliedInSIP	  off
+	  SolverResetMethod	  "Fast"
+	  PositivePriorityOrder	  off
+	  AutoInsertRateTranBlk	  off
+	  SampleTimeConstraint	  "Unconstrained"
+	  InsertRTBMode		  "Whenever possible"
+	  SampleTimeProperty	  []
+	  DecoupledContinuousIntegration off
+	  MinimalZcImpactIntegration off
+	}
+	Simulink.DataIOCC {
+	  $ObjectID		  10
+	  Version		  "1.18.0"
+	  DisabledProps		  []
+	  Description		  ""
+	  Decimation		  "1"
+	  ExternalInput		  "[t, u]"
+	  FinalStateName	  "xFinal"
+	  InitialState		  "xInitial"
+	  LimitDataPoints	  on
+	  MaxDataPoints		  "1000"
+	  LoadExternalInput	  off
+	  LoadInitialState	  off
+	  SaveFinalState	  off
+	  SaveCompleteFinalSimState off
+	  SaveFormat		  "Array"
+	  SignalLoggingSaveFormat "ModelDataLogs"
+	  SaveOutput		  on
+	  SaveState		  off
+	  SignalLogging		  on
+	  DSMLogging		  on
+	  InspectSignalLogs	  off
+	  VisualizeSimOutput	  on
+	  StreamToWorkspace	  off
+	  StreamVariableName	  "streamout"
+	  SaveTime		  on
+	  ReturnWorkspaceOutputs  off
+	  StateSaveName		  "xout"
+	  TimeSaveName		  "tout"
+	  OutputSaveName	  "yout"
+	  SignalLoggingName	  "logsout"
+	  DSMLoggingName	  "dsmout"
+	  OutputOption		  "RefineOutputTimes"
+	  OutputTimes		  "[]"
+	  ReturnWorkspaceOutputsName "out"
+	  Refine		  "1"
+	  LoggingToFile		  off
+	  DatasetSignalFormat	  "timeseries"
+	  LoggingFileName	  "out.mat"
+	  LoggingIntervals	  "[-inf, inf]"
+	}
+	Simulink.OptimizationCC {
+	  $ObjectID		  11
+	  Version		  "1.18.0"
+	  Array {
+	    Type		    "Cell"
+	    Dimension		    8
+	    Cell		    "ZeroExternalMemoryAtStartup"
+	    Cell		    "ZeroInternalMemoryAtStartup"
+	    Cell		    "NoFixptDivByZeroProtection"
+	    Cell		    "OptimizeModelRefInitCode"
+	    Cell		    "BooleansAsBitfields"
+	    Cell		    "PassReuseOutputArgsAs"
+	    Cell		    "PassReuseOutputArgsThreshold"
+	    Cell		    "UseSpecifiedMinMax"
+	    PropName		    "DisabledProps"
+	  }
+	  Description		  ""
+	  BlockReduction	  on
+	  BooleanDataType	  on
+	  ConditionallyExecuteInputs on
+	  DefaultParameterBehavior "Tunable"
+	  UseDivisionForNetSlopeComputation "off"
+	  UseFloatMulNetSlope	  off
+	  DefaultUnderspecifiedDataType	"double"
+	  UseSpecifiedMinMax	  off
+	  InlineInvariantSignals  off
+	  OptimizeBlockIOStorage  on
+	  BufferReuse		  on
+	  EnhancedBackFolding	  off
+	  CachingGlobalReferences off
+	  GlobalBufferReuse	  on
+	  StrengthReduction	  off
+	  AdvancedOptControl	  ""
+	  ExpressionFolding	  on
+	  BooleansAsBitfields	  off
+	  BitfieldContainerType	  "uint_T"
+	  EnableMemcpy		  on
+	  MemcpyThreshold	  64
+	  PassReuseOutputArgsAs	  "Structure reference"
+	  PassReuseOutputArgsThreshold 12
+	  ExpressionDepthLimit	  2147483647
+	  LocalBlockOutputs	  on
+	  RollThreshold		  5
+	  StateBitsets		  off
+	  DataBitsets		  off
+	  ActiveStateOutputEnumStorageType "Native Integer"
+	  ZeroExternalMemoryAtStartup on
+	  ZeroInternalMemoryAtStartup on
+	  InitFltsAndDblsToZero	  on
+	  NoFixptDivByZeroProtection off
+	  EfficientFloat2IntCast  off
+	  EfficientMapNaN2IntZero on
+	  LifeSpan		  "inf"
+	  MaxStackSize		  "Inherit from target"
+	  BufferReusableBoundary  on
+	  SimCompilerOptimization "off"
+	  AccelVerboseBuild	  off
+	  OptimizeBlockOrder	  "off"
+	  OptimizeDataStoreBuffers on
+	  BusAssignmentInplaceUpdate on
+	  DifferentSizesBufferReuse off
+	  OptimizationLevel	  "level2"
+	  OptimizationPriority	  "Balanced"
+	  OptimizationCustomize	  on
+	  UseRowMajorAlgorithm	  off
+	  LabelGuidedReuse	  off
+	}
+	Simulink.DebuggingCC {
+	  $ObjectID		  12
+	  Version		  "1.18.0"
+	  Array {
+	    Type		    "Cell"
+	    Dimension		    1
+	    Cell		    "UseOnlyExistingSharedCode"
+	    PropName		    "DisabledProps"
+	  }
+	  Description		  ""
+	  RTPrefix		  "error"
+	  ConsistencyChecking	  "none"
+	  ArrayBoundsChecking	  "none"
+	  SignalInfNanChecking	  "none"
+	  StringTruncationChecking "error"
+	  SignalRangeChecking	  "none"
+	  ReadBeforeWriteMsg	  "UseLocalSettings"
+	  WriteAfterWriteMsg	  "UseLocalSettings"
+	  WriteAfterReadMsg	  "UseLocalSettings"
+	  AlgebraicLoopMsg	  "warning"
+	  ArtificialAlgebraicLoopMsg "warning"
+	  SaveWithDisabledLinksMsg "warning"
+	  SaveWithParameterizedLinksMsg	"none"
+	  CheckSSInitialOutputMsg on
+	  UnderspecifiedInitializationDetection	"Classic"
+	  MergeDetectMultiDrivingBlocksExec "none"
+	  CheckExecutionContextPreStartOutputMsg off
+	  CheckExecutionContextRuntimeOutputMsg	off
+	  SignalResolutionControl "TryResolveAllWithWarning"
+	  BlockPriorityViolationMsg "warning"
+	  MinStepSizeMsg	  "warning"
+	  TimeAdjustmentMsg	  "none"
+	  MaxConsecutiveZCsMsg	  "error"
+	  MaskedZcDiagnostic	  "warning"
+	  IgnoredZcDiagnostic	  "warning"
+	  SolverPrmCheckMsg	  "warning"
+	  InheritedTsInSrcMsg	  "warning"
+	  MultiTaskDSMMsg	  "error"
+	  MultiTaskCondExecSysMsg "error"
+	  MultiTaskRateTransMsg	  "error"
+	  SingleTaskRateTransMsg  "none"
+	  TasksWithSamePriorityMsg "warning"
+	  ExportedTasksRateTransMsg "none"
+	  SigSpecEnsureSampleTimeMsg "warning"
+	  CheckMatrixSingularityMsg "none"
+	  IntegerOverflowMsg	  "warning"
+	  Int32ToFloatConvMsg	  "warning"
+	  ParameterDowncastMsg	  "error"
+	  ParameterOverflowMsg	  "error"
+	  ParameterUnderflowMsg	  "none"
+	  ParameterPrecisionLossMsg "warning"
+	  ParameterTunabilityLossMsg "warning"
+	  FixptConstUnderflowMsg  "none"
+	  FixptConstOverflowMsg	  "none"
+	  FixptConstPrecisionLossMsg "none"
+	  UnderSpecifiedDataTypeMsg "none"
+	  UnnecessaryDatatypeConvMsg "none"
+	  VectorMatrixConversionMsg "none"
+	  InvalidFcnCallConnMsg	  "error"
+	  FcnCallInpInsideContextMsg "warning"
+	  SignalLabelMismatchMsg  "none"
+	  UnconnectedInputMsg	  "warning"
+	  UnconnectedOutputMsg	  "warning"
+	  UnconnectedLineMsg	  "warning"
+	  UseOnlyExistingSharedCode "error"
+	  SFcnCompatibilityMsg	  "none"
+	  FrameProcessingCompatibilityMsg "error"
+	  UniqueDataStoreMsg	  "none"
+	  BusObjectLabelMismatch  "warning"
+	  RootOutportRequireBusObject "warning"
+	  AssertControl		  "UseLocalSettings"
+	  AllowSymbolicDim	  on
+	  RowMajorDimensionSupport off
+	  ModelReferenceIOMsg	  "none"
+	  ModelReferenceMultiInstanceNormalModeStructChecksumCheck "error"
+	  ModelReferenceVersionMismatchMessage "none"
+	  ModelReferenceIOMismatchMessage "none"
+	  UnknownTsInhSupMsg	  "warning"
+	  ModelReferenceDataLoggingMessage "warning"
+	  ModelReferenceSymbolNameMessage "warning"
+	  ModelReferenceExtraNoncontSigs "error"
+	  StateNameClashWarn	  "warning"
+	  SimStateInterfaceChecksumMismatchMsg "warning"
+	  SimStateOlderReleaseMsg "error"
+	  ChecksumConsistencyForSSReuse	"none"
+	  LibraryContextMissingDiagnostic "none"
+	  InitInArrayFormatMsg	  "warning"
+	  StrictBusMsg		  "ErrorLevel1"
+	  BusNameAdapt		  "WarnAndRepair"
+	  NonBusSignalsTreatedAsBus "none"
+	  SymbolicDimMinMaxWarning "warning"
+	  LossOfSymbolicDimsSimulationWarning "warning"
+	  LossOfSymbolicDimsCodeGenerationWarning "error"
+	  SymbolicDimsDataTypeCodeGenerationDiagnostic "error"
+	  BlockIODiagnostic	  "none"
+	  SFUnusedDataAndEventsDiag "warning"
+	  SFUnexpectedBacktrackingDiag "warning"
+	  SFInvalidInputDataAccessInChartInitDiag "warning"
+	  SFNoUnconditionalDefaultTransitionDiag "warning"
+	  SFTransitionOutsideNaturalParentDiag "warning"
+	  SFUnreachableExecutionPathDiag "warning"
+	  SFUndirectedBroadcastEventsDiag "warning"
+	  SFTransitionActionBeforeConditionDiag	"warning"
+	  SFOutputUsedAsStateInMooreChartDiag "error"
+	  SFTemporalDelaySmallerThanSampleTimeDiag "warning"
+	  SFSelfTransitionDiag	  "warning"
+	  SFExecutionAtInitializationDiag "none"
+	  SFMachineParentedDataDiag "warning"
+	  IntegerSaturationMsg	  "warning"
+	  AllowedUnitSystems	  "all"
+	  UnitsInconsistencyMsg	  "warning"
+	  AllowAutomaticUnitConversions	on
+	  RCSCRenamedMsg	  "warning"
+	  RCSCObservableMsg	  "warning"
+	  ForceCombineOutputUpdateInSim	off
+	  UnitDatabase		  ""
+	}
+	Simulink.HardwareCC {
+	  $ObjectID		  13
+	  Version		  "1.18.0"
+	  DisabledProps		  []
+	  Description		  ""
+	  ProdBitPerChar	  8
+	  ProdBitPerShort	  16
+	  ProdBitPerInt		  32
+	  ProdBitPerLong	  32
+	  ProdBitPerLongLong	  64
+	  ProdBitPerFloat	  32
+	  ProdBitPerDouble	  64
+	  ProdBitPerPointer	  32
+	  ProdBitPerSizeT	  32
+	  ProdBitPerPtrDiffT	  32
+	  ProdLargestAtomicInteger "Char"
+	  ProdLargestAtomicFloat  "None"
+	  ProdIntDivRoundTo	  "Undefined"
+	  ProdEndianess		  "Unspecified"
+	  ProdWordSize		  32
+	  ProdShiftRightIntArith  on
+	  ProdLongLongMode	  off
+	  ProdHWDeviceType	  "32-bit Generic"
+	  TargetBitPerChar	  8
+	  TargetBitPerShort	  16
+	  TargetBitPerInt	  32
+	  TargetBitPerLong	  32
+	  TargetBitPerLongLong	  64
+	  TargetBitPerFloat	  32
+	  TargetBitPerDouble	  64
+	  TargetBitPerPointer	  32
+	  TargetBitPerSizeT	  32
+	  TargetBitPerPtrDiffT	  32
+	  TargetLargestAtomicInteger "Char"
+	  TargetLargestAtomicFloat "None"
+	  TargetShiftRightIntArith on
+	  TargetLongLongMode	  off
+	  TargetIntDivRoundTo	  "Undefined"
+	  TargetEndianess	  "Unspecified"
+	  TargetWordSize	  32
+	  TargetPreprocMaxBitsSint 32
+	  TargetPreprocMaxBitsUint 32
+	  TargetHWDeviceType	  "Specified"
+	  TargetUnknown		  off
+	  ProdEqTarget		  on
+	  UseEmbeddedCoderFeatures on
+	  UseSimulinkCoderFeatures on
+	}
+	Simulink.ModelReferenceCC {
+	  $ObjectID		  14
+	  Version		  "1.18.0"
+	  DisabledProps		  []
+	  Description		  ""
+	  UpdateModelReferenceTargets "IfOutOfDateOrStructuralChange"
+	  EnableRefExpFcnMdlSchedulingChecks on
+	  CheckModelReferenceTargetMessage "error"
+	  EnableParallelModelReferenceBuilds off
+	  ParallelModelReferenceErrorOnInvalidPool on
+	  ParallelModelReferenceMATLABWorkerInit "None"
+	  ModelReferenceNumInstancesAllowed "Multi"
+	  PropagateVarSize	  "Infer from blocks in model"
+	  ModelDependencies	  ""
+	  ModelReferencePassRootInputsByReference on
+	  ModelReferenceMinAlgLoopOccurrences off
+	  PropagateSignalLabelsOutOfModel off
+	  SupportModelReferenceSimTargetCustomCode off
+	}
+	Simulink.SFSimCC {
+	  $ObjectID		  15
+	  Version		  "1.18.0"
+	  DisabledProps		  []
+	  Description		  ""
+	  SimCustomSourceCode	  ""
+	  SimCustomHeaderCode	  ""
+	  SimCustomInitializer	  ""
+	  SimCustomTerminator	  ""
+	  SimReservedNameArray	  []
+	  SimUserSources	  ""
+	  SimUserIncludeDirs	  ""
+	  SimUserLibraries	  ""
+	  SimUserDefines	  ""
+	  SimCustomCompilerFlags  ""
+	  SimCustomLinkerFlags	  ""
+	  SFSimEcho		  on
+	  SimCtrlC		  on
+	  SimIntegrity		  on
+	  SimUseLocalCustomCode	  off
+	  SimParseCustomCode	  on
+	  SimBuildMode		  "sf_incremental_build"
+	  SimGenImportedTypeDefs  off
+	  ModelFunctionsGlobalVisibility "on"
+	  CompileTimeRecursionLimit 50
+	  EnableRuntimeRecursion  on
+	  MATLABDynamicMemAlloc	  on
+	  MATLABDynamicMemAllocThreshold 65536
+	}
+	Simulink.RTWCC {
+	  $BackupClass		  "Simulink.RTWCC"
+	  $ObjectID		  16
+	  Version		  "1.18.0"
+	  Array {
+	    Type		    "Cell"
+	    Dimension		    16
+	    Cell		    "IncludeHyperlinkInReport"
+	    Cell		    "GenerateTraceInfo"
+	    Cell		    "GenerateTraceReport"
+	    Cell		    "GenerateTraceReportSl"
+	    Cell		    "GenerateTraceReportSf"
+	    Cell		    "GenerateTraceReportEml"
+	    Cell		    "PortableWordSizes"
+	    Cell		    "GenerateWebview"
+	    Cell		    "GenerateCodeMetricsReport"
+	    Cell		    "GenerateCodeReplacementReport"
+	    Cell		    "GenerateMissedCodeReplacementReport"
+	    Cell		    "GenerateErtSFunction"
+	    Cell		    "CreateSILPILBlock"
+	    Cell		    "CodeExecutionProfiling"
+	    Cell		    "CodeProfilingSaveOptions"
+	    Cell		    "CodeProfilingInstrumentation"
+	    PropName		    "DisabledProps"
+	  }
+	  SystemTargetFile	  "grt.tlc"
+	  HardwareBoard		  "None"
+	  TLCOptions		  ""
+	  GenCodeOnly		  off
+	  MakeCommand		  "make_rtw"
+	  GenerateMakefile	  on
+	  PackageGeneratedCodeAndArtifacts off
+	  PackageName		  ""
+	  TemplateMakefile	  "grt_default_tmf"
+	  PostCodeGenCommand	  ""
+	  Description		  ""
+	  GenerateReport	  off
+	  SaveLog		  off
+	  RTWVerbose		  on
+	  RetainRTWFile		  off
+	  RTWBuildHooks		  []
+	  ProfileTLC		  off
+	  TLCDebug		  off
+	  TLCCoverage		  off
+	  TLCAssert		  off
+	  RTWUseLocalCustomCode	  off
+	  RTWUseSimCustomCode	  off
+	  CustomSourceCode	  ""
+	  CustomHeaderCode	  ""
+	  CustomInclude		  ""
+	  CustomSource		  ""
+	  CustomLibrary		  ""
+	  CustomDefine		  ""
+	  CustomLAPACKCallback	  ""
+	  CustomFFTCallback	  ""
+	  CustomInitializer	  ""
+	  CustomTerminator	  ""
+	  Toolchain		  "Automatically locate an installed toolchain"
+	  BuildConfiguration	  "Faster Builds"
+	  CustomToolchainOptions  []
+	  IncludeHyperlinkInReport off
+	  LaunchReport		  off
+	  PortableWordSizes	  off
+	  CreateSILPILBlock	  "None"
+	  CodeExecutionProfiling  off
+	  CodeExecutionProfileVariable "executionProfile"
+	  CodeProfilingSaveOptions "SummaryOnly"
+	  CodeProfilingInstrumentation off
+	  SILDebugging		  off
+	  TargetLang		  "C"
+	  IncludeBusHierarchyInRTWFileBlockHierarchyMap	off
+	  GenerateTraceInfo	  off
+	  GenerateTraceReport	  off
+	  GenerateTraceReportSl	  off
+	  GenerateTraceReportSf	  off
+	  GenerateTraceReportEml  off
+	  GenerateWebview	  off
+	  GenerateCodeMetricsReport off
+	  GenerateCodeReplacementReport	off
+	  GenerateMissedCodeReplacementReport off
+	  RTWCompilerOptimization "off"
+	  ObjectivePriorities	  []
+	  RTWCustomCompilerOptimizations ""
+	  CheckMdlBeforeBuild	  "Off"
+	  SharedConstantsCachingThreshold 1024
+	  Array {
+	    Type		    "Handle"
+	    Dimension		    2
+	    Simulink.CodeAppCC {
+	      $ObjectID		      17
+	      Version		      "1.18.0"
+	      Array {
+		Type			"Cell"
+		Dimension		28
+		Cell			"IgnoreCustomStorageClasses"
+		Cell			"InsertBlockDesc"
+		Cell			"SFDataObjDesc"
+		Cell			"SimulinkDataObjDesc"
+		Cell			"DefineNamingRule"
+		Cell			"SignalNamingRule"
+		Cell			"ParamNamingRule"
+		Cell			"InlinedPrmAccess"
+		Cell			"CustomSymbolStr"
+		Cell			"CustomSymbolStrGlobalVar"
+		Cell			"CustomSymbolStrType"
+		Cell			"CustomSymbolStrField"
+		Cell			"CustomSymbolStrFcn"
+		Cell			"CustomSymbolStrBlkIO"
+		Cell			"CustomSymbolStrTmpVar"
+		Cell			"CustomSymbolStrMacro"
+		Cell			"IgnoreTestpoints"
+		Cell			"BlockCommentType"
+		Cell			"InsertPolySpaceComments"
+		Cell			"MATLABFcnDesc"
+		Cell			"InternalIdentifier"
+		Cell			"CustomSymbolStrModelFcn"
+		Cell			"CustomSymbolStrFcnArg"
+		Cell			"CustomSymbolStrUtil"
+		Cell			"CustomSymbolStrEmxType"
+		Cell			"CustomSymbolStrEmxFcn"
+		Cell			"CustomUserTokenString"
+		Cell			"ReqsInCode"
+		PropName		"DisabledProps"
+	      }
+	      Description	      ""
+	      Comment		      ""
+	      ForceParamTrailComments off
+	      GenerateComments	      on
+	      CommentStyle	      "Auto"
+	      IgnoreCustomStorageClasses on
+	      IgnoreTestpoints	      off
+	      MaxIdLength	      31
+	      PreserveName	      off
+	      PreserveNameWithParent  off
+	      ShowEliminatedStatement off
+	      OperatorAnnotations     off
+	      SimulinkDataObjDesc     off
+	      SFDataObjDesc	      off
+	      MATLABFcnDesc	      off
+	      MangleLength	      1
+	      SharedChecksumLength    8
+	      CustomSymbolStrGlobalVar "$R$N$M"
+	      CustomSymbolStrType     "$N$R$M_T"
+	      CustomSymbolStrField    "$N$M"
+	      CustomSymbolStrFcn      "$R$N$M$F"
+	      CustomSymbolStrModelFcn "$R$N"
+	      CustomSymbolStrFcnArg   "rt$I$N$M"
+	      CustomSymbolStrBlkIO    "rtb_$N$M"
+	      CustomSymbolStrTmpVar   "$N$M"
+	      CustomSymbolStrMacro    "$R$N$M"
+	      CustomSymbolStrUtil     "$N$C"
+	      CustomSymbolStrEmxType  "emxArray_$M$N"
+	      CustomSymbolStrEmxFcn   "emx$M$N"
+	      CustomUserTokenString   ""
+	      CustomCommentsFcn	      ""
+	      DefineNamingRule	      "None"
+	      DefineNamingFcn	      ""
+	      ParamNamingRule	      "None"
+	      ParamNamingFcn	      ""
+	      SignalNamingRule	      "None"
+	      SignalNamingFcn	      ""
+	      InsertBlockDesc	      off
+	      InsertPolySpaceComments off
+	      SimulinkBlockComments   on
+	      BlockCommentType	      "BlockPathComment"
+	      StateflowObjectComments on
+	      MATLABSourceComments    off
+	      EnableCustomComments    off
+	      InternalIdentifierFile  ""
+	      InternalIdentifier      "Shortened"
+	      InlinedPrmAccess	      "Literals"
+	      ReqsInCode	      off
+	      UseSimReservedNames     off
+	      ReservedNameArray	      []
+	    }
+	    Simulink.GRTTargetCC {
+	      $BackupClass	      "Simulink.TargetCC"
+	      $ObjectID		      18
+	      Version		      "1.18.0"
+	      Array {
+		Type			"Cell"
+		Dimension		15
+		Cell			"IncludeMdlTerminateFcn"
+		Cell			"RemoveDisableFunc"
+		Cell			"SuppressErrorStatus"
+		Cell			"ERTCustomFileBanners"
+		Cell			"GenerateSampleERTMain"
+		Cell			"GenerateTestInterfaces"
+		Cell			"RemoveResetFunc"
+		Cell			"PurelyIntegerCode"
+		Cell			"SupportNonInlinedSFcns"
+		Cell			"SupportComplex"
+		Cell			"SupportAbsoluteTime"
+		Cell			"SupportContinuousTime"
+		Cell			"ExistingSharedCode"
+		Cell			"ModelStepFunctionPrototypeControlCompliant"
+		Cell			"GenerateAllocFcn"
+		PropName		"DisabledProps"
+	      }
+	      Description	      ""
+	      TargetFcnLib	      "ansi_tfl_tmw.mat"
+	      TargetLibSuffix	      ""
+	      TargetPreCompLibLocation ""
+	      GenFloatMathFcnCalls    "NOT IN USE"
+	      TargetLangStandard      "C89/C90 (ANSI)"
+	      CodeReplacementLibrary  "None"
+	      UtilityFuncGeneration   "Auto"
+	      MultiwordTypeDef	      "System defined"
+	      MultiwordLength	      2048
+	      DynamicStringBufferSize 256
+	      GenerateFullHeader      on
+	      InferredTypesCompatibility off
+	      ExistingSharedCode      ""
+	      GenerateSampleERTMain   off
+	      GenerateTestInterfaces  off
+	      ModelReferenceCompliant on
+	      ParMdlRefBuildCompliant on
+	      CompOptLevelCompliant   on
+	      ConcurrentExecutionCompliant on
+	      IncludeMdlTerminateFcn  on
+	      GeneratePreprocessorConditionals "Disable all"
+	      CombineOutputUpdateFcns off
+	      CombineSignalStateStructs	off
+	      SuppressErrorStatus     off
+	      IncludeFileDelimiter    "Auto"
+	      ERTCustomFileBanners    off
+	      SupportAbsoluteTime     on
+	      LogVarNameModifier      "rt_"
+	      MatFileLogging	      on
+	      MultiInstanceERTCode    off
+	      CodeInterfacePackaging  "Nonreusable function"
+	      SupportNonFinite	      on
+	      SupportComplex	      on
+	      PurelyIntegerCode	      off
+	      SupportContinuousTime   on
+	      SupportNonInlinedSFcns  on
+	      RemoveDisableFunc	      off
+	      RemoveResetFunc	      off
+	      SupportVariableSizeSignals off
+	      ParenthesesLevel	      "Nominal"
+	      CastingMode	      "Nominal"
+	      MATLABClassNameForMDSCustomization "Simulink.SoftwareTarget.GRTCustomization"
+	      ModelStepFunctionPrototypeControlCompliant off
+	      CPPClassGenCompliant    on
+	      AutosarCompliant	      off
+	      MDXCompliant	      off
+	      GRTInterface	      on
+	      GenerateAllocFcn	      off
+	      UseToolchainInfoCompliant	on
+	      GenerateSharedConstants on
+	      CoderGroups	      []
+	      AccessMethods	      []
+	      LookupTableObjectStructAxisOrder "1,2,3,4,..."
+	      LUTObjectStructOrderExplicitValues "Size,Breakpoints,Table"
+	      LUTObjectStructOrderEvenSpacing "Size,Breakpoints,Table"
+	      ArrayLayout	      "Column-major"
+	      ERTHeaderFileRootName   "$R$E"
+	      ERTSourceFileRootName   "$R$E"
+	      ERTDataFileRootName     "$R_data"
+	      UseMalloc		      off
+	      ExtMode		      off
+	      ExtModeStaticAlloc      off
+	      ExtModeTesting	      off
+	      ExtModeStaticAllocSize  1000000
+	      ExtModeTransport	      0
+	      ExtModeMexFile	      "ext_comm"
+	      ExtModeMexArgs	      ""
+	      ExtModeIntrfLevel	      "Level1"
+	      RTWCAPISignals	      off
+	      RTWCAPIParams	      off
+	      RTWCAPIStates	      off
+	      RTWCAPIRootIO	      off
+	      GenerateASAP2	      off
+	      MultiInstanceErrorCode  "Error"
+	    }
+	    PropName		    "Components"
+	  }
+	}
+	SlCovCC.ConfigComp {
+	  $ObjectID		  19
+	  Version		  "1.18.0"
+	  DisabledProps		  []
+	  Description		  "Simulink Coverage Configuration Component"
+	  Name			  "Simulink Coverage"
+	  CovEnable		  off
+	  CovScope		  "EntireSystem"
+	  CovIncludeTopModel	  on
+	  RecordCoverage	  off
+	  CovPath		  "/"
+	  CovSaveName		  "covdata"
+	  CovCompData		  ""
+	  CovMetricSettings	  "dw"
+	  CovFilter		  ""
+	  CovHTMLOptions	  ""
+	  CovNameIncrementing	  off
+	  CovHtmlReporting	  on
+	  CovForceBlockReductionOff on
+	  CovEnableCumulative	  on
+	  CovSaveCumulativeToWorkspaceVar on
+	  CovSaveSingleToWorkspaceVar on
+	  CovCumulativeVarName	  "covCumulativeData"
+	  CovCumulativeReport	  off
+	  CovSaveOutputData	  on
+	  CovOutputDir		  "slcov_output/$ModelName$"
+	  CovDataFileName	  "$ModelName$_cvdata"
+	  CovShowResultsExplorer  on
+	  CovReportOnPause	  on
+	  CovModelRefEnable	  "off"
+	  CovModelRefExcluded	  ""
+	  CovExternalEMLEnable	  off
+	  CovSFcnEnable		  on
+	  CovBoundaryAbsTol	  1e-05
+	  CovBoundaryRelTol	  0.01
+	  CovUseTimeInterval	  off
+	  CovStartTime		  0
+	  CovStopTime		  0
+	  CovMcdcMode		  "Masking"
+	}
+	PropName		"Components"
+      }
+      Name		      "Configuration"
+      ExtraOptions	      ""
+      CurrentDlgPage	      "Solver"
+      ConfigPrmDlgPosition    [ 1160, 285, 2040, 915 ]
+    }
+    PropName		    "ConfigurationSets"
+  }
+  Simulink.ConfigSet {
+    $PropName		    "ActiveConfigurationSet"
+    $ObjectID		    8
+  }
+  Object {
+    $PropName		    "DataTransfer"
+    $ObjectID		    20
+    $ClassName		    "Simulink.GlobalDataTransfer"
+    DefaultTransitionBetweenSyncTasks "Ensure deterministic transfer (maximum delay)"
+    DefaultTransitionBetweenAsyncTasks "Ensure data integrity only"
+    DefaultTransitionBetweenContTasks "Ensure deterministic transfer (minimum delay)"
+    DefaultExtrapolationMethodBetweenContTasks "None"
+    AutoInsertRateTranBlk   [0]
+  }
+  ExplicitPartitioning	  off
+  BlockDefaults {
+    ForegroundColor	    "black"
+    BackgroundColor	    "white"
+    DropShadow		    off
+    NamePlacement	    "normal"
+    FontName		    "Arial"
+    FontSize		    10
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+    ShowName		    on
+    HideAutomaticName	    on
+    BlockRotation	    0
+    BlockMirror		    off
+  }
+  AnnotationDefaults {
+    HorizontalAlignment	    "center"
+    VerticalAlignment	    "middle"
+    ForegroundColor	    "black"
+    BackgroundColor	    "white"
+    DropShadow		    off
+    FontName		    "Arial"
+    FontSize		    10
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+    MarkupType		    "model"
+    UseDisplayTextAsClickCallback off
+    AnnotationType	    "note_annotation"
+    FixedHeight		    off
+    FixedWidth		    off
+    Interpreter		    "off"
+  }
+  LineDefaults {
+    FontName		    "Arial"
+    FontSize		    9
+    FontWeight		    "normal"
+    FontAngle		    "normal"
+  }
+  MaskDefaults {
+    SelfModifiable	    "off"
+    IconFrame		    "on"
+    IconOpaque		    "opaque"
+    RunInitForIconRedraw    "analyze"
+    IconRotate		    "none"
+    PortRotate		    "default"
+    IconUnits		    "autoscale"
+  }
+  MaskParameterDefaults {
+    Evaluate		    "on"
+    Tunable		    "on"
+    NeverSave		    "off"
+    Internal		    "off"
+    ReadOnly		    "off"
+    Enabled		    "on"
+    Visible		    "on"
+    ToolTip		    "on"
+  }
+  BlockParameterDefaults {
+    Block {
+      BlockType		      BusSelector
+    }
+  }
+  System {
+    Name		    "x1iop"
+    Location		    [0, 0, 1600, 900]
+    Open		    on
+    PortBlocksUseCompactNotation off
+    SetDomainSpec	    off
+    DomainSpecType	    "Deduce"
+    ModelBrowserVisibility  off
+    ModelBrowserWidth	    200
+    ScreenColor		    "white"
+    PaperOrientation	    "landscape"
+    PaperPositionMode	    "auto"
+    PaperType		    "usletter"
+    PaperUnits		    "inches"
+    TiledPaperMargins	    [0.500000, 0.500000, 0.500000, 0.500000]
+    TiledPageScale	    1
+    ShowPageBoundaries	    off
+    ZoomFactor		    "100"
+    ReportName		    "simulink-default.rpt"
+    SIDHighWatermark	    "1001"
+    Block {
+      BlockType		      Reference
+      Name		      "ADC0"
+      SID		      "931"
+      Tag		      "cdsAdc"
+      Description	      "type-GSC_16AI64SSA\ncard_num=0        "
+      Ports		      [0, 1]
+      Position		      [135, 422, 210, 448]
+      ZOrder		      -1
+      ForegroundColor	      "red"
+      DropShadow	      on
+      AttributesFormatString  "%<Description>\\n%<Tag>"
+      LibraryVersion	      "1.15"
+      FontSize		      14
+      SourceBlock	      "cdsAdcx0/ADC0"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      BusSelector
+      Name		      "Bus\nSelector6"
+      SID		      "936"
+      Description	      "ADC Selector"
+      Ports		      [1, 32]
+      Position		      [315, 16, 350, 849]
+      ZOrder		      -2
+      ShowName		      off
+      AttributesFormatString  "%<Description>"
+      OutputSignals	      "adc_0_0,adc_0_1,adc_0_2,adc_0_3,adc_0_4,adc_0_5,adc_0_6,adc_0_7,adc_0_8,adc_0_9,adc_0_10,ad"
+      "c_0_11,adc_0_12,adc_0_13,adc_0_14,adc_0_15,adc_0_16,adc_0_17,adc_0_18,adc_0_19,adc_0_20,adc_0_21,adc_0_22,adc_0_"
+      "23,adc_0_24,adc_0_25,adc_0_26,adc_0_27,adc_0_28,adc_0_29,adc_0_30,adc_0_31"
+      OutputAsBus	      off
+      Port {
+	PortNumber		1
+	Name			"<adc_0_0>"
+      }
+      Port {
+	PortNumber		2
+	Name			"<adc_0_1>"
+      }
+      Port {
+	PortNumber		3
+	Name			"<adc_0_2>"
+      }
+      Port {
+	PortNumber		4
+	Name			"<adc_0_3>"
+      }
+      Port {
+	PortNumber		5
+	Name			"<adc_0_4>"
+      }
+      Port {
+	PortNumber		6
+	Name			"<adc_0_5>"
+      }
+      Port {
+	PortNumber		7
+	Name			"<adc_0_6>"
+      }
+      Port {
+	PortNumber		8
+	Name			"<adc_0_7>"
+      }
+      Port {
+	PortNumber		9
+	Name			"<adc_0_8>"
+      }
+      Port {
+	PortNumber		10
+	Name			"<adc_0_9>"
+      }
+      Port {
+	PortNumber		11
+	Name			"<adc_0_10>"
+      }
+      Port {
+	PortNumber		12
+	Name			"<adc_0_11>"
+      }
+      Port {
+	PortNumber		13
+	Name			"<adc_0_12>"
+      }
+      Port {
+	PortNumber		14
+	Name			"<adc_0_13>"
+      }
+      Port {
+	PortNumber		15
+	Name			"<adc_0_14>"
+      }
+      Port {
+	PortNumber		16
+	Name			"<adc_0_15>"
+      }
+      Port {
+	PortNumber		17
+	Name			"<adc_0_16>"
+      }
+      Port {
+	PortNumber		18
+	Name			"<adc_0_17>"
+      }
+      Port {
+	PortNumber		19
+	Name			"<adc_0_18>"
+      }
+      Port {
+	PortNumber		20
+	Name			"<adc_0_19>"
+      }
+      Port {
+	PortNumber		21
+	Name			"<adc_0_20>"
+      }
+      Port {
+	PortNumber		22
+	Name			"<adc_0_21>"
+      }
+      Port {
+	PortNumber		23
+	Name			"<adc_0_22>"
+      }
+      Port {
+	PortNumber		24
+	Name			"<adc_0_23>"
+      }
+      Port {
+	PortNumber		25
+	Name			"<adc_0_24>"
+      }
+      Port {
+	PortNumber		26
+	Name			"<adc_0_25>"
+      }
+      Port {
+	PortNumber		27
+	Name			"<adc_0_26>"
+      }
+      Port {
+	PortNumber		28
+	Name			"<adc_0_27>"
+      }
+      Port {
+	PortNumber		29
+	Name			"<adc_0_28>"
+      }
+      Port {
+	PortNumber		30
+	Name			"<adc_0_29>"
+      }
+      Port {
+	PortNumber		31
+	Name			"<adc_0_30>"
+      }
+      Port {
+	PortNumber		32
+	Name			"<adc_0_31>"
+      }
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "DAC_0"
+      SID		      "947"
+      Description	      "card_num=0"
+      Ports		      [16]
+      Position		      [715, 29, 765, 811]
+      ZOrder		      -3
+      BackgroundColor	      "cyan"
+      DropShadow	      on
+      AttributesFormatString  "%<Description>"
+      LibraryVersion	      "1.8"
+      SourceBlock	      "dac/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM0"
+      SID		      "941"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 33, 610, 57]
+      ZOrder		      -4
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM1"
+      SID		      "942"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 58, 505, 82]
+      ZOrder		      -5
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM10"
+      SID		      "956"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 283, 610, 307]
+      ZOrder		      -6
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM11"
+      SID		      "957"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 308, 505, 332]
+      ZOrder		      -7
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM12"
+      SID		      "958"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 333, 610, 357]
+      ZOrder		      -8
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM13"
+      SID		      "959"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 358, 505, 382]
+      ZOrder		      -9
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM14"
+      SID		      "960"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 383, 610, 407]
+      ZOrder		      -10
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM15"
+      SID		      "961"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 408, 505, 432]
+      ZOrder		      -11
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM16"
+      SID		      "980"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 433, 610, 457]
+      ZOrder		      -12
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM17"
+      SID		      "981"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 458, 505, 482]
+      ZOrder		      -13
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM18"
+      SID		      "982"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 483, 610, 507]
+      ZOrder		      -14
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM19"
+      SID		      "983"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 508, 505, 532]
+      ZOrder		      -15
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM2"
+      SID		      "948"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 83, 610, 107]
+      ZOrder		      -16
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM20"
+      SID		      "984"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 533, 610, 557]
+      ZOrder		      -17
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM21"
+      SID		      "985"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 558, 505, 582]
+      ZOrder		      -18
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM22"
+      SID		      "986"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 583, 610, 607]
+      ZOrder		      -19
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM23"
+      SID		      "987"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 608, 505, 632]
+      ZOrder		      -20
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM24"
+      SID		      "988"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 633, 610, 657]
+      ZOrder		      -21
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM25"
+      SID		      "989"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 658, 505, 682]
+      ZOrder		      -22
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM26"
+      SID		      "990"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 683, 610, 707]
+      ZOrder		      -23
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM27"
+      SID		      "991"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 708, 505, 732]
+      ZOrder		      -24
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM28"
+      SID		      "992"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 733, 610, 757]
+      ZOrder		      -25
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM29"
+      SID		      "993"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 758, 505, 782]
+      ZOrder		      -26
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM3"
+      SID		      "949"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 108, 505, 132]
+      ZOrder		      -27
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM30"
+      SID		      "994"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 783, 610, 807]
+      ZOrder		      -28
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM31"
+      SID		      "995"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 808, 505, 832]
+      ZOrder		      -29
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM4"
+      SID		      "950"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 133, 610, 157]
+      ZOrder		      -30
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM5"
+      SID		      "951"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 158, 505, 182]
+      ZOrder		      -31
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM6"
+      SID		      "952"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 183, 610, 207]
+      ZOrder		      -32
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM7"
+      SID		      "953"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 208, 505, 232]
+      ZOrder		      -33
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM8"
+      SID		      "954"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [540, 233, 610, 257]
+      ZOrder		      -34
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "FM9"
+      SID		      "955"
+      Tag		      "cdsFilt"
+      Description	      "Purpose:                                                                                     "
+      "                                                                                                                "
+      "                             \nStandard CDS IIR filter module.                                                  "
+      "                                                                                                                "
+      "                                         \n                                                                     "
+      "                                                                                                                "
+      "                                                     \nOperation:                                               "
+      "                                                                                                                "
+      "                                                                 \nConsists of 10 second order section IIR filte"
+      "rs, plus a ramped gain stage. In FE code, also provides pre-defined test points and excitation channel inputs. T"
+      "he filter coefficients are defined in the LIGO system using the 'foton' tool.\n                                 "
+      "                                                                                                                "
+      "                                                                                         \nUsage:               "
+      "                                                                                                                "
+      "                                                                                                     \nName the "
+      "part with the desired filter module name.                                                                       "
+      "                                                                                                                "
+      " "
+      Ports		      [1, 1]
+      Position		      [435, 258, 505, 282]
+      ZOrder		      -35
+      BackgroundColor	      "darkGreen"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.2"
+      SourceBlock	      "cdsFilt/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Block {
+      BlockType		      Reference
+      Name		      "host=@HOSTNAME@\nsite=X1\nrate=16K\ndcuid=1\nshmem_daq=1\nadcMaster=1\nspecific_cpu=2\nno_rfm_dma=1"
+      SID		      "927"
+      Tag		      "cdsParameters"
+      Ports		      [1, 1]
+      Position		      [85, 35, 125, 95]
+      ZOrder		      -36
+      BackgroundColor	      "orange"
+      AttributesFormatString  "%<Tag>"
+      LibraryVersion	      "1.4"
+      SourceBlock	      "cdsParameters/Subsystem"
+      SourceType	      "SubSystem"
+      ShowPortLabels	      "FromPortIcon"
+      SystemSampleTime	      "-1"
+      FunctionWithSeparateData off
+      RTWMemSecFuncInitTerm   "Inherit from model"
+      RTWMemSecFuncExecute    "Inherit from model"
+      RTWMemSecDataConstants  "Inherit from model"
+      RTWMemSecDataInternal   "Inherit from model"
+      RTWMemSecDataParameters "Inherit from model"
+      GeneratePreprocessorConditionals off
+    }
+    Line {
+      ZOrder		      1
+      SrcBlock		      "ADC0"
+      SrcPort		      1
+      DstBlock		      "Bus\nSelector6"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_0>"
+      ZOrder		      2
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      1
+      DstBlock		      "FM0"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_2>"
+      ZOrder		      3
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      3
+      DstBlock		      "FM2"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_1>"
+      ZOrder		      4
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      2
+      DstBlock		      "FM1"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_4>"
+      ZOrder		      5
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      5
+      DstBlock		      "FM4"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_3>"
+      ZOrder		      6
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      4
+      DstBlock		      "FM3"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_5>"
+      ZOrder		      7
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      6
+      DstBlock		      "FM5"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_6>"
+      ZOrder		      8
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      7
+      DstBlock		      "FM6"
+      DstPort		      1
+    }
+    Line {
+      ZOrder		      9
+      SrcBlock		      "FM0"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_7>"
+      ZOrder		      10
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      8
+      DstBlock		      "FM7"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_8>"
+      ZOrder		      11
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      9
+      DstBlock		      "FM8"
+      DstPort		      1
+    }
+    Line {
+      ZOrder		      12
+      SrcBlock		      "FM2"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      2
+    }
+    Line {
+      ZOrder		      13
+      SrcBlock		      "FM4"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      3
+    }
+    Line {
+      ZOrder		      14
+      SrcBlock		      "FM6"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      4
+    }
+    Line {
+      ZOrder		      15
+      SrcBlock		      "FM8"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      5
+    }
+    Line {
+      ZOrder		      16
+      SrcBlock		      "FM10"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      6
+    }
+    Line {
+      ZOrder		      17
+      SrcBlock		      "FM12"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      7
+    }
+    Line {
+      ZOrder		      18
+      SrcBlock		      "FM14"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      8
+    }
+    Line {
+      ZOrder		      19
+      SrcBlock		      "FM16"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      9
+    }
+    Line {
+      ZOrder		      20
+      SrcBlock		      "FM18"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      10
+    }
+    Line {
+      ZOrder		      21
+      SrcBlock		      "FM20"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      11
+    }
+    Line {
+      ZOrder		      22
+      SrcBlock		      "FM22"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      12
+    }
+    Line {
+      ZOrder		      23
+      SrcBlock		      "FM24"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      13
+    }
+    Line {
+      ZOrder		      24
+      SrcBlock		      "FM28"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      15
+    }
+    Line {
+      ZOrder		      25
+      SrcBlock		      "FM26"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      14
+    }
+    Line {
+      ZOrder		      26
+      SrcBlock		      "FM30"
+      SrcPort		      1
+      DstBlock		      "DAC_0"
+      DstPort		      16
+    }
+    Line {
+      Name		      "<adc_0_9>"
+      ZOrder		      27
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      10
+      DstBlock		      "FM9"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_11>"
+      ZOrder		      28
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      12
+      DstBlock		      "FM11"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_13>"
+      ZOrder		      29
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      14
+      DstBlock		      "FM13"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_15>"
+      ZOrder		      30
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      16
+      DstBlock		      "FM15"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_17>"
+      ZOrder		      31
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      18
+      DstBlock		      "FM17"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_19>"
+      ZOrder		      32
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      20
+      DstBlock		      "FM19"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_21>"
+      ZOrder		      33
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      22
+      DstBlock		      "FM21"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_23>"
+      ZOrder		      34
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      24
+      DstBlock		      "FM23"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_25>"
+      ZOrder		      35
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      26
+      DstBlock		      "FM25"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_27>"
+      ZOrder		      36
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      28
+      DstBlock		      "FM27"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_29>"
+      ZOrder		      37
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      30
+      DstBlock		      "FM29"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_31>"
+      ZOrder		      38
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      32
+      DstBlock		      "FM31"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_30>"
+      ZOrder		      39
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      31
+      DstBlock		      "FM30"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_28>"
+      ZOrder		      40
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      29
+      DstBlock		      "FM28"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_26>"
+      ZOrder		      41
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      27
+      DstBlock		      "FM26"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_24>"
+      ZOrder		      42
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      25
+      DstBlock		      "FM24"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_22>"
+      ZOrder		      43
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      23
+      DstBlock		      "FM22"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_20>"
+      ZOrder		      44
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      21
+      DstBlock		      "FM20"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_18>"
+      ZOrder		      45
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      19
+      DstBlock		      "FM18"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_16>"
+      ZOrder		      46
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      17
+      DstBlock		      "FM16"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_14>"
+      ZOrder		      47
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      15
+      DstBlock		      "FM14"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_12>"
+      ZOrder		      48
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      13
+      DstBlock		      "FM12"
+      DstPort		      1
+    }
+    Line {
+      Name		      "<adc_0_10>"
+      ZOrder		      49
+      Labels		      [0, 0]
+      SrcBlock		      "Bus\nSelector6"
+      SrcPort		      11
+      DstBlock		      "FM10"
+      DstPort		      1
+    }
+  }
+}
