@@ -908,6 +908,14 @@ sleep(2);
 }
 
 
+/**
+ * @brief main loop for the crc checking thread.
+ * @param arg Input structure defining the epics variables to set.
+ * @return null
+ * @note this is outside of the main thread so that it does not stall
+ * the filling of the mbuf while waiting for filesystem I/O (ie crc check
+ * of the file).
+ */
 void* check_crc(void* arg) {
     check_crc_params* crc_params = (check_crc_params*)arg;
     char okfilemsg[] = "";
