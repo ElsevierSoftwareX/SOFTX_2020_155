@@ -1,0 +1,11 @@
+[Unit]
+Description=Advanced LIGO RTS stand-alone EPICS data concentrator
+After=network-online.target
+
+[Service]
+EnvironmentFile=/etc/advligorts/env
+ExecStart=/usr/bin/standalone_edc -i /etc/advligorts/edc.ini -I 0.0.0.0:9000 $STANDALONE_EDC_ARGS
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

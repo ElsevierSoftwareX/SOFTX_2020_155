@@ -4,14 +4,10 @@ After=network-online.target
 
 [Service]
 User=controls
-Type=simple
 EnvironmentFile=/etc/advligorts/env
 ExecStart=/usr/bin/omx_xmit $OMX_XMIT_ARGS
-StandardOutput=journal
-StandardError=journal
 Restart=always
 RestartSec=5
-StartLimitInterval=0
 
 [Install]
 WantedBy=multi-user.target
