@@ -50,8 +50,6 @@ Depends:
  advligorts-module-support,
  python3,
  ${misc:Depends},
-Recommends:
- ietf-leap-seconds,
 Description: advLigoRTS gpstime kernel module
  Core component of advLigoRTS.
  .
