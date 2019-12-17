@@ -1,6 +1,8 @@
 support/systemd/rts-daqd.service lib/systemd/system
 support/systemd/rts-nds.service lib/systemd/system
 support/systemd/rts-run_number.service lib/systemd/system
+support/systemd/rts-edc.service lib/systemd/system
 usr/bin/daqd
 usr/bin/nds
 usr/bin/run_number_server
+usr/bin/standalone_edc
