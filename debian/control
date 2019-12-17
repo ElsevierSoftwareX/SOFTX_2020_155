@@ -17,11 +17,13 @@ Build-Depends:
  libc-dev-bin,
  libfl-dev,
  libmotif-dev,
+ libnds2-client-dev,
  libtool,
  libxpm-dev,
  libxt-dev,
  libzmq3-dev,
  pkg-config,
+ rapidjson-dev,
 Standards-Version: 3.9.8
 Vcs-Git: https://git.ligo.org/cds/advLigoRTS
 
