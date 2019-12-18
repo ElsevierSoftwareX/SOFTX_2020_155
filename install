@@ -140,11 +140,10 @@ fi
 /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
 sleep 5
 
-LSPCI_PATH=`sudo which lspci`
-ADC_COUNT=\`\$LSPCI_PATH -v -n | grep 3101 | wc -l\`
-DAC16_COUNT=\`\$LSPCI_PATH -v -n | grep 3120 | wc -l\`
-DAC18_COUNT=\`\$LSPCI_PATH -v -n | grep 3357 | wc -l\`
-DAC20_COUNT=\`\$LSPCI_PATH -v -n | grep 3574 | wc -l\`
+ADC_COUNT=\`lspci -v -n | grep 3101 | wc -l\`
+DAC16_COUNT=\`lspci -v -n | grep 3120 | wc -l\`
+DAC18_COUNT=\`lspci -v -n | grep 3357 | wc -l\`
+DAC20_COUNT=\`lspci -v -n | grep 3574 | wc -l\`
 echo Number of ADC cards on bus = \$ADC_COUNT 
 echo Number of DAC16 cards on bus = \$DAC16_COUNT 
 echo Number of DAC18 cards on bus = \$DAC18_COUNT 
