@@ -109,6 +109,7 @@ typedef struct CDS_DOLPHIN_INFO {
 #ifdef COMMDATA_INLINE
 #  include "../fe/commData3.c"
 #else
+#  include "../fe/commDataUsp.c"
   // initialize the CommDataState struct
   // send data
   //   the cycle counter is included in the checksum,

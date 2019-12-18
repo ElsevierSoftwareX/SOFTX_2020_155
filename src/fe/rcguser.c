@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
+#include <stdbool.h>
 
 #include "moduleLoadCommon.c"
 
@@ -391,8 +392,10 @@ main( int argc, char** argv )
     // Slave gets RFM module count from MASTER.
     cdsPciModules.rfmCount = ioMemData->rfmCount;
     cdsPciModules.dolphinCount = ioMemData->dolphinCount;
-    cdsPciModules.dolphinRead[ 0 ] = ioMemData->dolphinRead[ 0 ];
-    cdsPciModules.dolphinWrite[ 0 ] = ioMemData->dolphinWrite[ 0 ];
+    if(cdsPciModules.dolphinCount)
+    {
+        dolphin_init(&cdsPciModules);
+    }
     for ( ii = 0; ii < cdsPciModules.rfmCount; ii++ )
     {
         cdsPciModules.pci_rfm[ ii ] = ioMemData->pci_rfm[ ii ];

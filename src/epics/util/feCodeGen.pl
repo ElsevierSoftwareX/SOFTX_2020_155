@@ -1492,10 +1492,10 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUTH "\#define TARGET_DAC18_COUNT $dac18Cnt\n";
 		print OUTH "\#define TARGET_DAC20_COUNT $dac20Cnt\n";
 	} else {
-		if($virtualiop) {
-			print OUTH "\#define TARGET_ADC_COUNT 0\n";
-		} else {
+		if($virtualiop == 0 and $adcMaster == 1) {
 			print OUTH "\#define TARGET_ADC_COUNT 1\n";
+		} else {
+			print OUTH "\#define TARGET_ADC_COUNT 0\n";
 		}
 		print OUTH "\#define TARGET_DAC16_COUNT 0\n";
 		print OUTH "\#define TARGET_DAC18_COUNT 0\n";
@@ -1854,7 +1854,11 @@ open(OUT2,">./".$cFile2) || die "cannot open c file for writing $cFile2";
 while(my $line = <OUT>) {
 	if(index($line,"fe.h") != -1) {
 		print OUT2 "#include \"feuser.h\" \n";
+		print OUT2 "#include \<stdbool.h\> \n";
 	} 
+	elsif(index($line,"COMMDATA_INLINE") != -1 && $adcMaster != 1) {
+		print OUT2 "#define COMMDATA_USP\n";
+	}
 	elsif(index($line,"controller") != -1 && $adcMaster != 1) {
 		print OUT2 "#include \"$rcg_src_dir/src/fe/controllerAppUser.c\"\n";
 	}
@@ -2793,6 +2797,7 @@ if($rate > 15) {
     }
   }
 }
+    print OUTM "CFLAGS += -DUNDERSAMPLE=1\n";
 if ($dac_internal_clocking) {
   print OUTM "#Comment out to enable external D/A converter clocking\n";
   print OUTM "CFLAGS += -DDAC_INTERNAL_CLOCKING\n";
@@ -2849,20 +2854,11 @@ if ($rfmTimeSlave > -1) {
 if ($flipSignals) {
   print OUTM "CFLAGS += -DFLIP_SIGNALS=1\n";
 }
-if ($pciNet == 1) {
-  print OUTM "#Enable use of PCIe RFM Network Gen 1\n";
-  print OUTM "DISDIR = /opt/srcdis\n";
-  print OUTM "CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
-} elsif($pciNet == 2) {
-  print OUTM "#Enable use of PCIe RFM Network Gen 2\n";
-  print OUTM "DISDIR = /opt/srcdis\n";
-  print OUTM "CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM_GX/drv/src -I\$(DISDIR)/src/IRM_GX/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -I\$(DISDIR)/src/COMMON/osif/kernel/include -I\$(DISDIR)/src/COMMON/osif/kernel/include/LINUX -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
- print OUTM "CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM_GX/drv/src -I\$(DISDIR)/src/IRM_GX/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -I\$(DISDIR)/src/COMMON/osif/kernel/include -I\$(DISDIR)/src/COMMON/osif/kernel/include/LINUX -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
-} else {
-  print OUTM "#Uncomment to use PCIe RFM Network\n";
-  print OUTM "#DISDIR = /home/controls/DIS\n";
-  print OUTM "#CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
-}
+
+print OUTM "#Enable use of PCIe RFM Network Gen 2\n";
+print OUTM "DOLPHIN_PATH = /opt/srcdis\n";
+print OUTM "CFLAGS += -DHAVE_CONFIG_H -I\$(DOLPHIN_PATH)/src/include/dis -I\$(DOLPHIN_PATH)/src/include -I\$(DOLPHIN_PATH)/src/SISCI/cmd/test/lib -I\$(DOLPHIN_PATH)/src/SISCI/src -I\$(DOLPHIN_PATH)/src/SISCI/api -I\$(DOLPHIN_PATH)/src/SISCI/cmd/include -I\$(DOLPHIN_PATH)/src/IRM_GX/drv/src -I\$(DOLPHIN_PATH)/src/IRM_GX/drv/src/LINUX -DOS_IS_LINUX=196616 -DLINUX -DUNIX  -DLITTLE_ENDIAN -DDIS_LITTLE_ENDIAN -DCPU_WORD_IS_64_BIT -DCPU_ADDR_IS_64_BIT -DCPU_WORD_SIZE=64 -DCPU_ADDR_SIZE=64 -DCPU_ARCH_IS_X86_64 -DADAPTER_IS_IX   -m64 -D_REENTRANT\n";
+
 if ($specificCpu > -1) {
   print OUTM "#Comment out to run on first available CPU\n";
   print OUTM "CFLAGS += -DSPECIFIC_CPU=$specificCpu\n";
@@ -2912,8 +2908,9 @@ if ($::rfmDelay) {
   print OUTM "CFLAGS += -DUSER_SPACE=1\n";
   print OUTM "CFLAGS += -fno-builtin-sincos\n";
 
-
-print OUTM "\n";
+print OUTM "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/opt/DIS/lib64\n";
+print OUTM "API_LIB_PATH=/opt/DIS/lib64\n";
+print OUTM "\n\n";
 
 print OUTM "\n";
 #print OUTM "all: \$(ALL)\n";
@@ -2923,7 +2920,7 @@ print OUTM "\n";
 print OUTM "\n";
 
 print OUTM "CFLAGS += -I\$(SUBDIRS)/../../include -I$rcg_src_dir\/src/drv -I$rcg_src_dir\/src/include \n";
-print OUTM "LDFLAGS = -lrt \n";
+print OUTM "LDFLAGS = -L \$(API_LIB_PATH) -lsisci\n";
 
 print OUTM "TARGET=$skeleton\n\n\n";
 print OUTM "$skeleton: $skeleton.o rfm.o \n\n";
