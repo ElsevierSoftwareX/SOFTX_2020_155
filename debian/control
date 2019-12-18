@@ -103,7 +103,7 @@ Description: advLigoRTS front end support
  .
  Binaries and systemd services for advLigoRTS front end systems.
 
-Package: advligorts-zmq
+Package: advligorts-transport-zmq
 Architecture: any
 Depends:
  advligorts-mbuf-dkms,
@@ -114,7 +114,7 @@ Description: advLigoRTS ZeroMQ network transport
  .
  ZeroMQ network transport for advLigoRTS DAQD structures.
 
-Package: advligorts-dix
+Package: advligorts-transport-dix
 Architecture: any
 Depends:
  advligorts-mbuf-dkms,
