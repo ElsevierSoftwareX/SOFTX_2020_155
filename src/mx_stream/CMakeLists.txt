@@ -34,5 +34,27 @@ if (OPENMX_FOUND)
 			${CMAKE_THREAD_LIBS_INIT}
 			args
 			)
+
+	add_executable(omx_recv_buffered omx_recv_buffered.cc recv_buffer.cc)
+	target_link_libraries(omx_recv_buffered PUBLIC
+			driver::shmem
+			pv::simple_pv
+			openmx::openmx
+			${CMAKE_THREAD_LIBS_INIT}
+			)
+
+	add_executable(test_recv_buffer recv_buffer.cc
+			tests/test_main.cc
+			tests/test_recv_buffer.cc)
+	target_include_directories(test_recv_buffer PUBLIC
+			${CMAKE_CURRENT_SOURCE_DIR}
+			${CMAKE_CURRENT_SOURCE_DIR}/../include)
+	target_link_libraries(test_recv_buffer PUBLIC
+			${CMAKE_THREAD_LIBS_INIT})
+
+	add_test(NAME test_recv_buffer
+			COMMAND test_recv_buffer
+			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
 	install(TARGETS omx_recv DESTINATION bin)
 endif (OPENMX_FOUND)
