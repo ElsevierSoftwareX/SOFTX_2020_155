@@ -164,8 +164,8 @@ public:
 
         fprintf( stderr,
                  "cycle data size = %d\t%d\n",
-                 cycle_data_size_,
-                 shmem_max_size_mb );
+                 (int)cycle_data_size_,
+                 (int)shmem_max_size_mb );
         ifo_header_->cycleDataSize = cycle_data_size_;
         ifo_header_->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
     }
