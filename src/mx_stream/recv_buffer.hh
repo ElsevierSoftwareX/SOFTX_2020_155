@@ -43,7 +43,7 @@ struct gps_key
 
     key_type key;
 
-    gps_key( ) noexcept : key( 0 )
+    gps_key( ): key( 0 )
     {
     }
     gps_key( key_type sec, cycle_type cycle )
