@@ -139,14 +139,14 @@ private:
     {
     }
 
-    static constexpr key_type
-                     shift_amount( )
+    static key_type
+    shift_amount( )
     {
         return 4;
     }
 
-    static constexpr cycle_type
-                     cycle_mask( )
+    static cycle_type
+    cycle_mask( )
     {
         return static_cast< cycle_type >( 0xf );
     }
