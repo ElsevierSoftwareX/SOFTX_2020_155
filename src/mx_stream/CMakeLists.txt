@@ -42,7 +42,9 @@ if (OPENMX_FOUND)
 			openmx::openmx
 			${CMAKE_THREAD_LIBS_INIT}
 			)
+	target_requires_cpp11(omx_recv_buffered PUBLIC)
 
+	if (${CXX_HAS_ATOMIC})
 	add_executable(test_recv_buffer recv_buffer.cc
 			tests/test_main.cc
 			tests/test_recv_buffer.cc)
@@ -51,10 +53,12 @@ if (OPENMX_FOUND)
 			${CMAKE_CURRENT_SOURCE_DIR}/../include)
 	target_link_libraries(test_recv_buffer PUBLIC
 			${CMAKE_THREAD_LIBS_INIT})
+	target_requires_cpp11(test_recv_buffer PUBLIC)
 
 	add_test(NAME test_recv_buffer
 			COMMAND test_recv_buffer
 			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+	endif (${CXX_HAS_ATOMIC})
 
 	install(TARGETS omx_recv DESTINATION bin)
 endif (OPENMX_FOUND)
