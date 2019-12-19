@@ -5,6 +5,7 @@
 //
 
 #include <string>
+#include <vector>
 
 #include "myriexpress.h"
 #include <unistd.h>
@@ -31,6 +32,7 @@
 // #include "testlib.h"
 
 #include "simple_pv.h"
+#include "recv_buffer.hh"
 
 #define __CDECL
 
@@ -92,16 +94,113 @@ struct thread_mon_info
 struct thread_info thread_index[ DCU_COUNT ];
 char*              sname[ DCU_COUNT ]; // Names of FE computers serving DAQ data
 char*              local_iface[ MAX_FE_COMPUTERS ];
-daq_multi_dcu_data_t mxDataBlockSingle[ MAX_FE_COMPUTERS ];
-int64_t              dataRecvTime[ MAX_FE_COMPUTERS ];
-const int            mc_header_size = sizeof( daq_multi_cycle_header_t );
-int                  stop_working_threads = 0;
-int                  start_acq = 0;
-static volatile int  keepRunning = 1;
-int                  thread_cycle[ MAX_FE_COMPUTERS ];
-int                  thread_timestamp[ MAX_FE_COMPUTERS ];
-int                  rcv_errors = 0;
-int                  dataRdy[ MAX_FE_COMPUTERS ];
+// daq_multi_dcu_data_t mxDataBlockSingle[ MAX_FE_COMPUTERS ];
+receive_buffer< 4 > circular_buffer;
+// int64_t              dataRecvTime[ MAX_FE_COMPUTERS ];
+// const int            mc_header_size = sizeof( daq_multi_cycle_header_t );
+int                 stop_working_threads = 0;
+int                 start_acq = 0;
+static volatile int keepRunning = 1;
+// int                  thread_cycle[ MAX_FE_COMPUTERS ];
+// int                  thread_timestamp[ MAX_FE_COMPUTERS ];
+int rcv_errors = 0;
+// int                  dataRdy[ MAX_FE_COMPUTERS ];
+
+/*!
+ * @brief RAII class to ensure MX is initialized and finalized
+ */
+class mx_initializer
+{
+public:
+    mx_initializer( )
+    {
+        mx_init( );
+    }
+    ~mx_initializer( )
+    {
+        mx_finalize( );
+    }
+};
+
+/*!
+ * @brief RAII class to ensure that worker threads get stopped
+ */
+class thread_stopper
+{
+public:
+    ~thread_stopper( )
+    {
+        stop_working_threads = 1;
+        sleep( 5 );
+        fprintf( stderr, "stopping threads\n" );
+    }
+};
+
+/*!
+ * @brief The data_recorder is used in conjuction with a recieve buffer
+ * to move data from the receive_buffer into an output mbuf.
+ */
+class data_recorder
+{
+    data_recorder( const data_recorder& other );
+    data_recorder& operator=( const data_recorder& other );
+
+public:
+    /*!
+     * @Initialize the data_recorder, opening the output shared memory buffer
+     * @param shmem_name Name of the shared memory buffer to output to
+     * @param shmem_max_size_mb Size of the buffer in MB
+     */
+    data_recorder( const std::string shmem_name, int shmem_max_size_mb )
+        : shmem_ptr_( findSharedMemorySize(
+              const_cast< char* >( shmem_name.c_str( ) ), shmem_max_size_mb ) )
+    {
+        ifo_header_ = (daq_multi_cycle_header_t*)shmem_ptr_;
+        ifo_data_ = (char*)shmem_ptr_ + sizeof( daq_multi_cycle_header_t );
+        cycle_data_size_ =
+            ( shmem_max_size_mb - sizeof( daq_multi_cycle_header_t ) ) /
+            DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+        cycle_data_size_ -= ( cycle_data_size_ % 8 );
+
+        fprintf( stderr,
+                 "cycle data size = %d\t%d\n",
+                 cycle_data_size_,
+                 shmem_max_size_mb );
+        ifo_header_->cycleDataSize = cycle_data_size_;
+        ifo_header_->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+    }
+
+    /*!
+     * @brief copy the given daq_dc_data_t into the output buffer
+     * @param input_data Data to copy
+     */
+    void
+    operator( )( const daq_dc_data_t& input_data )
+    {
+        size_t data_size =
+            input_data.header.fullDataBlockSize + sizeof( input_data.header );
+        if ( data_size > cycle_data_size_ )
+        {
+            fprintf( stderr,
+                     "Overflow of the output buffer, requested %d bytes for a "
+                     "%d byte destination",
+                     (int)data_size,
+                     (int)cycle_data_size_ );
+            throw std::runtime_error( "Overflow of the output mbuf" );
+        }
+        char* dest = ifo_data_ +
+            input_data.header.dcuheader[ 0 ].cycle * cycle_data_size_;
+        memcpy( dest, &input_data, data_size );
+
+        ifo_header_->curCycle = input_data.header.dcuheader[ 0 ].cycle;
+    }
+
+private:
+    void*                     shmem_ptr_;
+    daq_multi_cycle_header_t* ifo_header_;
+    char*                     ifo_data_;
+    size_t                    cycle_data_size_;
+};
 
 void
 usage( )
@@ -189,23 +288,24 @@ print_diags( int                   nsys,
 void*
 rcvr_thread( void* arg )
 {
-    struct thread_info*   my_info = (struct thread_info*)arg;
-    int                   mt = my_info->index;
-    uint32_t              mv = my_info->match_val;
-    uint32_t              board_id = my_info->bid;
-    uint32_t              tpn = my_info->tpn;
-    int                   cycle = 0;
-    daq_multi_dcu_data_t* mxDataBlock;
-    mx_return_t           ret;
-    int                   count, len, cur_req;
-    mx_status_t           stat;
-    mx_request_t          req[ NUM_RREQ ];
-    mx_segment_t          seg;
-    uint32_t              result;
-    char*                 buffer;
-    uint32_t              filter;
-    mx_endpoint_t         ep;
-    int                   myErrorStat = 0;
+    struct thread_info* my_info = (struct thread_info*)arg;
+    int                 mt = my_info->index;
+    uint32_t            mv = my_info->match_val;
+    uint32_t            board_id = my_info->bid;
+    uint32_t            tpn = my_info->tpn;
+    int                 cycle = 0;
+
+    mx_return_t  ret;
+    int          count, cur_req;
+    mx_status_t  stat;
+    mx_request_t req[ NUM_RREQ ];
+    mx_segment_t seg;
+    uint32_t     result;
+    // char*                 buffer;
+    std::vector< daq_multi_dcu_data_t > buffer( NUM_RREQ );
+    uint32_t                            filter;
+    mx_endpoint_t                       ep;
+    int                                 myErrorStat = 0;
 
     filter = FILTER;
     int copySize;
@@ -221,28 +321,15 @@ rcvr_thread( void* arg )
     }
 
     fprintf( stderr, "waiting for someone to connect on CH %d\n", mt );
-    len = 0xf00000;
-    fprintf( stderr, "buffer length = %d\n", len );
-    buffer = (char*)malloc( len );
-    if ( buffer == NULL )
-    {
-        fprintf( stderr, "Can't allocate buffers here\n" );
-        mx_close_endpoint( ep );
-        return ( 0 );
-    }
-    len /= NUM_RREQ;
-    fprintf( stderr, " length = %d\n", len );
 
     for ( cur_req = 0; cur_req < NUM_RREQ; cur_req++ )
     {
-        seg.segment_ptr = &buffer[ cur_req * len ];
-        seg.segment_length = len;
+        seg.segment_ptr = &buffer[ cur_req ];
+        seg.segment_length = sizeof( daq_multi_dcu_data_t );
         mx_irecv( ep, &seg, 1, mv, MX_MATCH_MASK_NONE, 0, &req[ cur_req ] );
     }
 
     mx_set_error_handler( MX_ERRORS_RETURN );
-
-    char* daqbuffer = (char*)&mxDataBlockSingle[ dblock ];
     do
     {
         for ( count = 0; count < NUM_RREQ; count++ )
@@ -261,17 +348,10 @@ rcvr_thread( void* arg )
             }
             if ( !myErrorStat )
             {
-                seg.segment_ptr = &buffer[ cur_req * len ];
-                mxDataBlock = (daq_multi_dcu_data_t*)seg.segment_ptr;
+                seg.segment_ptr = &buffer[ cur_req ];
+                circular_buffer.ingest( buffer[ cur_req ] );
                 copySize = stat.xfer_length;
-                memcpy( daqbuffer, seg.segment_ptr, copySize );
-                // Get the message DAQ cycle number
-                cycle = mxDataBlock->header.dcuheader[ 0 ].cycle;
-                // Pass cycle and timestamp data back to main process
-                thread_cycle[ dblock ] = cycle;
-                thread_timestamp[ dblock ] =
-                    mxDataBlock->header.dcuheader[ 0 ].timeSec;
-                dataRecvTime[ dblock ] = s_clock( );
+
                 mx_irecv(
                     ep, &seg, 1, mv, MX_MATCH_MASK_NONE, 0, &req[ cur_req ] );
             }
@@ -295,10 +375,10 @@ main( int argc, char** argv )
     int nsys = MAX_FE_COMPUTERS; // The number of mapped shared memories (number
                                  // of data sources)
     std::string buffer_name = "ifo";
-    int   c;
-    int   ii; // Loop counter
-    int   delay_ms = 10;
-    int   delay_cycles = 0;
+    int         c;
+    int         ii; // Loop counter
+    int         delay_ms = 10;
+    int         delay_cycles = 0;
 
     extern char* optarg; // Needed to get arguments to program
 
@@ -395,7 +475,7 @@ main( int argc, char** argv )
     max_data_size = max_data_size_mb * 1024 * 1024;
     delay_cycles = delay_ms * 10;
 
-    mx_init( );
+    mx_initializer mx_;
     // MX_MUTEX_INIT(&stream_mutex);
 
     // set up to catch Control C
@@ -405,20 +485,9 @@ main( int argc, char** argv )
 
     fprintf( stderr, "Num of sys = %d\n", nsys );
 
-    // Get pointers to local DAQ mbuf
-    ifo = (char*)findSharedMemorySize( const_cast<char*>(buffer_name.c_str()), max_data_size_mb );
-    ifo_header = (daq_multi_cycle_header_t*)ifo;
-    ifo_data = (char*)ifo + sizeof( daq_multi_cycle_header_t );
-    cycle_data_size = ( max_data_size - sizeof( daq_multi_cycle_header_t ) ) /
-        DAQ_NUM_DATA_BLOCKS_PER_SECOND;
-    cycle_data_size -= ( cycle_data_size % 8 );
-    fprintf( stderr,
-             "cycle data size = %d\t%d\n",
-             cycle_data_size,
-             max_data_size_mb );
+    data_recorder recorder( buffer_name, max_data_size_mb );
+
     sleep( 3 );
-    ifo_header->cycleDataSize = cycle_data_size;
-    ifo_header->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
 
     fprintf( stderr, "nsys = %d\n", nsys );
 
@@ -468,316 +537,322 @@ main( int argc, char** argv )
     int     recv_buckets[ ( MAX_DELAY_MS / 5 ) + 2 ];
     int     festatus = 0;
     int     ix_xmit_stop = 0;
+    gps_key last_received;
 
     missed_flag = 1;
     memset( &missed_nsys[ 0 ], 0, sizeof( missed_nsys ) );
     memset( recv_buckets, 0, sizeof( recv_buckets ) );
+
+    // ensure the threads get stopped before exit.
+    thread_stopper clean_threads_;
     do
     {
-        // Reset counters
-        timeout = 0;
-        for ( ii = 0; ii < nsys; ii++ )
-            dataRdy[ ii ] = 0;
-        for ( ii = 0; ii < nsys; ii++ )
-            thread_cycle[ ii ] = 50;
-        threads_rdy = 0;
-        any_rdy = 0;
 
-        // Wait up to 100ms until received data from at least 1 FE or timeout
+        gps_key latest_in_buffer;
         do
         {
             usleep( 2000 );
-            for ( ii = 0; ii < nsys; ii++ )
-            {
-                if ( nextCycle == thread_cycle[ ii ] )
-                    any_rdy = 1;
-            }
-            timeout += 1;
-        } while ( !any_rdy && timeout < 50 );
-#ifndef TIME_INTERVAL_DIAG
-        mytime = s_clock( );
-#endif
+            latest_in_buffer = circular_buffer.latest( );
+        } while ( latest_in_buffer == last_received );
 
-        // Wait up to delay_ms ms in 1/10ms intervals until data received from
-        // everyone or timeout
-        timeout = 0;
-        do
-        {
-            usleep( 100 );
-            for ( ii = 0; ii < nsys; ii++ )
-            {
-                if ( nextCycle == thread_cycle[ ii ] && !dataRdy[ ii ] )
-                    threads_rdy++;
-                if ( nextCycle == thread_cycle[ ii ] )
-                    dataRdy[ ii ] = 1;
-            }
-            timeout += 1;
-        } while ( threads_rdy < nsys && timeout < delay_cycles );
-        if ( timeout >= 100 )
-            rcv_errors += ( nsys - threads_rdy );
-#ifndef TIME_INTERVAL_DIAG
-        mylasttime = s_clock( );
-#endif
+        gps_key process_at = latest_in_buffer;
+        process_at.key -= 2;
 
-        if ( any_rdy )
-        {
-            int tbsize = 0;
-#ifdef TIME_INTERVAL_DIAG
-            // Timing diagnostics for time between cycles
-            mytime = s_clock( );
-            myptime = mytime - mylasttime;
-            mylasttime = mytime;
-#else
-            // Timing diagnostics for rcv window
-            myptime = mylasttime - mytime;
-#endif
+        circular_buffer.process_slice_at( process_at, recorder );
 
-            if ( myptime < min_cycle_time )
-            {
-                min_cycle_time = myptime;
-            }
-            if ( myptime > max_cycle_time )
-            {
-                max_cycle_time = myptime;
-            }
-            mean_cycle_time += myptime;
-            ++n_cycle_time;
-
-            // Reset total DCU counter
-            mytotaldcu = 0;
-            // Reset total DC data size counter
-            dc_datablock_size = 0;
-            // Get pointer to next data block in shared memory
-            nextData = (char*)ifo_data;
-            nextData += cycle_data_size * nextCycle;
-            ifoDataBlock = (daq_multi_dcu_data_t*)nextData;
-            zbuffer = (char*)nextData + header_size;
-            zbuffer_remaining = cycle_data_size - header_size;
-
-            min_recv_time = 0x7fffffffffffffff;
-            festatus = 0;
-            // Loop over all data buffers received from FE computers
-            for ( ii = 0; ii < nsys; ii++ )
-            {
-                recv_time[ ii ] = -1;
-                if ( dataRdy[ ii ] )
-                {
-                    festatus += ( 1 << ii );
-                    recv_time[ ii ] = dataRecvTime[ ii ];
-                    if ( recv_time[ ii ] < min_recv_time )
-                    {
-                        min_recv_time = recv_time[ ii ];
-                    }
-                    if ( do_verbose && nextCycle == 0 )
-                    {
-                        fprintf( stderr, "+++%d\n", ii );
-                    }
-                    int myc = mxDataBlockSingle[ ii ].header.dcuTotalModels;
-                    // For each model, copy over data header information
-                    for ( jj = 0; jj < myc; jj++ )
-                    {
-                        // Copy data header information
-                        ifoDataBlock->header.dcuheader[ mytotaldcu ].dcuId =
-                            mxDataBlockSingle[ ii ]
-                                .header.dcuheader[ jj ]
-                                .dcuId;
-                        ifoDataBlock->header.dcuheader[ mytotaldcu ].fileCrc =
-                            mxDataBlockSingle[ ii ]
-                                .header.dcuheader[ jj ]
-                                .fileCrc;
-                        ifoDataBlock->header.dcuheader[ mytotaldcu ].status =
-                            mxDataBlockSingle[ ii ]
-                                .header.dcuheader[ jj ]
-                                .status;
-                        ifoDataBlock->header.dcuheader[ mytotaldcu ].cycle =
-                            mxDataBlockSingle[ ii ]
-                                .header.dcuheader[ jj ]
-                                .cycle;
-                        if ( !ix_xmit_stop )
-                        {
-                            ifoDataBlock->header.dcuheader[ mytotaldcu ]
-                                .timeSec = mxDataBlockSingle[ ii ]
-                                               .header.dcuheader[ jj ]
-                                               .timeSec;
-                            ifoDataBlock->header.dcuheader[ mytotaldcu ]
-                                .timeNSec = mxDataBlockSingle[ ii ]
-                                                .header.dcuheader[ jj ]
-                                                .timeNSec;
-                        }
-                        ifoDataBlock->header.dcuheader[ mytotaldcu ].dataCrc =
-                            mxDataBlockSingle[ ii ]
-                                .header.dcuheader[ jj ]
-                                .dataCrc;
-                        ifoDataBlock->header.dcuheader[ mytotaldcu ]
-                            .dataBlockSize = mxDataBlockSingle[ ii ]
-                                                 .header.dcuheader[ jj ]
-                                                 .dataBlockSize;
-                        ifoDataBlock->header.dcuheader[ mytotaldcu ]
-                            .tpBlockSize = mxDataBlockSingle[ ii ]
-                                               .header.dcuheader[ jj ]
-                                               .tpBlockSize;
-                        ifoDataBlock->header.dcuheader[ mytotaldcu ].tpCount =
-                            mxDataBlockSingle[ ii ]
-                                .header.dcuheader[ jj ]
-                                .tpCount;
-
-                        // Check for downstream DAQ reset request from EDCU
-                        if ( mxDataBlockSingle[ ii ]
-                                     .header.dcuheader[ jj ]
-                                     .dcuId == 52 &&
-                             mxDataBlockSingle[ ii ]
-                                     .header.dcuheader[ jj ]
-                                     .tpCount == dc_number )
-                        {
-                            fprintf( stderr,
-                                     "Got a DAQ Reset REQUEST %u\n",
-                                     mxDataBlockSingle[ ii ]
-                                         .header.dcuheader[ jj ]
-                                         .timeSec );
-                            ifoDataBlock->header.dcuheader[ mytotaldcu ]
-                                .tpCount = 0;
-                            ix_xmit_stop = 16 * IX_STOP_SEC;
-                        }
-                        for ( kk = 0; kk < DAQ_GDS_MAX_TP_NUM; kk++ )
-                            ifoDataBlock->header.dcuheader[ mytotaldcu ]
-                                .tpNum[ kk ] = mxDataBlockSingle[ ii ]
-                                                   .header.dcuheader[ jj ]
-                                                   .tpNum[ kk ];
-                        edbs[ mytotaldcu ] = mxDataBlockSingle[ ii ]
-                                                 .header.dcuheader[ jj ]
-                                                 .tpBlockSize +
-                            mxDataBlockSingle[ ii ]
-                                .header.dcuheader[ jj ]
-                                .dataBlockSize;
-                        // Get some diags
-                        if ( ifoDataBlock->header.dcuheader[ mytotaldcu ]
-                                 .status != 0xbad )
-                            ets = mxDataBlockSingle[ ii ]
-                                      .header.dcuheader[ jj ]
-                                      .timeSec;
-                        estatus[ mytotaldcu ] =
-                            ifoDataBlock->header.dcuheader[ mytotaldcu ].status;
-                        edcuid[ mytotaldcu ] =
-                            ifoDataBlock->header.dcuheader[ mytotaldcu ].dcuId;
-                        // Increment total DCU count
-                        mytotaldcu++;
-                    }
-                    // Get the size of the data to transfer
-                    int mydbs =
-                        mxDataBlockSingle[ ii ].header.fullDataBlockSize;
-                    // Get pointer to data in receive data block
-                    char* mbuffer =
-                        (char*)&mxDataBlockSingle[ ii ].dataBlock[ 0 ];
-                    if ( mydbs > zbuffer_remaining )
-                    {
-                        fprintf(
-                            stderr,
-                            "Buffer overflow found.  Attempting to write %d "
-                            "bytes to zbuffer which has %d bytes remainging\n",
-                            (int)mydbs,
-                            (int)zbuffer_remaining );
-                        abort( );
-                    }
-                    // Copy data from receive buffer to shared memory
-                    memcpy( zbuffer, mbuffer, mydbs );
-                    // Increment shared memory data buffer pointer for next data
-                    // set
-                    zbuffer += mydbs;
-                    // Calc total size of data block for this cycle
-                    dc_datablock_size += mydbs;
-                    tbsize += mydbs;
-                }
-                else
-                {
-                    missed_nsys[ ii ] |= missed_flag;
-                    if ( do_verbose && nextCycle == 0 )
-                    {
-                        fprintf( stderr, "---%d\n", ii );
-                    }
-                }
-            }
-            // Write total data block size to shared memory header
-            ifoDataBlock->header.fullDataBlockSize = dc_datablock_size;
-            // Write total dcu count to shared memory header
-            ifoDataBlock->header.dcuTotalModels = mytotaldcu;
-            // Set multi_cycle head cycle to indicate data ready for this cycle
-            ifo_header->curCycle = nextCycle;
-
-            // Calc IX message size
-            sendLength = header_size + ifoDataBlock->header.fullDataBlockSize;
-            for ( ii = 0; ii < nsys; ++ii )
-            {
-                recv_time[ ii ] -= min_recv_time;
-            }
-            datablock_size_running += dc_datablock_size;
-            if ( nextCycle == 0 )
-            {
-                uptime++;
-                mean_cycle_time =
-                    ( n_cycle_time > 0 ? mean_cycle_time / n_cycle_time
-                                       : 1 << 31 );
-
-                if ( do_verbose )
-                {
-                    fprintf( stderr,
-                             "\nData rdy for cycle = %d\t\tTime Interval = %ld "
-                             "msec\n",
-                             nextCycle,
-                             myptime );
-                    fprintf( stderr,
-                             "Min/Max/Mean cylce time %d/%d/%d msec over %ld "
-                             "cycles\n",
-                             min_cycle_time,
-                             max_cycle_time,
-                             mean_cycle_time,
-                             n_cycle_time );
-                    fprintf( stderr,
-                             "Total DCU = %d\t\t\tBlockSize = %d\n",
-                             mytotaldcu,
-                             dc_datablock_size );
-                    print_diags(
-                        mytotaldcu, nextCycle, sendLength, ifoDataBlock, edbs );
-                }
-                n_cycle_time = 0;
-                min_cycle_time = 1 << 30;
-                max_cycle_time = 0;
-                mean_cycle_time = 0;
-
-                missed_flag = 1;
-                datablock_size_running = 0;
-            }
-            else
-            {
-                missed_flag <<= 1;
-            }
-            if ( ix_xmit_stop )
-            {
-                ix_xmit_stop--;
-                if ( ix_xmit_stop == 0 )
-                    fprintf( stderr, "Restarting Dolphin Xmit\n" );
-            }
-        }
-        sprintf( dcstatus, "%ld ", ets );
-        for ( ii = 0; ii < mytotaldcu; ii++ )
-        {
-            sprintf(
-                dcs, "%d %d %d ", edcuid[ ii ], estatus[ ii ], edbs[ ii ] );
-            strcat( dcstatus, dcs );
-        }
-
-        // Increment cycle count
-        nextCycle++;
-        nextCycle %= 16;
+        //#ifndef TIME_INTERVAL_DIAG
+        //        mytime = s_clock( );
+        //#endif
+        //
+        //        // Wait up to delay_ms ms in 1/10ms intervals until data
+        //        received from everyone or timeout timeout = 0; do
+        //        {
+        //            usleep( 100 );
+        //            for ( ii = 0; ii < nsys; ii++ )
+        //            {
+        //                if ( nextCycle == thread_cycle[ ii ] && !dataRdy[ ii ]
+        //                )
+        //                    threads_rdy++;
+        //                if ( nextCycle == thread_cycle[ ii ] )
+        //                    dataRdy[ ii ] = 1;
+        //            }
+        //            timeout += 1;
+        //        } while ( threads_rdy < nsys && timeout < delay_cycles );
+        //        if ( timeout >= 100 )
+        //            rcv_errors += ( nsys - threads_rdy );
+        //#ifndef TIME_INTERVAL_DIAG
+        //        mylasttime = s_clock( );
+        //#endif
+        //
+        //        if ( any_rdy )
+        //        {
+        //            int tbsize = 0;
+        //#ifdef TIME_INTERVAL_DIAG
+        //            // Timing diagnostics for time between cycles
+        //            mytime = s_clock( );
+        //            myptime = mytime - mylasttime;
+        //            mylasttime = mytime;
+        //#else
+        //            // Timing diagnostics for rcv window
+        //            myptime = mylasttime - mytime;
+        //#endif
+        //
+        //            if ( myptime < min_cycle_time )
+        //            {
+        //                min_cycle_time = myptime;
+        //            }
+        //            if ( myptime > max_cycle_time )
+        //            {
+        //                max_cycle_time = myptime;
+        //            }
+        //            mean_cycle_time += myptime;
+        //            ++n_cycle_time;
+        //
+        //            // Reset total DCU counter
+        //            mytotaldcu = 0;
+        //            // Reset total DC data size counter
+        //            dc_datablock_size = 0;
+        //            // Get pointer to next data block in shared memory
+        //            nextData = (char*)ifo_data;
+        //            nextData += cycle_data_size * nextCycle;
+        //            ifoDataBlock = (daq_multi_dcu_data_t*)nextData;
+        //            zbuffer = (char*)nextData + header_size;
+        //            zbuffer_remaining = cycle_data_size - header_size;
+        //
+        //            min_recv_time = 0x7fffffffffffffff;
+        //            festatus = 0;
+        //            // Loop over all data buffers received from FE computers
+        //            for ( ii = 0; ii < nsys; ii++ )
+        //            {
+        //                recv_time[ ii ] = -1;
+        //                if ( dataRdy[ ii ] )
+        //                {
+        //                    festatus += ( 1 << ii );
+        //                    recv_time[ ii ] = dataRecvTime[ ii ];
+        //                    if ( recv_time[ ii ] < min_recv_time )
+        //                    {
+        //                        min_recv_time = recv_time[ ii ];
+        //                    }
+        //                    if ( do_verbose && nextCycle == 0 )
+        //                    {
+        //                        fprintf( stderr, "+++%d\n", ii );
+        //                    }
+        //                    int myc = mxDataBlockSingle[ ii
+        //                    ].header.dcuTotalModels;
+        //                    // For each model, copy over data header
+        //                    information for ( jj = 0; jj < myc; jj++ )
+        //                    {
+        //                        // Copy data header information
+        //                        ifoDataBlock->header.dcuheader[ mytotaldcu
+        //                        ].dcuId =
+        //                            mxDataBlockSingle[ ii ]
+        //                                .header.dcuheader[ jj ]
+        //                                .dcuId;
+        //                        ifoDataBlock->header.dcuheader[ mytotaldcu ]
+        //                            .fileCrc = mxDataBlockSingle[ ii ]
+        //                                           .header.dcuheader[ jj ]
+        //                                           .fileCrc;
+        //                        ifoDataBlock->header.dcuheader[ mytotaldcu ]
+        //                            .status = mxDataBlockSingle[ ii ]
+        //                                          .header.dcuheader[ jj ]
+        //                                          .status;
+        //                        ifoDataBlock->header.dcuheader[ mytotaldcu
+        //                        ].cycle =
+        //                            mxDataBlockSingle[ ii ]
+        //                                .header.dcuheader[ jj ]
+        //                                .cycle;
+        //                        if ( !ix_xmit_stop )
+        //                        {
+        //                            ifoDataBlock->header.dcuheader[ mytotaldcu
+        //                            ]
+        //                                .timeSec = mxDataBlockSingle[ ii ]
+        //                                               .header.dcuheader[ jj ]
+        //                                               .timeSec;
+        //                            ifoDataBlock->header.dcuheader[ mytotaldcu
+        //                            ]
+        //                                .timeNSec = mxDataBlockSingle[ ii ]
+        //                                                .header.dcuheader[ jj
+        //                                                ] .timeNSec;
+        //                        }
+        //                        ifoDataBlock->header.dcuheader[ mytotaldcu ]
+        //                            .dataCrc = mxDataBlockSingle[ ii ]
+        //                                           .header.dcuheader[ jj ]
+        //                                           .dataCrc;
+        //                        ifoDataBlock->header.dcuheader[ mytotaldcu ]
+        //                            .dataBlockSize = mxDataBlockSingle[ ii ]
+        //                                                 .header.dcuheader[ jj
+        //                                                 ] .dataBlockSize;
+        //                        ifoDataBlock->header.dcuheader[ mytotaldcu ]
+        //                            .tpBlockSize = mxDataBlockSingle[ ii ]
+        //                                               .header.dcuheader[ jj ]
+        //                                               .tpBlockSize;
+        //                        ifoDataBlock->header.dcuheader[ mytotaldcu ]
+        //                            .tpCount = mxDataBlockSingle[ ii ]
+        //                                           .header.dcuheader[ jj ]
+        //                                           .tpCount;
+        //
+        //                        // Check for downstream DAQ reset request from
+        //                        EDCU if ( mxDataBlockSingle[ ii ]
+        //                                     .header.dcuheader[ jj ]
+        //                                     .dcuId == 52 &&
+        //                             mxDataBlockSingle[ ii ]
+        //                                     .header.dcuheader[ jj ]
+        //                                     .tpCount == dc_number )
+        //                        {
+        //                            fprintf( stderr,
+        //                                     "Got a DAQ Reset REQUEST %u\n",
+        //                                     mxDataBlockSingle[ ii ]
+        //                                         .header.dcuheader[ jj ]
+        //                                         .timeSec );
+        //                            ifoDataBlock->header.dcuheader[ mytotaldcu
+        //                            ]
+        //                                .tpCount = 0;
+        //                            ix_xmit_stop = 16 * IX_STOP_SEC;
+        //                        }
+        //                        for ( kk = 0; kk < DAQ_GDS_MAX_TP_NUM; kk++ )
+        //                            ifoDataBlock->header.dcuheader[ mytotaldcu
+        //                            ]
+        //                                .tpNum[ kk ] = mxDataBlockSingle[ ii ]
+        //                                                   .header.dcuheader[
+        //                                                   jj ] .tpNum[ kk ];
+        //                        edbs[ mytotaldcu ] = mxDataBlockSingle[ ii ]
+        //                                                 .header.dcuheader[ jj
+        //                                                 ] .tpBlockSize +
+        //                            mxDataBlockSingle[ ii ]
+        //                                .header.dcuheader[ jj ]
+        //                                .dataBlockSize;
+        //                        // Get some diags
+        //                        if ( ifoDataBlock->header.dcuheader[
+        //                        mytotaldcu ]
+        //                                 .status != 0xbad )
+        //                            ets = mxDataBlockSingle[ ii ]
+        //                                      .header.dcuheader[ jj ]
+        //                                      .timeSec;
+        //                        estatus[ mytotaldcu ] =
+        //                            ifoDataBlock->header.dcuheader[ mytotaldcu
+        //                            ]
+        //                                .status;
+        //                        edcuid[ mytotaldcu ] =
+        //                            ifoDataBlock->header.dcuheader[ mytotaldcu
+        //                            ]
+        //                                .dcuId;
+        //                        // Increment total DCU count
+        //                        mytotaldcu++;
+        //                    }
+        //                    // Get the size of the data to transfer
+        //                    int mydbs =
+        //                        mxDataBlockSingle[ ii
+        //                        ].header.fullDataBlockSize;
+        //                    // Get pointer to data in receive data block
+        //                    char* mbuffer =
+        //                        (char*)&mxDataBlockSingle[ ii ].dataBlock[ 0
+        //                        ];
+        //                    if ( mydbs > zbuffer_remaining )
+        //                    {
+        //                        fprintf( stderr,
+        //                                 "Buffer overflow found.  Attempting
+        //                                 to write %d " "bytes to zbuffer which
+        //                                 has %d bytes remainging\n",
+        //                                 (int)mydbs,
+        //                                 (int)zbuffer_remaining );
+        //                        abort( );
+        //                    }
+        //                    // Copy data from receive buffer to shared memory
+        //                    memcpy( zbuffer, mbuffer, mydbs );
+        //                    // Increment shared memory data buffer pointer for
+        //                    next data set zbuffer += mydbs;
+        //                    // Calc total size of data block for this cycle
+        //                    dc_datablock_size += mydbs;
+        //                    tbsize += mydbs;
+        //                }
+        //                else
+        //                {
+        //                    missed_nsys[ ii ] |= missed_flag;
+        //                    if ( do_verbose && nextCycle == 0 )
+        //                    {
+        //                        fprintf( stderr, "---%d\n", ii );
+        //                    }
+        //                }
+        //            }
+        //            // Write total data block size to shared memory header
+        //            ifoDataBlock->header.fullDataBlockSize =
+        //            dc_datablock_size;
+        //            // Write total dcu count to shared memory header
+        //            ifoDataBlock->header.dcuTotalModels = mytotaldcu;
+        //            // Set multi_cycle head cycle to indicate data ready for
+        //            this cycle ifo_header->curCycle = nextCycle;
+        //
+        //            // Calc IX message size
+        //            sendLength =
+        //                header_size + ifoDataBlock->header.fullDataBlockSize;
+        //            for ( ii = 0; ii < nsys; ++ii )
+        //            {
+        //                recv_time[ ii ] -= min_recv_time;
+        //            }
+        //            datablock_size_running += dc_datablock_size;
+        //            if ( nextCycle == 0 )
+        //            {
+        //                uptime++;
+        //                mean_cycle_time =
+        //                    ( n_cycle_time > 0 ? mean_cycle_time /
+        //                    n_cycle_time
+        //                                       : 1 << 31 );
+        //
+        //                if ( do_verbose )
+        //                {
+        //                    fprintf(
+        //                        stderr,
+        //                        "\nData rdy for cycle = %d\t\tTime Interval =
+        //                        %ld " "msec\n", nextCycle, myptime );
+        //                    fprintf(
+        //                        stderr,
+        //                        "Min/Max/Mean cylce time %d/%d/%d msec over
+        //                        %ld " "cycles\n", min_cycle_time,
+        //                        max_cycle_time,
+        //                        mean_cycle_time,
+        //                        n_cycle_time );
+        //                    fprintf( stderr,
+        //                             "Total DCU = %d\t\t\tBlockSize = %d\n",
+        //                             mytotaldcu,
+        //                             dc_datablock_size );
+        //                    print_diags( mytotaldcu,
+        //                                 nextCycle,
+        //                                 sendLength,
+        //                                 ifoDataBlock,
+        //                                 edbs );
+        //                }
+        //                n_cycle_time = 0;
+        //                min_cycle_time = 1 << 30;
+        //                max_cycle_time = 0;
+        //                mean_cycle_time = 0;
+        //
+        //                missed_flag = 1;
+        //                datablock_size_running = 0;
+        //            }
+        //            else
+        //            {
+        //                missed_flag <<= 1;
+        //            }
+        //            if ( ix_xmit_stop )
+        //            {
+        //                ix_xmit_stop--;
+        //                if ( ix_xmit_stop == 0 )
+        //                    fprintf( stderr, "Restarting Dolphin Xmit\n" );
+        //            }
+        //        }
+        //        sprintf( dcstatus, "%ld ", ets );
+        //        for ( ii = 0; ii < mytotaldcu; ii++ )
+        //        {
+        //            sprintf(
+        //                dcs, "%d %d %d ", edcuid[ ii ], estatus[ ii ], edbs[
+        //                ii ] );
+        //            strcat( dcstatus, dcs );
+        //        }
+        //
+        //        // Increment cycle count
+        //        nextCycle++;
+        //        nextCycle %= 16;
     } while ( keepRunning ); // End of infinite loop
 
-    // Stop Rcv Threads
-    fprintf( stderr, "stopping threads %d \n", nsys );
-    stop_working_threads = 1;
-
-    // Wait for threads to stop
-    sleep( 5 );
-    fprintf( stderr, "closing out MX\n" );
-    mx_finalize( );
-
-    exit( 0 );
+    return 0;
 }
