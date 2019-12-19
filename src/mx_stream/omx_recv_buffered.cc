@@ -158,7 +158,7 @@ public:
         ifo_header_ = (daq_multi_cycle_header_t*)shmem_ptr_;
         ifo_data_ = (char*)shmem_ptr_ + sizeof( daq_multi_cycle_header_t );
         cycle_data_size_ =
-            ( shmem_max_size_mb - sizeof( daq_multi_cycle_header_t ) ) /
+            ( (shmem_max_size_mb*1024*1024) - sizeof( daq_multi_cycle_header_t ) ) /
             DAQ_NUM_DATA_BLOCKS_PER_SECOND;
         cycle_data_size_ -= ( cycle_data_size_ % 8 );
 
