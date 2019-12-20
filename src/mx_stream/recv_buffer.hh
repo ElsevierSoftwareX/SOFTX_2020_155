@@ -342,6 +342,12 @@ struct receive_buffer
         }
     }
 
+    size_t
+    size() const
+    {
+        return N;
+    }
+
 private:
     static int
     cycle_to_index( gps_key::cycle_type cycle )

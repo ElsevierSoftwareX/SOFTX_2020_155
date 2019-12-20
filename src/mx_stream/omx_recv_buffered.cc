@@ -275,6 +275,9 @@ usage( )
              "defaults to 10\n" );
     fprintf( stderr, "-t - Number of rcvr threads per NIC: default = 16\n" );
     fprintf( stderr, "-n - Data Concentrator number (0 or 1) : default = 0\n" );
+    fprintf( stderr,
+             "-B - Number cycles to delay output by (0 - 3): default = 0\n" );
+    fprintf( stderr, "     Setting to a non-0 value sets -d == 0\n" );
     fprintf( stderr, "-h - help\n" );
 }
 
@@ -451,6 +454,7 @@ main( int argc, char** argv )
     int                       max_data_size = 0;
     char*                     mywriteaddr;
     int                       dc_number = 1;
+    int                       buffer_cycles = 0;
 
     /* set up defaults */
     int tpn = THREADS_PER_NIC;
@@ -462,7 +466,7 @@ main( int argc, char** argv )
     }
 
     // Get arguments sent to process
-    while ( ( c = getopt( argc, argv, "b:hs:m:vp:d:l:t:n:" ) ) != EOF )
+    while ( ( c = getopt( argc, argv, "B:b:hs:m:vp:d:l:t:n:" ) ) != EOF )
         switch ( c )
         {
         case 's':
@@ -524,14 +528,28 @@ main( int argc, char** argv )
             setvbuf( stdout, NULL, _IOLBF, 0 );
             stderr = stdout;
             break;
+        case 'B':
+            buffer_cycles = atoi( optarg );
+            buffer_cycles = std::max( buffer_cycles, 0 );
+            buffer_cycles =
+                std::min( buffer_cycles, (int)circular_buffer.size( ) - 2 );
+            if ( buffer_cycles > 0 )
+            {
+                delay_ms = 0;
+            }
+            break;
         case 'h':
         default:
             usage( );
             exit( 1 );
         }
 
+    fprintf( stderr, "Delaying output by %dms to wait for data\n", delay_ms );
+    fprintf( stderr,
+             "Delaying output by %d cycles to wait for data\n",
+             buffer_cycles );
     max_data_size = max_data_size_mb * 1024 * 1024;
-    delay_cycles = delay_ms * 10;
+    delay_cycles = delay_ms * 1000;
 
     mx_initializer mx_;
     // MX_MUTEX_INIT(&stream_mutex);
@@ -616,8 +634,10 @@ main( int argc, char** argv )
             latest_in_buffer = circular_buffer.latest( );
         } while ( latest_in_buffer == last_received );
 
+        usleep( delay_cycles );
+
         gps_key process_at = latest_in_buffer;
-        process_at.key -= 2;
+        process_at.key -= buffer_cycles;
 
         circular_buffer.process_slice_at( process_at, recorder );
         circular_buffer.copy_headers( headers.begin( ) );
