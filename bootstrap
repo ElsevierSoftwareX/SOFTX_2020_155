@@ -1,6 +1,0 @@
-#! /bin/sh
-# Use this script to initiate RCG builds
-# Auther: Keith Thorne
-
-aclocal
-autoconf
