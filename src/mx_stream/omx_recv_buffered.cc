@@ -4,6 +4,8 @@
 /// Dolphin IX..
 //
 
+#include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -157,6 +159,41 @@ dump_headers( It cur, It end, std::ostream& os )
     }
 }
 
+template < typename It >
+std::pair< int, int >
+quick_stats( It cur, It end, std::ostream& os, gps_key now_key )
+{
+    std::pair< int, int > dcu_stats =
+        std::make_pair( DAQ_TRANSIT_MAX_DCU + 1, 0 );
+
+    for ( ; cur != end; ++cur )
+    {
+        buffer_headers& cur_buf = *cur;
+
+        int64_t min_time = 0x0fffffffffffffff;
+        int64_t max_time = 0;
+        int64_t delta = 0;
+
+        int dcus = cur_buf.dcu_count;
+        for ( int i = 0; i < dcus; ++i )
+        {
+            min_time = std::min( min_time, cur_buf.time_ingested[ i ] );
+            max_time = std::max( max_time, cur_buf.time_ingested[ i ] );
+            delta = max_time - min_time;
+        }
+
+        int key_delta = now_key.key - cur_buf.latest.key;
+        if ( key_delta >= 0 )
+        {
+            dcu_stats.first = std::min( dcu_stats.first, dcus );
+            dcu_stats.second = std::max( dcu_stats.second, dcus );
+        }
+        os << "[" << std::setw( 2 ) << key_delta << " dcus " << std::setw( 3 )
+           << dcus << " spread " << std::setw( 3 ) << delta << "ms] ";
+    }
+    os << std::endl;
+    return dcu_stats;
+}
 /*!
  * @brief The data_recorder is used in conjuction with a recieve buffer
  * to move data from the receive_buffer into an output mbuf.
@@ -567,6 +604,7 @@ main( int argc, char** argv )
     std::array< buffer_headers, 4 > headers;
 
     // ensure the threads get stopped before exit.
+    int            max_dcus_received = 0;
     thread_stopper clean_threads_;
     do
     {
@@ -582,10 +620,17 @@ main( int argc, char** argv )
         process_at.key -= 2;
 
         circular_buffer.process_slice_at( process_at, recorder );
-        if ( do_verbose && process_at.cycle( ) == 0 )
+        circular_buffer.copy_headers( headers.begin( ) );
+
+        if ( do_verbose )
         {
-            circular_buffer.copy_headers( headers.begin( ) );
-            dump_headers( headers.begin( ), headers.end( ), std::cout );
+            auto dcu_stats = quick_stats(
+                headers.begin( ), headers.end( ), std::cout, process_at );
+            if ( dcu_stats.second < max_dcus_received )
+            {
+                dump_headers( headers.begin( ), headers.end( ), std::cout );
+            }
+            max_dcus_received = dcu_stats.second;
         }
 
         //#ifndef TIME_INTERVAL_DIAG
