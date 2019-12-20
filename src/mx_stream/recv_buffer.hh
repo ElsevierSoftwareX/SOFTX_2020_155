@@ -13,6 +13,8 @@
 #include <mutex>
 #include <stdint.h>
 
+#include <sys/time.h>
+
 /*!
  * @brief std::begin for arrays on old gcc
  */
@@ -43,7 +45,7 @@ struct gps_key
 
     key_type key;
 
-    gps_key( ): key( 0 )
+    gps_key( ) : key( 0 )
     {
     }
     gps_key( key_type sec, cycle_type cycle )
@@ -152,22 +154,42 @@ private:
     }
 };
 
+struct buffer_headers
+{
+    std::array< daq_msg_header_t, DAQ_TRANSIT_MAX_DCU > headers;
+    std::array< int64_t, DAQ_TRANSIT_MAX_DCU >          time_ingested;
+    gps_key                                             latest;
+    unsigned int                                        dcu_count;
+};
+
 struct buffer_entry
 {
     buffer_entry( )
-        : m( ), latest( ), ifo_data( ), data( &ifo_data.dataBlock[ 0 ] )
+        : m( ), latest( ), ifo_data( ), data( &ifo_data.dataBlock[ 0 ] ),
+          time_ingested( )
     {
     }
-    std::mutex    m;
-    gps_key       latest;
-    daq_dc_data_t ifo_data;
-    char*         data;
+    std::mutex                                 m;
+    gps_key                                    latest;
+    daq_dc_data_t                              ifo_data;
+    char*                                      data;
+    std::array< int64_t, DAQ_TRANSIT_MAX_DCU > time_ingested;
+
+    static int64_t
+    time_now( )
+    {
+        timeval tv;
+        gettimeofday( &tv, 0 );
+        return static_cast< int64_t >( tv.tv_sec * 1000 + tv.tv_usec / 1000 );
+    }
 
     void
-    injest( const daq_multi_dcu_data_t& input )
+    ingest( const daq_multi_dcu_data_t& input )
     {
         gps_key key( input.header.dcuheader[ 0 ].timeSec,
                      input.header.dcuheader[ 0 ].cycle );
+
+        int64_t timestamp = time_now( );
 
         std::lock_guard< std::mutex > l_( m );
         if ( key > latest )
@@ -204,6 +226,7 @@ struct buffer_entry
             input_data += block_size;
             ifo_data.header.fullDataBlockSize += block_size;
             ++ifo_data.header.dcuTotalModels;
+            time_ingested[ dest_index ] = timestamp;
         }
         latest = key;
     }
@@ -218,6 +241,20 @@ struct buffer_entry
             return;
         }
         cb( ifo_data );
+    }
+
+    void
+    copy_headers( buffer_headers& dest )
+    {
+        std::lock_guard< std::mutex > l_( m );
+        std::copy( array_begin( ifo_data.header.dcuheader ),
+                   array_end( ifo_data.header.dcuheader ),
+                   dest.headers.begin( ) );
+        std::copy( time_ingested.begin( ),
+                   time_ingested.end( ),
+                   dest.time_ingested.begin( ) );
+        dest.latest = latest;
+        dest.dcu_count = ifo_data.header.dcuTotalModels;
     }
 
 private:
@@ -258,7 +295,7 @@ struct receive_buffer
         gps_key key( input.header.dcuheader[ 0 ].timeSec,
                      input.header.dcuheader[ 0 ].cycle );
 
-        target_buffer.injest( input );
+        target_buffer.ingest( input );
 
         std::less< gps_key > comp;
         key.atomic_store_to_if( &latest_, comp );
@@ -292,6 +329,17 @@ struct receive_buffer
         buffer_entry& target_buffer = buffer_[ index ];
 
         target_buffer.process_if( process_key, cb );
+    }
+
+    template < typename It >
+    void
+    copy_headers( It dest )
+    {
+        for ( size_t i = 0; i < N; ++i )
+        {
+            buffer_[ i ].copy_headers( *dest );
+            ++dest;
+        }
     }
 
 private:

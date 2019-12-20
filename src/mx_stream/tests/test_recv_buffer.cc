@@ -67,7 +67,7 @@ TEST_CASE( "You can insert a test structure into a buffer entry" )
     buffer_entry entry;
     auto         daq_p = create_test_blob(
         std::vector< unsigned int >{ 5, 6, 7, 8 }, 1000000000, 5 );
-    entry.injest( *daq_p );
+    entry.ingest( *daq_p );
 
     gps_key target( 1000000000, 5 );
     REQUIRE( entry.latest == target );
@@ -80,7 +80,7 @@ TEST_CASE(
     buffer_entry entry;
     auto         daq_p = create_test_blob(
         std::vector< unsigned int >{ 5, 6, 7, 8 }, 1000000000, 5 );
-    entry.injest( *daq_p );
+    entry.ingest( *daq_p );
 
     gps_key target( 1000000000, 5 );
     REQUIRE( entry.latest == target );
@@ -88,7 +88,7 @@ TEST_CASE(
 
     daq_p = create_test_blob(
         std::vector< unsigned int >{ 9, 10, 11 }, 1000000000, 4 );
-    entry.injest( *daq_p );
+    entry.ingest( *daq_p );
 
     REQUIRE( entry.latest == target );
     REQUIRE( entry.ifo_data.header.dcuTotalModels == 4 );
@@ -104,7 +104,7 @@ TEST_CASE( "Buffers clear old entries when a new timestamp is put in" )
     buffer_entry entry;
     auto         daq_p = create_test_blob(
         std::vector< unsigned int >{ 5, 6, 7, 8 }, 1000000000, 5 );
-    entry.injest( *daq_p );
+    entry.ingest( *daq_p );
 
     gps_key target( 1000000000, 5 );
     REQUIRE( entry.latest == target );
@@ -112,7 +112,7 @@ TEST_CASE( "Buffers clear old entries when a new timestamp is put in" )
 
     daq_p = create_test_blob(
         std::vector< unsigned int >{ 9, 10, 11 }, 1000000000, 6 );
-    entry.injest( *daq_p );
+    entry.ingest( *daq_p );
 
     gps_key new_target( 1000000000, 6 );
 
@@ -130,7 +130,7 @@ TEST_CASE( "Buffers append in data when it is the same time" )
     buffer_entry entry;
     auto         daq_p = create_test_blob(
         std::vector< unsigned int >{ 5, 6, 7, 8 }, 1000000000, 5 );
-    entry.injest( *daq_p );
+    entry.ingest( *daq_p );
 
     gps_key target( 1000000000, 5 );
     REQUIRE( entry.latest == target );
@@ -138,7 +138,7 @@ TEST_CASE( "Buffers append in data when it is the same time" )
 
     daq_p = create_test_blob(
         std::vector< unsigned int >{ 9, 10, 11 }, 1000000000, 5 );
-    entry.injest( *daq_p );
+    entry.ingest( *daq_p );
 
     REQUIRE( entry.latest == target );
     REQUIRE( entry.ifo_data.header.dcuTotalModels == 7 );

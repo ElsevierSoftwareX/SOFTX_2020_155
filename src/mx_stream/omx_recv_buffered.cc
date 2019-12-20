@@ -4,6 +4,7 @@
 /// Dolphin IX..
 //
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -136,6 +137,26 @@ public:
     }
 };
 
+template < typename It >
+void
+dump_headers( It cur, It end, std::ostream& os )
+{
+    for ( ; cur != end; ++cur )
+    {
+        buffer_headers& cur_buf = *cur;
+        int             dcus = cur_buf.dcu_count;
+        os << "Buffer latest: " << cur_buf.latest.gps( ) << ":"
+           << cur_buf.latest.cycle( ) << "\n";
+        os << "dcu_count " << dcus << "\n";
+        for ( int i = 0; i < dcus; ++i )
+        {
+            os << "dcuid " << cur_buf.headers[ i ].dcuId << " ingested at "
+               << cur_buf.time_ingested[ i ] << "\n";
+        }
+        os << std::endl;
+    }
+}
+
 /*!
  * @brief The data_recorder is used in conjuction with a recieve buffer
  * to move data from the receive_buffer into an output mbuf.
@@ -157,8 +178,8 @@ public:
     {
         ifo_header_ = (daq_multi_cycle_header_t*)shmem_ptr_;
         ifo_data_ = (char*)shmem_ptr_ + sizeof( daq_multi_cycle_header_t );
-        cycle_data_size_ =
-            ( (shmem_max_size_mb*1024*1024) - sizeof( daq_multi_cycle_header_t ) ) /
+        cycle_data_size_ = ( ( shmem_max_size_mb * 1024 * 1024 ) -
+                             sizeof( daq_multi_cycle_header_t ) ) /
             DAQ_NUM_DATA_BLOCKS_PER_SECOND;
         cycle_data_size_ -= ( cycle_data_size_ % 8 );
 
@@ -543,6 +564,8 @@ main( int argc, char** argv )
     memset( &missed_nsys[ 0 ], 0, sizeof( missed_nsys ) );
     memset( recv_buckets, 0, sizeof( recv_buckets ) );
 
+    std::array< buffer_headers, 4 > headers;
+
     // ensure the threads get stopped before exit.
     thread_stopper clean_threads_;
     do
@@ -559,6 +582,11 @@ main( int argc, char** argv )
         process_at.key -= 2;
 
         circular_buffer.process_slice_at( process_at, recorder );
+        if ( do_verbose && process_at.cycle( ) == 0 )
+        {
+            circular_buffer.copy_headers( headers.begin( ) );
+            dump_headers( headers.begin( ), headers.end( ), std::cout );
+        }
 
         //#ifndef TIME_INTERVAL_DIAG
         //        mytime = s_clock( );
