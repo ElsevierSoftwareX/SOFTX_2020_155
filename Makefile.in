@@ -91,7 +91,6 @@ all:
 .PHONY : doc
 doc:	
 	(cd doc && bash ./doxScript && doxygen doxygen.cfg)
-	
 
 reclean:
 	-/bin/rm -rf build config src target
