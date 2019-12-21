@@ -11,7 +11,7 @@ except IndexError:
 
 uname = os.uname()
 modstat = subprocess.run(
-    ['dkms', '-k', uname.release, 'status', modname],
+    ['/usr/sbin/dkms', '-k', uname.release, 'status', modname],
     capture_output=True, text=True,
 )
 if modstat.returncode == 0 and modstat.stdout:
