@@ -23,7 +23,7 @@ RCG_SRC=${RCG_SRC:-/usr/share/advligorts/src}
 RCG_BUILDD=${RCG_BUILDD:-/var/cache/advligorts/rcg-$RTS_VERSION}
 # FIXME: the RCG hard-codes /opt/rtcds as the root
 RCG_TARGET=/opt/rtcds/${site}/${ifo}
-RTS_USER=${RTS_USER:-controls}
+RTS_USER=${RTS_USER:-$(whoami)}
 
 # search paths for C source code
 CDS_SRC=${CDS_SRC:-$RCG_LIB_PATH}
