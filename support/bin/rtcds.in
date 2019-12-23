@@ -5,7 +5,6 @@ ENV_FILE=${RTS_ENV:-/etc/advligorts/env}
 RCG_SRC=${RCG_SRC:-/usr/share/advligorts/src}
 RCG_BUILDD=${RCG_BUILDD:-/var/cache/advligorts/rcg-$RTS_VERSION}
 RTS_USER=${RTS_USER:-controls}
-RTSYSTAB=/etc/rtsystab
 
 source "$ENV_FILE" 2>/dev/null || true
 
@@ -22,7 +21,7 @@ CDS_IFO_SRC=${CDS_IFO_SRC:-$CDS_SRC}
 RCG_LIB_PATH=$RCG_LIB_PATH:${RCG_SRC}/src/epics/simLink/:${RCG_SRC}/src/epics/simLink/lib
 
 USER_VARS=(SITE IFO OPTRTCDS RCG_LIB_PATH)
-LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RTS_USER RTSYSTAB)
+LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RTS_USER)
 EXPORT_VARS=(${USER_VARS[@]} site ifo CDS_SRC CDS_IFO_SRC)
 
 ##################################################
@@ -68,34 +67,23 @@ prep_buildd() {
 
 ########
 
+_systemctl_list_units() {
+    systemctl list-units --all --full --plain --no-legend --no-pager rts@*.target \
+	| awk '{print $1}' \
+	| sed 's/^rts@\([a-z0-9]*\)\.target$/\1/'
+}
+
 list_host_sys() {
-    local host=$(hostname -s)
-    local systems=($(grep -s "^${host}" $RTSYSTAB | sed s/$host//))
-    echo ${systems[@]}
-}
-
-tname() {
-    if [[ ${1,,*} == 'iop' ]] ; then
-	list_host_sys | head -1
-    else
-	echo "$1"
-    fi
-}
-
-check_host_fe() {
-    if [ -z "$(list_host_sys)" ] ; then
-	log "No $RTSYSTAB defined for this system."
-	exit 3
-    fi
+    _systemctl_list_units | grep 'iop' || true
+    _systemctl_list_units | grep -v 'iop' || true
 }
 
 check_host_sys() {
     for sys ; do
-	for hsys in $(list_host_sys) ; do
-	    [[ "$hsys" == "$sys" ]] && return 0
-	done
-	log "Cannot start/stop system '$sys' on host $(hostname -s)."
-	exit 4
+	if ! systemctl is-enabled "$sys" ; then
+	    log "System '$sys' is not enabled on this system (enable first)."
+	    exit 4
+	fi
     done
 }
 
@@ -104,7 +92,6 @@ check_host_sys() {
 build_sys() {
     cd $RCG_BUILDD
     for sys ; do
-	sys=$(tname "$sys")
 	log "### building $sys..."
 	make $sys
     done
@@ -113,7 +100,6 @@ build_sys() {
 install_sys() {
     cd $RCG_BUILDD
     for sys ; do
-	sys=$(tname "$sys")
 	log "### installing $sys..."
 	make install-$sys
     done
@@ -121,7 +107,6 @@ install_sys() {
 
 start_sys() {
     for sys ; do
-	sys=$(tname "$sys")
 	log "### starting $sys..."
 	sudo systemctl start rts@${sys}.target
     done
@@ -129,7 +114,6 @@ start_sys() {
 
 stop_sys() {
     for sys ; do
-	sys=$(tname "$sys")
 	log "### stopping $sys..."
 	#${SCRIPTD}/kill${sys}
 	sudo systemctl stop rts@${sys}.target
@@ -138,7 +122,6 @@ stop_sys() {
 
 enable_sys() {
     for sys ; do
-	sys=$(tname "$sys")
 	log "### enabling $sys..."
 	sudo systemctl enable rts@${sys}.target
     done
@@ -146,7 +129,6 @@ enable_sys() {
 
 disable_sys() {
     for sys ; do
-	sys=$(tname "$sys")
 	log "### disabling $sys..."
 	sudo systemctl disable rts@${sys}.target
     done
@@ -200,6 +182,7 @@ Available commands:
   build|make <sys>           build system
   install <sys>              install system
 
+  list|ls                    list systems for host
   start <sys>...|--all       start systems
   restart <sys>...|--all     restart running systems
   stop|kill <sys>...|--all   stop running systems
@@ -208,7 +191,6 @@ Available commands:
 
   blog <sys>                 show last build log for system
     -i                         print log paths
-  list|ls                    list all systems for current host
   lsmod                      list loaded RTS kernel modules
   dtail|dmesg                tail dmesg logs
   env                        print system environment info
@@ -250,7 +232,6 @@ case $cmd in
 	    log "You must specify at least one system to start (or '--all')."
 	    exit 2
 	fi
-	check_host_fe
 	if [[ "$1" == '--all' ]] ; then
 	    start_sys $(list_host_sys)
 	else
@@ -263,7 +244,6 @@ case $cmd in
 	    log "You must specify at least one system to restart (or '--all')."
 	    exit 2
 	fi
-	check_host_fe
 	if [[ "$1" == '--all' ]] ; then
 	    # we do this in reverse so the IOP is stopped last
 	    stop_sys $(list_host_sys | tac)
@@ -279,7 +259,6 @@ case $cmd in
 	    log "You must specify at least one system to stop (or '--all')."
 	    exit 2
 	fi
-	check_host_fe
 	if [[ "$1" == '--all' ]] ; then
 	    # we do this in reverse so the IOP is stopped last
 	    stop_sys $(list_host_sys | tac)
@@ -293,12 +272,10 @@ case $cmd in
 	    log "You must specify at least one system to $cmd (or '--all')."
 	    exit 2
 	fi
-	check_host_fe
 	if [[ "$1" == '--all' ]] ; then
 	    # we do this in reverse so the IOP is stopped last
 	    ${cmd}_sys $(list_host_sys | tac)
 	else
-	    check_host_sys $@
 	    ${cmd}_sys $@
 	fi
 	;;
@@ -326,8 +303,7 @@ case $cmd in
 	esac
 	;;
     'list'|'ls')
-	check_host_fe
-	list_host_sys | tr ' ' '\n'
+	list_host_sys
 	;;
     'lsmod'|'lsmods')
 	_lsmod
