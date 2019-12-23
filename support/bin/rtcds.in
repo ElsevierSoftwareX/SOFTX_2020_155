@@ -1,6 +1,14 @@
 #!/bin/bash -e
 
+log() {
+    echo "$@" >&2
+}
+
 RTS_VERSION=${RTS_VERSION:-__VERSION__}
+if [[ "$RTS_VERSION" =~ ._VERSION_. ]] ; then
+    log "RTS_VERSION variable not set."
+    exit 1
+fi
 
 # this should define all USER_VARS (see below)
 ENV_FILE=${RTS_ENV:-/etc/advligorts/env}
@@ -30,10 +38,6 @@ LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RCG_TARGET RTS_USER)
 EXPORT_VARS=(${USER_VARS[@]} site ifo CDS_SRC CDS_IFO_SRC)
 
 ##################################################
-
-log() {
-    echo "$@" >&2
-}
 
 check_env() {
     for var in ${USER_VARS[*]} ; do
