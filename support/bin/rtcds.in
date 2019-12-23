@@ -192,7 +192,6 @@ Available commands:
   blog <sys>                 show last build log for system
     -i                         print log paths
   lsmod                      list loaded RTS kernel modules
-  dtail|dmesg                tail dmesg logs
   env                        print system environment info
   version|--version|-v       print version
   help|--help|-h             this help
@@ -307,10 +306,6 @@ case $cmd in
 	;;
     'lsmod'|'lsmods')
 	_lsmod
-	;;
-    'dtail'|'dmesg')
-	LINES=$(($(tput lines) - 14))
-	watch -n1 "dmesg | tail -$LINES"
 	;;
     'env')
 	check_env
