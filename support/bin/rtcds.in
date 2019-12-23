@@ -285,7 +285,7 @@ case $cmd in
 	    shift
 	fi
 	if [ -z "$1" ] ; then
-	    log "You must specify at least one system to view."
+	    log "You must specify system to view."
 	    exit 2
 	fi
 	olog="${RCG_BUILDD}/${1}.log"
