@@ -13,6 +13,7 @@ Build-Depends:
  grace,
  ldas-tools-al-dev,
  ldas-tools-framecpp-dev,
+ libboost-dev,
  libbz2-dev,
  libc-dev-bin,
  libfl-dev,
