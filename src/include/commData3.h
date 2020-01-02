@@ -106,14 +106,15 @@ typedef struct CDS_DOLPHIN_INFO {
 #define IPC_RFM_XFER_SIZE	(sizeof(struct CDS_IPC_XMIT) * MAX_IPC_RFM)
 
 // decide between inline or not for commData functions
-#ifdef COMMDATA_INLINE
-#  include "../fe/commData3.c"
-#else
-#  include "../fe/commDataUsp.c"
   // initialize the CommDataState struct
   // send data
   //   the cycle counter is included in the checksum,
   //   and is used to index the ring buffer
+#ifdef COMMDATA_INLINE
+#  include "../fe/commData3.c"
+#endif
+#ifdef COMMDATA_USP
+#  include "../fe/commDataUsp.c"
 #endif
 
 //void commData3Init(int connects, int rate, CDS_IPC_INFO ipcInfo[], long rfmAddress[]);
