@@ -1175,7 +1175,6 @@ print "\nVersion = $svnVer\n";
 $size = length($svnVer);
 print "\nLength = $size\n";
 $svnVerSub = substr($svnVer, 0, ($size - 1));
-print OUTH "#define BUILD_SVN_VERSION_NO \t \"$svnVerSub\"\n\n";
 # ########    TEST    ############
 print EPICS "\nEPICS CDS_EPICS dspSpace coeffSpace epicsSpace\n\n";
 print EPICS "\n\n";

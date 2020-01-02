@@ -100,9 +100,6 @@ assign msgDAQ to "{ifo}:FEC-{sysnum}_MSGDAQ";
 string msgFESTAT;
 assign msgFESTAT to "{ifo}:FEC-{sysnum}_MSG_FESTAT";
 
-string svnString;
-assign svnString to "{ifo}:FEC-{sysnum}_BUILD_SVN";
-
 int stateWord;
 assign stateWord to "{ifo}:FEC-{sysnum}_STATE_WORD";
 
@@ -346,9 +343,6 @@ state init
 #endif
 
 #endif
-	strcpy(svnString,BUILD_SVN_VERSION_NO);
-	pvPut(svnString);
-%%  printf("svn is %s\n", svnString);
 
 #if defined(SEQUENCER_NAME_tcsh1) || defined(SEQUENCER_NAME_tcsh2)
     tcsEnable = 0;
