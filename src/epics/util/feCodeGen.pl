@@ -1168,14 +1168,6 @@ $inCnt = 0;
 #//	- Write Epics structs common to all CDS front ends to the .h file.
 print OUTH "#define MAX_FIR \t $firCnt\n";
 print OUTH "#define MAX_FIR_POLY \t $firCnt\n\n";
-# ########    TEST    ############
-if (-d "$rcg_src_dir/.git") {$svnVer = `cd $rcg_src_dir; git log | grep git-svn-id | head -1 | sed 's/.*@//g' | cut -d' ' -f1`;}
-else {$svnVer = `cd $rcg_src_dir; svnversion`;}
-print "\nVersion = $svnVer\n";
-$size = length($svnVer);
-print "\nLength = $size\n";
-$svnVerSub = substr($svnVer, 0, ($size - 1));
-# ########    TEST    ############
 print EPICS "\nEPICS CDS_EPICS dspSpace coeffSpace epicsSpace\n\n";
 print EPICS "\n\n";
 print OUTH "typedef struct CDS_EPICS_IN {\n";
