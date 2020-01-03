@@ -28,6 +28,13 @@ typedef struct SimplePV
 extern void
 send_pv_update( int fd, const char* prefix, SimplePV* pvs, int pv_count );
 
+typedef void*    simple_pv_handle;
+simple_pv_handle simple_pv_server_create( SimplePV* pvs, int pv_count );
+
+void simple_pv_server_update( simple_pv_handle server );
+
+void simple_pv_server_destroy( simple_pv_handle* server );
+
 #ifdef __cplusplus
 }
 #endif
