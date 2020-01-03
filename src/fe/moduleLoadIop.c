@@ -71,8 +71,8 @@ rt_iop_init( void )
     ret = mbuf_allocate_area( SYSTEM_NAME_STRING_LOWER, 64 * 1024 * 1024, 0 );
     if ( ret < 0 )
     {
-        printk( "mbuf_allocate_area() failed; ret = %d\n", ret );
-        return -1;
+	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area(epics) failed; ret = %d\n", ret );
+        return -12;
     }
     _epics_shm = (unsigned char*)( kmalloc_area[ ret ] );
     // Set pointer to EPICS area
@@ -83,8 +83,8 @@ rt_iop_init( void )
     ret = mbuf_allocate_area( "ipc", 16 * 1024 * 1024, 0 );
     if ( ret < 0 )
     {
-        printk( "mbuf_allocate_area(ipc) failed; ret = %d\n", ret );
-        return -1;
+	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area(ipc) failed; ret = %d\n", ret );
+        return -12;
     }
     _ipc_shm = (unsigned char*)( kmalloc_area[ ret ] );
 
@@ -96,8 +96,8 @@ rt_iop_init( void )
     ret = mbuf_allocate_area( fname, 64 * 1024 * 1024, 0 );
     if ( ret < 0 )
     {
-        printk( "mbuf_allocate_area() failed; ret = %d\n", ret );
-        return -1;
+	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR:mbuf_allocate_area(daq) failed; ret = %d\n", ret );
+        return -12;
     }
     _daq_shm = (unsigned char*)( kmalloc_area[ ret ] );
     daqPtr = (struct rmIpcStr*)_daq_shm;
@@ -117,7 +117,7 @@ rt_iop_init( void )
     status = mapPciModules( &cdsPciModules );
     if ( status < cards )
     {
-        printk( " ERROR **** Did not find correct number of cards! Expected %d "
+	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: Did not find correct number of cards! Expected %d "
                 "and Found %d\n",
                 cards,
                 status );
@@ -221,13 +221,14 @@ rt_iop_init( void )
     }
     if ( cnt == 10 || cdsPciModules.adcCount == 0 )
     {
+	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: EPICS restore not set - exiting\n");
+	pLocalEpics->epicsOutput.fe_status = BURT_RESTORE_ERROR;
         // Cleanup
 #ifdef DOLPHIN_TEST
         finish_dolphin( );
 #endif
-        return -1;
+        return -6;
     }
-    printk( "BURT Restore Complete\n" );
 
     pLocalEpics->epicsInput.vmeReset = 0;
 
