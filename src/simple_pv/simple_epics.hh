@@ -22,32 +22,33 @@ namespace simple_epics
 {
     namespace detail
     {
-        class setup_pv_table;
-    }
+        class simplePVBase : public casPV
+        {
+        public:
+            simplePVBase( ) : casPV( )
+            {
+            }
+            ~simplePVBase( ) override = default;
+
+            virtual void update( ) = 0;
+        };
+    } // namespace detail
 
     class Server;
 
-    /*typedef struct SimplePV
-{
-    const char* name;
-    int         pv_type; /// SIMPLE_PV_INT or SIMPLE_PV_STRING
-    void*       data;
-
-    // These values are only used for an int pv
-    int alarm_high;
-    int alarm_low;
-    int warn_high;
-    int warn_low;
-} SimplePV;*/
-
-    class pvAttributes
+    /*!
+     * @brief A description of a PV, used to describe an int PV to the server.
+     * @note this is given a pointer to the data.  This value is only read
+     * when a Server object is told to update its data.
+     */
+    class pvIntAttributes
     {
     public:
-        pvAttributes( std::string           pv_name,
-                      int*                  value,
-                      std::pair< int, int > alarm_range,
-                      std::pair< int, int > warn_range )
-            : pv_type_( SIMPLE_PV_INT ), name_{ std::move( pv_name ) },
+        pvIntAttributes( std::string           pv_name,
+                         int*                  value,
+                         std::pair< int, int > alarm_range,
+                         std::pair< int, int > warn_range )
+            : name_{ std::move( pv_name ) },
 
               alarm_low_{ alarm_range.first },
               alarm_high_{ alarm_range.second }, warn_low_{ warn_range.first },
@@ -89,7 +90,6 @@ namespace simple_epics
         }
 
     private:
-        int         pv_type_;
         std::string name_;
 
         int alarm_high_;
@@ -100,84 +100,57 @@ namespace simple_epics
         int* src_;
     };
 
-    class simplePV : public casPV
+    /*!
+     * @brief A description of a PV, used to describe a string PV to the server.
+     * @note this is given a pointer to the data.  This value is only read
+     * when a Server object is told to update its data.
+     */
+    class pvStringAttributes
     {
-        friend class detail::setup_pv_table;
-
     public:
-        simplePV( Server& server, pvAttributes attr )
-            : casPV( ), server_{ server }, attr_{ std::move( attr ) },
-              val_( ), monitored_{ false }
+        pvStringAttributes( std::string pv_name, const char* value )
+            : name_{ std::move( pv_name ) }, src_{ value }
         {
-            val_ = new gddScalar( gddAppType_value, aitEnumInt32 );
-            val_->unreference( );
-            set_value( *attr_.src( ) );
         }
-        ~simplePV( ) override;
 
-        caStatus read( const casCtx& ctx, gdd& prototype ) override;
-        caStatus write( const casCtx& ctx, const gdd& value ) override;
-
-        void destroy( ) override{};
-
-        aitEnum bestExternalType( ) const override;
+        const std::string&
+        name( ) const
+        {
+            return name_;
+        }
 
         const char*
-        getName( ) const override
+        src( ) const
         {
-            return attr_.name( ).c_str( );
+            return src_;
         }
-
-        caStatus interestRegister( ) override;
-
-        void interestDelete( ) override;
-
-        void update( );
 
     private:
-        void set_value( int value );
+        std::string name_;
 
-        static void setup_func_table( );
-
-        gddAppFuncTableStatus
-        read_attr_not_handled( gdd& g )
-        {
-            return S_casApp_success;
-        }
-
-        gddAppFuncTableStatus read_status( gdd& g );
-
-        gddAppFuncTableStatus read_severity( gdd& g );
-
-        gddAppFuncTableStatus read_precision( gdd& g );
-
-        gddAppFuncTableStatus read_alarm_high( gdd& g );
-
-        gddAppFuncTableStatus read_alarm_low( gdd& g );
-
-        gddAppFuncTableStatus read_warn_high( gdd& g );
-
-        gddAppFuncTableStatus read_warn_low( gdd& g );
-
-        gddAppFuncTableStatus read_value( gdd& g );
-
-        Server&         server_;
-        pvAttributes    attr_;
-        smartGDDPointer val_;
-        bool            monitored_;
-
-        static gddAppFuncTable< simplePV > func_table;
+        const char* src_;
     };
 
+    /*!
+     * @brief An R/O implementation of the Portable CA Server.
+     */
     class Server : public caServer
     {
     public:
-        Server( ) : caServer( ), attrs_{}
+        Server( ) : caServer( ), pvs_{}
         {
         }
         ~Server( ) override;
 
-        void addPV( pvAttributes attr );
+        /*!
+         * @brief Add a PV to the server.
+         */
+        void addPV( pvIntAttributes attr );
+        void addPV( pvStringAttributes attr );
+
+        /*!
+         * @brief Reflect all changes in the data for each PV into the server
+         */
         void update( );
 
         pvExistReturn pvExistTest( const casCtx&    ctx,
@@ -188,8 +161,8 @@ namespace simple_epics
                                  const char*   pPVAliasName ) override;
 
     private:
-        std::mutex                                           m_;
-        std::map< std::string, std::unique_ptr< simplePV > > attrs_;
+        std::mutex                                                       m_;
+        std::map< std::string, std::unique_ptr< detail::simplePVBase > > pvs_;
     };
 
 } // namespace simple_epics
