@@ -286,10 +286,23 @@ public:
 
             std::ostringstream ss;
             ss << name_ << "-" << i;
-            generators_.push_back( GeneratorPtr(
-                new Generators::GPSMod100kSecWithOffsetAndCycle< int >(
-                    SimChannel( ss.str( ), 2, 16, chnum ),
-                    ( i + dcu_id_ ) % 21 ) ) );
+
+            if ( i % 2 == 0 )
+            {
+                generators_.push_back( GeneratorPtr(
+                    new Generators::GPSMod100kSecWithOffsetAndCycle< int >(
+                        SimChannel( ss.str( ), 2, 16, chnum ),
+                        ( i + dcu_id_ ) % 21 ) ) );
+            }
+            else
+            {
+                generators_.push_back( GeneratorPtr(
+                    new Generators::GPSMod100kSecWithOffsetAndCycle< int >(
+                        SimChannel( ss.str( ), 7, 16, chnum ),
+                        ( i + dcu_id_ ) % 21 ) ) );
+            }
+
+
         }
         for ( size_t i = slow_channel_boundary; i < channel_num; ++i )
         {
