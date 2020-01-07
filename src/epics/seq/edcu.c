@@ -866,7 +866,6 @@ sleep(2);
 	logFileEntry(logmsg);
 	edcuClearSdf(pref);
 
-    crc_params.message_dest = daqmsgaddr;
     crc_params.ini_filename = daqFile;
     crc_params.orig_crc = daqFileCrc;
 
@@ -931,7 +930,7 @@ void* check_crc(void* arg) {
 
     while (1) {
         sleep(5);
-        cur_crc = checkFileCrc(daqFile);
+        cur_crc = checkFileCrc(crc_params->ini_filename);
 
         if (cur_crc != crc_params->orig_crc) {
             dbPutField(&(crc_params->message_dest),DBR_STRING,modfilemsg,1);
