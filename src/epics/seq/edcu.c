@@ -811,9 +811,8 @@ sleep(2);
 	char daqbytename[256]; sprintf(daqbytename, "%s_%s", pref, "DAQ_BYTE_COUNT");	// Request to monitor all channels.
 	status = dbNameToAddr(daqbytename,&daqbyteaddr);		// Get Address.
 
-	dbAddr daqmsgaddr;
 	char moddaqfilemsg[256]; sprintf(moddaqfilemsg, "%s_%s", pref, "MSGDAQ");	// Record to write if DAQ file changed.
-	status = dbNameToAddr(moddaqfilemsg,&daqmsgaddr);
+	status = dbNameToAddr(moddaqfilemsg, &(crc_params.message_dest));
 
 	sprintf(timechannel,"%s_%s", pref, "TIME_STRING");
 	// printf("timechannel = %s\n",timechannel);
@@ -935,7 +934,7 @@ void* check_crc(void* arg) {
         cur_crc = checkFileCrc(daqFile);
 
         if (cur_crc != crc_params->orig_crc) {
-            dbPutField(&daqmsgaddr,DBR_STRING,modfilemsg,1);
+            dbPutField(&(crc_params->message_dest),DBR_STRING,modfilemsg,1);
             if (was_ok) {
                 logFileEntry("Detected Change to DAQ Config file.");
             }
