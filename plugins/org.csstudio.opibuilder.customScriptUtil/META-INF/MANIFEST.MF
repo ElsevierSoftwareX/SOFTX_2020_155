@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: CustomScriptUtil
-Bundle-SymbolicName: org.csstudio.opibuilder.customScriptUtil
-Bundle-Version: 1.0.0.qualifier
-Fragment-Host: org.csstudio.opibuilder;bundle-version="3.1.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: org.csstudio.opibuilder.customScriptUtil
-Import-Package: org.csstudio.utility.pv.nds

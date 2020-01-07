@@ -47,7 +47,14 @@ DEVFLAGS=@DEVFLAGS@
 	@/bin/mv -f build/$@epics-config build/$@epics/config
 	@echo Building front-end Linux kernel module $@...
 	@make -sC src/fe/$@ clean
-#	@cp $(srcdir)/src/drv/gpstime/Module.symvers src/fe/$@
+# copy IOP symbol file to build area if found
+	@cp src/fe/ModuleIOP.symvers src/fe/$@ > /dev/null 2>&1 || /bin/true
+# build it
+	@make -C src/fe/$@ >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
+# save IOP symbol to file
+	@grep IOP src/fe/$@/Module.symvers > /tmp/tmp.symvers
+	@awk -vOFS='\t' '{$$3 = "/"; print}' /tmp/tmp.symvers > src/fe/ModuleIOP.symvers
+	@rm /tmp/tmp.symvers
 	@make -C src/fe/$@ >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@$(srcdir)/src/epics/util/checkUndefined.pl $@_error.log >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@echo Done
@@ -84,7 +91,6 @@ all:
 .PHONY : doc
 doc:	
 	(cd doc && bash ./doxScript && doxygen doxygen.cfg)
-	
 
 reclean:
 	-/bin/rm -rf build config src target
@@ -181,89 +187,3 @@ installWorldTest: $(patsubst %,install-%,$(TST_MODELS))
 # Show all predefined preprocessor definitions
 dump_predefines:
 	gcc -E -dM -x c /dev/null
-
-
-# Build NDS program
-nds:
-	(cd $(srcdir)/src/nds; autoconf)
-	/bin/rm -rf build/nds
-	/bin/mkdir -p build/nds
-	(mysrc=$(srcdir); cd build/nds; $$mysrc/src/nds/configure  && make)
-
-# Build frame builder data concentrator program
-dc:
-	(cd $(srcdir)/src/daqd; autoconf)
-	/bin/rm -rf build/dc
-	/bin/mkdir -p build/dc
-	(mysrc=$(srcdir); cd build/dc; $$mysrc/src/daqd/configure '--enable-symmetricom' '--with-mx' '--without-myrinet' '--enable-debug' '--with-epics' '--with-concentrator' && make)
-
-# Build frame builder data concentator program with OpenMX
-dc-omx:
-	(cd $(srcdir)/src/daqd; autoconf)
-	/bin/rm -rf build/dc-omx
-	/bin/mkdir -p build/dc-omx
-	(mysrc=$(srcdir); cd build/dc-omx; $$mysrc/src/daqd/configure '--enable-symmetricom' '--with-omx' '--without-myrinet' '--enable-debug' '--with-epics' '--with-concentrator' && make)
-
-# Build frame builder NDS (broadcast receiver)
-rcv:
-	(cd $(srcdir)/src/daqd; autoconf)
-	/bin/rm -rf build/rcv
-	/bin/mkdir -p build/rcv
-	(mysrc=$(srcdir); cd build/rcv; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--enable-rcv' '--with-epics'  && make)
-
-# Build frame writer (broadcast receiver) without test points support
-fw:
-	(cd $(srcdir)/src/daqd; autoconf)
-	/bin/rm -rf build/fw
-	/bin/mkdir -p build/fw
-	(mysrc=$(srcdir); cd build/fw; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-epics' '--enable-fw' --disable-testpoints  && make)
-
-#
-# Build DMT 1-second frame broadcaster
-bcst:
-	(cd $(srcdir)/src/daqd; autoconf)
-	/bin/rm -rf build/bcst
-	/bin/mkdir -p build/bcst
-	(mysrc=$(srcdir); cd build/bcst; $$mysrc/src/daqd/configure '--enable-debug' '--with-broadcast' '--without-myrinet' '--with-epics'  && make)
-
-# build standalone frame builder
-stand:
-	(cd $(srcdir)/src/daqd; autoconf)
-	/bin/rm -rf build/stand
-	/bin/mkdir -p build/stand
-	(mysrc=$(srcdir); cd build/stand; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics' && make)
-
-# build  mx data receiving daqd
-#
-mx:
-	(cd $(srcdir)/src/daqd; autoconf)
-	/bin/rm -rf build/mx
-	/bin/mkdir -p build/mx
-	(mysrc=$(srcdir); cd build/mx; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics' --with-mx && make)
-
-mx-symm:
-	(cd $(srcdir)/src/daqd; autoconf)
-	/bin/rm -rf build/mx-symm
-	/bin/mkdir -p build/mx-symm
-	(mysrc=$(srcdir); cd build/mx-symm; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics' --with-mx '--enable-symmetricom' && make)
-
-
-mx-localtime:
-	(cd $(srcdir)/src/daqd; autoconf)
-	/bin/rm -rf build/mx-localtime
-	/bin/mkdir -p build/mx-localtime
-	(mysrc=$(srcdir); cd build/mx-localtime; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics' --with-mx '--enable-local-timing' && make)
-
-
-standiop:
-	(cd $(srcdir)/src/daqd; autoconf)
-	/bin/rm -rf build/standiop
-	/bin/mkdir -p build/standiop
-	(mysrc=$(srcdir); cd build/standiop; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics' '--enable-standiop' --enable-iop && make)
-
-
-standiop-localtime:
-	(cd $(srcdir)/src/daqd; autoconf)
-	/bin/rm -rf build/standiop-localtime
-	/bin/mkdir -p build/standiop-localtime
-	(mysrc=$(srcdir); cd build/standiop-localtime; $$mysrc/src/daqd/configure '--disable-broadcast' '--enable-debug' '--without-myrinet' '--with-epics' --enable-local-timing --enable-iop && make)

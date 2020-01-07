@@ -14,10 +14,20 @@ of this distribution.
 // - Make appropriate log file entries
 // - Get rid of need to build skeleton.st
 
+#include <atomic>
+#include <algorithm>
+#include <array>
+#include <iterator>
+#include <numeric>
+#include <string>
+#include <thread>
+#include <utility>
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdarg.h>
 #include <unistd.h>
 #include <time.h>
@@ -25,12 +35,22 @@ of this distribution.
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-#include "crc.h"
-
 #include <daqmap.h>
-#include <param.h>
+#include <daq_data_types.h>
+
+#define BOOST_ASIO_USE_BOOST_DATE_TIME_FOR_SOCKET_IOSTREAM
+#include <boost/asio.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/lockfree/spsc_queue.hpp>
+
+#include <rapidjson/writer.h>
+#include <rapidjson/stringbuffer.h>
+
+
 extern "C" {
 #include "findSharedMemory.h"
+#include "crc.h"
+#include "param.h"
 }
 #include "cadef.h"
 #include "fb.h"
@@ -40,24 +60,87 @@ extern "C" {
 #include <iostream>
 
 #define EDCU_MAX_CHANS 50000
+#define DIAG_QUEUE_DEPTH 3
+
+using boost::asio::ip::tcp;
+
+#if BOOST_ASIO_VERSION < 101200
+using io_context_t = boost::asio::io_service;
+inline io_context_t&
+get_context( tcp::acceptor& acceptor )
+{
+    return acceptor.get_io_service( );
+}
+
+inline boost::asio::ip::address
+make_address( const char* str )
+{
+    return boost::asio::ip::address::from_string( str );
+}
+#else
+using io_context_t = boost::asio::io_context;
+
+inline io_context_t&
+get_context( tcp::acceptor& acceptor )
+{
+    return acceptor.get_executor( ).context( );
+}
+
+inline boost::asio::ip::address
+make_address( const char* str )
+{
+    return boost::asio::ip::make_address( str );
+}
+#endif
 
 // Function prototypes
 // ****************************************************************************************
 int checkFileCrc( const char* );
 
-unsigned long daqFileCrc;
-typedef struct daqd_c
+typedef union edc_data_t
 {
-    int   num_chans;
-    int   con_chans;
-    int   val_events;
-    int   con_events;
-    float channel_value[ EDCU_MAX_CHANS ];
-    char  channel_name[ EDCU_MAX_CHANS ][ 64 ];
-    int   channel_status[ EDCU_MAX_CHANS ];
-    long  gpsTime;
-    long  epicsSync;
-} daqd_c;
+    int16_t data_int16;
+    int32_t data_int32;
+    float   data_float32;
+    double  data_float64;
+} edc_data_t;
+
+struct edc_timestamped_data_t
+{
+    edc_timestamped_data_t(): data(), timestamp() {
+        timestamp.secPastEpoch = 0;
+        timestamp.nsec = 0;
+    }
+    edc_data_t data;
+    epicsTimeStamp timestamp;
+};
+
+unsigned long daqFileCrc;
+class daqd_c
+{
+public:
+    daqd_c():
+    num_chans(0), con_chans(0), val_events(0), con_events(0),
+    channel_type(), channel_value(), channel_name(), channel_status(),
+    gpsTime(0),
+    epicsSync(0),
+    prefix(nullptr),
+    dcuid(0)
+    {}
+
+    int                num_chans;
+    int con_chans;
+    int                val_events;
+    int                con_events;
+    daq_data_t         channel_type[ EDCU_MAX_CHANS ];
+    edc_timestamped_data_t         channel_value[ EDCU_MAX_CHANS ];
+    char               channel_name[ EDCU_MAX_CHANS ][ 64 ];
+    int                channel_status[ EDCU_MAX_CHANS ];
+    long               gpsTime;
+    long               epicsSync;
+    char*              prefix;
+    int                dcuid;
+};
 
 int num_chans_index = -1;
 int con_chans_index = -1;
@@ -72,7 +155,6 @@ static struct cdsDaqNetGdsTpNum* shmTpTable;
 static const int                 buf_size = DAQ_DCU_BLOCK_SIZE * 2;
 static const int                 header_size =
     sizeof( struct rmIpcStr ) + sizeof( struct cdsDaqNetGdsTpNum );
-static DAQ_XFER_INFO xferInfo;
 
 static int symmetricom_fd = -1;
 int        timemarks[ 16 ] = { 1000 * 1000,   63500 * 1000,  126000 * 1000,
@@ -82,6 +164,263 @@ int        timemarks[ 16 ] = { 1000 * 1000,   63500 * 1000,  126000 * 1000,
                         751000 * 1000, 813500 * 1000, 876000 * 1000,
                         938500 * 1000 };
 int        nextTrig = 0;
+
+/*!
+ * @brief A collection of information used for diagnostic output
+ */
+struct diag_info_block
+{
+    diag_info_block( ) : con_chans( 0 ), status( )
+    {
+        std::fill( std::begin( status ), std::end( status ), 0xbad );
+    }
+    diag_info_block( const diag_info_block& other )
+        : con_chans( other.con_chans ), status( )
+    {
+        std::copy( std::begin( other.status ),
+                   std::end( other.status ),
+                   std::begin( status ) );
+    }
+    diag_info_block&
+    operator=( const diag_info_block& other )
+    {
+        con_chans = other.con_chans;
+        std::copy( std::begin( other.status ),
+                   std::end( other.status ),
+                   std::begin( status ) );
+        return *this;
+    }
+
+    int con_chans;
+    int status[ EDCU_MAX_CHANS ];
+};
+
+typedef boost::lockfree::spsc_queue<
+    diag_info_block*,
+    boost::lockfree::capacity< DIAG_QUEUE_DEPTH > >
+    diag_queue_t;
+
+/*!
+ * @brief this structure is used to refer to the message queues used between the
+ * main thread and the diag thread.
+ */
+struct diag_thread_queues
+{
+    diag_thread_queues( diag_queue_t& message_queue,
+                        diag_queue_t& free_list_queue )
+        : msg_queue( message_queue ), free_queue( free_list_queue )
+    {
+    }
+
+    diag_queue_t& msg_queue;
+    diag_queue_t& free_queue;
+};
+
+/*!
+ * @brief this structure is used to give the diag thread the information it
+ * needs to start and run.
+ */
+struct diag_thread_args
+{
+    diag_thread_args( const std::string& hostname,
+                      int                port,
+                      diag_queue_t&      message_queue,
+                      diag_queue_t&      free_list_queue )
+        : address( hostname, port ), queues( message_queue, free_list_queue )
+    {
+    }
+    diag_thread_args( diag_queue_t& message_queue,
+                      diag_queue_t& free_list_queue )
+        : address( "127.0.0.1", 9000 ), queues( message_queue, free_list_queue )
+    {
+    }
+    std::pair< std::string, int > address;
+    diag_thread_queues            queues;
+};
+
+/*!
+ * @brief A Stream interface for rapid json to be paired with a writer.  It
+ * doesn't write any data, instead calculating the size in bytes that would be
+ * needed to actually encode the data written to it.
+ */
+class SizeCalcJsonStream
+{
+public:
+    typedef char Ch;
+    SizeCalcJsonStream( ) : count_( 0 )
+    {
+    }
+
+    Ch
+    Peek( ) const
+    {
+        throw std::runtime_error( "Peek not implemented" );
+    }
+    Ch
+    Take( )
+    {
+        throw std::runtime_error( "Take not implemented" );
+    }
+    size_t
+    Tell( )
+    {
+        throw std::runtime_error( "Tell not implemented" );
+    }
+
+    Ch*
+    PutBegin( )
+    {
+        throw std::runtime_error( "PutBegin not implemented" );
+    };
+
+    void
+    Put( Ch c )
+    {
+        ++count_;
+    }
+    void
+    Flush( )
+    {
+    }
+    size_t
+    PutEnd( Ch* begin )
+    {
+        throw std::runtime_error( "PutEnd not implemented" );
+    }
+
+    bool
+    SpaceAvailable( ) const
+    {
+        return true;
+    }
+
+    std::size_t
+    GetSize( ) const
+    {
+        return count_;
+    }
+
+private:
+    std::size_t count_;
+};
+
+/*!
+ * @brief A Stream interface for rapid json to be paired with a writer.  It
+ * writes into a fixed size buffer, and reports if there some space left.
+ */
+template < std::size_t MIN_SIZE >
+class FixedSizeJsonStream
+{
+public:
+    typedef char Ch;
+    FixedSizeJsonStream( char* begin, char* end )
+        : begin_( begin ), cur_( begin ), end_( end )
+    {
+    }
+
+    Ch
+    Peek( ) const
+    {
+        throw std::runtime_error( "Peek not implemented" );
+    }
+    Ch
+    Take( )
+    {
+        throw std::runtime_error( "Take not implemented" );
+    }
+    size_t
+    Tell( )
+    {
+        throw std::runtime_error( "Tell not implemented" );
+    }
+
+    Ch*
+    PutBegin( )
+    {
+        throw std::runtime_error( "PutBegin not implemented" );
+    };
+
+    void
+    Put( Ch c )
+    {
+        if ( cur_ < end_ )
+        {
+            *cur_ = c;
+            ++cur_;
+        }
+        else
+        {
+            throw std::out_of_range( "The FixedSizeBuffer has overflown" );
+        }
+    }
+    void
+    Flush( )
+    {
+    }
+    size_t
+    PutEnd( Ch* begin )
+    {
+        throw std::runtime_error( "PutEnd not implemented" );
+    }
+
+    void
+    AdvanceCounter( std::size_t count )
+    {
+        cur_ += count;
+    }
+
+    bool
+    SpaceAvailable( ) const
+    {
+        return ( end_ - cur_ ) > MIN_SIZE;
+    }
+
+    Ch*
+    GetString( ) const
+    {
+        return begin_;
+    }
+
+    std::size_t
+    GetSize( ) const
+    {
+        return cur_ - begin_;
+    }
+
+    void
+    Reset( )
+    {
+        cur_ = begin_;
+    }
+
+private:
+    Ch* begin_;
+    Ch* cur_;
+    Ch* end_;
+};
+
+struct diag_client_conn
+{
+    explicit diag_client_conn( io_context_t& io )
+        : io_context( io ), socket( io ), data( ), buffer( ),
+          buffer_stream( buffer.data( ), buffer.data( ) + buffer.size( ) ),
+          writer( buffer_stream ), list_progress( 0 )
+    {
+    }
+
+    io_context_t&   io_context;
+    tcp::socket     socket;
+    diag_info_block data;
+
+    std::array< char, 32000 >                       buffer;
+    FixedSizeJsonStream< 256 >                      buffer_stream;
+    rapidjson::Writer< FixedSizeJsonStream< 256 > > writer;
+    int                                             list_progress;
+};
+
+// forward
+void diag_thread_mainloop( diag_thread_args* args );
+void update_diag_info( diag_thread_queues& queues );
 
 // End Header ************************************************************
 //
@@ -243,12 +582,38 @@ connectCallback( struct connection_handler_args args )
 {
     // **************************************************************************
     int* channel_status = (int*)ca_puser( args.chid );
-    *channel_status = args.op == CA_OP_CONN_UP ? 0 : 0xbad;
-    if ( args.op == CA_OP_CONN_UP )
-        daqd_edcu1.con_chans++;
-    else
-        daqd_edcu1.con_chans--;
+    int  new_status = ( args.op == CA_OP_CONN_UP ? 0 : 0xbad );
+    /* In practice we have seen multiple disconnect events in a row w/o a
+     * connect event. So only update when there is a change.  Otherwise this
+     * code cannot count well.
+     */
+    if ( *channel_status != new_status )
+    {
+        *channel_status = new_status;
+        if ( args.op == CA_OP_CONN_UP )
+        {
+            daqd_edcu1.con_chans++;
+        }
+        else
+        {
+            daqd_edcu1.con_chans--;
+        }
+    }
     daqd_edcu1.con_events++;
+}
+
+inline
+bool operator>(const epicsTimeStamp t1, const epicsTimeStamp t2)
+{
+    if (t1.secPastEpoch > t2.secPastEpoch)
+    {
+        return true;
+    }
+    if (t1.secPastEpoch < t2.secPastEpoch)
+    {
+        return false;
+    }
+    return t1.nsec > t2.nsec;
 }
 
 // **************************************************************************
@@ -261,332 +626,243 @@ subscriptionHandler( struct event_handler_args args )
     {
         return;
     }
-    if ( args.type == DBR_FLOAT )
+
+    switch ( args.type )
     {
-        float val = *( (float*)args.dbr );
-        *( (float*)( args.usr ) ) = val;
+    case DBR_TIME_SHORT:
+    {
+
+        dbr_time_short* dbr = (dbr_time_short*)(args.dbr);
+
+        edc_timestamped_data_t* edc_data = ((edc_timestamped_data_t *) (args.usr));
+        int i = edc_data - &(daqd_edcu1.channel_value[0]);
+        if (dbr->stamp > edc_data->timestamp)
+        {
+//            if (strcmp(daqd_edcu1.channel_name[i], "X6:EDC-1571--gpssmd30koff1p--20--1--16") == 0)
+//            {
+//                std::cout << edc_data->data.data_int16 << " " << edc_data->timestamp.secPastEpoch << ":"
+//                << edc_data->timestamp.nsec << "    -> "
+//                << dbr->value << " " << dbr->stamp.secPastEpoch << ":"
+//                << dbr->stamp.nsec << std::endl;
+//            }
+            edc_data->data.data_int16 = dbr->value;
+            edc_data->timestamp.secPastEpoch = dbr->stamp.secPastEpoch;
+            edc_data->timestamp.nsec = dbr->stamp.nsec;
+        }
     }
-    else
+    break;
+    case DBR_TIME_LONG:
     {
+        dbr_time_long* dbr = (dbr_time_long*)(args.dbr);
+        edc_timestamped_data_t* edc_data = ((edc_timestamped_data_t *) (args.usr));
+        if (dbr->stamp > edc_data->timestamp)
+        {
+            edc_data->data.data_int32 = dbr->value;
+            edc_data->timestamp.secPastEpoch = dbr->stamp.secPastEpoch;
+            edc_data->timestamp.nsec = dbr->stamp.nsec;
+        }
+    }
+    break;
+    case DBR_TIME_FLOAT:
+    {
+        dbr_time_float* dbr = (dbr_time_float*)(args.dbr);
+        edc_timestamped_data_t* edc_data = ((edc_timestamped_data_t *) (args.usr));
+        if (dbr->stamp > edc_data->timestamp)
+        {
+            edc_data->data.data_float32 = dbr->value;
+            edc_data->timestamp.secPastEpoch = dbr->stamp.secPastEpoch;
+            edc_data->timestamp.nsec = dbr->stamp.nsec;
+        }
+    }
+    break;
+    case DBR_TIME_DOUBLE:
+    {
+        dbr_time_double* dbr = (dbr_time_double*)(args.dbr);
+        edc_timestamped_data_t* edc_data = ((edc_timestamped_data_t *) (args.usr));
+        if (dbr->stamp > edc_data->timestamp)
+        {
+            edc_data->data.data_float64 = dbr->value;
+            edc_data->timestamp.secPastEpoch = dbr->stamp.secPastEpoch;
+            edc_data->timestamp.nsec = dbr->stamp.nsec;
+        }
+    }
+    break;
+    default:
         printf( "Arg type unknown\n" );
+        break;
     }
 }
 
-/**
- * Scan the input text for the first non-whitespace character and return a
- * pointer to that location.
- * @param line NULL terminated string to check.
- * @return Pointer to the the first non whitespace (space, tab, nl, cr)
- * character.  Returns NULL iff line is NULL.
- */
-const char*
-skip_whitespace( const char* line )
+bool
+valid_data_type( daq_data_t datatype )
 {
-    const char* cur = line;
-    char        ch = 0;
-    if ( !line )
+    switch ( datatype )
     {
-        return NULL;
+    case _undefined:
+    case _32bit_complex:
+    case _32bit_uint:
+    case _64bit_integer:
+    default:
+        return false;
+    case _16bit_integer:
+    case _32bit_integer:
+    case _32bit_float:
+    case _64bit_double:
+        return true;
     }
-    ch = *cur;
-    while ( ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n' )
-    {
-        ++cur;
-        ch = *cur;
-    }
-    return cur;
+    return true;
 }
 
-/**
- * Given a line with an comment denoted by '#' terminate
- * the line at the start of the comment.
- * @param line The line to modify, a NULL terminated string
- * @note This may modify the string pointed to by line.
- * This is safe to call with a NULL pointer.
- */
-void
-remove_line_comments( char* line )
+int
+daq_data_t_to_epics( daq_data_t datatype )
 {
-    char ch = 0;
-
-    if ( !line )
+    switch ( datatype )
     {
-        return;
-    }
-    while ( ( ch = *line ) )
-    {
-        if ( ch == '#' )
-        {
-            *line = '\0';
-            return;
-        }
-        ++line;
+    case _16bit_integer:
+        return DBR_TIME_SHORT;
+    case _32bit_integer:
+        return DBR_TIME_LONG;
+    case _32bit_float:
+        return DBR_TIME_FLOAT;
+    case _64bit_double:
+        return DBR_TIME_DOUBLE;
+    default:
+        throw std::runtime_error( "Unexpected data type given" );
     }
 }
 
-/**
- * Given a NULL terminated string remove any trailing whitespace
- * @param line The line to modify, a NULL terminated string
- * @note This may modify the string pointed to by line.
- * This is safe to call with a NULL pointer.
- */
-void
-remove_trailing_whitespace( char* newname )
+std::size_t
+accumulte_daq_sizes(std::size_t cur, daq_data_t data_type)
 {
-    char* cur = newname;
-    char* last_non_ws = NULL;
-    char  ch = 0;
-
-    if ( !newname )
-    {
-        return;
-    }
-    ch = *cur;
-    while ( ch )
-    {
-        if ( ch != ' ' && ch != '\t' && ch != '\r' && ch != '\n' )
-        {
-            last_non_ws = cur;
-        }
-        ++cur;
-        ch = *cur;
-    }
-    if ( !last_non_ws )
-    {
-        *newname = '\0';
-    }
-    else
-    {
-        last_non_ws++;
-        *last_non_ws = '\0';
-    }
+    return cur + data_type_size(data_type);
 }
 
-// **************************************************************************
-void
-edcuCreateChanFile( char* fdir, char* edcuinifilename, char* fecid )
+std::size_t
+calculate_data_size(const daqd_c& edc)
 {
-    // **************************************************************************
-    int   ok = 0;
-    int   i = 0;
-    int   status = 0;
-    char  errMsg[ 64 ] = "";
-    FILE* daqfileptr = NULL;
-    FILE* edcuini = NULL;
-    FILE* edcumaster = NULL;
-    char  masterfile[ 64 ] = "";
-    char  edcuheaderfilename[ 64 ] = "";
-    char  line[ 128 ] = "";
-    char* newname = 0;
-    char  edcufilename[ 64 ] = "";
-    char* dcuid = 0;
+    return std::accumulate(&(edc.channel_type[0]), &(edc.channel_type[0]) + edc.num_chans, 0, accumulte_daq_sizes);
+}
 
-    sprintf( errMsg, "%s", fecid );
-    dcuid = strtok( errMsg, "-" );
-    dcuid = strtok( NULL, "-" );
-    sprintf( masterfile, "%s%s", fdir, "edcumaster.txt" );
-    sprintf( edcuheaderfilename, "%s%s", fdir, "edcuheader.txt" );
+bool
+channel_is_edcu_special_chan( daqd_c* edc, const char* channel_name )
+{
+    const char* dummy_prefix = "";
+    const char* prefix = ( edc->prefix ? edc->prefix : dummy_prefix );
+    size_t      pref_len = strlen( prefix );
+    size_t      name_len = strlen( channel_name );
 
-    // Open the master file which contains list of EDCU files to read channels
-    // from.
-    edcumaster = fopen( masterfile, "r" );
-    if ( edcumaster == NULL )
+    if ( name_len <= pref_len )
     {
-        sprintf(
-            errMsg, "DAQ FILE ERROR: FILE %s DOES NOT EXIST\n", masterfile );
-        fprintf( stderr, "%s", errMsg );
-        // logFileEntry( errMsg );
-        goto done;
+        return false;
     }
-    // Open the file to write the composite channel list.
-    edcuini = fopen( edcuinifilename, "w" );
-    if ( edcuini == NULL )
+    if ( strncmp( prefix, channel_name, pref_len ) != 0 )
     {
-        sprintf( errMsg,
-                 "DAQ FILE ERROR: FILE %s DOES NOT EXIST\n",
-                 edcuinifilename );
-        fprintf( stderr, "%s", errMsg );
-        // logFileEntry( errMsg );
-        goto done;
+        return false;
     }
+    const char* remainder = channel_name + pref_len;
+    return ( strcmp( remainder, "EDCU_CHAN_CONN" ) == 0 ||
+             strcmp( remainder, "EDCU_CHAN_CNT" ) == 0 ||
+             strcmp( remainder, "EDCU_CHAN_NOCON" ) == 0 );
+}
 
-    // Write standard header into .ini file
-    fprintf( edcuini, "%s", "[default] \n" );
-    fprintf( edcuini, "%s", "gain=1.00 \n" );
-    fprintf( edcuini, "%s", "datatype=4 \n" );
-    fprintf( edcuini, "%s", "ifoid=0 \n" );
-    fprintf( edcuini, "%s", "slope=1 \n" );
-    fprintf( edcuini, "%s", "acquire=3 \n" );
-    fprintf( edcuini, "%s", "offset=0 \n" );
-    fprintf( edcuini, "%s", "units=undef \n" );
-    fprintf( edcuini, "%s%s%s", "dcuid=", dcuid, " \n" );
-    fprintf( edcuini, "%s", "datarate=16 \n\n" );
+int
+channel_parse_callback( char*              channel_name,
+                        struct CHAN_PARAM* params,
+                        void*              user )
+{
+    daqd_c* edc = reinterpret_cast< daqd_c* >( user );
 
-    // Read the master file entries.
-    while ( fgets( line, sizeof line, edcumaster ) != NULL )
+    if ( !edc || !channel_name || !params )
     {
-        newname = strtok( line, "\n" );
-        if ( !newname )
-        {
-            continue;
-        }
-        newname = (char*)skip_whitespace( newname );
-        remove_line_comments( newname );
-        remove_trailing_whitespace( newname );
-
-        if ( *newname == '\0' )
-        {
-            continue;
-        }
-        strcpy( edcufilename, fdir );
-        strcat( edcufilename, newname );
-        printf( "File in master = %s\n", edcufilename );
-        daqfileptr = fopen( edcufilename, "r" );
-        if ( daqfileptr == NULL )
-        {
-            fprintf(
-                stderr,
-                "DAQ FILE ERROR: FILE %s DOES NOT EXIST OR CANNOT BE READ!\n",
-                edcufilename );
-            goto done;
-        }
-        while ( fgets( line, sizeof line, daqfileptr ) != NULL )
-        {
-            fprintf( edcuini, "%s", line );
-        }
-        fclose( daqfileptr );
-        daqfileptr = NULL;
+        return 0;
     }
-    ok = 1;
-done:
-    if ( daqfileptr )
-        fclose( daqfileptr );
-    if ( edcuini )
-        fclose( edcuini );
-    if ( edcumaster )
-        fclose( edcumaster );
-    if ( !ok )
+    if ( edc->num_chans >= 50000 )
     {
+        std::cerr << "Too many channels, aborting\n";
         exit( 1 );
     }
-}
-
-int
-veto_line_due_to_datarate( const char* line )
-{
-    const int datarate_eq_len = 9;
-
-    if ( !line )
+    if ( strlen( channel_name ) >=
+         sizeof( edc->channel_name[ edc->num_chans ] ) )
     {
-        return 0;
+        std::cerr << "Channel name is too long '" << channel_name << "'\n";
+        exit( 1 );
     }
-    if ( strncmp( "datarate=", line, datarate_eq_len ) != 0 )
+    if ( params->datarate != 16 )
     {
-        return 0;
+        std::cerr << "EDC channels may only be 16Hz\n";
+        exit( 1 );
     }
-
-    if ( strcmp( "16\n", line + datarate_eq_len ) == 0 ||
-         strcmp( "16", line + datarate_eq_len ) == 0 )
+    if ( params->dcuid != edc->dcuid && edc->dcuid >= 0 )
     {
-        return 0;
+        std::cerr << "The edc can only have a single dcuid in its file\n";
+        exit( 1 );
     }
-    return 1;
-}
-
-int
-veto_line_due_to_datatype( const char* line )
-{
-    const int datatype_eq_len = 9;
-
-    if ( !line )
+    if ( edc->dcuid < 0 )
     {
-        return 0;
+        edc->dcuid = params->dcuid;
     }
-    if ( strncmp( "datatype=", line, datatype_eq_len ) != 0 )
+    daq_data_t daq_data_type = static_cast< daq_data_t >( params->datatype );
+    if ( !valid_data_type( daq_data_type ) )
     {
-        return 0;
+        std::cerr << "Invalid data type given for " << channel_name << "\n";
+        exit( 1 );
     }
-
-    if ( strcmp( "4\n", line + datatype_eq_len ) == 0 ||
-         strcmp( "4", line + datatype_eq_len ) == 0 )
+    if ( channel_is_edcu_special_chan( edc, channel_name ) )
     {
-        return 0;
+        if ( daq_data_type != _32bit_integer && daq_data_type != _32bit_float )
+        {
+            std::cerr
+                << "The edcu special variables (EDCU_CHAN_CONN/CNT/NOCON) "
+                   "must be 32 bit ints ("
+                << static_cast< int >( _32bit_integer ) << ") or 32 bit floats("
+                << static_cast< int >( _32bit_float ) << "\n";
+            exit( 1 );
+        }
     }
+    edc->channel_type[ edc->num_chans ] = daq_data_type;
+    strncpy( edc->channel_name[ edc->num_chans ],
+             channel_name,
+             sizeof( edc->channel_name[ edc->num_chans ] ) );
+    ++( edc->num_chans );
     return 1;
 }
 
 // **************************************************************************
 void
-edcuCreateChanList( const char* pref, const char* daqfilename )
+edcuCreateChanList( daqd_c& daq, const char* daqfilename, unsigned long* crc )
 {
     // **************************************************************************
-    int   i;
-    int   status;
-    FILE* daqfileptr;
-    char  errMsg[ 64 ];
-    // char daqfile[64];
-    char  line[ 128 ];
-    char* newname;
+    int           i = 0;
+    int           status = 0;
+    unsigned long dummy_crc = 0;
 
     char eccname[ 256 ];
-    sprintf( eccname, "%s%s", pref, "EDCU_CHAN_CONN" );
+    sprintf( eccname, "%s%s", daq.prefix, "EDCU_CHAN_CONN" );
     char chcntname[ 256 ];
-    sprintf( chcntname, "%s%s", pref, "EDCU_CHAN_CNT" );
+    sprintf( chcntname, "%s%s", daq.prefix, "EDCU_CHAN_CNT" );
     char cnfname[ 256 ];
-    sprintf( cnfname, "%s%s", pref, "EDCU_CHAN_NOCON" );
+    sprintf( cnfname, "%s%s", daq.prefix, "EDCU_CHAN_NOCON" );
 
-    // sprintf(daqfile, "%s%s", fdir, "EDCU.ini");
-    daqd_edcu1.num_chans = 0;
-    daqfileptr = fopen( daqfilename, "r" );
-    if ( daqfileptr == NULL )
+    if ( !crc )
     {
-        fprintf(
-            stderr, "DAQ FILE ERROR: FILE %s DOES NOT EXIST\n", daqfilename );
+        crc = &dummy_crc;
     }
-    while ( fgets( line, sizeof line, daqfileptr ) != NULL )
-    {
-        status = strlen( line );
-        if ( strncmp( line, "[", 1 ) == 0 && status > 0 )
-        {
-            newname = strtok( line, "]" );
-            // printf("status = %d New name = %s and %s\n",status,line,newname);
-            newname = strtok( line, "[" );
-            // printf("status = %d New name = %s and %s\n",status,line,newname);
-            if ( strcmp( newname, "default" ) == 0 )
-            {
-                printf( "DEFAULT channel = %s\n", newname );
-            }
-            else
-            {
-                // printf("NEW channel = %s\n", newname);
-                sprintf( daqd_edcu1.channel_name[ daqd_edcu1.num_chans ],
-                         "%s",
-                         newname );
-                daqd_edcu1.num_chans++;
-            }
-        }
-        else
-        {
-            if ( veto_line_due_to_datarate( line ) )
-            {
-                fprintf(
-                    stderr,
-                    "Invalid data rate found, all entries must be 16Hz\n" );
-                exit( 1 );
-            }
-            if ( veto_line_due_to_datatype( line ) )
-            {
-                fprintf( stderr,
-                         "Invalid data type found, all entries must be 4 "
-                         "(float)\n" );
-                exit( 1 );
-            }
-        }
-    }
-    fclose( daqfileptr );
+    daq.num_chans = 0;
 
-    xferInfo.crcLength = 4 * daqd_edcu1.num_chans;
-    printf( "CRC data length = %d\n", xferInfo.crcLength );
+    daq.dcuid = -1;
+    parseConfigFile( const_cast< char* >( daqfilename ),
+                     crc,
+                     channel_parse_callback,
+                     -1,
+                     (char*)0,
+                     reinterpret_cast< void* >( &daq ) );
+    if ( daq.num_chans < 1 )
+    {
+        std::cerr << "No channels to record, aborting\n";
+        exit( 1 );
+    }
+
+    std::cout << "CRC data length = " << calculate_data_size(daqd_edcu1) << "\n";
 
     chid chid1;
     if ( ca_context_create( ca_enable_preemptive_callback ) != ECA_NORMAL )
@@ -595,59 +871,75 @@ edcuCreateChanList( const char* pref, const char* daqfilename )
         exit( 1 );
     }
 
-    for ( i = 0; i < daqd_edcu1.num_chans; i++ )
+    for ( i = 0; i < daq.num_chans; i++ )
     {
-        if ( strcmp( daqd_edcu1.channel_name[ i ], chcntname ) == 0 )
+        if ( strcmp( daq.channel_name[ i ], chcntname ) == 0 )
         {
             num_chans_index = i;
             internal_channel_count = internal_channel_count + 1;
-            daqd_edcu1.channel_status[ i ] = 0;
+            daq.channel_status[ i ] = 0;
         }
-        else if ( strcmp( daqd_edcu1.channel_name[ i ], eccname ) == 0 )
+        else if ( strcmp( daq.channel_name[ i ], eccname ) == 0 )
         {
             con_chans_index = i;
             internal_channel_count = internal_channel_count + 1;
-            daqd_edcu1.channel_status[ i ] = 0;
+            daq.channel_status[ i ] = 0;
         }
-        else if ( strcmp( daqd_edcu1.channel_name[ i ], cnfname ) == 0 )
+        else if ( strcmp( daq.channel_name[ i ], cnfname ) == 0 )
         {
             nocon_chans_index = i;
             internal_channel_count = internal_channel_count + 1;
-            daqd_edcu1.channel_status[ i ] = 0;
+            daq.channel_status[ i ] = 0;
         }
         else
         {
-            status =
-                ca_create_channel( daqd_edcu1.channel_name[ i ],
-                                   connectCallback,
-                                   (void*)&( daqd_edcu1.channel_status[ i ] ),
-                                   0,
-                                   &chid1 );
+            status = ca_create_channel( daq.channel_name[ i ],
+                                        connectCallback,
+                                        (void*)&( daq.channel_status[ i ] ),
+                                        0,
+                                        &chid1 );
             if ( status != ECA_NORMAL )
             {
                 fprintf( stderr,
                          "Error creating connection to %s\n",
-                         daqd_edcu1.channel_name[ i ] );
+                         daq.channel_name[ i ] );
             }
             status = ca_create_subscription(
-                DBR_FLOAT,
+                daq_data_t_to_epics( daq.channel_type[ i ] ),
                 0,
                 chid1,
                 DBE_VALUE,
                 subscriptionHandler,
-                (void*)&( daqd_edcu1.channel_value[ i ] ),
+                (void*)&( daq.channel_value[ i ] ),
                 0 );
             if ( status != ECA_NORMAL )
             {
                 fprintf( stderr,
                          "Error creating subscription for %s\n",
-                         daqd_edcu1.channel_name[ i ] );
+                         daq.channel_name[ i ] );
             }
         }
     }
 
-    daqd_edcu1.con_chans = daqd_edcu1.con_chans + internal_channel_count;
+    daq.con_chans = daq.con_chans + internal_channel_count;
 }
+
+void edcuLoadSpecial(int index, int value)
+{
+    if (index >= 0) {
+        switch (daqd_edcu1.channel_type[index]) {
+            case _32bit_integer:
+                daqd_edcu1.channel_value[index].data.data_int32 = value;
+                break;
+            case _32bit_float:
+                daqd_edcu1.channel_value[index].data.data_float32 = static_cast<float>(value);
+                break;
+        }
+    }
+}
+
+
+
 
 // **************************************************************************
 void
@@ -657,36 +949,77 @@ edcuWriteData( int           daqBlockNum,
                int           daqreset )
 // **************************************************************************
 {
-    float* daqData;
-    int    buf_size;
-    int    ii;
+    char* daqData;
+    int   buf_size;
+    int   ii;
 
-    if ( num_chans_index != -1 )
-    {
-        daqd_edcu1.channel_value[ num_chans_index ] = daqd_edcu1.num_chans;
-    }
-
-    if ( con_chans_index != -1 )
-    {
-        daqd_edcu1.channel_value[ con_chans_index ] = daqd_edcu1.con_chans;
-    }
-
-    if ( nocon_chans_index != -1 )
-    {
-        daqd_edcu1.channel_value[ nocon_chans_index ] =
-            daqd_edcu1.num_chans - daqd_edcu1.con_chans;
-    }
+    edcuLoadSpecial(num_chans_index, daqd_edcu1.num_chans);
+    edcuLoadSpecial(con_chans_index, daqd_edcu1.con_chans);
+    edcuLoadSpecial(nocon_chans_index, daqd_edcu1.num_chans - daqd_edcu1.con_chans);
 
     buf_size = DAQ_DCU_BLOCK_SIZE * DAQ_NUM_SWING_BUFFERS;
-    daqData = (float*)( shmDataPtr + ( buf_size * daqBlockNum ) );
-    memcpy( daqData,
-            daqd_edcu1.channel_value,
-            daqd_edcu1.num_chans * sizeof( float ) );
+    daqData = (char*)( shmDataPtr + ( buf_size * daqBlockNum ) );
+    char *data_start = daqData;
+
+    static std::int16_t data_16 = 0;
+    for ( ii = 0; ii < daqd_edcu1.num_chans; ++ii )
+    {
+        switch ( daqd_edcu1.channel_type[ ii ] )
+        {
+        case _16bit_integer:
+        {
+            if (strcmp(daqd_edcu1.channel_name[ii], "X6:EDC-99--gpssmd30koff1p--0--1--16") == 0)
+            {
+                std::int16_t tmp = daqd_edcu1.channel_value[ ii ].data.data_int16;
+                std::cout << tmp;
+                if (tmp < data_16)
+                {
+                    std::cout << " **";
+                }
+                std::cout << std::endl;
+                data_16 = tmp;
+            }
+            *reinterpret_cast< int16_t* >( daqData ) =
+                daqd_edcu1.channel_value[ ii ].data.data_int16;
+            daqData += sizeof( int16_t );
+            break;
+        }
+        case _32bit_integer:
+        {
+            *reinterpret_cast< int32_t* >( daqData ) =
+                daqd_edcu1.channel_value[ ii ].data.data_int32;
+            daqData += sizeof( int32_t );
+            break;
+        }
+        case _32bit_float:
+        {
+            *reinterpret_cast< float* >( daqData ) =
+                daqd_edcu1.channel_value[ ii ].data.data_float32;
+            daqData += sizeof( float );
+            break;
+        }
+        case _64bit_double:
+        {
+            *reinterpret_cast< double* >( daqData ) =
+                daqd_edcu1.channel_value[ ii ].data.data_float64;
+            daqData += sizeof( double );
+            break;
+        }
+        default:
+            std::cerr << "Unknown data type found, the edc does not know how "
+                         "to layout the data, aborting\n";
+            exit( 1 );
+        }
+    }
+    // memcpy( daqData,
+    //        daqd_edcu1.channel_value,
+    //        daqd_edcu1.num_chans * sizeof( float ) );
     dipc->dcuId = dcuId;
     dipc->crc = daqFileCrc;
-    dipc->dataBlockSize = xferInfo.crcLength;
+    dipc->dataBlockSize = daqData - data_start;
+    dipc->channelCount = daqd_edcu1.num_chans;
     dipc->bp[ daqBlockNum ].cycle = daqBlockNum;
-    dipc->bp[ daqBlockNum ].crc = xferInfo.crcLength;
+    dipc->bp[ daqBlockNum ].crc = daqData - data_start;
     dipc->bp[ daqBlockNum ].timeSec = (unsigned int)cycle_gps_time;
     dipc->bp[ daqBlockNum ].timeNSec = (unsigned int)daqBlockNum;
     if ( daqreset )
@@ -758,12 +1091,13 @@ usage( const char* prog )
     std::cout << "Usage:\n\t" << prog << " <options>\n\n";
     std::cout
         << "-b <mbuf name> - The name of the mbuf to write to [edc_daq]\n";
-    std::cout << "-d <dcu id> - The dcu id number to use [52]\n";
     std::cout << "-i <ini file name> - The ini file to read [edc.ini]\n";
     std::cout << "-w <wait time in ms> - Number of ms to wait after each 16Hz "
                  "segment has starts [0]\n";
     std::cout << "-p <prefix> - Prefix to add to the connection stats channel "
                  "names\n";
+    std::cout << "-l <interface:port> - Where to bind to for the diagnostic "
+                 "http output\n";
     std::cout << "-h - this help\n";
     std::cout << "\nThe standalone edcu is used to record epics data and put "
                  "it into a memory buffer which can ";
@@ -778,8 +1112,22 @@ usage( const char* prog )
     std::cout << "\n\t<prefix>EDCU_CHAN_CONN\n\t<prefix>EDCU_CHAN_NOCON\n\t<"
                  "prefix>EDCU_CHAN_CNT\n";
     std::cout << "\nIn a typical setup standalone_edcu, local_dc, and "
-                 "daqd_shmem would be run.\n";
+                 "daqd would be run.\n";
     std::cout << "\n";
+}
+
+std::pair< std::string, int >
+parse_address( const std::string& str )
+{
+    std::string hostname = str;
+    int         port = 20222;
+    auto        pos = str.find( ':' );
+    if ( pos != std::string::npos )
+    {
+        hostname = str.substr( 0, pos );
+        port = std::stoi( str.substr( pos + 1 ) );
+    }
+    return std::make_pair( std::move( hostname ), port );
 }
 
 /// Called on EPICS startup; This is generic EPICS provided function, modified
@@ -789,46 +1137,34 @@ main( int argc, char* argv[] )
 {
     // Addresses for SDF EPICS records.
     // Initialize request for file load on startup.
-    long        status;
-    int         request;
-    int         daqTrigger;
-    long        ropts = 0;
-    long        nvals = 1;
-    int         rdstatus = 0;
-    char        timestring[ 128 ];
-    int         ii;
-    int         fivesectimer = 0;
-    long        coeffFileCrc;
-    char        modfilemsg[] = "Modified File Detected ";
-    struct stat st = { 0 };
-    char        filemsg[ 128 ];
-    char        logmsg[ 256 ];
-    int         pageNum = 0;
-    int         pageNumDisp = 0;
-    int         daqreset = 0;
-    char        errMsg[ 64 ];
-    int         send_daq_reset = 0;
+    int send_daq_reset = 0;
+
+    diag_queue_t    diag_msg_queue;
+    diag_queue_t    diag_free_queue;
+    diag_info_block diag_info[ DIAG_QUEUE_DEPTH ];
+    for ( int i = 0; i < DIAG_QUEUE_DEPTH; ++i )
+    {
+        diag_free_queue.push( &( diag_info[ i ] ) );
+    }
 
     const char* daqsharedmemname = "edc_daq";
     // const char* syncsharedmemname = "-";
     const char* daqFile = "edc.ini";
-    const char* prefix = "";
-    int         mydcuid = 52;
-    char        logfilename[ 256 ] = "";
-    char        edculogfilename[ 256 ] = "";
+    // const char* prefix = "";
 
     int delay_multiplier = 0;
 
+    memset( (void*)&daqd_edcu1, 0, sizeof( daqd_edcu1 ) );
+
+    diag_thread_args diag_args( diag_msg_queue, diag_free_queue );
+
     int cur_arg = 0;
-    while ( ( cur_arg = getopt( argc, argv, "b:d:i:w:p:h" ) ) != EOF )
+    while ( ( cur_arg = getopt( argc, argv, "b:i:w:p:l:h" ) ) != EOF )
     {
         switch ( cur_arg )
         {
         case 'b':
             daqsharedmemname = optarg;
-            break;
-        case 'd':
-            mydcuid = atoi( optarg );
             break;
         case 'i':
             daqFile = optarg;
@@ -837,7 +1173,10 @@ main( int argc, char* argv[] )
             delay_multiplier = atoi( optarg );
             break;
         case 'p':
-            prefix = optarg;
+            daqd_edcu1.prefix = optarg;
+            break;
+        case 'l':
+            diag_args.address = parse_address( optarg );
             break;
         case 'h':
         default:
@@ -847,19 +1186,19 @@ main( int argc, char* argv[] )
         }
     }
 
-    printf( "My dcuid is %d\n", mydcuid );
-    sleep( 2 );
     // **********************************************
     //
 
     // EDCU STUFF
     // ********************************************************************************************************
 
-    for ( ii = 0; ii < EDCU_MAX_CHANS; ii++ )
+    for ( int ii = 0; ii < EDCU_MAX_CHANS; ii++ )
+    {
         daqd_edcu1.channel_status[ ii ] = 0xbad;
+    }
     edcuInitialize( daqsharedmemname, "-" );
-    // edcuCreateChanFile(daqDir,daqFile,pref);
-    edcuCreateChanList( prefix, daqFile );
+    edcuCreateChanList( daqd_edcu1, daqFile, &daqFileCrc );
+    std::cout << "The edc dcuid = " << daqd_edcu1.dcuid << "\n";
     int datarate = daqd_edcu1.num_chans * 64 / 1000;
 
     // Start SPECT
@@ -873,8 +1212,6 @@ main( int argc, char* argv[] )
     int cycle = 0;
     int numReport = 0;
 
-    // Initialize DAQ and COEFF file CRC checksums for later compares.
-    daqFileCrc = checkFileCrc( daqFile );
     printf( "DAQ file CRC = %u \n", daqFileCrc );
     fprintf( stderr,
              "%s\n%s = %u\n%s = %d",
@@ -891,6 +1228,9 @@ main( int argc, char* argv[] )
     transmit_time.nanosec = 0;
 
     int cyle = 0;
+
+    update_diag_info( diag_args.queues );
+    std::thread diag_thread( diag_thread_mainloop, &diag_args );
 
     // Start Infinite Loop
     // *******************************************************************************
@@ -909,12 +1249,303 @@ main( int argc, char* argv[] )
         daqd_edcu1.gpsTime = now.sec;
         daqd_edcu1.epicsSync = cycle;
 
-        edcuWriteData(
-            daqd_edcu1.epicsSync, daqd_edcu1.gpsTime, mydcuid, send_daq_reset );
+        edcuWriteData( daqd_edcu1.epicsSync,
+                       daqd_edcu1.gpsTime,
+                       daqd_edcu1.dcuid,
+                       send_daq_reset );
 
         cycle = ( cycle + 1 ) % 16;
         transmit_time = transmit_time + time_step;
+
+        if ( cycle == 0 )
+        {
+            update_diag_info( diag_args.queues );
+        }
     }
 
     return ( 0 );
+}
+
+/*!
+ * @brief Route to be called from the main thread to send a diag blog to the
+ * diag thread.  This holds a snapshot of the status of the channels and
+ * connections.
+ * @param queues The set of queues used to communicate with between the threads
+ */
+void
+update_diag_info( diag_thread_queues& queues )
+{
+    if ( !queues.free_queue.read_available( ) )
+    {
+        return;
+    }
+    diag_info_block* info = nullptr;
+    queues.free_queue.pop( &info );
+
+    info->con_chans = daqd_edcu1.con_chans;
+    std::copy( std::begin( daqd_edcu1.channel_status ),
+               std::begin( daqd_edcu1.channel_status ) + daqd_edcu1.num_chans,
+               std::begin( info->status ) );
+
+    queues.msg_queue.push( info );
+}
+
+/*!
+ * @brief handler called from the diag thread periodically to pull diag
+ * information out of the shared diag message queue.
+ * @param queues The queues used to communicate with the main thread
+ * @param dest The data block to copy the diag information to.
+ */
+void
+get_diag_info( diag_thread_queues& queues, diag_info_block& dest )
+{
+    if ( !queues.msg_queue.read_available( ) )
+    {
+        return;
+    }
+    diag_info_block* info = nullptr;
+    queues.msg_queue.pop( &info );
+
+    dest = *info;
+
+    queues.free_queue.push( info );
+}
+
+/*!
+ * @brief timer callback for get_diag_info,  this just ensure the get_diag_info
+ * is called and resets the time
+ * @param timer the timer
+ * @param queues The message queues
+ * @param dest where to write the diag info
+ */
+void
+get_diag_info_handler( boost::asio::deadline_timer& timer,
+                       diag_thread_queues&          queues,
+                       diag_info_block&             dest )
+{
+    get_diag_info( queues, dest );
+    timer.expires_from_now( boost::posix_time::seconds( 1 ) );
+    timer.async_wait(
+        [&timer, &queues, &dest]( const boost::system::error_code& ) {
+            get_diag_info_handler( timer, queues, dest );
+        } );
+}
+
+void accept_loop( io_context_t&          io_context,
+                  tcp::acceptor&         acceptor,
+                  const diag_info_block& cur_diag );
+
+/*!
+ * @brief start writing the json by doing the initial header
+ * @tparam Writer The writer
+ * @param writer the writer
+ * @param conn the connection diag info to dump
+ */
+template < typename Writer >
+void
+client_open_json( Writer& writer, diag_client_conn& conn )
+{
+    writer.StartObject( );
+    writer.Key( "TotalChannels" );
+    writer.Int( daqd_edcu1.num_chans );
+    writer.Key( "ConnectedChannelCount" );
+    writer.Int( conn.data.con_chans );
+    writer.Key( "DisconnectedChannelCount" );
+    writer.Int( daqd_edcu1.num_chans - conn.data.con_chans );
+    writer.Key( "DisconnectedChannels" );
+    writer.StartArray( );
+}
+
+/*!
+ * @brief iteratate over the channel list and output channel entries until
+ * the list is done, or the supplied buffer reports no more room.
+ * @tparam Writer The writer
+ * @tparam Buffer The buffer
+ * @param writer The writer
+ * @param buf The buffer
+ * @param conn The connection and diag info to iterate over
+ * @param cur The index to start on
+ * @return The next index to start at (daqd_edc1.num_chans when it is complete)
+ */
+template < typename Writer, typename Buffer >
+int
+client_fill_json( Writer& writer, Buffer& buf, diag_client_conn& conn, int cur )
+{
+    for ( ; cur != daqd_edcu1.num_chans && buf.SpaceAvailable( ); ++cur )
+    {
+        if ( conn.data.status[ cur ] != 0 )
+        {
+            writer.String( daqd_edcu1.channel_name[ cur ] );
+        }
+    }
+    return cur;
+}
+
+/*!
+ * @brief Close out the client diagnositcs json message.
+ * @tparam Writer The writer
+ * @param writer the writer
+ */
+template < typename Writer >
+void
+client_close_json( Writer& writer )
+{
+    writer.EndArray( );
+    writer.EndObject( );
+}
+
+/*!
+ * @brief calculate the size needed to hold a json message representing the
+ * diagnostics for the given client connection
+ * @param conn client connection and diagnostics object
+ * @return the number of bytes needed to hold the json message
+ */
+std::size_t
+calc_required_size_for_json( diag_client_conn& conn )
+{
+    SizeCalcJsonStream                      counting_buffer;
+    rapidjson::Writer< SizeCalcJsonStream > writer( counting_buffer );
+
+    client_open_json( writer, conn );
+    client_fill_json( writer, counting_buffer, conn, 0 );
+    client_close_json( writer );
+    return counting_buffer.GetSize( );
+}
+
+void
+client_finalize( std::shared_ptr< diag_client_conn > conn )
+{
+    conn->buffer_stream.Reset( );
+    client_close_json( conn->writer );
+    boost::asio::async_write(
+        conn->socket,
+        boost::asio::buffer( conn->buffer_stream.GetString( ),
+                             conn->buffer_stream.GetSize( ) ),
+        [conn]( const boost::system::error_code& ec, std::size_t ) {} );
+}
+
+void
+client_write( std::shared_ptr< diag_client_conn > conn )
+{
+    if ( conn->list_progress == daqd_edcu1.num_chans )
+    {
+        client_finalize( std::move( conn ) );
+        return;
+    }
+    conn->buffer_stream.Reset( );
+    conn->list_progress = client_fill_json(
+        conn->writer, conn->buffer_stream, *conn, conn->list_progress );
+
+    if ( conn->buffer_stream.GetSize( ) == 0 )
+    {
+        client_finalize( std::move( conn ) );
+        return;
+    }
+
+    boost::asio::async_write(
+        conn->socket,
+        boost::asio::buffer( conn->buffer_stream.GetString( ),
+                             conn->buffer_stream.GetSize( ) ),
+        [conn]( const boost::system::error_code& ec, std::size_t ) {
+            if ( !ec )
+            {
+                client_write( conn );
+            }
+        } );
+}
+
+void
+start_client_write( std::shared_ptr< diag_client_conn > conn )
+{
+    const static char* header{ "HTTP/1.0 200 Ok\r\n"
+                               "Content-Type: application/json\r\n"
+                               "Cache-Control: max-age=1\r\n"
+                               "Content-Length: %d\r\n"
+                               "Connection: close\r\n\r\n" };
+
+    std::size_t req_size = calc_required_size_for_json( *conn );
+
+    std::size_t header_size = static_cast< std::size_t >(
+        snprintf( conn->buffer.data( ),
+                  conn->buffer.size( ),
+                  header,
+                  static_cast< int >( req_size ) ) );
+    if ( header_size >= conn->buffer.size( ) )
+    {
+        throw std::out_of_range( "Buffer overflowed while sending headers" );
+    }
+    conn->buffer_stream.Reset( );
+    conn->buffer_stream.AdvanceCounter( header_size );
+    conn->writer.Reset( conn->buffer_stream );
+    conn->list_progress = 0;
+    client_open_json( conn->writer, *conn );
+
+    conn->list_progress = client_fill_json(
+        conn->writer, conn->buffer_stream, *conn, conn->list_progress );
+
+    boost::asio::async_write(
+        conn->socket,
+        boost::asio::buffer( conn->buffer_stream.GetString( ),
+                             conn->buffer_stream.GetSize( ) ),
+        [conn]( const boost::system::error_code& ec, std::size_t ) {
+            if ( !ec )
+            {
+                client_write( conn );
+            }
+        } );
+}
+
+void
+handle_accept( io_context_t&                       io_context,
+               tcp::acceptor&                      acceptor,
+               std::shared_ptr< diag_client_conn > conn,
+               const boost::system::error_code&    ec,
+               const diag_info_block&              cur_diag )
+{
+    if ( !ec )
+    {
+        conn->data = cur_diag;
+    }
+    std::cerr << "Accepting a new connection\n";
+    conn->io_context.post( [conn]( ) { start_client_write( conn ); } );
+    accept_loop( io_context, acceptor, cur_diag );
+}
+
+void
+accept_loop( io_context_t&          io_context,
+             tcp::acceptor&         acceptor,
+             const diag_info_block& cur_diag )
+{
+    std::shared_ptr< diag_client_conn > conn =
+        std::make_shared< diag_client_conn >( io_context );
+    acceptor.async_accept( conn->socket,
+                           [&io_context, &acceptor, conn, &cur_diag](
+                               const boost::system::error_code& ec ) {
+                               handle_accept(
+                                   io_context, acceptor, conn, ec, cur_diag );
+                           } );
+}
+
+/*!
+ * @brief the diag thread main loop
+ * @param args Arguments to the diag thread
+ */
+void
+diag_thread_mainloop( diag_thread_args* args )
+{
+    diag_info_block cur_diag;
+
+    io_context_t       io_context;
+    io_context_t::work net_work( io_context );
+
+    boost::asio::deadline_timer diag_timer( io_context );
+    get_diag_info_handler( diag_timer, args->queues, cur_diag );
+
+    tcp::acceptor acceptor(
+        io_context,
+        tcp::endpoint( make_address( args->address.first.c_str( ) ),
+                       args->address.second ) );
+
+    accept_loop( io_context, acceptor, cur_diag );
+    io_context.run( );
 }

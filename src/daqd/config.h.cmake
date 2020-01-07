@@ -31,115 +31,15 @@
 
 #cmakedefine FLEX_USES_IOSTREAM_REF
 
-/* FW build settings */
-#ifdef DAQD_BUILD_FW
+/* Generic daqd with shmem interface */
 
-    /* do not broadcast data */
-    #define NO_BROADCAST 1
-    /* run an edcu */
-    #define EPICS_EDCU 1
-    /* receive broadcasts */
-    #define USE_BROADCAST
+#define DATA_CONCENTRATOR 1
+/* Using Symmetricom GPS card */
+#define USE_SYMMETRICOM 1
+/* run an ecdu */
+#define EPICS_EDCU 1
+/* Interface with the GDS Testpoint server */
+#define GDS_TESTPOINTS 1
 
-#endif
-
-/* DC build settings */
-#ifdef DAQD_BUILD_DC
-
-    #define DATA_CONCENTRATOR 1
-    /* Using Symmetricom GPS card */
-    #define USE_SYMMETRICOM 1
-    /* Define if building with MX */
-    #define USE_MX 1
-    /* run an ecdu */
-    #define EPICS_EDCU 1
-    /* Interface with the GDS Testpoint server */
-    #define GDS_TESTPOINTS 1
-
-#endif
-
-/* DC build settings */
-#ifdef DAQD_BUILD_DC_ZMQ
-
-    #define DATA_CONCENTRATOR 1
-    /* Using Symmetricom GPS card */
-    #define USE_SYMMETRICOM 1
-    /* run an ecdu */
-    #define EPICS_EDCU 1
-    /* Interface with the GDS Testpoint server */
-    #define GDS_TESTPOINTS 1
-
-#endif
-
-/* Generic daqd with shmem interface (new standiop) */
-#ifdef DAQD_BUILD_SHMEM
-
-    #define DATA_CONCENTRATOR 1
-    /* Using Symmetricom GPS card */
-    #define USE_SYMMETRICOM 1
-    /* run an ecdu */
-    #define EPICS_EDCU 1
-    /* Interface with the GDS Testpoint server */
-    #define GDS_TESTPOINTS 1
-
-#endif
-
-/* MX SYMM build settings */
-#ifdef DAQD_BUILD_MXSYMM
-
-    /* Interface with the GDS Testpoint server */
-    #define GDS_TESTPOINTS 1
-    /* do not broadcast data */
-    #define NO_BROADCAST 1
-    /* run an ecdu */
-    #define EPICS_EDCU 1
-    /* Using Symmetricom GPS card */
-    #define USE_SYMMETRICOM 1
-    /* Use MX */
-    #define USE_MX 1
-
-#endif
-
-/* RCV build settings */
-#ifdef DAQD_BUILD_RCV
-
-    /* Interface with the GDS Testpoint server */
-    #define GDS_TESTPOINTS 1
-    /* do not broadcast data */
-    #define NO_BROADCAST 1
-    /* run an ecdu */
-    #define EPICS_EDCU 1
-    /* receive broadcasts */
-    #define USE_BROADCAST
-
-#endif
-
-/* BCST build settings */
-#ifdef DAQD_BUILD_BCST
-
-    /* Interface with the GDS Testpoint server */
-    #define GDS_TESTPOINTS 1
-    /* run an edcu */
-    #define EPICS_EDCU 1
-    /* receive broadcasts */
-    #define USE_BROADCAST
-
-#endif
-
-/* StandIOP build settings */
-#ifdef DAQD_BUILD_STANDIOP
-
-    /* Interface with the GPS Testpoint server */
-    #define GDS_TESTPOINTS 1
-    /* do not broadcast data */
-    #define NO_BROADCAST 1
-    /* run an edcu */
-    #define EPICS_EDCU 1
-    /* use the symmetricom timing system */
-    #define USE_SYMMETRICOM 1
-    /* use an iop */
-    #define USE_IOP 1
-
-#endif
 
 #endif /* CONFIG_H */

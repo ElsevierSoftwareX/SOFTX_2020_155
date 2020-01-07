@@ -9,7 +9,8 @@ struct caltime ctout;
 struct gps gps;
 
 
-main()
+int
+main(int argc, char* argv[])
 {
   long mjd;
   char stin[100],stout[100];

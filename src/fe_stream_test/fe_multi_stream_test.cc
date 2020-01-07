@@ -240,12 +240,20 @@ public:
         size_t mid_channel_num =
             mid_data_bytes / ( sizeof( float ) * mid_rate );
         size_t slow_channel_num = slow_data_bytes / ( sizeof( float ) * 16 );
-        size_t channel_num = fast_channel_num + slow_channel_num;
+        size_t slow_16i_channel_num = 0;
+        if ( slow_channel_num > 2 )
+        {
+            slow_channel_num -= 1;
+            slow_16i_channel_num = 2;
+        }
+        size_t channel_num = fast_channel_num + mid_channel_num +
+            slow_channel_num + slow_16i_channel_num;
 
         generators_.reserve( channel_num );
         tp_generators_.reserve( tp_table_.size( ) );
 
         size_t mid_channel_boundary = fast_channel_num + mid_channel_num;
+        size_t slow_channel_boundary = mid_channel_boundary + slow_channel_num;
 
         ChNumDb chDb;
         ChNumDb tpDb;
@@ -272,15 +280,26 @@ public:
                     SimChannel( ss.str( ), 2, mid_rate, chnum ),
                     ( i + dcu_id_ ) % 21 ) ) );
         }
-        for ( size_t i = mid_channel_boundary; i < channel_num; ++i )
+        for ( size_t i = mid_channel_boundary; i < slow_channel_boundary; ++i )
         {
             int chnum = chDb.next( 4 );
 
             std::ostringstream ss;
             ss << name_ << "-" << i;
-            generators_.push_back(
-                GeneratorPtr( new Generators::GPSSecondWithOffset< int >(
+            generators_.push_back( GeneratorPtr(
+                new Generators::GPSMod100kSecWithOffsetAndCycle< int >(
                     SimChannel( ss.str( ), 2, 16, chnum ),
+                    ( i + dcu_id_ ) % 21 ) ) );
+        }
+        for ( size_t i = slow_channel_boundary; i < channel_num; ++i )
+        {
+            int chnum = chDb.next( 4 );
+
+            std::ostringstream ss;
+            ss << name_ << "-" << i;
+            generators_.push_back( GeneratorPtr(
+                new Generators::GPSMod100SecWithOffsetAndCycle< short >(
+                    SimChannel( ss.str( ), 1, 16, chnum ),
                     ( i + dcu_id_ ) % 21 ) ) );
         }
 
@@ -291,8 +310,8 @@ public:
             std::ostringstream ss;
             ss << name_ << "-TP" << i;
             // TP need truncated
-            tp_generators_.push_back(
-                GeneratorPtr( new Generators::GPSMod100kSecWithOffset< float >(
+            tp_generators_.push_back( GeneratorPtr(
+                new Generators::GPSMod100kSecWithOffsetAndCycle< float >(
                     SimChannel( ss.str( ), 4, model_rate_, chnum, dcu_id_ ),
                     ( i + dcu_id_ ) % 21 ) ) );
         }
@@ -502,19 +521,24 @@ generate_models( std::vector< ModelPtr >& models,
                  int                      cycle,
                  const GPS::gps_time&     cur_time )
 {
-    dest.header.dcuTotalModels = models.size( );
+    dest.header.dcuTotalModels = 0;
     dest.header.fullDataBlockSize = 0;
     char* data = dest.dataBlock;
     char* data_end = data + max_data_size;
+    auto header_it = std::begin(dest.header.dcuheader);
+    auto header_end = std::end(dest.header.dcuheader);
+
     for ( int i = 0; i < models.size( ); ++i )
     {
         char*     start = data;
         ModelPtr& mp = models[ i ];
-        if ( mp->status( ) == MODEL_STATUS::STOPPED )
+        if ( mp->status( ) == MODEL_STATUS::STOPPED || header_it == header_end )
         {
             continue;
         }
-        daq_msg_header_t& dcu_header = dest.header.dcuheader[ i ];
+        ++dest.header.dcuTotalModels;
+        daq_msg_header_t& dcu_header = *header_it;
+        header_it++;
         dcu_header.dcuId = mp->dcu_id( );
         dcu_header.fileCrc = mp->config_crc( );
         dcu_header.status = 2;
@@ -759,7 +783,8 @@ usage( const char* progname )
     std::cout << "\t-b name - Name of the output mbuf [local_dc]\n";
     std::cout << "\t-m size_mb - Size in MB of the output mbuf [100]\n";
     std::cout << "\t-k size_kb - Default data rate of each model in kB\n";
-    std::cout << "\t-R num - number of models to simulate [1-120]\n";
+    std::cout << "\t-R num - number of models to simulate [1-247]\n";
+    std::cout << "\t-D dcu,dcu,dcu,... - Simulate the given dcus\n";
     std::cout << "\t-t dcu:tp#,tp#,tp#,... - enable the given testpoints on "
                  "the given dcu\n";
     std::cout << "\t-f dcu,dcu,dcu,... - fail the given dcu's (write configs, "
@@ -773,6 +798,51 @@ usage( const char* progname )
     std::cout << "-t/-f options must come after the -R call\n";
 }
 
+/*!
+ * @brief Given a set of dcuids and model data sizes, initialize a set of model
+ * parameters
+ * @tparam Cont The input dcuid container type
+ * @tparam OutIt The type of the output iterator
+ * @param model_dcus The dcuids to use
+ * @param out_it Output iterator to push model params to
+ * @param model_data_size The data size for each model
+ * @param max_size_mb The total data size
+ */
+template < typename Cont, typename OutIt >
+void
+initialize_model_params( const Cont& model_dcus,
+                         OutIt       out_it,
+                         int         model_data_size,
+                         int         max_size_mb )
+{
+    int count = model_dcus.size( );
+    if ( count > 247 || count < 1 )
+    {
+        throw std::runtime_error( "Must specify [1-247] models" );
+    }
+    if ( model_data_size * count >= ( max_size_mb * 1024 * 1024 ) )
+    {
+        throw std::runtime_error(
+            "Too much data, increase the buffer size or reduce models "
+            "or data rate" );
+    }
+    std::transform( model_dcus.begin( ),
+                    model_dcus.end( ),
+                    out_it,
+                    [model_data_size]( int dcuid ) -> ModelParams {
+                        int         rate = 2048;
+                        int         data_rate = model_data_size;
+                        ModelParams params;
+                        params.dcuid = dcuid;
+                        params.model_rate = rate;
+                        params.data_rate = data_rate;
+                        std::ostringstream os;
+                        os << "mod" << dcuid;
+                        params.name = os.str( );
+                        return params;
+                    } );
+}
+
 Options
 parse_arguments( int argc, char* argv[] )
 {
@@ -780,7 +850,7 @@ parse_arguments( int argc, char* argv[] )
     int     c;
     int     model_data_size = 700 * 1024;
 
-    while ( ( c = getopt( argc, argv, "i:M:b:m:R:k:h:St:f:" ) ) != -1 )
+    while ( ( c = getopt( argc, argv, "i:M:b:m:D:R:k:h:St:f:" ) ) != -1 )
     {
         switch ( c )
         {
@@ -805,40 +875,33 @@ parse_arguments( int argc, char* argv[] )
             }
             model_data_size *= 1024;
             break;
-        case 'R':
+        case 'D':
         {
-            int count = std::atoi( optarg );
-            if ( count > 120 || count < 1 )
-            {
-                throw std::runtime_error( "Must specify [1-128] models" );
-            }
+            std::vector< int > model_dcus = parse_int_list( optarg );
             if ( !opts.models.empty( ) )
             {
                 throw std::runtime_error( "Models already specified" );
             }
-            if ( model_data_size * count >=
-                 ( opts.mbuf_size_mb * 1024 * 1024 ) )
+            opts.models.reserve( model_dcus.size( ) );
+            initialize_model_params( model_dcus,
+                                     std::back_inserter( opts.models ),
+                                     model_data_size,
+                                     opts.mbuf_size_mb );
+            break;
+        }
+        case 'R':
+        {
+            int count = std::atoi( optarg );
+            if ( !opts.models.empty( ) )
             {
-                throw std::runtime_error(
-                    "Too much data, increase the buffer size or reduce models "
-                    "or data rate" );
+                throw std::runtime_error( "Models already specified" );
             }
             opts.models.reserve( count );
             std::vector< int > model_dcus = get_n_dcus( count );
-            for ( int i = 0; i < model_dcus.size( ); ++i )
-            {
-                int         rate = 2048;
-                int         data_rate = model_data_size;
-                int         dcuid = model_dcus[ i ];
-                ModelParams params;
-                params.dcuid = dcuid;
-                params.model_rate = rate;
-                params.data_rate = data_rate;
-                std::ostringstream os;
-                os << "mod" << dcuid;
-                params.name = os.str( );
-                opts.models.push_back( params );
-            }
+            initialize_model_params( model_dcus,
+                                     std::back_inserter( opts.models ),
+                                     model_data_size,
+                                     opts.mbuf_size_mb );
         }
         break;
         case 'S':

@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
-extern int errno;
+#include <unistd.h>
 #include "tai.h"
 #include "leapsecs.h"
 

@@ -3,8 +3,6 @@
 
 #include <stats.hh>
 
-class mx_rcv_stats public virtual stats {
-};
-
+class mx_rcv_stats public virtual stats{};
 
 #endif

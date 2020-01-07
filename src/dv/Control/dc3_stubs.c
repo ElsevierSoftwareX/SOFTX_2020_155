@@ -55,6 +55,8 @@ extern void XDdisable_link ( Widget w, XtPointer client_data, XtPointer call_dat
 
 
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <dirent.h>
 #include "dc3m.h"
 
@@ -3359,7 +3361,7 @@ void showPage(Widget w, XtPointer client_data, XtPointer xt_call_data)
 }
 
 /* used when starting a new Xmgr*/
-
+void
 updateFields() {
   char  temptext[24];
 	   updateStatusField();
@@ -3398,6 +3400,7 @@ updateFields() {
 	XmTextFieldSetString(trigLevelText, temptext);
 }
 
+void
 initializeWindows()
 {
 	updateFields();
@@ -5851,7 +5854,7 @@ void restartXmgr(Widget w, XtPointer client_data, XtPointer xt_call_data)
   ClearWatchCursor();
 }
 
-
+void
 unregisterDropSites() {
 	Widget w[] = { serverIpText, serverPortText, plotDisplay,
 			trigLevelText, yMinText, yMaxText, lidtext,

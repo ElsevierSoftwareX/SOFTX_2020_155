@@ -32,6 +32,7 @@ char *dayname[7] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" } ;
 
 char out[101];
 
+int
 main(argc,argv)
 int argc;
 char **argv;

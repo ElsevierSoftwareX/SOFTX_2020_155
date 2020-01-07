@@ -93,8 +93,7 @@ void
 print_diags( int                   nsys,
              int                   lastCycle,
              int                   sendLength,
-             daq_multi_dcu_data_t* ixDataBlock,
-             int                   dbs[] )
+             daq_multi_dcu_data_t* ixDataBlock)
 {
     // **********************************************************************************************
     int ii = 0;
@@ -106,7 +105,7 @@ print_diags( int                   nsys,
              sendLength );
     fprintf( stderr,
              "DCU ID\tCycle \t "
-             "TimeSec\tTimeNSec\tDataSize\tTPCount\tTPSize\tXmitSize\n" );
+             "TimeSec\tTimeNSec\tDataSize\tTPCount\tTPSize\n" );
     for ( ii = 0; ii < nsys; ii++ )
     {
         fprintf( stderr, "%d", ixDataBlock->header.dcuheader[ ii ].dcuId );
@@ -120,7 +119,6 @@ print_diags( int                   nsys,
             stderr, "\t\t%d", ixDataBlock->header.dcuheader[ ii ].tpCount );
         fprintf(
             stderr, "\t%d", ixDataBlock->header.dcuheader[ ii ].tpBlockSize );
-        fprintf( stderr, "\t%d", dbs[ ii ] );
         fprintf( stderr, "\n " );
     }
 }
@@ -326,11 +324,9 @@ main( int argc, char** argv )
     int              datablock_size_running = 0;
     int              datablock_size_mb_s = 0;
     static const int header_size = sizeof( daq_multi_dcu_header_t );
-    char             dcstatus[ 4096 ];
     char             dcs[ 48 ];
     int              edcuid[ 10 ];
     int              estatus[ 10 ];
-    int              edbs[ 10 ];
     unsigned long    ets = 0;
     int              timeout = 0;
     int              threads_rdy;
@@ -338,24 +334,24 @@ main( int argc, char** argv )
     int              jj, kk;
     int              sendLength = 0;
 
-    int      min_cycle_time = 1 << 30;
-    int      pv_min_cycle_time = 0;
-    int      max_cycle_time = 0;
-    int      pv_max_cycle_time = 0;
-    int      mean_cycle_time = 0;
-    int      pv_mean_cycle_time = 0;
-    int      pv_dcu_count = 0;
-    int      pv_total_datablock_size = 0;
-    int      pv_datablock_size_mb_s = 0;
-    int      uptime = 0;
-    int      pv_uptime = 0;
-    int      gps_time = 0;
-    int      pv_gps_time = 0;
-    int      missed_flag = 0;
-    int64_t  min_recv_time = 0;
-    int64_t  cur_ref_time = 0;
-    int      festatus = 0;
-    int      pv_festatus = 0;
+    int     min_cycle_time = 1 << 30;
+    int     pv_min_cycle_time = 0;
+    int     max_cycle_time = 0;
+    int     pv_max_cycle_time = 0;
+    int     mean_cycle_time = 0;
+    int     pv_mean_cycle_time = 0;
+    int     pv_dcu_count = 0;
+    int     pv_total_datablock_size = 0;
+    int     pv_datablock_size_mb_s = 0;
+    int     uptime = 0;
+    int     pv_uptime = 0;
+    int     gps_time = 0;
+    int     pv_gps_time = 0;
+    int     missed_flag = 0;
+    int64_t min_recv_time = 0;
+    int64_t cur_ref_time = 0;
+    int     festatus = 0;
+    int     pv_festatus = 0;
 
     SimplePV pvs[] = {
         {
@@ -553,7 +549,7 @@ main( int argc, char** argv )
                              mytotaldcu,
                              dc_datablock_size );
                     print_diags(
-                        mytotaldcu, nextCycle, sendLength, ifoDataBlock, edbs );
+                        mytotaldcu, nextCycle, sendLength, ifoDataBlock );
                 }
                 n_cycle_time = 0;
                 min_cycle_time = 1 << 30;
@@ -620,13 +616,6 @@ main( int argc, char** argv )
                 // network
                 SCIFlush( sequence, SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY );
             }
-        }
-        sprintf( dcstatus, "%ld ", ets );
-        for ( ii = 0; ii < mytotaldcu; ii++ )
-        {
-            sprintf(
-                dcs, "%d %d %d ", edcuid[ ii ], estatus[ ii ], edbs[ ii ] );
-            strcat( dcstatus, dcs );
         }
 
         // Increment cycle count

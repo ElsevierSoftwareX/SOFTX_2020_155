@@ -5,57 +5,67 @@
 #include <sys/types.h>
 #include <time.h>
 
-#ifdef	NDEBUG
-#define	DEBUG1(EX) ((void)0)
-#define	DEBUG(L,EX) ((void)0)
+#ifdef NDEBUG
+#define DEBUG1( EX ) ( (void)0 )
+#define DEBUG( L, EX ) ( (void)0 )
 #else
 extern int _debug;
-#define	DEBUG1(EX) DEBUG(1,EX)
-#define	DEBUG(L,EX) if (_debug >= L) {EX;}
-#endif	/* ! NDEBUG */
+#define DEBUG1( EX ) DEBUG( 1, EX )
+#define DEBUG( L, EX )                                                         \
+    if ( _debug >= L )                                                         \
+    {                                                                          \
+        EX;                                                                    \
+    }
+#endif /* ! NDEBUG */
 
 #include <syslog.h>
 
 extern int nds_log_level;
 
-#if defined(DAEMONIC)
+#if defined( DAEMONIC )
 
-#define system_log(L, format, args...) {			\
-	if (nds_log_level >= L) {				\
-		syslog (LOG_INFO, format, ##args);	\
-	}						\
-}
+#define system_log( L, format, args... )                                       \
+    {                                                                          \
+        if ( nds_log_level >= L )                                              \
+        {                                                                      \
+            syslog( LOG_INFO, format, ##args );                                \
+        }                                                                      \
+    }
 #else /* ! defined(DAEMONIC) */
 
 #include <stdio.h>
 
-#if ! defined(_POSIX_C_SOURCE)
+#if !defined( _POSIX_C_SOURCE )
 
-#define system_log(L, format, args...) {				\
-	if (nds_log_level >= L) {					\
-		long t = time (0);				\
-		char ___B__U__F___ [27];			\
-		ctime_r (&t, ___B__U__F___, 26);		\
-		___B__U__F___ [24] = 0;				\
-		fprintf (stderr, "[%s] ", ___B__U__F___);	\
-		fprintf (stderr, format, ##args);		\
-		fputc ('\n', stderr);				\
-	}\
-}
+#define system_log( L, format, args... )                                       \
+    {                                                                          \
+        if ( nds_log_level >= L )                                              \
+        {                                                                      \
+            long t = time( 0 );                                                \
+            char ___B__U__F___[ 27 ];                                          \
+            ctime_r( &t, ___B__U__F___, 26 );                                  \
+            ___B__U__F___[ 24 ] = 0;                                           \
+            fprintf( stderr, "[%s] ", ___B__U__F___ );                         \
+            fprintf( stderr, format, ##args );                                 \
+            fputc( '\n', stderr );                                             \
+        }                                                                      \
+    }
 
 #else /* defined(_POSIX_C_SOURCE) */
 
-#define system_log(L, format, args...) {				\
-	if (nds_log_level >= L) {					\
-		long t = time (0);				\
-		char ___B__U__F___ [27];			\
-		ctime_r (&t, ___B__U__F___);			\
-		___B__U__F___ [24] = 0;				\
-		fprintf (stderr, "[%s] ", ___B__U__F___);	\
-		fprintf (stderr, format, ##args);		\
-		fputc ('\n', stderr);				\
-	}\
-}
+#define system_log( L, format, args... )                                       \
+    {                                                                          \
+        if ( nds_log_level >= L )                                              \
+        {                                                                      \
+            long t = time( 0 );                                                \
+            char ___B__U__F___[ 27 ];                                          \
+            ctime_r( &t, ___B__U__F___ );                                      \
+            ___B__U__F___[ 24 ] = 0;                                           \
+            fprintf( stderr, "[%s] ", ___B__U__F___ );                         \
+            fprintf( stderr, format, ##args );                                 \
+            fputc( '\n', stderr );                                             \
+        }                                                                      \
+    }
 
 #endif /* defined(_POSIX_C_SOURCE) */
 

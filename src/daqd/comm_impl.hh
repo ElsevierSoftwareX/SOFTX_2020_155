@@ -10,12 +10,13 @@
 
 #include <ostream>
 
-namespace comm_impl {
+namespace comm_impl
+{
 
-    extern void configure_channels_body_begin_end();
+    extern void configure_channels_body_begin_end( );
 
 }
 
 #define DAQD_TRUNK_COMM_IMPL_HH
 
-#endif //DAQD_TRUNK_COMM_IMPL_HH
+#endif // DAQD_TRUNK_COMM_IMPL_HH

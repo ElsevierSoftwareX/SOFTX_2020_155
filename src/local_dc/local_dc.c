@@ -648,7 +648,7 @@ int __CDECL
                  modelnames[ ii ],
                  modelrates[ ii ],
                  dcuid[ ii ] );
-        if ( status != 0 )
+        if ( status != 0 || modelrates[ ii ] == 0 )
         {
             fprintf( stderr,
                      "Unable to determine the rate of %s\n",

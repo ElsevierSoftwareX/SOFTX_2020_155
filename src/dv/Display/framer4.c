@@ -11,6 +11,8 @@
 
 #include "framer4.h"
 
+/* forward declaration */
+void checkOpInputs();
 
 int main(int argc, char *argv[])
 {
@@ -964,6 +966,7 @@ double realtrigger;
 
 }
 
+void
 checkOpInputs()
 {
 int i, j, msgint;

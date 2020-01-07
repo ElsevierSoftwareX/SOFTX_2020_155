@@ -89,12 +89,14 @@ mkdir "$TDIR/logs"
 
 echo "Ini dir = $TDIR/ini_files"
 
-"$FE_MULTI_STREAM_TEST" -S -i "$TDIR/ini_files" -M "$TDIR/ini_files/master" -k 2048 -R 3 > "$TDIR/logs/models" &
+"$FE_MULTI_STREAM_TEST" -S -i "$TDIR/ini_files" -M "$TDIR/ini_files/master" -k 2048 -D 5,6,255 > "$TDIR/logs/models" &
 PID_STREAM=$!
+
+sleep 2
 
 echo "Streamer PID = $PID_STREAM"
 
-"$LOCAL_DC" -m 100 -s "mod5 mod6 mod7" -d "$TDIR/ini_files" -b "local_dc" > "$TDIR/logs/local_dc" &
+"$LOCAL_DC" -m 100 -s "mod5 mod6 mod255" -d "$TDIR/ini_files" -b "local_dc" > "$TDIR/logs/local_dc" &
 PID_LOCAL_DC=$!
 
 sleep 1
@@ -107,7 +109,7 @@ PID_ZMQ_RECV=$!
 
 "$FE_STREAM_CHECK" -m zmq_recv -s 100 -v -c "$TDIR/ini_files/mod5.ini" "$TDIR/ini_files/tpchn_mod5.par" \
 -c "$TDIR/ini_files/mod6.ini" "$TDIR/ini_files/tpchn_mod6.par" \
--c "$TDIR/ini_files/mod7.ini" "$TDIR/ini_files/tpchn_mod7.par"
+-c "$TDIR/ini_files/mod255.ini" "$TDIR/ini_files/tpchn_mod255.par"
 RESULT=$?
 
 exit $?

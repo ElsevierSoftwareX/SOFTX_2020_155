@@ -11,7 +11,7 @@ struct caltime ct;
 
 char x[TAIA_FMTFRAC];
 
-main()
+int main(int argc, char* argv[])
 {
   if (leapsecs_init() == -1) {
     fprintf(stderr,"utcnow: fatal: unable to init leapsecs\n");

@@ -73,19 +73,23 @@ mkdir "$TDIR/logs"
 
 echo "Ini dir = $TDIR/ini_files"
 
-"$FE_MULTI_STREAM_TEST" -S -i "$TDIR/ini_files" -M "$TDIR/ini_files/master" -R 3 -k 2048 > "$TDIR/logs/models" &
+"$FE_MULTI_STREAM_TEST" -S -i "$TDIR/ini_files" -M "$TDIR/ini_files/master" -k 300 -D 5,6,7,250,255,  > "$TDIR/logs/models" &
 PID_STREAM=$!
 
 echo "Streamer PID = $PID_STREAM"
 
-"$LOCAL_DC" -m 100 -s "mod5 mod6 mod7" -d "$TDIR/ini_files" -b "local_dc" > "$TDIR/logs/local_dc" &
+sleep 1
+
+"$LOCAL_DC" -m 100 -s "mod5 mod6 mod7 mod250 mod255" -d "$TDIR/ini_files" -b "local_dc" > "$TDIR/logs/local_dc" &
 PID_LOCAL_DC=$!
 
 echo "Local_dc PID = $PID_LOCAL_DC"
 
 "$FE_STREAM_CHECK" -m local_dc -s 100 -v -c "$TDIR/ini_files/mod5.ini" "$TDIR/ini_files/tpchn_mod5.par" \
 -c "$TDIR/ini_files/mod6.ini" "$TDIR/ini_files/tpchn_mod6.par" \
--c "$TDIR/ini_files/mod7.ini" "$TDIR/ini_files/tpchn_mod7.par"
+-c "$TDIR/ini_files/mod7.ini" "$TDIR/ini_files/tpchn_mod7.par" \
+-c "$TDIR/ini_files/mod250.ini" "$TDIR/ini_files/tpchn_mod250.par" \
+-c "$TDIR/ini_files/mod255.ini" "$TDIR/ini_files/tpchn_mod255.par"
 RESULT=$?
 
 exit $?

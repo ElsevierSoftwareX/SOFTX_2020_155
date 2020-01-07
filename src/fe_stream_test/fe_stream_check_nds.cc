@@ -132,6 +132,28 @@ get_nds_channels( Config& cfg )
         NDS::channel_predicate( "*", NDS::channel::CHANNEL_TYPE_ONLINE ) );
 }
 
+bool
+is_16bit_int_channel( const NDS::channel& ch )
+{
+    return ch.DataType( ) == NDS::channel::DATA_TYPE_INT16;
+}
+
+void
+add_16bit_int_channel( const NDS::channels_type& channels,
+                       std::vector< int >&       indexes )
+{
+    for ( int i = 0; i < channels.size( ); ++i )
+    {
+        if ( is_16bit_int_channel( channels[ i ] ) &&
+             std::find( indexes.begin( ), indexes.end( ), i ) ==
+                 indexes.end( ) )
+        {
+            indexes.push_back( i );
+            break;
+        }
+    }
+}
+
 std::vector< GeneratorPtr >
 load_generators( Config& cfg )
 {
@@ -147,7 +169,13 @@ load_generators( Config& cfg )
                   << cfg.seed << "\n";
         std::vector< int > indexes{};
         indexes.reserve( cfg.random_channels );
-        for ( int i = 0; i < cfg.random_channels; ++i )
+        add_16bit_int_channel( channels, indexes );
+        add_16bit_int_channel( channels, indexes );
+        for ( int i = 0; i < indexes.size( ); ++i )
+        {
+            cfg.channels.push_back( channels[ indexes[ i ] ].Name( ) );
+        }
+        for ( int i = indexes.size( ); i < cfg.random_channels; ++i )
         {
             int index = 0;
             do
@@ -192,29 +220,56 @@ main( int argc, char* argv[] )
 
     std::cout << "Starting check at " << cfg.gps << std::endl;
 
-    std::vector< std::shared_ptr< NDS::buffers_type > > data_from_nds;
-    NDS::parameters                                     params(
+    NDS::buffers_type data_from_nds;
+    NDS::parameters   params(
         cfg.hostname, cfg.port, NDS::connection::PROTOCOL_ONE );
-    auto stream = NDS::iterate(
-        params, NDS::request_period( cfg.gps, cfg.gps + 1 ), cfg.channels );
-    for ( const auto& bufs : stream )
-    {
-        data_from_nds.push_back( bufs );
-    }
 
-    if ( data_from_nds.size( ) != 1 )
+    std::cout << "Requesting data from " << cfg.gps << " to " << cfg.gps + 1
+              << std::endl;
+
+    data_from_nds.reserve( cfg.channels.size( ) );
+    int remaining_channels = cfg.channels.size( );
+    int start_channel = 0;
+    int chunk_index = 0;
+    while ( remaining_channels > 0 )
     {
-        std::cerr
-            << "This is unexpected, more buffer segments than anticipated\n";
-        std::cerr << data_from_nds.size( ) << " buffer segments\n";
-        exit( 1 );
+        static const int                    CHUNK = 128;
+        NDS::connection::channel_names_type channels;
+        channels.reserve( CHUNK );
+
+        std::cout << "Chunk " << chunk_index << "\n";
+
+        int chunk = std::min( CHUNK, remaining_channels );
+        std::copy( cfg.channels.begin( ) + start_channel,
+                   cfg.channels.begin( ) + start_channel + chunk,
+                   std::back_inserter( channels ) );
+        remaining_channels -= chunk;
+        start_channel += chunk;
+        ++chunk_index;
+
+        auto stream = NDS::iterate(
+            params, NDS::request_period( cfg.gps, cfg.gps + 1 ), channels );
+        int iterations = 0;
+        for ( const auto& bufs : stream )
+        {
+            if ( iterations != 0 )
+            {
+                std::cerr << "This is unexpected, more buffer segments than "
+                             "anticipated\n";
+                exit( 1 );
+            }
+            std::copy( bufs->begin( ),
+                       bufs->end( ),
+                       std::back_inserter( data_from_nds ) );
+            ++iterations;
+        }
     }
 
     for ( int i = 0; i < generators.size( ); ++i )
     {
         Generator& cur_gen = *( generators[ i ].get( ) );
 
-        NDS::buffer& sample_buf = ( *data_from_nds[ 0 ] )[ i ];
+        NDS::buffer& sample_buf = data_from_nds[ i ];
         if ( sample_buf.samples_to_bytes( sample_buf.Samples( ) ) !=
              cur_gen.bytes_per_sec( ) )
         {
@@ -227,8 +282,8 @@ main( int argc, char* argv[] )
 
         {
             char* out = &ref_buf[ 0 ];
-            int   gps_sec = ( *data_from_nds.front( ) )[ 0 ].Start( );
-            int   gps_nano = ( *data_from_nds.front( ) )[ 0 ].StartNano( );
+            int   gps_sec = sample_buf.Start( );
+            int   gps_nano = sample_buf.StartNano( );
             int   step = 1000000000 / 16;
             for ( int j = 0; j < 16; ++j )
             {

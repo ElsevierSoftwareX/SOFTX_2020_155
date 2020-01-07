@@ -68,7 +68,6 @@
 extern "C" {
 #endif
 
-
 /* Header File List: */
 #ifdef OS_VXWORKS
 #include <vxWorks.h>
@@ -80,7 +79,7 @@ extern "C" {
     * The time conversion API provides functions to convert between
     TAI (international atomic time) and UTC (coordinated universal time).
     It uses an internal table to account for leap seconds. When additional
-    leap seconds are announced, the tabel has to be update and the 
+    leap seconds are announced, the tabel has to be update and the
     module recompiled.
     This module also provides utility routines to break down a TAI
     format, to convert to and from a network portable representation
@@ -88,13 +87,13 @@ extern "C" {
 
     Knowm limitations: The conversion only works for dates after
     Jan. 1, 1972.
-   
+
     @memo Converts between UTC and TAI
     @author Written April 1998 by Daniel Sigg
     @version 0.5
 ************************************************************************/
 
-/*@{*/	
+/*@{*/
 
 /** @name Constants and flags.
     * Constants and flags of the time conversion API.
@@ -116,7 +115,7 @@ extern "C" {
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-#define _USE_POSIX_TIMER 
+#define _USE_POSIX_TIMER
 #endif
 
 /** Defines the TAI offset relative to GPS time. GPS time is expressed in
@@ -125,47 +124,45 @@ extern "C" {
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-#define TAIatGPSzero	694656019UL
-
+#define TAIatGPSzero 694656019UL
 
 /** One second expressed in ns.
 
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-#define _ONESEC 	1000000000LL
+#define _ONESEC 1000000000LL
 
 /** One hour expressed in ns.
 
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-#define _ONEHOUR 	(3600 * _ONESEC)
+#define _ONEHOUR ( 3600 * _ONESEC )
 
 /** One day expressed in ns.
 
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-#define _ONEDAY 	(24 * _ONEHOUR)
+#define _ONEDAY ( 24 * _ONEHOUR )
 
-/** Number of epochs within a second. Should reflect the system 
+/** Number of epochs within a second. Should reflect the system
     heartbeat, e.g. 16 for LIGO.
 
     @author DS, April 98
     @see Heartbeat API
 ************************************************************************/
-#define NUMBER_OF_EPOCHS 	16
+#define NUMBER_OF_EPOCHS 16
 
 /** One epoch expressed in ns.
 
     @author DS, April 98
     @see Heartbeat API
 ************************************************************************/
-#define _EPOCH			(_ONESEC / NUMBER_OF_EPOCHS)	
+#define _EPOCH ( _ONESEC / NUMBER_OF_EPOCHS )
 
 /*@}*/
-
 
 /** @name Data types.
     * Data types of the time conversion API.
@@ -185,47 +182,44 @@ extern "C" {
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   typedef long long tainsec_t;
+typedef long long tainsec_t;
 
-
-/** Denotes a type representing TAI in sec. This is an unsigned integer 
+/** Denotes a type representing TAI in sec. This is an unsigned integer
     of 32 bits.
 
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   typedef unsigned long taisec_t;
+typedef unsigned long taisec_t;
 #endif
 
-/** Denotes a type representing the nsec part of TAI. This is an integer 
+/** Denotes a type representing the nsec part of TAI. This is an integer
     of 32 bits.
 
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   typedef long nsec_t;
-
+typedef long nsec_t;
 
 /** Denotes a struct representing TAI broken down in sec and nsec.
 
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   struct tai_struct
-   {
-      /** sec part of TAI. */
-      taisec_t tai;
-      /** nsec part of TAI. */
-      nsec_t nsec;	
-   };
+struct tai_struct
+{
+    /** sec part of TAI. */
+    taisec_t tai;
+    /** nsec part of TAI. */
+    nsec_t nsec;
+};
 
 /** Denotes a type representing TAI broken down in sec and nsec.
 
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   typedef struct tai_struct tai_t;
-
+typedef struct tai_struct tai_t;
 
 /** Denotes a type representing UTC. It is identical to the struct tm
     defined in <time.h>.
@@ -233,29 +227,28 @@ extern "C" {
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   typedef struct tm utc_t;
+typedef struct tm utc_t;
 
 /** Denotes a struct representing UTC leap seconds.
 
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   struct leap_struct
-   {
-   /** TAI when the leap seconds takes effect. */
-      taisec_t transition;
-      /** Seconds of correction to apply. The correction is given as
-       the new total difference between TAI and UTC. */
-      int change;
-   };
+struct leap_struct
+{
+    /** TAI when the leap seconds takes effect. */
+    taisec_t transition;
+    /** Seconds of correction to apply. The correction is given as
+     the new total difference between TAI and UTC. */
+    int change;
+};
 
 /** Denotes a type representing UTC leap seconds.
 
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   typedef struct leap_struct leap_t;
-
+typedef struct leap_struct leap_t;
 
 /*@}*/
 
@@ -270,7 +263,7 @@ extern "C" {
 /*@{*/
 
 /** Converts TAI (international atomic time) to UTC (coordinated universal
-    time). TAI time is defined as Jan. 1, 1958, 00:00. UTC is defined 
+    time). TAI time is defined as Jan. 1, 1958, 00:00. UTC is defined
     to coincide with TAI on Jan. 1, 1972, 00:00. To keep the earth
     period synchronized with UTC, leap seconds are added periodically.
     This function corrects for leap seconds as long as the internal table
@@ -283,11 +276,10 @@ extern "C" {
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   utc_t* TAItoUTC (taisec_t t, utc_t* utc_ptr);
-
+utc_t* TAItoUTC( taisec_t t, utc_t* utc_ptr );
 
 /** Converts TAI (international atomic time) to UTC (coordinated universal
-    time). TAI zero is defined as Jan. 1, 1958, 00:00. UTC is defined 
+    time). TAI zero is defined as Jan. 1, 1958, 00:00. UTC is defined
     to coincide with TAI on Jan. 1, 1972, 00:00. To keep the earth
     period synchronized with UTC, leap seconds are added periodically.
     This function corrects for leap seconds as long as the internal table
@@ -300,11 +292,10 @@ extern "C" {
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   utc_t* TAIntoUTC (tainsec_t t, utc_t* utc_ptr);
+utc_t* TAIntoUTC( tainsec_t t, utc_t* utc_ptr );
 
-
-/** Converts UTC (coordinated universal time) to TAI (international atomic 
-    time). TAI zero is defined as Jan. 1, 1958, 00:00. UTC is defined 
+/** Converts UTC (coordinated universal time) to TAI (international atomic
+    time). TAI zero is defined as Jan. 1, 1958, 00:00. UTC is defined
     to coincide with TAI on Jan. 1, 1972, 00:00. To keep the earth
     period synchronized with UTC, leap seconds are added periodically.
     This function corrects for leap seconds as long as the internal table
@@ -316,11 +307,10 @@ extern "C" {
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   taisec_t UTCtoTAI (const utc_t* utc_ptr);
+taisec_t UTCtoTAI( const utc_t* utc_ptr );
 
-
-/** Converts UTC (coordinated universal time) to TAI (international atomic 
-    time). TAI zero is defined as Jan. 1, 1958, 00:00. UTC is defined 
+/** Converts UTC (coordinated universal time) to TAI (international atomic
+    time). TAI zero is defined as Jan. 1, 1958, 00:00. UTC is defined
     to coincide with TAI on Jan. 1, 1972, 00:00. To keep the earth
     period synchronized with UTC, leap seconds are added periodically.
     This function corrects for leap seconds as long as the internal table
@@ -332,8 +322,7 @@ extern "C" {
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   tainsec_t UTCtoTAIn (const utc_t* utc_ptr);
-
+tainsec_t UTCtoTAIn( const utc_t* utc_ptr );
 
 /** Returns the current atomci time in nsec. Implementation dependent;
     uses <time.h> on some systems.
@@ -342,8 +331,7 @@ extern "C" {
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   tainsec_t TAInow (void);
-
+tainsec_t TAInow( void );
 
 /** Converts TAI from a broken down format into one with nsec units.
 
@@ -352,11 +340,10 @@ extern "C" {
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   tainsec_t TAInsec (const tai_t* t);
+tainsec_t TAInsec( const tai_t* t );
 
-
-/** Converts TAI from a format with nsec units into one with sec units. 
-    Also calculates the broken down format if a pointer to a data 
+/** Converts TAI from a format with nsec units into one with sec units.
+    Also calculates the broken down format if a pointer to a data
     structure is provided.
 
     @param t atomic time in nsec
@@ -365,8 +352,7 @@ extern "C" {
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   taisec_t TAIsec (tainsec_t t, tai_t* tai);
-
+taisec_t TAIsec( tainsec_t t, tai_t* tai );
 
 /** Converts a TAI variable in nsec units into a network portable form.
     Uses TAIsec to break down TAI into two 32 bit numbers which are then
@@ -374,14 +360,13 @@ extern "C" {
     must be at least 8 bytes in size.
 
     @param t atomic time in nsec
-    @param buf pointer to a buffer used for stroring the network 
+    @param buf pointer to a buffer used for stroring the network
                portable TAI
     @return pointer to the buffer
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   char* htonTAI (tainsec_t t, char* buf);
-
+char* htonTAI( tainsec_t t, char* buf );
 
 /** Converts a TAI variable from network portable form into one with nsec
     units. First, reads 2 4 byte integers, convertes them into host format
@@ -393,8 +378,7 @@ extern "C" {
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   tainsec_t ntohTAI (const char* buf);
-
+tainsec_t ntohTAI( const char* buf );
 
 /** Returns the next leap second from the internal table. Neglects any
     leap seconds prior to the provided TAI. The information is provided
@@ -403,19 +387,18 @@ extern "C" {
     value describes the new total difference between TAI and UTC.
 
     @param t atomic time in sec
-    @param  nextleap pointer to data structure used for storing the next 
-                     leap second information 
-    @return pointer the next leap second information, NULL if no more 
+    @param  nextleap pointer to data structure used for storing the next
+                     leap second information
+    @return pointer the next leap second information, NULL if no more
             leap seconds.
     @author DS, April 98
     @see Time Conversion
 ************************************************************************/
-   leap_t* getNextLeap (taisec_t t, leap_t* nextleap);
+leap_t* getNextLeap( taisec_t t, leap_t* nextleap );
 
 /*@}*/
 
 /*@}*/
-
 
 #ifdef __cplusplus
 }

@@ -20,9 +20,8 @@ via pkg-config
 5. make -j 8
 
 * Note on Boost.
-FrameCPP 2.6+ uses the boost libraries shared_ptr.  To install boost see (https://www.boost.org/doc/libs/1_69_0/more/getting_started/unix-variants.html)
+FrameCPP 2.6+ and the standalone_edc uses the boost libraries.  Boost is a hard requirement for the daqd.  To install boost see (https://www.boost.org/doc/libs/1_69_0/more/getting_started/unix-variants.html)
 You may need to pass a parameter to cmake -DBOOST_ROOT=<boost install prefix> to help cmake find boost.
-This is not required for FrameCPP < 2.6.
 
 
 You can make specific targets in cmake.  One useful command is 'make help' from the build directory.  This lists all the targets that are available. Another method is to go to the appropariate location
@@ -35,13 +34,7 @@ RelWithDebInfo does a release build with debug.  On gcc this means -O -g.
 The following components will be built:
 
 awgtpman
-daqd_fw
-daqd_dc_mx
-daqd_rcv
-daqd_mx_symm
-daqd_standiop
-daqd_bcst
-daqd_shmem (if the compiler is new enough)
+daqd (if the compiler is new enough)
 nds
 dataviewer (in its many pieces)
 mx_stream
@@ -49,7 +42,7 @@ run_number_server
 the zmq_stream components
 zmq_fe
 zmq_rcv_ix_xmit_delay
-
+standalone_edc
 
 If you need to install a copy of cmake you can retrieve the source from kitware.
 
@@ -109,13 +102,13 @@ the gentoo systems.
 
 ZMQ/Dolphin IX transport
 
-The transport layer to be used with daqd_shmem is in flux.  Currently the following components are used:
+The transport layer to be used with daqd is in flux.  Currently the following components are used:
 
 zmq_fe on the FE computers
 zmq_rcv_ix_xmit_delay on the data concentrator
 ix_fb_recv on the daqd machines
 
-We also have a rebuild of the mx_streamer to work with the daqd_shmem system.  This is NOT ready yet.
+We also have a rebuild of the mx_streamer to work with the daqd system.  This is NOT ready yet.
 
 mx_stream on the FE computers
 mx_rcv on the data concentrator (eventually mx_rcv_ix_xmit)
@@ -155,9 +148,9 @@ ix_fb_rcv -g 0 -b ifo
 
 Tell it which dolphin group to listen to, and where to put the data.
 
-Configuring daqd_shmem
+Configuring daqd
 
-Daqd_shmem needs to know which mbuf to read from and its size.
+Daqd needs to know which mbuf to read from and its size.
 
 set parameter "shmem_input" = "ifo";
 set parameter "shmem_size" = "104857600";

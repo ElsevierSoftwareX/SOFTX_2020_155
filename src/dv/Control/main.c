@@ -33,6 +33,10 @@
 #include "../Th/datasrv.h"
 #include "globs.h"
 
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>q
+
 /* Action Table */
 
 /* Global Declarations */
@@ -45,6 +49,8 @@ struct DChList allChan[MAX_CHANNELS];
 Cursor watch_cursor;
 
 extern int plotterNum;
+extern void initializeWindows();
+extern void unregisterDropSites();
 
 int
 serverConnect()  {
@@ -298,6 +304,7 @@ void initApp(int argc, char **argv)
 }
 
 
+void
 doStuff() {
   int ac;
   Arg al[64];
@@ -534,7 +541,6 @@ int main(int argc, char **argv)
 	XtRealizeWidget (shell1);
 
 	{
-	  extern void initializeWindows();
 	  initializeWindows();
 	}
 

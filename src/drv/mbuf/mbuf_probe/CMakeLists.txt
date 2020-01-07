@@ -1,4 +1,11 @@
 
-add_executable(mbuf_probe mbuf_probe.cc)
-target_include_directories(mbuf_probe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
+add_executable(mbuf_probe
+        mbuf_probe.cc
+        mbuf_decoders.cc
+        analyze_daq_multi_dc.cc
+        analyze_rmipc.cc)
+target_include_directories(mbuf_probe PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../include
+        )
 target_link_libraries(mbuf_probe PUBLIC driver::shmem)

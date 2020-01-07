@@ -12,7 +12,8 @@ char *dayname[7] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" } ;
 char out[101];
 char x[TAI_PACK];
 
-main()
+int
+main(int argc, char* argv[])
 {
   struct tai t;
   struct tai t2;

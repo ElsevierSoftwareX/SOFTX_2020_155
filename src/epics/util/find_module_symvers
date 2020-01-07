@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import subprocess
+
+try:
+    modname = sys.argv[1]
+except IndexError:
+    exit("usage: {} <modname>".format(sys.argv[0]))
+
+uname = os.uname()
+modstat = subprocess.run(
+    ['/usr/sbin/dkms', '-k', uname.release, 'status', modname],
+    capture_output=True, text=True,
+)
+if modstat.returncode == 0 and modstat.stdout:
+    modstat = modstat.stdout.split(':')[0].split(', ')
+    if len(modstat) >= 4:
+        modvers = modstat[1]
+        mkvers = modstat[2]
+        march = modstat[3]
+        modsym = os.path.join(
+            '/var/lib/dkms',
+            modname,
+            modvers,
+            mkvers,
+            march,
+            'Module.symvers',
+        )
+        if os.path.exists(modsym):
+            print(modsym)
+            exit()
+
+modsym = os.path.join('/var/cache', modname, 'Module.symvers')
+if os.path.exists(modsym):
+    print(modsym)
+    exit()
+
+exit("Module '{}' symvers file could not be found.".format(modname))

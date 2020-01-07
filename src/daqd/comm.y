@@ -268,7 +268,7 @@ static int prompt_lineno;
 %type <y_int>  ChannelNames1
 %type <y_int>  WriterType
 %type <y_int>  allOrNothing
-%pure_parser
+%pure-parser
 
 %%
 
@@ -456,60 +456,6 @@ CommandLine: /* Nothing */
 		   //iocsh($4);
 		}
 		//free($4);
-#endif
-	}
-	| STATUS EPICS DCU OptionalIntnum {
-#if EPICS_EDCU == 1
-	   AUTH_CHECK(((my_lexer *)lexer));
-	   ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
-	   if (daqd.edcu1.running) {
-	      *yyout << daqd.edcu1.num_chans << " channels" << endl;
-	      *yyout << daqd.edcu1.con_chans << " connected" << endl; 
-	      *yyout << daqd.edcu1.num_chans - daqd.edcu1.con_chans << " disconnected" << endl; 
-	      *yyout << daqd.edcu1.con_events << " connection events processed" << endl; 
-	      *yyout << daqd.edcu1.val_events << " value change events processed" << endl; 
-	      if ($4) {
-		int total_disco = 0;
-		int total_bad_bad = 0;
-	        for (int i = 0 ; i < daqd.edcu1.num_chans; i++) {
-		  if (daqd.edcu1.channel_status[i]) {
-		    total_disco++;
-		    *yyout << daqd.channels[daqd.edcu1.fidx + i]. name << endl;
-		    if (daqd.edcu1.channel_status[i] != 0xbad) {
-			*yyout << "ERROR: status value is " << daqd.edcu1.channel_status[i] << endl;
-			total_bad_bad++;
-		    }
-		  }
-	        }
-		*yyout << "Total " << total_disco << " disconnected." << endl;
-		if (total_bad_bad) *yyout << "Total " << total_bad_bad << " have invalid (not 0xbad) status value" << endl;
-	      }
-	   }
-#endif
-	}
-	| START EPICS DCU {
-#if EPICS_EDCU == 1
-	   AUTH_CHECK(((my_lexer *)lexer));
-	   ostream *yyout = ((my_lexer *)lexer)->get_yyout ();
-	   if (daqd.edcu1.running) {
-	     *yyout << "EDCU already running" << endl;
-	   } else {
-	     int num_epics_channels = 0;
-	     for (int i = 0; i < daqd.num_channels; i++) 
-		if (IS_EPICS_DCU(daqd.channels [i].dcu_id)) {
-		  if (!num_epics_channels) daqd.edcu1.fidx = i;
-		  num_epics_channels++;
-	        }
-	     if (!num_epics_channels) {
-		*yyout << "`start epics dcu': there are no epics channels configured" << endl;
-		system_log(1, "edcu was not started; no channels configured");
-	     } else {
-	        daqd.edcu1.num_chans = num_epics_channels;
-	   	if (! daqd.start_edcu (yyout)) {
-		  system_log(1, "edcu started");
-	   	} else exit (1);
-	     }
-	   }
 #endif
 	}
 	| STATUS DCU {
@@ -1027,10 +973,6 @@ CommandLine: /* Nothing */
 	| ENABLE OFFLINE {
 		AUTH_CHECK(((my_lexer *)lexer));
 		daqd.offline_disabled = 0;
-	}
-	| ENABLE FCKRS {
-		AUTH_CHECK(((my_lexer *)lexer));
-		daqd.enable_fckrs = true;
 	}
 	| HELP {
 		print_command_help (((my_lexer *)lexer)->get_yyout ());
@@ -1926,7 +1868,7 @@ CommandLine: /* Nothing */
 
 		*yyout << "number\t|busy\t|bytes\t|gps\t\t|gps_n\t\t|run" << endl;
 		for (i = 0; i < ((my_lexer *)lexer)->cb -> blocks; i++) {
-			*yyout << i << "\t" << ((my_lexer *)lexer)->cb -> block [i].busy
+			*yyout << i << "\t" << !((my_lexer *)lexer)->cb -> block [i].busy.empty()
 				<< "\t" << ((my_lexer *)lexer)->cb -> block [i].bytes 
 				<< "\t" << ((my_lexer *)lexer)->cb -> block [i].prop.gps
 				<< "\t" << ((my_lexer *)lexer)->cb -> block [i].prop.gps_n
@@ -3232,7 +3174,7 @@ print_block_stats (ostream *yyout, circ_buffer_t *cb)
 
   *yyout << "consumer\t|next_block_out\t|next_block_out_16th" << endl;
   for (i = 0; i < MAX_CONSUMERS; i++)
-    if (cb -> cmask & 1 << i)
+    if (cb -> cmask.get(i))
       *yyout << i << "\t\t|" << cb -> next_block_out [i] << "\t\t|" << cb -> next_block_out_16th [i] << endl;
 
   //  yyout -> flush ();
