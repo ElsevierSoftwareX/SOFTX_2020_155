@@ -57,9 +57,7 @@ usage( )
              "-m buffer size - Sizer of the input buffer in MB [20-100]\n" );
     fprintf( stderr, "-v - verbose prints diag test data\n" );
     fprintf( stderr, "-g - Dolphin IX channel to xmit on (0-3)\n" );
-    fprintf( stderr, "-p - Debug pv prefix, requires -P as well\n" );
-    fprintf( stderr,
-             "-P - Path to a named pipe to send PV debug information to\n" );
+    fprintf( stderr, "-p - Debug pv prefix\n" );
     fprintf( stderr, "-h - help\n" );
 }
 
@@ -172,9 +170,8 @@ main( int argc, char** argv )
     extern char* optarg; // Needed to get arguments to program
 
     // PV/debug information
-    char* pv_prefix = 0;
-    char* pv_debug_pipe_name = 0;
-    int   pv_debug_pipe = -1;
+    char*            pv_prefix = 0;
+    simple_pv_handle pcas_server = NULL;
 
     // Declare shared memory data variables
     daq_multi_cycle_header_t* ifo_header;
@@ -192,7 +189,7 @@ main( int argc, char** argv )
     int xmitData = 0;
 
     // Get arguments sent to process
-    while ( ( c = getopt( argc, argv, "b:hm:g:vp:P:l:" ) ) != EOF )
+    while ( ( c = getopt( argc, argv, "b:hm:g:vp:l:" ) ) != EOF )
         switch ( c )
         {
         case 'v':
@@ -220,9 +217,6 @@ main( int argc, char** argv )
             break;
         case 'p':
             pv_prefix = optarg;
-            break;
-        case 'P':
-            pv_debug_pipe_name = optarg;
             break;
         case 'l':
             if ( 0 == freopen( optarg, "w", stdout ) )
@@ -449,14 +443,14 @@ main( int argc, char** argv )
         },
 
     };
-    if ( pv_debug_pipe_name )
+    if ( pv_prefix )
     {
-        pv_debug_pipe = open( pv_debug_pipe_name, O_NONBLOCK | O_RDWR, 0 );
-        if ( pv_debug_pipe < 0 )
+        pcas_server = simple_pv_server_create(
+            pv_prefix, pvs, sizeof( pvs ) / sizeof( pvs[ 0 ] ) );
+        if ( pcas_server == NULL )
         {
             fprintf( stderr,
-                     "Unable to open %s for writting (pv status)\n",
-                     pv_debug_pipe_name );
+                     "Unable to create EPICS channel access server.\n" );
             exit( 1 );
         }
     }
@@ -525,10 +519,7 @@ main( int argc, char** argv )
                 pv_mean_cycle_time = mean_cycle_time;
                 pv_max_cycle_time = max_cycle_time;
                 pv_min_cycle_time = min_cycle_time;
-                send_pv_update( pv_debug_pipe,
-                                pv_prefix,
-                                pvs,
-                                sizeof( pvs ) / sizeof( pvs[ 0 ] ) );
+                simple_pv_server_update( pcas_server );
 
                 if ( do_verbose )
                 {
@@ -629,6 +620,8 @@ main( int argc, char** argv )
         // Cleanup the Dolphin connections
         error = dolphin_closeout( );
     }
+
+    simple_pv_server_destroy( &pcas_server );
 
     exit( 0 );
 }
