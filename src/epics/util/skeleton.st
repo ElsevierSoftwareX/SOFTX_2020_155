@@ -118,6 +118,15 @@ assign allNewCoeff to "{ifo}:FEC-{sysnum}_LOAD_NEW_COEFF";
 string localtimestring;
 assign localtimestring to "{ifo}:FEC-{sysnum}_TIME_STRING";
 
+int uptime_day;
+assign uptime_day to "{ifo}:FEC-{sysnum}_UPTIME_DAY";
+
+int uptime_hour;
+assign uptime_hour to "{ifo}:FEC-{sysnum}_UPTIME_HOUR";
+
+int uptime_minute;
+assign uptime_minute to "{ifo}:FEC-{sysnum}_UPTIME_MINUTE";
+
 #ifndef NO_DAQ_IN_SKELETON
 
 int reload;
@@ -137,15 +146,6 @@ assign dataSize to "{ifo}:DAQ-FEC_{sysnum}_TOTAL";
 
 int dcuId;
 assign dcuId to "{ifo}:DAQ-FEC_{sysnum}_DCU_ID";
-
-int uptime_day;
-assign uptime_day to "{ifo}:FEC-{sysnum}_UPTIME_DAY";
-
-int uptime_hour;
-assign uptime_hour to "{ifo}:FEC-{sysnum}_UPTIME_HOUR";
-
-int uptime_minute;
-assign uptime_minute to "{ifo}:FEC-{sysnum}_UPTIME_MINUTE";
 
 #endif
 
