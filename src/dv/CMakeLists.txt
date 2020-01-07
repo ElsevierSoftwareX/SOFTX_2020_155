@@ -2,19 +2,13 @@ FIND_PACKAGE(Grace)
 FIND_PACKAGE(Motif)
 FIND_PACKAGE(X11)
 
-if (${X11_Xpm_FOUND})
-    set(_has_X11_Xpm TRUE)
-else (${X11_Xpm_FOUND})
-    set(_has_X11_Xpm FALSE)
-endif (${X11_Xpm_FOUND})
-
 if (${X11_Xt_FOUND})
     set(_has_X11_Xt TRUE)
 else (${X11_Xt_FOUND})
     set(_has_X11_Xt FALSE)
 endif (${X11_Xt_FOUND})
 
-if (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xpm} AND ${_has_X11_Xt} AND ${X11_FOUND})
+if (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xt} AND ${X11_FOUND})
     Message("Dataviewr will be built")
 
     # create some targets to make things look nice
@@ -26,7 +20,6 @@ if (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xpm} AND ${_has_X11_Xt} AND
     add_library(dv_x11_ INTERFACE)
     target_include_directories(dv_x11_ INTERFACE ${X11_INCLUDE_DIR})
     target_link_libraries(dv_x11_ INTERFACE
-            ${X11_Xpm_LIB}
             ${X11_Xt_LIB}
             ${X11_LIBRARIES})
     add_library(dv::X11 ALIAS dv_x11_)
@@ -44,10 +37,9 @@ if (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xpm} AND ${_has_X11_Xt} AND
             DESTINATION bin
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
-else (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xpm} AND ${_has_X11_Xt} AND ${X11_FOUND})
+else (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xt} AND ${X11_FOUND})
     Message("Dataviewer will NOT be built")
     Message("X11 found = ${X11_FOUND}")
     Message("motif found = ${MOTIF_FOUND}")
-    Message("Xpm found = ${X11_Xpm_FOUND}")
     Message("Xt found = ${X11_Xt_FOUND}")
-endif (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xpm} AND ${_has_X11_Xt} AND ${X11_FOUND})
+endif (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xt} AND ${X11_FOUND})
