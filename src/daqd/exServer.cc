@@ -429,7 +429,22 @@ pvInfo exServer::pvList[] = {
             0,
             excasIoSync,
             1,
-            pvValue + PV::PV_CONFIGURATION_NUMBER )
+            pvValue + PV::PV_CONFIGURATION_NUMBER ),
+    pvInfo( 1,
+            "RAW_MTREND_FW_STATE",
+            0xffffffff,
+            0,
+            excasIoSync,
+            1,
+            pvValue + PV::PV_RAW_MTREND_FW_STATE ),
+    pvInfo( 1,
+            "RAW_MTREND_FW_SEC",
+            0xffffffff,
+            0,
+            excasIoSync,
+            1,
+            pvValue + PV::PV_RAW_MTREND_FW_SEC )
+
 };
 
 const unsigned exServer::pvListNElem = NELEMENTS( exServer::pvList );

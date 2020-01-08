@@ -74,6 +74,9 @@ namespace PV
         PV_MINUTE_FRAME_CHECK_SUM_TRUNC,
         // run/configuration numbers
         PV_CONFIGURATION_NUMBER,
+        // raw trend writer state
+        PV_RAW_MTREND_FW_STATE,   // is the raw trend writer currently writing
+        PV_RAW_MTREND_FW_SEC,     // processing time for raw trend data
         MAX_PV
     };
 
