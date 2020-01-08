@@ -75,8 +75,8 @@ namespace PV
         // run/configuration numbers
         PV_CONFIGURATION_NUMBER,
         // raw trend writer state
-        PV_RAW_MTREND_FW_STATE,   // is the raw trend writer currently writing
-        PV_RAW_MTREND_FW_SEC,     // processing time for raw trend data
+        PV_RAW_MTREND_TW_STATE,   // is the raw trend writer currently writing
+        PV_RAW_MTREND_TW_WRITE_SEC,     // processing time for raw trend data
         MAX_PV
     };
 

@@ -91,7 +91,7 @@ trender_c::raw_minute_saver( )
 
             time_t t = time( 0 );
             DEBUG( 1, cerr << "Begin raw minute trend writing" << endl );
-            PV::set_pv( PV::PV_RAW_MTREND_FW_STATE, STATE_WRITING );
+            PV::set_pv( PV::PV_RAW_MTREND_TW_STATE, STATE_WRITING );
 
             mt_stats.sample( );
             for ( int j = 0; mt_file_stats.sample( ), j < num_channels;
@@ -215,8 +215,8 @@ trender_c::raw_minute_saver( )
                    cerr << "Finished raw minute trend writing in " << t
                         << " seconds" << endl );
 
-            PV::set_pv( PV::PV_RAW_MTREND_FW_STATE, STATE_NORMAL );
-            PV::set_pv( PV::PV_RAW_MTREND_FW_SEC, t );
+            PV::set_pv( PV::PV_RAW_MTREND_TW_STATE, STATE_NORMAL );
+            PV::set_pv( PV::PV_RAW_MTREND_TW_WRITE_SEC, t );
         }
 
         if ( eof_flag )

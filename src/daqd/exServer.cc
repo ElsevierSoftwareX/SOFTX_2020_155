@@ -431,19 +431,19 @@ pvInfo exServer::pvList[] = {
             1,
             pvValue + PV::PV_CONFIGURATION_NUMBER ),
     pvInfo( 1,
-            "RAW_MTREND_FW_STATE",
+            "RAW_MTREND_TW_STATE",
             0xffffffff,
             0,
             excasIoSync,
             1,
-            pvValue + PV::PV_RAW_MTREND_FW_STATE ),
+            pvValue + PV::PV_RAW_MTREND_TW_STATE ),
     pvInfo( 1,
-            "RAW_MTREND_FW_SEC",
+            "RAW_MTREND_TW_WRITE_SEC",
             0xffffffff,
             0,
             excasIoSync,
             1,
-            pvValue + PV::PV_RAW_MTREND_FW_SEC )
+            pvValue + PV::PV_RAW_MTREND_TW_WRITE_SEC )
 
 };
 
