@@ -287,22 +287,23 @@ public:
             std::ostringstream ss;
             ss << name_ << "-" << i;
 
+            int       offset = ( i + dcu_id_ ) % 21;
+            const int slow_rate = 16;
             if ( i % 2 == 0 )
             {
                 generators_.push_back( GeneratorPtr(
                     new Generators::GPSMod100kSecWithOffsetAndCycle< int >(
-                        SimChannel( ss.str( ), 2, 16, chnum ),
-                        ( i + dcu_id_ ) % 21 ) ) );
+                        SimChannel( ss.str( ), 2, slow_rate, chnum ),
+                        offset ) ) );
             }
             else
             {
                 generators_.push_back( GeneratorPtr(
-                    new Generators::GPSMod100kSecWithOffsetAndCycle< int >(
-                        SimChannel( ss.str( ), 7, 16, chnum ),
-                        ( i + dcu_id_ ) % 21 ) ) );
+                    new Generators::GPSMod100kSecWithOffsetAndCycle<
+                        std::uint32_t >(
+                        SimChannel( ss.str( ), 7, slow_rate, chnum ),
+                        offset ) ) );
             }
-
-
         }
         for ( size_t i = slow_channel_boundary; i < channel_num; ++i )
         {
@@ -538,8 +539,8 @@ generate_models( std::vector< ModelPtr >& models,
     dest.header.fullDataBlockSize = 0;
     char* data = dest.dataBlock;
     char* data_end = data + max_data_size;
-    auto header_it = std::begin(dest.header.dcuheader);
-    auto header_end = std::end(dest.header.dcuheader);
+    auto  header_it = std::begin( dest.header.dcuheader );
+    auto  header_end = std::end( dest.header.dcuheader );
 
     for ( int i = 0; i < models.size( ); ++i )
     {
