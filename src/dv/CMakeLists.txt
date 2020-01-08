@@ -15,13 +15,15 @@ if (${GRACE_FOUND} AND ${MOTIF_FOUND} AND ${_has_X11_Xt} AND ${X11_FOUND})
     add_library(motif_ INTERFACE)
     target_include_directories(motif_ INTERFACE ${MOTIF_INCLUDE_DIR})
     target_link_libraries(motif_ INTERFACE ${MOTIF_LIBRARIES})
+
     add_library(motif::motif ALIAS motif_)
 
     add_library(dv_x11_ INTERFACE)
     target_include_directories(dv_x11_ INTERFACE ${X11_INCLUDE_DIR})
     target_link_libraries(dv_x11_ INTERFACE
             ${X11_Xt_LIB}
-            ${X11_LIBRARIES})
+            ${X11_X11_LIB})
+
     add_library(dv::X11 ALIAS dv_x11_)
 
     add_subdirectory(Lib/UTC_GPS)
