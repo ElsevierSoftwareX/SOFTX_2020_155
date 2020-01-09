@@ -129,6 +129,7 @@ $rate = "60"; # In microseconds (default setting)
 $brate = "52";
 $dcuId = 10; # Default dcu Id
 $targetHost = "localhost"; # Default target host name
+$edcusync = "none";
 $specificCpu = -1; # Defaults is to run the FE on the first available CPU
 $adcMaster = -1;
 $dacWdOverride = -1;
@@ -1243,6 +1244,7 @@ print EPICS "DUMMY FEC\_$dcuId\_DAQ_BYTE_COUNT int ao 0 field(HOPR,\"4000\") fie
 print EPICS "DUMMY FEC\_$dcuId\_EDCU_CHAN_NOCON int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
 print EPICS "DUMMY FEC\_$dcuId\_EDCU_CHAN_CONN int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
 print EPICS "DUMMY FEC\_$dcuId\_EDCU_CHAN_CNT int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
+print EPICS "DUMMY FEC\_$dcuId\_EDCU_DAQ_RESET int ao 0 field(HOPR,\"4000\") field(LOPR,\"0\") field(HIHI,\"1\") field(HHSV,\"MAJOR\")\n";
 }elsif ($globalsdf) {
 print OUTH "\tint timeDiag;\n";
 print EPICS "DUMMY FEC\_$dcuId\_TIME_DIAG int ai 0\n";
@@ -1494,6 +1496,12 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUTH "\#define TARGET_DAC18_COUNT 0\n";
 		print OUTH "\#define TARGET_DAC20_COUNT 0\n";
 	}
+    if ($edcu) {
+        $no_daq = 1;
+	    print OUTH "\#define TARGET_RT_FLAG 0\n";
+    } else {
+	    print OUTH "\#define TARGET_RT_FLAG 1\n";
+    }
 	print OUTH "\#define TARGET_DAQ_FLAG $no_daq\n";
 	if ($specificCpu > -1) {
   		print OUTH "\#define TARGET_CPU $specificCpu\n";
@@ -2453,6 +2461,7 @@ sub createEpicsMakefile {
 	if ($edcu) {
 	  print OUTME "EXTRA_CFLAGS += -DEDCU=1\n";
 	  print OUTME "EXTRA_CFLAGS += -DNO_DAQ_IN_SKELETON=1\n";
+	  print OUTME "SYNC_SRC = $edcusync\n";
 	}
 	if ($globalsdf) {
 	  print OUTME "EXTRA_CFLAGS += -DEDCU=1\n";
@@ -2537,6 +2546,9 @@ if ($no_sync) {
 if (0 == $dac_testpoint_names && 0 == $::extraTestPoints && 0 == $filtCnt) {
 	print "Not compiling DAQ into the front-end\n";
 	$no_daq = 1;
+}
+if ($edcu) {
+    $no_daq = 1;
 }
 if ($no_daq) {
   print OUTM "#Comment out to enable DAQ\n";

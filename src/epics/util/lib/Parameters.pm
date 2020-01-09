@@ -170,6 +170,8 @@ sub parseParams {
 				$::virtualiop = $spp[1];
 			} elsif ($spp[0] eq "adcclock") { 
 				$::adcclock = $spp[1];
+			} elsif ($spp[0] eq "sync") { 
+				$::edcusync = $spp[1];
 			} elsif ($spp[0] eq "optimizeIO") { 
 				$::optimizeIO = $spp[1];
 			} elsif ($spp[0] eq "no_zero_pad") { 

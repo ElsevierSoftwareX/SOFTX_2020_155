@@ -17,6 +17,7 @@ daccount16=`grep TARGET_DAC16_COUNT src/include/${system}.h | head -1 | awk '{pr
 daccount18=`grep TARGET_DAC18_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
 daccount20=`grep TARGET_DAC20_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
 nodaq=`grep TARGET_DAQ_FLAG src/include/${system}.h | head -1 | awk '{print $3}'`
+rtflag=`grep TARGET_RT_FLAG src/include/${system}.h | head -1 | awk '{print $3}'`
 targetcpu=`grep TARGET_CPU src/include/${system}.h | head -1 | awk '{print $3}'`
 cpumeter=`grep TARGET_METER src/include/${system}.h | head -1 | awk '{print $3}'`
 site=`grep site= target/${system}epics/${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`
@@ -127,6 +128,25 @@ EOF
 echo /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
 /bin/touch /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
 /bin/chmod +x /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
+if [ ${rtflag} -eq 0 ];then
+cat > /opt/rtcds/$site/${lower_ifo}/scripts/start${system} << EOF
+#!/bin/bash
+#
+
+if [ \`hostname\` != '${hostname}' ]; then
+	echo Cannot run \`basename \$0\` on \`hostname\` computer
+	exit 1
+fi
+
+/opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
+sleep 5
+(cd /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics && ./startup${ifo})
+
+EOF
+
+fi
+
+if [ ${rtflag} -eq 1 ];then
 
 cat > /opt/rtcds/$site/${lower_ifo}/scripts/start${system} << EOF
 #!/bin/bash
@@ -197,6 +217,8 @@ touch /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
 chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
 
 EOF
+
+fi
 
 echo /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp
 /bin/touch /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp
