@@ -59,9 +59,7 @@ int dacOF[ MAX_DAC_MODULES ];
 #include "drv/inputFilterModule1.h"
 #include <drv/app_dac_functions.c>
 
-#ifdef DOLPHIN_TEST
-#include "dolphin.c"
-#endif
+#include "dolphin_usp.c"
 
 #define BILLION 1000000000L
 

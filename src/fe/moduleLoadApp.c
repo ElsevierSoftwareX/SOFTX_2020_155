@@ -81,16 +81,16 @@ rt_fe_init( void )
     ret = mbuf_allocate_area( SYSTEM_NAME_STRING_LOWER, 64 * 1024 * 1024, 0 );
     if ( ret < 0 )
     {
-        printk( "mbuf_allocate_area() failed; ret = %d\n", ret );
-        return -1;
+        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area(epics) failed; ret = %d\n", ret );
+        return -12;
     }
     _epics_shm = (unsigned char*)( kmalloc_area[ ret ] );
     // Allocate IPC shmem area
     ret = mbuf_allocate_area( "ipc", 16 * 1024 * 1024, 0 );
     if ( ret < 0 )
     {
-        printk( "mbuf_allocate_area(ipc) failed; ret = %d\n", ret );
-        return -1;
+        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area(ipc) failed; ret = %d\n", ret );
+        return -12;
     }
     _ipc_shm = (unsigned char*)( kmalloc_area[ ret ] );
 
@@ -102,8 +102,8 @@ rt_fe_init( void )
     ret = mbuf_allocate_area( fname, 64 * 1024 * 1024, 0 );
     if ( ret < 0 )
     {
-        printk( "mbuf_allocate_area() failed; ret = %d\n", ret );
-        return -1;
+        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR:mbuf_allocate_area() failed; ret = %d\n", ret );
+        return -12;
     }
     _daq_shm = (unsigned char*)( kmalloc_area[ ret ] );
     daqPtr = (struct rmIpcStr*)_daq_shm;
@@ -295,15 +295,15 @@ rt_fe_init( void )
     // If no ADC cards were found, then SLAVE cannot run
     if ( !cdsPciModules.adcCount )
     {
-        printk( "No ADC cards found - exiting\n" );
-        return -1;
+        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: No ADC cards found - exiting\n" );
+        return -5;
     }
     // This did not quite work for some reason
     // Need to find a way to handle skipped DAC cards in slaves
     // cdsPciModules.dacCount = ioMemData->dacCount;
     if ( status < cards )
     {
-        printk( " ERROR **** Did not find correct number of cards! Expected %d "
+        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: Did not find correct number of cards! Expected %d "
                 "and Found %d\n",
                 cards,
                 status );
@@ -352,9 +352,10 @@ rt_fe_init( void )
     // If EPICS not running, EXIT
     if ( cnt == 10 )
     {
+	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: EPICS restore not set - exiting\n");
         pLocalEpics->epicsOutput.fe_status = BURT_RESTORE_ERROR;
         // Cleanup
-        return -1;
+        return -6;
     }
 
     pLocalEpics->epicsInput.vmeReset = 0;
