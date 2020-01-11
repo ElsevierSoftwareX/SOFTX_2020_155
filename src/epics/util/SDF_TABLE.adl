@@ -1,7 +1,7 @@
 
 file {
-	name="/opt/rtcds/rtscore/trunk/src/epics/util/SDF_TABLE.adl"
-	version=030104
+	name="/opt/rtcds/rtscore/advligorts/src/epics/util/SDF_TABLE.adl"
+	version=030109
 }
 display {
 	object {
@@ -528,7 +528,7 @@ menu {
 	control {
 		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_WILDCARD"
 		clr=0
-		bclr=60
+		bclr=14
 	}
 }
 rectangle {
@@ -9399,7 +9399,7 @@ menu {
 	control {
 		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SORT"
 		clr=0
-		bclr=60
+		bclr=14
 	}
 }
 "text update" {

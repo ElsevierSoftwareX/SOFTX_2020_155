@@ -1,7 +1,7 @@
 
 file {
-	name="/opt/rtcds/rtscore/branches/branch-2.9/src/epics/util/SDF_SAVE.adl"
-	version=030107
+	name="/opt/rtcds/rtscore/advligorts/src/epics/util/SDF_SAVE.adl"
+	version=030109
 }
 display {
 	object {
@@ -507,42 +507,31 @@ composite {
 		}
 	}
 }
-composite {
+menu {
+	object {
+		x=117
+		y=156
+		width=200
+		height=25
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SAVE_TYPE"
+		clr=0
+		bclr=14
+	}
+}
+text {
 	object {
 		x=117
 		y=140
 		width=200
-		height=41
+		height=14
 	}
-	"composite name"=""
-	children {
-		menu {
-			object {
-				x=117
-				y=156
-				width=200
-				height=25
-			}
-			control {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SAVE_TYPE"
-				clr=0
-				bclr=60
-			}
-		}
-		text {
-			object {
-				x=117
-				y=140
-				width=200
-				height=14
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="SAVE TABLE OR EPICS DB"
-			align="horiz. centered"
-		}
+	"basic attribute" {
+		clr=14
 	}
+	textix="SAVE TABLE OR EPICS DB"
+	align="horiz. centered"
 }
 "text update" {
 	object {
@@ -574,42 +563,31 @@ text {
 	textix="OVERWRITE OR TIME_NOW FILE NAME"
 	align="horiz. centered"
 }
-composite {
+menu {
+	object {
+		x=117
+		y=203
+		width=200
+		height=25
+	}
+	control {
+		chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SAVE_OPTS"
+		clr=0
+		bclr=14
+	}
+}
+text {
 	object {
 		x=117
 		y=187
 		width=200
-		height=41
+		height=14
 	}
-	"composite name"=""
-	children {
-		menu {
-			object {
-				x=117
-				y=203
-				width=200
-				height=25
-			}
-			control {
-				chan="SITE_NAME:FEC-DCU_NODE_ID_SDF_SAVE_OPTS"
-				clr=0
-				bclr=60
-			}
-		}
-		text {
-			object {
-				x=117
-				y=187
-				width=200
-				height=14
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="FILE OPTIONS SELECTION"
-			align="horiz. centered"
-		}
+	"basic attribute" {
+		clr=14
 	}
+	textix="FILE OPTIONS SELECTION"
+	align="horiz. centered"
 }
 "text entry" {
 	object {

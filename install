@@ -343,6 +343,8 @@ if test -e /opt/rtcds/$site/${lower_ifo}/medm/${system}; then
 fi
 /bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/medm/${system}
 (cd build/${system}epics/medm; find . -name "*.adl" | xargs cp --parents -r -t /opt/rtcds/$site/${lower_ifo}/medm/${system};)
+/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/caqtdm/${system}
+(cd build/${system}epics/medm/caqtdm; find . -name "*.ui" | xargs cp --parents -r -t /opt/rtcds/$site/${lower_ifo}/caqtdm/${system};)
 
 if [ -e $srcdir/src/epics/util/post_build_script.py ]; then
 	echo Running post-build script
