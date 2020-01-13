@@ -267,6 +267,7 @@ $meFile .= "Makefile\.";
 $meFile .= $ARGV[1];
 $meFile .= epics;
 $epicsScreensDir = "../../../build/" . $ARGV[1] . "epics/medm";
+$caqtdmScreensDir = "../../../build/" . $ARGV[1] . "epics/medm/caqtdm";
 $configFilesDir = "../../../build/" . $ARGV[1] . "epics/config";
 $compileMessageDir = "../../../";
 $warnMsgFile = $compileMessageDir . $ARGV[1] . "_warnings.log";
@@ -1935,6 +1936,8 @@ $ffmedm .= "\\/";
 }
 
 mkpath $epicsScreensDir, 0, 0755;
+mkpath $caqtdmScreensDir, 0, 0755;
+
 my $usite = uc $site;
 my $lsite = lc $site;
 my $sysname = "FEC";
@@ -1959,15 +1962,15 @@ $totalMedm = $adcCnt + $dacCnt;
 print "Found $adcCnt ADC modules part is $adcPartNum[0]\n";
 print "Found $dacCnt DAC modules part is $dacPartNum[0]\n";
 
-#//		-  Generate Guardian Alarm Monitor Screen
-system("cp $rcg_src_dir/src/epics/util/ALARMS.adl ALARMS.adl");
-system("cat ALARMS.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_ALARM_MONITOR.adl");
-system("cp $rcg_src_dir/src/epics/util/BURT_RESTORE.adl BURT_RESTORE.adl");
-system("cat BURT_RESTORE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_BURT_RESTORE.adl");
+
+#//		-  Generate SDF Restore Screen
 system("cp $rcg_src_dir/src/epics/util/SDF_RESTORE.adl SDF_RESTORE.adl");
 system("cat SDF_RESTORE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_SDF_RESTORE.adl");
+#//		-  Generate SDF Save Screen
 system("cp $rcg_src_dir/src/epics/util/SDF_SAVE.adl SDF_SAVE.adl");
 system("cat SDF_SAVE.adl | sed '$sed_arg' > $epicsScreensDir/$sysname" . "_SDF_SAVE.adl");
+
+#//		-  Generate SDF Table Screen
 if ($::casdf) {
 system("cp $rcg_src_dir/src/epics/util/SDF_TABLE_CA.adl SDF_TABLE.adl");
 } else {
@@ -2161,6 +2164,7 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 	}
 		  $sysname = uc($skeleton);
 }
+
 # ******************************************************************************************
 #//		- GENERATE SORTED ADC LIST FILE
 $adcFile = "./diags2.txt";
@@ -2238,6 +2242,26 @@ for($ii=0;$ii<$dacCnt;$ii++)
       ("CDS::Dac20::createDac20Medm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii);
    } else {
       ("CDS::Dac18::createDac18Medm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii);
+   }
+}
+
+# ******************************************************************************************
+#//		- GENERATE caQtDM SCREENS
+$sed_arg = "s/$ifo\\/medm/$ifo\\/caqtdm/g ";
+$rmadl_arg = "s/.adl/.ui/g ";
+opendir my $dh, $epicsScreensDir;
+while (my $cf = readdir $dh) {
+   if($cf =~ m/.adl/) {
+        my ($fbase,$fext) = split '\.',$cf;
+	print "file is $fbase \n";
+	system("cp $epicsScreensDir/$cf ./tmp.adl" );
+	system("cat tmp.adl | sed '$sed_arg' > tmp2.adl");
+	system("cat tmp2.adl | sed '$rmadl_arg' > tmp.adl");
+	system("adl2ui tmp.adl");
+	$ui_output = "$caqtdmScreensDir/$fbase" . ".ui";
+	print "new file is $ui_output \n";
+	system("cp tmp.ui $ui_output");
+	system("rm tmp.adl tmp2.adl tmp.ui");
    }
 }
 

@@ -111,7 +111,7 @@ sub createGdsMedm
 	$xpos = 555; $ypos = 268; $width = 215; $height = 50;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{yellow},"","","");
 	# File loading
-	$xpos = 625; $ypos = 72; $width = 69; $height = 15; 
+	$xpos = 575; $ypos = 72; $width = 170; $height = 15; 
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"CONFIGURATION FILES",$ecolors{white});
 	# BURT STUFF ******************************************************************************************************
 	# Add BURT related display
@@ -129,7 +129,7 @@ sub createGdsMedm
 	$xpos = 562; $ypos = 128; $width = 200; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_LOADED",$ecolors{white},$ecolors{blue},"static");
 	# BURT Reload Time
-	$xpos = 562; $ypos = 147; $width = 200; $height = 15;
+	$xpos = 562; $ypos = 147; $width = 200; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_SDF_RELOAD_TIME",$ecolors{white},$ecolors{blue},"static");
 
 	$xpos = 210; $ypos = 117; $width = 153; $height = 18;
@@ -150,7 +150,7 @@ sub createGdsMedm
 	$xpos = 480; $ypos = 330; $width = 240; $height = 17;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_MSG_FESTAT",$ecolors{white},$ecolors{blue},"static");
 	# Add timing label
-	$xpos = 63; $ypos = 72; $width = 45; $height = 15; 
+	$xpos = 45; $ypos = 72; $width = 120; $height = 15; 
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"TIMING STATUS",$ecolors{white});
 	# Add i/o status label
 	$xpos = 254; $ypos = 72; $width = 69; $height = 15;
@@ -167,14 +167,14 @@ sub createGdsMedm
 	$xpos = 14; $ypos = 93; $width = 85; $height = 72;
         $medmdata .= ("CDS::medmGen::medmGenMeter") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_CPU_METER",$ecolors{ltblue},$ecolors{mdblue});
 	# Add DIAG RESET button
-	$xpos = 617; $ypos = 44; $width = 100; $height = 20;
+	$xpos = 210; $ypos = 142; $width = 86; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenMessage") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DIAG_RESET",$ecolors{white},$ecolors{blue},"Diag Reset","1");
 
 	# Add GPS Time label
-	$xpos = 550; $ypos = 27; $width = 69; $height = 15;
+	$xpos = 580; $ypos = 29; $width = 69; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"GPS Time",$ecolors{black});
 	# Add GPS Time Monitor
-	$xpos = 617; $ypos = 26; $width = 100; $height = 15;
+	$xpos = 680; $ypos = 26; $width = 100; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_TIME_DIAG",$ecolors{white},$ecolors{blue},"static");
 
 	# Add Sync Source label
@@ -200,19 +200,19 @@ sub createGdsMedm
 	$medmdata .= ("CDS::medmGen::medmGenTextDyn") -> ($xpos,$ypos,$width,$height,"NO SYNC",$ecolors{red},"(A&255) == 0","$site\:FEC-$dcuid\_TIME_ERR");
 
     # Add Uptime
-	$xpos = 101; $ypos = 145; $width = 97; $height = 21;
+	$xpos = 680; $ypos = 46; $width = 100; $height = 21;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{black},"","","");
-	$xpos = 109; $ypos = 129; $width = 85; $height = 15;
+	$xpos = 560; $ypos = 50; $width = 120; $height = 14;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"Uptime (D/H/M)",$ecolors{black});
-	$xpos = 105; $ypos = 148; $width = 25; $height = 15;
+	$xpos = 683; $ypos = 49; $width = 25; $height = 15;
     $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_UPTIME_DAY",$ecolors{white},$ecolors{black},"static");
-	$xpos = 130; $ypos = 148; $width = 10; $height = 15;
+	$xpos = 713; $ypos = 49; $width = 10; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height," : ",$ecolors{white});
-	$xpos = 138; $ypos = 148; $width = 25; $height = 15;
+	$xpos = 721; $ypos = 49; $width = 25; $height = 15;
     $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_UPTIME_HOUR",$ecolors{white},$ecolors{black},"static");
-	$xpos = 164; $ypos = 148; $width = 10; $height = 15;
+	$xpos = 747; $ypos = 49; $width = 10; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height," : ",$ecolors{white});
-	$xpos = 172; $ypos = 148; $width = 25; $height = 15;
+	$xpos = 755; $ypos = 49; $width = 25; $height = 15;
     $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_UPTIME_MINUTE",$ecolors{white},$ecolors{black},"static");
 
 
@@ -433,8 +433,8 @@ sub createGdsMedm
 	# ****************** ADD ADC / DAC related disp *******************************************************************
 	my $totalCards = 0;
 	$mdlNamelc = lc($mdlName);
-	$xpos = 215; $ypos = 200; $width = 30; $height = 20;
-	$bxpos = 247; $bypos = 201; $bwidth = 21; $bheight = 18;
+	$xpos = 205; $ypos = 200; $width = 40; $height = 20;
+	$bxpos = 255; $bypos = 201; $bwidth = 21; $bheight = 18;
 	for($ii=0;$ii<$adcCnt;$ii++)
 	{
 		$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_MONITOR_ADC$::adcCardNum[$ii].adl";
@@ -444,9 +444,9 @@ sub createGdsMedm
 		$bypos += 22;
 		$totalCards ++;
 		if(($totalCards % 5) == 0) {
-			$xpos = 295;
+			$xpos = 290;
 			$ypos = 200;
-			$bxpos = 327;
+			$bxpos = 340;
 			$bypos = 201;
 		}
 	}
