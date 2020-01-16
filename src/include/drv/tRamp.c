@@ -124,8 +124,18 @@ RampParamUpdate( RampParamState* state )
     state->isRamping = !( dxNow == 0.0 && state->dxPrev == 0.0 );
     if ( dxNow == dxReq )
         state->val = state->req;
-    else
+    else if(dxNow != 0.0)
+    {
+        const double min_precision = 1.1103e-16;  //approx. minimum fraction of a
+                                                // double precision value that when added, changes that value
+
+        double min_change = lfabs(state->val)*min_precision;
+        if(minchange > lfabs(dxNow))
+        {
+            dxNow = dxNow > 0 ? minchange : -minchange;
+        }
         state->val += dxNow;
+    }
     state->dxPrev = dxNow;
 
     return state->val;
