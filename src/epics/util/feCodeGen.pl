@@ -267,7 +267,7 @@ $meFile .= "Makefile\.";
 $meFile .= $ARGV[1];
 $meFile .= epics;
 $epicsScreensDir = "../../../build/" . $ARGV[1] . "epics/medm";
-$caqtdmScreensDir = "../../../build/" . $ARGV[1] . "epics/medm/caqtdm";
+$caqtdmScreensDir = "../../../build/" . $ARGV[1] . "epics/medm";
 $configFilesDir = "../../../build/" . $ARGV[1] . "epics/config";
 $compileMessageDir = "../../../";
 $warnMsgFile = $compileMessageDir . $ARGV[1] . "_warnings.log";
@@ -1936,7 +1936,6 @@ $ffmedm .= "\\/";
 }
 
 mkpath $epicsScreensDir, 0, 0755;
-mkpath $caqtdmScreensDir, 0, 0755;
 
 my $usite = uc $site;
 my $lsite = lc $site;
@@ -2247,21 +2246,15 @@ for($ii=0;$ii<$dacCnt;$ii++)
 
 # ******************************************************************************************
 #//		- GENERATE caQtDM SCREENS
-$sed_arg = "s/$ifo\\/medm/$ifo\\/caqtdm/g ";
-$rmadl_arg = "s/.adl/.ui/g ";
 opendir my $dh, $epicsScreensDir;
 while (my $cf = readdir $dh) {
    if($cf =~ m/.adl/) {
-        my ($fbase,$fext) = split '\.',$cf;
-	print "file is $fbase \n";
-	system("cp $epicsScreensDir/$cf ./tmp.adl" );
-	system("cat tmp.adl | sed '$sed_arg' > tmp2.adl");
-	system("cat tmp2.adl | sed '$rmadl_arg' > tmp.adl");
-	system("adl2ui tmp.adl");
+	my ($fbase,$fext) = split '\.',$cf;
+	system("cp $epicsScreensDir/$cf ." );
 	$ui_output = "$caqtdmScreensDir/$fbase" . ".ui";
-	print "new file is $ui_output \n";
-	system("cp tmp.ui $ui_output");
-	system("rm tmp.adl tmp2.adl tmp.ui");
+	system("adl2ui $cf");
+	system("cp $fbase.ui $ui_output");
+	system("rm $fbase.ui $cf");
    }
 }
 
