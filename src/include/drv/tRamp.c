@@ -149,7 +149,7 @@ RampParamUpdate( RampParamState* state )
     state->isRamping = !( dxNow == 0.0 && state->dxPrev == 0.0 );
 
     //if close enough, just jump to the end
-    if ( lfabs(dxNow) > lfabs(dxReq))
+    if ( lfabs(dxNow) >= lfabs(dxReq))
     {
         state->val = state->req;
         dxNow = dxReq;
