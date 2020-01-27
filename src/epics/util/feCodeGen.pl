@@ -2676,11 +2676,12 @@ if ($pciNet > 0) {
         if (-e "$pciegenfile") {
           print OUTM "#Enable use of PCIe RFM Network Gen 2\n";
           print OUTM "DISDIR = /opt/srcdis\n";
-          print OUTM "EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM_GX/drv/src -I\$(DISDIR)/src/IRM_GX/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -I\$(DISDIR)/src/COMMON/osif/kernel/include -I\$(DISDIR)/src/COMMON/osif/kernel/include/LINUX -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
-        print OUTM "EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_DIS_KERNEL_=1 -I\$(DISDIR)/src/IRM_GX/drv/src -I\$(DISDIR)/src/IRM_GX/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -I\$(DISDIR)/src/COMMON/osif/kernel/include -I\$(DISDIR)/src/COMMON/osif/kernel/include/LINUX -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
+          print OUTM "KBUILD_EXTRA_SYMBOLS += \$(DISDIR)/src/SCI_SOCKET/ksocket/LINUX/Module.symvers\n";
+          print OUTM "EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_DIS_KERNEL_=1 -I\$(DISDIR)/src/IRM_GX/drv/src -I\$(DISDIR)/src/IRM_GX/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -I\$(DISDIR)/src/COMMON/osif/kernel/include -I\$(DISDIR)/src/COMMON/osif/kernel/include/LINUX -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
 	} else {
           print OUTM "#Enable use of PCIe RFM Network Gen 1\n";
           print OUTM "DISDIR = /opt/srcdis\n";
+          print OUTM "KBUILD_EXTRA_SYMBOLS += \$(DISDIR)/src/SCI_SOCKET/ksocket/lib/LINUX/Module.symvers\n";
           print OUTM "EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
         }
 }
