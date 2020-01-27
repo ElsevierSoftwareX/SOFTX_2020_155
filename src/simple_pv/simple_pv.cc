@@ -3,6 +3,7 @@
 //
 #include "simple_pv.h"
 #include "simple_epics.hh"
+#include "simple_epics_internal.hh"
 
 #include <algorithm>
 #include <memory>
@@ -20,7 +21,7 @@ simple_pv_server_create( const char* prefix, SimplePV* pvs, int pv_count )
         return nullptr;
     }
     std::unique_ptr< simple_epics::Server > server =
-        std::make_unique< simple_epics::Server >( );
+        simple_epics::detail::make_unique_ptr< simple_epics::Server >( );
 
     const std::string prefix_ = ( prefix ? prefix : "" );
 

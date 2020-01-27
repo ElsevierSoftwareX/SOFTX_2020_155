@@ -24,7 +24,7 @@ namespace simple_epics
         }
         std::string name{ attr.name( ) };
         pvs_.insert( std::make_pair( std::move( name ),
-                                     std::make_unique< detail::simpleIntPV >(
+                                     detail::make_unique_ptr< detail::simpleIntPV >(
                                          *this, std::move( attr ) ) ) );
     }
 
@@ -41,7 +41,7 @@ namespace simple_epics
         }
         std::string name{ attr.name( ) };
         pvs_.insert( std::make_pair( std::move( name ),
-                                     std::make_unique< detail::simpleStringPV >(
+                                     detail::make_unique_ptr< detail::simpleStringPV >(
                                          *this, std::move( attr ) ) ) );
     }
 
