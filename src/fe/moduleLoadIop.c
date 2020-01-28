@@ -61,7 +61,8 @@ rt_iop_init( void )
     status = init_dolphin( 2 );
     if ( status != 0 )
     {
-        return -1;
+	    printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: Dolphin Network initialization failed; ret = %d\n", ret );
+        return -6;
     }
 #endif
 
