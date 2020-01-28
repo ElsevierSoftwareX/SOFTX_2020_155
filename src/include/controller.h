@@ -277,6 +277,8 @@ CDS_HARDWARE              cdsPciModules; // Structure of PCI hardware addresses
 volatile IO_MEM_DATA*     ioMemData;
 volatile IO_MEM_DATA_IOP* ioMemDataIop;
 volatile int              vmeDone = 0; // Code kill command
+volatile int              fe_status_return = 0; // fe code status return to module_exit
+volatile int              fe_status_return_subcode = 0; // fe code status return to module_exit
 volatile int              stop_working_threads = 0;
 
 extern unsigned int cpu_khz;

@@ -255,6 +255,7 @@ fe_start_iop( void* arg )
     if ( initVars( pDsp[ 0 ], pDsp[ 0 ], dspCoeff, MAX_MODULES, pCoeff[ 0 ] ) )
     {
         pLocalEpics->epicsOutput.fe_status = FILT_INIT_ERROR;
+        fe_status_return = FILT_INIT_ERROR;
         return 0;
     }
 
@@ -288,6 +289,7 @@ fe_start_iop( void* arg )
     if ( status == -1 )
     {
         pLocalEpics->epicsOutput.fe_status = DAQ_INIT_ERROR;
+        fe_status_return = DAQ_INIT_ERROR;
         vmeDone = 1;
         return ( 0 );
     }
@@ -310,6 +312,7 @@ fe_start_iop( void* arg )
 
     // Clear the code exit flag
     vmeDone = 0;
+    fe_status_return = 0;
 
     /// \> Call user application software initialization routine.
     iopDacEnable = feCode( cycleNum,
@@ -534,16 +537,15 @@ fe_start_iop( void* arg )
             }
         }
 
+	// In normal operation, the following for loop runs only once per IOP code cycle.
+	// This for loop runs > once per cycle if ADC is clocking faster then IOP is running ie
+    // specifically added for fast 18bit ADC running at 128KS/sec and greater.
         for ( usloop = 0; usloop < UNDERSAMPLE; usloop++ )
         {
-
-            // **************************************************************************************
-            /// \> Call the front end specific application  ******************\n
-            /// - -- This is where the user application produced by RCG gets
-            /// called and executed. \n\n
-            //
+            // Move ADC data from read buffer to local buffer for passing to user code.
             for ( ii = 0; ii < cdsPciModules.adcCount; ii++ )
             {
+                // If ADC is fast 18bit, then provide means to move oversampled ADC data
                 if ( cdsPciModules.adcType[ ii ] == GSC_18AI32SSC1M )
                 {
                     for ( jj = 0; jj < 32; jj++ )
@@ -553,12 +555,18 @@ fe_start_iop( void* arg )
                 }
                 else
                 {
+                    // This is standard ADC (not oversampled 18bit) data move
                     for ( jj = 0; jj < 32; jj++ )
                     {
                         adcval[ ii ][ jj ] = dWord[ ii ][ jj ][ 0 ];
                     }
                 }
             }
+            // **************************************************************************************
+            /// \> Call the front end specific application  ******************\n
+            /// - -- This is where the user application produced by RCG gets
+            /// called and executed. \n\n
+            //
             cpuClock[ CPU_TIME_USR_START ] = rdtsc_ordered( );
             iopDacEnable = feCode( cycleNum,
                                    adcval,
@@ -946,6 +954,7 @@ fe_start_iop( void* arg )
                     pLocalEpics->epicsOutput.fe_status = CHAN_HOP_ERROR;
                     stop_working_threads = 1;
                     vmeDone = 1;
+                    fe_status_return = CHAN_HOP_ERROR;
                     continue;
                 }
                 else

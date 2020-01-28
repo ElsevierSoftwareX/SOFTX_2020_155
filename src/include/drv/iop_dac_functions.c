@@ -115,11 +115,13 @@ inline int
 iop_dac_write( )
 {
     unsigned int* pDacData;
-    int           ii, jj, mm;
+    int           mm;
     int           limit;
     int           mask;
     int           num_outs;
     int           status = 0;
+    int           card = 0;
+    int           chan = 0;
 
     /// START OF IOP DAC WRITE ***************************************** \n
     /// \> If DAC FIFO error, always output zero to DAC modules. \n
@@ -128,55 +130,55 @@ iop_dac_write( )
     /// \> Loop thru all DAC modules
     if ( dacWriteEnable > 4 )
     {
-        for ( jj = 0; jj < cdsPciModules.dacCount; jj++ )
+        for ( card = 0; card < cdsPciModules.dacCount; card++ )
         {
             /// - -- Point to DAC memory buffer
-            pDacData = (unsigned int*)( cdsPciModules.pci_dac[ jj ] );
+            pDacData = (unsigned int*)( cdsPciModules.pci_dac[ card ] );
             /// - -- locate the proper DAC memory block
-            mm = cdsPciModules.dacConfig[ jj ];
+            mm = cdsPciModules.dacConfig[ card ];
             /// - -- Determine if memory block has been set with the correct
             /// cycle count by Slave app.
             if ( ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle == ioClockDac )
             {
-                dacEnable |= pBits[ jj ];
+                dacEnable |= pBits[ card ];
             }
             else
             {
-                dacEnable &= ~( pBits[ jj ] );
-                dacChanErr[ jj ] += 1;
+                dacEnable &= ~( pBits[ card ] );
+                dacChanErr[ card ] += 1;
             }
             /// - -- Set overflow limits, data mask, and chan count based on DAC
             /// type
             limit = OVERFLOW_LIMIT_16BIT;
             mask = GSAO_16BIT_MASK;
             num_outs = GSAO_16BIT_CHAN_COUNT;
-            if ( cdsPciModules.dacType[ jj ] == GSC_18AO8 )
+            if ( cdsPciModules.dacType[ card ] == GSC_18AO8 )
             {
                 limit = OVERFLOW_LIMIT_18BIT; // 18 bit limit
                 mask = GSAO_18BIT_MASK;
                 num_outs = GSAO_18BIT_CHAN_COUNT;
             }
-            if ( cdsPciModules.dacType[ jj ] == GSC_20AO8 )
+            if ( cdsPciModules.dacType[ card ] == GSC_20AO8 )
             {
                 limit = OVERFLOW_LIMIT_20BIT; // 20 bit limit
                 mask = GSAO_20BIT_MASK;
                 num_outs = GSAO_20BIT_CHAN_COUNT;
             }
             /// - -- For each DAC channel
-            for ( ii = 0; ii < num_outs; ii++ )
+            for ( chan = 0; chan < num_outs;chan++ )
             {
 #ifdef FLIP_SIGNALS
-                dacOut[ jj ][ ii ] *= -1;
+                dacOut[ card ][ chan ] *= -1;
 #endif
                 /// - ---- Read DAC output value from shared memory and reset
                 /// memory to zero
-                if ( ( !dacChanErr[ jj ] ) && ( iopDacEnable ) )
+                if ( ( !dacChanErr[ card ] ) && ( iopDacEnable ) )
                 {
                     dac_out =
-                        ioMemData->iodata[ mm ][ ioMemCntrDac ].data[ ii ];
+                        ioMemData->iodata[ mm ][ ioMemCntrDac ].data[ chan ];
                     /// - --------- Zero out data in case user app dies by next
                     /// cycle when two or more apps share same DAC module.
-                    ioMemData->iodata[ mm ][ ioMemCntrDac ].data[ ii ] = 0;
+                    ioMemData->iodata[ mm ][ ioMemCntrDac ].data[ chan ] = 0;
                 }
                 else
                 {
@@ -185,28 +187,28 @@ iop_dac_write( )
                 }
                 /// - ----  Write out ADC duotone signal to first DAC, last
                 /// channel, if DAC duotone is enabled.
-                if ( ( dt_diag.dacDuoEnable ) && ( ii == ( num_outs - 1 ) ) &&
-                     ( jj == 0 ) )
+                if ( ( dt_diag.dacDuoEnable ) && ( chan == ( num_outs - 1 ) ) &&
+                     ( card == 0 ) )
                 {
                     dac_out = adcinfo.adcData[ 0 ][ ADC_DUOTONE_CHAN ];
                 }
 // Code below is only for use in DAQ test system.
 #ifdef DIAG_TEST
-                if ( ( ii == 0 ) && ( jj == 0 ) )
+                if ( ( chan == 0 ) && ( card == 0 ) )
                 {
                     if ( cycleNum < 100 )
                         dac_out = limit / 20;
                     else
                         dac_out = 0;
                 }
-                if ( ( ii == 0 ) && ( jj == 1 ) )
+                if ( ( chan == 0 ) && ( card == 1 ) )
                 {
                     if ( cycleNum < 100 )
                         dac_out = limit / 20;
                     else
                         dac_out = 0;
                 }
-                if ( ( ii == 0 ) && ( jj == 2 ) )
+                if ( ( chan == 0 ) && ( card == 2 ) )
                 {
                     if ( cycleNum < 100 )
                         dac_out = limit / 20;
@@ -219,10 +221,10 @@ iop_dac_write( )
                 /// errors
                 if ( dac_out > limit || dac_out < -limit )
                 {
-                    dacinfo.overflowDac[ jj ][ ii ]++;
-                    pLocalEpics->epicsOutput.overflowDacAcc[ jj ][ ii ]++;
+                    dacinfo.overflowDac[ card ][ chan ]++;
+                    pLocalEpics->epicsOutput.overflowDacAcc[ card ][ chan ]++;
                     overflowAcc++;
-                    dacOF[ jj ] = 1;
+                    dacOF[ card ] = 1;
                     odcStateWord |= ODC_DAC_OVF;
                     ;
                     if ( dac_out > limit )
@@ -235,10 +237,10 @@ iop_dac_write( )
                     dac_out = 0;
                 /// - ---- Load last values to EPICS channels for monitoring on
                 /// GDS_TP screen.
-                dacOutEpics[ jj ][ ii ] = dac_out;
+                dacOutEpics[ card ][ chan ] = dac_out;
 
                 /// - ---- Load DAC testpoints
-                floatDacOut[ 16 * jj + ii ] = dac_out;
+                floatDacOut[ 16 * card + chan ] = dac_out;
 
                 /// - ---- Write to DAC local memory area, for later xmit to DAC
                 /// module
@@ -252,17 +254,17 @@ iop_dac_write( )
             /// - -- DMA Write data to DAC module
             if ( dacWriteEnable > 4 )
             {
-                if ( cdsPciModules.dacType[ jj ] == GSC_16AO16 )
+                if ( cdsPciModules.dacType[ card ] == GSC_16AO16 )
                 {
-                    gsc16ao16DmaStart( jj );
+                    gsc16ao16DmaStart( card );
                 }
-                else if ( cdsPciModules.dacType[ jj ] == GSC_20AO8 )
+                else if ( cdsPciModules.dacType[ card ] == GSC_20AO8 )
                 {
-                    gsc20ao8DmaStart( jj );
+                    gsc20ao8DmaStart( card );
                 }
                 else
                 {
-                    gsc18ao8DmaStart( jj );
+                    gsc18ao8DmaStart( card );
                 }
             }
         }

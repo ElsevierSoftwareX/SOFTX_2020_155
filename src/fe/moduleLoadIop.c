@@ -294,10 +294,10 @@ rt_iop_cleanup( void )
     // Bring the CPU back up
     cpu_up( CPUID );
     msleep( 1000 );
-    printk( "Brought the CPU back up\n" );
 #endif
-    printk( "Just before returning from cleanup_module "
-            "for " SYSTEM_NAME_STRING_LOWER "\n" );
+
+    // Print out any error messages from FE code on exit
+    print_exit_messages(fe_status_return, fe_status_return_subcode);
 }
 
 module_init( rt_iop_init );

@@ -223,6 +223,8 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
             pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
             pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
             pLocalEpics->epicsOutput.fe_status = ADC_TO_ERROR;
+            fe_status_return = ADC_TO_ERROR;
+            fe_status_return_subcode = card;
             stop_working_threads = 1;
             vmeDone = 1;
             continue;
@@ -256,16 +258,10 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
         packedData = (int*)cdsPciModules.pci_adc[ card ];
         /// - ---- First, and only first, channel should have upper bit marker
         /// set. If not, have a channel hopping error.
-        if ( (unsigned int)*packedData > 65535 )
-        // if(!((unsigned int)*packedData & ADC_1ST_CHAN_MARKER))
-        {
-            // adcinfo->adcChanErr[jj] = 1;
-            adcinfo->chanHop = 0;
-            // pLocalEpics->epicsOutput.stateWord |= FE_ERROR_ADC;
-        }
-        else
+        if(!((unsigned int)*packedData & ADC_1ST_CHAN_MARKER))
         {
             adcinfo->chanHop = 1;
+            fe_status_return_subcode = card;
         }
 
         limit = OVERFLOW_LIMIT_16BIT;

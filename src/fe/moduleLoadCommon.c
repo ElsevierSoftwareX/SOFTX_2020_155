@@ -145,3 +145,34 @@ print_io_info( CDS_HARDWARE* cdsp )
                 "*************\n" );
     }
 }
+
+print_exit_messages(int error_type, int error_sub)
+{
+    printf( "" SYSTEM_NAME_STRING_LOWER " : Brought the CPU back up\n" );
+    switch(error_type) {
+        case FILT_INIT_ERROR:
+            printf("" SYSTEM_NAME_STRING_LOWER " FE error: %s\n","exited on filter initiialization error");
+            break;
+        case DAQ_INIT_ERROR:
+            printf("" SYSTEM_NAME_STRING_LOWER " FE error: %s\n","exited on DAQ initiialization error");
+            break;
+        case CHAN_HOP_ERROR:
+            printf("" SYSTEM_NAME_STRING_LOWER " FE error: %s\n","exited on ADC Channel Hopping error");
+            printf("" SYSTEM_NAME_STRING_LOWER " : Error detected on ADC %d\n",error_sub);
+            break;
+        case BURT_RESTORE_ERROR:
+            printf("" SYSTEM_NAME_STRING_LOWER " FE error: %s\n","exited on BURT restore error");
+            break;
+        case DAC_INIT_ERROR:
+            printf("" SYSTEM_NAME_STRING_LOWER " FE error: %s\n","exited on DAC module initialization error");
+            break;
+        case ADC_TO_ERROR:
+            printf("" SYSTEM_NAME_STRING_LOWER " FE error: %s\n","exited on ADC module timeout error");
+            printf("" SYSTEM_NAME_STRING_LOWER " : Error detected on ADC %d\n",error_sub);
+            break;
+        default:
+            printf( "Returning from cleanup_module "
+            "for " SYSTEM_NAME_STRING_LOWER "\n" );
+            break;
+    }
+}
