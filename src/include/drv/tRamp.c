@@ -120,12 +120,45 @@ RampParamUpdate( RampParamState* state )
             dxNow = dxLand;
     }
 
+
+    //approx. minimum fraction of a double precision value that when added, changes that value
+    const double minprecision = 1.1103e-16;
+
+    //minimum change that will affect the current value (this is approximate, and can be bigger than the minimum change).
+    double minchange = lfabs(state->val)*minprecision;
+
+    if(dxNow != 0.0)
+    {
+        //handle the case where dxReq is smaller than our approx. minimum
+        if(minchange > lfabs(dxReq))
+        {
+            dxNow = dxReq;
+        }
+        else
+        {
+            //otherwise, use the approx. minimum as a lower limit for our change.
+            if(minchange > lfabs(dxNow))
+            {
+                dxNow = dxNow > 0 ? minchange : -minchange;
+            }
+        }
+    }
+
+
     // update state
     state->isRamping = !( dxNow == 0.0 && state->dxPrev == 0.0 );
-    if ( dxNow == dxReq )
+
+    //if close enough, just jump to the end
+    if ( lfabs(dxNow) >= lfabs(dxReq))
+    {
         state->val = state->req;
+        dxNow = dxReq;
+    }
     else
+    {
         state->val += dxNow;
+    }
+
     state->dxPrev = dxNow;
 
     return state->val;

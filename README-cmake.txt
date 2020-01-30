@@ -92,67 +92,77 @@ pcaspy
 libboost-all-dev    (Required for FrameCPP >= 2.6.0)
 
 You will also need to install
-MX/Open-MX
+Open-MX
 Dolphin
 
-MX and open-MX are available in the CDS jessie-restricted repository (Debian 8) or may be built by hand.
+Open-MX is available in the CDS jessie-restricted repository (Debian 8) or may be built by hand.
 
 On Debian 8 we have back ported the main zmq package from Debian 9 so that 4.2.1 is available on Debian 8, 9, and
 the gentoo systems.
 
-ZMQ/Dolphin IX transport
+FE -> DAQD Transport
 
-The transport layer to be used with daqd is in flux.  Currently the following components are used:
+The transport layer to be used with daqd is a modular system based around xmit and recv processes. Currently the following components are used:
 
-zmq_fe on the FE computers
-zmq_rcv_ix_xmit_delay on the data concentrator
-ix_fb_recv on the daqd machines
+Using OpenMX and IX Dolphin
 
-We also have a rebuild of the mx_streamer to work with the daqd system.  This is NOT ready yet.
+local_dc and omx_xmit on the FE computers
+omx_recv and dix_xmit on the data concentrator
+dix_recv on the daqd machines
 
-mx_stream on the FE computers
-mx_rcv on the data concentrator (eventually mx_rcv_ix_xmit)
-ix_fb_recv on the daqd machines eventually
+Using Zmq and IX Dolphin
 
-Running zmq_fe
-
-zmq_fe is invoked like this:
-
-zmq_fe -s "system list here... x1iopasc0 x1asc..." -D <optional delay in ms> -d <path to gds param dir> -e eth1
-
-You can get epics data out of the system as well, to do so add:
-
--p <some EPICS variable name prefix>
--P <path to a fifo>
-
-Then run the src/zmq_stream/scripts/dc_cas.py <path to fifo used by zmq_fe>.  This will export some information about the sender over EPICS.
+local_dc and zmq_xmit on the FE computers
+zmq_recv and dix_xmit on the data concentrator
+dix_recv on the daqd machines
 
 
-Receiving ZMQ on the data concentrator.
+local_dc reads the individual model shared memory sections and concentrates it into one machine wide share memory block.  Then the *_xmit programs read the shared machine block and transmit the data.  The *_xmit processes receive data from the machines.
 
-The receiver process on the data concentrator is zmq_rcv_ix_xmit, it is run as:
+local_dc -b local_dc -m 100 -s "x1iop x1model1 x1model2"
+ -b name of the local buffer to put the data into
+ -m size in MB of the local buffer
+ -s list of models to concentrate data from
 
-zmq_rcv_ix_xmit-delay -s "fe endpoints to subscribe to" -g 0 -b ifo -p <epics prefix> -P <path to fifo> -X <timing debug file>
+omx_xmit  -b local_dc -m 100 -e 1 -r 1 -t x1dc0:0
+ -b name of the local buffer to read data from
+ -m size of the local buffer
+ -e local MX endpoint
+ -r remote MX endpoint
+ -t target device
 
-The -p & -P parameters used the same as with zmq_fe.  You must run a copy of dc_cas.py to export this data.
-The -g field is the dolphin group number.
--b ifo tells the system to use the "ifo" named mbuf
--X dumps information about what has been received around a timing/input glitch in zmq to a file, it is not required.
+omx_recv -s 32 -b local_dc -m 100 -d 10
+ -s the number of systems to listen for
+ -b the name of the local buffer to write data to
+ -m the size of the local buffer
+ -d number of ms to wait for all the data to arrive
 
+dix_xmit -b local_dc -m 100 -g 0 -p X1:CDS-DIX_
+ -b the name of the buffer to read data from
+ -m the size of the buffer in MB
+ -g the IX memory window/group number to transfer data over
+ -p prefix for EPICS debug information
 
-Receiving IX on the daqds
+dix_recv -b local_dc -m 100 -g 0
+ -b the name of the buffer to write data to
+ -m the size of the buffer in MB
+ -g the IX memory window/group number to transfer data over
 
-Run the ix_fb_rcv on the daqd systems (fw, tw, nds, ...)
+zmq_xmit -b local_dc -m 100 -e eth0
+ -b the name of the buffer to read data from
+ -m the size of the buffer in MB
+ -e the interface to publish data on
 
-ix_fb_rcv -g 0 -b ifo
-
-Tell it which dolphin group to listen to, and where to put the data.
+zmq_recv -b local_dc -m 100 -s "x1susex x1lsc0 x1asc0"
+ -b the name of the buffer to write data to
+ -m the size of the buffer in MB
+ -s the systems to retrieve data from
 
 Configuring daqd
 
 Daqd needs to know which mbuf to read from and its size.
 
-set parameter "shmem_input" = "ifo";
+set parameter "shmem_input" = "local_dc";
 set parameter "shmem_size" = "104857600";
 
 This MUST be set prior to the producer being started, and should just be set before any start ... calls in the daqdrc.

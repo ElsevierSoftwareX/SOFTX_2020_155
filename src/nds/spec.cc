@@ -297,6 +297,11 @@ Spec::parse( std::string fname )
                     mSignalTypes.push_back( _32bit_complex );
                     mSignalBps.push_back( 8 );
                 }
+                else if ( v[ i ] == "_32bit_uint" )
+                {
+                    mSignalTypes.push_back( _32bit_uint );
+                    mSignalBps.push_back( 4 );
+                }
                 else if ( v[ i ] == "unknown" )
                 {
                     mSignalTypes.push_back( _undefined );

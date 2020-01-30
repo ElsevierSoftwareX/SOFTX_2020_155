@@ -45,6 +45,9 @@ extern daqd_c daqd;
 void*
 trender_c::raw_minute_saver( )
 {
+    const int STATE_NORMAL = 0;
+    const int STATE_WRITING = 1;
+
     // Set thread parameters
     daqd_c::set_thread_priority(
         "Raw minute trend saver", "dqmtraw", SAVER_THREAD_PRIORITY, 0 );
@@ -88,6 +91,7 @@ trender_c::raw_minute_saver( )
 
             time_t t = time( 0 );
             DEBUG( 1, cerr << "Begin raw minute trend writing" << endl );
+            PV::set_pv( PV::PV_RAW_MTREND_TW_STATE, STATE_WRITING );
 
             mt_stats.sample( );
             for ( int j = 0; mt_file_stats.sample( ), j < num_channels;
@@ -210,6 +214,9 @@ trender_c::raw_minute_saver( )
             DEBUG( 1,
                    cerr << "Finished raw minute trend writing in " << t
                         << " seconds" << endl );
+
+            PV::set_pv( PV::PV_RAW_MTREND_TW_STATE, STATE_NORMAL );
+            PV::set_pv( PV::PV_RAW_MTREND_TW_WRITE_SEC, t );
         }
 
         if ( eof_flag )
