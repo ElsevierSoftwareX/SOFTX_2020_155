@@ -39,7 +39,8 @@ namespace CDS_NDS
             _64bit_integer = 3,
             _32bit_float = 4,
             _64bit_double = 5,
-            _32bit_complex = 6
+            _32bit_complex = 6,
+            _32bit_uint = 7
         } DataTypeType;
 
         /// Get the data type string
@@ -63,6 +64,8 @@ namespace CDS_NDS
                 return "_64bit_double";
             case _32bit_complex:
                 return "_32bit_complex";
+            case _32bit_uint:
+                return "_32bit_uint";
             }
             return "unknown";
         }

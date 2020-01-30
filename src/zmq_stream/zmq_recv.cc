@@ -631,8 +631,7 @@ main(int argc, char **argv)
 
 	// PV/debug information
 	char *pv_prefix = 0;
-	char *pv_debug_pipe_name = 0;
-	int pv_debug_pipe = -1;
+	simple_pv_handle pcas_server = NULL;
 
 	// Declare shared memory data variables
 	daq_multi_cycle_header_t *ifo_header;
@@ -660,7 +659,7 @@ main(int argc, char **argv)
     int receive_map_dump_counter = 0;
 
 	// Get arguments sent to process
-	while ((c = getopt(argc, argv, "b:hs:m:vp:P:DL:zX:")) != EOF) switch(c) {
+	while ((c = getopt(argc, argv, "b:hs:m:vp:DL:zX:")) != EOF) switch(c) {
 	case 's':
 		sysname = optarg;
 		break;
@@ -684,12 +683,9 @@ main(int argc, char **argv)
     case 'b':
         buffer_name = optarg;
         break;
-	case 'p':
-		pv_prefix = optarg;
-		break;
-	case 'P':
-		pv_debug_pipe_name = optarg;
-		break;
+    case 'p':
+            pv_prefix = optarg;
+            break;
     case 'h':
     case 'L':
         local_iface_names = optarg;
@@ -1044,13 +1040,14 @@ main(int argc, char **argv)
                         0, 0, 0, 0,
             },
 	};
-	if (pv_debug_pipe_name)
+	if (pv_prefix)
 	{
-		pv_debug_pipe = open(pv_debug_pipe_name, O_NONBLOCK | O_RDWR, 0);
-		if (pv_debug_pipe < 0) {
-			fprintf(stderr, "Unable to open %s for writting (pv status)\n", pv_debug_pipe_name);
-			exit(1);
-		}
+	    pcas_server = simple_pv_server_create(pv_prefix, pvs, sizeof(pvs)/ sizeof(pvs[0]));
+            if ( pcas_server == NULL )
+            {
+                fprintf(stderr, "Unable to create epics server\n");
+                exit(1);
+            }
 	}
 
 	missed_flag = 1;
@@ -1245,7 +1242,7 @@ main(int argc, char **argv)
 					}
 					missed_nsys[ii] = 0;
 				}
-				send_pv_update(pv_debug_pipe, pv_prefix, pvs, sizeof(pvs)/sizeof(pvs[0]));
+				simple_pv_server_update(pcas_server);
 
 				if (do_verbose) {
 					printf("\nData rdy for cycle = %d\t\tTime Interval = %ld msec\n", sending_cycle, myptime);
@@ -1309,5 +1306,6 @@ main(int argc, char **argv)
         }
     }
     zmq_ctx_destroy(zmq_ctx);
-	exit(0);
+    simple_pv_server_destroy( &pcas_server );
+    exit(0);
 }
