@@ -18,6 +18,8 @@
 #include "mx_extensions.h"
 #include <pthread.h>
 
+#include "args.h"
+
 #define MX_MUTEX_T pthread_mutex_t
 #define MX_MUTEX_INIT( mutex_ ) pthread_mutex_init( mutex_, 0 )
 #define MX_MUTEX_LOCK( mutex_ ) pthread_mutex_lock( mutex_ )
@@ -70,39 +72,6 @@ int daqStatBit[ 2 ];
 /*                                U S A G E */
 /*                                                                               */
 /*********************************************************************************/
-
-void
-Usage( )
-{
-    fprintf( stderr, "Usage of omx_xmit:\n" );
-    fprintf( stderr, "mx_fe  -s <models> <OPTIONS>\n" );
-    fprintf( stderr,
-             " -b <buffer>    : Name of the mbuf to read local data from "
-             "(defaults to local_dc)\n" );
-    fprintf( stderr,
-             " -m <value>     : Local memory buffer size in megabytes\n" );
-    fprintf( stderr, " -l <filename>  : log file name\n" );
-    fprintf( stderr, " -v 1           : Enable verbose output\n" );
-    fprintf( stderr,
-             " -e <0-31>	    : Number of the local mx end point to "
-             "transmit on\n" );
-    fprintf( stderr,
-             " -r <0-31>      : Number of the remote mx end point to transmit "
-             "to\n" );
-    fprintf( stderr,
-             " -t <target name: Name of MX target computer to transmit to\n" );
-    fprintf( stderr,
-             " -d <directory> : Path to the gds tp dir used to lookup model "
-             "rates\n" );
-    fprintf( stderr,
-             " -D <value>     : Add a delay in ms to sending the data.  Used "
-             "to spread the load\n" );
-    fprintf( stderr,
-             "                : when working with multiple sending systems.  "
-             "Defaults to 0.\n" );
-    fprintf( stderr, " -h             : This helpscreen\n" );
-    fprintf( stderr, "\n" );
-}
 
 /**
  * @brief Set the cycle counter to an invalid value.
@@ -349,22 +318,23 @@ int __CDECL
     int   nsys = 1;
     int   dcuId[ 10 ];
     int   ii = 0;
-    char* gds_tp_dir = 0;
+    const char* gds_tp_dir = 0;
     int   max_data_size_mb = 64;
     int   max_data_size = 0;
     int   error = 0;
-    char* buffer_name = "local_dc";
+    const char* buffer_name = "local_dc";
     int   send_delay_ms = 0;
+    args_handle arg_parser = NULL;
 
     mx_endpoint_t ep;
-    uint16_t      my_eid;
+    int      my_eid;
     uint64_t      his_nic_id;
     uint32_t      board_id;
     uint32_t      filter;
-    uint16_t      his_eid;
-    char*         rem_host;
-    char*         sysname;
-    extern char*  optarg;
+    int      his_eid;
+    const char*         rem_host;
+    const char*         sysname;
+    const char*   logfname = 0;
     mx_return_t   ret;
 
     rem_host = NULL;
@@ -379,74 +349,52 @@ int __CDECL
 
     ii = 0;
 
-    if ( argc < 3 )
+    arg_parser = args_create_parser("Transmit data between a LIGO FE computer and the daqd system over the open mx protocol");
+    if (!arg_parser)
     {
-        Usage( );
-        return ( -1 );
+        return -1;
     }
+    args_add_string_ptr(arg_parser, 't', ARGS_NO_LONG, "target", "Name of the MX target computer to transmit to", &rem_host, "");
+    args_add_string_ptr(arg_parser, 'b', ARGS_NO_LONG, "buffer", "Name of the mbuf to read local data from", &buffer_name, "local_dc");
+    args_add_int(arg_parser, 'm', ARGS_NO_LONG, "20-100", "Local memory buffer size in megabytes", &max_data_size_mb, 100);
+    args_add_string_ptr(arg_parser, 'l', ARGS_NO_LONG, "filename", "Log file name", &logfname, 0);
+    args_add_int(arg_parser, 'e', ARGS_NO_LONG, "0-31", "Number of the local mx end point to transmit on", &my_eid, 0);
+    args_add_int(arg_parser, 'r', ARGS_NO_LONG, "0-31", "Number of the remote mx end point to transmit to", &his_eid, 0);
+    args_add_flag(arg_parser, 'v', ARGS_NO_LONG, "Verbose output", &do_verbose);
+    args_add_string_ptr(arg_parser, 'd', ARGS_NO_LONG, "directory", "Path to the gds tp dir used to lookup models", &gds_tp_dir, 0);
+    args_add_int(arg_parser, 'D', ARGS_NO_LONG, "ms", "Add a delay in ms to before sending data.  Used to spread the load", &send_delay_ms, 0);
 
+    if (args_parse(arg_parser, argc, argv) < 0)
+    {
+        return -1;
+    }
     /* Get the parameters */
-    while ( ( counter = getopt( argc, argv, "b:e:m:h:v:r:t:d:l:D:" ) ) != EOF )
+    if ( max_data_size_mb < 20 )
     {
-        switch ( counter )
-        {
-        case 't':
-            rem_host = optarg;
-            break;
-        case 'b':
-            buffer_name = optarg;
-            fprintf( stderr, "Buffer name = '%s'\n", buffer_name );
-            break;
-
-        case 'm':
-            max_data_size_mb = atoi( optarg );
-            if ( max_data_size_mb < 20 )
-            {
-                fprintf( stderr, "Min data block size is 20 MB\n" );
-                return -1;
-            }
-            if ( max_data_size_mb > 100 )
-            {
-                fprintf( stderr, "Max data block size is 100 MB\n" );
-                return -1;
-            }
-            break;
-
-        case 'l':
-            if ( 0 == freopen( optarg, "w", stdout ) )
-            {
-                perror( "freopen" );
-                exit( 1 );
-            }
-            setvbuf( stdout, NULL, _IOLBF, 0 );
-            stderr = stdout;
-            break;
-        case 'r':
-            his_eid = atoi( optarg );
-            fprintf( stderr, "remoteeid = %d\n", his_eid );
-            break;
-        case 'v':
-            do_verbose = atoi( optarg );
-            break;
-        case 'e':
-            my_eid = atoi( optarg );
-            fprintf( stderr, "myeid = %d\n", my_eid );
-            break;
-        case 'd':
-            gds_tp_dir = optarg;
-            break;
-        case 'h':
-            Usage( );
-            return ( 0 );
-        case 'D':
-            send_delay_ms = atoi( optarg );
-            break;
-        default:
-            fprintf( stderr, "Not handling argument '%c'\n", counter );
-        }
+        fprintf( stderr, "Min data block size is 20 MB\n" );
+        args_fprint_usage(arg_parser, argv[0], stderr);
+        return -1;
     }
-
+    if ( max_data_size_mb > 100 )
+    {
+        fprintf( stderr, "Max data block size is 100 MB\n" );
+        args_fprint_usage(arg_parser, argv[0], stderr);
+        return -1;
+    }
     max_data_size = max_data_size_mb * 1024 * 1024;
+
+    if (logfname != 0)
+    {
+        if ( 0 == freopen( optarg, "w", stdout ) )
+        {
+            perror( "freopen" );
+            exit( 1 );
+        }
+        setvbuf( stdout, NULL, _IOLBF, 0 );
+        stderr = stdout;
+    }
+    fprintf( stderr, "myeid = %d\n", my_eid );
+    fprintf( stderr, "remoteeid = %d\n", his_eid );
 
     // If sending to DAQ via net enabled, ensure all options have been set
     mx_init( );
@@ -456,7 +404,7 @@ int __CDECL
         fprintf( stderr,
                  "\n***ERROR\n***Must set both -e and -r options to send data "
                  "to DAQ\n\n" );
-        Usage( );
+        args_fprint_usage(arg_parser, argv[0], stderr);
         return ( 0 );
     }
     fprintf( stderr,
@@ -474,7 +422,7 @@ int __CDECL
     }
 
     // Get pointers to local DAQ mbuf
-    ifo = (char*)findSharedMemorySize( buffer_name, max_data_size_mb );
+    ifo = (char*)findSharedMemorySize( (char*)buffer_name, max_data_size_mb );
     ifo_header = (daq_multi_cycle_header_t*)ifo;
     ifo_data = (char*)ifo + sizeof( daq_multi_cycle_header_t );
     cycle_data_size = ( max_data_size - sizeof( daq_multi_cycle_header_t ) ) /
@@ -496,7 +444,7 @@ int __CDECL
         exit( 1 );
     }
     sleep( 1 );
-    mx_hostname_to_nic_id( rem_host, &his_nic_id );
+    mx_hostname_to_nic_id( (char*)rem_host, &his_nic_id );
 
     reset_cycle_counter( ifo_header );
 
@@ -513,6 +461,7 @@ int __CDECL
     fprintf( stderr, "Closing out OpenMX and exiting\n" );
     mx_close_endpoint( ep );
     mx_finalize( );
+    args_destroy(&arg_parser);
 
     return 0;
 }

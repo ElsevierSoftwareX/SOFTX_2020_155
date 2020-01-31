@@ -21,7 +21,7 @@ if (OPENMX_FOUND)
 			${CMAKE_CURRENT_SOURCE_DIR}
             ${CMAKE_CURRENT_SOURCE_DIR}/../common
             ${CMAKE_CURRENT_SOURCE_DIR}/../common/bsd)
-	target_link_libraries(omx_xmit PUBLIC openmx::openmx ${MAKE_THREAD_LIBS_INIT})
+	target_link_libraries(omx_xmit PUBLIC openmx::openmx args ${MAKE_THREAD_LIBS_INIT})
 	set_target_properties(omx_xmit PROPERTIES LINKER_LANGUAGE CXX)
 
     install(TARGETS omx_xmit DESTINATION bin)
@@ -32,6 +32,7 @@ if (OPENMX_FOUND)
 			pv::simple_pv
 			openmx::openmx
 			${CMAKE_THREAD_LIBS_INIT}
+			args
 			)
 	install(TARGETS omx_recv DESTINATION bin)
 endif (OPENMX_FOUND)
