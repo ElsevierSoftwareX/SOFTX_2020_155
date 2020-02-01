@@ -25,6 +25,7 @@
 #include "../include/daqmap.h"
 #include "../include/daq_core.h"
 #include "../zmq_stream/dc_utils.h"
+#include "args.h"
 
 // #include "testlib.h"
 
@@ -98,24 +99,6 @@ int                  thread_cycle[ MAX_FE_COMPUTERS ];
 int                  thread_timestamp[ MAX_FE_COMPUTERS ];
 int                  rcv_errors = 0;
 int                  dataRdy[ MAX_FE_COMPUTERS ];
-
-void
-usage( )
-{
-    fprintf( stderr,
-             "Usage: mx2ix [args] -s server names -m shared memory size -g IX "
-             "channel \n" );
-    fprintf( stderr, "-l filename - log file name\n" );
-    fprintf( stderr,
-             "-s - number of FE computers to connect (1-32): Default = 32\n" );
-    fprintf( stderr, "-v - verbose prints diag test data\n" );
-    fprintf( stderr,
-             "-d - Max delay in milli seconds to wait for a FE to send data, "
-             "defaults to 10\n" );
-    fprintf( stderr, "-t - Number of rcvr threads per NIC: default = 16\n" );
-    fprintf( stderr, "-n - Data Concentrator number (0 or 1) : default = 0\n" );
-    fprintf( stderr, "-h - help\n" );
-}
 
 // *************************************************************************
 // Timing Diagnostic Routine
@@ -290,13 +273,12 @@ main( int argc, char** argv )
     pthread_t thread_id[ MAX_FE_COMPUTERS ];
     int nsys = MAX_FE_COMPUTERS; // The number of mapped shared memories (number
                                  // of data sources)
-    char* buffer_name = "ifo";
-    int   c;
-    int   ii; // Loop counter
-    int   delay_ms = 10;
-    int   delay_cycles = 0;
-
-    extern char* optarg; // Needed to get arguments to program
+    const char* buffer_name = "ifo";
+    int         c;
+    int         ii; // Loop counter
+    int         delay_ms = 10;
+    int         delay_cycles = 0;
+    int         dc_number = 0;
 
     // Declare shared memory data variables
     daq_multi_cycle_header_t* ifo_header;
@@ -308,85 +290,99 @@ main( int argc, char** argv )
     int                       max_data_size_mb = 100;
     int                       max_data_size = 0;
     char*                     mywriteaddr;
-    int                       dc_number = 1;
+    const char*               logfname = 0;
+    args_handle               arg_parser = NULL;
 
     /* set up defaults */
     int tpn = THREADS_PER_NIC;
 
-    if ( argc < 3 )
+    arg_parser = args_create_parser( "Receive data between from LIGO FE "
+                                     "computers over the open mx protocol" );
+    if ( !arg_parser )
     {
-        usage( );
-        return ( -1 );
+        return -1;
+    }
+    args_add_int( arg_parser,
+                  's',
+                  ARGS_NO_LONG,
+                  "1-32",
+                  "Number of FE computers to listen for",
+                  &nsys,
+                  MAX_FE_COMPUTERS );
+    args_add_flag(
+        arg_parser, 'v', ARGS_NO_LONG, "Verbose output", &do_verbose );
+    args_add_string_ptr( arg_parser,
+                         'b',
+                         ARGS_NO_LONG,
+                         "buffer",
+                         "Name of the mbuf to write data to",
+                         &buffer_name,
+                         "local_dc" );
+    args_add_int( arg_parser,
+                  'm',
+                  ARGS_NO_LONG,
+                  "20-100",
+                  "Local memory buffer size in megabytes",
+                  &max_data_size_mb,
+                  100 );
+    args_add_int( arg_parser,
+                  't',
+                  ARGS_NO_LONG,
+                  "threads",
+                  "Number of receiver threads per NIC",
+                  &tpn,
+                  16 );
+    args_add_int( arg_parser,
+                  'd',
+                  ARGS_NO_LONG,
+                  "ms",
+                  "Max delay in milli seconds to wait for a FE to send data",
+                  &delay_ms,
+                  10 );
+    args_add_string_ptr( arg_parser,
+                         'l',
+                         ARGS_NO_LONG,
+                         "filename",
+                         "Log file name",
+                         &logfname,
+                         0 );
+
+    if ( args_parse( arg_parser, argc, argv ) < 0 )
+    {
+        return -1;
     }
 
-    // Get arguments sent to process
-    while ( ( c = getopt( argc, argv, "b:hs:m:vp:d:l:t:n:" ) ) != EOF )
-        switch ( c )
+    if ( nsys > MAX_FE_COMPUTERS )
+    {
+        fprintf( stderr, "Max number of FE computers is 32\n" );
+        args_fprint_usage( arg_parser, argv[ 0 ], stderr );
+        exit( 1 );
+    }
+    if ( max_data_size_mb < 20 )
+    {
+        fprintf( stderr, "Min data block size is 20 MB\n" );
+        return -1;
+    }
+    if ( max_data_size_mb > 100 )
+    {
+        fprintf( stderr, "Max data block size is 100 MB\n" );
+        return -1;
+    }
+    if ( delay_ms < MIN_DELAY_MS || delay_ms > MAX_DELAY_MS )
+    {
+        fprintf( stderr, "The delay factor must be between 5ms and 40ms\n" );
+        return -1;
+    }
+    if ( logfname != 0 )
+    {
+        if ( 0 == freopen( optarg, "w", stdout ) )
         {
-        case 's':
-            nsys = atoi( optarg );
-            if ( nsys > MAX_FE_COMPUTERS )
-            {
-                fprintf( stderr, "Max number of FE computers is 32\n" );
-                usage( );
-                exit( 1 );
-            }
-            break;
-        case 'v':
-            do_verbose = 1;
-            break;
-        case 'n':
-            dc_number = atoi( optarg );
-            dc_number++;
-            if ( dc_number > 2 )
-            {
-                fprintf( stderr, "DC number must be 0 or 1\n" );
-                usage( );
-                exit( 1 );
-            }
-            break;
-        case 'm':
-            max_data_size_mb = atoi( optarg );
-            if ( max_data_size_mb < 20 )
-            {
-                fprintf( stderr, "Min data block size is 20 MB\n" );
-                return -1;
-            }
-            if ( max_data_size_mb > 100 )
-            {
-                fprintf( stderr, "Max data block size is 100 MB\n" );
-                return -1;
-            }
-            break;
-        case 't':
-            tpn = atoi( optarg );
-            break;
-        case 'b':
-            buffer_name = optarg;
-            break;
-        case 'd':
-            delay_ms = atoi( optarg );
-            if ( delay_ms < MIN_DELAY_MS || delay_ms > MAX_DELAY_MS )
-            {
-                fprintf( stderr,
-                         "The delay factor must be between 5ms and 40ms\n" );
-                return -1;
-            }
-            break;
-        case 'l':
-            if ( 0 == freopen( optarg, "w", stdout ) )
-            {
-                perror( "freopen" );
-                exit( 1 );
-            }
-            setvbuf( stdout, NULL, _IOLBF, 0 );
-            stderr = stdout;
-            break;
-        case 'h':
-        default:
-            usage( );
+            perror( "freopen" );
             exit( 1 );
         }
+        setvbuf( stdout, NULL, _IOLBF, 0 );
+        stderr = stdout;
+    }
 
     max_data_size = max_data_size_mb * 1024 * 1024;
     delay_cycles = delay_ms * 10;
@@ -402,7 +398,7 @@ main( int argc, char** argv )
     fprintf( stderr, "Num of sys = %d\n", nsys );
 
     // Get pointers to local DAQ mbuf
-    ifo = (char*)findSharedMemorySize( buffer_name, max_data_size_mb );
+    ifo = (char*)findSharedMemorySize( (char*)buffer_name, max_data_size_mb );
     ifo_header = (daq_multi_cycle_header_t*)ifo;
     ifo_data = (char*)ifo + sizeof( daq_multi_cycle_header_t );
     cycle_data_size = ( max_data_size - sizeof( daq_multi_cycle_header_t ) ) /
@@ -774,6 +770,8 @@ main( int argc, char** argv )
     sleep( 5 );
     fprintf( stderr, "closing out MX\n" );
     mx_finalize( );
+
+    args_destroy( arg_parser );
 
     exit( 0 );
 }
