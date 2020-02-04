@@ -9,3 +9,4 @@ target_include_directories(mbuf_probe PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/../../include
         )
 target_link_libraries(mbuf_probe PUBLIC driver::shmem)
+target_requires_cpp11(mbuf_probe PRIVATE)
