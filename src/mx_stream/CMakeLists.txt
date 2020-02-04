@@ -15,7 +15,17 @@ if (OPENMX_FOUND)
 #    target_link_libraries(mx_stream PUBLIC openmx::openmx ${MAKE_THREAD_LIBS_INIT})
 #    set_target_properties(mx_stream PROPERTIES LINKER_LANGUAGE CXX)
 
-    add_executable(omx_xmit mx_fe.c ${CMAKE_CURRENT_SOURCE_DIR}/../drv/rfm.c)
+	add_executable(mx_fe mx_fe.c ${CMAKE_CURRENT_SOURCE_DIR}/../drv/rfm.c)
+	target_compile_definitions(mx_fe PUBLIC -DNO_RTL -D_XOPEN_SOURCE -D_BSD_SOURCE)
+	target_include_directories(mx_fe PUBLIC
+			${CMAKE_CURRENT_SOURCE_DIR}
+			${CMAKE_CURRENT_SOURCE_DIR}/../common
+			${CMAKE_CURRENT_SOURCE_DIR}/../common/bsd)
+	target_link_libraries(mx_fe PUBLIC openmx::openmx args ${MAKE_THREAD_LIBS_INIT})
+	set_target_properties(mx_fe PROPERTIES LINKER_LANGUAGE CXX)
+
+
+    add_executable(omx_xmit omx_xmit.c ${CMAKE_CURRENT_SOURCE_DIR}/../drv/rfm.c)
 	target_compile_definitions(omx_xmit PUBLIC -DNO_RTL -D_XOPEN_SOURCE -D_BSD_SOURCE)
 	target_include_directories(omx_xmit PUBLIC
 			${CMAKE_CURRENT_SOURCE_DIR}
