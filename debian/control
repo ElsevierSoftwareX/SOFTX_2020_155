@@ -80,7 +80,6 @@ Depends:
  linux-headers-4.19.0-6-rtcds-amd64,
  make,
  python3,
- subversion,
  sudo,
  tcsh,
  ${misc:Depends},
