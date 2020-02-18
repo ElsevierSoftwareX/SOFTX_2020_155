@@ -1,35 +1,43 @@
 #!/bin/bash -e
 
-RTS_VERSION=${RTS_VERSION:-__VERSION__}
-ENV_FILE=${RTS_ENV:-/etc/advligorts/env}
-RCG_SRC=${RCG_SRC:-/usr/share/advligorts/src}
-RCG_BUILDD=${RCG_BUILDD:-/var/cache/advligorts/rcg-$RTS_VERSION}
-RTS_USER=${RTS_USER:-controls}
-RTSYSTAB=/etc/rtsystab
+log() {
+    echo "$@" >&2
+}
 
+RTS_VERSION=${RTS_VERSION:-__VERSION__}
+if [[ "$RTS_VERSION" =~ ._VERSION_. ]] ; then
+    log "RTS_VERSION variable not set."
+    exit 1
+fi
+
+# this should define all USER_VARS (see below)
+ENV_FILE=${RTS_ENV:-/etc/advligorts/env}
 source "$ENV_FILE" 2>/dev/null || true
 
 SITE=${SITE^^*}
 site=${SITE,,*}
 IFO=${IFO^^*}
-ifo=${ifo,,*}
+ifo=${IFO,,*}
+
+RCG_SRC=${RCG_SRC:-/usr/share/advligorts/src}
+RCG_BUILDD=${RCG_BUILDD:-/var/cache/advligorts/rcg-$RTS_VERSION}
+# FIXME: the RCG hard-codes /opt/rtcds as the root
+RCG_TARGET=/opt/rtcds/${site}/${ifo}
+RTS_USER=${RTS_USER:-$(whoami)}
 
 # search paths for C source code
 CDS_SRC=${CDS_SRC:-$RCG_LIB_PATH}
 CDS_IFO_SRC=${CDS_IFO_SRC:-$CDS_SRC}
 
 # add RCG module source to lib path
+# FIXME: rename RCG_MOD_PATH
 RCG_LIB_PATH=$RCG_LIB_PATH:${RCG_SRC}/src/epics/simLink/:${RCG_SRC}/src/epics/simLink/lib
 
-USER_VARS=(SITE IFO OPTRTCDS RCG_LIB_PATH)
-LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RTS_USER RTSYSTAB)
+USER_VARS=(SITE IFO RCG_LIB_PATH)
+LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RCG_TARGET RTS_USER)
 EXPORT_VARS=(${USER_VARS[@]} site ifo CDS_SRC CDS_IFO_SRC)
 
 ##################################################
-
-log() {
-    echo "$@" >&2
-}
 
 check_env() {
     for var in ${USER_VARS[*]} ; do
@@ -50,93 +58,61 @@ check_env() {
     done
 }
 
-# FIXME: the RCG currently requires that the kernel source be at
-# /usr/src/linux.  this checks that /usr/src/linux is a symlink to the
-# header dir for the currently running kernel.  This shouldn't be
-# necessary once the RCG is fixed.
-check_linux_src() {
-    if [ "$RCG_IGNORE_KERNEL_RELEASE" ] ; then
-	return
+prep_buildd() {
+    if [ -d "$RCG_BUILDD" ] ; then
+        return
     fi
-    local target=$(readlink /usr/src/linux)
-    local msg=
-    if [ ! -d /usr/src/linux ] ; then
-	msg="Missing linux source."
-    elif [ -z "$target" ] ; then
-	msg="Unknown linux source."
+    log "creating RCG_BUILDD $RCG_BUILDD..."
+    if sudo -u $RTS_USER mkdir -p "$RCG_BUILDD" 2>/dev/null ; then
+        sudo -u $RTS_USER chown $RTS_USER:$RTS_USER "$RCG_BUILDD"
+    elif sudo mkdir -p "$RCG_BUILDD" 2>/dev/null ; then
+        sudo chown $RTS_USER:$RTS_USER "$RCG_BUILDD"
+    else
+        log "Could not create build directory '$RCG_BUILDD' (owner: $RTS_USER:$RTS_USER)."
+        log "Please create manually to continue."
+        exit 1
     fi
-    local release=$(uname -r | sed 's/-amd64$/-common/')
-    for ls in /usr/src/linux-headers-${release}{,-common} ; do
-	if [[ "$target" == "$ls" ]] ; then
-	    return
-	fi
-	if [ -d "$ls" ] ; then
-	    break
-	fi
-    done
-    if [ -z "$msg" ] ; then
-	msg="Linux source does not match currently running kernel."
-    fi
-    log "$msg
-
-The RCG expects the linux source to be at /usr/src/linux.  For modern
-distros this should be a symlink to the source installed as part of
-the kernel header package for the running kernel.  For this system:
-
-/usr/src/linux -> $ls
-
-Please create/update this link, or set the RCG_IGNORE_KERNEL_RELEASE
-environment variable to bypass this check."
-
-    exit 10
+    log "configuring RCG_BUILDD $RCG_BUILDD..."
+    cd "$RCG_BUILDD"
+    sudo -u $RTS_USER "$RCG_SRC"/configure
 }
 
 prep_target(){
-    log "creating OPTRTCDS..."
-    mkdir -p ${OPTRTCDS}/{target,chans}/tmp
-}
-
-prep_buildd() {
-    sudo mkdir -p "$RCG_BUILDD"
-    sudo chown "$RTS_USER" "$RCG_BUILDD"
-    if [ -e "$RCG_BUILDD"/Makefile ] ; then
-	return
+    if [ -d "$RCG_TARGET" ] ; then
+        return
     fi
-    log "configuring RCG_BUILDD..."
-    cd "$RCG_BUILDD"
-    "$RCG_SRC"/configure
+    log "creating RCG_TARGET $RCG_TARGET..."
+    if sudo -u $RTS_USER mkdir -p "$RCG_TARGET" 2>/dev/null ; then
+        sudo -u $RTS_USER chown $RTS_USER:$RTS_USER "$RCG_TARGET"
+    elif sudo mkdir -p "$RCG_TARGET" 2>/dev/null ; then
+        sudo chown $RTS_USER:$RTS_USER "$RCG_TARGET"
+    else
+        log "Could not create target directory '$RCG_TARGET' (owner: $RTS_USER:$RTS_USER)."
+        log "Please create manually to continue."
+        exit 1
+    fi
+    sudo -u $RTS_USER mkdir -p ${RCG_TARGET}/{target,chans/tmp}
 }
 
 ########
 
+_systemctl_list_units() {
+    systemctl list-units --all --full --plain --no-legend --no-pager rts@*.target \
+	| awk '{print $1}' \
+	| sed 's/^rts@\([a-z0-9]*\)\.target$/\1/'
+}
+
 list_host_sys() {
-    local host=$(hostname -s)
-    local systems=($(grep -s "^${host}" $RTSYSTAB | sed s/$host//))
-    echo ${systems[@]}
-}
-
-tname() {
-    if [[ ${1,,*} == 'iop' ]] ; then
-	list_host_sys | head -1
-    else
-	echo "$1"
-    fi
-}
-
-check_host_fe() {
-    if [ -z "$(list_host_sys)" ] ; then
-	log "No $RTSYSTAB defined for this system."
-	exit 3
-    fi
+    _systemctl_list_units | grep 'iop' || true
+    _systemctl_list_units | grep -v 'iop' || true
 }
 
 check_host_sys() {
     for sys ; do
-	for hsys in $(list_host_sys) ; do
-	    [[ "$hsys" == "$sys" ]] && return 0
-	done
-	log "Cannot start/stop system '$sys' on host $(hostname -s)."
-	exit 4
+	if ! systemctl is-enabled "$sys" ; then
+	    log "System '$sys' is not enabled on this system (enable first)."
+	    exit 4
+	fi
     done
 }
 
@@ -145,24 +121,21 @@ check_host_sys() {
 build_sys() {
     cd $RCG_BUILDD
     for sys ; do
-	sys=$(tname "$sys")
 	log "### building $sys..."
-	make $sys
+	sudo -u $RTS_USER -E make $sys
     done
 }
 
 install_sys() {
     cd $RCG_BUILDD
     for sys ; do
-	sys=$(tname "$sys")
 	log "### installing $sys..."
-	make install-$sys
+	sudo -u $RTS_USER -E make install-$sys
     done
 }
 
 start_sys() {
     for sys ; do
-	sys=$(tname "$sys")
 	log "### starting $sys..."
 	sudo systemctl start rts@${sys}.target
     done
@@ -170,7 +143,6 @@ start_sys() {
 
 stop_sys() {
     for sys ; do
-	sys=$(tname "$sys")
 	log "### stopping $sys..."
 	#${SCRIPTD}/kill${sys}
 	sudo systemctl stop rts@${sys}.target
@@ -179,7 +151,6 @@ stop_sys() {
 
 enable_sys() {
     for sys ; do
-	sys=$(tname "$sys")
 	log "### enabling $sys..."
 	sudo systemctl enable rts@${sys}.target
     done
@@ -187,7 +158,6 @@ enable_sys() {
 
 disable_sys() {
     for sys ; do
-	sys=$(tname "$sys")
 	log "### disabling $sys..."
 	sudo systemctl disable rts@${sys}.target
     done
@@ -241,6 +211,7 @@ Available commands:
   build|make <sys>           build system
   install <sys>              install system
 
+  list|ls                    list systems for host
   start <sys>...|--all       start systems
   restart <sys>...|--all     restart running systems
   stop|kill <sys>...|--all   stop running systems
@@ -249,9 +220,7 @@ Available commands:
 
   blog <sys>                 show last build log for system
     -i                         print log paths
-  list|ls                    list all systems for current host
   lsmod                      list loaded RTS kernel modules
-  dtail|dmesg                tail dmesg logs
   env                        print system environment info
   version|--version|-v       print version
   help|--help|-h             this help
@@ -274,7 +243,6 @@ case $cmd in
 	    log "You must specify at least one system to build."
 	    exit 2
 	fi
-	check_linux_src
 	check_env
 	prep_buildd
 	build_sys $@
@@ -285,6 +253,7 @@ case $cmd in
 	    exit 2
 	fi
 	check_env
+	prep_target
 	install_sys $@
 	;;
     'start')
@@ -292,7 +261,6 @@ case $cmd in
 	    log "You must specify at least one system to start (or '--all')."
 	    exit 2
 	fi
-	check_host_fe
 	if [[ "$1" == '--all' ]] ; then
 	    start_sys $(list_host_sys)
 	else
@@ -305,7 +273,6 @@ case $cmd in
 	    log "You must specify at least one system to restart (or '--all')."
 	    exit 2
 	fi
-	check_host_fe
 	if [[ "$1" == '--all' ]] ; then
 	    # we do this in reverse so the IOP is stopped last
 	    stop_sys $(list_host_sys | tac)
@@ -321,7 +288,6 @@ case $cmd in
 	    log "You must specify at least one system to stop (or '--all')."
 	    exit 2
 	fi
-	check_host_fe
 	if [[ "$1" == '--all' ]] ; then
 	    # we do this in reverse so the IOP is stopped last
 	    stop_sys $(list_host_sys | tac)
@@ -335,12 +301,10 @@ case $cmd in
 	    log "You must specify at least one system to $cmd (or '--all')."
 	    exit 2
 	fi
-	check_host_fe
 	if [[ "$1" == '--all' ]] ; then
 	    # we do this in reverse so the IOP is stopped last
 	    ${cmd}_sys $(list_host_sys | tac)
 	else
-	    check_host_sys $@
 	    ${cmd}_sys $@
 	fi
 	;;
@@ -351,7 +315,7 @@ case $cmd in
 	    shift
 	fi
 	if [ -z "$1" ] ; then
-	    log "You must specify at least one system to view."
+	    log "You must specify system to view."
 	    exit 2
 	fi
 	olog="${RCG_BUILDD}/${1}.log"
@@ -368,15 +332,10 @@ case $cmd in
 	esac
 	;;
     'list'|'ls')
-	check_host_fe
-	list_host_sys | tr ' ' '\n'
+	list_host_sys
 	;;
     'lsmod'|'lsmods')
 	_lsmod
-	;;
-    'dtail'|'dmesg')
-	LINES=$(($(tput lines) - 14))
-	watch -n1 "dmesg | tail -$LINES"
 	;;
     'env')
 	check_env
