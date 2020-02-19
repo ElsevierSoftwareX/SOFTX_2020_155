@@ -138,6 +138,8 @@ Depends:
  advligorts-rcg,
  linux-headers-4.19.0-6-rtcds-amd64,
  ${misc:Depends},
+Recommends:
+  cds-workstation,
 Description: advLigoRTS stand-alone "CYMAC" metapackage
  Advanced LIGO data acquisition system, stand-alone version.
 
