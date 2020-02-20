@@ -1,3 +1,9 @@
+advligorts (4.0.0~dev3-2) unstable; urgency=medium
+
+  * Move standalone_edc binary to advligorts-fe package
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Thu, 20 Feb 2020 11:36:54 -0800
+
 advligorts (4.0.0~dev3-1) unstable; urgency=medium
 
   * New dev release
