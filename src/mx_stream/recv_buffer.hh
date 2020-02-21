@@ -7,13 +7,56 @@
 
 #include "daq_core.h"
 
+#include <algorithm>
 #include <array>
 #include <functional>
 #include <iterator>
 #include <mutex>
+#include <iostream>
 #include <stdint.h>
 
 #include <sys/time.h>
+
+#include "atomic_config.h"
+
+#ifdef HAVE_ATOMIC
+#include <atomic>
+    template <typename T>
+    T
+    load_atomically(const T& item)
+    {
+        return reinterpret_cast<const std::atomic<T>&>(item).load();
+    }
+
+    template <typename T>
+    void
+    store_atomically(T& item, const T value)
+    {
+        reinterpret_cast<std::atomic<T>&>(item).store(value);
+    }
+#else
+    template <typename T>
+    T
+    load_atomically(const T& item)
+    {
+        return __sync_or_and_fetch( const_cast< T* >( &item ),
+                                   static_cast< T >( 0 ) );
+    }
+
+    template <typename T>
+    void
+    store_atomically(T& item, const T value)
+    {
+        T old_val;
+        old_val = load_atomically( item );
+        while ( old_val != value )
+        {
+            old_val =
+                __sync_val_compare_and_swap( &( &item ), old_val, value );
+        }
+
+    }
+#endif
 
 /*!
  * @brief std::begin for arrays on old gcc
@@ -107,21 +150,20 @@ struct gps_key
     void
     atomic_load_from( const gps_key* source )
     {
-        key = __sync_or_and_fetch( const_cast< key_type* >( &( source->key ) ),
-                                   static_cast< key_type >( 0 ) );
+        key = load_atomically(source->key);
     }
 
-    void
-    atomic_store_to( gps_key* dest )
-    {
-        gps_key old_key;
-        old_key.atomic_load_from( dest );
-        while ( old_key != *this )
-        {
-            old_key.key =
-                __sync_val_compare_and_swap( &( dest->key ), old_key.key, key );
-        }
-    }
+//    void
+//    atomic_store_to( gps_key* dest )
+//    {
+//        gps_key old_key;
+//        old_key.atomic_load_from( dest );
+//        while ( old_key != *this )
+//        {
+//            old_key.key =
+//                __sync_val_compare_and_swap( &( dest->key ), old_key.key, key );
+//        }
+//    }
 
     template < typename Pred >
     void
@@ -166,7 +208,7 @@ struct buffer_entry
 {
     buffer_entry( )
         : m( ), latest( ), ifo_data( ), data( &ifo_data.dataBlock[ 0 ] ),
-          time_ingested( )
+          time_ingested( ), first_injestion( 0 ), buffer_spread( 0 )
     {
     }
     std::mutex                                 m;
@@ -174,6 +216,8 @@ struct buffer_entry
     daq_dc_data_t                              ifo_data;
     char*                                      data;
     std::array< int64_t, DAQ_TRANSIT_MAX_DCU > time_ingested;
+    int64_t                                    first_injestion;
+    int64_t                                    buffer_spread;
 
     static int64_t
     time_now( )
@@ -181,6 +225,16 @@ struct buffer_entry
         timeval tv;
         gettimeofday( &tv, 0 );
         return static_cast< int64_t >( tv.tv_sec * 1000 + tv.tv_usec / 1000 );
+    }
+
+    int64_t get_spread() const
+    {
+        return load_atomically(buffer_spread);
+    }
+
+    int64_t clear_spread()
+    {
+        store_atomically(buffer_spread, static_cast<decltype(buffer_spread)>(0));
     }
 
     void
@@ -194,7 +248,9 @@ struct buffer_entry
         std::lock_guard< std::mutex > l_( m );
         if ( key > latest )
         {
+            store_atomically(buffer_spread, timestamp - first_injestion);
             clear( );
+            first_injestion = timestamp;
         }
         else if ( key < latest )
         {
@@ -346,6 +402,29 @@ struct receive_buffer
     size() const
     {
         return N;
+    }
+
+    void
+    dump_largest_span(std::ostream& os)
+    {
+        std::array<std::int64_t, N> spreads;
+
+        std::transform(buffer_.begin(), buffer_.end(), spreads.begin(), [](const buffer_entry& entry) -> std::int64_t {
+            auto spread = entry.get_spread();
+            /* the first time through the spread will be the timestamp of the first entry, so
+             * call that a 0 spread.
+             */
+            return (spread > 100000000 ? 0 : spread);
+        });
+        if (std::max_element(spreads.begin(), spreads.end()) > 30)
+        {
+            int i = 0;
+            for (const auto& spread:spreads)
+            {
+                os << "slice " << i << ") max-spread = " << spread << "\n";
+                ++i;
+            }
+        }
     }
 
 private:

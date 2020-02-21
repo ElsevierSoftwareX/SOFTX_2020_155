@@ -3,6 +3,8 @@ include(FindThreads)
 
 if (OPENMX_FOUND)
 
+	configure_file(atomic_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/atomic_config.h)
+
     # this is a weird area, these are .c files but need to be built as C++
     # this should be fixed after we stop the manual makefile build
 #    set (CMAKE_C_COMPILER ${CMAKE_CXX_COMPILER})
@@ -46,6 +48,7 @@ if (OPENMX_FOUND)
 			)
 
 	add_executable(omx_recv_buffered omx_recv_buffered.cc recv_buffer.cc)
+	target_include_directories(omx_recv_buffered PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 	target_link_libraries(omx_recv_buffered PUBLIC
 			driver::shmem
 			pv::simple_pv
