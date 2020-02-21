@@ -232,7 +232,7 @@ struct buffer_entry
         return load_atomically(buffer_spread);
     }
 
-    int64_t clear_spread()
+    void clear_spread()
     {
         store_atomically(buffer_spread, static_cast<decltype(buffer_spread)>(0));
     }
