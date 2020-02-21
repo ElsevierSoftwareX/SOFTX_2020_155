@@ -208,7 +208,8 @@ struct buffer_entry
 {
     buffer_entry( )
         : m( ), latest( ), ifo_data( ), data( &ifo_data.dataBlock[ 0 ] ),
-          time_ingested( ), first_injestion( 0 ), buffer_spread( 0 )
+          time_ingested( ), first_injestion( 0 ), last_injestion(0),
+          buffer_spread( 0 )
     {
     }
     std::mutex                                 m;
@@ -217,6 +218,7 @@ struct buffer_entry
     char*                                      data;
     std::array< int64_t, DAQ_TRANSIT_MAX_DCU > time_ingested;
     int64_t                                    first_injestion;
+    int64_t                                    last_injestion;
     int64_t                                    buffer_spread;
 
     static int64_t
@@ -248,7 +250,7 @@ struct buffer_entry
         std::lock_guard< std::mutex > l_( m );
         if ( key > latest )
         {
-            store_atomically(buffer_spread, timestamp - first_injestion);
+            store_atomically(buffer_spread, last_injestion - first_injestion);
             clear( );
             first_injestion = timestamp;
         }
@@ -256,6 +258,7 @@ struct buffer_entry
         {
             return;
         }
+        last_injestion = timestamp;
 
         const char* input_data = &input.dataBlock[ 0 ];
         for ( int i = 0; i < input.header.dcuTotalModels; ++i )
@@ -410,11 +413,7 @@ struct receive_buffer
         std::array<std::int64_t, N> spreads;
 
         std::transform(buffer_.begin(), buffer_.end(), spreads.begin(), [](const buffer_entry& entry) -> std::int64_t {
-            auto spread = entry.get_spread();
-            /* the first time through the spread will be the timestamp of the first entry, so
-             * call that a 0 spread.
-             */
-            return (spread > 100000000 ? 0 : spread);
+            return entry.get_spread();
         });
         if (*std::max_element(spreads.begin(), spreads.end()) > 30)
         {
