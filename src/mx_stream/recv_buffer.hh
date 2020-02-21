@@ -209,7 +209,7 @@ struct buffer_entry
     buffer_entry( )
         : m( ), latest( ), ifo_data( ), data( &ifo_data.dataBlock[ 0 ] ),
           time_ingested( ), first_injestion( 0 ), last_injestion(0),
-          buffer_spread( 0 )
+          buffer_spread( 0 ), discarded_messages( 0 )
     {
     }
     std::mutex                                 m;
@@ -220,6 +220,7 @@ struct buffer_entry
     int64_t                                    first_injestion;
     int64_t                                    last_injestion;
     int64_t                                    buffer_spread;
+    int64_t                                    discarded_messages;
 
     static int64_t
     time_now( )
@@ -234,9 +235,13 @@ struct buffer_entry
         return load_atomically(buffer_spread);
     }
 
-    void clear_spread()
+    int64_t get_discarded_and_clear_messages()
     {
-        store_atomically(buffer_spread, static_cast<decltype(buffer_spread)>(0));
+        std::atomic<std::int64_t>* discard =
+            reinterpret_cast<std::atomic<std::int64_t>* >(&discarded_messages);
+        int64_t discards = load_atomically(discarded_messages);
+        while (!discard->compare_exchange_strong(discards, 0)) {}
+        return discards;
     }
 
     void
@@ -411,16 +416,19 @@ struct receive_buffer
     dump_largest_span(std::ostream& os)
     {
         std::array<std::int64_t, N> spreads;
+        std::array<std::int64_t, N> discards;
 
         std::transform(buffer_.begin(), buffer_.end(), spreads.begin(), [](const buffer_entry& entry) -> std::int64_t {
             return entry.get_spread();
         });
-        if (*std::max_element(spreads.begin(), spreads.end()) > 30)
+        std::transform(buffer_.begin(), buffer_.end(), spreads.begin(), [](buffer_entry& entry) -> std::int64_t {
+            return entry.get_discarded_and_clear_messages();
+        });
+        if (*std::max_element(spreads.begin(), spreads.end()) > 30 || *std::max_element(discards.begin(), discards.end()) > 0)
         {
-            int i = 0;
-            for (const auto& spread:spreads)
+            for (int i = 0; i < N; ++i)
             {
-                os << "slice " << i << ") max-spread = " << spread << "\n";
+                os << "slice " << i << ") max-spread = " << spreads[i] << "   discards = " << discards[i] << "\n";
                 ++i;
             }
         }
