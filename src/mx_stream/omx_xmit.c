@@ -385,7 +385,7 @@ int __CDECL
 
     if (logfname != 0)
     {
-        if ( 0 == freopen( optarg, "w", stdout ) )
+        if ( 0 == freopen( logfname, "w", stdout ) )
         {
             perror( "freopen" );
             exit( 1 );
