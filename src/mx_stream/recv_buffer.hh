@@ -416,7 +416,7 @@ struct receive_buffer
              */
             return (spread > 100000000 ? 0 : spread);
         });
-        if (std::max_element(spreads.begin(), spreads.end()) > 30)
+        if (*std::max_element(spreads.begin(), spreads.end()) > 30)
         {
             int i = 0;
             for (const auto& spread:spreads)
