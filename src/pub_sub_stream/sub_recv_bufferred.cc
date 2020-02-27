@@ -1,0 +1,573 @@
+//
+// @file sub_recv_buffered.c
+// @brief  DAQ data concentrator code. Receives data via subscription and writes
+// to local memory.
+//
+
+#include <algorithm>
+#include <iomanip>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <thread>
+#include <vector>
+
+#include <unistd.h>
+#include <ctype.h>
+#include <sys/time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/file.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <signal.h>
+#include "../drv/crc.c"
+#include <time.h>
+#include "../include/daqmap.h"
+#include "../include/daq_core.h"
+#include "../zmq_stream/dc_utils.h"
+
+#include <boost/algorithm/string.hpp>
+#include <pub_sub/sub.hh>
+
+#include "args.h"
+
+// #include "testlib.h"
+
+#include "simple_pv.h"
+#include "recv_buffer.hh"
+
+#define __CDECL
+
+#define MIN_DELAY_MS 5
+#define MAX_DELAY_MS 40
+
+#define MAX_FE_COMPUTERS 32
+
+extern "C" {
+extern void* findSharedMemorySize( char*, int );
+}
+
+int do_verbose = 0;
+
+struct thread_info
+{
+    int         index{};
+    std::string conn_string{};
+    std::thread thread{};
+};
+struct thread_mon_info
+{
+    int   index;
+    void* ctx;
+};
+
+// daq_multi_dcu_data_t mxDataBlockSingle[ MAX_FE_COMPUTERS ];
+receive_buffer< 4 > circular_buffer;
+// int64_t              dataRecvTime[ MAX_FE_COMPUTERS ];
+// const int            mc_header_size = sizeof( daq_multi_cycle_header_t );
+int                 stop_working_threads = 0;
+int                 start_acq = 0;
+static volatile int keepRunning = 1;
+// int                  thread_cycle[ MAX_FE_COMPUTERS ];
+// int                  thread_timestamp[ MAX_FE_COMPUTERS ];
+int rcv_errors = 0;
+// int                  dataRdy[ MAX_FE_COMPUTERS ];
+
+/*!
+ * @brief RAII class to ensure that worker threads get stopped
+ */
+class thread_stopper
+{
+public:
+    ~thread_stopper( )
+    {
+        stop_working_threads = 1;
+        sleep( 5 );
+        fprintf( stderr, "stopping threads\n" );
+    }
+};
+
+template < typename It >
+void
+dump_headers( It cur, It end, std::ostream& os )
+{
+    for ( ; cur != end; ++cur )
+    {
+        buffer_headers& cur_buf = *cur;
+        int             dcus = cur_buf.dcu_count;
+        os << "Buffer latest: " << cur_buf.latest.gps( ) << ":"
+           << cur_buf.latest.cycle( ) << "\n";
+        os << "dcu_count " << dcus << "\n";
+        for ( int i = 0; i < dcus; ++i )
+        {
+            os << "dcuid " << cur_buf.headers[ i ].dcuId << " ingested at "
+               << cur_buf.time_ingested[ i ] << "\n";
+        }
+        os << std::endl;
+    }
+}
+
+template < typename It >
+std::pair< int, int >
+quick_stats( It cur, It end, std::ostream& os, gps_key now_key )
+{
+    std::pair< int, int > dcu_stats =
+        std::make_pair( DAQ_TRANSIT_MAX_DCU + 1, 0 );
+
+    for ( ; cur != end; ++cur )
+    {
+        buffer_headers& cur_buf = *cur;
+
+        int64_t min_time = 0x0fffffffffffffff;
+        int64_t max_time = 0;
+        int64_t delta = 0;
+
+        int dcus = cur_buf.dcu_count;
+        for ( int i = 0; i < dcus; ++i )
+        {
+            min_time = std::min( min_time, cur_buf.time_ingested[ i ] );
+            max_time = std::max( max_time, cur_buf.time_ingested[ i ] );
+            delta = max_time - min_time;
+        }
+
+        int key_delta = now_key.key - cur_buf.latest.key;
+        if ( key_delta >= 0 )
+        {
+            dcu_stats.first = std::min( dcu_stats.first, dcus );
+            dcu_stats.second = std::max( dcu_stats.second, dcus );
+        }
+        os << "[" << std::setw( 2 ) << key_delta << " dcus " << std::setw( 3 )
+           << dcus << " spread " << std::setw( 3 ) << delta << "ms] ";
+    }
+    os << std::endl;
+    return dcu_stats;
+}
+/*!
+ * @brief The data_recorder is used in conjuction with a recieve buffer
+ * to move data from the receive_buffer into an output mbuf.
+ */
+class data_recorder
+{
+    data_recorder( const data_recorder& other );
+    data_recorder& operator=( const data_recorder& other );
+
+public:
+    /*!
+     * @Initialize the data_recorder, opening the output shared memory buffer
+     * @param shmem_name Name of the shared memory buffer to output to
+     * @param shmem_max_size_mb Size of the buffer in MB
+     */
+    data_recorder( const std::string shmem_name, int shmem_max_size_mb )
+        : shmem_ptr_( findSharedMemorySize(
+              const_cast< char* >( shmem_name.c_str( ) ), shmem_max_size_mb ) )
+    {
+        ifo_header_ = (daq_multi_cycle_header_t*)shmem_ptr_;
+        ifo_data_ = (char*)shmem_ptr_ + sizeof( daq_multi_cycle_header_t );
+        cycle_data_size_ = ( ( shmem_max_size_mb * 1024 * 1024 ) -
+                             sizeof( daq_multi_cycle_header_t ) ) /
+            DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+        cycle_data_size_ -= ( cycle_data_size_ % 8 );
+
+        fprintf( stderr,
+                 "cycle data size = %d\t%d\n",
+                 (int)cycle_data_size_,
+                 (int)shmem_max_size_mb );
+        ifo_header_->cycleDataSize = cycle_data_size_;
+        ifo_header_->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
+    }
+
+    /*!
+     * @brief copy the given daq_dc_data_t into the output buffer
+     * @param input_data Data to copy
+     */
+    void
+    operator( )( const daq_dc_data_t& input_data )
+    {
+        size_t data_size =
+            input_data.header.fullDataBlockSize + sizeof( input_data.header );
+        if ( data_size > cycle_data_size_ )
+        {
+            fprintf( stderr,
+                     "Overflow of the output buffer, requested %d bytes for a "
+                     "%d byte destination",
+                     (int)data_size,
+                     (int)cycle_data_size_ );
+            throw std::runtime_error( "Overflow of the output mbuf" );
+        }
+        char* dest = ifo_data_ +
+            input_data.header.dcuheader[ 0 ].cycle * cycle_data_size_;
+        memcpy( dest, &input_data, data_size );
+
+        ifo_header_->curCycle = input_data.header.dcuheader[ 0 ].cycle;
+    }
+
+private:
+    void*                     shmem_ptr_;
+    daq_multi_cycle_header_t* ifo_header_;
+    char*                     ifo_data_;
+    size_t                    cycle_data_size_;
+};
+
+void
+usage( )
+{
+    fprintf( stderr,
+             "Usage: mx2ix [args] -s server names -m shared memory size -g IX "
+             "channel \n" );
+    fprintf( stderr, "-l filename - log file name\n" );
+    fprintf( stderr,
+             "-s - number of FE computers to connect (1-32): Default = 32\n" );
+    fprintf( stderr, "-v - verbose prints diag test data\n" );
+    fprintf( stderr,
+             "-d - Max delay in milli seconds to wait for a FE to send data, "
+             "defaults to 10\n" );
+    fprintf( stderr, "-t - Number of rcvr threads per NIC: default = 16\n" );
+    fprintf( stderr, "-n - Data Concentrator number (0 or 1) : default = 0\n" );
+    fprintf( stderr,
+             "-B - Number cycles to delay output by (0 - 3): default = 0\n" );
+    fprintf( stderr, "     Setting to a non-0 value sets -d == 0\n" );
+    fprintf( stderr, "-h - help\n" );
+}
+
+// *************************************************************************
+// Timing Diagnostic Routine
+// *************************************************************************
+static int64_t
+s_clock( void )
+{
+    struct timeval tv;
+    gettimeofday( &tv, NULL );
+    return ( int64_t )( tv.tv_sec * 1000 + tv.tv_usec / 1000 );
+}
+
+// *************************************************************************
+// Catch Control C to end cod in controlled manner
+// *************************************************************************
+void
+intHandler( int dummy )
+{
+    keepRunning = 0;
+}
+
+void
+sigpipeHandler( int dummy )
+{
+}
+
+// **********************************************************************************************
+void
+print_diags( int                   nsys,
+             int                   lastCycle,
+             int                   sendLength,
+             daq_multi_dcu_data_t* ixDataBlock,
+             int                   dbs[] )
+{
+    // **********************************************************************************************
+    int ii = 0;
+    // Print diags in verbose mode
+    fprintf( stderr, "Receive errors = %d\n", rcv_errors );
+    fprintf( stderr,
+             "Time = %d\t size = %d\n",
+             ixDataBlock->header.dcuheader[ 0 ].timeSec,
+             sendLength );
+    fprintf( stderr,
+             "DCU ID\tCycle \t "
+             "TimeSec\tTimeNSec\tDataSize\tTPCount\tTPSize\tXmitSize\n" );
+    for ( ii = 0; ii < nsys; ii++ )
+    {
+        fprintf( stderr, "%d", ixDataBlock->header.dcuheader[ ii ].dcuId );
+        fprintf( stderr, "\t%d", ixDataBlock->header.dcuheader[ ii ].cycle );
+        fprintf( stderr, "\t%d", ixDataBlock->header.dcuheader[ ii ].timeSec );
+        fprintf( stderr, "\t%d", ixDataBlock->header.dcuheader[ ii ].timeNSec );
+        fprintf( stderr,
+                 "\t\t%d",
+                 ixDataBlock->header.dcuheader[ ii ].dataBlockSize );
+        fprintf(
+            stderr, "\t\t%d", ixDataBlock->header.dcuheader[ ii ].tpCount );
+        fprintf(
+            stderr, "\t%d", ixDataBlock->header.dcuheader[ ii ].tpBlockSize );
+        fprintf( stderr, "\t%d", dbs[ ii ] );
+        fprintf( stderr, "\n " );
+    }
+}
+
+// *************************************************************************
+// Main Process
+// *************************************************************************
+int
+main( int argc, char** argv )
+{
+    pthread_t thread_id[ MAX_FE_COMPUTERS ];
+    // int nsys = MAX_FE_COMPUTERS; // The number of mapped shared memories
+    // (number
+    // of data sources)
+    const char* buffer_name = "ifo";
+    int         c;
+    int         ii; // Loop counter
+    int         delay_ms = 10;
+    int         delay_cycles = 0;
+
+    extern char* optarg; // Needed to get arguments to program
+
+    // Declare shared memory data variables
+    daq_multi_cycle_header_t*  ifo_header;
+    char*                      ifo;
+    char*                      ifo_data;
+    int                        cycle_data_size;
+    daq_multi_dcu_data_t*      ifoDataBlock;
+    char*                      nextData;
+    int                        max_data_size_mb = 100;
+    int                        max_data_size = 0;
+    char*                      mywriteaddr;
+    int                        dc_number = 1;
+    int                        buffer_cycles = 0;
+    const char*                logfname = nullptr;
+    const char*                subs = nullptr;
+    const char*                subs_file = nullptr;
+    std::vector< std::string > subscription_strings{};
+    int                        thread_per_sub = 0;
+
+    args_handle arg_parser =
+        args_create_parser( "Receive data from a LIGO simple publisher" );
+    if ( !arg_parser )
+    {
+        return -1;
+    }
+    args_add_string_ptr( arg_parser,
+                         's',
+                         ARGS_NO_LONG,
+                         "systems",
+                         "Space separated list of subscription strings",
+                         &subs,
+                         "" );
+    args_add_string_ptr( arg_parser,
+                         'S',
+                         "sub-list",
+                         "file",
+                         "File with 1 subscription string per line, if "
+                         "pressent, this superceeds -s",
+                         &subs_file,
+                         nullptr );
+    args_add_string_ptr( arg_parser,
+                         'b',
+                         ARGS_NO_LONG,
+                         "buffer",
+                         "Name of the mbuf to read local data from",
+                         &buffer_name,
+                         "local_dc" );
+    args_add_int( arg_parser,
+                  'm',
+                  ARGS_NO_LONG,
+                  "20-100",
+                  "Local memory buffer size in megabytes",
+                  &max_data_size_mb,
+                  100 );
+    args_add_string_ptr( arg_parser,
+                         'l',
+                         ARGS_NO_LONG,
+                         "filename",
+                         "Log file name",
+                         &logfname,
+                         nullptr );
+    args_add_flag(
+        arg_parser, 'v', ARGS_NO_LONG, "Verbose output", &do_verbose );
+    args_add_int( arg_parser,
+                  'd',
+                  ARGS_NO_LONG,
+                  "5-40",
+                  "The number of ms to delay data",
+                  &delay_ms,
+                  5 );
+    args_add_int( arg_parser,
+                  'B',
+                  ARGS_NO_LONG,
+                  "cycles",
+                  "The number of cycles to delay data",
+                  &buffer_cycles,
+                  0 );
+    args_add_flag(
+        arg_parser,
+        ARGS_NO_SHORT,
+        "multi-thread",
+        "Set if an explicit thread should be created for each subscription",
+        &thread_per_sub );
+
+    if ( args_parse( arg_parser, argc, argv ) < 0 )
+    {
+        return -1;
+    }
+
+    if ( subs_file )
+    {
+        std::ifstream input( subs_file );
+        std::string   line;
+        while ( std::getline( input, line, '\n' ) )
+        {
+            if ( line.empty( ) )
+            {
+                continue;
+            }
+            subscription_strings.emplace_back( line );
+        }
+    }
+    else
+    {
+        boost::algorithm::split(
+            subscription_strings, subs, boost::algorithm::is_space( ) );
+    }
+    if ( max_data_size_mb < 20 )
+    {
+        fprintf( stderr, "Min data block size is 20 MB\n" );
+        return -1;
+    }
+    if ( max_data_size_mb > 100 )
+    {
+        fprintf( stderr, "Max data block size is 100 MB\n" );
+        return -1;
+    }
+    if ( logfname != nullptr )
+    {
+        if ( !freopen( optarg, "w", stdout ) )
+        {
+            perror( "freopen" );
+            exit( 1 );
+        }
+        setvbuf( stdout, NULL, _IOLBF, 0 );
+        stderr = stdout;
+    }
+    if ( delay_ms < MIN_DELAY_MS || delay_ms > MAX_DELAY_MS )
+    {
+        fprintf( stderr, "The delay factor must be between 5ms and 40ms\n" );
+        return -1;
+    }
+    buffer_cycles = std::max( buffer_cycles, 0 );
+    buffer_cycles = std::min( buffer_cycles, (int)circular_buffer.size( ) - 2 );
+    if ( buffer_cycles > 0 )
+    {
+        delay_ms = 0;
+    }
+
+    fprintf( stderr, "Delaying output by %dms to wait for data\n", delay_ms );
+    fprintf( stderr,
+             "Delaying output by %d cycles to wait for data\n",
+             buffer_cycles );
+    max_data_size = max_data_size_mb * 1024 * 1024;
+    delay_cycles = delay_ms * 1000;
+
+    // set up to catch Control C
+    signal( SIGINT, intHandler );
+    // setup to ignore sig pipe
+    signal( SIGPIPE, sigpipeHandler );
+
+    fprintf( stderr, "Num of sys = %d\n", (int)subscription_strings.size( ) );
+
+    data_recorder recorder( buffer_name, max_data_size_mb );
+
+    std::vector< std::unique_ptr< pub_sub::Subscriber > > subscribers{};
+    subscribers.reserve( subscription_strings.size( ) );
+    if ( !thread_per_sub )
+    {
+        subscribers.emplace_back( std::make_unique< pub_sub::Subscriber >( ) );
+    }
+    for ( const auto& conn_str : subscription_strings )
+    {
+        if ( thread_per_sub )
+        {
+            subscribers.emplace_back(
+                std::make_unique< pub_sub::Subscriber >( ) );
+        }
+        fprintf( stderr, "Beginning subscription on %s\n", conn_str.c_str( ) );
+        subscribers.front( )->subscribe(
+            conn_str, 9000, []( pub_sub::SubMessage sub_msg ) {
+                circular_buffer.ingest(
+                    *( (daq_multi_dcu_data_t*)sub_msg.data( ) ) );
+            } );
+    }
+
+    int nextCycle = 0;
+    start_acq = 1;
+    int64_t          mytime = 0;
+    int64_t          mylasttime = 0;
+    int64_t          myptime = 0;
+    int64_t          n_cycle_time = 0;
+    int              mytotaldcu = 0;
+    char*            zbuffer;
+    size_t           zbuffer_remaining = 0;
+    int              dc_datablock_size = 0;
+    int              datablock_size_running = 0;
+    static const int header_size = sizeof( daq_multi_dcu_header_t );
+    char             dcstatus[ 4096 ];
+    char             dcs[ 48 ];
+    int              edcuid[ 10 ];
+    int              estatus[ 10 ];
+    int              edbs[ 10 ];
+    unsigned long    ets = 0;
+    int              timeout = 0;
+    int              threads_rdy;
+    int              any_rdy = 0;
+    int              jj, kk;
+    int              sendLength = 0;
+
+    int     min_cycle_time = 1 << 30;
+    int     max_cycle_time = 0;
+    int     mean_cycle_time = 0;
+    int     uptime = 0;
+    int     missed_flag = 0;
+    int     missed_nsys[ MAX_FE_COMPUTERS ];
+    int64_t recv_time[ MAX_FE_COMPUTERS ];
+    int64_t min_recv_time = 0;
+    int     recv_buckets[ ( MAX_DELAY_MS / 5 ) + 2 ];
+    int     festatus = 0;
+    int     ix_xmit_stop = 0;
+    gps_key last_received;
+
+    missed_flag = 1;
+    memset( &missed_nsys[ 0 ], 0, sizeof( missed_nsys ) );
+    memset( recv_buckets, 0, sizeof( recv_buckets ) );
+
+    std::array< buffer_headers, 4 > headers;
+
+    // ensure the threads get stopped before exit.
+    int            max_dcus_received = 0;
+    thread_stopper clean_threads_;
+    do
+    {
+
+        gps_key latest_in_buffer;
+        do
+        {
+            usleep( 2000 );
+            latest_in_buffer = circular_buffer.latest( );
+        } while ( latest_in_buffer == last_received );
+
+        usleep( delay_cycles );
+
+        gps_key process_at = latest_in_buffer;
+        process_at.key -= buffer_cycles;
+
+        circular_buffer.process_slice_at( process_at, recorder );
+        circular_buffer.copy_headers( headers.begin( ) );
+
+        if ( do_verbose )
+        {
+            auto dcu_stats = quick_stats(
+                headers.begin( ), headers.end( ), std::cout, process_at );
+            if ( dcu_stats.second < max_dcus_received )
+            {
+                dump_headers( headers.begin( ), headers.end( ), std::cout );
+            }
+            max_dcus_received = dcu_stats.second;
+        }
+
+        circular_buffer.dump_largest_span( std::cout );
+
+    } while ( keepRunning ); // End of infinite loop
+
+    return 0;
+}

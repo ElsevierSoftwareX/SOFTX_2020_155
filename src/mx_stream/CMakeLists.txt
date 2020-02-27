@@ -63,7 +63,8 @@ if (OPENMX_FOUND)
 			tests/test_recv_buffer.cc)
 	target_include_directories(test_recv_buffer PUBLIC
 			${CMAKE_CURRENT_SOURCE_DIR}
-			${CMAKE_CURRENT_SOURCE_DIR}/../include)
+			${CMAKE_CURRENT_SOURCE_DIR}/../include
+			${CMAKE_CURRENT_BINARY_DIR})
 	target_link_libraries(test_recv_buffer PUBLIC
 			${CMAKE_THREAD_LIBS_INIT})
 	target_requires_cpp11(test_recv_buffer PUBLIC)
