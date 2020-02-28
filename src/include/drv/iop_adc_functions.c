@@ -258,7 +258,8 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
         packedData = (int*)cdsPciModules.pci_adc[ card ];
         /// - ---- First, and only first, channel should have upper bit marker
         /// set. If not, have a channel hopping error.
-        if(!((unsigned int)*packedData & ADC_1ST_CHAN_MARKER))
+        if ( (unsigned int)*packedData < 65535 )
+        // if(!((unsigned int)*packedData & ADC_1ST_CHAN_MARKER))
         {
             adcinfo->chanHop = 1;
             fe_status_return_subcode = card;
