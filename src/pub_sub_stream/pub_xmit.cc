@@ -11,6 +11,8 @@
 #include <sys/types.h>
 #include <stdlib.h>
 
+#include "make_unique.hh"
+
 #include "../drv/crc.c"
 #include "../include/daq_core.h"
 #include "drv/shmem.h"
@@ -44,7 +46,7 @@ public:
         int count = std::min( prealloc_count, 10 );
         for ( int i = 0; i < count; ++i )
         {
-            put( std::make_unique< daq_dc_data_t >( ) );
+            put( make_unique_ptr< daq_dc_data_t > ( ) );
         }
     }
     Arena( const Arena& ) = delete;
@@ -68,7 +70,7 @@ public:
         daq_dc_data_t* tmp = nullptr;
         if ( !arena_.pop( tmp ) )
         {
-            return std::make_unique< daq_dc_data_t >( );
+            return make_unique_ptr< daq_dc_data_t >( );
         }
         return std::unique_ptr< daq_dc_data_t >( tmp );
     }

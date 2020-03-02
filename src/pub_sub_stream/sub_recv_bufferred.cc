@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <thread>
 #include <vector>
@@ -38,6 +39,7 @@
 
 #include "simple_pv.h"
 #include "recv_buffer.hh"
+#include "make_unique.hh"
 
 #define __CDECL
 
@@ -90,7 +92,7 @@ public:
     }
 };
 
-class SubDebug : public pub_sub::DebugNotices
+class SubDebug : public pub_sub::SubDebugNotices
 {
 public:
     SubDebug(): received_messages{0}, dropped_messages{0}, retransmit_requests{0}, retransmit_size{}, message_spread{} {}
@@ -538,14 +540,14 @@ main( int argc, char** argv )
     subscribers.reserve( subscription_strings.size( ) );
     if ( !thread_per_sub )
     {
-        subscribers.emplace_back( std::make_unique< pub_sub::Subscriber >( ) );
+        subscribers.emplace_back( make_unique_ptr< pub_sub::Subscriber>( ) );
     }
     for ( const auto& conn_str : subscription_strings )
     {
         if ( thread_per_sub )
         {
             subscribers.emplace_back(
-                std::make_unique< pub_sub::Subscriber >( ) );
+                make_unique_ptr< pub_sub::Subscriber >(  ) );
         }
         subscribers.front()->SetupDebugHooks(&debug);
         fprintf( stderr, "Beginning subscription on %s\n", conn_str.c_str( ) );

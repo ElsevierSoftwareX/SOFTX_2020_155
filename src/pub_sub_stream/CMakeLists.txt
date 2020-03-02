@@ -13,7 +13,9 @@ if (PUB_SUB_ROOT)
             driver::shmem
             pv::simple_pv
             args
-            pub_sub)
+            pub_sub
+            )
+    target_requires_cpp11(pub_xmit PUBLIC)
 
     add_executable(pub_xmit_asan
             pub_xmit.cc
@@ -23,7 +25,10 @@ if (PUB_SUB_ROOT)
             driver::shmem
             pv::simple_pv
             args
-            pub_sub_asan)
+            pub_sub_asan
+    )
+    target_requires_cpp11(pub_xmit_asan PUBLIC)
+
 
     add_executable(sub_recv
             sub_recv_bufferred.cc
@@ -36,6 +41,7 @@ if (PUB_SUB_ROOT)
             pv::simple_pv
             args
             pub_sub)
+    target_requires_cpp11(sub_recv PUBLIC)
 
     add_executable(sub_recv_asan
             sub_recv_bufferred.cc
@@ -48,6 +54,7 @@ if (PUB_SUB_ROOT)
             pv::simple_pv
             args
             pub_sub_asan)
+    target_requires_cpp11(sub_recv_asan PUBLIC)
 
     configure_file(test_pub_sub_xmit_recv.sh.in test_pub_sub_xmit_recv.sh @ONLY)
 
