@@ -30,14 +30,11 @@
 #include <time.h>
 #include "../include/daqmap.h"
 #include "../include/daq_core.h"
-#include "../zmq_stream/dc_utils.h"
 
 #include <boost/algorithm/string.hpp>
 #include <pub_sub/sub.hh>
 
 #include "args.h"
-
-// #include "testlib.h"
 
 #include "simple_pv.h"
 #include "recv_buffer.hh"
@@ -91,6 +88,61 @@ public:
         sleep( 5 );
         fprintf( stderr, "stopping threads\n" );
     }
+};
+
+class SubDebug : public pub_sub::DebugNotices
+{
+public:
+    SubDebug(): received_messages{0}, dropped_messages{0}, retransmit_requests{0}, retransmit_size{}, message_spread{} {}
+    ~SubDebug() override = default;
+
+    void message_received( const pub_sub::SubId sub_id, const pub_sub::KeyType,
+                      std::size_t size, std::chrono::milliseconds spread) override
+    {
+        int index = static_cast<int>(spread.count()/2);
+        index = std::min(index, (int)message_spread.size()-1);
+        message_spread[index]++;
+        ++received_messages;
+    }
+
+    void retransmit_request_made( const pub_sub::SubId sub_id, const pub_sub::KeyType key, int packet_count ) override
+    {
+        ++retransmit_requests;
+        int index = packet_count / 5;
+        index = std::max(index, (int)retransmit_size.size()-1);
+        retransmit_size[index]++;
+    }
+
+    void message_dropped( const pub_sub::SubId sub_id, const pub_sub::KeyType key) override
+    {
+        ++dropped_messages;
+    }
+
+    void clear()
+    {
+        //received_messages = 0;
+        //dropped_messages = 0;
+        //retransmit_requests = 0;
+        std::fill(retransmit_size.begin(), retransmit_size.end(), 0);
+        std::fill(message_spread.begin(), message_spread.end(), 0);
+    }
+
+    int received_messages;
+    int dropped_messages;
+    int retransmit_requests;
+    std::array<int, 10> retransmit_size;
+    std::array<int, 10> message_spread;
+};
+
+class SimplePVCloser {
+public:
+    explicit SimplePVCloser(simple_pv_handle handle): handle_{handle} {}
+    ~SimplePVCloser()
+    {
+        simple_pv_server_destroy(&handle_);
+    }
+private:
+    simple_pv_handle handle_;
 };
 
 template < typename It >
@@ -214,27 +266,6 @@ private:
     size_t                    cycle_data_size_;
 };
 
-void
-usage( )
-{
-    fprintf( stderr,
-             "Usage: mx2ix [args] -s server names -m shared memory size -g IX "
-             "channel \n" );
-    fprintf( stderr, "-l filename - log file name\n" );
-    fprintf( stderr,
-             "-s - number of FE computers to connect (1-32): Default = 32\n" );
-    fprintf( stderr, "-v - verbose prints diag test data\n" );
-    fprintf( stderr,
-             "-d - Max delay in milli seconds to wait for a FE to send data, "
-             "defaults to 10\n" );
-    fprintf( stderr, "-t - Number of rcvr threads per NIC: default = 16\n" );
-    fprintf( stderr, "-n - Data Concentrator number (0 or 1) : default = 0\n" );
-    fprintf( stderr,
-             "-B - Number cycles to delay output by (0 - 3): default = 0\n" );
-    fprintf( stderr, "     Setting to a non-0 value sets -d == 0\n" );
-    fprintf( stderr, "-h - help\n" );
-}
-
 // *************************************************************************
 // Timing Diagnostic Routine
 // *************************************************************************
@@ -330,6 +361,7 @@ main( int argc, char** argv )
     const char*                logfname = nullptr;
     const char*                subs = nullptr;
     const char*                subs_file = nullptr;
+    const char*                epics_prefix = nullptr;
     std::vector< std::string > subscription_strings{};
     int                        thread_per_sub = 0;
 
@@ -397,6 +429,7 @@ main( int argc, char** argv )
         "multi-thread",
         "Set if an explicit thread should be created for each subscription",
         &thread_per_sub );
+    args_add_string_ptr( arg_parser, 'p', ARGS_NO_LONG, "", "The EPICS variable prefix to use", &epics_prefix, nullptr);
 
     if ( args_parse( arg_parser, argc, argv ) < 0 )
     {
@@ -460,10 +493,42 @@ main( int argc, char** argv )
     max_data_size = max_data_size_mb * 1024 * 1024;
     delay_cycles = delay_ms * 1000;
 
+    SubDebug debug;
+    simple_pv_handle epics_server = nullptr;
+    std::vector<SimplePV> pvs;
+    if (epics_prefix)
+    {
+        pvs.emplace_back(SimplePV{"RECEIVED_MSG_COUNT", SIMPLE_PV_INT, &debug.received_messages, 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"DROPPED_MSG_COUNT", SIMPLE_PV_INT, &debug.dropped_messages, 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"RETRANSMIT_REQ", SIMPLE_PV_INT, &debug.retransmit_requests, 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"RETRANSMIT_5_PKT", SIMPLE_PV_INT, &debug.retransmit_size[0], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"RETRANSMIT_10_PKT", SIMPLE_PV_INT, &debug.retransmit_size[1], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"RETRANSMIT_15_PKT", SIMPLE_PV_INT, &debug.retransmit_size[2], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"RETRANSMIT_20_PKT", SIMPLE_PV_INT, &debug.retransmit_size[3], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"RETRANSMIT_25_PKT", SIMPLE_PV_INT, &debug.retransmit_size[4], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"RETRANSMIT_30_PKT", SIMPLE_PV_INT, &debug.retransmit_size[5], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"RETRANSMIT_35_PKT", SIMPLE_PV_INT, &debug.retransmit_size[6], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"RETRANSMIT_40_PKT", SIMPLE_PV_INT, &debug.retransmit_size[7], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"RETRANSMIT_45_PKT", SIMPLE_PV_INT, &debug.retransmit_size[8], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"RETRANSMIT_50_PKT", SIMPLE_PV_INT, &debug.retransmit_size[9], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"MSG_DURATION_0_MS", SIMPLE_PV_INT, &debug.message_spread[0], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"MSG_DURATION_2_MS", SIMPLE_PV_INT, &debug.message_spread[1], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"MSG_DURATION_4_MS", SIMPLE_PV_INT, &debug.message_spread[2], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"MSG_DURATION_6_MS", SIMPLE_PV_INT, &debug.message_spread[3], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"MSG_DURATION_8_MS", SIMPLE_PV_INT, &debug.message_spread[4], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"MSG_DURATION_10_MS", SIMPLE_PV_INT, &debug.message_spread[5], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"MSG_DURATION_12_MS", SIMPLE_PV_INT, &debug.message_spread[6], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"MSG_DURATION_14_MS", SIMPLE_PV_INT, &debug.message_spread[7], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"MSG_DURATION_16_MS", SIMPLE_PV_INT, &debug.message_spread[8], 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"MSG_DURATION_18_MS", SIMPLE_PV_INT, &debug.message_spread[9], 1000, -1, 1000, -1});
+        epics_server = simple_pv_server_create( epics_prefix, pvs.data(), pvs.size() );
+    }
+    SimplePVCloser epics_server_teardown_(epics_server);
+
     // set up to catch Control C
     signal( SIGINT, intHandler );
     // setup to ignore sig pipe
-    signal( SIGPIPE, sigpipeHandler );
+    //signal( SIGPIPE, sigpipeHandler );
 
     fprintf( stderr, "Num of sys = %d\n", (int)subscription_strings.size( ) );
 
@@ -482,6 +547,7 @@ main( int argc, char** argv )
             subscribers.emplace_back(
                 std::make_unique< pub_sub::Subscriber >( ) );
         }
+        subscribers.front()->SetupDebugHooks(&debug);
         fprintf( stderr, "Beginning subscription on %s\n", conn_str.c_str( ) );
         subscribers.front( )->subscribe(
             conn_str, 9000, []( pub_sub::SubMessage sub_msg ) {
@@ -563,6 +629,14 @@ main( int argc, char** argv )
                 dump_headers( headers.begin( ), headers.end( ), std::cout );
             }
             max_dcus_received = dcu_stats.second;
+        }
+        if (latest_in_buffer.cycle() % 4 == 0)
+        {
+            simple_pv_server_update(epics_server);
+            if (latest_in_buffer.cycle() == 0)
+            {
+                debug.clear();
+            }
         }
 
         circular_buffer.dump_largest_span( std::cout );

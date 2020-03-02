@@ -239,11 +239,14 @@ send_to_local_memory( const std::string& conn_string, int send_delay_ms )
         //            print_diags( nsys, lastCycle, sendLength, ixDataBlock );
 
         std::unique_ptr< daq_dc_data_t > msg_buffer = memory_arena.get( );
-        // Copy data to 0mq message buffer
-        memcpy( (void*)msg_buffer.get( ), nextData, sendLength );
+        // Copy data to message buffer and compact
+        memcpy(msg_buffer.get(), nextData, sendLength);
+        daq_dc_data_t*   tmp = reinterpret_cast<daq_dc_data_t*>(nextData);
+        //compact_daq_struct(tmp, (void*)msg_buffer.get());
+
         // Send Data
         usleep( send_delay_ms * 1000 );
-        daq_dc_data_t*   tmp = (daq_dc_data_t*)nextData;
+
         pub_sub::KeyType key =
             ( tmp->header.dcuheader[ 0 ].timeSec << 8 ) + nextCycle;
         publisher.publish(

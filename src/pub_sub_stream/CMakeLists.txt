@@ -27,10 +27,9 @@ if (PUB_SUB_ROOT)
 
     add_executable(sub_recv
             sub_recv_bufferred.cc
-            ../mx_stream/recv_buffer.cc
+            recv_buffer.cc
             )
     target_include_directories(sub_recv PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include
-            ${CMAKE_CURRENT_SOURCE_DIR}/../mx_stream
             ${CMAKE_CURRENT_BINARY_DIR})
     target_link_libraries(sub_recv PUBLIC
             driver::shmem
@@ -40,10 +39,9 @@ if (PUB_SUB_ROOT)
 
     add_executable(sub_recv_asan
             sub_recv_bufferred.cc
-            ../mx_stream/recv_buffer.cc
+            recv_buffer.cc
             )
     target_include_directories(sub_recv_asan PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include
-            ${CMAKE_CURRENT_SOURCE_DIR}/../mx_stream
             ${CMAKE_CURRENT_BINARY_DIR})
     target_link_libraries(sub_recv_asan PUBLIC
             driver::shmem
