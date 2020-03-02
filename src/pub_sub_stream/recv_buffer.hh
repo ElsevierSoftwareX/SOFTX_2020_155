@@ -18,7 +18,7 @@
 #include <sys/time.h>
 
 #include "atomic_config.h"
-#include "struct_compact.hh"
+//#include "struct_compact.hh"
 
 #ifdef HAVE_ATOMIC
 #include <atomic>
