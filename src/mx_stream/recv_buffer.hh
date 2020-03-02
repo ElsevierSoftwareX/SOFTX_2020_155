@@ -261,6 +261,7 @@ struct buffer_entry
         }
         else if ( key < latest )
         {
+	    reinterpret_cast<std::atomic<std::int64_t>*>(&discarded_messages)->operator++();
             return;
         }
         last_injestion = timestamp;
@@ -418,18 +419,22 @@ struct receive_buffer
         std::array<std::int64_t, N> spreads;
         std::array<std::int64_t, N> discards;
 
-        std::transform(buffer_.begin(), buffer_.end(), spreads.begin(), [](const buffer_entry& entry) -> std::int64_t {
-            return entry.get_spread();
-        });
-        std::transform(buffer_.begin(), buffer_.end(), spreads.begin(), [](buffer_entry& entry) -> std::int64_t {
-            return entry.get_discarded_and_clear_messages();
-        });
-        if (*std::max_element(spreads.begin(), spreads.end()) > 30 || *std::max_element(discards.begin(), discards.end()) > 0)
+	bool show_stats = false;
+
+	for (int i = 0; i < N; ++i)
+	{
+            spreads[i] = buffer_[i].get_spread();
+            discards[i] = buffer_[i].get_discarded_and_clear_messages();
+	    if (spreads[i] > 30 || discards[i] > 0)
+	    {
+	        show_stats = true;
+	    }
+	}
+        if (show_stats)
         {
             for (int i = 0; i < N; ++i)
             {
                 os << "slice " << i << ") max-spread = " << spreads[i] << "   discards = " << discards[i] << "\n";
-                ++i;
             }
         }
     }
