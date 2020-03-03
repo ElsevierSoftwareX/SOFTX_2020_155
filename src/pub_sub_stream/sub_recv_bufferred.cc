@@ -95,7 +95,8 @@ public:
 class SubDebug : public pub_sub::SubDebugNotices
 {
 public:
-    SubDebug(): received_messages{0}, dropped_messages{0}, retransmit_requests{0}, retransmit_size{}, message_spread{} {}
+    SubDebug(): received_messages{0}, dropped_messages{0}, retransmit_requests{0}, terminated_connections{0},
+	   new_connections{0}, renewed_connections{0}, retransmit_size{}, message_spread{} {}
     ~SubDebug() override = default;
 
     void message_received( const pub_sub::SubId sub_id, const pub_sub::KeyType,
@@ -111,13 +112,33 @@ public:
     {
         ++retransmit_requests;
         int index = packet_count / 5;
-        index = std::max(index, (int)retransmit_size.size()-1);
+        index = std::min(index, (int)retransmit_size.size()-1);
         retransmit_size[index]++;
     }
 
     void message_dropped( const pub_sub::SubId sub_id, const pub_sub::KeyType key) override
     {
         ++dropped_messages;
+    }
+
+    void connection_terminated( const pub_sub::SubId sub_id, const pub_sub::KeyType key ) override
+    {
+        if (key != pub_sub::NEXT_PUB_MSG())
+	{
+	    terminated_connections++;
+	}
+    }
+
+    void connection_started( const pub_sub::SubId sub_id, const pub_sub::KeyType key ) override
+    {
+	if (key == pub_sub::NEXT_PUB_MSG())
+	{
+	    new_connections++;
+	}
+	else
+	{
+	    renewed_connections++;
+	}
     }
 
     void clear()
@@ -132,6 +153,9 @@ public:
     int received_messages;
     int dropped_messages;
     int retransmit_requests;
+    int terminated_connections;
+    int new_connections;
+    int renewed_connections;
     std::array<int, 10> retransmit_size;
     std::array<int, 10> message_spread;
 };
@@ -444,7 +468,7 @@ main( int argc, char** argv )
         std::string   line;
         while ( std::getline( input, line, '\n' ) )
         {
-            if ( line.empty( ) )
+            if ( line.empty( ) || line[0] == '#' )
             {
                 continue;
             }
@@ -500,6 +524,9 @@ main( int argc, char** argv )
     std::vector<SimplePV> pvs;
     if (epics_prefix)
     {
+        pvs.emplace_back(SimplePV{"NEW_CONNECTIONS", SIMPLE_PV_INT, &debug.new_connections, 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"RENEWED_CONNECTIONS", SIMPLE_PV_INT, &debug.renewed_connections, 1000, -1, 1000, -1});
+        pvs.emplace_back(SimplePV{"TERMINATED_CONNECTIONS", SIMPLE_PV_INT, &debug.terminated_connections, 1000, -1, 1000, -1});
         pvs.emplace_back(SimplePV{"RECEIVED_MSG_COUNT", SIMPLE_PV_INT, &debug.received_messages, 1000, -1, 1000, -1});
         pvs.emplace_back(SimplePV{"DROPPED_MSG_COUNT", SIMPLE_PV_INT, &debug.dropped_messages, 1000, -1, 1000, -1});
         pvs.emplace_back(SimplePV{"RETRANSMIT_REQ", SIMPLE_PV_INT, &debug.retransmit_requests, 1000, -1, 1000, -1});

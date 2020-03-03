@@ -427,7 +427,7 @@ struct receive_buffer
        {
             spreads[i] = buffer_[i].get_spread();
             discards[i] = buffer_[i].get_discarded_and_clear_messages();
-           if (spreads[i] > 30 || discards[i] > 0)
+           if (spreads[i] > 35 || discards[i] > 0)
            {
                show_stats = true;
            }
