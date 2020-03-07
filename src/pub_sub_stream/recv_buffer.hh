@@ -22,41 +22,39 @@
 
 #ifdef HAVE_ATOMIC
 #include <atomic>
-    template <typename T>
-    T
-    load_atomically(const T& item)
-    {
-        return reinterpret_cast<const std::atomic<T>&>(item).load();
-    }
+template < typename T >
+T
+load_atomically( const T& item )
+{
+    return reinterpret_cast< const std::atomic< T >& >( item ).load( );
+}
 
-    template <typename T>
-    void
-    store_atomically(T& item, const T value)
-    {
-        reinterpret_cast<std::atomic<T>&>(item).store(value);
-    }
+template < typename T >
+void
+store_atomically( T& item, const T value )
+{
+    reinterpret_cast< std::atomic< T >& >( item ).store( value );
+}
 #else
-    template <typename T>
-    T
-    load_atomically(const T& item)
-    {
-        return __sync_or_and_fetch( const_cast< T* >( &item ),
-                                   static_cast< T >( 0 ) );
-    }
+template < typename T >
+T
+load_atomically( const T& item )
+{
+    return __sync_or_and_fetch( const_cast< T* >( &item ),
+                                static_cast< T >( 0 ) );
+}
 
-    template <typename T>
-    void
-    store_atomically(T& item, const T value)
+template < typename T >
+void
+store_atomically( T& item, const T value )
+{
+    T old_val;
+    old_val = load_atomically( item );
+    while ( old_val != value )
     {
-        T old_val;
-        old_val = load_atomically( item );
-        while ( old_val != value )
-        {
-            old_val =
-                __sync_val_compare_and_swap( &( &item ), old_val, value );
-        }
-
+        old_val = __sync_val_compare_and_swap( &( &item ), old_val, value );
     }
+}
 #endif
 
 /*!
@@ -151,20 +149,21 @@ struct gps_key
     void
     atomic_load_from( const gps_key* source )
     {
-        key = load_atomically(source->key);
+        key = load_atomically( source->key );
     }
 
-//    void
-//    atomic_store_to( gps_key* dest )
-//    {
-//        gps_key old_key;
-//        old_key.atomic_load_from( dest );
-//        while ( old_key != *this )
-//        {
-//            old_key.key =
-//                __sync_val_compare_and_swap( &( dest->key ), old_key.key, key );
-//        }
-//    }
+    //    void
+    //    atomic_store_to( gps_key* dest )
+    //    {
+    //        gps_key old_key;
+    //        old_key.atomic_load_from( dest );
+    //        while ( old_key != *this )
+    //        {
+    //            old_key.key =
+    //                __sync_val_compare_and_swap( &( dest->key ), old_key.key,
+    //                key );
+    //        }
+    //    }
 
     template < typename Pred >
     void
@@ -207,10 +206,18 @@ struct buffer_headers
 
 struct buffer_entry
 {
-    buffer_entry( )
+    buffer_entry( std::atomic< int64_t >* track_late_here = nullptr,
+                  std::atomic< int64_t >* track_discards_here = nullptr,
+                  std::atomic< int64_t >* track_total_span_here = nullptr )
         : m( ), latest( ), ifo_data( ), data( &ifo_data.dataBlock[ 0 ] ),
-          time_ingested( ), first_injestion( 0 ), last_injestion(0),
-          buffer_spread( 0 ), discarded_messages( 0 )
+          time_ingested( ), first_injestion( 0 ), last_injestion( 0 ),
+          is_late_( false ), dummy_tracking_( 0 ),
+          late_notification_( track_late_here ? track_late_here
+                                              : &dummy_tracking_ ),
+          discard_notification_( track_discards_here ? track_discards_here
+                                                     : &dummy_tracking_ ),
+          span_notification_( track_total_span_here ? track_total_span_here
+                                                     : &dummy_tracking_ )
     {
     }
     std::mutex                                 m;
@@ -220,8 +227,22 @@ struct buffer_entry
     std::array< int64_t, DAQ_TRANSIT_MAX_DCU > time_ingested;
     int64_t                                    first_injestion;
     int64_t                                    last_injestion;
-    int64_t                                    buffer_spread;
-    int64_t                                    discarded_messages;
+    bool                                       is_late_;
+    std::atomic< int64_t >                     dummy_tracking_;
+    std::atomic< int64_t >*                    late_notification_;
+    std::atomic< int64_t >*                    discard_notification_;
+    std::atomic< int64_t >*                    span_notification_;
+
+    void
+    setup_tracking(std::atomic< int64_t >* track_late_here,
+                   std::atomic< int64_t >* track_discards_here,
+                   std::atomic< int64_t >* track_total_span_here )
+    {
+        std::lock_guard<std::mutex> l_(m);
+        late_notification_ = ( track_late_here ? track_late_here : &dummy_tracking_ );
+        discard_notification_ = ( track_discards_here ? track_discards_here : &dummy_tracking_ );
+        span_notification_ = ( track_total_span_here ? track_total_span_here : &dummy_tracking_ );
+    }
 
     static int64_t
     time_now( )
@@ -229,20 +250,6 @@ struct buffer_entry
         timeval tv;
         gettimeofday( &tv, 0 );
         return static_cast< int64_t >( tv.tv_sec * 1000 + tv.tv_usec / 1000 );
-    }
-
-    int64_t get_spread() const
-    {
-        return load_atomically(buffer_spread);
-    }
-
-    int64_t get_discarded_and_clear_messages()
-    {
-        std::atomic<std::int64_t>* discard =
-            reinterpret_cast<std::atomic<std::int64_t>* >(&discarded_messages);
-        int64_t discards = load_atomically(discarded_messages);
-        while (!discard->compare_exchange_strong(discards, 0)) {}
-        return discards;
     }
 
     void
@@ -256,18 +263,22 @@ struct buffer_entry
         std::lock_guard< std::mutex > l_( m );
         if ( key > latest )
         {
-            store_atomically(buffer_spread, last_injestion - first_injestion);
+            (*span_notification_).exchange( last_injestion - first_injestion );
             clear( );
             first_injestion = timestamp;
         }
         else if ( key < latest )
         {
-            reinterpret_cast<std::atomic<std::int64_t>*>(&discarded_messages)->operator++();
+            ( *discard_notification_ )++;
             return;
+        }
+        if ( is_late_ )
+        {
+            ( *late_notification_ )++;
         }
         last_injestion = timestamp;
 
-        //expand_into_daq_struct((void*)&input, 64, &ifo_data);
+        // expand_into_daq_struct((void*)&input, 64, &ifo_data);
         const char* input_data = &input.dataBlock[ 0 ];
         for ( int i = 0; i < input.header.dcuTotalModels; ++i )
         {
@@ -343,7 +354,14 @@ struct receive_buffer
 #endif
     typedef std::mutex mutex_type;
 
-    receive_buffer( ) = default;
+    receive_buffer( ): latest_{}, late_entries_{0}, discarded_entries_{0},
+          cycle_message_span_(), buffer_{}
+    {
+        for( auto& buffer:buffer_ )
+        {
+            buffer.setup_tracking(&late_entries_, &discarded_entries_, &cycle_message_span_);
+        }
+    }
     receive_buffer( const receive_buffer& other ) = delete;
     receive_buffer( receive_buffer&& other ) = delete;
     receive_buffer& operator=( const receive_buffer& other ) = delete;
@@ -374,6 +392,24 @@ struct receive_buffer
         gps_key key;
         key.atomic_load_from( &latest_ );
         return key;
+    }
+
+    int64_t
+    get_and_clear_late()
+    {
+        return late_entries_.exchange(0);
+    }
+
+    int64_t
+    get_and_clear_discards()
+    {
+        return discarded_entries_.exchange(0);
+    }
+
+    int64_t
+    get_and_clear_cycle_message_span()
+    {
+        return cycle_message_span_.exchange(0);
     }
 
     /*!
@@ -410,46 +446,22 @@ struct receive_buffer
     }
 
     size_t
-    size() const
+    size( ) const
     {
         return N;
     }
 
-    void
-    dump_largest_span(std::ostream& os)
-    {
-        std::array<std::int64_t, N> spreads;
-        std::array<std::int64_t, N> discards;
-
-       bool show_stats = false;
-
-       for (int i = 0; i < N; ++i)
-       {
-            spreads[i] = buffer_[i].get_spread();
-            discards[i] = buffer_[i].get_discarded_and_clear_messages();
-           if (spreads[i] > 35 || discards[i] > 0)
-           {
-               show_stats = true;
-           }
-       }
-        if (show_stats)
-
-        {
-            for (int i = 0; i < N; ++i)
-            {
-                os << "slice " << i << ") max-spread = " << spreads[i] << "   discards = " << discards[i] << "\n";
-            }
-        }
-    }
-
-private:
     static int
     cycle_to_index( gps_key::cycle_type cycle )
     {
         return cycle % N;
     }
 
+private:
     gps_key                       latest_;
+    std::atomic<std::int64_t>     late_entries_;
+    std::atomic<std::int64_t>     discarded_entries_;
+    std::atomic<std::int64_t>     cycle_message_span_;
     std::array< buffer_entry, N > buffer_;
 };
 

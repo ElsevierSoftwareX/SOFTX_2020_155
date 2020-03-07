@@ -1,8 +1,5 @@
-Message("PUB_SUB_ROOT = ${PUB_SUB_ROOT}")
-if (PUB_SUB_ROOT)
-    add_subdirectory(${PUB_SUB_ROOT}
-            ${CMAKE_CURRENT_BINARY_DIR}/pub_sub)
-
+Message("libcds-pubsub_FOUND = ${libcds-pubsub_FOUND}")
+if (libcds-pubsub_FOUND)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../mx_stream/atomic_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/atomic_config.h)
 
     add_executable(pub_xmit
@@ -13,7 +10,7 @@ if (PUB_SUB_ROOT)
             driver::shmem
             pv::simple_pv
             args
-            pub_sub
+            cds::pub_sub
             )
     target_requires_cpp11(pub_xmit PUBLIC)
 
@@ -25,7 +22,7 @@ if (PUB_SUB_ROOT)
             driver::shmem
             pv::simple_pv
             args
-            pub_sub_asan
+            cds::pub_sub_asan
     )
     target_requires_cpp11(pub_xmit_asan PUBLIC)
 
@@ -40,7 +37,7 @@ if (PUB_SUB_ROOT)
             driver::shmem
             pv::simple_pv
             args
-            pub_sub)
+            cds::pub_sub)
     target_requires_cpp11(sub_recv PUBLIC)
 
     add_executable(sub_recv_asan
@@ -53,7 +50,7 @@ if (PUB_SUB_ROOT)
             driver::shmem
             pv::simple_pv
             args
-            pub_sub_asan)
+            cds::pub_sub_asan)
     target_requires_cpp11(sub_recv_asan PUBLIC)
 
     configure_file(test_pub_sub_xmit_recv.sh.in test_pub_sub_xmit_recv.sh @ONLY)
@@ -63,4 +60,4 @@ if (PUB_SUB_ROOT)
             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 
-endif (PUB_SUB_ROOT)
+endif (libcds-pubsub_FOUND)

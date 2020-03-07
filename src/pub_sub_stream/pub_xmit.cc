@@ -17,7 +17,7 @@
 #include "../include/daq_core.h"
 #include "drv/shmem.h"
 
-#include <pub_sub/pub.hh>
+#include <cds-pubsub/pub.hh>
 
 #include <boost/lockfree/spsc_queue.hpp>
 
@@ -46,7 +46,7 @@ public:
         int count = std::min( prealloc_count, 10 );
         for ( int i = 0; i < count; ++i )
         {
-            put( make_unique_ptr< daq_dc_data_t > ( ) );
+            put( make_unique_ptr< daq_dc_data_t >( ) );
         }
     }
     Arena( const Arena& ) = delete;
@@ -64,15 +64,28 @@ public:
     Arena& operator=( const Arena& ) = delete;
     Arena& operator=( Arena&& ) = delete;
 
-    std::unique_ptr< daq_dc_data_t >
+    pub_sub::DataPtr
     get( )
     {
-        daq_dc_data_t* tmp = nullptr;
+        daq_dc_data_t*                   tmp = nullptr;
+        std::unique_ptr< daq_dc_data_t > safe_tmp{ nullptr };
         if ( !arena_.pop( tmp ) )
         {
-            return make_unique_ptr< daq_dc_data_t >( );
+            safe_tmp = make_unique_ptr< daq_dc_data_t >( );
         }
-        return std::unique_ptr< daq_dc_data_t >( tmp );
+        else
+        {
+            safe_tmp = std::unique_ptr< daq_dc_data_t >( tmp );
+        }
+        return std::shared_ptr< unsigned char[] >(
+            reinterpret_cast< unsigned char* >( safe_tmp.get( ) ),
+            [this]( unsigned char* p ) {
+                if ( p )
+                {
+                    this->put( std::unique_ptr< daq_dc_data_t >(
+                        reinterpret_cast< daq_dc_data_t* >( p ) ) );
+                }
+            } );
     }
 
     void
@@ -212,7 +225,7 @@ send_to_local_memory( const std::string& conn_string, int send_delay_ms )
     std::uint32_t result;
 
     Arena              memory_arena( 5 );
-    pub_sub::Publisher publisher( conn_string, 9000 );
+    pub_sub::Publisher publisher( conn_string );
     do
     {
 
@@ -240,11 +253,11 @@ send_to_local_memory( const std::string& conn_string, int send_delay_ms )
         //        if ( nextCycle == 8 && do_verbose )
         //            print_diags( nsys, lastCycle, sendLength, ixDataBlock );
 
-        std::unique_ptr< daq_dc_data_t > msg_buffer = memory_arena.get( );
+        pub_sub::DataPtr msg_buffer = memory_arena.get( );
         // Copy data to message buffer and compact
-        memcpy(msg_buffer.get(), nextData, sendLength);
-        daq_dc_data_t*   tmp = reinterpret_cast<daq_dc_data_t*>(nextData);
-        //compact_daq_struct(tmp, (void*)msg_buffer.get());
+        memcpy( msg_buffer.get( ), nextData, sendLength );
+        auto tmp = reinterpret_cast< daq_dc_data_t* >( nextData );
+        // compact_daq_struct(tmp, (void*)msg_buffer.get());
 
         // Send Data
         usleep( send_delay_ms * 1000 );
@@ -252,16 +265,7 @@ send_to_local_memory( const std::string& conn_string, int send_delay_ms )
         pub_sub::KeyType key =
             ( tmp->header.dcuheader[ 0 ].timeSec << 8 ) + nextCycle;
         publisher.publish(
-            key,
-            pub_sub::Message( msg_buffer.get( ), sendLength ),
-            [&memory_arena]( pub_sub::Message m ) {
-                if ( m.data )
-                {
-                    memory_arena.put( std::unique_ptr< daq_dc_data_t >(
-                        reinterpret_cast< daq_dc_data_t* >( m.data ) ) );
-                }
-            } );
-        msg_buffer.release( );
+            key, pub_sub::Message( std::move( msg_buffer ), sendLength ) );
         nextCycle = ( nextCycle + 1 ) % 16;
 
     } while ( keepRunning ); /* do this until sighalt */
