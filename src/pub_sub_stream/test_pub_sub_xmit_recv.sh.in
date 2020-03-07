@@ -101,11 +101,13 @@ PID_LOCAL_DC=$!
 
 sleep 1
 
-"$PUB_XMIT" -b "local_dc" -m 100 -p "udp://127.0.0.1/127.255.255.255" > "$TDIR/logs/pub_xmit.log" &
+"$PUB_XMIT" -b "local_dc" -m 100 -p "tcp://127.0.0.1:9000" > "$TDIR/logs/pub_xmit.log" &
 PID_PUB_XMIT=$!
 
-"$SUB_RECV" -b "sub_recv" -m 100 -s "udp://127.255.255.255" > "$TDIR/logs/sub_recv.log" &
+"$SUB_RECV" -b "sub_recv" -m 100 -s "tcp://127.0.0.1:9000" > "$TDIR/logs/sub_recv.log" &
 PID_SUB_RECV=$!
+
+sleep 1
 
 "$FE_STREAM_CHECK" -m sub_recv -s 100 -v -c "$TDIR/ini_files/mod5.ini" "$TDIR/ini_files/tpchn_mod5.par" \
 -c "$TDIR/ini_files/mod6.ini" "$TDIR/ini_files/tpchn_mod6.par" \

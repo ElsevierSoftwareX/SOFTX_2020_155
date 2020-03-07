@@ -46,7 +46,7 @@ public:
         int count = std::min( prealloc_count, 10 );
         for ( int i = 0; i < count; ++i )
         {
-            put( make_unique_ptr< daq_dc_data_t >( ) );
+            put( new unsigned char[sizeof(daq_dc_data_t)] );
         }
     }
     Arena( const Arena& ) = delete;
@@ -55,10 +55,12 @@ public:
     {
         while ( arena_.read_available( ) )
         {
-            daq_dc_data_t* tmp = nullptr;
+            unsigned char* tmp = nullptr;
             arena_.pop( tmp );
-            auto deleter = std::unique_ptr< daq_dc_data_t >( tmp );
-            tmp = nullptr;
+            if (tmp)
+            {
+                delete [] tmp;
+            }
         }
     }
     Arena& operator=( const Arena& ) = delete;
@@ -67,44 +69,37 @@ public:
     pub_sub::DataPtr
     get( )
     {
-        daq_dc_data_t*                   tmp = nullptr;
-        std::unique_ptr< daq_dc_data_t > safe_tmp{ nullptr };
+        unsigned char*                   tmp = nullptr;
         if ( !arena_.pop( tmp ) )
         {
-            safe_tmp = make_unique_ptr< daq_dc_data_t >( );
-        }
-        else
-        {
-            safe_tmp = std::unique_ptr< daq_dc_data_t >( tmp );
+            tmp = new unsigned char [sizeof(daq_dc_data_t)];
         }
         return std::shared_ptr< unsigned char[] >(
-            reinterpret_cast< unsigned char* >( safe_tmp.get( ) ),
+            tmp,
             [this]( unsigned char* p ) {
                 if ( p )
                 {
-                    this->put( std::unique_ptr< daq_dc_data_t >(
-                        reinterpret_cast< daq_dc_data_t* >( p ) ) );
+                    this->put( p ) ;
                 }
             } );
     }
 
     void
-    put( std::unique_ptr< daq_dc_data_t > p )
+    put( unsigned char* p )
     {
         if ( !p )
         {
             return;
         }
-        auto tmp = p.release( );
-        if ( !arena_.push( tmp ) )
+        if ( !arena_.push( p ) )
         {
-            auto deleter = std::unique_ptr< daq_dc_data_t >( tmp );
+            delete [] p;
         }
     }
 
 private:
     using queue_t =
-        boost::lockfree::spsc_queue< daq_dc_data_t*,
+        boost::lockfree::spsc_queue< unsigned char*,
                                      boost::lockfree::capacity< 10 > >;
     queue_t arena_;
 };
