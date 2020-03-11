@@ -217,7 +217,7 @@ struct buffer_entry
           discard_notification_( track_discards_here ? track_discards_here
                                                      : &dummy_tracking_ ),
           span_notification_( track_total_span_here ? track_total_span_here
-                                                     : &dummy_tracking_ )
+                                                    : &dummy_tracking_ )
     {
     }
     std::mutex                                 m;
@@ -234,14 +234,17 @@ struct buffer_entry
     std::atomic< int64_t >*                    span_notification_;
 
     void
-    setup_tracking(std::atomic< int64_t >* track_late_here,
-                   std::atomic< int64_t >* track_discards_here,
-                   std::atomic< int64_t >* track_total_span_here )
+    setup_tracking( std::atomic< int64_t >* track_late_here,
+                    std::atomic< int64_t >* track_discards_here,
+                    std::atomic< int64_t >* track_total_span_here )
     {
-        std::lock_guard<std::mutex> l_(m);
-        late_notification_ = ( track_late_here ? track_late_here : &dummy_tracking_ );
-        discard_notification_ = ( track_discards_here ? track_discards_here : &dummy_tracking_ );
-        span_notification_ = ( track_total_span_here ? track_total_span_here : &dummy_tracking_ );
+        std::lock_guard< std::mutex > l_( m );
+        late_notification_ =
+            ( track_late_here ? track_late_here : &dummy_tracking_ );
+        discard_notification_ =
+            ( track_discards_here ? track_discards_here : &dummy_tracking_ );
+        span_notification_ = ( track_total_span_here ? track_total_span_here
+                                                     : &dummy_tracking_ );
     }
 
     static int64_t
@@ -263,7 +266,8 @@ struct buffer_entry
         std::lock_guard< std::mutex > l_( m );
         if ( key > latest )
         {
-            (*span_notification_).exchange( last_injestion - first_injestion );
+            ( *span_notification_ )
+                .exchange( last_injestion - first_injestion );
             clear( );
             first_injestion = timestamp;
         }
@@ -354,12 +358,14 @@ struct receive_buffer
 #endif
     typedef std::mutex mutex_type;
 
-    receive_buffer( ): latest_{}, late_entries_{0}, discarded_entries_{0},
-          cycle_message_span_(), buffer_{}
+    receive_buffer( )
+        : latest_{}, late_entries_{ 0 }, discarded_entries_{ 0 },
+          cycle_message_span_( ), buffer_{}
     {
-        for( auto& buffer:buffer_ )
+        for ( auto& buffer : buffer_ )
         {
-            buffer.setup_tracking(&late_entries_, &discarded_entries_, &cycle_message_span_);
+            buffer.setup_tracking(
+                &late_entries_, &discarded_entries_, &cycle_message_span_ );
         }
     }
     receive_buffer( const receive_buffer& other ) = delete;
@@ -395,21 +401,21 @@ struct receive_buffer
     }
 
     int64_t
-    get_and_clear_late()
+    get_and_clear_late( )
     {
-        return late_entries_.exchange(0);
+        return late_entries_.exchange( 0 );
     }
 
     int64_t
-    get_and_clear_discards()
+    get_and_clear_discards( )
     {
-        return discarded_entries_.exchange(0);
+        return discarded_entries_.exchange( 0 );
     }
 
     int64_t
-    get_and_clear_cycle_message_span()
+    get_and_clear_cycle_message_span( )
     {
-        return cycle_message_span_.exchange(0);
+        return cycle_message_span_.exchange( 0 );
     }
 
     /*!
@@ -459,9 +465,9 @@ struct receive_buffer
 
 private:
     gps_key                       latest_;
-    std::atomic<std::int64_t>     late_entries_;
-    std::atomic<std::int64_t>     discarded_entries_;
-    std::atomic<std::int64_t>     cycle_message_span_;
+    std::atomic< std::int64_t >   late_entries_;
+    std::atomic< std::int64_t >   discarded_entries_;
+    std::atomic< std::int64_t >   cycle_message_span_;
     std::array< buffer_entry, N > buffer_;
 };
 

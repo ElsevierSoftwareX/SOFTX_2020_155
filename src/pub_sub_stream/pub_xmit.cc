@@ -46,7 +46,7 @@ public:
         int count = std::min( prealloc_count, 10 );
         for ( int i = 0; i < count; ++i )
         {
-            put( new unsigned char[sizeof(daq_dc_data_t)] );
+            put( new unsigned char[ sizeof( daq_dc_data_t ) ] );
         }
     }
     Arena( const Arena& ) = delete;
@@ -57,9 +57,9 @@ public:
         {
             unsigned char* tmp = nullptr;
             arena_.pop( tmp );
-            if (tmp)
+            if ( tmp )
             {
-                delete [] tmp;
+                delete[] tmp;
             }
         }
     }
@@ -69,19 +69,18 @@ public:
     pub_sub::DataPtr
     get( )
     {
-        unsigned char*                   tmp = nullptr;
+        unsigned char* tmp = nullptr;
         if ( !arena_.pop( tmp ) )
         {
-            tmp = new unsigned char [sizeof(daq_dc_data_t)];
+            tmp = new unsigned char[ sizeof( daq_dc_data_t ) ];
         }
-        return std::shared_ptr< unsigned char[] >(
-            tmp,
-            [this]( unsigned char* p ) {
-                if ( p )
-                {
-                    this->put( p ) ;
-                }
-            } );
+        return std::shared_ptr< unsigned char[] >( tmp,
+                                                   [this]( unsigned char* p ) {
+                                                       if ( p )
+                                                       {
+                                                           this->put( p );
+                                                       }
+                                                   } );
     }
 
     void
@@ -93,7 +92,7 @@ public:
         }
         if ( !arena_.push( p ) )
         {
-            delete [] p;
+            delete[] p;
         }
     }
 

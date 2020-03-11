@@ -95,9 +95,14 @@ public:
 class SubDebug : public pub_sub::SubDebugNotices
 {
 public:
-    SubDebug(): received_messages{0}, dropped_messages{0}, retransmit_requests{0}, terminated_connections{0},
-	   new_connections{0}, renewed_connections{0}, retransmit_size{}, message_spread{} {}
-    ~SubDebug() override = default;
+    SubDebug( )
+        : received_messages{ 0 }, dropped_messages{ 0 },
+          retransmit_requests{ 0 }, terminated_connections{ 0 },
+          new_connections{ 0 }, renewed_connections{ 0 }, retransmit_size{},
+          message_spread{}
+    {
+    }
+    ~SubDebug( ) override = default;
 
     void
     message_received( const pub_sub::SubId sub_id,
@@ -118,8 +123,8 @@ public:
     {
         ++retransmit_requests;
         int index = packet_count / 5;
-        index = std::min(index, (int)retransmit_size.size()-1);
-        retransmit_size[index]++;
+        index = std::min( index, (int)retransmit_size.size( ) - 1 );
+        retransmit_size[ index ]++;
     }
 
     void
@@ -129,27 +134,32 @@ public:
         ++dropped_messages;
     }
 
-    void connection_terminated( const pub_sub::SubId sub_id, const pub_sub::KeyType key ) override
+    void
+    connection_terminated( const pub_sub::SubId   sub_id,
+                           const pub_sub::KeyType key ) override
     {
-        if (key != pub_sub::NEXT_PUB_MSG())
-	{
-	    terminated_connections++;
-	}
+        if ( key != pub_sub::NEXT_PUB_MSG( ) )
+        {
+            terminated_connections++;
+        }
     }
 
-    void connection_started( const pub_sub::SubId sub_id, const pub_sub::KeyType key ) override
+    void
+    connection_started( const pub_sub::SubId   sub_id,
+                        const pub_sub::KeyType key ) override
     {
-	if (key == pub_sub::NEXT_PUB_MSG())
-	{
-	    new_connections++;
-	}
-	else
-	{
-	    renewed_connections++;
-	}
+        if ( key == pub_sub::NEXT_PUB_MSG( ) )
+        {
+            new_connections++;
+        }
+        else
+        {
+            renewed_connections++;
+        }
     }
 
-    void clear()
+    void
+    clear( )
     {
         // received_messages = 0;
         // dropped_messages = 0;
@@ -158,14 +168,14 @@ public:
         std::fill( message_spread.begin( ), message_spread.end( ), 0 );
     }
 
-    int received_messages;
-    int dropped_messages;
-    int retransmit_requests;
-    int terminated_connections;
-    int new_connections;
-    int renewed_connections;
-    std::array<int, 10> retransmit_size;
-    std::array<int, 10> message_spread;
+    int                   received_messages;
+    int                   dropped_messages;
+    int                   retransmit_requests;
+    int                   terminated_connections;
+    int                   new_connections;
+    int                   renewed_connections;
+    std::array< int, 10 > retransmit_size;
+    std::array< int, 10 > message_spread;
 };
 
 class SimplePVCloser
@@ -516,7 +526,7 @@ main( int argc, char** argv )
         std::string   line;
         while ( std::getline( input, line, '\n' ) )
         {
-            if ( line.empty( ) || line[0] == '#' )
+            if ( line.empty( ) || line[ 0 ] == '#' )
             {
                 continue;
             }
@@ -572,26 +582,141 @@ main( int argc, char** argv )
     std::vector< SimplePV > pvs;
     if ( epics_prefix )
     {
-        pvs.emplace_back( SimplePV{ "DCUS_RECEIVED", SIMPLE_PV_INT, &dcus_received, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "MAX_DCUS_RECEIVED", SIMPLE_PV_INT, &reporting_max_dcus_received, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "MIN_DCUS_RECEIVED", SIMPLE_PV_INT, &reporting_min_dcus_received, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "MEAN_DCUS_RECEIVED", SIMPLE_PV_INT, &reporting_mean_dcus_recieved, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "SPREAD_MS", SIMPLE_PV_INT, &spread_ms, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "MAX_SPREAD_MS_LATCHED", SIMPLE_PV_INT, &latching_max_spread_ms, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "MAX_SPREAD_MS", SIMPLE_PV_INT, &reporting_max_spread_ms, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "MIN_SPREAD_MS", SIMPLE_PV_INT, &reporting_min_spread_ms, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "MEAN_SPREAD_MS", SIMPLE_PV_INT, &reporting_mean_spread_ms, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "TOTAL_SPREAD_MS", SIMPLE_PV_INT, &total_spread_ms, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "MAX_TOTAL_SPREAD_MS_LATCHED", SIMPLE_PV_INT, &latching_total_max_spread_ms, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "MAX_TOTAL_SPREAD_MS", SIMPLE_PV_INT, &reporting_total_max_spread_ms, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "MIN_TOTAL_SPREAD_MS", SIMPLE_PV_INT, &reporting_total_min_spread_ms, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "MEAN_TOTAL_SPREAD_MS", SIMPLE_PV_INT, &reporting_total_mean_spread_ms, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "LATE_MESSAGES_LAST_SEC", SIMPLE_PV_INT, &late_messages_last_sec, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "VERY_LATE_MESSAGES_LAST_SEC", SIMPLE_PV_INT, &very_late_messages_last_sec, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "DROPPED_MESSAGES_LAST_SEC", SIMPLE_PV_INT, &discarded_messages_last_sec, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "LATE_MESSAGES", SIMPLE_PV_INT, &late_messages, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "VERY_LATE_MESSAGES", SIMPLE_PV_INT, &very_late_messages, 1000,0, 1000, 0 });
-        pvs.emplace_back( SimplePV{ "DROPPED_MESSAGES", SIMPLE_PV_INT, &discarded_messages, 1000,0, 1000, 0 });
+        pvs.emplace_back( SimplePV{ "DCUS_RECEIVED",
+                                    SIMPLE_PV_INT,
+                                    &dcus_received,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "MAX_DCUS_RECEIVED",
+                                    SIMPLE_PV_INT,
+                                    &reporting_max_dcus_received,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "MIN_DCUS_RECEIVED",
+                                    SIMPLE_PV_INT,
+                                    &reporting_min_dcus_received,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "MEAN_DCUS_RECEIVED",
+                                    SIMPLE_PV_INT,
+                                    &reporting_mean_dcus_recieved,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{
+            "SPREAD_MS", SIMPLE_PV_INT, &spread_ms, 1000, 0, 1000, 0 } );
+        pvs.emplace_back( SimplePV{ "MAX_SPREAD_MS_LATCHED",
+                                    SIMPLE_PV_INT,
+                                    &latching_max_spread_ms,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "MAX_SPREAD_MS",
+                                    SIMPLE_PV_INT,
+                                    &reporting_max_spread_ms,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "MIN_SPREAD_MS",
+                                    SIMPLE_PV_INT,
+                                    &reporting_min_spread_ms,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "MEAN_SPREAD_MS",
+                                    SIMPLE_PV_INT,
+                                    &reporting_mean_spread_ms,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "TOTAL_SPREAD_MS",
+                                    SIMPLE_PV_INT,
+                                    &total_spread_ms,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "MAX_TOTAL_SPREAD_MS_LATCHED",
+                                    SIMPLE_PV_INT,
+                                    &latching_total_max_spread_ms,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "MAX_TOTAL_SPREAD_MS",
+                                    SIMPLE_PV_INT,
+                                    &reporting_total_max_spread_ms,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "MIN_TOTAL_SPREAD_MS",
+                                    SIMPLE_PV_INT,
+                                    &reporting_total_min_spread_ms,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "MEAN_TOTAL_SPREAD_MS",
+                                    SIMPLE_PV_INT,
+                                    &reporting_total_mean_spread_ms,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "LATE_MESSAGES_LAST_SEC",
+                                    SIMPLE_PV_INT,
+                                    &late_messages_last_sec,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "VERY_LATE_MESSAGES_LAST_SEC",
+                                    SIMPLE_PV_INT,
+                                    &very_late_messages_last_sec,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "DROPPED_MESSAGES_LAST_SEC",
+                                    SIMPLE_PV_INT,
+                                    &discarded_messages_last_sec,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "LATE_MESSAGES",
+                                    SIMPLE_PV_INT,
+                                    &late_messages,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "VERY_LATE_MESSAGES",
+                                    SIMPLE_PV_INT,
+                                    &very_late_messages,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
+        pvs.emplace_back( SimplePV{ "DROPPED_MESSAGES",
+                                    SIMPLE_PV_INT,
+                                    &discarded_messages,
+                                    1000,
+                                    0,
+                                    1000,
+                                    0 } );
         pvs.emplace_back( SimplePV{ "RECEIVED_MSG_COUNT",
                                     SIMPLE_PV_INT,
                                     &debug.received_messages,
@@ -793,7 +918,6 @@ main( int argc, char** argv )
     start_acq = 1;
     static const int header_size = sizeof( daq_multi_dcu_header_t );
 
-
     int     min_cycle_time = 1 << 30;
     int     max_cycle_time = 0;
     int     mean_cycle_time = 0;
@@ -839,25 +963,27 @@ main( int argc, char** argv )
         {
             buffer_headers& cur_header = headers[ pub_index ];
             dcus_received = static_cast< int >( cur_header.dcu_count );
-            int64_t smallest = std::numeric_limits<int64_t>::max();
+            int64_t smallest = std::numeric_limits< int64_t >::max( );
             int64_t largest = 0;
-            for (int i = 0; i < dcus_received; ++i)
+            for ( int i = 0; i < dcus_received; ++i )
             {
-                auto cur_time = cur_header.time_ingested[i];
-                smallest = std::min(smallest, cur_time);
-                largest = std::max(largest, cur_time);
+                auto cur_time = cur_header.time_ingested[ i ];
+                smallest = std::min( smallest, cur_time );
+                largest = std::max( largest, cur_time );
             }
-            spread_ms = static_cast<int>(largest-smallest);
+            spread_ms = static_cast< int >( largest - smallest );
         }
-        min_dcus_received = std::min(min_dcus_received, dcus_received);
-        max_dcus_received = std::max(max_dcus_received, dcus_received);
-        min_spread_ms = std::min(min_spread_ms, spread_ms);
-        max_spread_ms = std::max(max_spread_ms, spread_ms);
-        latching_max_spread_ms = std::max(max_spread_ms, latching_max_spread_ms);
-        total_spread_ms = circular_buffer.get_and_clear_cycle_message_span();
-        min_total_spread_ms = std::min(min_total_spread_ms, total_spread_ms);
-        max_total_spread_ms = std::max(max_total_spread_ms, total_spread_ms);
-        latching_total_max_spread_ms = std::max(max_total_spread_ms, latching_total_max_spread_ms);
+        min_dcus_received = std::min( min_dcus_received, dcus_received );
+        max_dcus_received = std::max( max_dcus_received, dcus_received );
+        min_spread_ms = std::min( min_spread_ms, spread_ms );
+        max_spread_ms = std::max( max_spread_ms, spread_ms );
+        latching_max_spread_ms =
+            std::max( max_spread_ms, latching_max_spread_ms );
+        total_spread_ms = circular_buffer.get_and_clear_cycle_message_span( );
+        min_total_spread_ms = std::min( min_total_spread_ms, total_spread_ms );
+        max_total_spread_ms = std::max( max_total_spread_ms, total_spread_ms );
+        latching_total_max_spread_ms =
+            std::max( max_total_spread_ms, latching_total_max_spread_ms );
         mean_dcus_received += dcus_received;
         mean_spread_ms += spread_ms;
         mean_total_spread_ms += total_spread_ms;
@@ -873,7 +999,7 @@ main( int argc, char** argv )
             }
             max_dcus_received = dcu_stats.second;
         }
-        if (latest_in_buffer.cycle( ) == 0)
+        if ( latest_in_buffer.cycle( ) == 0 )
         {
             reporting_max_dcus_received = max_dcus_received;
             reporting_min_dcus_received = min_dcus_received;
@@ -884,15 +1010,20 @@ main( int argc, char** argv )
             reporting_mean_dcus_recieved = 0;
             reporting_mean_spread_ms = 0;
             reporting_total_mean_spread_ms = 0;
-            if (mean_samples > 0)
+            if ( mean_samples > 0 )
             {
-                reporting_mean_dcus_recieved = mean_dcus_received / mean_samples;
+                reporting_mean_dcus_recieved =
+                    mean_dcus_received / mean_samples;
                 reporting_mean_spread_ms = mean_spread_ms / mean_samples;
-                reporting_total_mean_spread_ms = mean_total_spread_ms / mean_samples;
+                reporting_total_mean_spread_ms =
+                    mean_total_spread_ms / mean_samples;
             }
-            late_messages_last_sec = static_cast<int>(circular_buffer.get_and_clear_late());
-            very_late_messages_last_sec = static_cast<int>(circular_buffer.get_and_clear_discards());
-            discarded_messages_last_sec = late_messages_last_sec + very_late_messages_last_sec;
+            late_messages_last_sec =
+                static_cast< int >( circular_buffer.get_and_clear_late( ) );
+            very_late_messages_last_sec =
+                static_cast< int >( circular_buffer.get_and_clear_discards( ) );
+            discarded_messages_last_sec =
+                late_messages_last_sec + very_late_messages_last_sec;
 
             late_messages += late_messages_last_sec;
             very_late_messages += very_late_messages_last_sec;

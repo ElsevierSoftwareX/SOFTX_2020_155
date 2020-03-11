@@ -314,26 +314,26 @@ send_to_local_memory( int           nsys,
 int __CDECL
     main( int argc, char* argv[] )
 {
-    int   counter = 0;
-    int   nsys = 1;
-    int   dcuId[ 10 ];
-    int   ii = 0;
+    int         counter = 0;
+    int         nsys = 1;
+    int         dcuId[ 10 ];
+    int         ii = 0;
     const char* gds_tp_dir = 0;
-    int   max_data_size_mb = 64;
-    int   max_data_size = 0;
-    int   error = 0;
+    int         max_data_size_mb = 64;
+    int         max_data_size = 0;
+    int         error = 0;
     const char* buffer_name = "local_dc";
-    int   send_delay_ms = 0;
+    int         send_delay_ms = 0;
     args_handle arg_parser = NULL;
 
     mx_endpoint_t ep;
-    int      my_eid;
+    int           my_eid;
     uint64_t      his_nic_id;
     uint32_t      board_id;
     uint32_t      filter;
-    int      his_eid;
-    const char*         rem_host;
-    const char*         sysname;
+    int           his_eid;
+    const char*   rem_host;
+    const char*   sysname;
     const char*   logfname = 0;
     mx_return_t   ret;
 
@@ -349,22 +349,74 @@ int __CDECL
 
     ii = 0;
 
-    arg_parser = args_create_parser("Transmit data between a LIGO FE computer and the daqd system over the open mx protocol");
-    if (!arg_parser)
+    arg_parser =
+        args_create_parser( "Transmit data between a LIGO FE computer and the "
+                            "daqd system over the open mx protocol" );
+    if ( !arg_parser )
     {
         return -1;
     }
-    args_add_string_ptr(arg_parser, 't', ARGS_NO_LONG, "target", "Name of the MX target computer to transmit to", &rem_host, "");
-    args_add_string_ptr(arg_parser, 'b', ARGS_NO_LONG, "buffer", "Name of the mbuf to read local data from", &buffer_name, "local_dc");
-    args_add_int(arg_parser, 'm', ARGS_NO_LONG, "20-100", "Local memory buffer size in megabytes", &max_data_size_mb, 100);
-    args_add_string_ptr(arg_parser, 'l', ARGS_NO_LONG, "filename", "Log file name", &logfname, 0);
-    args_add_int(arg_parser, 'e', ARGS_NO_LONG, "0-31", "Number of the local mx end point to transmit on", &my_eid, 0);
-    args_add_int(arg_parser, 'r', ARGS_NO_LONG, "0-31", "Number of the remote mx end point to transmit to", &his_eid, 0);
-    args_add_flag(arg_parser, 'v', ARGS_NO_LONG, "Verbose output", &do_verbose);
-    args_add_string_ptr(arg_parser, 'd', ARGS_NO_LONG, "directory", "Path to the gds tp dir used to lookup models", &gds_tp_dir, 0);
-    args_add_int(arg_parser, 'D', ARGS_NO_LONG, "ms", "Add a delay in ms to before sending data.  Used to spread the load", &send_delay_ms, 0);
+    args_add_string_ptr( arg_parser,
+                         't',
+                         ARGS_NO_LONG,
+                         "target",
+                         "Name of the MX target computer to transmit to",
+                         &rem_host,
+                         "" );
+    args_add_string_ptr( arg_parser,
+                         'b',
+                         ARGS_NO_LONG,
+                         "buffer",
+                         "Name of the mbuf to read local data from",
+                         &buffer_name,
+                         "local_dc" );
+    args_add_int( arg_parser,
+                  'm',
+                  ARGS_NO_LONG,
+                  "20-100",
+                  "Local memory buffer size in megabytes",
+                  &max_data_size_mb,
+                  100 );
+    args_add_string_ptr( arg_parser,
+                         'l',
+                         ARGS_NO_LONG,
+                         "filename",
+                         "Log file name",
+                         &logfname,
+                         0 );
+    args_add_int( arg_parser,
+                  'e',
+                  ARGS_NO_LONG,
+                  "0-31",
+                  "Number of the local mx end point to transmit on",
+                  &my_eid,
+                  0 );
+    args_add_int( arg_parser,
+                  'r',
+                  ARGS_NO_LONG,
+                  "0-31",
+                  "Number of the remote mx end point to transmit to",
+                  &his_eid,
+                  0 );
+    args_add_flag(
+        arg_parser, 'v', ARGS_NO_LONG, "Verbose output", &do_verbose );
+    args_add_string_ptr( arg_parser,
+                         'd',
+                         ARGS_NO_LONG,
+                         "directory",
+                         "Path to the gds tp dir used to lookup models",
+                         &gds_tp_dir,
+                         0 );
+    args_add_int(
+        arg_parser,
+        'D',
+        ARGS_NO_LONG,
+        "ms",
+        "Add a delay in ms to before sending data.  Used to spread the load",
+        &send_delay_ms,
+        0 );
 
-    if (args_parse(arg_parser, argc, argv) < 0)
+    if ( args_parse( arg_parser, argc, argv ) < 0 )
     {
         return -1;
     }
@@ -372,18 +424,18 @@ int __CDECL
     if ( max_data_size_mb < 20 )
     {
         fprintf( stderr, "Min data block size is 20 MB\n" );
-        args_fprint_usage(arg_parser, argv[0], stderr);
+        args_fprint_usage( arg_parser, argv[ 0 ], stderr );
         return -1;
     }
     if ( max_data_size_mb > 100 )
     {
         fprintf( stderr, "Max data block size is 100 MB\n" );
-        args_fprint_usage(arg_parser, argv[0], stderr);
+        args_fprint_usage( arg_parser, argv[ 0 ], stderr );
         return -1;
     }
     max_data_size = max_data_size_mb * 1024 * 1024;
 
-    if (logfname != 0)
+    if ( logfname != 0 )
     {
         if ( 0 == freopen( logfname, "w", stdout ) )
         {
@@ -404,7 +456,7 @@ int __CDECL
         fprintf( stderr,
                  "\n***ERROR\n***Must set both -e and -r options to send data "
                  "to DAQ\n\n" );
-        args_fprint_usage(arg_parser, argv[0], stderr);
+        args_fprint_usage( arg_parser, argv[ 0 ], stderr );
         return ( 0 );
     }
     fprintf( stderr,
@@ -461,7 +513,7 @@ int __CDECL
     fprintf( stderr, "Closing out OpenMX and exiting\n" );
     mx_close_endpoint( ep );
     mx_finalize( );
-    args_destroy(&arg_parser);
+    args_destroy( &arg_parser );
 
     return 0;
 }

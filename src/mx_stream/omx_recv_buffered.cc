@@ -653,7 +653,7 @@ main( int argc, char** argv )
             max_dcus_received = dcu_stats.second;
         }
 
-        circular_buffer.dump_largest_span(std::cout);
+        circular_buffer.dump_largest_span( std::cout );
 
         //#ifndef TIME_INTERVAL_DIAG
         //        mytime = s_clock( );
