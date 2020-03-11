@@ -33,15 +33,15 @@ if [ ! -x "$LOCAL_DC" ]; then
     exit 1
 fi
 
-PUB_XMIT="$CWD/pub_xmit"
+PUB_XMIT="$CWD/cps_xmit"
 if [ ! -x "$PUB_XMIT" ]; then
-    echo "pub_xmit is required"
+    echo "cps_xmit is required"
     exit 1
 fi
 
-SUB_RECV="$CWD/sub_recv"
+SUB_RECV="$CWD/cps_recv"
 if [ ! -x "$SUB_RECV" ]; then
-    echo "sub_recv is required"
+    echo "cps_recv is required"
     exit 1
 fi
 
