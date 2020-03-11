@@ -76,6 +76,8 @@ Usage( )
     fprintf( stderr,
              " -d <directory> : Path to the gds tp dir used to lookup model "
              "rates\n" );
+    fprintf( stderr,
+        " -w <value>     : Number of ms to wait for models to finish\n");
     fprintf( stderr, " -h             : This helpscreen\n" );
     fprintf( stderr, "\n" );
 }
@@ -408,9 +410,8 @@ loadMessageBuffer( int nsys, int lastCycle, int status, int dataRdy[] )
 
 // **********************************************************************************************
 int
-send_to_local_memory( int nsys, int len )
+send_to_local_memory( int nsys, int len, int do_wait )
 {
-    int   do_wait = 1;
     char* nextData;
 
     int          ii;
@@ -506,7 +507,7 @@ int __CDECL
     char*        sysname;
     int          len;
     int          iter;
-    int          do_wait;
+    int          do_wait = 1;
     int          do_bothways;
     extern char* optarg;
 
@@ -524,7 +525,7 @@ int __CDECL
     }
 
     /* Get the parameters */
-    while ( ( counter = getopt( argc, argv, "b:e:m:h:v:s:r:t:d:l:D:" ) ) !=
+    while ( ( counter = getopt( argc, argv, "b:e:m:h:v:s:r:t:d:l:D:w:" ) ) !=
             EOF )
         switch ( counter )
         {
@@ -564,6 +565,9 @@ int __CDECL
             break;
         case 'd':
             gds_tp_dir = optarg;
+            break;
+        case 'w':
+            do_wait = atoi( optarg );
             break;
         case 'h':
             Usage( );
@@ -673,7 +677,7 @@ int __CDECL
     // shared memory
     do
     {
-        error = send_to_local_memory( nsys, len );
+        error = send_to_local_memory( nsys, len, do_wait );
     } while ( error == 0 && keepRunning == 1 );
 
     return 0;
