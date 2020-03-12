@@ -16,6 +16,7 @@ Build-Depends:
  libboost-all-dev,
  libbz2-dev,
  libc-dev-bin,
+ libcds-pubsub-dev,
  libfl-dev,
  libmotif-dev,
  libnds2-client-dev,
@@ -129,6 +130,18 @@ Description: advLigoRTS Dolphin IX PCI shared memory transport
  .
  Dolphin IX PCI shared memory transport for advLigoRTS DAQD
  structures.
+
+Package: advligorts-transport-pubsub
+Architecture: any
+Depends:
+ advligorts-mbuf-dkms,
+ libcds-pubsub,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: advLigoRTS pub/sub based transport
+ Core component of advLigoRTS.
+ .
+ pub/sub ip based network transport for advLigoRTS DAQD structures.
 
 Package: advligorts-cymac
 Architecture: all
