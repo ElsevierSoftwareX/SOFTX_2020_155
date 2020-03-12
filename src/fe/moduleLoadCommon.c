@@ -6,7 +6,9 @@ void
 print_io_info( CDS_HARDWARE* cdsp )
 {
     int ii, jj, kk;
+    int channels = 0;
     jj = 0;
+    
 #ifndef USER_SPACE
     printf( "" SYSTEM_NAME_STRING_LOWER ":startup time is %ld\n",
             current_time_fe( ) );
@@ -31,10 +33,28 @@ print_io_info( CDS_HARDWARE* cdsp )
     for ( ii = 0; ii < cdsp->adcCount; ii++ )
     {
         kk++;
-        if ( cdsp->adcType[ ii ] == GSC_18AISS6C )
+        if ( cdsp->adcType[ ii ] == GSC_18AI32SSC1M )
         {
-            printf( "\tADC %d is a GSC_18AISS6C module\n", ii );
-            printf( "\t\tChannels = 6 \n" );
+            printf( "\tADC %d is a GSC_18AI32SSC1M module\n", ii );
+            jj =  (cdsp->adcConfig[ ii ] >> 16) & 0x3 ;
+            switch (jj) {
+                case 0:
+                    channels = 32;
+                    break;
+                case 1:
+                    channels = 16;
+                    break;
+                case 2:
+                    channels = 8;
+                    break;
+                case 3:
+                    channels = 4;
+                    break;
+                default:
+                    channels = 0;
+                    break;
+            }
+            printf( "\t\tChannels = %d \n",channels );
             printf( "\t\tFirmware Rev = %d \n\n",
                     ( cdsp->adcConfig[ ii ] & 0xfff ) );
         }

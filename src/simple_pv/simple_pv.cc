@@ -25,10 +25,11 @@ simple_pv_server_create( const char* prefix, SimplePV* pvs, int pv_count )
 
     const std::string prefix_ = ( prefix ? prefix : "" );
 
+    auto pv_server = server.get();
     std::for_each(
         pvs,
         pvs + pv_count,
-        [&prefix_, pv_server = server.get( )]( const SimplePV& pv ) -> void {
+        [&prefix_, pv_server]( const SimplePV& pv ) -> void {
             if ( !pv.name || !pv.data )
             {
                 return;

@@ -67,6 +67,7 @@ namespace analyze
                     os << " dcu: " << std::setw( 3 ) << header->dcuId;
                     os << " gps: " << std::setw( 10 ) << header->timeSec << ":"
                        << std::setw( 2 ) << header->timeNSec;
+                    os << " fileCrc " << header->fileCrc;
                     os << " data: " << header->dataBlockSize;
                     os << " tp: " << header->tpBlockSize;
                     if ( header->tpCount > 0 )
@@ -137,6 +138,7 @@ namespace analyze
                     os << "\n\tdcu: " << std::setw( 3 ) << header.dcuId;
                     os << " gps: " << std::setw( 10 ) << header.timeSec << ":"
                        << std::setw( 2 ) << header.timeNSec;
+                    os << " fileCrc: " << header.fileCrc;
                     os << " data: " << header.dataBlockSize;
                     os << " tp: " << header.tpBlockSize;
                     if ( header.tpCount > 0 )

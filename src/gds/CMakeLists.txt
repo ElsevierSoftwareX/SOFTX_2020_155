@@ -6,7 +6,7 @@ SET(max_chnname_size "-DMAX_CHNNAME_SIZE=60")
 SET( RPCFLAGS -C -N -M -DPORTMAP -DLIGO_GDS -DGDS_NO_EPICS ${max_chnname_size})
 
 if (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
-    Message(FATAL_ERROR "The GDS code cannot build with source dir == build dir!")
+    Message(FATAL_ERROR "The GDS code cannot build with source dir ${CMAKE_CURRENT_SOURCE_DIR} == build dir! ${CMAKE_CURRENT_BINARY_DIR}")
 endif (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 
 

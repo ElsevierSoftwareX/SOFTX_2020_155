@@ -10,6 +10,7 @@ add_subdirectory(run_number)
 add_subdirectory(drv)
 add_subdirectory(local_dc)
 add_subdirectory(fe_stream_test)
+add_subdirectory(pub_sub_stream)
 
 if (${LibZMQ_FOUND})
     add_subdirectory(zmq_stream)
