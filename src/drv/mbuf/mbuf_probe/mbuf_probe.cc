@@ -27,6 +27,7 @@
 #include "mbuf_probe.hh"
 #include "analyze_daq_multi_dc.hh"
 #include "analyze_rmipc.hh"
+#include "gap_check.hh"
 
 void
 usage( const char* progname )
@@ -39,6 +40,8 @@ usage( const char* progname )
     std::cout << "\tcopy - copy a mbuf to a file\n";
     std::cout << "\tdelete - decrement the usage count of an mbuf\n";
     std::cout << "\tanalyze - continually read the mbuf and do some analysis\n";
+    std::cout << "\tgap_check - continually scan the buffers looking for "
+                 "gaps/jumps in the data stream\n";
     std::cout << "\t-b <buffer name> - The name of the buffer to act on\n";
     std::cout
         << "\t-m <buffer size in MB> - The size of the buffer in megabytes\n";
@@ -75,6 +78,7 @@ parse_options( int argc, char* argv[] )
     command_lookup.insert( std::make_pair( "copy", COPY ) );
     command_lookup.insert( std::make_pair( "delete", DELETE ) );
     command_lookup.insert( std::make_pair( "analyze", ANALYZE ) );
+    command_lookup.insert( std::make_pair( "gap_check", GAP_CHECK ) );
 
     std::map< std::string, MBufStructures > struct_lookup;
     struct_lookup.insert( std::make_pair( "rmIpcStr", MBUF_RMIPC ) );
@@ -342,6 +346,24 @@ handle_analyze( const ConfigOpts& opts )
 }
 
 int
+handle_gap_check( const ConfigOpts& opts )
+{
+    const int OK = 0;
+    const int ERROR = 1;
+
+    if ( opts.analysis_type != MBUF_DAQ_MULTI_DC )
+    {
+        std::cout << "daq_multi_cycle is the only mode that the crc_check is "
+                     "valid for\n";
+        return ERROR;
+    }
+    volatile void* buffer =
+        shmem_open_segment( opts.buffer_name.c_str( ), opts.buffer_size );
+    check_gap::check_gaps( buffer, opts.buffer_size );
+    return OK;
+}
+
+int
 main( int argc, char* argv[] )
 {
     ConfigOpts opts = parse_options( argc, argv );
@@ -384,6 +406,8 @@ main( int argc, char* argv[] )
         break;
     case ANALYZE:
         return handle_analyze( opts );
+    case GAP_CHECK:
+        return handle_gap_check( opts );
     }
     return 0;
 }
