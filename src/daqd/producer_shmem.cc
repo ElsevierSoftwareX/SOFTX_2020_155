@@ -325,6 +325,7 @@ producer::frame_writer( )
                 }
             }
 
+	    std::cout << "i = " << i%16 << " gps = " << gps << " frac = " << frac << "\n";
             bool new_sec = ( i % 16 ) == 0;
             bool is_good = false;
             if ( new_sec )
@@ -352,7 +353,7 @@ producer::frame_writer( )
                 std::cerr << "###################################\n\n\nGlitch "
                              "in receive\n"
                           << "prev " << prev_gps << ":" << prev_frac
-                          << "    cur " << gps << ":" << frac << std::endl;
+                          << "    cur " << gps << ":" << frac << " new_sec = " << new_sec  << " i%16 = " << i%16 << std::endl;
             }
         }
         if ( data_block->header.dcuTotalModels == 0 || ( gps > prev_gps + 1 ) )
