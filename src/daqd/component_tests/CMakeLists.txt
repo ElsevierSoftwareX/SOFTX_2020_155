@@ -8,5 +8,7 @@ add_executable(test_crc32 ../checksum_crc32.cc test_checksum_crc32.cc
 target_include_directories(test_crc32 PUBLIC ..)
 target_compile_definitions(test_crc32 PRIVATE CRC32_AUTO_GENERATE_TABLE)
 
-add_executable(test_crc32_table_lookup ../checksum_crc32.cc test_checksum_crc32)
+add_executable(test_crc32_table_lookup ../checksum_crc32.cc
+        test_checksum_crc32.cc
+        ../../drv/crc.c)
 target_include_directories(test_crc32_table_lookup PUBLIC ..)
