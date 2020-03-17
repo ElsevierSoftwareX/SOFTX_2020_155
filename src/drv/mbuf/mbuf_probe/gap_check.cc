@@ -82,7 +82,9 @@ namespace check_gap
 
         auto first = true;
         auto prev_sample_time = std::chrono::steady_clock::now();
-        while ( true )
+	int cycles = 0;
+        
+	while ( true )
         {
             bool           error = false;
             cycle_sample_t new_sample =
@@ -114,13 +116,13 @@ namespace check_gap
                 ++cycle_mismatch;
                 error = true;
             }
-            if ( new_sample.gps_nano != nano_times[ new_sample.cycle ] )
+/*            if ( new_sample.gps_nano != nano_times[ new_sample.cycle ] )
             {
                 std::cout << "Nanos/cycle mismatch " << new_sample.gps_nano
                           << ":" << new_sample.gps_cycle << "\n";
                 ++nano_mismatch;
                 error = true;
-            }
+            }*/
             if ( ( new_sample.gps == cur_sample.gps &&
                    ( new_sample.gps_cycle == cur_sample.gps_cycle + 1 ) ) ||
                  ( new_sample.gps == cur_sample.gps + 1 &&
@@ -135,10 +137,14 @@ namespace check_gap
                 ++time_jump;
                 error = true;
             }
-            std::cout << "Sample " << new_sample.gps << ":"
-                      << new_sample.gps_cycle << " - deltat = "
-                      << ( new_sample.time_ms - cur_sample.time_ms );
-            if ( !error )
+	    if (cycles < 10)
+	    {
+	            std::cout << "Sample " << new_sample.gps << ":"
+        	              << new_sample.gps_cycle << " - deltat = "
+                	      << ( new_sample.time_ms - cur_sample.time_ms ) << std::endl;
+		    ++cycles;
+	    }
+            if ( error )
             {
                 std::cout << "\t cycle_jumps " << cycle_jumps << " count_mis "
                           << cycle_mismatch << " nano_mis " << nano_mismatch
