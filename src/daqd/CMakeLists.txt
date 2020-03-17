@@ -142,7 +142,6 @@ target_link_libraries(daqd PUBLIC
 
 install(TARGETS daqd DESTINATION bin)
 
-
 add_executable(test_daqd_cmask_t tests/test_main.cc
 		tests/test_daqd_cmask_t.cc)
 target_include_directories(test_daqd_cmask_t PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

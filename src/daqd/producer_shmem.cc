@@ -578,7 +578,7 @@ producer::frame_writer( )
                 unsigned long  bytes = read_size;
                 unsigned char* cp = (unsigned char*)read_dest;
 
-                //                crc_obj.add(cp, bytes);
+                crc_obj.add(cp, bytes);
                 //                while ( bytes-- )
                 //                {
                 //                    crc = ( crc << 8 ) ^
@@ -775,11 +775,11 @@ producer::frame_writer( )
         if ( stat_cycles >= 16 )
         {
             PV::set_pv( PV::PV_PRDCR_TIME_FULL_MIN_MS,
-                        conv::s_to_ms_int( stat_recv.getMin( ) ) );
+                        conv::s_to_ms_int( stat_full.getMin( ) ) );
             PV::set_pv( PV::PV_PRDCR_TIME_FULL_MAX_MS,
-                        conv::s_to_ms_int( stat_recv.getMax( ) ) );
+                        conv::s_to_ms_int( stat_full.getMax( ) ) );
             PV::set_pv( PV::PV_PRDCR_TIME_FULL_MEAN_MS,
-                        conv::s_to_ms_int( stat_recv.getMean( ) ) );
+                        conv::s_to_ms_int( stat_full.getMean( ) ) );
 
             PV::set_pv( PV::PV_PRDCR_TIME_RECV_MIN_MS,
                         conv::s_to_ms_int( stat_recv.getMin( ) ) );
