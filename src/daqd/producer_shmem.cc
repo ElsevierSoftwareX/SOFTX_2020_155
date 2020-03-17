@@ -366,6 +366,8 @@ producer::frame_writer( )
             }
         }
 
+        stat_crc.sample();
+
         read_dest = move_buf;
         for ( int j = DCU_ID_EDCU; j < DCU_COUNT; j++ )
         {
@@ -554,7 +556,6 @@ producer::frame_writer( )
                 daqd.dcuCycle[ 0 ][ j ] = cur_dcu.cycle;
 
                 /* Check DCU data checksum */
-                stat_crc.sample();
                 // unsigned long  crc = 0;
                 unsigned long  bytes = read_size;
                 unsigned char* cp = (unsigned char*)read_dest;
@@ -577,8 +578,6 @@ producer::frame_writer( )
                 //                crc = ~crc & 0xFFFFFFFF;
                 auto crc = crc_obj.result( );
                 crc_obj.reset( );
-
-                stat_crc.tick();
 
                 int cblk = i % 16;
                 // Reset CRC/second variable for this DCU
@@ -653,6 +652,8 @@ producer::frame_writer( )
                 }
             }
         }
+
+        stat_crc.tick();
 
         int cblk = i % 16;
 
@@ -772,9 +773,9 @@ producer::frame_writer( )
             PV::set_pv( PV::PV_PRDCR_TIME_RECV_MEAN_MS,
                         conv::s_to_ms_int( stat_recv.getMean( ) ) );
 
-            PV::set_pv( PV::PV_PRDCR_CRC_TIME_CRC_MEAN_MS,
+            PV::set_pv( PV::PV_PRDCR_CRC_TIME_CRC_MIN_MS,
                         conv::s_to_ms_int( stat_crc.getMin( ) ) );
-            PV::set_pv( PV::PV_PRDCR_CRC_TIME_CRC_MEAN_MS,
+            PV::set_pv( PV::PV_PRDCR_CRC_TIME_CRC_MAX_MS,
                         conv::s_to_ms_int( stat_crc.getMax( ) ) );
             PV::set_pv( PV::PV_PRDCR_CRC_TIME_CRC_MEAN_MS,
                         conv::s_to_ms_int( stat_crc.getMean( ) ) );
