@@ -89,16 +89,16 @@ namespace check_gap
             bool           error = false;
             cycle_sample_t new_sample =
                 wait_for_time_change( multi_header->header );
+            auto sample_time = std::chrono::steady_clock::now();
             if (!first)
             {
-                auto sample_time = std::chrono::steady_clock::now();
                 auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(sample_time - prev_sample_time);
                 if ( duration.count() < 52 || duration.count() > 72 )
                 {
                     std::cout << "Bad duration, cycle took " << duration.count() << "ms\n";
                 }
-                prev_sample_time = sample_time;
             }
+            prev_sample_time = sample_time;
             first = false;
 
             if ( new_sample.cycle !=
