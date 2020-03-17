@@ -107,6 +107,7 @@ add_executable(daqd
 		listener.cc
 		daqd.cc
 		comm_impl.cc
+		checksum_crc32.cc
 		../include/daq_core.h
 		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc

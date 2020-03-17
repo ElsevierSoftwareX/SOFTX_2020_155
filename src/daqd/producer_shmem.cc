@@ -51,6 +51,8 @@ using namespace std;
 
 #include <sys/ioctl.h>
 
+#include "checksum_crc32.hh"
+
 #include "epics_pvs.hh"
 
 #include "raii.hh"
@@ -143,6 +145,18 @@ public:
     }
 };
 
+namespace
+{
+    std::int64_t
+    get_ms( )
+    {
+        timespec ts;
+        clock_gettime( CLOCK_MONOTONIC, &ts );
+        return static_cast< std::int64_t >( ts.tv_sec ) * 1000 * 1000 +
+            static_cast< std::int64_t >( ts.tv_nsec / ( 1000 * 1000 ) );
+    }
+} // namespace
+
 /// The main data movement thread (the producer)
 void*
 producer::frame_writer( )
@@ -152,6 +166,8 @@ producer::frame_writer( )
 
     unsigned long prev_gps, prev_frac;
     unsigned long gps, frac;
+
+    checksum_crc32 crc_obj;
 
     // last status value
     std::array< bool, DCU_COUNT > dcuSeenLastCycle{};
@@ -218,38 +234,6 @@ producer::frame_writer( )
     // No waiting here if compiled as broadcasts receiver
 
     int cycle_delay = daqd.cycle_delay;
-    // Wait until a second boundary
-    /*{
-        if ((daqd.dcu_status_check & 4) == 0) {
-
-            if (daqd.symm_ok() == 0) {
-                printf(
-                    "The Symmetricom IRIG-B timing card is not synchronized\n");
-                // exit(10);
-            }
-
-            unsigned long f;
-            const unsigned int c = 1000000000 / 16;
-            // Wait for the beginning of a second
-            for (;;) {
-
-                prev_gps = daqd.symm_gps(&f);
-                gps = prev_gps;
-                // if (f > 999493000) break;
-                if (f < ((cycle_delay + 2) * c) && f > ((cycle_delay + 1) * c))
-                    break; // Three cycles after a second
-
-                struct timespec wait = {0, 10000000UL}; // 10 milliseconds
-                nanosleep(&wait, NULL);
-            }
-            prev_gps = gps;
-            prev_frac = c * cycle_delay;
-            frac = c * (cycle_delay + 1);
-            printf("Starting at gps %ld prev_gps %ld frac %ld f %ld\n", gps,
-                   prev_gps, frac, f);
-            controller_cycle = 1;
-        }
-    }*/
 
     // Wait until a second ends, so that the next data sould
     // come in on cycle 0
@@ -290,16 +274,18 @@ producer::frame_writer( )
     if ( daqd.dcu_status_check & 4 )
         resync = 1;
 
+    std::array< int, DCU_COUNT >          dcu_to_zmq_lookup{};
+    std::array< char*, DCU_COUNT >        dcu_data_from_zmq{};
+    std::array< unsigned int, DCU_COUNT > dcu_data_crc{};
+    std::array< unsigned int, DCU_COUNT > dcu_data_gps{};
+
+    std::int64_t prev_ms = get_ms( );
     for ( unsigned long i = 0;; i++ )
     { // timing
         tick( ); // measure statistics
 
         // DEBUG(6, printf("Timing %d gps=%d frac=%d\n", i, gps, frac));
 
-        std::array< int, DCU_COUNT >          dcu_to_zmq_lookup;
-        std::array< char*, DCU_COUNT >        dcu_data_from_zmq;
-        std::array< unsigned int, DCU_COUNT > dcu_data_crc;
-        std::array< unsigned int, DCU_COUNT > dcu_data_gps;
         std::fill( dcu_to_zmq_lookup.begin( ), dcu_to_zmq_lookup.end( ), -1 );
         std::fill(
             dcu_data_from_zmq.begin( ), dcu_data_from_zmq.end( ), (char*)0 );
@@ -310,6 +296,13 @@ producer::frame_writer( )
         stat_recv.sample( );
         daq_dc_data_t* data_block = shmem_receiver.receive_data( );
         stat_recv.tick( );
+        std::int64_t cur_ms = get_ms( );
+        std::int64_t delta_ms = cur_ms - prev_ms;
+        if ( delta_ms > 85 )
+        {
+            std::cout << "Long read - " << delta_ms << "\n";
+        }
+        prev_ms = cur_ms;
 
         if ( data_block->header.dcuTotalModels > 0 )
         {
@@ -325,7 +318,8 @@ producer::frame_writer( )
                 }
             }
 
-	    std::cout << "i = " << i%16 << " gps = " << gps << " frac = " << frac << "\n";
+            std::cout << "i = " << i % 16 << " gps = " << gps
+                      << " frac = " << frac << "\n";
             bool new_sec = ( i % 16 ) == 0;
             bool is_good = false;
             if ( new_sec )
@@ -353,7 +347,9 @@ producer::frame_writer( )
                 std::cerr << "###################################\n\n\nGlitch "
                              "in receive\n"
                           << "prev " << prev_gps << ":" << prev_frac
-                          << "    cur " << gps << ":" << frac << " new_sec = " << new_sec  << " i%16 = " << i%16 << std::endl;
+                          << "    cur " << gps << ":" << frac
+                          << " new_sec = " << new_sec << " i%16 = " << i % 16
+                          << std::endl;
             }
         }
         if ( data_block->header.dcuTotalModels == 0 || ( gps > prev_gps + 1 ) )
@@ -578,22 +574,28 @@ producer::frame_writer( )
                 daqd.dcuCycle[ 0 ][ j ] = cur_dcu.cycle;
 
                 /* Check DCU data checksum */
-                unsigned long  crc = 0;
+                // unsigned long  crc = 0;
                 unsigned long  bytes = read_size;
                 unsigned char* cp = (unsigned char*)read_dest;
-                while ( bytes-- )
-                {
-                    crc = ( crc << 8 ) ^
-                        crctab[ ( ( crc >> 24 ) ^ *( cp++ ) ) & 0xFF ];
-                }
-                bytes = read_size;
-                while ( bytes > 0 )
-                {
-                    crc = ( crc << 8 ) ^
-                        crctab[ ( ( crc >> 24 ) ^ bytes ) & 0xFF ];
-                    bytes >>= 8;
-                }
-                crc = ~crc & 0xFFFFFFFF;
+
+                //                crc_obj.add(cp, bytes);
+                //                while ( bytes-- )
+                //                {
+                //                    crc = ( crc << 8 ) ^
+                //                        crctab[ ( ( crc >> 24 ) ^ *( cp++ ) )
+                //                        & 0xFF ];
+                //                }
+                //                bytes = read_size;
+                //                while ( bytes > 0 )
+                //                {
+                //                    crc = ( crc << 8 ) ^
+                //                        crctab[ ( ( crc >> 24 ) ^ bytes ) &
+                //                        0xFF ];
+                //                    bytes >>= 8;
+                //                }
+                //                crc = ~crc & 0xFFFFFFFF;
+                auto crc = crc_obj.result( );
+                crc_obj.reset( );
                 int cblk = i % 16;
                 // Reset CRC/second variable for this DCU
                 if ( cblk == 0 )
