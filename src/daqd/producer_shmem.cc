@@ -145,18 +145,6 @@ public:
     }
 };
 
-namespace
-{
-    std::int64_t
-    get_ms( )
-    {
-        timespec ts;
-        clock_gettime( CLOCK_MONOTONIC, &ts );
-        return static_cast< std::int64_t >( ts.tv_sec ) * 1000 * 1000 +
-            static_cast< std::int64_t >( ts.tv_nsec / ( 1000 * 1000 ) );
-    }
-} // namespace
-
 /// The main data movement thread (the producer)
 void*
 producer::frame_writer( )
@@ -279,7 +267,6 @@ producer::frame_writer( )
     std::array< unsigned int, DCU_COUNT > dcu_data_crc{};
     std::array< unsigned int, DCU_COUNT > dcu_data_gps{};
 
-    std::int64_t prev_ms = get_ms( );
     for ( unsigned long i = 0;; i++ )
     { // timing
         tick( ); // measure statistics
@@ -296,13 +283,6 @@ producer::frame_writer( )
         stat_recv.sample( );
         daq_dc_data_t* data_block = shmem_receiver.receive_data( );
         stat_recv.tick( );
-        std::int64_t cur_ms = get_ms( );
-        std::int64_t delta_ms = cur_ms - prev_ms;
-        if ( delta_ms > 85 )
-        {
-            std::cout << "Long read - " << delta_ms << "\n";
-        }
-        prev_ms = cur_ms;
 
         if ( data_block->header.dcuTotalModels > 0 )
         {
@@ -574,6 +554,7 @@ producer::frame_writer( )
                 daqd.dcuCycle[ 0 ][ j ] = cur_dcu.cycle;
 
                 /* Check DCU data checksum */
+                stat_crc.sample();
                 // unsigned long  crc = 0;
                 unsigned long  bytes = read_size;
                 unsigned char* cp = (unsigned char*)read_dest;
@@ -596,6 +577,9 @@ producer::frame_writer( )
                 //                crc = ~crc & 0xFFFFFFFF;
                 auto crc = crc_obj.result( );
                 crc_obj.reset( );
+
+                stat_crc.tick();
+
                 int cblk = i % 16;
                 // Reset CRC/second variable for this DCU
                 if ( cblk == 0 )
