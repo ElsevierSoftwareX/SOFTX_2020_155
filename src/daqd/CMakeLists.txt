@@ -4,8 +4,6 @@ FIND_PROGRAM(DATE_PROG date)
 INCLUDE(Cpp11)
 INCLUDE(CheckCXXSourceCompiles)
 
-add_subdirectory(component_tests)
-
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
 set(__daqd_tmp_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
@@ -147,6 +145,28 @@ add_executable(test_daqd_cmask_t tests/test_main.cc
 target_include_directories(test_daqd_cmask_t PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME test_daqd_cmask_t
 		COMMAND test_daqd_cmask_t
+		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+add_executable(generate_crc32_table checksum_crc32.cc)
+target_compile_definitions(generate_crc32_table PRIVATE CRC32_MAIN)
+target_compile_definitions(generate_crc32_table PRIVATE CRC32_AUTO_GENERATE_TABLE)
+
+add_executable(test_crc32 checksum_crc32.cc
+		tests/test_checksum_crc32.cc
+		../drv/crc.c)
+target_compile_definitions(test_crc32 PRIVATE CRC32_AUTO_GENERATE_TABLE)
+target_include_directories(test_crc32 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(NAME test_crc32
+		COMMAND test_crc32
+		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+add_executable(test_crc32_table_lookup
+		checksum_crc32.cc
+		tests/test_checksum_crc32.cc
+		../drv/crc.c)
+target_include_directories(test_crc32_table_lookup PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_test(NAME test_crc32_table_lookup
+		COMMAND test_crc32_table_lookup
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 if (libNDS2Client_FOUND)
