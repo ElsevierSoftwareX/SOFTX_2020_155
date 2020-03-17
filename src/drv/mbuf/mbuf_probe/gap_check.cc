@@ -2,6 +2,7 @@
 // Created by jonathan.hanks on 3/13/20.
 //
 #include "gap_check.hh"
+#include <chrono>
 #include <daq_core.h>
 
 #include <sys/time.h>
@@ -79,11 +80,25 @@ namespace check_gap
         cycle_sample_t cur_sample =
             wait_for_time_change( multi_header->header );
 
+        auto first = true;
+        auto prev_sample_time = std::chrono::steady_clock::now();
         while ( true )
         {
             bool           error = false;
             cycle_sample_t new_sample =
                 wait_for_time_change( multi_header->header );
+            if (!first)
+            {
+                auto sample_time = std::chrono::steady_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(sample_time - prev_sample_time);
+                if ( duration.count() < 52 || duration.count() > 72 )
+                {
+                    std::cout << "Bad duration, cycle took " << duration.count() << "ms\n";
+                }
+                prev_sample_time = sample_time;
+            }
+            first = false;
+
             if ( new_sample.cycle !=
                  ( cur_sample.cycle + 1 ) % multi_header->header.maxCycle )
             {
