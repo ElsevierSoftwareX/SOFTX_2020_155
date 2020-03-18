@@ -425,28 +425,6 @@ producer::frame_writer( )
                     reinterpret_cast< char* >( read_dest ) +
                     cur_dcu.dataBlockSize;
 
-                //                std::cout << "is zmq dcu number " << zmq_index
-                //                << std::endl;
-
-                //                if (j == 21)
-                //                {
-                //                    int block_time =
-                //                    static_cast<int>(data_block->header.dcuheader[zmq_index].timeSec);
-                //                    int data_error = 0;
-                //                    for (int k = 0; k < 64; ++k)
-                //                    {
-                //                        if (((int*)read_dest)[k] !=
-                //                        block_time)
-                //                            data_error++;
-                //                    }
-                //                    if (data_error > 0) {
-                //                        std::cerr << "!!!!!!!!!!!! invalid
-                //                        data found in test " << data_error <<
-                //                        " times at " << block_time <<
-                //                        std::endl;
-                //                    }
-                //                }
-
                 int              cblk1 = ( i + 1 ) % DAQ_NUM_DATA_BLOCKS;
                 static const int ifo = 0; // For now
 
@@ -556,26 +534,10 @@ producer::frame_writer( )
                 daqd.dcuCycle[ 0 ][ j ] = cur_dcu.cycle;
 
                 /* Check DCU data checksum */
-                // unsigned long  crc = 0;
                 unsigned long  bytes = read_size;
                 unsigned char* cp = (unsigned char*)read_dest;
 
                 crc_obj.add(cp, bytes);
-                //                while ( bytes-- )
-                //                {
-                //                    crc = ( crc << 8 ) ^
-                //                        crctab[ ( ( crc >> 24 ) ^ *( cp++ ) )
-                //                        & 0xFF ];
-                //                }
-                //                bytes = read_size;
-                //                while ( bytes > 0 )
-                //                {
-                //                    crc = ( crc << 8 ) ^
-                //                        crctab[ ( ( crc >> 24 ) ^ bytes ) &
-                //                        0xFF ];
-                //                    bytes >>= 8;
-                //                }
-                //                crc = ~crc & 0xFFFFFFFF;
                 auto crc = crc_obj.result( );
                 crc_obj.reset( );
 
