@@ -150,7 +150,7 @@ void*
 producer::frame_writer( )
 {
     unsigned char*           read_dest;
-    circ_buffer_block_prop_t prop;
+    //circ_buffer_block_prop_t prop;
 
     unsigned long prev_gps, prev_frac;
     unsigned long gps, frac;
@@ -170,20 +170,61 @@ producer::frame_writer( )
     daqd_c::set_thread_priority(
         "Producer", "dqprod", PROD_THREAD_PRIORITY, PROD_CPUAFFINITY );
 
-    unsigned char*                      move_buf = 0;
-    int                                 vmic_pv_len = 0;
-    raii::array_ptr< struct put_dpvec > _vmic_pv(
-        new struct put_dpvec[ MAX_CHANNELS ] );
-    struct put_dpvec* vmic_pv = _vmic_pv.get( );
+    work_queue_ = std::unique_ptr< work_queue_t >( new work_queue_t );
+    for ( int i = 0; i < PRODUCER_WORK_QUEUE_BUF_COUNT; ++i )
+    {
+        std::unique_ptr< producer_buf > buf_( new producer_buf );
 
-    // use the offsets calculated by initialize_vmpic
-    // for the start of the dcu's
-    daqd_c::dcu_move_address dcu_move_addresses;
+        buf_->move_buf = nullptr;
+        buf_->vmic_pv_len = 0;
 
-    // FIXME: move_buf could leak on errors (but we would probably die anyways.
-    daqd.initialize_vmpic(
-        &move_buf, &vmic_pv_len, vmic_pv, &dcu_move_addresses );
-    raii::array_ptr< unsigned char > _move_buf( move_buf );
+        daqd.initialize_vmpic(&(buf_->move_buf), &(buf_->vmic_pv_len), buf_->vmic_pv,
+                               &(buf_->dcu_move_addresses) );
+        raii::array_ptr<unsigned char> mbuf_(buf_->move_buf);
+
+        work_queue_->add_to_queue(PRODUCER_WORK_QUEUE_START, buf_.get());
+        buf_.release();
+        mbuf_.release();
+    }
+
+    // start up CRC and transfer thread
+    {
+        DEBUG(4, cerr << "Starting producer CRC thread" << endl);
+        pthread_attr_t attr;
+        pthread_attr_init(&attr);
+        pthread_attr_setstacksize(&attr, daqd.thread_stack_size);
+        pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
+
+        raii::lock_guard<pthread_mutex_t> crc_sync(prod_crc_mutex);
+        int err = pthread_create(&crc_tid, &attr,
+                                 (void *(*)(void *))this->frame_writer_crc_static,
+                                 (void *)this);
+        if (err) {
+            pthread_attr_destroy(&attr);
+            system_log(1, "pthread_create() err=%d while creating producer debug crc thread", err);
+            exit(1);
+        }
+        pthread_attr_destroy(&attr);
+
+        pthread_cond_wait(&prod_crc_cond, &prod_crc_mutex);
+        DEBUG(5, cerr << "producer threads synced" << endl);
+    }
+
+//    unsigned char*                      move_buf = nullptr;
+//    int                                 vmic_pv_len = 0;
+//    raii::array_ptr< struct put_dpvec > _vmic_pv(
+//        new struct put_dpvec[ MAX_CHANNELS ] );
+//    struct put_dpvec* vmic_pv = _vmic_pv.get( );
+//
+//
+//    // use the offsets calculated by initialize_vmpic
+//    // for the start of the dcu's
+//    dcu_move_address dcu_move_addresses;
+//
+//    // FIXME: move_buf could leak on errors (but we would probably die anyways.
+//    daqd.initialize_vmpic(
+//        &move_buf, &vmic_pv_len, vmic_pv, &dcu_move_addresses );
+//    raii::array_ptr< unsigned char > _move_buf( move_buf );
 
     // Allocate local test point tables
     static struct cdsDaqNetGdsTpNum gds_tp_table[ 2 ][ DCU_COUNT ];
@@ -284,6 +325,9 @@ producer::frame_writer( )
         daq_dc_data_t* data_block = shmem_receiver.receive_data( );
         stat_recv.tick( );
 
+        producer_buf* cur_buffer = work_queue_->get_from_queue(RECV_THREAD_INPUT);
+        circ_buffer_block_prop_t* cur_prop = &cur_buffer->prop;
+
         if ( data_block->header.dcuTotalModels > 0 )
         {
             gps = data_block->header.dcuheader[ 0 ].timeSec;
@@ -368,7 +412,7 @@ producer::frame_writer( )
 
         stat_crc.sample();
 
-        read_dest = move_buf;
+        read_dest = cur_buffer->move_buf;
         for ( int j = DCU_ID_EDCU; j < DCU_COUNT; j++ )
         {
 
@@ -388,7 +432,7 @@ producer::frame_writer( )
                 continue; // skip unconfigured DCU nodes
             }
             dcuSeenLastCycle[ j ] = true;
-            read_dest = dcu_move_addresses.start[ j ];
+            read_dest = cur_buffer->dcu_move_addresses.start[ j ];
             long read_size = daqd.dcuDAQsize[ 0 ][ j ];
             if ( IS_MYRINET_DCU( j ) )
             {
@@ -421,7 +465,7 @@ producer::frame_writer( )
                         (void*)( ( (char*)dcu_data_from_zmq[ j ] ) +
                                  cur_dcu.dataBlockSize ),
                         tp_size );
-                int tp_off = reinterpret_cast< char* >( move_buf ) -
+                int tp_off = reinterpret_cast< char* >( cur_buffer->move_buf ) -
                     reinterpret_cast< char* >( read_dest ) +
                     cur_dcu.dataBlockSize;
 
@@ -629,7 +673,7 @@ producer::frame_writer( )
                     continue; // Skip TP and EXC DCUs
                 if ( daqd.dcuSize[ ifo ][ j ] == 0 )
                     continue; // Skip unconfigured DCUs
-                prop.dcu_data[ j + ifo * DCU_COUNT ].cycle =
+                cur_prop->dcu_data[ j + ifo * DCU_COUNT ].cycle =
                     daqd.dcuCycle[ ifo ][ j ];
                 volatile struct rmIpcStr* ipc = daqd.dcuIpc[ ifo ][ j ];
 
@@ -637,20 +681,20 @@ producer::frame_writer( )
                 if ( IS_MYRINET_DCU( j ) && ifo == 0 )
                 {
 
-                    prop.dcu_data[ j ].crc =
+                    cur_prop->dcu_data[ j ].crc =
                         dcu_data_crc[ j ]; // gmDaqIpc[j].bp[cblk].crc;
 
                     // printf("dcu %d crc=0x%x\n", j, prop.dcu_data[j].crc);
                     // Remove 0x8000 status from propagating to the broadcast
                     // receivers
-                    prop.dcu_data[ j ].status =
+                    cur_prop->dcu_data[ j ].status =
                         daqd.dcuStatus[ 0 /* IFO */ ][ j ] & ~0x8000;
                 }
                 else
                 {
-                    prop.dcu_data[ j + ifo * DCU_COUNT ].crc =
+                    cur_prop->dcu_data[ j + ifo * DCU_COUNT ].crc =
                         ipc->bp[ cblk ].crc;
-                    prop.dcu_data[ j + ifo * DCU_COUNT ].status =
+                    cur_prop->dcu_data[ j + ifo * DCU_COUNT ].status =
                         daqd.dcuStatus[ ifo ][ j ];
                 }
             }
@@ -658,13 +702,13 @@ producer::frame_writer( )
 
         // prop.gps = time(0) - 315964819 + 33;
 
-        prop.gps = gps;
+        cur_prop->gps = gps;
         // if (cblk > (15 - cycle_delay))
         //    prop.gps--;
 
-        prop.gps_n = 1000000000 / 16 * ( i % 16 );
+        cur_prop->gps_n = 1000000000 / 16 * ( i % 16 );
         // printf("before put %d %d %d\n", prop.gps, prop.gps_n, frac);
-        prop.leap_seconds = daqd.gps_leap_seconds( prop.gps );
+        cur_prop->leap_seconds = daqd.gps_leap_seconds( gps );
 
         // std::cout << "about to call put16th_dpscattered with " << vmic_pv_len
         // << " entries. prop.gps = " << prop.gps << " prop.gps_n = " <<
@@ -672,32 +716,12 @@ producer::frame_writer( )
         //    std::cout << " " << *vmic_pv[ii].src_status_addr;
         // std::cout << std::endl;
 
-        stat_transfer.sample( );
-        int nbi = daqd.b1->put16th_dpscattered( vmic_pv, vmic_pv_len, &prop );
-        stat_transfer.tick( );
+        work_queue_->add_to_queue(RECV_THREAD_OUTPUT, cur_buffer);
+        cur_buffer = nullptr;
 
-        {
-            circ_buffer_block_t* block_p = daqd.b1->block_prop( nbi );
-            // std::cout << "block_p->prop.gps = " << block_p->prop.gps << "
-            // block_p->prop.gps_n = " << block_p->prop.gps_n << std::endl; if
-            // (block_p->prop.gps != prop.gps) {
-            //    std::cout << "\n\nblock_p->prop.gps (" << block_p->prop.gps <<
-            //    ") != prop.gps (" << prop.gps << ")\n" << std::endl;
-            //}
-            // assert(block_p->prop.gps == prop.gps);
-        }
-
-        DEBUG( 4,
-               std::cout << "put16th_dpscattered returned " << nbi << std::endl;
-               std::cout << "drops: " << daqd.b1->drops( )
-                         << " blocks: " << daqd.b1->blocks( )
-                         << " puts: " << daqd.b1->num_puts( ) << " consumers: "
-                         << daqd.b1->get_cons_num( ) << std::endl; );
-        //  printf("%d %d\n", prop.gps, prop.gps_n);
-        // DEBUG1(cerr << "producer " << i << endl);
 
         PV::set_pv( PV::PV_CYCLE, i );
-        PV::set_pv( PV::PV_GPS, prop.gps );
+        PV::set_pv( PV::PV_GPS, gps );
         // DEBUG1(cerr << "gps=" << PV::pv(PV::PV_GPS) << endl);
         if ( i % 16 == 0 )
         {
@@ -741,18 +765,10 @@ producer::frame_writer( )
                         conv::s_to_ms_int( stat_crc.getMax( ) ) );
             PV::set_pv( PV::PV_PRDCR_CRC_TIME_CRC_MEAN_MS,
                         conv::s_to_ms_int( stat_crc.getMean( ) ) );
-
-            PV::set_pv( PV::PV_PRDCR_CRC_TIME_XFER_MIN_MS,
-                        conv::s_to_ms_int( stat_transfer.getMin( ) ) );
-            PV::set_pv( PV::PV_PRDCR_CRC_TIME_XFER_MAX_MS,
-                        conv::s_to_ms_int( stat_transfer.getMax( ) ) );
-            PV::set_pv( PV::PV_PRDCR_CRC_TIME_XFER_MEAN_MS,
-                        conv::s_to_ms_int( stat_transfer.getMean( ) ) );
-
+            
             stat_full.clearStats( );
             stat_crc.clearStats( );
             stat_recv.clearStats( );
-            stat_transfer.clearStats( );
             stat_cycles = 0;
         }
 
@@ -833,6 +849,155 @@ producer::frame_writer_debug_crc( )
 void*
 producer::frame_writer_crc( )
 {
-    // not implemented
-    return (void*)NULL;
+    int stat_cycles = 0;
+
+    stats stat_transfer;
+
+//    PV::set_pv(PV::PV_UPTIME_SECONDS, 0);
+//    PV::set_pv(PV::PV_GPS, 0);
+
+    // Set thread parameters
+    daqd_c::set_thread_priority("Producer crc", "dqprodcrc",
+                                PROD_CRC_THREAD_PRIORITY, PROD_CRC_CPUAFFINITY);
+
+    //checksum_crc32 crc_obj;
+
+    {
+        raii::lock_guard< pthread_mutex_t > lock_{prod_crc_mutex};
+        pthread_cond_signal(&prod_crc_cond);
+    }
+
+    for (unsigned long i = 0;; ++i) {
+        unsigned int gps, gps_n;
+
+        producer_buf *cur_buffer = work_queue_->get_from_queue(CRC_THREAD_INPUT);
+        circ_buffer_block_prop_t* cur_prop = &(cur_buffer->prop);
+        gps = cur_prop->gps;
+        gps_n = cur_prop->gps_n;
+//        unsigned char *move_buf = cur_buffer->move_buf;
+
+//        stat_full.sample();
+//        stat_crc.sample();
+//        // Parse received broadcast transmission header and
+//        // check config file CRCs and data CRCs, check DCU size and number
+//        // Assign DCU status and cycle.
+//        unsigned int *header =
+//            (unsigned int *)(((char *)move_buf) - BROADCAST_HEADER_SIZE);
+//        int ndcu = ntohl(*header++);
+//        // printf("ndcu = %d\n", ndcu);
+//        if (ndcu > 0 && ndcu <= MAX_BROADCAST_DCU_NUM) {
+//            int data_offs = 0; // Offset to the current DCU data
+//            for (int j = 0; j < ndcu; j++) {
+//                unsigned int dcu_number;
+//                unsigned int dcu_size;   // Data size for this DCU
+//                unsigned int config_crc; // Configuration file CRC
+//                unsigned int dcu_crc;    // Data CRC
+//                unsigned int status; // DCU status word bits (0-ok, 0xbad-out of
+//                // sync, 0x1000-trasm error
+//                // 0x2000 - configuration mismatch).
+//                unsigned int cycle;  // DCU cycle
+//                dcu_number = ntohl(*header++);
+//                dcu_size = ntohl(*header++);
+//                config_crc = ntohl(*header++);
+//                dcu_crc = ntohl(*header++);
+//                status = ntohl(*header++);
+//                cycle = ntohl(*header++);
+//                int ifo = 0;
+//                if (dcu_number > DCU_COUNT) {
+//                    ifo = 1;
+//                    dcu_number -= DCU_COUNT;
+//                }
+//                // printf("dcu=%d size=%d config_crc=0x%x crc=0x%x status=0x%x
+//                // cycle=%d\n",
+//                // dcu_number, dcu_size, config_crc, dcu_crc, status, cycle);
+//                if (daqd.dcuSize[ifo][dcu_number]) { // Don't do anything if
+//                    // this DCU is not
+//                    // configured
+//                    daqd.dcuStatus[ifo][dcu_number] = status;
+//                    daqd.dcuCycle[ifo][dcu_number] = cycle;
+//                    if (status ==
+//                        0) { // If the DCU status is OK from the concentrator
+//                        // Check for local configuration and data mismatch
+//                        if (config_crc != daqd.dcuConfigCRC[ifo][dcu_number]) {
+//                            // Detected local configuration mismach
+//                            daqd.dcuStatus[ifo][dcu_number] |= 0x2000;
+//                        }
+//                        unsigned char *cp =
+//                            move_buf + data_offs; // Start of data
+//                        unsigned int bytes = dcu_size; // DCU data size
+//                        crc_obj.add(cp, bytes);
+////                        unsigned int crc = 0;
+////                        // Calculate DCU data CRC
+////                        while (bytes--) {
+////                            crc = (crc << 8) ^
+////                                  crctab[((crc >> 24) ^ *(cp++)) & 0xFF];
+////                        }
+////                        bytes = dcu_size;
+////                        while (bytes > 0) {
+////                            crc = (crc << 8) ^
+////                                  crctab[((crc >> 24) ^ bytes) & 0xFF];
+////                            bytes >>= 8;
+////                        }
+////                        crc = ~crc & 0xFFFFFFFF;
+//                        unsigned int crc = crc_obj.result();
+//                        if (crc != dcu_crc) {
+//                            // Detected data corruption !!!
+//                            daqd.dcuStatus[ifo][dcu_number] |= 0x1000;
+//                            DEBUG1(printf(
+//                                "ifo=%d dcu=%d calc_crc=0x%x data_crc=0x%x\n",
+//                                ifo, dcu_number, crc, dcu_crc));
+//                        }
+//                        crc_obj.reset();
+//                    }
+//                }
+//                data_offs += dcu_size;
+//            }
+//        }
+//        stat_crc.tick();
+//
+//        // :TODO: make sure all DCUs configuration matches; restart when the
+//        // mismatch detected
+//
+//        prop.gps = gps;
+//        prop.gps_n = gps_n;
+//
+//        prop.leap_seconds = daqd.gps_leap_seconds(prop.gps);
+
+        stat_transfer.sample( );
+        int nbi = daqd.b1->put16th_dpscattered( cur_buffer->vmic_pv, cur_buffer->vmic_pv_len, cur_prop );
+        stat_transfer.tick( );
+
+        DEBUG( 4,
+               std::cout << "put16th_dpscattered returned " << nbi << std::endl;
+                   std::cout << "drops: " << daqd.b1->drops( )
+                             << " blocks: " << daqd.b1->blocks( )
+                             << " puts: " << daqd.b1->num_puts( ) << " consumers: "
+                             << daqd.b1->get_cons_num( ) << std::endl; );
+        //  printf("%d %d\n", prop.gps, prop.gps_n);
+        // DEBUG1(cerr << "producer " << i << endl);
+
+
+        work_queue_->add_to_queue(CRC_THREAD_OUTPUT, cur_buffer);
+        cur_buffer = nullptr;
+
+        //  printf("%d %d\n", prop.gps, prop.gps_n);
+        // DEBUG1(cerr << "producer " << i << endl);
+
+        ++stat_cycles;
+        if (stat_cycles >= 16) {
+//            PV::set_pv(PV::PV_PRDCR_CRC_TIME_CRC_MIN_MS, conv::s_to_ms_int(stat_crc.getMin()));
+//            PV::set_pv(PV::PV_PRDCR_CRC_TIME_CRC_MAX_MS, conv::s_to_ms_int(stat_crc.getMax()));
+//            PV::set_pv(PV::PV_PRDCR_CRC_TIME_CRC_MEAN_MS, conv::s_to_ms_int(stat_crc.getMean()));
+
+            PV::set_pv(PV::PV_PRDCR_CRC_TIME_XFER_MIN_MS, conv::s_to_ms_int(stat_transfer.getMin()));
+            PV::set_pv(PV::PV_PRDCR_CRC_TIME_XFER_MAX_MS, conv::s_to_ms_int(stat_transfer.getMax()));
+            PV::set_pv(PV::PV_PRDCR_CRC_TIME_XFER_MEAN_MS, conv::s_to_ms_int(stat_transfer.getMean()));
+
+//            stat_crc.clearStats();
+            stat_transfer.clearStats();
+            stat_cycles = 0;
+        }
+    }
+
+    return nullptr;
 }

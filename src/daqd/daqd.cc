@@ -80,7 +80,7 @@ namespace
         char _tmpf[ filesys_c::filename_max + 10 ];
     };
 
-    typedef work_queue::work_queue< framer_buf > framer_work_queue;
+    typedef work_queue::work_queue< framer_buf, 2 > framer_work_queue;
 } // namespace
 
 /// Helper function to deal with the archive channels.
@@ -1098,7 +1098,7 @@ daqd_c::framer( int science )
         daqd_c::locker _l( this );
         if ( !_science_framer_work_queue )
             _science_framer_work_queue =
-                reinterpret_cast< void* >( new framer_work_queue( 2 ) );
+                reinterpret_cast< void* >( new framer_work_queue(  ) );
         _work_queue = reinterpret_cast< framer_work_queue* >(
             _science_framer_work_queue );
     }
@@ -1107,7 +1107,7 @@ daqd_c::framer( int science )
         daqd_c::locker _l( this );
         if ( !_framer_work_queue )
             _framer_work_queue =
-                reinterpret_cast< void* >( new framer_work_queue( 2 ) );
+                reinterpret_cast< void* >( new framer_work_queue( ) );
         _work_queue =
             reinterpret_cast< framer_work_queue* >( _framer_work_queue );
     }

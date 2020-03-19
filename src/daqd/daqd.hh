@@ -152,18 +152,6 @@ public:
         second_trend_frame
     };
 
-    /// dcu_mov_address is a list of start points in a move buffer for each
-    /// possible dcu it is provided as a helper for producer type systems which
-    /// need to deal with an internal move buffer.
-    struct dcu_move_address
-    {
-        dcu_move_address( )
-        {
-            memset( &start[ 0 ], 0, sizeof( char* ) * DCU_COUNT );
-        }
-        unsigned char* start[ DCU_COUNT ];
-    };
-
 private:
     typedef std::pair< std::string, std::string >        _string_pair;
     typedef std::pair< std::string, std::string >        _checksum_pair;

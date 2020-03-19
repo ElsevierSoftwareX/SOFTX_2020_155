@@ -1,9 +1,10 @@
 #ifndef WORK_QUEUE_HH
 #define WORK_QUEUE_HH
 
+#include <array>
+#include <condition_variable>
+#include <mutex>
 #include <queue>
-#include <vector>
-#include "raii.hh"
 
 namespace work_queue
 {
@@ -11,49 +12,46 @@ namespace work_queue
     /**
      * A simple work queue
      */
-    template < typename T >
+    template < typename T, size_t N >
     class work_queue
     {
-        pthread_mutex_t _lock;
-        pthread_cond_t  _wait;
+        std::mutex lock_;
+        std::condition_variable  wait_;
 
-        typedef T*                        queue_entry;
-        typedef std::queue< queue_entry > queue_type;
+        using queue_entry = T*;
+        using queue_type = std::queue< queue_entry >;
+        using lock_type = std::unique_lock< std::mutex >;
 
-        std::vector< queue_type > _queues;
-
-        work_queue( const work_queue& other );
-        work_queue operator=( const work_queue& other );
+        std::array< queue_type, N > queues_;
 
     public:
-        work_queue( size_t num_queues ) : _queues( num_queues )
+        work_queue( ) : lock_{}, wait_{}, queues_{}
         {
-            pthread_mutex_init( &_lock, NULL );
-            pthread_cond_init( &_wait, NULL );
         }
-
-        ~work_queue( )
-        {
-            pthread_mutex_destroy( &_lock );
-        }
+        work_queue( const work_queue& other ) = delete;
+        work_queue( work_queue&& other ) = delete;
+        work_queue& operator=( const work_queue& other ) = delete;
+        work_queue& operator=( work_queue&& other ) = delete;
 
         void
         add_to_queue( size_t index, queue_entry entry )
         {
             if ( !entry )
                 return;
-            raii::lock_guard< pthread_mutex_t > lock( _lock );
-            _queues.at( index ).push( entry );
-            pthread_cond_broadcast( &_wait );
+            lock_type l_{ lock_ };
+            queues_.at( index ).push( entry );
+            wait_.notify_all();
         }
 
         queue_entry
         get_from_queue( size_t index )
         {
-            raii::lock_guard< pthread_mutex_t > lock( _lock );
-            while ( _queues.at( index ).empty( ) )
-                pthread_cond_wait( &_wait, &_lock );
-            queue_type& cur_queue = _queues.at( index );
+            lock_type l_{ lock_ };
+            while ( queues_.at( index ).empty( ) )
+            {
+                wait_.wait(l_);
+            }
+            queue_type& cur_queue = queues_.at( index );
             queue_entry val = cur_queue.front( );
             cur_queue.pop( );
             return val;
@@ -62,15 +60,13 @@ namespace work_queue
         void
         dump_status( ostream& out )
         {
-            raii::lock_guard< pthread_mutex_t > lock( _lock );
+            lock_type l_{ lock_ };
+
             int                                 counter = 0;
             out << "work queue status" << endl;
-            for ( typename std::vector< queue_type >::iterator cur =
-                      _queues.begin( );
-                  cur != _queues.end( );
-                  ++cur )
+            for ( const auto& queue:queues_ )
             {
-                out << "\tqueue " << counter++ << cur->size( ) << endl;
+                out << "\tqueue " << counter++ << " " << queue.size( ) << std::endl;
             }
         }
     };
