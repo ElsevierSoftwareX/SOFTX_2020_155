@@ -342,8 +342,6 @@ producer::frame_writer( )
                 }
             }
 
-            std::cout << "i = " << i % 16 << " gps = " << gps
-                      << " frac = " << frac << "\n";
             bool new_sec = ( i % 16 ) == 0;
             bool is_good = false;
             if ( new_sec )
