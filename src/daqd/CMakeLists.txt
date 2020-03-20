@@ -169,6 +169,15 @@ add_test(NAME test_crc32_table_lookup
 		COMMAND test_crc32_table_lookup
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
+add_executable(test_shmem_recv tests/test_main.cc
+		tests/test_shmem_recv.cc)
+target_include_directories(test_shmem_recv PUBLIC
+		${CMAKE_CURRENT_SOURCE_DIR}
+		../include)
+add_test(NAME test_shmem_recv
+		COMMAND test_shmem_recv
+		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
 if (libNDS2Client_FOUND)
 
 	configure_file(tests/daqdrc_live_test ${CMAKE_CURRENT_BINARY_DIR}/daqdrc_live_test COPYONLY)
