@@ -274,6 +274,8 @@ producer::frame_writer( )
         daq_dc_data_t* data_block = shmem_receiver.receive_data( );
         stat_recv.tick( );
 
+
+
         producer_buf* cur_buffer =
             work_queue_->get_from_queue( RECV_THREAD_INPUT );
         circ_buffer_block_prop_t* cur_prop = &cur_buffer->prop;
@@ -292,49 +294,55 @@ producer::frame_writer( )
                 }
             }
 
-            bool new_sec = ( i % 16 ) == 0;
-            bool is_good = false;
-            if ( new_sec )
+            if ( i % 16 == 0 )
             {
-                is_good = ( gps == prev_gps + 1 && frac == 0 );
-                for ( int i = 0; i < data_block->header.dcuTotalModels; ++i )
+                for ( int j = 0; j < data_block->header.dcuTotalModels; ++j )
                 {
-                    int dcuid = data_block->header.dcuheader[ i ].dcuId;
+                    int dcuid = data_block->header.dcuheader[ j ].dcuId;
                     gds_tp_table[ 0 ][ dcuid ].count =
-                        data_block->header.dcuheader[ i ].tpCount;
-                    std::copy( &data_block->header.dcuheader[ i ].tpNum[ 0 ],
-                               &data_block->header.dcuheader[ i ].tpNum[ 256 ],
+                        data_block->header.dcuheader[ j ].tpCount;
+                    std::copy( &data_block->header.dcuheader[ j ].tpNum[ 0 ],
+                               &data_block->header.dcuheader[ j ].tpNum[ 256 ],
                                &gds_tp_table[ 0 ][ dcuid ].tpNum[ 0 ] );
                 }
             }
-            else
-            {
-                const unsigned int step = 1000000000 / 16;
-                is_good = ( gps == prev_gps &&
-                            ( ( frac == prev_frac + 1 ) ||
-                              ( frac == prev_frac + step ) ) );
-            }
-            if ( !is_good )
-            {
-                std::cerr << "###################################\n\n\nGlitch "
-                             "in receive\n"
-                          << "prev " << prev_gps << ":" << prev_frac
-                          << "    cur " << gps << ":" << frac
-                          << " new_sec = " << new_sec << " i%16 = " << i % 16
-                          << std::endl;
-            }
         }
-        if ( data_block->header.dcuTotalModels == 0 || ( gps > prev_gps + 1 ) )
         {
-            fprintf( stderr,
-                     "Dropped data from shmem or received 0 dcus; gps now = "
-                     "%d, %d; was = %d, %d; dcu count = %d\n",
-                     gps,
-                     frac,
-                     (int)prev_gps,
-                     (int)prev_frac,
-                     (int)( data_block->header.dcuTotalModels ) );
-            exit( 1 );
+            auto expected_gps = prev_gps;
+            if (prev_frac == DATA_BLOCKS-1 || prev_frac >= 937500000)
+            {
+                ++expected_gps;
+            }
+            auto expected_nano = prev_frac + (1000000000/16);
+            if (expected_nano >= 1000000000)
+            {
+                expected_nano = 0;
+            }
+            auto expected_cycle = DATA_BLOCKS + 10;
+            if (prev_frac < DATA_BLOCKS)
+            {
+                expected_cycle = (prev_frac + 1) % DATA_BLOCKS;
+            }
+            if ( data_block->header.dcuTotalModels == 0 ||
+                 gps != expected_gps || (
+                                            frac != expected_cycle &&
+                                            frac != expected_nano
+                                            ))
+            {
+                fprintf(
+                    stderr,
+                    "Dropped data from shmem or received 0 dcus; gps now = "
+                    "%d, %d; was = %d, %d; dcu count = %d\n",
+                    gps,
+                    frac,
+                    (int)prev_gps,
+                    (int)prev_frac,
+                    (int)( data_block->header.dcuTotalModels ) );
+
+                fprintf(stderr, "\texpected gps = %d\n", expected_gps );
+                fprintf(stderr, "\texpected cycle = %d\n\texpected nano = %d\n\n", expected_cycle, expected_cycle);
+                exit( 1 );
+            }
         }
 
         // map out the order of the dcuids in the zmq data, this could change
