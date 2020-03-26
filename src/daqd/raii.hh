@@ -2,6 +2,7 @@
 #define RAII_HH
 
 #include <unistd.h>
+#include <memory>
 
 /**
  * Some 'smart' resource wrappers using the raii technique.

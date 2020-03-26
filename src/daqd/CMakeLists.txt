@@ -106,6 +106,7 @@ add_executable(daqd
 		daqd.cc
 		comm_impl.cc
 		checksum_crc32.cc
+		thread_launcher.cc
 		../include/daq_core.h
 		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc
@@ -140,11 +141,16 @@ target_link_libraries(daqd PUBLIC
 
 install(TARGETS daqd DESTINATION bin)
 
-add_executable(test_daqd_cmask_t tests/test_main.cc
-		tests/test_daqd_cmask_t.cc)
-target_include_directories(test_daqd_cmask_t PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-add_test(NAME test_daqd_cmask_t
-		COMMAND test_daqd_cmask_t
+add_executable(test_daqd_unit_tests tests/test_main.cc
+		tests/test_daqd_cmask_t.cc
+		tests/test_shmem_recv.cc
+		tests/test_thread_launcher.cc
+		thread_launcher.cc
+		)
+target_include_directories(test_daqd_unit_tests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ../include)
+target_link_libraries(test_daqd_unit_tests PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+add_test(NAME test_daqd_unit_tests
+		COMMAND test_daqd_unit_tests
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_executable(generate_crc32_table checksum_crc32.cc)
@@ -167,15 +173,6 @@ add_executable(test_crc32_table_lookup
 target_include_directories(test_crc32_table_lookup PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 add_test(NAME test_crc32_table_lookup
 		COMMAND test_crc32_table_lookup
-		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
-
-add_executable(test_shmem_recv tests/test_main.cc
-		tests/test_shmem_recv.cc)
-target_include_directories(test_shmem_recv PUBLIC
-		${CMAKE_CURRENT_SOURCE_DIR}
-		../include)
-add_test(NAME test_shmem_recv
-		COMMAND test_shmem_recv
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 if (libNDS2Client_FOUND)

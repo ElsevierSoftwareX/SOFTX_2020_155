@@ -41,24 +41,24 @@ private:
 
     struct producer_buf
     {
-        struct put_dpvec vmic_pv[MAX_CHANNELS]{};
-        int vmic_pv_len{0};
-        unsigned char *move_buf{nullptr};
+        struct put_dpvec         vmic_pv[ MAX_CHANNELS ]{};
+        int                      vmic_pv_len{ 0 };
+        unsigned char*           move_buf{ nullptr };
         circ_buffer_block_prop_t prop{};
-        //unsigned int gps{0};
-        //unsigned int gps_n{0};
-        //unsigned int seq{0};
-        //int length{0};
+        // unsigned int gps{0};
+        // unsigned int gps_n{0};
+        // unsigned int seq{0};
+        // int length{0};
         dcu_move_address dcu_move_addresses{};
     };
 
-    using work_queue_t = work_queue::work_queue< producer_buf, PRODUCER_WORK_QUEUES >;
-    std::unique_ptr< work_queue_t > work_queue_;
+    using work_queue_t =
+        work_queue::work_queue< producer_buf, PRODUCER_WORK_QUEUES >;
+    using shared_work_queue_ptr = std::shared_ptr< work_queue_t >;
 
 public:
     producer( int a = 0 )
-        : pnum( 0 ), pvec_len( 0 ), cycle_input( 3 ), parallel( 1 ),
-          work_queue_{ nullptr }
+        : pnum( 0 ), pvec_len( 0 ), cycle_input( 3 ), parallel( 1 )
     {
         for ( int i = 0; i < 2; i++ )
             for ( int j = 0; j < DCU_COUNT; j++ )
@@ -81,18 +81,9 @@ public:
     {
         return ( (producer*)a )->frame_writer( );
     }
-    void* frame_writer_debug_crc( );
-    static void*
-    frame_writer_debug_crc_static( void* a )
-    {
-        return ( (producer*)a )->frame_writer_debug_crc( );
-    }
-    void* frame_writer_crc( );
-    static void*
-    frame_writer_crc_static( void* a )
-    {
-        return ( (producer*)a )->frame_writer_crc( );
-    }
+
+    void frame_writer_crc( shared_work_queue_ptr work_queue );
+
     void* grabIfoData( int, int, unsigned char* );
     void  grabIfoDataThread( void );
     static void*

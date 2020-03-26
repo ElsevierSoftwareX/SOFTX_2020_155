@@ -55,6 +55,7 @@ using namespace std;
 #include "daqd.hh"
 #include "sing_list.hh"
 #include "net_writer.hh"
+#include "thread_launcher.hh"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -62,26 +63,6 @@ using namespace std;
 #include <string.h>
 
 #include "epics_pvs.hh"
-#include "work_queue.hh"
-
-namespace
-{
-    struct framer_buf
-    {
-        daqd_c::adc_data_ptr_type dptr;
-        ldas_frame_h_type         frame;
-        time_t                    gps, gps_n;
-        unsigned long             nac;
-        int                       frame_file_length_seconds;
-        unsigned int              frame_number;
-        int                       dir_num;
-        // buffers for filenames
-        char tmpf[ filesys_c::filename_max + 10 ];
-        char _tmpf[ filesys_c::filename_max + 10 ];
-    };
-
-    typedef work_queue::work_queue< framer_buf, 2 > framer_work_queue;
-} // namespace
 
 /// Helper function to deal with the archive channels.
 int
@@ -326,7 +307,8 @@ daqd_c::configure_channels_files( )
             return 1;
         }
         // DEBUG(1, cerr << "Channel config: dcu " <<
-        // daqd.channels[daqd.num_channels - 1].dcu_id << " crc=0x" << hex << crc
+        // daqd.channels[daqd.num_channels - 1].dcu_id << " crc=0x" << hex <<
+        // crc
         // << dec << endl); printf("%s has dcuid=%d\n", buf, ini_file_dcu_id);
         if ( daqd.num_channels )
         {
@@ -808,7 +790,7 @@ daqd_c::full_frame( int                frame_length_seconds,
 /// IO Thread for the full resolution frame saver
 /// This is the thread that does the actual writing
 void*
-daqd_c::framer_io( int science )
+daqd_c::framer_io( shared_frame_work_queue_ptr _work_queue, int science )
 {
     const int STATE_NORMAL = 0;
     const int STATE_WRITING = 1;
@@ -817,16 +799,12 @@ daqd_c::framer_io( int science )
 
     shmem_bcast_frame = parameters( ).get< int >( "GDS_BROADCAST", 0 ) == 1;
 
-    framer_work_queue* _work_queue = 0;
     if ( science )
     {
         daqd_c::set_thread_priority( "Science frame saver IO",
                                      "dqscifrio",
                                      SAVER_THREAD_PRIORITY,
                                      SCIENCE_SAVER_IO_CPUAFFINITY );
-        daqd_c::locker( this );
-        _work_queue = reinterpret_cast< framer_work_queue* >(
-            _science_framer_work_queue );
     }
     else
     {
@@ -834,9 +812,6 @@ daqd_c::framer_io( int science )
                                      "dqfulfrio",
                                      SAVER_THREAD_PRIORITY,
                                      FULL_SAVER_IO_CPUAFFINITY );
-        daqd_c::locker( this );
-        _work_queue =
-            reinterpret_cast< framer_work_queue* >( _framer_work_queue );
     }
     enum PV::PV_NAME epics_state_var =
         ( science ? PV::PV_SCIENCE_FW_STATE : PV::PV_RAW_FW_STATE );
@@ -1091,26 +1066,8 @@ daqd_c::framer( int science )
     enum PV::PV_NAME epics_sec_var =
         ( science ? PV::PV_SCIENCE_FW_DATA_SEC : PV::PV_RAW_FW_DATA_SEC );
 
-    framer_work_queue* _work_queue = 0;
-    // create work queues
-    if ( science )
-    {
-        daqd_c::locker _l( this );
-        if ( !_science_framer_work_queue )
-            _science_framer_work_queue =
-                reinterpret_cast< void* >( new framer_work_queue(  ) );
-        _work_queue = reinterpret_cast< framer_work_queue* >(
-            _science_framer_work_queue );
-    }
-    else
-    {
-        daqd_c::locker _l( this );
-        if ( !_framer_work_queue )
-            _framer_work_queue =
-                reinterpret_cast< void* >( new framer_work_queue( ) );
-        _work_queue =
-            reinterpret_cast< framer_work_queue* >( _framer_work_queue );
-    }
+    auto _work_queue = std::make_shared< framer_work_queue >( );
+    work_queue::aborter< framer_work_queue > queue_closer_( *_work_queue );
 
     unsigned long nac = 0; // Number of active channels
     long          frame_cntr;
@@ -1158,22 +1115,13 @@ daqd_c::framer( int science )
         pthread_attr_setstacksize( &attr, daqd.thread_stack_size );
         pthread_attr_setscope( &attr, PTHREAD_SCOPE_SYSTEM );
 
-        int err = 0;
-        if ( science )
-        {
-            err = pthread_create(
-                &science_frame_saver_io_tid,
-                &attr,
-                (void* (*)(void*))daqd_c::science_framer_io_static,
-                (void*)this );
-        }
-        else
-        {
-            err = pthread_create( &frame_saver_io_tid,
-                                  &attr,
-                                  (void* (*)(void*))daqd_c::framer_io_static,
-                                  (void*)this );
-        }
+        int err = launch_pthread( science_frame_saver_io_tid,
+                                  attr,
+                                  [this, _work_queue, science]( ) mutable {
+                                      this->framer_io( std::move( _work_queue ),
+                                                       science );
+                                  } );
+
         if ( err )
         {
             pthread_attr_destroy( &attr );
@@ -1385,7 +1333,8 @@ daqd_c::framer( int science )
                             nac++;
                         }
 
-                        //		cerr << "saver; block " << nb << " bytes "
+                        //		cerr << "saver; block " << nb << " bytes
+                        //"
                         //<< prop -> bytes << endl;
                     }
                 }

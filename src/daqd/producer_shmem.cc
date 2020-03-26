@@ -10,7 +10,6 @@
 #include <errno.h>
 #include <time.h>
 #include <assert.h>
-#include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -30,6 +29,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype> // old <ctype.h>
+#include <memory>
 #include <sys/prctl.h>
 
 #ifdef USE_SYMMETRICOM
@@ -60,6 +60,7 @@ using namespace std;
 #include "circ.h"
 #include "daq_core.h"
 #include "shmem_receiver.hh"
+#include "thread_launcher.hh"
 
 extern daqd_c       daqd;
 extern int          shutdown_server( );
@@ -111,7 +112,8 @@ producer::frame_writer( )
     daqd_c::set_thread_priority(
         "Producer", "dqprod", PROD_THREAD_PRIORITY, PROD_CPUAFFINITY );
 
-    work_queue_ = std::unique_ptr< work_queue_t >( new work_queue_t );
+    auto work_queue = std::make_shared< work_queue_t >( );
+    work_queue::aborter< work_queue_t > queue_closer_( *work_queue );
     for ( int i = 0; i < PRODUCER_WORK_QUEUE_BUF_COUNT; ++i )
     {
         std::unique_ptr< producer_buf > buf_( new producer_buf );
@@ -125,7 +127,7 @@ producer::frame_writer( )
                                &( buf_->dcu_move_addresses ) );
         raii::array_ptr< unsigned char > mbuf_( buf_->move_buf );
 
-        work_queue_->add_to_queue( PRODUCER_WORK_QUEUE_START, buf_.get( ) );
+        work_queue->add_to_queue( PRODUCER_WORK_QUEUE_START, buf_.get( ) );
         buf_.release( );
         mbuf_.release( );
     }
@@ -139,11 +141,10 @@ producer::frame_writer( )
         pthread_attr_setscope( &attr, PTHREAD_SCOPE_SYSTEM );
 
         raii::lock_guard< pthread_mutex_t > crc_sync( prod_crc_mutex );
-        int                                 err =
-            pthread_create( &crc_tid,
-                            &attr,
-                            (void* (*)(void*))this->frame_writer_crc_static,
-                            (void*)this );
+        int err = launch_pthread( crc_tid, attr, [this, work_queue]( ) mutable {
+            this->frame_writer_crc( std::move( work_queue ) );
+        } );
+
         if ( err )
         {
             pthread_attr_destroy( &attr );
@@ -274,10 +275,8 @@ producer::frame_writer( )
         daq_dc_data_t* data_block = shmem_receiver.receive_data( );
         stat_recv.tick( );
 
-
-
         producer_buf* cur_buffer =
-            work_queue_->get_from_queue( RECV_THREAD_INPUT );
+            work_queue->get_from_queue( RECV_THREAD_INPUT );
         circ_buffer_block_prop_t* cur_prop = &cur_buffer->prop;
 
         if ( data_block->header.dcuTotalModels > 0 )
@@ -309,25 +308,23 @@ producer::frame_writer( )
         }
         {
             auto expected_gps = prev_gps;
-            if (prev_frac == DATA_BLOCKS-1 || prev_frac >= 937500000)
+            if ( prev_frac == DATA_BLOCKS - 1 || prev_frac >= 937500000 )
             {
                 ++expected_gps;
             }
-            auto expected_nano = prev_frac + (1000000000/16);
-            if (expected_nano >= 1000000000)
+            auto expected_nano = prev_frac + ( 1000000000 / 16 );
+            if ( expected_nano >= 1000000000 )
             {
                 expected_nano = 0;
             }
             auto expected_cycle = DATA_BLOCKS + 10;
-            if (prev_frac < DATA_BLOCKS)
+            if ( prev_frac < DATA_BLOCKS )
             {
-                expected_cycle = (prev_frac + 1) % DATA_BLOCKS;
+                expected_cycle = ( prev_frac + 1 ) % DATA_BLOCKS;
             }
             if ( data_block->header.dcuTotalModels == 0 ||
-                 gps != expected_gps || (
-                                            frac != expected_cycle &&
-                                            frac != expected_nano
-                                            ))
+                 gps != expected_gps ||
+                 ( frac != expected_cycle && frac != expected_nano ) )
             {
                 fprintf(
                     stderr,
@@ -339,8 +336,11 @@ producer::frame_writer( )
                     (int)prev_frac,
                     (int)( data_block->header.dcuTotalModels ) );
 
-                fprintf(stderr, "\texpected gps = %d\n", expected_gps );
-                fprintf(stderr, "\texpected cycle = %d\n\texpected nano = %d\n\n", expected_cycle, expected_cycle);
+                fprintf( stderr, "\texpected gps = %d\n", expected_gps );
+                fprintf( stderr,
+                         "\texpected cycle = %d\n\texpected nano = %d\n\n",
+                         expected_cycle,
+                         expected_cycle );
                 exit( 1 );
             }
         }
@@ -672,7 +672,7 @@ producer::frame_writer( )
         //    std::cout << " " << *vmic_pv[ii].src_status_addr;
         // std::cout << std::endl;
 
-        work_queue_->add_to_queue( RECV_THREAD_OUTPUT, cur_buffer );
+        work_queue->add_to_queue( RECV_THREAD_OUTPUT, cur_buffer );
         cur_buffer = nullptr;
 
         PV::set_pv( PV::PV_CYCLE, i );
@@ -790,19 +790,10 @@ producer::frame_writer( )
     }
 }
 
-/// A main loop for a producer that does a debug crc operation
-/// in a seperate thread
-void*
-producer::frame_writer_debug_crc( )
-{
-    // not implemented
-    return (void*)NULL;
-}
-
 /// A main loop for a producer that does crc  and data transfer
 /// in a seperate thread.
-void*
-producer::frame_writer_crc( )
+void
+producer::frame_writer_crc( shared_work_queue_ptr work_queue )
 {
     int stat_cycles = 0;
 
@@ -829,7 +820,7 @@ producer::frame_writer_crc( )
         unsigned int gps, gps_n;
 
         producer_buf* cur_buffer =
-            work_queue_->get_from_queue( CRC_THREAD_INPUT );
+            work_queue->get_from_queue( CRC_THREAD_INPUT );
         circ_buffer_block_prop_t* cur_prop = &( cur_buffer->prop );
         gps = cur_prop->gps;
         gps_n = cur_prop->gps_n;
@@ -897,11 +888,11 @@ producer::frame_writer_crc( )
         ////                        while (bytes--) {
         ////                            crc = (crc << 8) ^
         ////                                  crctab[((crc >> 24) ^ *(cp++)) &
-        ///0xFF]; /                        } /                        bytes =
-        ///dcu_size; /                        while (bytes > 0) { / crc = (crc
+        /// 0xFF]; /                        } /                        bytes =
+        /// dcu_size; /                        while (bytes > 0) { / crc = (crc
         ///<< 8) ^ /                                  crctab[((crc >> 24) ^
-        ///bytes) & 0xFF]; /                            bytes >>= 8; / } / crc =
-        ///~crc & 0xFFFFFFFF;
+        /// bytes) & 0xFF]; /                            bytes >>= 8; / } / crc
+        /// = ~crc & 0xFFFFFFFF;
         //                        unsigned int crc = crc_obj.result();
         //                        if (crc != dcu_crc) {
         //                            // Detected data corruption !!!
@@ -942,7 +933,7 @@ producer::frame_writer_crc( )
         //  printf("%d %d\n", prop.gps, prop.gps_n);
         // DEBUG1(cerr << "producer " << i << endl);
 
-        work_queue_->add_to_queue( CRC_THREAD_OUTPUT, cur_buffer );
+        work_queue->add_to_queue( CRC_THREAD_OUTPUT, cur_buffer );
         cur_buffer = nullptr;
 
         //  printf("%d %d\n", prop.gps, prop.gps_n);
@@ -970,6 +961,4 @@ producer::frame_writer_crc( )
             stat_cycles = 0;
         }
     }
-
-    return nullptr;
 }
