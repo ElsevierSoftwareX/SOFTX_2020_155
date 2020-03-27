@@ -1,6 +1,6 @@
-#include <zmq.hpp>
-#include "run_number_structs.h"
 #include "run_number_client.hh"
+
+#include "run_number_internal.hh"
 
 namespace daqd_run_number
 {
@@ -16,42 +16,29 @@ namespace daqd_run_number
             if ( hash.size( ) > sizeof( req.hash ) )
                 return 0;
 
+            auto target_address =
+                daqd_run_number::parse_connection_string( target );
+
+            io_context_t                context;
+            tcp::resolver               resolver( context );
+            tcp::resolver::results_type endpoints =
+                resolver.resolve( target_address.address, target_address.port );
+            tcp::socket socket( context );
+            boost::asio::connect( socket, endpoints );
+
             req.version = 1;
             req.hash_size = static_cast< short >( hash.size( ) );
             memset( &req.hash[ 0 ], 0, sizeof( req.hash ) );
             memcpy( &req.hash[ 0 ], hash.data( ), hash.size( ) );
 
-            zmq::context_t context( 1 );
-            zmq::socket_t  requestor( context, ZMQ_REQ );
+            boost::asio::write( socket, to_const_buffer( req ) );
 
-            zmq::message_t request( sizeof( req ) );
-            memcpy( request.data( ), &req, sizeof( req ) );
+            daqd_run_number_resp_v1_t resp;
+            boost::asio::read( socket, to_buffer( resp ) );
 
-            int dummy = timeout;
-#ifdef ZMQ_CONNECT_TIMEOUT
-            requestor.setsockopt(
-                ZMQ_CONNECT_TIMEOUT, &dummy, sizeof( dummy ) );
-#endif
-            requestor.setsockopt( ZMQ_SNDTIMEO, &dummy, sizeof( dummy ) );
-            requestor.setsockopt( ZMQ_RCVTIMEO, &dummy, sizeof( dummy ) );
-            dummy = 0;
-            requestor.setsockopt( ZMQ_LINGER, &dummy, sizeof( dummy ) );
-
-            requestor.connect( target.c_str( ) );
-            requestor.send( request );
-
-            zmq::message_t resp_msg;
-            if ( !requestor.recv( &resp_msg ) )
+            if ( resp.version != 1 )
                 return 0;
-
-            if ( resp_msg.size( ) != sizeof( daqd_run_number_resp_v1_t ) )
-                return 0;
-            daqd_run_number_resp_v1_t* resp =
-                reinterpret_cast< daqd_run_number_resp_v1_t* >(
-                    resp_msg.data( ) );
-            if ( resp->version != 1 )
-                return 0;
-            return resp->number;
+            return resp.number;
         }
         catch ( ... )
         {

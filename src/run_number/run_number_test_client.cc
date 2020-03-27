@@ -2,37 +2,42 @@
 #include <iostream>
 #include <string>
 
+#include "args.h"
 #include "run_number_client.hh"
 
 bool
 parse_args( int argc, char* argv[], std::string& target, std::string& hash )
 {
-    assert( argc >= 1 );
-    std::string prog_name( argv[ 0 ] );
+    const char* default_target = "127.0.0.1:5556";
+    const char* default_hash = "1111111111111111111";
 
-    bool need_help = false;
-    for ( int i = 1; i < argc; ++i )
+    const char* target_dest = nullptr;
+    const char* hash_dest = nullptr;
+
+    auto parser =
+        args_create_parser( "Simple test of the run number server, give the "
+                            "destination and a hash value." );
+    args_add_string_ptr( parser,
+                         't',
+                         "target",
+                         "ip:port",
+                         "address and port of the server",
+                         &target_dest,
+                         default_target );
+    args_add_string_ptr( parser,
+                         ARGS_NO_SHORT,
+                         "hash",
+                         "",
+                         "hash value to send",
+                         &hash_dest,
+                         default_hash );
+
+    if ( args_parse( parser, argc, argv ) <= 0 )
     {
-        std::string arg( argv[ i ] );
-        if ( arg == "-h" || arg == "--help" )
-            need_help = true;
-    }
-    if ( need_help || ( argc != 3 && argc != 2 ) )
-    {
-        std::cerr << "Usage:\n\t" << prog_name << " [target] <hash>\n\n";
-        std::cerr << "Where target defaults to '" << target
-                  << "' if not specified." << std::endl;
         return false;
     }
-    if ( argc == 2 )
-    {
-        hash = argv[ 1 ];
-    }
-    if ( argc == 3 )
-    {
-        target = argv[ 1 ];
-        hash = argv[ 2 ];
-    }
+    target = target_dest;
+    hash = hash_dest;
     return true;
 }
 

@@ -1,107 +1,63 @@
 #include <iostream>
 #include <string>
-#include <vector>
-#include <zmq.hpp>
-#include "run_number.hh"
-#include "run_number_structs.h"
+#include <fstream>
 
-static const std::string default_db = "run-number.db";
-static const std::string default_endpoint = "tcp://*:5556";
+#include "args.h"
+
+#include "run_number.hh"
+#include "run_number_server.hh"
+
+static const char* default_db = "run-number.db";
+static const char* default_endpoint = "0.0.0.0:5556";
 
 struct config
 {
     std::string db_path;
     std::string endpoint;
     bool        verbose;
-    bool        test_crash;
 
     config( )
-        : db_path( default_db ), endpoint( default_endpoint ), verbose( false ),
-          test_crash( false )
+        : db_path( default_db ), endpoint( default_endpoint ), verbose( false )
     {
     }
-    config( const config& other )
-        : db_path( other.db_path ), endpoint( other.endpoint ),
-          verbose( other.verbose ), test_crash( other.test_crash )
-    {
-    }
-    config&
-    operator=( const config& other )
-    {
-        db_path = other.db_path;
-        endpoint = other.endpoint;
-        verbose = other.verbose;
-        test_crash = other.test_crash;
-        return *this;
-    }
+    config( const config& other ) = default;
+    config& operator=( const config& other ) = default;
 };
-
-void
-send_zero_response( zmq::socket_t& s )
-{
-    daqd_run_number_resp_v1_t resp;
-    bzero( &resp, sizeof( resp ) );
-    resp.version = 1;
-}
 
 bool
 parse_args( int argc, char* argv[], config& cfg )
 {
-    std::string prog_name( ( argc >= 1 ? argv[ 0 ] : "unknown" ) );
+    auto parser = args_create_parser(
+        "LIGO run number server.  The run number server listens "
+        "for requests from the frame writers and helps to "
+        "synchronize the run number based on configuration "
+        "hashes." );
+    int         verbose = 0;
+    const char* file_dest = nullptr;
+    const char* endpoint_dest = nullptr;
 
-    bool need_help = false;
-    bool endpoint_assigned = false;
-    for ( int i = 1; i < argc; ++i )
+    args_add_flag( parser, 'v', "verbose", "verbose output", &verbose );
+    args_add_string_ptr( parser,
+                         'f',
+                         "file",
+                         "",
+                         "run number database",
+                         &file_dest,
+                         default_db );
+    args_add_string_ptr( parser,
+                         'l',
+                         "listen",
+                         "ip:port",
+                         "address and port to listen on",
+                         &endpoint_dest,
+                         default_endpoint );
+    if ( args_parse( parser, argc, argv ) <= 0 )
     {
-        std::string arg( argv[ i ] );
-        if ( arg == "-v" )
-        {
-            cfg.verbose = true;
-        }
-        else if ( arg == "-h" || arg == "--help" )
-        {
-            need_help = true;
-            break;
-        }
-        else if ( arg == "--test-crash" )
-        {
-            cfg.test_crash = true;
-            break;
-        }
-        else if ( arg == "-f" || arg == "--file" )
-        {
-            if ( i + 1 >= argc )
-            {
-                need_help = true;
-                break;
-            }
-            cfg.db_path = argv[ i + 1 ];
-            i++;
-        }
-        else
-        {
-            if ( endpoint_assigned )
-            {
-                need_help = true;
-                break;
-            }
-            cfg.endpoint = arg;
-            endpoint_assigned = true;
-        }
-    }
-    if ( need_help )
-    {
-        std::cerr << "Usage:\n\t" << prog_name << " [options] [endpoint]\n\n";
-        std::cerr << "Where options are:\n\t-v\tVerbose\n\t--test-crash\t";
-        std::cerr << "A debug/test mode where the server does not complete a "
-                     "request.  DO NOT USE in production\n";
-        std::cerr << "\t-f|--file <filename>\tDatabase file to use.\n";
-        std::cerr << "The endpoint defaults to '" << default_endpoint
-                  << "' if not specified.\n";
-        std::cerr << "The database file defaults to '" << default_db
-                  << "' if not specified." << std::endl;
         return false;
     }
+    cfg.verbose = ( verbose > 0 );
+    cfg.db_path = file_dest;
+    cfg.endpoint = endpoint_dest;
     return true;
 }
 
@@ -113,72 +69,22 @@ main( int argc, char* argv[] )
     {
         return 1;
     }
+    std::ofstream dummy{};
+    std::ostream* log = &dummy;
+    if ( cfg.verbose )
+    {
+        log = &std::cerr;
+    }
 
     daqdrn::file_backing_store                       db( cfg.db_path );
     daqdrn::run_number< daqdrn::file_backing_store > run_number_generator( db );
 
-    zmq::context_t context( 1 );
-    zmq::socket_t  responder( context, ZMQ_REP );
+    *log << "Binding to " << cfg.endpoint << std::endl;
+    auto server_address =
+        daqd_run_number::parse_connection_string( cfg.endpoint );
 
-    if ( cfg.verbose )
-        std::cout << "Binding to " << cfg.endpoint << std::endl;
-    responder.bind( cfg.endpoint.c_str( ) );
-
-    while ( true )
-    {
-        zmq::message_t request;
-
-        responder.recv( &request );
-
-        if ( cfg.test_crash )
-        {
-            std::cerr << "crashing on purpose" << std::endl;
-            std::exit( 1 );
-        }
-
-        if ( request.size( ) != sizeof( ::daqd_run_number_req_v1_t ) )
-        {
-            if ( cfg.verbose )
-            {
-                std::cout << "Received a bad request [invalid size]"
-                          << std::endl;
-            }
-            send_zero_response( responder );
-            continue;
-        }
-        daqd_run_number_req_v1_t* req =
-            reinterpret_cast< daqd_run_number_req_v1_t* >( request.data( ) );
-        if ( req->version != 1 || req->hash_size < 0 ||
-             req->hash_size > sizeof( req->hash ) )
-        {
-            if ( cfg.verbose )
-            {
-                std::cout << "Received a bad request [invalid parameters]"
-                          << std::endl;
-                send_zero_response( responder );
-                continue;
-            }
-        }
-
-        if ( cfg.verbose )
-        {
-            std::string hash( req->hash, req->hash_size );
-            std::cout << "Received a v" << req->version << " request with hash "
-                      << hash << " ";
-        }
-
-        daqd_run_number_resp_v1_t resp;
-        resp.version = 1;
-        resp.padding = 0;
-        resp.number = run_number_generator.get_number(
-            std::string( req->hash, req->hash_size ) );
-        zmq::message_t response( sizeof( resp ) );
-        memcpy( response.data( ), &resp, sizeof( resp ) );
-        responder.send( response );
-        if ( cfg.verbose )
-        {
-            std::cout << "returning run number = " << resp.number << std::endl;
-        }
-    }
+    daqd_run_number::server< decltype( run_number_generator ) > server(
+        run_number_generator, server_address, *log );
+    server.run( );
     return 0;
 }
