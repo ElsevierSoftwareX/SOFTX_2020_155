@@ -121,7 +121,6 @@ target_include_directories(daqd PUBLIC
 		${CMAKE_CURRENT_BINARY_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}
 		${CMAKE_CURRENT_SOURCE_DIR}/../include
-		${CMAKE_CURRENT_SOURCE_DIR}/../zmq_stream
 		${RPC_INCLUDE_DIRS}
 		)
 target_link_libraries(daqd PUBLIC

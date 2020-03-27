@@ -30,7 +30,6 @@
 #include <time.h>
 #include "../include/daqmap.h"
 #include "../include/daq_core.h"
-#include "../zmq_stream/dc_utils.h"
 
 // #include "testlib.h"
 

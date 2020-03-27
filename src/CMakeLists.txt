@@ -12,12 +12,6 @@ add_subdirectory(local_dc)
 add_subdirectory(fe_stream_test)
 add_subdirectory(pub_sub_stream)
 
-if (${LibZMQ_FOUND})
-    add_subdirectory(zmq_stream)
-else (${LibZMQ_FOUND})
-    MESSAGE("Skipping zmq_stream")
-endif (${LibZMQ_FOUND})
-
 if (${DOLPHIN_FOUND})
     add_subdirectory(ix_stream)
 else (${DOLPHIN_FOUND})
