@@ -1,3 +1,4 @@
+configure_file(tests/test_run_number_server.sh.in "${CMAKE_CURRENT_BINARY_DIR}/test_run_number_server.sh" @ONLY)
 
 add_executable(run_number_server run_number_main.cc run_number.cc run_number.hh)
 target_link_libraries(run_number_server PRIVATE
@@ -40,6 +41,10 @@ target_link_libraries(run_number_test_client PUBLIC
         ${CMAKE_THREAD_LIBS_INIT})
 
 add_test(_rn_basic_run_number_tests_ test_run_number)
+
+add_test(NAME test_run_number_server
+        COMMAND /bin/bash ./test_run_number_server.sh
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 install(TARGETS run_number_server
         DESTINATION bin

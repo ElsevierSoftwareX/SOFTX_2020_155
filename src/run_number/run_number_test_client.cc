@@ -44,7 +44,7 @@ parse_args( int argc, char* argv[], std::string& target, std::string& hash )
 int
 main( int argc, char* argv[] )
 {
-    std::string target = "tcp://localhost:5556";
+    std::string target = "localhost:5556";
     std::string hash = "";
 
     if ( !parse_args( argc, argv, target, hash ) )
@@ -53,7 +53,7 @@ main( int argc, char* argv[] )
     }
 
     int number = daqd_run_number::get_run_number( target, hash );
-    std::cout << "The new run number is " << number << std::endl;
+    std::cout << number << std::endl;
 
     return 0;
 }
