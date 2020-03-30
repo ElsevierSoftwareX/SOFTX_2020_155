@@ -13,7 +13,7 @@
 namespace check_gap
 {
     static std::int64_t
-    time_now( )
+    time_now_ms( )
     {
         timeval tv;
         gettimeofday( &tv, 0 );
@@ -39,7 +39,7 @@ namespace check_gap
         {
             usleep( 2000 );
         }
-        results.time_ms = time_now( );
+        results.time_ms = time_now_ms( );
         results.cycle = header.curCycle;
 
         unsigned int   stride = header.cycleDataSize;
@@ -58,6 +58,11 @@ namespace check_gap
     int
     check_gaps( volatile void* buffer, std::size_t buffer_size )
     {
+        const int ave_cycle_time = 62;
+        const int allowed_cycle_delta = 10;
+        const int min_cycle_time = ave_cycle_time - allowed_cycle_delta;
+        const int max_cycle_type = ave_cycle_time + allowed_cycle_delta;
+
         std::int64_t nano_step = 1000000000 / 16;
         std::int64_t nano_times[ 16 ];
 
@@ -70,8 +75,8 @@ namespace check_gap
         {
             nano_times[ i ] = i * nano_step;
         }
-        if ( !buffer || buffer_size < 20 * 1024 * 1024 ||
-             buffer_size > 100 * 1024 * 1024 )
+        if ( !buffer || buffer_size < DAQD_MIN_SHMEM_BUFFER_SIZE ||
+             buffer_size > DAQD_MAX_SHMEM_BUFFER_SIZE )
         {
             return 0;
         }
@@ -81,21 +86,25 @@ namespace check_gap
             wait_for_time_change( multi_header->header );
 
         auto first = true;
-        auto prev_sample_time = std::chrono::steady_clock::now();
-	int cycles = 0;
-        
-	while ( true )
+        auto prev_sample_time = std::chrono::steady_clock::now( );
+        int  cycles = 0;
+
+        while ( true )
         {
             bool           error = false;
             cycle_sample_t new_sample =
                 wait_for_time_change( multi_header->header );
-            auto sample_time = std::chrono::steady_clock::now();
-            if (!first)
+            auto sample_time = std::chrono::steady_clock::now( );
+            if ( !first )
             {
-                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(sample_time - prev_sample_time);
-                if ( duration.count() < 52 || duration.count() > 72 )
+                auto duration =
+                    std::chrono::duration_cast< std::chrono::milliseconds >(
+                        sample_time - prev_sample_time );
+                if ( duration.count( ) < min_cycle_time ||
+                     duration.count( ) > max_cycle_type )
                 {
-                    std::cout << "Bad duration, cycle took " << duration.count() << "ms\n";
+                    std::cout << "Bad duration, cycle took "
+                              << duration.count( ) << "ms\n";
                 }
             }
             prev_sample_time = sample_time;
@@ -116,13 +125,15 @@ namespace check_gap
                 ++cycle_mismatch;
                 error = true;
             }
-/*            if ( new_sample.gps_nano != nano_times[ new_sample.cycle ] )
-            {
-                std::cout << "Nanos/cycle mismatch " << new_sample.gps_nano
-                          << ":" << new_sample.gps_cycle << "\n";
-                ++nano_mismatch;
-                error = true;
-            }*/
+            /*            if ( new_sample.gps_nano != nano_times[
+               new_sample.cycle ] )
+                        {
+                            std::cout << "Nanos/cycle mismatch " <<
+               new_sample.gps_nano
+                                      << ":" << new_sample.gps_cycle << "\n";
+                            ++nano_mismatch;
+                            error = true;
+                        }*/
             if ( ( new_sample.gps == cur_sample.gps &&
                    ( new_sample.gps_cycle == cur_sample.gps_cycle + 1 ) ) ||
                  ( new_sample.gps == cur_sample.gps + 1 &&
@@ -137,13 +148,14 @@ namespace check_gap
                 ++time_jump;
                 error = true;
             }
-	    if (cycles < 10)
-	    {
-	            std::cout << "Sample " << new_sample.gps << ":"
-        	              << new_sample.gps_cycle << " - deltat = "
-                	      << ( new_sample.time_ms - cur_sample.time_ms ) << std::endl;
-		    ++cycles;
-	    }
+            if ( cycles < 10 )
+            {
+                std::cout << "Sample " << new_sample.gps << ":"
+                          << new_sample.gps_cycle << " - deltat = "
+                          << ( new_sample.time_ms - cur_sample.time_ms )
+                          << std::endl;
+                ++cycles;
+            }
             if ( error )
             {
                 std::cout << "\t cycle_jumps " << cycle_jumps << " count_mis "

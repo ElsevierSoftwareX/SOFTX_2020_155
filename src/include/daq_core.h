@@ -31,6 +31,13 @@ extern "C" {
 #define DAQ_PROXY_PORT 5557
 #define DAQ_TRANSIT_MAX_DCU 256
 
+#define DAQD_MAX_SHMEM_BUFFER_SIZE ( 100 * 1024 * 1024 )
+#define DAQD_MIN_SHMEM_BUFFER_SIZE ( 20 * 1024 * 1024 )
+
+#if DAQD_MAX_SHMEM_BUFFER_SIZE < DAQ_TRANSIT_MAX_DC_BYTE_SEC
+#error "The shmem buffer sizes are wrong, please fix!"
+#endif
+
 //
 //
 // DAQ data message header structure
