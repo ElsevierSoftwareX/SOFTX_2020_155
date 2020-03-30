@@ -59,6 +59,30 @@ generate_inputs( )
     return inputs;
 }
 
+extern unsigned int crctab[ 256 ];
+
+unsigned int older_crc(unsigned char* cp, unsigned long read_size)
+{
+    unsigned long crc = 0;
+    unsigned long bytes = read_size;
+    while ( bytes-- )
+    {
+        crc = ( crc << 8 ) ^
+            crctab[ ( ( crc >> 24 ) ^ *( cp++ ) )
+            & 0xFF ];
+    }
+    bytes = read_size;
+    while ( bytes > 0 )
+    {
+        crc = ( crc << 8 ) ^
+            crctab[ ( ( crc >> 24 ) ^ bytes ) &
+            0xFF ];
+        bytes >>= 8;
+    }
+    crc = ~crc & 0xFFFFFFFF;
+    return crc;
+}
+
 TEST_CASE( "Generate the crc32 class data" )
 {
     test_list inputs = generate_inputs( );
@@ -83,5 +107,6 @@ TEST_CASE( "Test the crc32 class" )
         checksum_crc32 sum;
         sum.add( input.first );
         REQUIRE( sum.result( ) == input.second );
+        REQUIRE( older_crc ( (unsigned char*)input.first.data(), input.first.size()) == input.second );
     }
 }

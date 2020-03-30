@@ -1,5 +1,6 @@
 
 add_executable(mbuf_probe
+        gap_check.cc
         mbuf_probe.cc
         mbuf_decoders.cc
         analyze_daq_multi_dc.cc

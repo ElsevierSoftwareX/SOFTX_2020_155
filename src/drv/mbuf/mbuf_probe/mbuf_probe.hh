@@ -21,6 +21,7 @@ enum MBufCommands
     COPY,
     DELETE,
     ANALYZE,
+    GAP_CHECK,
 };
 
 enum MBufStructures
@@ -104,6 +105,14 @@ struct ConfigOpts
             {
                 set_error( "To analyze a buffer a buffer, size, and structure "
                            "type must be provided" );
+            }
+            break;
+        case GAP_CHECK:
+            if ( buffer_name.empty( ) || buffer_size == 0 ||
+                 analysis_type != MBUF_DAQ_MULTI_DC )
+            {
+                set_error( "To do gap checking a buffer and size must be set "
+                           "as well as daq_multi_cycle" );
             }
             break;
         case INVALID:
