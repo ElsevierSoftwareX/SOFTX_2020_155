@@ -23,7 +23,6 @@ Build-Depends:
  libtool,
  libxpm-dev,
  libxt-dev,
- libzmq3-dev,
  pkg-config,
  rapidjson-dev,
 Standards-Version: 3.9.8
@@ -106,17 +105,6 @@ Description: advLigoRTS front end support
  .
  Binaries and systemd services for advLigoRTS front end systems.
 
-Package: advligorts-transport-zmq
-Architecture: any
-Depends:
- advligorts-mbuf-dkms,
- ${misc:Depends},
- ${shlibs:Depends},
-Description: advLigoRTS ZeroMQ network transport
- Core component of advLigoRTS.
- .
- ZeroMQ network transport for advLigoRTS DAQD structures.
-
 Package: advligorts-transport-dix
 Architecture: any
 Depends:
@@ -141,7 +129,7 @@ Depends:
 Description: advLigoRTS pub/sub based transport
  Core component of advLigoRTS.
  .
- pub/sub ip based network transport for advLigoRTS DAQD structures.
+ IP-based pub/sub network transport for advLigoRTS DAQD structures.
 
 Package: advligorts-cymac
 Architecture: all
