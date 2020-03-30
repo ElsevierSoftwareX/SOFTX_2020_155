@@ -1,6 +1,9 @@
 #ifndef RAII_HH
 #define RAII_HH
 
+#include <unistd.h>
+#include <memory>
+
 /**
  * Some 'smart' resource wrappers using the raii technique.
  * This should be cleaned up and foled into C++11 code as
@@ -130,6 +133,27 @@ namespace raii
             }
         }
     };
+
+    // std::make_unique didn't make it into C++11, so
+    // to allow this to work in a pre C++14 world, we
+    // provide a simple replacement.
+    //
+    // A make_unique<> for C++11.  Taken from
+    // "Effective Modern C++ by Scott Meyers (O'Reilly).
+    // Copyright 2015 Scott Meyers, 978-1-491-90399-5"
+    //
+    // Permission given in the book to reuse code segments.
+    //
+    // @tparam T The type of the object to be managed by the unique_ptr
+    // @tparam Ts The type of the arguments to T's constructor
+    // @param params The arguments to forward to the constructor
+    // @return a std::unique_ptr<T>
+    template < typename T, typename... Ts >
+    std::unique_ptr< T >
+    make_unique_ptr( Ts&&... params )
+    {
+        return std::unique_ptr< T >( new T( std::forward< Ts >( params )... ) );
+    }
 
 } // namespace raii
 

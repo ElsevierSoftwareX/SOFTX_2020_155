@@ -13,6 +13,7 @@
 #include "config.h"
 #include <sys/syscall.h>
 #include <sys/prctl.h>
+#include "work_queue.hh"
 
 #include <deque>
 #include <map>
@@ -152,24 +153,31 @@ public:
         second_trend_frame
     };
 
-    /// dcu_mov_address is a list of start points in a move buffer for each
-    /// possible dcu it is provided as a helper for producer type systems which
-    /// need to deal with an internal move buffer.
-    struct dcu_move_address
-    {
-        dcu_move_address( )
-        {
-            memset( &start[ 0 ], 0, sizeof( char* ) * DCU_COUNT );
-        }
-        unsigned char* start[ DCU_COUNT ];
-    };
+    /// Keep pointers to the data samples for each data channel
+    /// An array of two pointers, fast_adc_ptr and aux_data_valid_ptr
+    typedef std::vector< std::pair< unsigned char*, INT_2U* > >
+        adc_data_ptr_type;
 
 private:
+    struct framer_buf
+    {
+        daqd_c::adc_data_ptr_type dptr;
+        ldas_frame_h_type         frame;
+        time_t                    gps, gps_n;
+        unsigned long             nac;
+        int                       frame_file_length_seconds;
+        unsigned int              frame_number;
+        int                       dir_num;
+        // buffers for filenames
+        char tmpf[ filesys_c::filename_max + 10 ];
+        char _tmpf[ filesys_c::filename_max + 10 ];
+    };
+    using framer_work_queue = work_queue::work_queue< framer_buf, 2 >;
+    using shared_frame_work_queue_ptr = std::shared_ptr< framer_work_queue >;
+
     typedef std::pair< std::string, std::string >        _string_pair;
     typedef std::pair< std::string, std::string >        _checksum_pair;
     typedef std::map< daqd_c::frame_type, _string_pair > _path_transform;
-    void*                                                _framer_work_queue;
-    void* _science_framer_work_queue;
 
     int _configuration_number;
 
@@ -220,8 +228,7 @@ private:
 
 public:
     daqd_c( )
-        : _framer_work_queue( 0 ), _science_framer_work_queue( 0 ),
-          _configuration_number( 0 ), b1( 0 ), producer1( 0 ),
+        : _configuration_number( 0 ), b1( 0 ), producer1( 0 ),
           num_channels( 0 ), num_active_channels( 0 ),
           num_science_channels( 0 ), num_channel_groups( 0 ),
           num_epics_channels( 0 ),
@@ -354,7 +361,8 @@ public:
     int   cnum; ///< Consumer number for the frame saver
     int   science_cnum; ///< Consumer number for the science frame saver
     void* framer( int ); ///< Full resolution frames saver thread
-    void* framer_io( int ); ///< IO for the full resolution frame saver
+    void* framer_io( shared_frame_work_queue_ptr _work_queue,
+                     int ); ///< IO for the full resolution frame saver
     static void*
     framer_static( void* a )
     {
@@ -365,18 +373,6 @@ public:
     science_framer_static( void* a )
     {
         return ( (daqd_c*)a )->framer( 1 );
-    };
-    /// framer io thread
-    static void*
-    framer_io_static( void* a )
-    {
-        return ( (daqd_c*)a )->framer_io( 0 );
-    };
-    /// science-mode frame saver io thread
-    static void*
-    science_framer_io_static( void* a )
-    {
-        return ( (daqd_c*)a )->framer_io( 1 );
     };
 
     /// Queue frame file checksums for output
@@ -621,10 +617,6 @@ public:
         return detector;
     }
 
-    /// Keep pointers to the data samples for each data channel
-    /// An array of two pointers, fast_adc_ptr and aux_data_valid_ptr
-    typedef std::vector< std::pair< unsigned char*, INT_2U* > >
-        adc_data_ptr_type;
     ldas_frame_h_type
     full_frame( int frame_length_seconds, int sience, adc_data_ptr_type& dptr );
 

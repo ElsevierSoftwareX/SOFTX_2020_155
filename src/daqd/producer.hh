@@ -3,6 +3,22 @@
 
 #include <stats/stats.hh>
 #include <iterator>
+#include <memory>
+#include "work_queue.hh"
+
+#include "daq_core.h"
+
+/// dcu_move_address is a list of start points in a move buffer for each
+/// possible dcu it is provided as a helper for producer type systems which
+/// need to deal with an internal move buffer.
+struct dcu_move_address
+{
+    dcu_move_address( )
+    {
+        memset( &start[ 0 ], 0, sizeof( char* ) * DCU_COUNT );
+    }
+    unsigned char* start[ DCU_COUNT ];
+};
 
 /// Data producer thread
 class producer : public stats
@@ -15,12 +31,34 @@ private:
     int             pvec_len;
     struct put_pvec pvec[ MAX_CHANNELS ];
 
-    void* _dbl_buf_hack;
+    const static int PRODUCER_WORK_QUEUES = 2;
+    const static int PRODUCER_WORK_QUEUE_BUF_COUNT = 5;
+    const static int PRODUCER_WORK_QUEUE_START = 0;
+    const static int RECV_THREAD_INPUT = 0;
+    const static int RECV_THREAD_OUTPUT = 1;
+    const static int CRC_THREAD_INPUT = 1;
+    const static int CRC_THREAD_OUTPUT = 0;
+
+    struct producer_buf
+    {
+        struct put_dpvec         vmic_pv[ MAX_CHANNELS ]{};
+        int                      vmic_pv_len{ 0 };
+        unsigned char*           move_buf{ nullptr };
+        circ_buffer_block_prop_t prop{};
+        // unsigned int gps{0};
+        // unsigned int gps_n{0};
+        // unsigned int seq{0};
+        // int length{0};
+        dcu_move_address dcu_move_addresses{};
+    };
+
+    using work_queue_t =
+        work_queue::work_queue< producer_buf, PRODUCER_WORK_QUEUES >;
+    using shared_work_queue_ptr = std::shared_ptr< work_queue_t >;
 
 public:
     producer( int a = 0 )
-        : pnum( 0 ), pvec_len( 0 ), cycle_input( 3 ), parallel( 1 ),
-          _dbl_buf_hack( 0 )
+        : pnum( 0 ), pvec_len( 0 ), cycle_input( 3 ), parallel( 1 )
     {
         for ( int i = 0; i < 2; i++ )
             for ( int j = 0; j < DCU_COUNT; j++ )
@@ -43,18 +81,9 @@ public:
     {
         return ( (producer*)a )->frame_writer( );
     }
-    void* frame_writer_debug_crc( );
-    static void*
-    frame_writer_debug_crc_static( void* a )
-    {
-        return ( (producer*)a )->frame_writer_debug_crc( );
-    }
-    void* frame_writer_crc( );
-    static void*
-    frame_writer_crc_static( void* a )
-    {
-        return ( (producer*)a )->frame_writer_crc( );
-    }
+
+    void frame_writer_crc( shared_work_queue_ptr work_queue );
+
     void* grabIfoData( int, int, unsigned char* );
     void  grabIfoDataThread( void );
     static void*
