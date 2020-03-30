@@ -1,0 +1,71 @@
+#!/bin/bash
+
+CWD="@CMAKE_CURRENT_BINARY_DIR@"
+
+PID_RUN_NUMBER_SERVER=0
+
+function kill_proc {
+    if [ $1 -gt 0 ]; then
+        echo "Closing process $1"
+        kill $1
+    fi
+}
+
+function cleanup {
+    rm -rf run-number.db
+    kill_proc $PID_RUN_NUMBER_SERVER
+}
+
+RUN_NUMBER_SERVER="$CWD/run_number_server"
+if [ ! -x "$RUN_NUMBER_SERVER" ]; then
+    echo "cannot find $RUN_NUMBER_SERVER"
+    exit 1
+fi
+
+TEST_RUN_NUMBER_SERVER="$CWD/run_number_test_client"
+if [ ! -x "$TEST_RUN_NUMBER_SERVER" ]; then
+    echo "cannot find $TEST_RUN_NUMBER_SERVER"
+    exit 1
+fi
+
+trap cleanup EXIT
+
+"$RUN_NUMBER_SERVER" &
+PID_RUN_NUMBER_SERVER=$!
+
+echo "Run number PID = PID_RUN_NUMBER_SERVER"
+
+sleep 1
+
+RN=`"$TEST_RUN_NUMBER_SERVER" --hash 1111111111`
+if [ "$RN" != 1 ]; then
+    echo "Unexpected run number got $RN expecting 1"
+    exit 1;
+fi
+
+RN=`"$TEST_RUN_NUMBER_SERVER" --hash 1111111111`
+if [ "$RN" != 1 ]; then
+    echo "Unexpected run number got $RN expecting 1"
+    exit 1;
+fi
+
+RN=`"$TEST_RUN_NUMBER_SERVER" --hash 1111111112`
+if [ "$RN" != 2 ]; then
+    echo "Unexpected run number got $RN expecting 2"
+    exit 1;
+fi
+
+RN=`"$TEST_RUN_NUMBER_SERVER" --hash 1111111112`
+if [ "$RN" != 2 ]; then
+    echo "Unexpected run number got $RN expecting 2"
+    exit 1;
+fi
+
+RN=`"$TEST_RUN_NUMBER_SERVER" --hash 1111111111`
+if [ "$RN" != 3 ]; then
+    echo "Unexpected run number got $RN expecting 3"
+    exit 1;
+fi
+
+echo "Tests passed"
+exit 0

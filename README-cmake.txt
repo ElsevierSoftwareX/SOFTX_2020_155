@@ -20,7 +20,7 @@ via pkg-config
 5. make -j 8
 
 * Note on Boost.
-FrameCPP 2.6+ and the standalone_edc uses the boost libraries.  Boost is a hard requirement for the daqd.  To install boost see (https://www.boost.org/doc/libs/1_69_0/more/getting_started/unix-variants.html)
+FrameCPP 2.6+ and the standalone_edc uses the boost libraries.  Boost is also hard requirement for the daqd, the edcu, and the run number server.  To install boost see (https://www.boost.org/doc/libs/1_69_0/more/getting_started/unix-variants.html)
 You may need to pass a parameter to cmake -DBOOST_ROOT=<boost install prefix> to help cmake find boost.
 
 
@@ -37,11 +37,15 @@ awgtpman
 daqd (if the compiler is new enough)
 nds
 dataviewer (in its many pieces)
-mx_stream
+omx_xmit
+omx_recv
+dix_xmit
+dix_recv
+cps_xmit
+cps_recv
+local_dc
 run_number_server
-the zmq_stream components
-zmq_fe
-zmq_rcv_ix_xmit_delay
+
 standalone_edc
 
 If you need to install a copy of cmake you can retrieve the source from kitware.
@@ -65,40 +69,43 @@ You can now use cmake as '/opt/cmake-3.7.2/bin/cmake'
 
 Building on Debian
 
-The cmake development is primarily done on Debian (both 8 & 9).  Though with an updated gentoo system it works there.
+The cmake development is primarily done on Debian 10.
 
-The LSCSoft and CDS debian repositories are used to provide some of the software.  See the following resources for information in setting up these repositories:
+The CDS debian repositories are used to provide some of the software.  See the following resources for information in setting up these repositories:
 
-https://wiki.ligo.org/Computing/DASWG/DebianJessie
 http://apt.ligo-wa.caltech.edu/debian/README.txt
 
 On Debian the following packages are used:
 
-build-essential
-cmake
-bison
-flex
-libzmq3-dev
-pkg-config
-ldas-tools-al-dev
-ldas-tools-framecpp-dev
-epics-dev
-libbz2-dev
-libmotif-dev
-libxpm-dev
-libxt-dev
-grace
-pcaspy
-libboost-all-dev    (Required for FrameCPP >= 2.6.0)
+ bison,
+ cmake,
+ debhelper (>= 9),
+ dkms,
+ dolphin-sisci-ix-devel,
+ epics-dev,
+ flex,
+ grace,
+ ldas-tools-al-dev,
+ ldas-tools-framecpp-dev,
+ libboost-all-dev,
+ libbz2-dev,
+ libc-dev-bin,
+ libcds-pubsub-dev,
+ libfl-dev,
+ libmotif-dev,
+ libnds2-client-dev,
+ libtool,
+ libxpm-dev,
+ libxt-dev,
+ libzmq3-dev,
+ pkg-config,
+ rapidjson-dev,
 
-You will also need to install
+You will may also wish to instll
 Open-MX
 Dolphin
 
-Open-MX is available in the CDS jessie-restricted repository (Debian 8) or may be built by hand.
-
-On Debian 8 we have back ported the main zmq package from Debian 9 so that 4.2.1 is available on Debian 8, 9, and
-the gentoo systems.
+Open-MX is available in the CDS jessie-restricted repository (Debian 8) or may be built by hand.  For Debian 10 it must be built by hand.
 
 FE -> DAQD Transport
 
@@ -110,10 +117,10 @@ local_dc and omx_xmit on the FE computers
 omx_recv and dix_xmit on the data concentrator
 dix_recv on the daqd machines
 
-Using Zmq and IX Dolphin
+Using CDS Pub/Sub and IX Dolphin
 
-local_dc and zmq_xmit on the FE computers
-zmq_recv and dix_xmit on the data concentrator
+local_dc and cps_xmit on the FE computers
+cps_recv and dix_xmit on the data concentrator
 dix_recv on the daqd machines
 
 
@@ -148,12 +155,12 @@ dix_recv -b local_dc -m 100 -g 0
  -m the size of the buffer in MB
  -g the IX memory window/group number to transfer data over
 
-zmq_xmit -b local_dc -m 100 -e eth0
+cps_xmit -b local_dc -m 100 -p "tcp://10.11.0.7:9000"
  -b the name of the buffer to read data from
  -m the size of the buffer in MB
- -e the interface to publish data on
+ -p the publish method, in this example tcp unicast from 10.11.0.7:9000
 
-zmq_recv -b local_dc -m 100 -s "x1susex x1lsc0 x1asc0"
+cps_recv -b local_dc -m 100 -s "tcp://10.11.0.7:9000 tcp://10.11.0.11:9000"
  -b the name of the buffer to write data to
  -m the size of the buffer in MB
  -s the systems to retrieve data from
