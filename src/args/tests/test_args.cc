@@ -95,6 +95,10 @@ TEST_CASE( "An arg parser can output its own help" )
     REQUIRE( std::strstr( buf.data( ), "--flag1" ) != nullptr );
     REQUIRE( std::strstr( buf.data( ), "-f" ) != nullptr );
     REQUIRE( std::strstr( buf.data( ), "A flag variable" ) != nullptr );
+    REQUIRE( std::strstr( buf.data( ), "An integer field. Default [0]" ) !=
+             nullptr );
+    REQUIRE( std::strstr( buf.data( ), "A file name. Default [none]" ) !=
+             nullptr );
 
     args_destroy( &args );
 }

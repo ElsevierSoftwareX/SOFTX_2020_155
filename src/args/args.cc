@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <string>
+#include <sstream>
 #include <vector>
 
 #include "args_internal.hh"
@@ -105,6 +106,31 @@ namespace
     to_string( const char* s )
     {
         return std::string( ( s ? s : "" ) );
+    }
+
+    std::string
+    to_string( int val )
+    {
+        std::stringstream os;
+        os << val;
+        return os.str( );
+    }
+
+    std::string
+    to_description( std::string        base_description,
+                    const std::string& default_val )
+    {
+        if ( !default_val.empty( ) )
+        {
+            if ( !base_description.empty( ) && base_description.back( ) != '.' )
+            {
+                base_description.append( "." );
+            }
+            base_description.append( " Default [" );
+            base_description.append( default_val );
+            base_description.append( "]" );
+        }
+        return std::move( base_description );
     }
 } // namespace
 
@@ -254,7 +280,7 @@ args_add_string_ptr( args_handle  args,
         short_name,
         to_string( long_name ),
         to_string( units ),
-        to_string( description ),
+        to_description( to_string( description ), to_string( default_value ) ),
         args_detail::argument_class::STRING_PTR_ARG,
         [destination, default_value]( ) { *destination = default_value; },
         [destination]( const char* opt ) {
@@ -292,7 +318,7 @@ args_add_int( args_handle args,
         short_name,
         to_string( long_name ),
         to_string( units ),
-        to_string( description ),
+        to_description( to_string( description ), to_string( default_value ) ),
         args_detail::argument_class::INT_ARG,
         [destination, default_value]( ) { *destination = default_value; },
         [destination]( const char* opt ) { *destination = std::atoi( opt ); } );
