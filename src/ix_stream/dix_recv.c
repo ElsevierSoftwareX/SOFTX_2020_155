@@ -14,6 +14,8 @@
 #include "../drv/crc.c"
 #include "../include/daq_core.h"
 
+#include "args.h"
+
 #define __CDECL
 
 #define MY_DCU_OFFSET 0x00000
@@ -30,22 +32,6 @@ static volatile int keepRunning = 1;
 /*                                U S A G E */
 /*                                                                               */
 /*********************************************************************************/
-
-void
-Usage( )
-{
-    printf( "Usage of dix_recv:\n" );
-    printf( "dix_recv -g <group>\n" );
-    printf( " -b <name>      : Destination buffer name (default local_dc)\n" );
-    printf( " -m <value>     : Size in MB of the destination buffer [20-100] "
-            "(default=100)\n" );
-    printf( " -a <value>     : Local adapter number (default %d)\n",
-            localAdapterNo );
-    printf( " -g <value>     : Reflective group identifier (0..5))\n" );
-    printf( " -v <value>     : Diagnostics level (0..1) \n" );
-    printf( " -h             : This help screen\n" );
-    printf( "\n" );
-}
 
 void
 intHandler( int dummy )
@@ -101,46 +87,49 @@ int __CDECL
     int                       do_verbose = 0;
     int                       max_data_size_mb = 100;
     int                       max_data_size = 0;
-    char*                     dest_mbuf_name = "local_dc";
+    const char*               default_dest_mbuf_name = "local_dc";
+    const char*               dest_mbuf_name = 0;
+    args_handle               arg_parser = 0;
 
     printf( "\n %s compiled %s : %s\n\n", argv[ 0 ], __DATE__, __TIME__ );
 
-    if ( argc < 2 )
+    arg_parser = args_create_parser( "IX Dolphin based receiver." );
+    args_add_string_ptr( arg_parser,
+                         'b',
+                         ARGS_NO_LONG,
+                         "mbuf name",
+                         "Output buffer name",
+                         &dest_mbuf_name,
+                         default_dest_mbuf_name );
+    args_add_int( arg_parser,
+                  'm',
+                  ARGS_NO_LONG,
+                  "[20-100]",
+                  "Output buffer size in mb",
+                  &max_data_size_mb,
+                  100 );
+    args_add_int( arg_parser,
+                  'g',
+                  ARGS_NO_LONG,
+                  "[0-3]",
+                  "The IX memory group to read from",
+                  &segmentId,
+                  0 );
+    args_add_int( arg_parser,
+                  'a',
+                  ARGS_NO_LONG,
+                  "number",
+                  "Local adapter number",
+                  &localAdapterNo,
+                  localAdapterNo );
+    args_add_flag(
+        arg_parser, 'v', ARGS_NO_LONG, "Verbose output", &do_verbose );
+    if ( args_parse( arg_parser, argc, argv ) <= 0 )
     {
-        printf( "Exiting here \n" );
-        Usage( );
-        return ( -1 );
+        exit( 1 );
     }
+    args_destroy( &arg_parser );
 
-    /* Get the parameters */
-    while ( ( counter = getopt( argc, argv, "m:g:a:v:b:" ) ) != EOF )
-        switch ( counter )
-        {
-        case 'b':
-            dest_mbuf_name = optarg;
-            break;
-
-        case 'm':
-            max_data_size_mb = atoi( optarg );
-            break;
-
-        case 'g':
-            segmentId = atoi( optarg );
-            break;
-
-        case 'a':
-            localAdapterNo = atoi( optarg );
-            break;
-
-        case 'v':
-            do_verbose = atoi( optarg );
-            break;
-
-        case 'h':
-            printf( "Exiting here 2 \n" );
-            Usage( );
-            return ( 0 );
-        }
     if ( max_data_size_mb < 20 || max_data_size_mb > 100 )
     {
         fprintf( stderr, "The data size parameter must be between 20 & 100\n" );
@@ -149,7 +138,8 @@ int __CDECL
     max_data_size = max_data_size_mb * 1024 * 1024;
 
     // Attach to local shared memory
-    char* ifo = (char*)findSharedMemorySize( dest_mbuf_name, max_data_size_mb );
+    char* ifo =
+        (char*)findSharedMemorySize( (char*)dest_mbuf_name, max_data_size_mb );
     daq_multi_cycle_data_t* ifo_shm = (daq_multi_cycle_data_t*)ifo;
     // char *ifo_data = (char *)ifo + sizeof(daq_multi_cycle_header_t);
     char* ifo_data = (char*)&( ifo_shm->dataBlock[ 0 ] );

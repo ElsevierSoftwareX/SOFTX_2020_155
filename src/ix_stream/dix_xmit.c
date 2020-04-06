@@ -32,6 +32,8 @@
 
 #include "simple_pv.h"
 
+#include "args.h"
+
 #define __CDECL
 
 #include "./dolphin_common.c"
@@ -44,22 +46,6 @@ extern void* findSharedMemorySize( char*, int );
 int do_verbose = 0;
 
 static volatile int keepRunning = 1;
-
-void
-usage( )
-{
-    fprintf( stderr,
-             "Usage: dix_ix_xmit [args] -m shared memory size -g IX "
-             "channel \n" );
-    fprintf( stderr, "-l filename - log file name\n" );
-    fprintf( stderr, "-b buffer name - Input buffer [local_dc]\n" );
-    fprintf( stderr,
-             "-m buffer size - Sizer of the input buffer in MB [20-100]\n" );
-    fprintf( stderr, "-v - verbose prints diag test data\n" );
-    fprintf( stderr, "-g - Dolphin IX channel to xmit on (0-3)\n" );
-    fprintf( stderr, "-p - Debug pv prefix\n" );
-    fprintf( stderr, "-h - help\n" );
-}
 
 // *************************************************************************
 // Timing Diagnostic Routine
@@ -91,7 +77,7 @@ void
 print_diags( int                   nsys,
              int                   lastCycle,
              int                   sendLength,
-             daq_multi_dcu_data_t* ixDataBlock)
+             daq_multi_dcu_data_t* ixDataBlock )
 {
     // **********************************************************************************************
     int ii = 0;
@@ -163,14 +149,16 @@ wait_for_cycle( volatile daq_multi_cycle_header_t* header,
 int
 main( int argc, char** argv )
 {
-    char* buffer_name = "local_dc";
-    int   c;
-    int   ii; // Loop counter
+    const char* default_buffer_name = "local_dc";
+    const char* buffer_name = default_buffer_name;
+    const char* logfile_name = 0;
+    int         c;
+    int         ii; // Loop counter
 
     extern char* optarg; // Needed to get arguments to program
 
     // PV/debug information
-    char*            pv_prefix = 0;
+    const char*      pv_prefix = 0;
     simple_pv_handle pcas_server = NULL;
 
     // Declare shared memory data variables
@@ -184,54 +172,72 @@ main( int argc, char** argv )
     int                       max_data_size = 0;
     char*                     mywriteaddr;
     int                       xmitBlockNum = 0;
+    args_handle               arg_parser = 0;
 
     /* set up defaults */
-    int xmitData = 0;
-
-    // Get arguments sent to process
-    while ( ( c = getopt( argc, argv, "b:hm:g:vp:l:" ) ) != EOF )
-        switch ( c )
+    arg_parser = args_create_parser( "IX Dolphin based transmitter" );
+    args_add_string_ptr( arg_parser,
+                         'b',
+                         ARGS_NO_LONG,
+                         "mbuf name",
+                         "Input buffer name",
+                         &buffer_name,
+                         default_buffer_name );
+    args_add_int( arg_parser,
+                  'm',
+                  ARGS_NO_LONG,
+                  "[20-100]",
+                  "Input buffer size in mb",
+                  &max_data_size_mb,
+                  100 );
+    args_add_int( arg_parser,
+                  'g',
+                  ARGS_NO_LONG,
+                  "[0-3]",
+                  "The IX memory group to output to",
+                  &segmentId,
+                  0 );
+    args_add_string_ptr( arg_parser,
+                         'p',
+                         ARGS_NO_LONG,
+                         "epics prefix",
+                         "The prefix for epics PVs that report status",
+                         &pv_prefix,
+                         0 );
+    args_add_string_ptr( arg_parser,
+                         'l',
+                         ARGS_NO_LONG,
+                         "filename",
+                         "Log file name",
+                         &logfile_name,
+                         0 );
+    args_add_flag(
+        arg_parser, 'v', ARGS_NO_LONG, "Verbose output", &do_verbose );
+    if ( args_parse( arg_parser, argc, argv ) <= 0 )
+    {
+        exit( 1 );
+    }
+    args_destroy( &arg_parser );
+    if ( max_data_size_mb < 20 )
+    {
+        fprintf( stderr, "Min data block size is 20 MB\n" );
+        return -1;
+    }
+    if ( max_data_size_mb > 100 )
+    {
+        fprintf( stderr, "Max data block size is 100 MB\n" );
+        return -1;
+    }
+    if ( logfile_name )
+    {
+        if ( 0 == freopen( logfile_name, "w", stdout ) )
         {
-        case 'v':
-            do_verbose = 1;
-            break;
-        case 'm':
-            max_data_size_mb = atoi( optarg );
-            if ( max_data_size_mb < 20 )
-            {
-                fprintf( stderr, "Min data block size is 20 MB\n" );
-                return -1;
-            }
-            if ( max_data_size_mb > 100 )
-            {
-                fprintf( stderr, "Max data block size is 100 MB\n" );
-                return -1;
-            }
-            break;
-        case 'g':
-            segmentId = atoi( optarg );
-            xmitData = 1;
-            break;
-        case 'b':
-            buffer_name = optarg;
-            break;
-        case 'p':
-            pv_prefix = optarg;
-            break;
-        case 'l':
-            if ( 0 == freopen( optarg, "w", stdout ) )
-            {
-                perror( "freopen" );
-                exit( 1 );
-            }
-            setvbuf( stdout, NULL, _IOLBF, 0 );
-            stderr = stdout;
-            break;
-        case 'h':
-        default:
-            usage( );
+            perror( "freopen" );
             exit( 1 );
         }
+        setvbuf( stdout, NULL, _IOLBF, 0 );
+        stderr = stdout;
+    }
     max_data_size = max_data_size_mb * 1024 * 1024;
 
     // set up to catch Control C
@@ -555,58 +561,55 @@ main( int argc, char** argv )
                 missed_flag <<= 1;
             }
 
-            if ( xmitData )
+            if ( sendLength > IX_BLOCK_SIZE )
             {
-                if ( sendLength > IX_BLOCK_SIZE )
-                {
-                    fprintf( stderr,
-                             "Buffer overflow.  Sending %d bytes into a "
-                             "dolphin block that holds %d\n",
-                             (int)sendLength,
-                             (int)IX_BLOCK_SIZE );
-                    abort( );
-                }
-                // WRITEDATA to Dolphin Network
-                SCIMemCpy( sequence,
-                           nextData,
-                           remoteMap,
-                           xmitDataOffset[ xmitBlockNum ],
-                           sendLength,
-                           memcpyFlag,
-                           &error );
-                error = SCI_ERR_OK;
-                if ( error != SCI_ERR_OK )
-                {
-                    fprintf(
-                        stderr, "SCIMemCpy failed - Error code 0x%x\n", error );
-                    fprintf( stderr,
-                             "For reference the expected error codes are:\n" );
-                    fprintf( stderr,
-                             "SCI_ERR_OUT_OF_RANGE = 0x%x\n",
-                             SCI_ERR_OUT_OF_RANGE );
-                    fprintf( stderr,
-                             "SCI_ERR_SIZE_ALIGNMENT = 0x%x\n",
-                             SCI_ERR_SIZE_ALIGNMENT );
-                    fprintf( stderr,
-                             "SCI_ERR_OFFSET_ALIGNMENT = 0x%x\n",
-                             SCI_ERR_OFFSET_ALIGNMENT );
-                    fprintf( stderr,
-                             "SCI_ERR_TRANSFER_FAILED = 0x%x\n",
-                             SCI_ERR_TRANSFER_FAILED );
-                    return error;
-                }
-                // Set data header information
-                unsigned int maxCycle = ifo_header->maxCycle;
-                unsigned int curCycle = ifo_header->curCycle;
-                xmitHeader[ xmitBlockNum ]->maxCycle = maxCycle;
-                xmitHeader[ xmitBlockNum ]->cycleDataSize = sendLength;
-                ;
-                // Send cycle last as indication of data ready for receivers
-                xmitHeader[ xmitBlockNum ]->curCycle = curCycle;
-                // Have to flush the buffers to make data go onto Dolphin
-                // network
-                SCIFlush( sequence, SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY );
+                fprintf( stderr,
+                         "Buffer overflow.  Sending %d bytes into a "
+                         "dolphin block that holds %d\n",
+                         (int)sendLength,
+                         (int)IX_BLOCK_SIZE );
+                abort( );
             }
+            // WRITEDATA to Dolphin Network
+            SCIMemCpy( sequence,
+                       nextData,
+                       remoteMap,
+                       xmitDataOffset[ xmitBlockNum ],
+                       sendLength,
+                       memcpyFlag,
+                       &error );
+            error = SCI_ERR_OK;
+            if ( error != SCI_ERR_OK )
+            {
+                fprintf(
+                    stderr, "SCIMemCpy failed - Error code 0x%x\n", error );
+                fprintf( stderr,
+                         "For reference the expected error codes are:\n" );
+                fprintf( stderr,
+                         "SCI_ERR_OUT_OF_RANGE = 0x%x\n",
+                         SCI_ERR_OUT_OF_RANGE );
+                fprintf( stderr,
+                         "SCI_ERR_SIZE_ALIGNMENT = 0x%x\n",
+                         SCI_ERR_SIZE_ALIGNMENT );
+                fprintf( stderr,
+                         "SCI_ERR_OFFSET_ALIGNMENT = 0x%x\n",
+                         SCI_ERR_OFFSET_ALIGNMENT );
+                fprintf( stderr,
+                         "SCI_ERR_TRANSFER_FAILED = 0x%x\n",
+                         SCI_ERR_TRANSFER_FAILED );
+                return error;
+            }
+            // Set data header information
+            unsigned int maxCycle = ifo_header->maxCycle;
+            unsigned int curCycle = ifo_header->curCycle;
+            xmitHeader[ xmitBlockNum ]->maxCycle = maxCycle;
+            xmitHeader[ xmitBlockNum ]->cycleDataSize = sendLength;
+            ;
+            // Send cycle last as indication of data ready for receivers
+            xmitHeader[ xmitBlockNum ]->curCycle = curCycle;
+            // Have to flush the buffers to make data go onto Dolphin
+            // network
+            SCIFlush( sequence, SCI_FLAG_FLUSH_CPU_BUFFERS_ONLY );
         }
 
         // Increment cycle count
@@ -614,12 +617,9 @@ main( int argc, char** argv )
         nextCycle %= 16;
     } while ( keepRunning ); // End of infinite loop
 
-    if ( xmitData )
-    {
-        fprintf( stderr, "closing out ix\n" );
-        // Cleanup the Dolphin connections
-        error = dolphin_closeout( );
-    }
+    fprintf( stderr, "closing out ix\n" );
+    // Cleanup the Dolphin connections
+    error = dolphin_closeout( );
 
     simple_pv_server_destroy( &pcas_server );
 
