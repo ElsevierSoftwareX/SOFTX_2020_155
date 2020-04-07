@@ -29,8 +29,6 @@ rt_iop_init( void )
 {
     int  status;
     int  ii, jj, kk; /// @param ii,jj,kk default loop counters
-    char fname[ 128 ]; /// @param fname[128] Name of shared mem area to allocate
-                       /// for DAQ data
     int cards; /// @param cards Number of PCIe cards found on bus
     int ret; /// @param ret Return value from various Malloc calls to allocate
              /// memory.
@@ -68,40 +66,12 @@ rt_iop_init( void )
 
     jj = 0;
 
-    /// Allocate EPICS memory area
-    ret = mbuf_allocate_area( SYSTEM_NAME_STRING_LOWER, 64 * 1024 * 1024, 0 );
+    ret = attach_shared_memory();
     if ( ret < 0 )
     {
-	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area(epics) failed; ret = %d\n", ret );
-        return -12;
+        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area failed; ret = %d\n", ret );
+        return ret;
     }
-    _epics_shm = (unsigned char*)( kmalloc_area[ ret ] );
-    // Set pointer to EPICS area
-    pLocalEpics = (CDS_EPICS*)&( (RFM_FE_COMMS*)_epics_shm )->epicsSpace;
-    pLocalEpics->epicsOutput.fe_status = 0;
-
-    /// Allocate IPC memory area
-    ret = mbuf_allocate_area( "ipc", 16 * 1024 * 1024, 0 );
-    if ( ret < 0 )
-    {
-	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area(ipc) failed; ret = %d\n", ret );
-        return -12;
-    }
-    _ipc_shm = (unsigned char*)( kmalloc_area[ ret ] );
-
-    // Assign pointer to IOP/USER app comms space
-    ioMemData = (IO_MEM_DATA*)( _ipc_shm + 0x4000 );
-
-    /// Allocate DAQ memory area
-    sprintf( fname, "%s_daq", SYSTEM_NAME_STRING_LOWER );
-    ret = mbuf_allocate_area( fname, 64 * 1024 * 1024, 0 );
-    if ( ret < 0 )
-    {
-	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR:mbuf_allocate_area(daq) failed; ret = %d\n", ret );
-        return -12;
-    }
-    _daq_shm = (unsigned char*)( kmalloc_area[ ret ] );
-    daqPtr = (struct rmIpcStr*)_daq_shm;
 
     pLocalEpics->epicsOutput.fe_status = 1;
     /// Find and initialize all PCIe I/O modules
@@ -212,6 +182,8 @@ rt_iop_init( void )
     // Initialize buffer for daqLib.c code
     daqBuffer = (long)&daqArea[ 0 ];
 
+    // wait to ensure EPICS is running before proceeding
+    msleep(5000);
     pLocalEpics->epicsOutput.fe_status = 2;
     printk( "Waiting for EPICS BURT Restore = %d\n",
             pLocalEpics->epicsInput.burtRestore );
