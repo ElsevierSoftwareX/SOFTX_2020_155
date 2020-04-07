@@ -27,8 +27,6 @@ rt_fe_init( void )
 {
     int  status;
     int  ii, jj, kk; /// @param ii,jj,kk default loop counters
-    char fname[ 128 ]; /// @param fname[128] Name of shared mem area to allocate
-                       /// for DAQ data
     int cards; /// @param cards Number of PCIe cards found on bus
     int adcCnt; /// @param adcCnt Number of ADC cards found by slave model.
     int dacCnt; /// @param dacCnt Number of 16bit DAC cards found by slave
@@ -77,36 +75,12 @@ rt_fe_init( void )
 
     jj = 0;
 
-    // Allocate EPICS shmem area
-    ret = mbuf_allocate_area( SYSTEM_NAME_STRING_LOWER, 64 * 1024 * 1024, 0 );
+    ret = attach_shared_memory();
     if ( ret < 0 )
     {
-        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area(epics) failed; ret = %d\n", ret );
-        return -12;
+        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area failed; ret = %d\n", ret );
+        return ret;
     }
-    _epics_shm = (unsigned char*)( kmalloc_area[ ret ] );
-    // Allocate IPC shmem area
-    ret = mbuf_allocate_area( "ipc", 16 * 1024 * 1024, 0 );
-    if ( ret < 0 )
-    {
-        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area(ipc) failed; ret = %d\n", ret );
-        return -12;
-    }
-    _ipc_shm = (unsigned char*)( kmalloc_area[ ret ] );
-
-    // Point to IOP/APP comms shmem area
-    ioMemData = (IO_MEM_DATA*)( _ipc_shm + 0x4000 );
-
-    // Allocate DAQ shmem area
-    sprintf( fname, "%s_daq", SYSTEM_NAME_STRING_LOWER );
-    ret = mbuf_allocate_area( fname, 64 * 1024 * 1024, 0 );
-    if ( ret < 0 )
-    {
-        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR:mbuf_allocate_area() failed; ret = %d\n", ret );
-        return -12;
-    }
-    _daq_shm = (unsigned char*)( kmalloc_area[ ret ] );
-    daqPtr = (struct rmIpcStr*)_daq_shm;
 
     // Find and initialize all PCI I/O modules
     // ******************************************************* Following I/O
@@ -314,6 +288,15 @@ rt_fe_init( void )
     // Following routine is in moduleLoadCommon.c
     print_io_info( &cdsPciModules );
 
+#ifdef REQUIRE_IO_CNT
+    if(cardCountErr) 
+    {
+        pLocalEpics->epicsOutput.fe_status = IO_CONFIG_ERROR;
+        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: Exit on incorrect card count \n");
+        return -5;
+    }
+#endif
+
     // Following section maps Reflected Memory, both VMIC hardware style and
     // Dolphin PCIe network style. Slave units will perform I/O transactions
     // with RFM directly ie MASTER does not do RFM I/O. Master unit only maps
@@ -341,9 +324,9 @@ rt_fe_init( void )
     // Initialize buffer for daqLib.c code
     daqBuffer = (long)&daqArea[ 0 ];
 
-    // Set Pointer to EPICS data
-    pLocalEpics = (CDS_EPICS*)&( (RFM_FE_COMMS*)_epics_shm )->epicsSpace;
     pLocalEpics->epicsOutput.fe_status = WAIT_BURT;
+    // wait to ensure EPICS is running before proceeding
+    msleep(5000);
     // Ensure EPICS is running
     for ( cnt = 0; cnt < 10 && pLocalEpics->epicsInput.burtRestore == 0; cnt++ )
     {

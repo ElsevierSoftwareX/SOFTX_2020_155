@@ -2553,6 +2553,13 @@ if ($daq2dc) {
 if ($remoteGPS) {
   print OUTM "EXTRA_CFLAGS += -DREMOTE_GPS\n";
 }
+if ($requireIOcnt) {
+  print OUTM "#Comment out to disenable exact IO module count requirement\n";
+  print OUTM "EXTRA_CFLAGS += -DREQUIRE_IO_CNT\n";
+} else {
+  print OUTM "#Uncomment to enable exact IO module count requirement\n";
+  print OUTM "#EXTRA_CFLAGS += -DREQUIRE_IO_CNT\n";
+}
 if ($no_sync) {
   print OUTM "#Comment out to enable 1PPS synchronization\n";
   print OUTM "EXTRA_CFLAGS += -DNO_SYNC\n";

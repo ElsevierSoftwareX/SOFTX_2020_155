@@ -166,6 +166,7 @@ print_io_info( CDS_HARDWARE* cdsp )
     }
 }
 
+void
 print_exit_messages(int error_type, int error_sub)
 {
     printf( "" SYSTEM_NAME_STRING_LOWER " : Brought the CPU back up\n" );
@@ -195,4 +196,47 @@ print_exit_messages(int error_type, int error_sub)
             "for " SYSTEM_NAME_STRING_LOWER "\n" );
             break;
     }
+}
+
+int attach_shared_memory()
+{
+int ret;
+char fname[ 128 ];
+
+    /// Allocate EPICS memory area
+    ret = mbuf_allocate_area( SYSTEM_NAME_STRING_LOWER, 64 * 1024 * 1024, 0 );
+    if ( ret < 0 )
+    {
+	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area(epics) failed; ret = %d\n", ret );
+        return -12;
+    }
+    _epics_shm = (unsigned char*)( kmalloc_area[ ret ] );
+    // Set pointer to EPICS area
+    pLocalEpics = (CDS_EPICS*)&( (RFM_FE_COMMS*)_epics_shm )->epicsSpace;
+    pLocalEpics->epicsOutput.fe_status = 0;
+
+    /// Allocate IPC memory area
+    ret = mbuf_allocate_area( "ipc", 16 * 1024 * 1024, 0 );
+    if ( ret < 0 )
+    {
+	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area(ipc) failed; ret = %d\n", ret );
+        return -12;
+    }
+    _ipc_shm = (unsigned char*)( kmalloc_area[ ret ] );
+
+    // Assign pointer to IOP/USER app comms space
+    ioMemData = (IO_MEM_DATA*)( _ipc_shm + 0x4000 );
+
+    /// Allocate DAQ memory area
+    sprintf( fname, "%s_daq", SYSTEM_NAME_STRING_LOWER );
+    ret = mbuf_allocate_area( fname, 64 * 1024 * 1024, 0 );
+    if ( ret < 0 )
+    {
+	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR:mbuf_allocate_area(daq) failed; ret = %d\n", ret );
+        return -12;
+    }
+    _daq_shm = (unsigned char*)( kmalloc_area[ ret ] );
+    daqPtr = (struct rmIpcStr*)_daq_shm;
+
+    return 0;
 }

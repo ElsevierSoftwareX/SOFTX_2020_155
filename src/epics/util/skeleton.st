@@ -569,6 +569,7 @@ state monScreen{
    pvPut(uptime_minute);
 
    festat = pEpics->epicsOutput.fe_status;
+   %% if(festat == -8) strcpy(msgFESTAT,"IO Config ERROR - exiting");
    %% if(festat == -7) strcpy(msgFESTAT,"ADC Timeout - exiting");
    %% if(festat == -6) strcpy(msgFESTAT,"DAC Init Failed - exiting");
    %% if(festat == -5) strcpy(msgFESTAT,"BURT Restore Failed - exiting");
