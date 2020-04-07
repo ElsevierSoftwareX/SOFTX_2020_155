@@ -95,6 +95,20 @@ rt_iop_init( void )
         cardCountErr = 1;
     }
 
+    // Print out all the I/O information
+    // Following routine is in moduleLoadCommon.c
+    print_io_info( &cdsPciModules );
+
+#ifdef REQUIRE_IO_CNT
+    if(cardCountErr)
+    {
+        pLocalEpics->epicsOutput.fe_status = IO_CONFIG_ERROR;
+        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: Exit on incorrect card count \n");
+        return -5;
+    }
+#endif
+
+    /// Wirte PCIe card info to mbuf for use by userapp models
     // Clear out card model info in IO_MEM
     for ( ii = 0; ii < MAX_IO_MODULES; ii++ )
     {
@@ -175,9 +189,6 @@ rt_iop_init( void )
     ioMemData->dolphinRead[ 1 ] = 0;
     ioMemData->dolphinWrite[ 1 ] = 0;
 #endif
-
-    /// Print out all the I/O information to dmesg
-    print_io_info( &cdsPciModules );
 
     // Initialize buffer for daqLib.c code
     daqBuffer = (long)&daqArea[ 0 ];
