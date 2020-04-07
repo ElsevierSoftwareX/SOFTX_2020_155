@@ -1,0 +1,33 @@
+#!/bin/bash -e
+
+TROOT=$(cd $(dirname $0) && pwd)
+RTCDS=$TROOT/../support/bin/rtcds.in
+RTCDS="bash -ex $RTCDS"
+HOSTNAME=$(hostname)
+
+export RTS_ENV=$TROOT/env
+# source "$RTS_ENV" #2>/dev/null || true
+# export IFO
+# export SITE
+# export RTS_USER
+
+export RTS_VERSION=?.?.?
+export RCG_SRC=$TROOT/../
+export RCG_BUILDD=$TROOT/build
+export RCG_TARGET=$TROOT/target
+export RCG_LIB_PATH=$TROOT/lib
+
+mkdir -p $RCG_LIB_PATH
+sed "s|@HOSTNAME@|$HOSTNAME|" <$TROOT/x1iop.mdl >$RCG_LIB_PATH/x1iop.mdl
+sed "s|@HOSTNAME@|$HOSTNAME|" <$TROOT/x1tst.mdl >$RCG_LIB_PATH/x1tst.mdl
+
+case $1 in
+    '')
+        rm -rf $RCG_BUILDD
+	$RTCDS build x1iop
+        $RTCDS build x1tst
+	;;
+    *)
+	$RTCDS $@
+	;;
+esac
