@@ -2836,7 +2836,7 @@ if ($dac_internal_clocking) {
   print OUTM "CFLAGS += -DDAC_INTERNAL_CLOCKING\n";
 }
 if ($adcMaster > -1) {
-  print OUTM "CFLAGS += -DADC_MASTER\n";
+  #print OUTM "CFLAGS += -DADC_MASTER\n";
   $modelType = "MASTER";
   if($diagTest > -1) {
   print OUTM "CFLAGS += -DDIAG_TEST\n";
@@ -2888,9 +2888,11 @@ if ($flipSignals) {
   print OUTM "CFLAGS += -DFLIP_SIGNALS=1\n";
 }
 
+if ($pciNet > 0) {
 print OUTM "#Enable use of PCIe RFM Network Gen 2\n";
 print OUTM "DOLPHIN_PATH = /opt/srcdis\n";
 print OUTM "CFLAGS += -DHAVE_CONFIG_H -I\$(DOLPHIN_PATH)/src/include/dis -I\$(DOLPHIN_PATH)/src/include -I\$(DOLPHIN_PATH)/src/SISCI/cmd/test/lib -I\$(DOLPHIN_PATH)/src/SISCI/src -I\$(DOLPHIN_PATH)/src/SISCI/api -I\$(DOLPHIN_PATH)/src/SISCI/cmd/include -I\$(DOLPHIN_PATH)/src/IRM_GX/drv/src -I\$(DOLPHIN_PATH)/src/IRM_GX/drv/src/LINUX -DOS_IS_LINUX=196616 -DLINUX -DUNIX  -DLITTLE_ENDIAN -DDIS_LITTLE_ENDIAN -DCPU_WORD_IS_64_BIT -DCPU_ADDR_IS_64_BIT -DCPU_WORD_SIZE=64 -DCPU_ADDR_SIZE=64 -DCPU_ARCH_IS_X86_64 -DADAPTER_IS_IX   -m64 -D_REENTRANT\n";
+}
 
 if ($specificCpu > -1) {
   print OUTM "#Comment out to run on first available CPU\n";
@@ -2953,7 +2955,11 @@ print OUTM "\n";
 print OUTM "\n";
 
 print OUTM "CFLAGS += -I\$(SUBDIRS)/../../include -I$rcg_src_dir\/src/drv -I$rcg_src_dir\/src/include \n";
+if ($pciNet > 0) {
 print OUTM "LDFLAGS = -L \$(API_LIB_PATH) -lsisci\n";
+} else {
+print OUTM "LDFLAGS = -L \$(API_LIB_PATH) \n";
+}
 
 print OUTM "TARGET=$skeleton\n\n\n";
 print OUTM "$skeleton: $skeleton.o rfm.o \n\n";
