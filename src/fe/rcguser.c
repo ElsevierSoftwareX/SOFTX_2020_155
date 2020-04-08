@@ -392,10 +392,12 @@ main( int argc, char** argv )
     // Slave gets RFM module count from MASTER.
     cdsPciModules.rfmCount = ioMemData->rfmCount;
     cdsPciModules.dolphinCount = ioMemData->dolphinCount;
+#if 0
     if(cdsPciModules.dolphinCount)
     {
         dolphin_init(&cdsPciModules);
     }
+#endif
     for ( ii = 0; ii < cdsPciModules.rfmCount; ii++ )
     {
         cdsPciModules.pci_rfm[ ii ] = ioMemData->pci_rfm[ ii ];

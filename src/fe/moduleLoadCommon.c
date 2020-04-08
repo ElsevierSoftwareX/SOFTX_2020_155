@@ -198,6 +198,7 @@ print_exit_messages(int error_type, int error_sub)
     }
 }
 
+#ifndef USER_SPACE
 int attach_shared_memory()
 {
 int ret;
@@ -240,3 +241,4 @@ char fname[ 128 ];
 
     return 0;
 }
+#endif
