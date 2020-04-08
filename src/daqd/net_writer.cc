@@ -81,7 +81,7 @@ net_writer_c::send_files( void )
     sprintf( jobn_buf, "%ld", job_num );
     string spec_filename = daqd.nds_jobs_dir + "/jobs/" + jobn_buf;
     string pipe = daqd.nds_jobs_dir +
-        "/pipe"; // unix domain socket communication endpoint
+        "/daqd_socket"; // unix domain socket communication endpoint
 
     // connect UNIX socket on pipe
     int                socketfd;
@@ -516,8 +516,8 @@ net_writer_c::producer( )
                     &prop );
 
                 //	cerr << "net_writer_c::producer(): put() of " <<
-                //source_buffptr -> block_prop (nb) -> bytes << " bytes" <<
-                //endl;
+                // source_buffptr -> block_prop (nb) -> bytes << " bytes" <<
+                // endl;
                 if ( nb16th == 0xf )
                     break;
             }
@@ -552,8 +552,8 @@ net_writer_c::producer( )
                     &prop );
 
                 //	cerr << "net_writer_c::producer(): put() of " <<
-                //source_buffptr -> block_prop (nb) -> bytes << " bytes" <<
-                //endl;
+                // source_buffptr -> block_prop (nb) -> bytes << " bytes" <<
+                // endl;
             }
             source_buffptr->unlock( cnum );
         }
@@ -700,7 +700,7 @@ net_writer_c::consumer( )
                         dec_vec[ i ].vec_bps / dec_vec[ i ].vec_rate;
                     //	      DEBUG1(cerr <<
                     //"net_writer_c::consumer(decimation): averaging " <<
-                    //samples_per_point << " samples" << endl);
+                    // samples_per_point << " samples" << endl);
                     DEBUG1( cerr
                             << "net_writer_c::consumer(decimation) decimating"
                             << samples_per_point << " samples" << endl );

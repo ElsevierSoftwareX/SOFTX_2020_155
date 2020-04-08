@@ -82,7 +82,7 @@ mkdir "$TDIR/logs"
 mkdir "$TDIR/frames"
 mkdir "$TDIR/frames/full"
 mkdir "$TDIR/frames/nds"
-mkdir "$TDIR/frames/nds/jobs"
+#mkdir "$TDIR/frames/nds/jobs"
 
 echo "Ini dir = $TDIR/ini_files"
 
@@ -103,7 +103,7 @@ PID_DAQD=$!
 sleep 5
 echo "Starting the nds service"
 
-"$NDS" "$TDIR/frames/nds/pipe" > "$TDIR/logs/nds" &
+"$NDS" --socketdir "$TDIR/frames/nds" > "$TDIR/logs/nds" &
 PID_NDS=$!
 
 echo "Sleeping to allow the daq to finish startup"
