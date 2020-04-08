@@ -51,8 +51,12 @@ target_include_directories(nds PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/framelib/src
     ${CMAKE_CURRENT_SOURCE_DIR}/framelib/src/zlib
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
+    ${Boost_INCLUDE_DIRS}
 )
-target_link_libraries(nds PRIVATE ldastools::framecpp)
+target_link_libraries(nds PRIVATE
+        args
+        ldastools::framecpp
+        ${Boost_LIBRARIES})
 
 install(TARGETS nds DESTINATION bin)
 

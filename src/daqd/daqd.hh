@@ -227,6 +227,12 @@ private:
     parameter_set _params;
 
 public:
+    static std::string
+    default_nds_jobs_dir( )
+    {
+        return "/var/run/nds";
+    }
+
     daqd_c( )
         : _configuration_number( 0 ), b1( 0 ), producer1( 0 ),
           num_channels( 0 ), num_active_channels( 0 ),
@@ -245,8 +251,9 @@ public:
           shutting_down( 0 ), num_listeners( 0 ), block_size( 0 ),
           thread_stack_size( 10 * 1024 * 1024 ), config_file_name( 0 ),
           offline_disabled( 0 ), profile( (char*)"main" ),
-          do_scan_frame_reads( 0 ), fsd( 1 ), science_fsd( 1 ), nds_jobs_dir( ),
-          detector_name( "" ), detector_prefix( "" ), detector_longitude( 0. ),
+          do_scan_frame_reads( 0 ), fsd( 1 ), science_fsd( 1 ),
+          nds_jobs_dir( default_nds_jobs_dir( ) ), detector_name( "" ),
+          detector_prefix( "" ), detector_longitude( 0. ),
           detector_latitude( 0. ), detector_elevation( .0 ),
           detector_arm_x_azimuth( .0 ), detector_arm_y_azimuth( .0 ),
           detector_arm_x_altitude( .0 ), detector_arm_y_altitude( .0 ),
