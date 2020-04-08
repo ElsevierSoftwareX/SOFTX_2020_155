@@ -13,20 +13,20 @@ namespace fs = boost::filesystem;
 
 struct NDSConfigOpts
 {
-    fs::path input_dir{};
+    fs::path run_dir{};
     fs::path log_path{};
     bool     exit{ false };
 
     fs::path
     socket_path( ) const
     {
-        return input_dir / "daqd_socket";
+        return run_dir / "daqd_socket";
     }
 
     fs::path
     jobs_dir( ) const
     {
-        return input_dir / "jobs";
+        return run_dir / "jobs";
     };
 };
 //
@@ -44,8 +44,8 @@ parse_args( int argc, char* argv[] )
     NDSConfigOpts opts;
 
     const char* log_dest = nullptr;
-    const char* job_dir = nullptr;
-    const char* default_job_dir = "/var/run/nds";
+    const char* run_dir = nullptr;
+    const char* default_run_dir = "/var/run/nds";
 
     auto arg_parser = args_create_parser(
         "The archive data retrieval service for daqd data" );
@@ -59,15 +59,15 @@ parse_args( int argc, char* argv[] )
     args_add_string_ptr(
         arg_parser,
         'd',
-        "socketdir",
+        "rundir",
         "path",
         "Directory that the jobs dir and daqd_socket reside in",
-        &job_dir,
-        default_job_dir );
+        &run_dir,
+        default_run_dir );
     opts.exit = ( args_parse( arg_parser, argc, argv ) < 1 );
     args_destroy( &arg_parser );
 
-    opts.input_dir = job_dir;
+    opts.run_dir = run_dir;
     opts.log_path = ( log_dest ? log_dest : "" );
     return opts;
 }
@@ -119,10 +119,11 @@ main( int argc, char* argv[] )
     setup_logging( programname, opts );
 
     std::string socket_path = opts.socket_path( ).string( );
-    std::cout << "NDS server starting\nJobs Dir = " << opts.input_dir;
-    std::cout << "\nSocket path = " << socket_path << std::endl;
+    std::cout << "NDS server starting\nRun dir = " << opts.run_dir;
+    std::cout << "\nSocket path = " << socket_path;
+    std::cout << "\nJobs dir = " << opts.jobs_dir( ) << std::endl;
 
-    fs::current_path( opts.input_dir );
+    fs::current_path( opts.run_dir );
     ensure_jobs_dir( opts );
 
     Nds nds( socket_path );

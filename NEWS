@@ -21,11 +21,12 @@ Changes for 4.0  (NOT YET RELEASED)
    - Increase the number of connections allowed on a daqd circular buffer past 32.
    - Generalize the data structure to allow changing the max number easier.  Currently set to 128.
 - Updated the nds process
-   - working dir defaults to /var/run/nds
+   - run dir defaults to /var/run/nds
    - the name of the socket has changed from pipe to daqd_socket
-   - the command line is changed to specifying the working dir instead of the pipe/socket filename
-   - ie nds --socketdir /var/run/nds
+   - the command line is changed to specifying the run dir instead of the pipe/socket filename
+   - ie nds --rundir /var/run/nds
      - gives a jobs dir of /var/run/nds/jobs and a socket at /var/run/nds/daqd_socket
+   - the nds process will attempt to create the 'jobs' directory if it does not exist
 ==================================================================================================
 Changes for 3.6  (NOT YET RELEASED)
 ==================================================================================================

@@ -103,7 +103,7 @@ PID_DAQD=$!
 sleep 5
 echo "Starting the nds service"
 
-"$NDS" --socketdir "$TDIR/frames/nds" > "$TDIR/logs/nds" &
+"$NDS" --rundir "$TDIR/frames/nds" > "$TDIR/logs/nds" &
 PID_NDS=$!
 
 echo "Sleeping to allow the daq to finish startup"
