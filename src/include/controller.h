@@ -74,6 +74,7 @@ char fp[ 64 * 1024 ];
 #define CPU_TIME_ADC_WAIT 9
 
 // fe_state defs
+#define IO_CONFIG_ERROR -8
 #define ADC_TO_ERROR -7
 #define DAC_INIT_ERROR -6
 #define BURT_RESTORE_ERROR -5
