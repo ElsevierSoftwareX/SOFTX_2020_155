@@ -3,7 +3,7 @@
 #include <iostream>
 #include <unistd.h>
 #include "nds.hh"
-//#include "framecpp/dictionary.hh"
+#include <boost/filesystem.hpp>
 
 using namespace CDS_NDS;
 
@@ -64,6 +64,10 @@ main( int argc, char* argv[] )
     int optind = parse_args( argc, argv );
     if ( argc != optind + 1 )
         usage( 1 );
+
+    boost::filesystem::path socket_path( argv[ optind ] );
+    auto                    working_dir = socket_path.parent_path( );
+    chdir( working_dir.c_str( ) );
     Nds nds( argv[ optind ] );
     int res = nds.run( );
     return res;
