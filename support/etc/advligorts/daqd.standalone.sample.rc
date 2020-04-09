@@ -41,7 +41,7 @@ set minute-trend-frame-dir="/frames/trend/minute", "X-X5_M-", ".gwf";
 #set raw-minute-trend-dir="/frames/trend/minute/raw";
 #set raw_minute_trend_saving_period=5;
 
-set nds-jobs-dir="/var/run/nds";
+set nds-jobs-dir="/run/nds";
 
 set parameter "shmem_input" = "local_dc";
 set parameter "shmem_size" = "104857600";

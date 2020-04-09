@@ -45,7 +45,7 @@ parse_args( int argc, char* argv[] )
 
     const char* log_dest = nullptr;
     const char* run_dir = nullptr;
-    const char* default_run_dir = "/var/run/nds";
+    const char* default_run_dir = "/run/nds";
 
     auto arg_parser = args_create_parser(
         "The archive data retrieval service for daqd data" );
