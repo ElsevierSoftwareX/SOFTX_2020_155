@@ -109,8 +109,8 @@ list_host_sys() {
 
 check_host_sys() {
     for sys ; do
-	if ! systemctl is-enabled "$sys" ; then
-	    log "System '$sys' is not enabled on this system (enable first)."
+	if ! systemctl is-enabled rts@${sys}.target ; then
+	    log "System '$sys' is not enabled on this system, first enable with 'enable ${sys}'."
 	    exit 4
 	fi
     done
