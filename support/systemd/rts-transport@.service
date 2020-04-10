@@ -1,12 +1,12 @@
 [Unit]
-Description=Advanced LIGO RTS local data concentrator
+Description=Advanced LIGO RTS DAQD transport
 After=network-online.target
 
 [Service]
 User=advligorts
 EnvironmentFile=-/etc/advligorts/systemd_env
 EnvironmentFile=-/etc/advligorts/systemd_env_%H
-ExecStart=/usr/bin/local_dc $local_dc_args
+ExecStart=/usr/bin/%i $%i_args
 Restart=always
 RestartSec=5
 
