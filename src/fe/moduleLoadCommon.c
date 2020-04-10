@@ -8,7 +8,7 @@ print_io_info( CDS_HARDWARE* cdsp )
     int ii, jj, kk;
     int channels = 0;
     jj = 0;
-    
+
 #ifndef USER_SPACE
     printf( "" SYSTEM_NAME_STRING_LOWER ":startup time is %ld\n",
             current_time_fe( ) );
@@ -36,25 +36,26 @@ print_io_info( CDS_HARDWARE* cdsp )
         if ( cdsp->adcType[ ii ] == GSC_18AI32SSC1M )
         {
             printf( "\tADC %d is a GSC_18AI32SSC1M module\n", ii );
-            jj =  (cdsp->adcConfig[ ii ] >> 16) & 0x3 ;
-            switch (jj) {
-                case 0:
-                    channels = 32;
-                    break;
-                case 1:
-                    channels = 16;
-                    break;
-                case 2:
-                    channels = 8;
-                    break;
-                case 3:
-                    channels = 4;
-                    break;
-                default:
-                    channels = 0;
-                    break;
+            jj = ( cdsp->adcConfig[ ii ] >> 16 ) & 0x3;
+            switch ( jj )
+            {
+            case 0:
+                channels = 32;
+                break;
+            case 1:
+                channels = 16;
+                break;
+            case 2:
+                channels = 8;
+                break;
+            case 3:
+                channels = 4;
+                break;
+            default:
+                channels = 0;
+                break;
             }
-            printf( "\t\tChannels = %d \n",channels );
+            printf( "\t\tChannels = %d \n", channels );
             printf( "\t\tFirmware Rev = %d \n\n",
                     ( cdsp->adcConfig[ ii ] & 0xfff ) );
         }
@@ -167,48 +168,60 @@ print_io_info( CDS_HARDWARE* cdsp )
 }
 
 void
-print_exit_messages(int error_type, int error_sub)
+print_exit_messages( int error_type, int error_sub )
 {
     printf( "" SYSTEM_NAME_STRING_LOWER " : Brought the CPU back up\n" );
-    switch(error_type) {
-        case FILT_INIT_ERROR:
-            printf("" SYSTEM_NAME_STRING_LOWER " FE error: %s\n","exited on filter initiialization error");
-            break;
-        case DAQ_INIT_ERROR:
-            printf("" SYSTEM_NAME_STRING_LOWER " FE error: %s\n","exited on DAQ initiialization error");
-            break;
-        case CHAN_HOP_ERROR:
-            printf("" SYSTEM_NAME_STRING_LOWER " FE error: %s\n","exited on ADC Channel Hopping error");
-            printf("" SYSTEM_NAME_STRING_LOWER " : Error detected on ADC %d\n",error_sub);
-            break;
-        case BURT_RESTORE_ERROR:
-            printf("" SYSTEM_NAME_STRING_LOWER " FE error: %s\n","exited on BURT restore error");
-            break;
-        case DAC_INIT_ERROR:
-            printf("" SYSTEM_NAME_STRING_LOWER " FE error: %s\n","exited on DAC module initialization error");
-            break;
-        case ADC_TO_ERROR:
-            printf("" SYSTEM_NAME_STRING_LOWER " FE error: %s\n","exited on ADC module timeout error");
-            printf("" SYSTEM_NAME_STRING_LOWER " : Error detected on ADC %d\n",error_sub);
-            break;
-        default:
-            printf( "Returning from cleanup_module "
-            "for " SYSTEM_NAME_STRING_LOWER "\n" );
-            break;
+    switch ( error_type )
+    {
+    case FILT_INIT_ERROR:
+        printf( "" SYSTEM_NAME_STRING_LOWER " FE error: %s\n",
+                "exited on filter initiialization error" );
+        break;
+    case DAQ_INIT_ERROR:
+        printf( "" SYSTEM_NAME_STRING_LOWER " FE error: %s\n",
+                "exited on DAQ initiialization error" );
+        break;
+    case CHAN_HOP_ERROR:
+        printf( "" SYSTEM_NAME_STRING_LOWER " FE error: %s\n",
+                "exited on ADC Channel Hopping error" );
+        printf( "" SYSTEM_NAME_STRING_LOWER " : Error detected on ADC %d\n",
+                error_sub );
+        break;
+    case BURT_RESTORE_ERROR:
+        printf( "" SYSTEM_NAME_STRING_LOWER " FE error: %s\n",
+                "exited on BURT restore error" );
+        break;
+    case DAC_INIT_ERROR:
+        printf( "" SYSTEM_NAME_STRING_LOWER " FE error: %s\n",
+                "exited on DAC module initialization error" );
+        break;
+    case ADC_TO_ERROR:
+        printf( "" SYSTEM_NAME_STRING_LOWER " FE error: %s\n",
+                "exited on ADC module timeout error" );
+        printf( "" SYSTEM_NAME_STRING_LOWER " : Error detected on ADC %d\n",
+                error_sub );
+        break;
+    default:
+        printf( "Returning from cleanup_module "
+                "for " SYSTEM_NAME_STRING_LOWER "\n" );
+        break;
     }
 }
 
 #ifndef USER_SPACE
-int attach_shared_memory()
+int
+attach_shared_memory( )
 {
-int ret;
-char fname[ 128 ];
+    int  ret;
+    char fname[ 128 ];
 
     /// Allocate EPICS memory area
     ret = mbuf_allocate_area( SYSTEM_NAME_STRING_LOWER, 64 * 1024 * 1024, 0 );
     if ( ret < 0 )
     {
-	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area(epics) failed; ret = %d\n", ret );
+        printk( "" SYSTEM_NAME_STRING_LOWER
+                ": ERROR: mbuf_allocate_area(epics) failed; ret = %d\n",
+                ret );
         return -12;
     }
     _epics_shm = (unsigned char*)( kmalloc_area[ ret ] );
@@ -220,7 +233,9 @@ char fname[ 128 ];
     ret = mbuf_allocate_area( "ipc", 16 * 1024 * 1024, 0 );
     if ( ret < 0 )
     {
-	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: mbuf_allocate_area(ipc) failed; ret = %d\n", ret );
+        printk( "" SYSTEM_NAME_STRING_LOWER
+                ": ERROR: mbuf_allocate_area(ipc) failed; ret = %d\n",
+                ret );
         return -12;
     }
     _ipc_shm = (unsigned char*)( kmalloc_area[ ret ] );
@@ -233,7 +248,9 @@ char fname[ 128 ];
     ret = mbuf_allocate_area( fname, 64 * 1024 * 1024, 0 );
     if ( ret < 0 )
     {
-	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR:mbuf_allocate_area(daq) failed; ret = %d\n", ret );
+        printk( "" SYSTEM_NAME_STRING_LOWER
+                ": ERROR:mbuf_allocate_area(daq) failed; ret = %d\n",
+                ret );
         return -12;
     }
     _daq_shm = (unsigned char*)( kmalloc_area[ ret ] );

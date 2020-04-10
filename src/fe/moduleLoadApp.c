@@ -10,17 +10,17 @@ extern void* kmalloc_area[ 16 ];
 extern int   mbuf_allocate_area( char* name, int size, struct file* file );
 extern void* fe_start_app( void* arg );
 extern char  daqArea[ 2 * DAQ_DCU_SIZE ]; // Space allocation for daqLib buffers
-
-// MAIN routine: Code starting point
-// ****************************************************************
-extern int need_to_load_IOP_first;
+struct task_struct* sthread;
 
 extern void         set_fe_code_idle( void* ( *ptr )(void*), unsigned int cpu );
 extern void         msleep( unsigned int );
-struct task_struct* sthread;
+extern int need_to_load_IOP_first;
 
 #include "moduleLoadCommon.c"
 
+
+// MAIN routine: Code starting point
+// ****************************************************************
 /// Startup function for initialization of kernel module.
 int
 rt_fe_init( void )
@@ -28,25 +28,6 @@ rt_fe_init( void )
     int  status;
     int  ii, jj, kk; /// @param ii,jj,kk default loop counters
     int cards; /// @param cards Number of PCIe cards found on bus
-    int adcCnt; /// @param adcCnt Number of ADC cards found by slave model.
-    int dacCnt; /// @param dacCnt Number of 16bit DAC cards found by slave
-                /// model.
-    int dac18Cnt; /// @param dac18Cnt Number of 18bit DAC cards found by slave
-                  /// model.
-    int dac20Cnt; /// @param dac20Cnt Number of 20bit DAC cards found by slave
-                  /// model.
-    int doCnt; /// @param doCnt Total number of digital I/O cards found by slave
-               /// model.
-    int do32Cnt; /// @param do32Cnt Total number of Contec 32 bit DIO cards
-                 /// found by slave model.
-    int doIIRO16Cnt; /// @param doIIRO16Cnt Total number of Acces I/O 16 bit
-                     /// relay cards found by slave model.
-    int doIIRO8Cnt; /// @param doIIRO8Cnt Total number of Acces I/O 8 bit relay
-                    /// cards found by slave model.
-    int cdo64Cnt; /// @param cdo64Cnt Total number of Contec 6464 DIO card 32bit
-                  /// output sections mapped by slave model.
-    int cdi64Cnt; /// @param cdo64Cnt Total number of Contec 6464 DIO card 32bit
-                  /// input sections mapped by slave model.
     int ret; /// @param ret Return value from various Malloc calls to allocate
              /// memory.
     int        cnt;
@@ -63,7 +44,7 @@ rt_fe_init( void )
 #endif
 
 #ifndef NO_CPU_SHUTDOWN
-    // See if our CPU core is free
+    // Verify requested CPU core is free
     if ( is_cpu_taken_by_rcg_model( CPUID ) )
     {
         printk( KERN_ALERT "Error: CPU %d already taken\n", CPUID );
@@ -85,196 +66,25 @@ rt_fe_init( void )
     // Find and initialize all PCI I/O modules
     // ******************************************************* Following I/O
     // card info is from feCode
+    pLocalEpics->epicsOutput.fe_status = FIND_MODULES;
     cards = sizeof( cards_used ) / sizeof( cards_used[ 0 ] );
     cdsPciModules.cards = cards;
     cdsPciModules.cards_used = cards_used;
-    // return -1;
     cdsPciModules.adcCount = 0;
     cdsPciModules.dacCount = 0;
     cdsPciModules.dioCount = 0;
     cdsPciModules.doCount = 0;
 
-    // If running as a slave process, I/O card information is via ipc shared
-    // memory
-    status = 0;
-    adcCnt = 0;
-    dacCnt = 0;
-    dac18Cnt = 0;
-    dac20Cnt = 0;
-    doCnt = 0;
-    do32Cnt = 0;
-    cdo64Cnt = 0;
-    cdi64Cnt = 0;
-    doIIRO16Cnt = 0;
-    doIIRO8Cnt = 0;
+     /// Call PCI initialization routine in mapApp.c file
+    status = mapPciModules(&cdsPciModules);
 
-    // Have to search thru all cards and find desired instance for application
-    // Master will map ADC cards first, then DAC and finally DIO
-    for ( ii = 0; ii < ioMemData->totalCards; ii++ )
-    {
-        for ( jj = 0; jj < cards; jj++ )
-        {
-            switch ( ioMemData->model[ ii ] )
-            {
-            case GSC_16AI64SSA:
-                if ( ( cdsPciModules.cards_used[ jj ].type == GSC_16AI64SSA ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == adcCnt ) )
-                {
-                    kk = cdsPciModules.adcCount;
-                    cdsPciModules.adcType[ kk ] = GSC_16AI64SSA;
-                    cdsPciModules.adcConfig[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.adcCount++;
-                    status++;
-                }
-                break;
-            case GSC_16AO16:
-                if ( ( cdsPciModules.cards_used[ jj ].type == GSC_16AO16 ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == dacCnt ) )
-                {
-                    kk = cdsPciModules.dacCount;
-                    cdsPciModules.dacType[ kk ] = GSC_16AO16;
-                    cdsPciModules.dacConfig[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.pci_dac[ kk ] =
-                        (long)( ioMemData->iodata[ ii ] );
-                    cdsPciModules.dacCount++;
-                    status++;
-                }
-                break;
-            case GSC_18AO8:
-                if ( ( cdsPciModules.cards_used[ jj ].type == GSC_18AO8 ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == dac18Cnt ) )
-                {
-                    kk = cdsPciModules.dacCount;
-                    cdsPciModules.dacType[ kk ] = GSC_18AO8;
-                    cdsPciModules.dacConfig[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.pci_dac[ kk ] =
-                        (long)( ioMemData->iodata[ ii ] );
-                    cdsPciModules.dacCount++;
-                    status++;
-                }
-                break;
-            case GSC_20AO8:
-                if ( cdsPciModules.cards_used[ jj ].type == GSC_20AO8 &&
-                     ( cdsPciModules.cards_used[ jj ].instance == dac20Cnt ) )
-                {
-                    kk = cdsPciModules.dacCount;
-                    cdsPciModules.dacType[ kk ] = GSC_20AO8;
-                    cdsPciModules.dacConfig[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.pci_dac[ kk ] =
-                        (long)( ioMemData->iodata[ ii ] );
-                    cdsPciModules.dacCount++;
-                    status++;
-                }
-                break;
-
-            case CON_6464DIO:
-                if ( ( cdsPciModules.cards_used[ jj ].type == CON_6464DIO ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == doCnt ) )
-                {
-                    kk = cdsPciModules.doCount;
-                    cdsPciModules.doType[ kk ] = ioMemData->model[ ii ];
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doCount++;
-                    cdsPciModules.cDio6464lCount++;
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doInstance[ kk ] = doCnt;
-                    status += 2;
-                }
-                if ( ( cdsPciModules.cards_used[ jj ].type == CDO64 ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == doCnt ) )
-                {
-                    kk = cdsPciModules.doCount;
-                    cdsPciModules.doType[ kk ] = CDO64;
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doCount++;
-                    cdsPciModules.cDio6464lCount++;
-                    cdsPciModules.doInstance[ kk ] = doCnt;
-                    cdo64Cnt++;
-                    status++;
-                }
-                if ( ( cdsPciModules.cards_used[ jj ].type == CDI64 ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == doCnt ) )
-                {
-                    kk = cdsPciModules.doCount;
-                    cdsPciModules.doType[ kk ] = CDI64;
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doInstance[ kk ] = doCnt;
-                    cdsPciModules.doCount++;
-                    cdsPciModules.cDio6464lCount++;
-                    cdi64Cnt++;
-                    status++;
-                }
-                break;
-            case CON_32DO:
-                if ( ( cdsPciModules.cards_used[ jj ].type == CON_32DO ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == do32Cnt ) )
-                {
-                    kk = cdsPciModules.doCount;
-                    cdsPciModules.doType[ kk ] = ioMemData->model[ ii ];
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doCount++;
-                    cdsPciModules.cDo32lCount++;
-                    cdsPciModules.doInstance[ kk ] = do32Cnt;
-                    status++;
-                }
-                break;
-            case ACS_16DIO:
-                if ( ( cdsPciModules.cards_used[ jj ].type == ACS_16DIO ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance ==
-                       doIIRO16Cnt ) )
-                {
-                    kk = cdsPciModules.doCount;
-                    cdsPciModules.doType[ kk ] = ioMemData->model[ ii ];
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doCount++;
-                    cdsPciModules.iiroDio1Count++;
-                    cdsPciModules.doInstance[ kk ] = doIIRO16Cnt;
-                    status++;
-                }
-                break;
-            case ACS_8DIO:
-                if ( ( cdsPciModules.cards_used[ jj ].type == ACS_8DIO ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == doIIRO8Cnt ) )
-                {
-                    kk = cdsPciModules.doCount;
-                    cdsPciModules.doType[ kk ] = ioMemData->model[ ii ];
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doCount++;
-                    cdsPciModules.iiroDioCount++;
-                    cdsPciModules.doInstance[ kk ] = doIIRO8Cnt;
-                    status++;
-                }
-                break;
-            default:
-                break;
-            }
-        }
-        if ( ioMemData->model[ ii ] == GSC_16AI64SSA )
-            adcCnt++;
-        if ( ioMemData->model[ ii ] == GSC_16AO16 )
-            dacCnt++;
-        if ( ioMemData->model[ ii ] == GSC_18AO8 )
-            dac18Cnt++;
-        if ( ioMemData->model[ ii ] == GSC_20AO8 )
-            dac20Cnt++;
-        if ( ioMemData->model[ ii ] == CON_6464DIO )
-            doCnt++;
-        if ( ioMemData->model[ ii ] == CON_32DO )
-            do32Cnt++;
-        if ( ioMemData->model[ ii ] == ACS_16DIO )
-            doIIRO16Cnt++;
-        if ( ioMemData->model[ ii ] == ACS_8DIO )
-            doIIRO8Cnt++;
-    }
     // If no ADC cards were found, then SLAVE cannot run
     if ( !cdsPciModules.adcCount )
     {
         printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: No ADC cards found - exiting\n" );
         return -5;
     }
-    // This did not quite work for some reason
-    // Need to find a way to handle skipped DAC cards in slaves
-    // cdsPciModules.dacCount = ioMemData->dacCount;
+
     if ( status < cards )
     {
         printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: Did not find correct number of cards! Expected %d "
@@ -297,35 +107,11 @@ rt_fe_init( void )
     }
 #endif
 
-    // Following section maps Reflected Memory, both VMIC hardware style and
-    // Dolphin PCIe network style. Slave units will perform I/O transactions
-    // with RFM directly ie MASTER does not do RFM I/O. Master unit only maps
-    // the RFM I/O space and passes pointers to SLAVES.
-
-    // Slave gets RFM module count from MASTER.
-    cdsPciModules.rfmCount = ioMemData->rfmCount;
-    // dolphinCount is number of segments
-    cdsPciModules.dolphinCount = ioMemData->dolphinCount;
-    // dolphin read/write 0 is for local PCIe network traffic
-    cdsPciModules.dolphinRead[ 0 ] = ioMemData->dolphinRead[ 0 ];
-    cdsPciModules.dolphinWrite[ 0 ] = ioMemData->dolphinWrite[ 0 ];
-    // dolphin read/write 1 is for long range PCIe (RFM) traffic
-    cdsPciModules.dolphinRead[ 1 ] = ioMemData->dolphinRead[ 1 ];
-    cdsPciModules.dolphinWrite[ 1 ] = ioMemData->dolphinWrite[ 1 ];
-    for ( ii = 0; ii < cdsPciModules.rfmCount; ii++ )
-    {
-        cdsPciModules.pci_rfm[ ii ] = ioMemData->pci_rfm[ ii ];
-        cdsPciModules.pci_rfm_dma[ ii ] = ioMemData->pci_rfm_dma[ ii ];
-    }
-    // User APP does not access IRIG-B cards
-    cdsPciModules.gps = 0;
-    cdsPciModules.gpsType = 0;
-
     // Initialize buffer for daqLib.c code
     daqBuffer = (long)&daqArea[ 0 ];
 
-    pLocalEpics->epicsOutput.fe_status = WAIT_BURT;
     // wait to ensure EPICS is running before proceeding
+    pLocalEpics->epicsOutput.fe_status = WAIT_BURT;
     msleep(5000);
     // Ensure EPICS is running
     for ( cnt = 0; cnt < 10 && pLocalEpics->epicsInput.burtRestore == 0; cnt++ )
@@ -344,6 +130,7 @@ rt_fe_init( void )
     pLocalEpics->epicsInput.vmeReset = 0;
     udelay( 2000 );
 
+    /// Start the controller thread
 #ifdef NO_CPU_SHUTDOWN
     sthread = kthread_create( fe_start_app, 0, "fe_start_app/%d", CPUID );
     if ( IS_ERR( sthread ) )
@@ -358,9 +145,11 @@ rt_fe_init( void )
     pLocalEpics->epicsOutput.fe_status = LOCKING_CORE;
 
 #ifndef NO_CPU_SHUTDOWN
+    pLocalEpics->epicsOutput.fe_status = LOCKING_CORE;
+    printk( "" SYSTEM_NAME_STRING_LOWER ": Locking CPU core %d\n", CPUID );
+
     set_fe_code_idle( fe_start_app, CPUID );
     msleep( 100 );
-
     cpu_down( CPUID );
 
     // The code runs on the disabled CPU
@@ -368,21 +157,23 @@ rt_fe_init( void )
     return 0;
 }
 
+/// Kernel module cleanup function
 void
 rt_fe_cleanup( void )
 {
     int        i;
-    int        ret;
-    extern int cpu_up( unsigned int cpu );
 
 #ifndef NO_CPU_SHUTDOWN
+    extern int cpu_up( unsigned int cpu );
+
     // Unset the code callback
     set_fe_code_idle( 0, CPUID );
 #endif
 
-    printk( "Setting stop_working_threads to 1\n" );
+    //printk( "Setting stop_working_threads to 1\n" );
     // Stop the code and wait
 #ifdef NO_CPU_SHUTDOWN
+    int        ret;
     ret = kthread_stop( sthread );
 #endif
     stop_working_threads = 1;
@@ -390,13 +181,14 @@ rt_fe_cleanup( void )
 
 #ifndef NO_CPU_SHUTDOWN
 
+    /// Bring the CPU core back on line
     // Unset the code callback
     set_fe_code_idle( 0, CPUID );
     // printk("Will bring back CPU %d\n", CPUID);
     msleep( 1000 );
     // Bring the CPU back up
     cpu_up( CPUID );
-    // msleep(1000);
+    msleep(1000);
 #endif
 
     // Print out any error messages from FE code on exit

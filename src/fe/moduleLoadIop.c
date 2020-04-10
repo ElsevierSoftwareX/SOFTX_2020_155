@@ -13,16 +13,17 @@ extern void* fe_start_iop( void* arg );
 extern char  daqArea[ 2 * DAQ_DCU_SIZE ]; // Space allocation for daqLib buffers
 struct task_struct* sthread;
 
-// MAIN routine: Code starting point
-// ****************************************************************
-int need_to_load_IOP_first;
-EXPORT_SYMBOL( need_to_load_IOP_first );
-
 extern void set_fe_code_idle( void* ( *ptr )(void*), unsigned int cpu );
 extern void msleep( unsigned int );
 
+int need_to_load_IOP_first;
+EXPORT_SYMBOL( need_to_load_IOP_first );
+
+
 #include "moduleLoadCommon.c"
 
+// MAIN routine: Code starting point
+// ****************************************************************
 /// Startup function for initialization of kernel module.
 int
 rt_iop_init( void )
@@ -73,9 +74,9 @@ rt_iop_init( void )
         return ret;
     }
 
-    pLocalEpics->epicsOutput.fe_status = 1;
     /// Find and initialize all PCIe I/O modules
     // Following I/O card info is from feCode
+    pLocalEpics->epicsOutput.fe_status = FIND_MODULES;
     cards = sizeof( cards_used ) / sizeof( cards_used[ 0 ] );
     cdsPciModules.cards = cards;
     cdsPciModules.cards_used = cards_used;
@@ -86,6 +87,14 @@ rt_iop_init( void )
 
     /// Call PCI initialization routine in map.c file.
     status = mapPciModules( &cdsPciModules );
+
+    // If no ADC cards were found, then cannot run
+    if ( !cdsPciModules.adcCount )
+    {
+        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: No ADC cards found - exiting\n" );
+        return -5;
+    }
+
     if ( status < cards )
     {
 	printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: Did not find correct number of cards! Expected %d "
@@ -109,93 +118,14 @@ rt_iop_init( void )
 #endif
 
     /// Wirte PCIe card info to mbuf for use by userapp models
-    // Clear out card model info in IO_MEM
-    for ( ii = 0; ii < MAX_IO_MODULES; ii++ )
-    {
-        ioMemData->model[ ii ] = -1;
-    }
-
-    /// Master send module counts to SLAVE via ipc shm
-    ioMemData->totalCards = status;
-    ioMemData->adcCount = cdsPciModules.adcCount;
-    ioMemData->dacCount = cdsPciModules.dacCount;
-    ioMemData->bioCount = cdsPciModules.doCount;
-    // kk will act as ioMem location counter for mapping modules
-    kk = cdsPciModules.adcCount;
-    for ( ii = 0; ii < cdsPciModules.adcCount; ii++ )
-    {
-        // MASTER maps ADC modules first in ipc shm for SLAVES
-        ioMemData->model[ ii ] = cdsPciModules.adcType[ ii ];
-        ioMemData->ipc[ ii ] =
-            ii; // ioData memory buffer location for SLAVE to use
-    }
-    for ( ii = 0; ii < cdsPciModules.dacCount; ii++ )
-    {
-        // Pass DAC info to SLAVE processes
-        ioMemData->model[ kk ] = cdsPciModules.dacType[ ii ];
-        ioMemData->ipc[ kk ] = kk;
-        // Following used by MASTER to point to ipc memory for inputting DAC
-        // data from SLAVES
-        cdsPciModules.dacConfig[ ii ] = kk;
-        kk++;
-    }
-    // MASTER sends DIO module information to SLAVES
-    // Note that for DIO, SLAVE modules will perform the I/O directly and
-    // therefore need to know the PCIe address of these modules.
-    ioMemData->bioCount = cdsPciModules.doCount;
-    for ( ii = 0; ii < cdsPciModules.doCount; ii++ )
-    {
-        // MASTER needs to find Contec 1616 I/O card to control timing slave.
-        if ( cdsPciModules.doType[ ii ] == CON_1616DIO )
-        {
-            tdsControl[ tdsCount ] = ii;
-            tdsCount++;
-        }
-        ioMemData->model[ kk ] = cdsPciModules.doType[ ii ];
-        // Unlike ADC and DAC, where a memory buffer number is passed, a PCIe
-        // address is passed for DIO cards.
-        ioMemData->ipc[ kk ] = cdsPciModules.pci_do[ ii ];
-        kk++;
-    }
-    // Following section maps Reflected Memory, both VMIC hardware style and
-    // Dolphin PCIe network style. Slave units will perform I/O transactions
-    // with RFM directly ie MASTER does not do RFM I/O. Master unit only maps
-    // the RFM I/O space and passes pointers to SLAVES.
-
-    /// Map VMIC RFM cards, if any
-    ioMemData->rfmCount = cdsPciModules.rfmCount;
-    for ( ii = 0; ii < cdsPciModules.rfmCount; ii++ )
-    {
-        // Master sends RFM memory pointers to SLAVES
-        ioMemData->pci_rfm[ ii ] = cdsPciModules.pci_rfm[ ii ];
-        ioMemData->pci_rfm_dma[ ii ] = cdsPciModules.pci_rfm_dma[ ii ];
-    }
-#ifdef DOLPHIN_TEST
-    /// Send Dolphin addresses to user app processes
-    // dolphinCount is number of segments
-    ioMemData->dolphinCount = cdsPciModules.dolphinCount;
-    // dolphin read/write 0 is for local PCIe network traffic
-    ioMemData->dolphinRead[ 0 ] = cdsPciModules.dolphinRead[ 0 ];
-    ioMemData->dolphinWrite[ 0 ] = cdsPciModules.dolphinWrite[ 0 ];
-    // dolphin read/write 1 is for long range PCIe (RFM) traffic
-    ioMemData->dolphinRead[ 1 ] = cdsPciModules.dolphinRead[ 1 ];
-    ioMemData->dolphinWrite[ 1 ] = cdsPciModules.dolphinWrite[ 1 ];
-
-#else
-    // Clear Dolphin pointers so the slave sees NULLs
-    ioMemData->dolphinCount = 0;
-    ioMemData->dolphinRead[ 0 ] = 0;
-    ioMemData->dolphinWrite[ 0 ] = 0;
-    ioMemData->dolphinRead[ 1 ] = 0;
-    ioMemData->dolphinWrite[ 1 ] = 0;
-#endif
+    send_io_info_to_mbuf( status, &cdsPciModules );
 
     // Initialize buffer for daqLib.c code
     daqBuffer = (long)&daqArea[ 0 ];
 
     // wait to ensure EPICS is running before proceeding
+    pLocalEpics->epicsOutput.fe_status = WAIT_BURT;
     msleep(5000);
-    pLocalEpics->epicsOutput.fe_status = 2;
     printk( "Waiting for EPICS BURT Restore = %d\n",
             pLocalEpics->epicsInput.burtRestore );
     /// Ensure EPICS running else exit
@@ -231,8 +161,9 @@ rt_iop_init( void )
 #endif
 
 #ifndef NO_CPU_SHUTDOWN
-    pLocalEpics->epicsOutput.fe_status = 3;
+    pLocalEpics->epicsOutput.fe_status = LOCKING_CORE;
     printk( "" SYSTEM_NAME_STRING_LOWER ": Locking CPU core %d\n", CPUID );
+
     // The code runs on the disabled CPU
     set_fe_code_idle( fe_start_iop, CPUID );
     msleep( 100 );

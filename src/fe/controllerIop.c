@@ -63,7 +63,7 @@ int pBits[ 9 ] = { 1, 2, 4, 8, 16, 32, 64, 128, 256 };
 int getGpsTime( unsigned int* tsyncSec, unsigned int* tsyncUsec );
 
 // Include C code modules
-#include "moduleLoadIop.c"
+#include "moduleLoad.c"
 
 #ifdef TIME_SLAVE
 #include "mapVirtual.c"
@@ -78,7 +78,7 @@ int getGpsTime( unsigned int* tsyncSec, unsigned int* tsyncUsec );
 #include <drv/adc_info.c>
 
 //***********************************************************************
-// TASK: fe_start_iop()
+// TASK: fe_start_controller()
 // This routine is the skeleton for all front end code
 //***********************************************************************
 /// This function is the main real-time sequencer or scheduler for all code
@@ -92,7 +92,7 @@ int getGpsTime( unsigned int* tsyncSec, unsigned int* tsyncUsec );
 /// Timing Distribution System.
 ///	-
 void*
-fe_start_iop( void* arg )
+fe_start_controller( void* arg )
 {
     int        ii, jj, kk, ll; // Dummy loop counter variables
     static int clock1Min = 0; ///  @param clockMin Minute counter (Not Used??)

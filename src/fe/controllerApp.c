@@ -33,7 +33,9 @@
 #include "controllerko.h"
 
 // Include C code modules
-#include "moduleLoadApp.c"
+#include "mapApp.c"
+// #include "moduleLoadApp.c"
+#include "moduleLoad.c"
 #include <drv/mapVirtual.h>
 #include <drv/app_adc_read.c>
 #include <drv/app_dac_functions.c>
@@ -60,7 +62,7 @@ deallocate_dac_channels( void )
 }
 
 //***********************************************************************
-// TASK: fe_start_app()
+// TASK: fe_start_controller()
 // This routine is the skeleton for all front end code
 //***********************************************************************
 /// This function is the main real-time sequencer or scheduler for all code
@@ -74,7 +76,7 @@ deallocate_dac_channels( void )
 /// Timing Distribution System.
 ///	-
 void*
-fe_start_app( void* arg )
+fe_start_controller( void* arg )
 {
     int        ii, jj, kk, ll; // Dummy loop counter variables
     static int clock1Min = 0; ///  @param clockMin Minute counter (Not Used??)
