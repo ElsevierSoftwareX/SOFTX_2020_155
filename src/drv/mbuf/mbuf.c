@@ -4,6 +4,7 @@
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
+#include <linux/device.h>
 #include <linux/slab.h>
 #include <linux/vmalloc.h>
 #include <linux/mm.h>
@@ -36,7 +37,9 @@ module_param(one_fill, short, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
 MODULE_PARM_DESC(on_fill, "Set to 1 want to fill newly allocated memory with one bits");
 
 /* character device structures */
-static dev_t mbuf_dev;
+static dev_t mbuf_dev = MKDEV( 0, 0 ) ;
+static struct class* mbuf_class = NULL;
+static struct device* mbuf_device = NULL;
 static struct cdev mbuf_cdev;
 
 /* methods of the character device */
@@ -414,11 +417,23 @@ static int __init mbuf_init(void)
                 goto out;
         }
 
+        if (IS_ERR(mbuf_class = class_create( THIS_MODULE, "ligo_mbuf" )))
+        {
+                printk(KERN_ERR "could not allocate device class for mbuf\n");
+                goto out_unalloc_region;
+        };
+
+        if (IS_ERR(mbuf_device = device_create( mbuf_class, NULL, mbuf_dev, NULL, "mbuf" )))
+        {
+                printk(KERN_ERR "could not create device file for mbuf\n");
+                goto out_cleanup_class;
+        }
+
         /* initialize the device structure and register the device with the kernel */
         cdev_init(&mbuf_cdev, &mbuf_fops);
         if ((ret = cdev_add(&mbuf_cdev, mbuf_dev, 1)) < 0) {
                 printk(KERN_ERR "could not allocate chrdev for buf\n");
-                goto out_unalloc_region;
+                goto out_cleanup_device;
         }
 
 	mbuf_sysfs_dir = kobject_create_and_add("mbuf", kernel_kobj);
@@ -442,7 +457,11 @@ static int __init mbuf_init(void)
 	return ret;
 
   out_remove_sysfs:
-		kobject_del(mbuf_sysfs_dir);
+	kobject_del(mbuf_sysfs_dir);
+  out_cleanup_device:
+        device_destroy( mbuf_class, mbuf_dev );
+  out_cleanup_class:
+        class_destroy( mbuf_class );
   out_unalloc_region:
         unregister_chrdev_region(mbuf_dev, 1);
   out:
@@ -452,6 +471,8 @@ static int __init mbuf_init(void)
 /* module unload */
 static void __exit mbuf_exit(void)
 {
+        device_destroy( mbuf_class, mbuf_dev );
+        class_destroy( mbuf_class );
         /* remove the character deivce */
         cdev_del(&mbuf_cdev);
         unregister_chrdev_region(mbuf_dev, 1);
