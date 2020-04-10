@@ -1,12 +1,11 @@
 [Unit]
-Description=Ensure the run number server is running
-After=network.target
+Description=Advanced LIGO RTS run number server
+After=network-online.target
 
 [Service]
-User=controls
-Group=controls
-ExecStart=/usr/bin/run_number_server -v
-WorkingDirectory=/var/lib/run_number
+User=advligorts
+StateDirectory=advligorts
+ExecStart=/usr/bin/run_number_server -v --file $STATE_DIRECTORY/run_number
 Restart=on-failure
 
 [Install]
