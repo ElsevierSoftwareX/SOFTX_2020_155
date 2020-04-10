@@ -1,3 +1,1 @@
-KERNEL=="gpstime", ACTION=="add", RUN+="__SHARE__/module-manage.sh add gpstime"
-KERNEL=="gpstime", ACTION=="add", RUN+="__SHARE__/calc_gps_offset.py -a"
-KERNEL=="gpstime", ACTION=="remove", RUN+="__SHARE__/module-manage.sh remove gpstime"
+KERNEL=="gpstime", ACTION=="add", GROUP="controls", RUN+="__SHARE__/calc_gps_offset.py -a"

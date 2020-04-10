@@ -13,6 +13,7 @@
 #include <linux/kernel.h>
 #include <linux/kobject.h>
 #include <linux/sysfs.h>
+#include <linux/device.h>
 
 #include <linux/types.h>
 #include <linux/errno.h>
@@ -52,7 +53,9 @@ atomic64_t gps_offset = ATOMIC_INIT(0);
 static int gps_module_sync_type = STATUS_SYMMETRICOM_NO_SYNC;
 
 /* character device structures */
-static dev_t symmetricom_dev;
+static dev_t symmetricom_dev = MKDEV( 0, 0 );
+static struct class* gpstime_class = NULL;
+static struct device* gpstime_device = NULL;
 static struct cdev symmetricom_cdev;
 static int card_present;
 static int card_type; /* 0 - symmetricom; 1 - spectracom */
@@ -308,11 +311,23 @@ static int __init symmetricom_init(void)
             goto out;
     }
 
+    if (IS_ERR(gpstime_class = class_create( THIS_MODULE, "ligo_gpstime" )))
+    {
+            printk(KERN_ERR "could not allocate device class for gpstime\n");
+            goto out_unalloc_region;
+    }
+
+    if (IS_ERR(gpstime_device = device_create( gpstime_class, NULL, symmetricom_dev, NULL, "gpstime" )))
+    {
+            printk(KERN_ERR "could not create device file for gpstime\n");
+            goto out_cleanup_class;
+    }
+
     /* initialize the device structure and register the device with the kernel */
     cdev_init(&symmetricom_cdev, &symmetricom_fops);
     if ((ret = cdev_add(&symmetricom_cdev, symmetricom_dev, 1)) < 0) {
             printk(KERN_ERR "could not allocate chrdev for buf\n");
-            goto out_unalloc_region;
+            goto out_cleanup_device;
     }
 
     // Create /proc/gps filesystem tree
@@ -379,6 +394,10 @@ out_remove_proc_entry:
         gpstime_sysfs_dir = NULL;
     }
     remove_proc_entry("gps", NULL);
+out_cleanup_device:
+    device_destroy( gpstime_class, symmetricom_dev );
+out_cleanup_class:
+    class_destroy( gpstime_class );
 out_unalloc_region:
         unregister_chrdev_region(symmetricom_dev, 1);
 out:
@@ -388,14 +407,15 @@ out:
 /* module unload */
 static void __exit symmetricom_exit(void)
 {
-    /* remove the character deivce */
-    cdev_del(&symmetricom_cdev);
-    unregister_chrdev_region(symmetricom_dev, 1);
-	remove_proc_entry("gps", NULL);
     if (gpstime_sysfs_dir != NULL) {
         kobject_del(gpstime_sysfs_dir);
         gpstime_sysfs_dir = NULL;
     }
+    remove_proc_entry("gps", NULL);
+    device_destroy( gpstime_class, symmetricom_dev );
+    class_destroy( gpstime_class );
+    cdev_del(&symmetricom_cdev);
+    unregister_chrdev_region(symmetricom_dev, 1);
 }
 
 EXPORT_SYMBOL(ligo_get_gps_driver_offset);
