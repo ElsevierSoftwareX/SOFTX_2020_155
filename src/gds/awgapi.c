@@ -104,11 +104,11 @@ static char *versionId = "Version $Id$" ;
 /*            								*/
 /*----------------------------------------------------------------------*/
 #define _NETID			"tcp"
-#define _MAX_IFO		128
+#define _MAX_IFO		256
 #define _MAX_AWG_PER_IFO	5
 #define MAX_SLOT_NAME 		256
 #define MAX_SLOT_LIST 		16
-#define _SHOWBUF_SIZE		(128 * 1024)
+#define _SHOWBUF_SIZE		(256 * 1024)
 #if !defined (_AWG_LIB) && !defined (_CONFIG_DYNAMIC)
 #define PRM_FILE		gdsPathFile ("/param", "awg.par")
 #define PRM_SECTION		"awg"
