@@ -1,0 +1,66 @@
+Software in this directory is used to build the FE computer code.
+
+IOP Kernel Module Configurations ************************
+Standard Configuration:
+    *** This is the standard production configuration ie each computer has 
+    *** an I/O chassis connected
+    controllerIop.c   - Primary infinite control loop; controls I/O and timing
+    moduleLoad.c    - Handles kernel module loading and unloading
+    dolphin.c       - Provides setup and mapping of Dolphin network for IPCs
+    map.c           - Used to map PCIe I/O modules
+    drv/iop_adc_functions   - Handles ADC I/O
+    drv/iop_dac_functions   - Handles DAC I/O
+    drv/dac_info.c          - Provides DAC card status info
+    drv/adc_info.c          - Provides ADC card status info
+
+Timing Slave Configuration (NO Pcie modules, timing from Dolphin network)
+    *** This is a test configuration for large test stands that have more
+    *** computers than I/O chassis:
+    controllerIop.c   - Primary infinite control loop; controls I/O and timing
+    moduleLoad.c    - Handles kernel module loading and unloading
+    dolphin.c       - Provides setup and mapping of Dolphin network for IPCs
+    mapVirtual.c    - Provides mbuf mapping of I/O cards
+    drv/time_slave_io   - Provides virtual I/O support
+    drv/dac_info.c          - Provides DAC card status info
+    drv/adc_info.c          - Provides ADC card status info
+
+Cymac Configuration (No standard timing system available)
+    *** This is a standalone test system configuration
+    controllerCymac.c   - Primary infinite control loop; controls I/O and timing
+    moduleLoad.c    - Handles kernel module loading and unloading
+    map.c           - Used to map PCIe I/O modules
+    drv/iop_adc_functions   - Handles ADC I/O
+    drv/iop_dac_functions   - Handles DAC I/O
+    drv/dac_info.c          - Provides DAC card status info
+    drv/adc_info.c          - Provides ADC card status info
+
+Long Range I/O chassis configuration
+    *** Used when FE connected to IOC over long range fiber
+    *** This is presently used to connect mid station PEM channels
+    controllerLR.c   - Primary infinite control loop; controls I/O and timing
+    moduleLoad.c    - Handles kernel module loading and unloading
+    dolphin.c       - Provides setup and mapping of Dolphin network for IPCs
+    map.c           - Used to map PCIe I/O modules
+    drv/iop_adc_functions   - Handles ADC I/O
+    drv/iop_dac_functions   - Handles DAC I/O
+    drv/dac_info.c          - Provides DAC card status info
+    drv/adc_info.c          - Provides ADC card status info
+
+
+Virtual Configuration (No I/O and no timing available)
+    *** Test configuration 
+
+User Application Kernel Module Configurations ************************
+    *** This is the standard production configuration for non-IOP models 
+    controllerApp.c         - Primary infinite control loop; controls I/O and timing
+    moduleLoad.c            - Handles kernel module loading and unloading
+    mapApp.c                - Used to map PCIe I/O modules
+    drv/app_adc_read.c      - Handles ADC I/O
+    drv/app_dac_functions.c - Handles DAC I/O
+    drv/app_dio_routines.c  - Provides DIO card I/O
+
+Following are due for deletion once dependent codes have been cleaned up to no longer use:
+    - moduleLoadIop -> functionality now in moduleLoad.c
+    - moduleLoadApp -> functionality now in moduleLoad.c
+    - controllerLR.c -> Add functionality to controllerIOP.c ???
+    - controllerCymac.c -> Simple ifdef change to controllerIop.c ????
