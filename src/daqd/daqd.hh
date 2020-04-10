@@ -230,7 +230,7 @@ public:
     static std::string
     default_nds_jobs_dir( )
     {
-        return "/var/run/nds";
+        return "/run/nds";
     }
 
     daqd_c( )
