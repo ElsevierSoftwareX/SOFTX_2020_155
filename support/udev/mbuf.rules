@@ -1,1 +1,1 @@
-KERNEL=="mbuf", ACTION=="add", GROUP="controls", MODE="0660"
+KERNEL=="mbuf", ACTION=="add", OWNER="advligorts", GROUP="advligorts", MODE="0660"
