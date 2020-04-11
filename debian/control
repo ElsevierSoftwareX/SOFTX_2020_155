@@ -28,19 +28,22 @@ Build-Depends:
 Standards-Version: 3.9.8
 Vcs-Git: https://git.ligo.org/cds/advLigoRTS
 
-Package: advligorts-module-support
+Package: advligorts-common
 Architecture: all
 Depends:
+ adduser,
+ debconf,
  ${misc:Depends},
-Description: advLigoRTS kernel module support
+Description: advLigoRTS common resources metapackage
  Core component of advLigoRTS.
  .
- Kernel module device creation scripts.
+ Support for other advLigoRTS packages, including creation of the
+ 'advligorts' user, system config and directories, etc.
 
 Package: advligorts-mbuf-dkms
 Architecture: any
 Depends:
- advligorts-module-support,
+ advligorts-common,
  ${misc:Depends},
 Description: advLigoRTS mbuf kernel module
  Core component of advLigoRTS.
@@ -50,7 +53,7 @@ Description: advLigoRTS mbuf kernel module
 Package: advligorts-gpstime-dkms
 Architecture: any
 Depends:
- advligorts-module-support,
+ advligorts-common,
  python3,
  ${misc:Depends},
 Description: advLigoRTS gpstime kernel module
@@ -61,6 +64,7 @@ Description: advLigoRTS gpstime kernel module
 Package: advligorts-daqd
 Architecture: any
 Depends:
+ advligorts-common,
  advligorts-gpstime-dkms,
  advligorts-mbuf-dkms,
  ${misc:Depends},
@@ -74,6 +78,7 @@ Description: advLigoRTS daqd binaries
 Package: advligorts-rcg
 Architecture: any
 Depends:
+ advligorts-common,
  autoconf,
  epics-seq-dev,
  libncurses5-dev,
@@ -93,6 +98,7 @@ Description: advLigoRTS real-time code generator (RCG)
 Package: advligorts-fe
 Architecture: any
 Depends:
+ advligorts-common,
  advligorts-mbuf-dkms,
  ${misc:Depends},
  ${shlibs:Depends},
@@ -105,10 +111,21 @@ Description: advLigoRTS front end support
  .
  Binaries and systemd services for advLigoRTS front end systems.
 
+Package: advligorts-transport-common
+Architecture: all
+Depends:
+ advligorts-common,
+ advligorts-mbuf-dkms,
+ ${misc:Depends},
+Description: advLigoRTS transport common metapackage
+ Core component of advLigoRTS.
+ .
+ Common systemd units and dependencies for transport services.
+
 Package: advligorts-transport-dix
 Architecture: any
 Depends:
- advligorts-mbuf-dkms,
+ advligorts-transport-common,
  dolphin-ix,
  dolphin-sisci-ix,
  ${misc:Depends},
@@ -122,7 +139,7 @@ Description: advLigoRTS Dolphin IX PCI shared memory transport
 Package: advligorts-transport-pubsub
 Architecture: any
 Depends:
- advligorts-mbuf-dkms,
+ advligorts-transport-common,
  libcds-pubsub,
  ${misc:Depends},
  ${shlibs:Depends},

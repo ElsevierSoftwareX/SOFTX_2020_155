@@ -1,0 +1,20 @@
+Template: advligorts/site
+Type: string
+Default: TST
+Description: Specify 'SITE' designator:
+ This should be a capitalized three-letter string designator for the
+ fascility where your systems reside.
+
+Template: advligorts/ifo
+Type: string
+Default: X1
+Description: Specify 'IFO' designator:
+ This should be a capitalized two-letter string to distinguish this
+ setup among multiple at the same site.
+
+Template: advligorts/rcg_lib_path
+Type: string
+Description: Paths to user model files:
+ Colon separated list of absolute paths to directories where user
+ model .mdl files will be stored, e.g.
+ '/opt/rtcds/usercode/isc:/opt/rtcds/usercode/sus'

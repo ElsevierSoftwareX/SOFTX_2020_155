@@ -1,3 +1,12 @@
+advligorts (4.0.0~dev6-1) unstable; urgency=medium
+
+  * New dev release
+  * New advligorts-common metapackage
+  * Create advligorts user
+  * Initial debconf support
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Fri, 10 Apr 2020 17:09:18 -0700
+
 advligorts (4.0.0~dev5-1) unstable; urgency=medium
 
   * Remove advligorts-transport-

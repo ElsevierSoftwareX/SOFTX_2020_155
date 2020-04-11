@@ -1,0 +1,49 @@
+#!/bin/sh
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+if ! getent passwd advligorts >/dev/null ; then
+    echo "creating advligorts user..."
+    adduser --quiet --system --no-create-home --group \
+	    --home /var/lib/advligorts \
+	    --gecos 'advLigoRTS,,,' \
+	    advligorts
+fi
+
+upper () {
+    echo -n "$@" | tr [a-z] [A-Z]
+}
+
+lower () {
+    echo -n "$@" | tr [A-Z] [a-z]
+}
+
+db_get advligorts/site
+SITE=$(upper $RET)
+db_get advligorts/ifo
+IFO=$(upper $RET)
+db_get advligorts/rcg_lib_path
+RCG_LIB_PATH=${RET}
+
+# FIXME: create /opt/rtcds directory and set "controls" ownership
+# correctly (get controls user from debhelper)
+#TARGET=$(lower /opt/rtcds/${SITE}/${IFO}/)
+#mkdir -p $TARGET
+#chown controls:controls $TARGET
+
+if ! [ -e /etc/advligorts/env ] ; then
+    cat <<EOF > /etc/advligorts/env
+SITE=$SITE
+IFO=$IFO
+RCG_LIB_PATH=$RCG_LIB_PATH
+EOF
+fi
+
+
+# required debhelper tag for extra substitution
+#DEBHELPER#
+
+
+exit 0

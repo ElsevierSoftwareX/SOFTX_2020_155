@@ -1,3 +1,4 @@
+support/etc/advligorts/daqd.standalone.sample.rc etc/advligorts/daqdrc
 support/systemd/rts-daqd.service lib/systemd/system
 support/systemd/rts-nds.service lib/systemd/system
 support/systemd/rts-run_number.service lib/systemd/system

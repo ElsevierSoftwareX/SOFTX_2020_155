@@ -1,4 +1,2 @@
-support/systemd/rts-cps_recv.service lib/systemd/system
-support/systemd/rts-cps_xmit.service lib/systemd/system
 usr/bin/cps_recv
 usr/bin/cps_xmit
