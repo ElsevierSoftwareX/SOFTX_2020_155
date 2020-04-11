@@ -1,9 +1,9 @@
 [Unit]
-Description=Advanced LIGO RTS DAQD
+Description=Advanced LIGO RTS data acquisition daemon
 After=network-online.target
 
 [Service]
-User=controls
+User=advligorts
 ExecStart=/usr/bin/daqd -c /etc/advligorts/daqdrc
 Restart=always
 

@@ -6,15 +6,15 @@ set dcu_status_check=1;
 set debug=0;
 set log=6;
 set zero_bad_data=0;
-set master_config="/etc/advligorts/master/master";
+set master_config="/etc/advligorts/master";
 configure channels begin end;
-tpconfig "/etc/advligorts/master/testpoint.par";
+tpconfig "/etc/advligorts/testpoint.par";
 
 status dcu;
 
 set gps_leaps = 820108813;
 set detector_name="TST";
-set detector_prefix="X5";
+set detector_prefix="X1";
 set detector_longitude=-90.7742403889;
 set detector_latitude=30.5628943337;
 set detector_elevation=.0;
@@ -27,21 +27,21 @@ set num_dirs = 10;
 set frames_per_dir=225;
 set full_frames_per_file=1;
 set full_frames_blocks_per_frame=16;
-set frame_dir="/frames/full", "X-X5_R-", ".gwf";
+set frame_dir="/frames/full", "X-X1_R-", ".gwf";
 
 #enable trend_frame_wiper;
 set trend_num_dirs=10;
 set trend_frames_per_dir=1440;
-set trend_frame_dir= "/frames/trend/second", "X-X5_T-", ".gwf";
+set trend_frame_dir= "/frames/trend/second", "X-X1_T-", ".gwf";
 
 set minute-trend-num-dirs=10;
 set minute-trend-frames-per-dir=24;
-set minute-trend-frame-dir="/frames/trend/minute", "X-X5_M-", ".gwf";
+set minute-trend-frame-dir="/frames/trend/minute", "X-X1_M-", ".gwf";
 
 #set raw-minute-trend-dir="/frames/trend/minute/raw";
 #set raw_minute_trend_saving_period=5;
 
-set nds-jobs-dir="/var/run/nds";
+set nds-jobs-dir="/run/nds";
 
 set parameter "shmem_input" = "local_dc";
 set parameter "shmem_size" = "104857600";
@@ -78,7 +78,7 @@ sleep 2;
 
 start producer;
 start epics dcu;
-start epics server "X5:DAQ-SHM0_" "X5:DAQ-SHM0_";
+start epics server "X1:DAQ-SHM0_" "X1:DAQ-SHM0_";
 
 start listener 8087;
 start listener 8088 1;
