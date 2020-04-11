@@ -34,7 +34,6 @@
 
 // Include C code modules
 #include "mapApp.c"
-// #include "moduleLoadApp.c"
 #include "moduleLoad.c"
 #include <drv/mapVirtual.h>
 #include <drv/app_adc_read.c>
