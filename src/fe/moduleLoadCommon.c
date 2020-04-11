@@ -1,6 +1,6 @@
 ///     @file moduleLoadCommon.c
-///     @brief File contains common routines for moduleLoadIop.c and
-///     moduleLoadApp.c.`
+///     @brief File contains common routines for moduleLoad.c 
+///     for both IOP and User apps.`
 
 void
 print_io_info( CDS_HARDWARE* cdsp )

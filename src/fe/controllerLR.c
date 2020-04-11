@@ -169,7 +169,7 @@ int              dacWatchDog = 0;
 int getGpsTime( unsigned int* tsyncSec, unsigned int* tsyncUsec );
 
 // Include C code modules
-#include "moduleLoadIop.c"
+#include "moduleLoad.c"
 #include "map.c"
 #include <drv/iop_adc_functions.c>
 #include <drv/iop_dac_functions.c>

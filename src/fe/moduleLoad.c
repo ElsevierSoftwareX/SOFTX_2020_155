@@ -1,5 +1,5 @@
-///	@file moduleLoadIop.c
-///	@brief File contains startup routines for real-time IOP code.
+///	@file moduleLoad.c
+///	@brief File contains startup routines for real-time IOP and App code.
 
 #include <asm/uaccess.h>
 #include <linux/ctype.h>
