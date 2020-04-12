@@ -1,3 +1,9 @@
+advligorts (4.0.0~dev6-2) unstable; urgency=medium
+
+  * Install daqdrc example as example
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Sun, 12 Apr 2020 12:46:55 -0700
+
 advligorts (4.0.0~dev6-1) unstable; urgency=medium
 
   * New dev release
