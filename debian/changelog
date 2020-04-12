@@ -1,6 +1,7 @@
 advligorts (4.0.0~dev6-2) unstable; urgency=medium
 
   * Install daqdrc example as example
+  * Add dkms dependency for RCG
 
  -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Sun, 12 Apr 2020 12:46:55 -0700
 

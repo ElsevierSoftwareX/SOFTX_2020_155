@@ -81,6 +81,7 @@ Depends:
  advligorts-common,
  autoconf,
  epics-seq-dev,
+ dkms,
  libncurses5-dev,
  linux-headers-4.19.0-6-rtcds-amd64,
  make,
