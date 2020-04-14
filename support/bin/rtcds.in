@@ -23,7 +23,6 @@ RCG_SRC=${RCG_SRC:-/usr/share/advligorts/src}
 RCG_BUILDD=${RCG_BUILDD:-/var/cache/advligorts/rcg-$RTS_VERSION}
 # FIXME: the RCG hard-codes /opt/rtcds as the root
 RCG_TARGET=/opt/rtcds/${site}/${ifo}
-RTS_USER=${RTS_USER:-$(whoami)}
 
 # search paths for C source code
 CDS_SRC=${CDS_SRC:-$RCG_LIB_PATH}
@@ -34,7 +33,7 @@ CDS_IFO_SRC=${CDS_IFO_SRC:-$CDS_SRC}
 RCG_LIB_PATH=$RCG_LIB_PATH:${RCG_SRC}/src/epics/simLink/:${RCG_SRC}/src/epics/simLink/lib
 
 USER_VARS=(SITE IFO RCG_LIB_PATH)
-LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RCG_TARGET RTS_USER)
+LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RCG_TARGET)
 EXPORT_VARS=(${USER_VARS[@]} site ifo CDS_SRC CDS_IFO_SRC)
 
 ##################################################
@@ -63,18 +62,14 @@ prep_buildd() {
         return
     fi
     log "creating RCG_BUILDD $RCG_BUILDD..."
-    if sudo -u $RTS_USER mkdir -p "$RCG_BUILDD" 2>/dev/null ; then
-        sudo -u $RTS_USER chown $RTS_USER:$RTS_USER "$RCG_BUILDD"
-    elif sudo mkdir -p "$RCG_BUILDD" 2>/dev/null ; then
-        sudo chown $RTS_USER:$RTS_USER "$RCG_BUILDD"
-    else
-        log "Could not create build directory '$RCG_BUILDD' (owner: $RTS_USER:$RTS_USER)."
-        log "Please create manually to continue."
+    if ! mkdir -p "$RCG_BUILDD" 2>/dev/null ; then
+        log "Could not create build directory '$RCG_BUILDD'."
+        log "Please create manually (with correct permissions) to continue."
         exit 1
     fi
     log "configuring RCG_BUILDD $RCG_BUILDD..."
     cd "$RCG_BUILDD"
-    sudo -u $RTS_USER "$RCG_SRC"/configure
+    "$RCG_SRC"/configure
 }
 
 prep_target(){
@@ -82,16 +77,12 @@ prep_target(){
         return
     fi
     log "creating RCG_TARGET $RCG_TARGET..."
-    if sudo -u $RTS_USER mkdir -p "$RCG_TARGET" 2>/dev/null ; then
-        sudo -u $RTS_USER chown $RTS_USER:$RTS_USER "$RCG_TARGET"
-    elif sudo mkdir -p "$RCG_TARGET" 2>/dev/null ; then
-        sudo chown $RTS_USER:$RTS_USER "$RCG_TARGET"
-    else
-        log "Could not create target directory '$RCG_TARGET' (owner: $RTS_USER:$RTS_USER)."
-        log "Please create manually to continue."
+    if ! mkdir -p "$RCG_TARGET" 2>/dev/null ; then
+        log "Could not create target directory '$RCG_TARGET'."
+        log "Please create manually (with correct permissions) to continue."
         exit 1
     fi
-    sudo -u $RTS_USER mkdir -p ${RCG_TARGET}/{target,chans/tmp}
+    mkdir -p ${RCG_TARGET}/{target,chans/tmp}
 }
 
 ########
@@ -109,7 +100,7 @@ list_host_sys() {
 
 check_host_sys() {
     for sys ; do
-	if ! systemctl is-enabled rts@${sys}.target ; then
+	if ! systemctl is-enabled rts@${sys}.target > /dev/null ; then
 	    log "System '$sys' is not enabled on this system, first enable with 'enable ${sys}'."
 	    exit 4
 	fi
@@ -122,7 +113,7 @@ build_sys() {
     cd $RCG_BUILDD
     for sys ; do
 	log "### building $sys..."
-	sudo -u $RTS_USER -E make $sys
+	make $sys
     done
 }
 
@@ -130,7 +121,7 @@ install_sys() {
     cd $RCG_BUILDD
     for sys ; do
 	log "### installing $sys..."
-	sudo -u $RTS_USER -E make install-$sys
+	make install-$sys
     done
 }
 
