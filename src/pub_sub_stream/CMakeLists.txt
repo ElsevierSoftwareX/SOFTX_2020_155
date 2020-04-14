@@ -2,6 +2,8 @@ Message("libcds-pubsub_FOUND = ${libcds-pubsub_FOUND}")
 if (libcds-pubsub_FOUND)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../mx_stream/atomic_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/atomic_config.h)
 
+    add_subdirectory(plugins)
+
     add_executable(cps_xmit
             pub_xmit.cc
             )
@@ -50,8 +52,35 @@ if (libcds-pubsub_FOUND)
             driver::shmem
             pv::simple_pv
             args
-            cds::pub_sub_asan)
+            cds::pub_sub_asan
+            sub_plugin_rmipc)
     target_requires_cpp11(cps_recv_asan PUBLIC)
+
+    add_executable(cds_pub_sub
+            cds_pub_sub.cc
+            recv_buffer.cc
+            )
+    target_include_directories(cds_pub_sub PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../src/include
+            ${CMAKE_CURRENT_BINARY_DIR})
+    target_link_libraries(cds_pub_sub PUBLIC
+            pv::simple_pv
+            args
+            cds::pub_sub
+            sub_plugin_rmipc)
+    target_requires_cpp11(cds_pub_sub PUBLIC)
+
+#    add_executable(cds_pub_sub_asan
+#            cds_pub_sub.cc
+#            recv_buffer.cc
+#            )
+#    target_include_directories(cds_pub_sub_asan PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../asan/include
+#            ${CMAKE_CURRENT_BINARY_DIR})
+#    target_link_libraries(cds_pub_sub_asan PUBLIC
+#            pv::simple_pv
+#            args
+#            cds::pub_sub_asan
+#            sub_plugin_rmipc)
+#    target_requires_cpp11(cds_pub_sub_asan PUBLIC)
 
     configure_file(test_pub_sub_xmit_recv.sh.in test_pub_sub_xmit_recv.sh @ONLY)
 
@@ -61,5 +90,6 @@ if (libcds-pubsub_FOUND)
 
     install(TARGETS cps_xmit DESTINATION bin)
     install(TARGETS cps_recv DESTINATION bin)
+    install(TARGETS cds_pub_sub DESTINATION bin)
 
 endif (libcds-pubsub_FOUND)
