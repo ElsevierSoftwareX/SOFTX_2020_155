@@ -1,0 +1,53 @@
+Template: advligorts/site
+Type: string
+Default: TST
+Description: Specify 'SITE' designator:
+ The SITE designator is a single, capitalized, three-letter string
+ indicating the facility where your systems reside.
+ .
+ If the string you enter is not exactly three letters with no spaces
+ you will be re-prompted to enter a better name.
+
+
+Template: advligorts/ifo
+Type: string
+Default: X1
+Description: Specify 'IFO' designator:
+ The IFO designator is a single, capitalized, two-letter string
+ indicating the name of this setup among multiple at the same site.
+ .
+ If the string you enter is not exactly two letters with no spaces
+ you will be re-prompted to enter a better name.
+
+
+Template: advligorts/rcg_lib_path
+Type: string
+Description: Paths to user model files:
+ The Real Time Code Generator (RCG) needs to know where to find the
+ user MATLAB Simulink .mdl files that describe the real-time models.
+ .
+ The following should be a colon-separated list of absolute paths to
+ directories where user RCG model files will be stored, e.g.:
+ .
+   /opt/rtcds/usercode/isc:/opt/rtcds/usercode/sus
+ .
+ Paths can be added or subtracted from this list at a later time by
+ editing the RCG_LIB_PATH variable /etc/advligo/env file.
+
+
+Template: advligorts/advligorts_users
+Type: string
+Default: controls
+Description: Users to add to the 'advligorts' group (space separated):
+ Users in the 'advligorts' group will be able to create, install, and
+ run real-time models.  Specify below any users that should have these
+ RTS priviledges.
+ .
+ Special dedicated users are not required, but traditionally systems
+ are configured to give this permission solely to the 'controls' user,
+ which is why it is offered as the default option.
+ .
+ Any specified users that don't exist will be created automatically.
+ Users can be added to this group later with the command:
+ .
+   adduser $USER advligorts

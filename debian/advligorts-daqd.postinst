@@ -1,0 +1,33 @@
+#!/bin/sh
+
+set -e
+
+# create the frame directory in a safe way, and give them to the
+# advligorts user
+#
+# NOTE: we do this only if the directory doesn't already exist so that
+# we don't break existing deployments that might need these
+# directories owned by a different user.
+if [ ! -e /frames ] ; then
+    mkdir -m 0755 /frames
+    chown advligorts:advligorts /frames
+    for sdir in full trend trend/second trend/minute trend/minute_raw ; do
+	runuser -u advligorts -- mkdir /frames/$sdir
+    done
+fi
+
+ENVFILE=/etc/advligorts/env
+DAQFILE=/etc/advligorts/daqdrc
+
+if [ ! -e $DAQFILE ] && [ -e $ENVFILE ] ; then
+    . $ENVFILE
+    D=$(echo -n $IFO | cut -c 1)
+    sed -e "s/TST/${SITE}/g" -e "s/X-X1/${D}-${IFO}/g" -e "s/X1/${IFO}/g" \
+	< /usr/share/doc/advligorts-daqd/examples/daqd.standalone.sample.rc \
+	> $DAQFILE
+fi
+
+# required debhelper tag for extra substitution
+#DEBHELPER#
+
+exit 0

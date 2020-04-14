@@ -1,0 +1,47 @@
+#!/bin/sh
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+chgrp advligorts /var/cache/advligorts
+chmod g+ws /var/cache/advligorts
+
+ENVFILE=/etc/advligorts/env
+
+if [ -e "$ENVFILE" ] ; then
+   . "$ENVFILE" || true
+
+   if [ "$SITE" ] && [ "$IFO" ] ; then
+       TARGET=$(echo -n /opt/rtcds/${SITE}/${IFO} | tr [A-Z] [a-z])
+       mkdir -p "$TARGET"
+       chgrp advligorts "$TARGET"
+       chmod g+ws "$TARGET"
+   fi
+
+   db_get advligorts/rcg_lib_path
+   RCG_LIB_PATH="$RET"
+
+   cp -a -f $ENVFILE $ENVFILE.tmp
+
+   test -z "$RCG_LIB_PATH" || grep -Eq '^ *RCG_LIB_PATH=' $ENVFILE || \
+       echo "RCG_LIB_PATH=" >> $ENVFILE
+
+   sed -e "s|^ *RCG_LIB_PATH=.*|RCG_LIB_PATH=$RCG_LIB_PATH|" \
+       < $ENVFILE > $ENVFILE.tmp
+   mv -f $ENVFILE.tmp $ENVFILE
+fi
+
+db_get advligorts/advligorts_users
+for user in $RET ; do
+    if ! getent passwd $user >/dev/null ; then
+	echo "creating '$user' user..."
+	adduser $user
+    fi
+    adduser $user advligorts
+done
+
+# required debhelper tag for extra substitution
+#DEBHELPER#
+
+exit 0

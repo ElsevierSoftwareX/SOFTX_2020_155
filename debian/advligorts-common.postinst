@@ -12,38 +12,30 @@ if ! getent passwd advligorts >/dev/null ; then
 	    advligorts
 fi
 
-upper () {
-    echo -n "$@" | tr [a-z] [A-Z]
-}
+ENVFILE=/etc/advligorts/env
 
-lower () {
-    echo -n "$@" | tr [A-Z] [a-z]
-}
-
-db_get advligorts/site
-SITE=$(upper $RET)
-db_get advligorts/ifo
-IFO=$(upper $RET)
-db_get advligorts/rcg_lib_path
-RCG_LIB_PATH=${RET}
-
-# FIXME: create /opt/rtcds directory and set "controls" ownership
-# correctly (get controls user from debhelper)
-#TARGET=$(lower /opt/rtcds/${SITE}/${IFO}/)
-#mkdir -p $TARGET
-#chown controls:controls $TARGET
-
-if ! [ -e /etc/advligorts/env ] ; then
-    cat <<EOF > /etc/advligorts/env
-SITE=$SITE
-IFO=$IFO
-RCG_LIB_PATH=$RCG_LIB_PATH
-EOF
+# generate env file if it doesn't exist
+if [ ! -e "$ENVFILE" ]; then
+    echo 'SITE=' > "$ENVFILE"
+    echo 'IFO=' >> "$ENVFILE"
 fi
 
+# substitute in the values from the debconf db.
+db_get advligorts/site
+SITE="$RET"
+db_get advligorts/ifo
+IFO="$RET"
+
+# cp before the sed ensures we do not mess up the config file's
+# ownership and permissions.
+cp -a -f $ENVFILE $ENVFILE.tmp
+
+sed -e "s/^ *SITE=.*/SITE=$SITE/" \
+    -e "s/^ *IFO=.*/IFO=$IFO/" \
+    < $ENVFILE > $ENVFILE.tmp
+mv -f $ENVFILE.tmp $ENVFILE
 
 # required debhelper tag for extra substitution
 #DEBHELPER#
-
 
 exit 0
