@@ -78,18 +78,23 @@ Description: advLigoRTS daqd binaries
 Package: advligorts-rcg
 Architecture: any
 Depends:
+ adduser,
  advligorts-common,
+ advligorts-gpstime-dkms,
+ advligorts-mbuf-dkms,
  autoconf,
- epics-seq-dev,
  dkms,
+ epics-seq-dev,
  libncurses5-dev,
  linux-headers-4.19.0-6-rtcds-amd64,
  make,
+ pkg-config,
  python3,
- sudo,
  tcsh,
  ${misc:Depends},
  ${perl:Depends},
+Recommends:
+ advligorts-rcg,
 Description: advLigoRTS real-time code generator (RCG)
  Core component of advLigoRTS.
  .
@@ -100,13 +105,13 @@ Package: advligorts-fe
 Architecture: any
 Depends:
  advligorts-common,
+ advligorts-gpstime-dkms,
  advligorts-mbuf-dkms,
+ sudo,
  ${misc:Depends},
  ${shlibs:Depends},
 Conflicts:
  advligorts-rcg (<< 4.0.0~dev0),
-Recommends:
- advligorts-rcg,
 Description: advLigoRTS front end support
  Core component of advLigoRTS.
  .
@@ -116,6 +121,7 @@ Package: advligorts-transport-common
 Architecture: all
 Depends:
  advligorts-common,
+ advligorts-gpstime-dkms,
  advligorts-mbuf-dkms,
  ${misc:Depends},
 Description: advLigoRTS transport common metapackage
@@ -158,7 +164,7 @@ Depends:
  linux-headers-4.19.0-6-rtcds-amd64,
  ${misc:Depends},
 Recommends:
-  cds-workstation,
+ cds-workstation,
 Description: advLigoRTS stand-alone "CYMAC" metapackage
  Advanced LIGO data acquisition system, stand-alone version.
 
