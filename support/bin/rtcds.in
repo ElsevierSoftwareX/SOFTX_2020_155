@@ -100,6 +100,10 @@ list_host_sys() {
 
 check_host_sys() {
     for sys ; do
+        if ! systemctl cat rts@${sys}.target > /dev/null ; then
+            log "RTS front end systemd units don't seem to be available.  Is the advligorts-fe package installed?"
+            exit 5
+        fi
 	if ! systemctl is-enabled rts@${sys}.target > /dev/null ; then
 	    log "System '$sys' is not enabled on this system, first enable with 'enable ${sys}'."
 	    exit 4
@@ -203,12 +207,15 @@ Available commands:
   install <sys>              install system
 
   list|ls                    list systems for host
+  enable <sys>...|--all      enable system start at boot
   start <sys>...|--all       start systems
   restart <sys>...|--all     restart running systems
   stop|kill <sys>...|--all   stop running systems
-  enable <sys>...|--all      enable system start at boot
   disable <sys>...|--all     disable system start at boot
+  status <sys>               show status for system services
 
+  log                        show logs for system services
+    -f                         follow logs
   blog <sys>                 show last build log for system
     -i                         print log paths
   lsmod                      list loaded RTS kernel modules
@@ -299,6 +306,27 @@ case $cmd in
 	    ${cmd}_sys $@
 	fi
 	;;
+    'status')
+	if [ -z "$1" ] ; then
+	    log "You must specify one system to show status."
+	    exit 2
+	fi
+        sys=$1
+        systemctl status rts@${sys}.target rts-{awgtpman,epics,module}@${sys}.service
+        ;;
+    'log')
+        args=
+	if [[ "$1" == '-f' ]] ; then
+	    args="-f"
+	    shift
+	fi
+	if [ -z "$1" ] ; then
+	    log "You must specify one system to show log."
+	    exit 2
+	fi
+        sys=$1
+        journalctl $args --unit=rts*${sys}*
+        ;;
     'blog')
 	format=full
 	if [[ "$1" == '-i' ]] ; then
