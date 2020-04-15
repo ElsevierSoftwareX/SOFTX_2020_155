@@ -39,6 +39,8 @@ sub parseParams {
 				$::site = $spp[1];
 			        if ($::site =~ /^M/) {
                 			$::location = "mit";
+        			} elsif ($::site =~ /^A/) {
+                			$::location = "lao";
         			} elsif ($::site =~ /^G/) {
                 			$::location = "geo";
         			} elsif ($::site =~ /^H/) {
@@ -96,17 +98,19 @@ sub parseParams {
 				print "Plant name is set to $spp[1]\n";
 				$::plantName = $spp[1];
 			} elsif ($spp[0] eq "shmem_daq" && $spp[1] == 1) {
+                # This is no longer required as this is the default
+                # It is left here for now to avoid changing the many
+                # controls models which already specify this parameter
 				print "Shared memory DAQ connection (No Myrinet)\n";
 				$::shmem_daq = 1;
 			} elsif ($spp[0] eq "no_sync" && $spp[1] == 1) {
+                # This essentially set up IOP for a Cymac
 				print "Will not sync up to 1PPS\n";
 				$::no_sync = 1;
 			} elsif ($spp[0] eq "no_daq" && $spp[1] == 1) {
+                # Will compile code not to use DAQ
 				print "Will not connect to DAQ\n";
 				$::no_daq = 1;
-			} elsif ($spp[0] eq "dac_internal_clocking" && $spp[1] == 1) {
-				print "Will clock D/A converter internally\n";
-				$::dac_internal_clocking = 1;
 			} elsif ($spp[0] eq "no_oversampling" && $spp[1] == 1) {
 				print "Will not oversample\n";
 				$::no_oversampling = 1;
@@ -144,9 +148,6 @@ sub parseParams {
 			} elsif ($spp[0] eq "remoteGPS") {
 				print "FE will run with EPICS for GPS Time\n";
 				$::remoteGPS = $spp[1];
-			} elsif ($spp[0] eq "remote_ipc_port") {
-				$::remoteIPCport = $spp[1];
-        			die "Invalid remote_ipc_port specified in cdsParamters\n" unless $::remoteIPCport >= 0;
 			} elsif ($spp[0] eq "rfm_dma") {
 				$::rfmDma = 1;
 			} elsif ($spp[0] eq "rfm_delay") {
@@ -162,8 +163,6 @@ sub parseParams {
 			} elsif ($spp[0] eq "biquad") { 
 				$::allBiquad = $spp[1];
 				print "AllBiquad set\n";
-			} elsif ($spp[0] eq "direct_dac_write") { 
-				$::directDacWrite = $spp[1];
 			} elsif ($spp[0] eq "requireIOcnt") { 
 				$::requireIOcnt = $spp[1];
 			} elsif ($spp[0] eq "virtualIOP") { 
@@ -177,6 +176,7 @@ sub parseParams {
 			} elsif ($spp[0] eq "no_zero_pad") { 
 				$::noZeroPad = $spp[1];
 			} elsif ($spp[0] eq "ipc_rate") { 
+                # Specify IPC rate if lower than model rate
 				$::ipcrate = $spp[1];
 			}
 		}

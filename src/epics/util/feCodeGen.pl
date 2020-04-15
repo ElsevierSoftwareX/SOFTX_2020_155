@@ -136,7 +136,6 @@ $dacWdOverride = -1;
 $adcSlave = -1;
 $timeMaster = -1;
 $timeSlave = -1;
-$iopTimeSlave = -1;
 $rfmTimeSlave = -1;
 $diagTest = -1;
 $flipSignals = 0;
@@ -154,7 +153,6 @@ $no_daq = 0; # Enable DAQ by default
 $gdsNodeId = 0;
 $ifoid = 0; # Default ifoid for the DAQ
 $nodeid = 0; # Default GDS node id for awgtpman
-$dac_internal_clocking = 0; # Default is DAC external clocking
 $no_oversampling = 0; # Default is to iversample
 $no_dac_interpolation = 0; # Default is to interpolate D/A outputs
 $max_name_len = 39;	# Maximum part name length
@@ -2603,10 +2601,6 @@ if($rate > 15) {
     }
   }
 }
-if ($dac_internal_clocking) {
-  print OUTM "#Comment out to enable external D/A converter clocking\n";
-  print OUTM "EXTRA_CFLAGS += -DDAC_INTERNAL_CLOCKING\n";
-}
 if ($adcMaster > -1) {
   print OUTM "EXTRA_CFLAGS += -DADC_MASTER\n";
   $modelType = "MASTER";
@@ -2650,12 +2644,6 @@ if ($timeSlave > -1 or $virtualiop == 2) {
 } else {
   print OUTM "#Uncomment to build a time slave\n";
   print OUTM "#EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
-}
-if ($iopTimeSlave > -1) {
-  print OUTM "EXTRA_CFLAGS += -DIOP_TIME_SLAVE=1\n";
-} else {
-  print OUTM "#Uncomment to build an IOP time slave\n";
-  print OUTM "#EXTRA_CFLAGS += -DIOP_TIME_SLAVE=1\n";
 }
 if($rfm_via_pcie == 1) {
   print OUTM "EXTRA_CFLAGS += -DRFM_VIA_PCIE=1\n";
@@ -2831,10 +2819,6 @@ if($rate > 15) {
   }
 }
     print OUTM "CFLAGS += -DUNDERSAMPLE=1\n";
-if ($dac_internal_clocking) {
-  print OUTM "#Comment out to enable external D/A converter clocking\n";
-  print OUTM "CFLAGS += -DDAC_INTERNAL_CLOCKING\n";
-}
 if ($adcMaster > -1) {
   #print OUTM "CFLAGS += -DADC_MASTER\n";
   $modelType = "MASTER";
@@ -2868,12 +2852,6 @@ if ($timeSlave > -1) {
 } else {
   print OUTM "#Uncomment to build a time slave\n";
   print OUTM "#CFLAGS += -DTIME_SLAVE=1\n";
-}
-if ($iopTimeSlave > -1) {
-  print OUTM "CFLAGS += -DIOP_TIME_SLAVE=1\n";
-} else {
-  print OUTM "#Uncomment to build an IOP time slave\n";
-  print OUTM "#CFLAGS += -DIOP_TIME_SLAVE=1\n";
 }
 if($rfm_via_pcie == 1) {
   print OUTM "CFLAGS += -DRFM_VIA_PCIE=1\n";

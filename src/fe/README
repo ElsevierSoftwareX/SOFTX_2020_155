@@ -4,6 +4,7 @@ IOP Kernel Module Configurations ************************
 Standard Configuration:
     *** This is the standard production configuration ie each computer has 
     *** an I/O chassis connected
+        - Sync can be via TDS or 1PPS on ADC0, channel 31
     controllerIop.c   - Primary infinite control loop; controls I/O and timing
     moduleLoad.c    - Handles kernel module loading and unloading
     dolphin.c       - Provides setup and mapping of Dolphin network for IPCs
@@ -27,6 +28,9 @@ Timing Slave Configuration (NO Pcie modules, timing from Dolphin network)
 Cymac Configuration (No standard timing system available)
     *** This is a standalone test system configuration
     controllerCymac.c   - Primary infinite control loop; controls I/O and timing
+        *** SOON TO BE DEPRECATED ****************************
+        - Need to test, but appears simple no_cync=1 in Parameter block and controllerIOP
+          can handle this case. Also need to verify if this case removes need for IRIG-B
     moduleLoad.c    - Handles kernel module loading and unloading
     map.c           - Used to map PCIe I/O modules
     drv/iop_adc_functions   - Handles ADC I/O
@@ -60,7 +64,5 @@ User Application Kernel Module Configurations ************************
     drv/app_dio_routines.c  - Provides DIO card I/O
 
 Following are due for deletion once dependent codes have been cleaned up to no longer use:
-    - moduleLoadIop -> functionality now in moduleLoad.c
-    - moduleLoadApp -> functionality now in moduleLoad.c
     - controllerLR.c -> Add functionality to controllerIOP.c ???
     - controllerCymac.c -> Simple ifdef change to controllerIop.c ????
