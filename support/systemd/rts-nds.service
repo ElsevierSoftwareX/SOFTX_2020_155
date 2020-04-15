@@ -4,7 +4,7 @@ After=network-online.target
 
 [Service]
 RuntimeDirectory=nds
-User=controls
+User=advligorts
 ExecStart=/usr/bin/nds --rundir /run/nds
 Restart=always
 

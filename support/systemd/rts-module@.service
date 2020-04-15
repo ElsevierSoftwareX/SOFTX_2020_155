@@ -1,6 +1,7 @@
 [Unit]
 Description=Advanced LIGO RTS kernel module: %i
 After=rts-epics@%i.service
+Wants=rts-epics@%i.service
 PartOf=rts@%i.target
 
 [Service]

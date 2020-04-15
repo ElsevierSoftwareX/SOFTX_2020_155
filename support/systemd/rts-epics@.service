@@ -3,5 +3,5 @@ Description=Advanced LIGO RTS EPICS IOC sequencer: %i
 PartOf=rts@%i.target
 
 [Service]
-User=controls
+User=advligorts
 ExecStart=/usr/bin/rts_epics_exec %i

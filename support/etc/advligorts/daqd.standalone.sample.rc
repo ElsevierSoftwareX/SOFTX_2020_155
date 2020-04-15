@@ -38,7 +38,7 @@ set minute-trend-num-dirs=10;
 set minute-trend-frames-per-dir=24;
 set minute-trend-frame-dir="/frames/trend/minute", "X-X1_M-", ".gwf";
 
-#set raw-minute-trend-dir="/frames/trend/minute/raw";
+#set raw-minute-trend-dir="/frames/trend/minute_raw";
 #set raw_minute_trend_saving_period=5;
 
 set nds-jobs-dir="/run/nds";
