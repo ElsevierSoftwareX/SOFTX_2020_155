@@ -1,54 +1,67 @@
 Software in this directory is used to build the FE computer code.
 
-IOP Kernel Module Configurations ************************
-Standard Configuration:
-    *** This is the standard production configuration ie each computer has 
-    *** an I/O chassis connected
-        - Sync can be via TDS or 1PPS on ADC0, channel 31
+IOP Kernel Module Software ************************
+    *** Required C Code Files:
     controllerIop.c   - Primary infinite control loop; controls I/O and timing
-    moduleLoad.c    - Handles kernel module loading and unloading
-    dolphin.c       - Provides setup and mapping of Dolphin network for IPCs
-    map.c           - Used to map PCIe I/O modules
-    drv/iop_adc_functions   - Handles ADC I/O
-    drv/iop_dac_functions   - Handles DAC I/O
-    drv/dac_info.c          - Provides DAC card status info
-    drv/adc_info.c          - Provides ADC card status info
-
-Timing Slave Configuration (NO Pcie modules, timing from Dolphin network)
-    *** This is a test configuration for large test stands that have more
-    *** computers than I/O chassis:
-    controllerIop.c   - Primary infinite control loop; controls I/O and timing
-    moduleLoad.c    - Handles kernel module loading and unloading
-    dolphin.c       - Provides setup and mapping of Dolphin network for IPCs
-    mapVirtual.c    - Provides mbuf mapping of I/O cards
-    drv/time_slave_io   - Provides virtual I/O support
-    drv/dac_info.c          - Provides DAC card status info
-    drv/adc_info.c          - Provides ADC card status info
-
-Cymac Configuration (No standard timing system available)
-    *** This is a standalone test system configuration
-    controllerCymac.c   - Primary infinite control loop; controls I/O and timing
-        *** SOON TO BE DEPRECATED ****************************
-        - Need to test, but appears simple no_cync=1 in Parameter block and controllerIOP
-          can handle this case. Also need to verify if this case removes need for IRIG-B
-    moduleLoad.c    - Handles kernel module loading and unloading
-    map.c           - Used to map PCIe I/O modules
-    drv/iop_adc_functions   - Handles ADC I/O
-    drv/iop_dac_functions   - Handles DAC I/O
-    drv/dac_info.c          - Provides DAC card status info
-    drv/adc_info.c          - Provides ADC card status info
-
-Long Range I/O chassis configuration
-    *** Used when FE connected to IOC over long range fiber
-    *** This is presently used to connect mid station PEM channels
-    controllerLR.c   - Primary infinite control loop; controls I/O and timing
-    moduleLoad.c    - Handles kernel module loading and unloading
-    dolphin.c       - Provides setup and mapping of Dolphin network for IPCs
-    map.c           - Used to map PCIe I/O modules
-    drv/iop_adc_functions   - Handles ADC I/O
-    drv/iop_dac_functions   - Handles DAC I/O
-    drv/dac_info.c          - Provides DAC card status info
-    drv/adc_info.c          - Provides ADC card status info
+    moduleLoad.c      - Handles kernel module loading and unloading
+    dolphin.c         - Provides setup and mapping of Dolphin network for IPCs
+    map.c             - Used to map PCIe I/O modules
+    include/drv/iop_adc_functions   - Handles ADC I/O
+    include/drv/iop_dac_functions   - Handles DAC I/O
+    include/drv/dac_info.c          - Provides DAC card status info
+    include/drv/adc_info.c          - Provides ADC card status info
+    ***
+    REQUIRED Model Parameter Block Entries:
+    ***
+    site=IFO_DESIGNATOR eg L1,H1,X2
+    rate=MODEL_CYCLE_RATE, standard 64K for production systems
+    dcuid=DCUID, a system unique number for data acquisition
+        - NOTE: 1 thru 6 and 14,15 are reserved for DAQ and may not be used
+    adcMaster=1 : Indicates this model is to be compiled as an IOP
+    host=COMPUTER_HOST_NAME : Name of computer on which this code is to run
+    ***
+    Parameter Block Entries for Specific Use Cases::
+    ***
+    1) Long Range IOP Configuration ***************************************
+       When the IO chassis is connected over a long range fiber, such as mid
+       station PEM:, set the following:
+            - rate=64K
+            - clock_div=2
+        In this configuration, IOP waits for 2 adc samples/chan to begin
+        a processing cycle, instead of the usual one sample. The code
+        will run thru 2 complete signals everytime it is triggered and
+        continue to pass ADC data to user models at standard 64K rate.  
+    2) High Speed ADC Configuration ***************************************
+        WARNING: TESTING OF THIS CONFIGURATION IS NOT COMPLETE
+        For a specific A+ application, a 1MS/sec ADC is clocked at 512KHz.
+        The IOP gets triggered every 8 samples, processes data at 512K, and 
+        passes data to user models at the standard 64K rate (no downsample 
+        filtering).
+        Necessary Parameter Block settings for this configuration.
+            - rate=512K
+            - clock_div=8
+    3) TIME MASTER / TIME SLAVE Configuration *****************************
+        This configuration provides the capability to connect FE computers
+        without IO chassis to a distribued system interconnected via a
+        Dolphine network. In this configuration, time and 64K clock cycle 
+        are sent over the Dolphin IPC network to provide control model
+        timing in lieu of the usual ADC clocking.
+        There must be one, and only one, TIME MASTER, which sends the timing
+        info on the Dolphin network:
+        Necessary Parameter Block settings for TIME MASTER.
+            - rate=64K : Time master must have IO chassis and run at 64K
+            - time_master=1
+        Necessary Parameter Block settings for TIME SLAVE (FE w/o IOC).
+            - rate=64K : Time slave IOP must run at 64K
+            - time_slave=1
+        
+    4) Non_LIGO Timing System Configuration *****************************
+        This configuration is designed to support test systems, such as 
+        CYMAC standalone lab test systems, that do not receive their 
+        ADC/DAC clocks from a LIGO timing slave. 
+        Necessary Parameter Block settings for this configuration.
+            - no_sync=1
+        
 
 
 Virtual Configuration (No I/O and no timing available)
@@ -64,5 +77,4 @@ User Application Kernel Module Configurations ************************
     drv/app_dio_routines.c  - Provides DIO card I/O
 
 Following are due for deletion once dependent codes have been cleaned up to no longer use:
-    - controllerLR.c -> Add functionality to controllerIOP.c ???
     - controllerCymac.c -> Simple ifdef change to controllerIop.c ????

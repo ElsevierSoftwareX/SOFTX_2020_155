@@ -65,22 +65,25 @@ sub parseParams {
                 			$::rate = 240;
         			} elsif ($param_speed eq "16K") {
                 			$::rate = 60;
+                			$::modelrate = 16;
         			} elsif ($param_speed eq "32K") {
                 			$::rate = 30;
+                			$::modelrate = 32;
         			} elsif ($param_speed eq "64K") {
                 			$::rate = 15;
+                			$::modelrate = 64;
         			} elsif ($param_speed eq "128K") {
                 			$::rate = 8;
-                			$::adcrate = 128;
+                			$::modelrate = 128;
         			} elsif ($param_speed eq "256K") {
                 			$::rate = 4;
-                			$::adcrate = 256;
+                			$::modelrate = 256;
         			} elsif ($param_speed eq "512K") {
                 			$::rate = 2;
-                			$::adcrate = 512;
+                			$::modelrate = 512;
         			} elsif ($param_speed eq "1024K") {
                 			$::rate = 1;
-                			$::adcrate = 1024;
+                			$::modelrate = 1024;
         			} else  { die "Invalid speed $param_speed specified\n"; }
 
 			} elsif ($spp[0] eq "dcuid") {
@@ -169,6 +172,8 @@ sub parseParams {
 				$::virtualiop = $spp[1];
 			} elsif ($spp[0] eq "adcclock") { 
 				$::adcclock = $spp[1];
+			} elsif ($spp[0] eq "clock_div") { 
+				$::clock_div = $spp[1];
 			} elsif ($spp[0] eq "sync") { 
 				$::edcusync = $spp[1];
 			} elsif ($spp[0] eq "optimizeIO") { 

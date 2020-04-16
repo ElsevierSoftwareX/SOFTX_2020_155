@@ -165,8 +165,8 @@ $remoteGPS = 0;
 $daq2dc = 0;
 $requireIOcnt = 0;
 $adcclock = 64;
-$adcrate = 64;
-$adc_std_rate = 64;
+$modelrate = 64;
+$clock_div = 1;
 
 # Normally, ARGV !> 2, so the following are not invoked in a standard make
 # This is legacy.
@@ -1365,7 +1365,10 @@ print OUTH "\tint dacDtTime;\n";
 print OUTH "\tint irigbTime;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME epicsOutput.dtTime int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_DUOTONE_TIME_DAC epicsOutput.dacDtTime int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.irigbTime int ao 0 field(HIHI,\"24\") field(HHSV,\"MAJOR\") field(HIGH,\"18\") field(HSV,\"MINOR\") field(LOW,\"5\") field(LSV,\"MAJOR\")\n";
+$irighihi = $clock_div * 15 + 9;
+$irighigh = $clock_div * 15 + 3;
+$iriglow =  $clock_div * 15 - 7;
+print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.irigbTime int ao 0 field(HIHI,\"$irighihi\") field(HHSV,\"MAJOR\") field(HIGH,\"$irighigh\") field(HSV,\"MINOR\") field(LOW,\"$iriglow\") field(LSV,\"MAJOR\")\n";
 }
 print OUTH "\tint awgStat;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_AWGTPMAN_STAT epicsOutput.awgStat int ao 0\n";
@@ -1687,7 +1690,7 @@ END
 	#
 	if ($ipcxCnt > 0 ) {
 	   #print OUT "\ncommData3Receive(myIpcCount, ipcInfo, timeSec , cycle);\n\n";
-	   print OUT "\nif((cycle % UNDERSAMPLE) == 0)commData3Receive(myIpcCount, ipcInfo, timeSec , (cycle / UNDERSAMPLE));\n\n";
+	   print OUT "\nif((cycle % ADC_MEMCPY_RATE) == 0)commData3Receive(myIpcCount, ipcInfo, timeSec , (cycle / ADC_MEMCPY_RATE));\n\n";
 	}
 	# END IPCx PART CODE
 
@@ -1794,7 +1797,7 @@ if ($ipcxCnt > 0) {
    if($ipccycle > 0) {
    print OUT "\n    if((cycle % $ipccycle) == 0) commData3Send(myIpcCount, ipcInfo, timeSec, (cycle / $ipccycle));\n\n";
    } else {
-   print OUT "\n    if((cycle % UNDERSAMPLE) == 0) commData3Send(myIpcCount, ipcInfo, timeSec, (cycle / UNDERSAMPLE));\n\n";
+   print OUT "\n    if((cycle % ADC_MEMCPY_RATE) == 0) commData3Send(myIpcCount, ipcInfo, timeSec, (cycle / ADC_MEMCPY_RATE));\n\n";
     }
 }
 # END IPCx PART CODE
@@ -2601,33 +2604,36 @@ if($rate > 15) {
     }
   }
 }
-if ($adcMaster > -1) {
+if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
   print OUTM "EXTRA_CFLAGS += -DADC_MASTER\n";
   $modelType = "MASTER";
   if($diagTest > -1) {
   print OUTM "EXTRA_CFLAGS += -DDIAG_TEST\n";
   }
-  if($adcclock > $adc_std_clock) {
-  	$undersample = $adcclock/$adc_std_rate;
-  } else {
-  	$undersample = $adcclock/$adcrate;
-  }
-  print OUTM "EXTRA_CFLAGS += -DUNDERSAMPLE=$undersample\n";
+# Invoked if IOP cycle rate slower than ADC clock rate
+  print OUTM "EXTRA_CFLAGS += -DUNDERSAMPLE=$clock_div\n";
+  $adccopyrate = $modelrate / $adcclock;
+  print OUTM "EXTRA_CFLAGS += -DADC_MEMCPY_RATE=$adccopyrate\n";
+
+#Following used for testing 
   if($dacWdOverride > -1) {
   print OUTM "EXTRA_CFLAGS += -DDAC_WD_OVERRIDE\n";
   }
+#Following set to run as standard kernel module
   if ($no_cpu_shutdown > 0) {
     print OUTM "EXTRA_CFLAGS += -DNO_CPU_SHUTDOWN\n";
   }
   # ADD DAC_AUTOCAL to IOPs
   print OUTM "EXTRA_CFLAGS += -DDAC_AUTOCAL\n";
-} else {
+} else { 
   print OUTM "#Uncomment to run on an I/O Master \n";
   print OUTM "#EXTRA_CFLAGS += -DADC_MASTER\n";
 }
-if ($adcSlave > -1) {
+
+if ($adcSlave > -1) {   #************ SETUP FOR USER APP ***************
   print OUTM "EXTRA_CFLAGS += -DADC_SLAVE\n";
   print OUTM "EXTRA_CFLAGS += -DUNDERSAMPLE=1\n";
+  print OUTM "EXTRA_CFLAGS += -DADC_MEMCPY_RATE=1\n";
   $modelType = "SLAVE";
 } else {
   print OUTM "#Uncomment to run on an I/O slave process\n";

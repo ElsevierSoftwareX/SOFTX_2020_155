@@ -44,7 +44,7 @@ typedef struct GSA_ADC_REG{
 #define GSAI_DMA_START          0x3
 #define GSAI_DMA1_START          0x300
 #define GSAI_DMA_DONE           0x10
-#define GSAI_DMA_BYTE_COUNT     0x80
+#define GSAI_DMA_BYTE_COUNT     (0x80 * UNDERSAMPLE)
 #define GSAI_ISR_ON_SAMPLE      0x3
 #define PLX_INT_ENABLE          0x900
 #define PLX_INT_DISABLE         0x800
@@ -61,4 +61,5 @@ typedef struct GSA_ADC_REG{
 #define GSAI_DATA_MASK          0xffff
 #define GSAI_CHAN_COUNT         32
 #define GSAI_CHAN_COUNT_M1      31
+#define GSAI_64_OFFSET          (GSAI_CHAN_COUNT * UNDERSAMPLE - 1)
 
