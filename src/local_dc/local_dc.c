@@ -680,5 +680,8 @@ int __CDECL
         error = send_to_local_memory( nsys, len, do_wait );
     } while ( error == 0 && keepRunning == 1 );
 
-    return 0;
+    // local_dc never returns unless there is a timeout - ie an error
+    // or a signal (ctrl-c) has been sent, so it is killed
+    // always return an error code.
+    return 1;
 }

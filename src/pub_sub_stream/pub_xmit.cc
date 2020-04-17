@@ -417,5 +417,6 @@ main( int argc, char* argv[] )
     fprintf( stderr, "Closing out OpenMX and exiting\n" );
     args_destroy( &arg_parser );
 
-    return 0;
+    // we never exit except for timeout or being killed
+    return 1;
 }

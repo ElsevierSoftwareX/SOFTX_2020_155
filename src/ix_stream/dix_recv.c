@@ -222,6 +222,6 @@ int __CDECL
             print_diags2( nsys, new_cycle, sendLength, ixDataBlock );
     } while ( keepRunning );
 
-    // Exit
-    return SCI_ERR_OK;
+    // we never exit except for timeout or being killed
+    return 1;
 }
