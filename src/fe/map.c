@@ -466,18 +466,6 @@ mapPciModules( CDS_HARDWARE* pCds )
         pCds->pci_rfm[ i ] = 0;
     }
 
-#ifndef RFM_VIA_PCIE
-    // Search system for 5565 VMIC RFM modules
-    while ( ( dacdev = pci_get_device( VMIC_VID, VMIC_TID, dacdev ) ) )
-    {
-        printk( "5565 RFM card on bus %x; device %x\n",
-                dacdev->bus->number,
-                PCI_SLOT( dacdev->devfn ) );
-        status = vmic5565Init( pCds, dacdev );
-        modCount++;
-    }
-#endif
-
     dacdev = NULL;
     status = 0;
     pCds->gps = 0;

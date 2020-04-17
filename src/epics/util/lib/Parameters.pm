@@ -148,6 +148,10 @@ sub parseParams {
 			} elsif ($spp[0] eq "pciRfm") {
 				print "FE will run with PCIE RFM Network\n";
 				$::pciNet = $spp[1];
+			} elsif ($spp[0] eq "dolphingen") {
+				print "FE will run with PCIE RFM Network\n";
+                # Set Dolphin Gen to run with; default=2
+				$::dolphinGen = $spp[1];
 			} elsif ($spp[0] eq "remoteGPS") {
 				print "FE will run with EPICS for GPS Time\n";
 				$::remoteGPS = $spp[1];

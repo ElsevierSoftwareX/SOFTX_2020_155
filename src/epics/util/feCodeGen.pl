@@ -68,24 +68,10 @@ die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>
 #Setup current working directory and pointer to RCG source directory.
 $currWorkDir = &Cwd::cwd();
 $rcg_src_dir = $ENV{"RCG_SRC_DIR"};
-$lrpciefile = $rcg_src_dir . "/src/include/USE_LR_PCIE";
-$pciegenfile = $rcg_src_dir . "/src/include/USE_DOLPHIN_GEN2";
-$zmqfile = $rcg_src_dir . "/src/include/USE_ZMQ";
-$usezmq = 0;
 $mbufsymfile = $ENV{"MBUFSYM"};
 $gpssymfile = $ENV{"GPSSYM"};
+$dolphinGen = 2;
 
-if (-e "$zmqfile") {
-        print "Using ZMQ for DAQ\n";
-        $usezmq = 1;
-}
-if (-e "$lrpciefile") {
-        print "PCIE LR exists\n";
-        $rfm_via_pcie = 1;
-} else {
-        print "PCIE LR DOES NOT exist\n";
-        $rfm_via_pcie = 0;
-}
 if (! length $rcg_src_dir) { $rcg_src_dir = "$currWorkDir/../../.."; }
 
 @sources = ();
@@ -2651,12 +2637,6 @@ if ($timeSlave > -1 or $virtualiop == 2) {
   print OUTM "#Uncomment to build a time slave\n";
   print OUTM "#EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
 }
-if($rfm_via_pcie == 1) {
-  print OUTM "EXTRA_CFLAGS += -DRFM_VIA_PCIE=1\n";
-}
-if($usezmq == 1) {
-  print OUTM "EXTRA_CFLAGS += -DUSE_ZMQ=1\n";
-}
 if ($rfmTimeSlave > -1) {
   print OUTM "EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
 } else {
@@ -2667,7 +2647,7 @@ if ($flipSignals) {
   print OUTM "EXTRA_CFLAGS += -DFLIP_SIGNALS=1\n";
 }
 if ($pciNet > 0) {
-        if (-e "$pciegenfile") {
+        if ($dolphinGen == 2") {
           print OUTM "#Enable use of PCIe RFM Network Gen 2\n";
           print OUTM "DISDIR = /opt/srcdis\n";
           print OUTM "KBUILD_EXTRA_SYMBOLS += \$(DISDIR)/src/SCI_SOCKET/ksocket/LINUX/Module.symvers\n";
@@ -2858,9 +2838,6 @@ if ($timeSlave > -1) {
 } else {
   print OUTM "#Uncomment to build a time slave\n";
   print OUTM "#CFLAGS += -DTIME_SLAVE=1\n";
-}
-if($rfm_via_pcie == 1) {
-  print OUTM "CFLAGS += -DRFM_VIA_PCIE=1\n";
 }
 if ($rfmTimeSlave > -1) {
   print OUTM "CFLAGS += -DRFM_TIME_SLAVE=1\n";
