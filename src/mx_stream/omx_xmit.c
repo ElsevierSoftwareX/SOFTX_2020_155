@@ -515,5 +515,6 @@ int __CDECL
     mx_finalize( );
     args_destroy( &arg_parser );
 
-    return 0;
+    // we never exit except for timeout or being killed
+    return 1;
 }

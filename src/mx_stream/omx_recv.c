@@ -772,5 +772,6 @@ main( int argc, char** argv )
 
     args_destroy( arg_parser );
 
-    exit( 0 );
+    // we never exit except for timeout or being killed
+    exit( 1 );
 }
