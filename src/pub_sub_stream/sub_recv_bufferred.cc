@@ -1048,5 +1048,6 @@ main( int argc, char** argv )
 
     } while ( keepRunning ); // End of infinite loop
 
-    return 0;
+    // We never exit unless we are killed, so always return an error
+    return 1;
 }
