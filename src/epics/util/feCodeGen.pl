@@ -2647,7 +2647,7 @@ if ($flipSignals) {
   print OUTM "EXTRA_CFLAGS += -DFLIP_SIGNALS=1\n";
 }
 if ($pciNet > 0) {
-        if ($dolphinGen == 2") {
+        if ($dolphinGen == 2) {
           print OUTM "#Enable use of PCIe RFM Network Gen 2\n";
           print OUTM "DISDIR = /opt/srcdis\n";
           print OUTM "KBUILD_EXTRA_SYMBOLS += \$(DISDIR)/src/SCI_SOCKET/ksocket/LINUX/Module.symvers\n";
