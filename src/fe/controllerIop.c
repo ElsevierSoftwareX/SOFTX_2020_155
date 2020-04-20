@@ -990,6 +990,7 @@ fe_start_controller( void* arg )
                 }
             }
 
+#ifndef TIME_SLAVE
             // *****************************************************************
             /// \> Cycle 400 to 400 + numDacModules, write DAC heartbeat to AI
             /// chassis (only for 18 bit DAC modules)
@@ -1028,7 +1029,6 @@ fe_start_controller( void* arg )
 // Check once per second on code cycle HKP_DAC_WD_CHK to dac count
 // Only one read per code cycle to reduce time
 // *****************************************************************
-#ifndef TIME_SLAVE
             if ( cycleNum >= HKP_DAC_WD_CHK &&
                  cycleNum < ( HKP_DAC_WD_CHK + cdsPciModules.dacCount ) )
             {
