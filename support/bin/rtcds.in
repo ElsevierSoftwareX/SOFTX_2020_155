@@ -12,7 +12,9 @@ fi
 
 # this should define all USER_VARS (see below)
 ENV_FILE=${RTS_ENV:-/etc/advligorts/env}
+set -o allexport
 source "$ENV_FILE" 2>/dev/null || true
+set +o allexport
 
 SITE=${SITE^^*}
 site=${SITE,,*}
