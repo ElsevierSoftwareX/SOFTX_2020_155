@@ -1,7 +1,9 @@
 [Unit]
 Description=Advanced LIGO RTS awgtpman: %i
 After=rts-module@%i.service
+Wants=rts-module@%i.service
 PartOf=rts@%i.target
 
 [Service]
 ExecStart=/usr/bin/rts_awgtpman_exec %i
+Restart=always
