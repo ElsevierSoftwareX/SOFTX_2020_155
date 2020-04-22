@@ -38,6 +38,10 @@ USER_VARS=(SITE IFO RCG_LIB_PATH)
 LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RCG_TARGET)
 EXPORT_VARS=(${USER_VARS[@]} site ifo CDS_SRC CDS_IFO_SRC)
 
+# set the umask to ensure that all files and directories are made
+# group writable
+umask 0002
+
 ##################################################
 
 check_env() {
