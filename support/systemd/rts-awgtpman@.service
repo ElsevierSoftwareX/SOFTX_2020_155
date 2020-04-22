@@ -5,5 +5,7 @@ Wants=rts-module@%i.service
 PartOf=rts@%i.target
 
 [Service]
+User=advligorts
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 ExecStart=/usr/bin/rts_awgtpman_exec %i
 Restart=always
