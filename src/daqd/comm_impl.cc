@@ -22,6 +22,9 @@ namespace comm_impl
         int i, j, k, offs;
         int rm_offs = 0;
 
+        auto skip_checks =
+            daqd.parameters( ).get< bool >( "allow_any_dcuid", false );
+
         // Configure channels from files
         if ( daqd.configure_channels_files( ) )
             exit( 1 );
@@ -36,6 +39,17 @@ namespace comm_impl
                 t = 1;
             else
                 t = cur_dcu != -1 && cur_dcu != daqd.channels[ i ].dcu_id;
+
+            if ( cur_dcu >= 0 && !skip_checks )
+            {
+                if ( !IS_TP_DCU( cur_dcu ) && !IS_MYRINET_DCU( cur_dcu ) )
+                {
+                    std::cerr
+                        << "DCUID found requested not in the standard ranges "
+                        << cur_dcu << std::endl;
+                    exit( 1 );
+                }
+            }
 
             if ( IS_TP_DCU( daqd.channels[ i ].dcu_id ) && t )
             {
