@@ -45,7 +45,7 @@ namespace comm_impl
                 if ( !IS_TP_DCU( cur_dcu ) && !IS_MYRINET_DCU( cur_dcu ) )
                 {
                     std::cerr
-                        << "DCUID found requested not in the standard ranges "
+                        << "requested DCUID not in the standard range: "
                         << cur_dcu << std::endl;
                     exit( 1 );
                 }
