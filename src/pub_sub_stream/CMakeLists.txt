@@ -1,5 +1,8 @@
 Message("libcds-pubsub_FOUND = ${libcds-pubsub_FOUND}")
-if (libcds-pubsub_FOUND)
+add_subdirectory(/home/jonathan.hanks/Documents/Programming/scratch/pub_sub2 pub_sub_internal)
+add_library(cds::pub_sub ALIAS pub_sub)
+add_library(cds::pub_sub_asan ALIAS pub_sub_asan)
+#if (libcds-pubsub_FOUND)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../mx_stream/atomic_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/atomic_config.h)
 
     add_subdirectory(plugins)
@@ -92,4 +95,4 @@ if (libcds-pubsub_FOUND)
     install(TARGETS cps_recv DESTINATION bin)
     install(TARGETS cds_pub_sub DESTINATION bin)
 
-endif (libcds-pubsub_FOUND)
+#endif (libcds-pubsub_FOUND)

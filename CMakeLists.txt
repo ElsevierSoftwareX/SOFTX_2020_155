@@ -28,7 +28,7 @@ FIND_PACKAGE(NDS2Client)
 FIND_PACKAGE(Boost COMPONENTS filesystem system)
 FIND_PACKAGE(RapidJSON)
 FIND_PACKAGE(RPC)
-FIND_PACKAGE(libcds-pubsub)
+#FIND_PACKAGE(libcds-pubsub)
 
 CHECK_CXX_SOURCE_COMPILES("#include <iostream>
 #include <FlexLexer.h>

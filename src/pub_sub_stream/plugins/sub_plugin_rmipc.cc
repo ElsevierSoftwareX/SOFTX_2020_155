@@ -23,7 +23,9 @@
 #include "daq_core.h"
 #include "../../drv/gpstime/gpstime.h"
 #include "arena.hh"
-#include "../../drv/crc.c"
+//#include "../../drv/crc.c"
+extern unsigned int crc_ptr(char*, unsigned int, unsigned int);
+extern unsigned int crc_len(unsigned int, unsigned int);
 
 extern "C" {
 void* findSharedMemory( const char* );
@@ -93,7 +95,7 @@ namespace cps_plugins
                                               CDS_DAQ_NET_GDS_TP_TABLE_OFFSET );
                     auto status = getmodelrate( &modelrates[ i ],
                                                 &dcuid[ i ],
-                                                shmem_fname.c_str( ),
+                                                name.c_str( ),
                                                 nullptr );
                     if ( status != 0 || modelrates[ i ] == 0 )
                     {
@@ -168,7 +170,7 @@ namespace cps_plugins
 
                 if ( !gds_tp_dir )
                 {
-                    gds_tp_dir = getenv( "GDS_TP_DIR " );
+                    gds_tp_dir = getenv( "GDS_TP_DIR" );
                 }
                 if ( gds_tp_dir )
                 {

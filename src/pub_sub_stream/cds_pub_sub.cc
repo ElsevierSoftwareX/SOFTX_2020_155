@@ -847,11 +847,13 @@ main( int argc, char** argv )
 
     data_recorder recorder( publishing_strings );
 
+    auto rmapi_plugin= std::make_shared<cps_plugins::SubPluginRmIpcApi>();
     std::vector< std::unique_ptr< pub_sub::Subscriber > > subscribers{};
     subscribers.reserve( subscription_strings.size( ) );
     if ( !thread_per_sub )
     {
         subscribers.emplace_back( make_unique_ptr< pub_sub::Subscriber >( ) );
+        subscribers.back()->load_plugin(rmapi_plugin);
     }
     for ( const auto& conn_str : subscription_strings )
     {
@@ -859,6 +861,7 @@ main( int argc, char** argv )
         {
             subscribers.emplace_back(
                 make_unique_ptr< pub_sub::Subscriber >( ) );
+            subscribers.back()->load_plugin(rmapi_plugin);
         }
         subscribers.front( )->SetupDebugHooks( &debug );
         fprintf( stderr, "Beginning subscription on %s\n", conn_str.c_str( ) );
