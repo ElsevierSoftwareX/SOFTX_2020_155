@@ -1802,20 +1802,10 @@ print "\tPart number is $remoteGpsPart\n";
 
 }
 
-if($virtualiop == 1) {
-print OUT "#include \"$rcg_src_dir/src/fe/controllerVirtual.c\"\n";
-} elsif ($virtualiop == 2) {
-  print OUT "#include \"$rcg_src_dir/src/fe/controllerIop.c\"\n";
-} elsif ($virtualiop == 3) {
-print OUT "#include \"$rcg_src_dir/src/fe/controllerLR.c\"\n";
-} elsif ($virtualiop == 4) {
-print OUT "#include \"$rcg_src_dir/src/fe/controllerCymac.c\"\n";
+if($adcMaster == 1) {
+	print OUT "#include \"$rcg_src_dir/src/fe/controllerIop.c\"\n";
 } else {
-  if($adcMaster == 1) {
-  	print OUT "#include \"$rcg_src_dir/src/fe/controllerIop.c\"\n";
-  } else {
   	print OUT "#include \"$rcg_src_dir/src/fe/controllerApp.c\"\n";
-  }
 }
 
 
@@ -2499,6 +2489,7 @@ sub createEpicsMakefile {
 #// Generate the user C code Makefile  \n\n
 sub createCmakefile{
 
+# Compile options common to all runtime configurations
 system ("/bin/cp GNUmakefile  ../../fe/$skeleton");
 open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 
@@ -2526,8 +2517,8 @@ print OUTM "\U$skeleton";
 print OUTM "_CODE\n";
 print OUTM "EXTRA_CFLAGS += -DFE_SRC=\\\"\L$skeleton/\L$skeleton.c\\\"\n";
 print OUTM "EXTRA_CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
-#print OUTM "EXTRA_CFLAGS += -DFE_PROC_FILE=\\\"\L${skeleton}_proc.h\\\"\n";
 
+# Model uses FIR filters
 if($systemName eq "sei" || $useFIRs)
 {
 print OUTM "EXTRA_CFLAGS += -DFIR_FILTERS\n";
@@ -2546,13 +2537,6 @@ if ($requireIOcnt) {
 } else {
   print OUTM "#Uncomment to enable exact IO module count requirement\n";
   print OUTM "#EXTRA_CFLAGS += -DREQUIRE_IO_CNT\n";
-}
-if ($no_sync) {
-  print OUTM "#Comment out to enable 1PPS synchronization\n";
-  print OUTM "EXTRA_CFLAGS += -DNO_SYNC\n";
-} else {
-  print OUTM "#Uncomment to disable 1PPS signal sinchronization (channel 31 (last), ADC 0)\n";
-  print OUTM "#EXTRA_CFLAGS += -DNO_SYNC\n";
 }
 if (0 == $dac_testpoint_names && 0 == $::extraTestPoints && 0 == $filtCnt) {
 	print "Not compiling DAQ into the front-end\n";
@@ -2590,6 +2574,26 @@ if($rate > 15) {
     }
   }
 }
+# Set to flip polarity of ADC input signals
+if ($flipSignals) {
+  print OUTM "EXTRA_CFLAGS += -DFLIP_SIGNALS=1\n";
+}
+# Set CPU core for runtime
+if ($specificCpu > -1) {
+  print OUTM "#Comment out to run on first available CPU\n";
+  print OUTM "EXTRA_CFLAGS += -DSPECIFIC_CPU=$specificCpu\n";
+}
+
+# Set BIQUAD as default starting RCG V2.8
+  print OUTM "EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
+
+if ($::rfmDelay) {
+  print OUTM "#Comment out to run without RFM Delayed by 1 cycle\n";
+  print OUTM "EXTRA_CFLAGS += -DRFM_DELAY=1\n";
+}
+
+#********* END OF COMMON COMPILE OPTIONS
+
 if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
   print OUTM "EXTRA_CFLAGS += -DADC_MASTER\n";
   $modelType = "MASTER";
@@ -2611,42 +2615,29 @@ if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
   }
   # ADD DAC_AUTOCAL to IOPs
   print OUTM "EXTRA_CFLAGS += -DDAC_AUTOCAL\n";
-} else { 
-  print OUTM "#Uncomment to run on an I/O Master \n";
-  print OUTM "#EXTRA_CFLAGS += -DADC_MASTER\n";
-}
 
-if ($adcSlave > -1) {   #************ SETUP FOR USER APP ***************
-  print OUTM "EXTRA_CFLAGS += -DADC_SLAVE\n";
-  print OUTM "EXTRA_CFLAGS += -DUNDERSAMPLE=1\n";
-  print OUTM "EXTRA_CFLAGS += -DADC_MEMCPY_RATE=1\n";
-  $modelType = "SLAVE";
-} else {
-  print OUTM "#Uncomment to run on an I/O slave process\n";
-  print OUTM "#EXTRA_CFLAGS += -DADC_SLAVE\n";
-}
-if ($timeMaster > -1) {
-  print OUTM "EXTRA_CFLAGS += -DTIME_MASTER=1\n";
-} else {
-  print OUTM "#Uncomment to build a time master\n";
-  print OUTM "#EXTRA_CFLAGS += -DTIME_MASTER=1\n";
-}
-if ($timeSlave > -1 or $virtualiop == 2) {
-  print OUTM "EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
-} else {
-  print OUTM "#Uncomment to build a time slave\n";
-  print OUTM "#EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
-}
-if ($rfmTimeSlave > -1) {
-  print OUTM "EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
-} else {
-  print OUTM "#Uncomment to build an RFM time slave\n";
-  print OUTM "#EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
-}
-if ($flipSignals) {
-  print OUTM "EXTRA_CFLAGS += -DFLIP_SIGNALS=1\n";
-}
-if ($pciNet > 0) {
+# Set to run without LIGO timing system
+  if ($no_sync) {
+    print OUTM "#Comment out to enable 1PPS synchronization\n";
+    print OUTM "EXTRA_CFLAGS += -DNO_SYNC\n";
+  }  
+# Set to run IOP as time master for the Dolphin Network
+  if ($timeMaster > -1) {
+    print OUTM "EXTRA_CFLAGS += -DTIME_MASTER=1\n";
+  }
+# Set to run IOP as time slave on the Dolphin Network
+  if ($timeSlave > -1 or $virtualiop == 2) {
+    print OUTM "EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
+    print OUTM "EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
+  }
+# Set to run IOP on internal clock ie no IO modules
+  if ($virtualiop == 1) {
+    print OUTM "EXTRA_CFLAGS += -DRUN_WO_IO_MODULES=1\n";
+    print OUTM "EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
+  }
+# Set IOP to map Dolphin Networks
+# Dolphin Gen2 is the default
+  if ($pciNet > 0) {
         if ($dolphinGen == 2) {
           print OUTM "#Enable use of PCIe RFM Network Gen 2\n";
           print OUTM "DISDIR = /opt/srcdis\n";
@@ -2658,53 +2649,25 @@ if ($pciNet > 0) {
           print OUTM "KBUILD_EXTRA_SYMBOLS += \$(DISDIR)/src/SCI_SOCKET/ksocket/lib/LINUX/Module.symvers\n";
           print OUTM "EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
         }
+  }
+
+  if ($::optimizeIO) {
+    print OUTM "EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
+  }
 }
-if ($specificCpu > -1) {
-  print OUTM "#Comment out to run on first available CPU\n";
-  print OUTM "EXTRA_CFLAGS += -DSPECIFIC_CPU=$specificCpu\n";
-} else {
-  print OUTM "#Uncomment to run on a specific CPU\n";
-  print OUTM "#EXTRA_CFLAGS += -DSPECIFIC_CPU=2\n";
+# End of IOP compile options
+
+if ($adcSlave > -1) {   #************ SETUP FOR USER APP ***************
+  print OUTM "EXTRA_CFLAGS += -DADC_SLAVE\n";
+  print OUTM "EXTRA_CFLAGS += -DUNDERSAMPLE=1\n";
+  print OUTM "EXTRA_CFLAGS += -DADC_MEMCPY_RATE=1\n";
+  $modelType = "SLAVE";
+
+  if ($::noZeroPad) {
+    print OUTM "EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
+  }
 }
 
-# Set BIQUAD as default starting RCG V2.8
-  print OUTM "#Comment out to go back to old iir_filter calculation form\n";
-  print OUTM "EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
-
-if ($::directDacWrite) {
-  print OUTM "EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
-} else {
-  print OUTM "#EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
-}
-
-if ($::noZeroPad) {
-  print OUTM "EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
-} else {
-  print OUTM "#EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
-}
-
-if ($::optimizeIO) {
-  print OUTM "EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
-} else {
-  print OUTM "#EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
-}
-  
-
-if ($::rfmDma) {
-  print OUTM "#Comment out to run with RFM DMA\n";
-  print OUTM "#EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
-} else {
-  print OUTM "#Comment out to run with RFM DMA\n";
-  print OUTM "EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
-}
-
-if ($::rfmDelay) {
-  print OUTM "#Comment out to run without RFM Delayed by 1 cycle\n";
-  print OUTM "EXTRA_CFLAGS += -DRFM_DELAY=1\n";
-} else {
-  print OUTM "#Clear comment to run with RFM Delayed by 1 cycle\n";
-  print OUTM "#EXTRA_CFLAGS += -DRFM_DELAY=1\n";
-}
 
 
 print OUTM "\n";

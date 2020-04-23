@@ -11,7 +11,7 @@ IOP Kernel Module Software ************************
     include/drv/dac_info.c          - Provides DAC card status info
     include/drv/adc_info.c          - Provides ADC card status info
     ***
-    REQUIRED Model Parameter Block Entries:
+    REQUIRED Model Parameter Block Entries for all IOP configurations:
     ***
     site=IFO_DESIGNATOR eg L1,H1,X2
     rate=MODEL_CYCLE_RATE, standard 64K for production systems
@@ -62,10 +62,11 @@ IOP Kernel Module Software ************************
         Necessary Parameter Block settings for this configuration.
             - no_sync=1
         
+    5) Running without hardware (Virtual) Configuration *****************
+        This configuration is designed to support running on a computer
+        that does not have any I/O modules.  It is intended as a test mode.
+            - virtualiop=1
 
-
-Virtual Configuration (No I/O and no timing available)
-    *** Test configuration 
 
 User Application Kernel Module Configurations ************************
     *** This is the standard production configuration for non-IOP models 

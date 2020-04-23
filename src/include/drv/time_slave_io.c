@@ -13,6 +13,14 @@ waitPcieTimingSignal( volatile TIMING_SIGNAL* timePtr, int cycle )
     else
         return ( 0 );
 }
+inline int
+waitInternalTimingSignal( int cycle )
+{
+    int loop = 0;
+
+    udelay( 14 );
+    return ( 0 );
+}
 inline unsigned int
 sync2master( volatile TIMING_SIGNAL* timePtr )
 {
@@ -32,6 +40,20 @@ sync2master( volatile TIMING_SIGNAL* timePtr )
     {
         return ( timePtr->gps_time );
     }
+}
+inline unsigned int
+sync2cpuclock( )
+{
+    struct timespec        t;
+    extern struct timespec current_kernel_time( void );
+    unsigned long          gpsoffset = 37;
+
+    t = current_kernel_time( );
+
+    t.tv_sec += gpsoffset;
+    t.tv_sec -= 315964819;
+
+    return t.tv_sec;
 }
 
 inline int
@@ -67,7 +89,7 @@ iop_adc_init( adcInfo_t* adcinfo )
 inline int
 iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
 {
-    int           kk;
+    int           kk = 0;
     volatile int* packedData;
     int           limit;
     int           mask;
@@ -78,10 +100,15 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
     int           card;
     int           chan;
     int           missedCycle;
+    int           iocycle = 0;
 
     // Read ADC data
+#ifdef TIMIE_SLAVE
     missedCycle = waitPcieTimingSignal( pcieTimer, cycleNum );
     timeSec = pcieTimer->gps_time;
+#else
+    missedCycle = waitInternalTimingSignal( cycleNum );
+#endif
 
     for ( card = 0; card < cdsPciModules.adcCount; card++ )
     {
@@ -172,36 +199,43 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
         num_outs = GSAI_CHAN_COUNT;
         /// - ---- Determine next ipc memory location to load ADC data
         ioMemCntr = ( cycleNum % IO_MEMORY_SLOTS );
+        iocycle = ( cycleNum / ADC_MEMCPY_RATE );
 
         /// - ----  Read adc data from PCI mapped memory into local variables
-        for ( chan = 0; chan < num_outs; chan++ )
+        for ( kk = 0; kk < UNDERSAMPLE; kk++ )
         {
-            // adcData is the integer representation of the ADC data
-            adcinfo->adcData[ card ][ chan ] = *packedData;
-            // dWord is the double representation of the ADC data
-            // This is the value used by the rest of the code calculations.
-            dWord[ card ][ chan ][ kk ] = adcinfo->adcData[ card ][ chan ];
-            /// - ----  Load ADC value into ipc memory buffer
-            ioMemData->iodata[ card ][ ioMemCntr ].data[ chan ] =
-                adcinfo->adcData[ card ][ chan ];
-            /// - ---- Check for ADC overflows
-            if ( ( adcinfo->adcData[ card ][ chan ] > limit ) ||
-                 ( adcinfo->adcData[ card ][ chan ] < -limit ) )
+            for ( chan = 0; chan < num_outs; chan++ )
             {
-                adcinfo->overflowAdc[ card ][ chan ]++;
-                pLocalEpics->epicsOutput.overflowAdcAcc[ card ][ chan ]++;
-                overflowAcc++;
-                adcinfo->adcOF[ card ] = 1;
-                odcStateWord |= ODC_ADC_OVF;
+                // adcData is the integer representation of the ADC data
+                adcinfo->adcData[ card ][ chan ] = *packedData;
+                // dWord is the double representation of the ADC data
+                // This is the value used by the rest of the code calculations.
+                dWord[ card ][ chan ][ kk ] = adcinfo->adcData[ card ][ chan ];
+                /// - ----  Load ADC value into ipc memory buffer
+                ioMemData->iodata[ card ][ ioMemCntr ].data[ chan ] =
+                    adcinfo->adcData[ card ][ chan ];
+                /// - ---- Check for ADC overflows
+                if ( ( adcinfo->adcData[ card ][ chan ] > limit ) ||
+                     ( adcinfo->adcData[ card ][ chan ] < -limit ) )
+                {
+                    adcinfo->overflowAdc[ card ][ chan ]++;
+                    pLocalEpics->epicsOutput.overflowAdcAcc[ card ][ chan ]++;
+                    overflowAcc++;
+                    adcinfo->adcOF[ card ] = 1;
+                    odcStateWord |= ODC_ADC_OVF;
+                }
+                packedData++;
             }
-            packedData++;
-        }
 
-        /// - ---- Write GPS time and cycle count as indicator to slave that adc
-        /// data is ready
-        ioMemData->gpsSecond = timeSec;
-        ioMemData->iodata[ card ][ ioMemCntr ].timeSec = timeSec;
-        ioMemData->iodata[ card ][ ioMemCntr ].cycle = cycleNum;
+            /// - ---- Write GPS time and cycle count as indicator to slave that
+            /// adc data is ready
+            ioMemData->gpsSecond = timeSec;
+            ioMemData->iodata[ card ][ ioMemCntr ].timeSec = timeSec;
+            ioMemData->iodata[ card ][ ioMemCntr ].cycle = cycleNum;
+            ioMemCntr++;
+            iocycle++;
+            iocycle %= 65536;
+        }
     }
     return adcStat;
 }

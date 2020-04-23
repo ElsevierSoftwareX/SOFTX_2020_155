@@ -71,7 +71,7 @@ mapPciModules( CDS_HARDWARE* pCds )
 {
     static struct pci_dev* dacdev;
     int                    status;
-    int                    i;
+    int                    i,ii;
     int                    ret;
     int                    modCount = 0;
 //  int fast_adc_cnt = 0;
@@ -142,7 +142,7 @@ mapPciModules( CDS_HARDWARE* pCds )
         if ( pCds->cards_used[ i ].type == GSC_16AI64SSA )
         {
             sprintf( fname, "%s_%d\n", "IO_DEV_", i );
-            ret = mbuf_allocate_area( fname, 32 * 4 * 65536, 0 );
+            ret = mbuf_allocate_area( fname, 32 * 4 * 128, 0 );
             if ( ret < 0 )
             {
                 printf( "mbuf_allocate_area() failed; ret = %d\n", ret );
@@ -151,7 +151,13 @@ mapPciModules( CDS_HARDWARE* pCds )
             _device_shm = (unsigned char*)( kmalloc_area[ ret ] );
             pCds->pci_adc[ adc_cnt ] = (long)_device_shm;
             pCds->adcType[ adc_cnt ] = GSC_16AI64SSA;
+            pCds->adcChannels[ adc_cnt ] = 32;
             pCds->adcCount++;
+            data = (int *) pCds->pci_adc[ adc_cnt ];
+            for(ii=0;ii<64;ii++) {
+                *data = ii;
+                data ++;
+            }
             adc_cnt++;
         }
         modCount++;
