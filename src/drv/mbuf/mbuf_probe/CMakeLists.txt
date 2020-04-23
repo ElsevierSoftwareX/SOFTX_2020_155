@@ -12,4 +12,4 @@ target_include_directories(mbuf_probe PRIVATE
 target_link_libraries(mbuf_probe PUBLIC driver::shmem)
 target_requires_cpp11(mbuf_probe PRIVATE)
 
-install(TARGETS mbuf_probe DESTINATION BIN)
+install(TARGETS mbuf_probe DESTINATION bin)
