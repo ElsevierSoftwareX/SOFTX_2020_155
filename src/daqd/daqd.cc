@@ -476,18 +476,6 @@ chanConfigCallback( char* channel_name, struct CHAN_PARAM* params, void* user )
         if ( IS_GDS_SIGNAL( *ccd ) )
             daqd.num_gds_channels++;
     }
-    if ( IS_EPICS_DCU( ccd->dcu_id ) )
-    {
-        daqd.num_epics_channels++;
-        if ( ccd->data_type != DAQ_DATATYPE_FLOAT )
-        {
-            system_log( 1,
-                        "EDCU channel `%s' has unsupported data type %d",
-                        ccd->name,
-                        ccd->data_type );
-            return 0;
-        }
-    }
 
     // assign conversion data
     ccd->signal_gain = params->gain;
