@@ -7,10 +7,10 @@
 #define M_TWO_PI 6.28318530717958647692
 
 #include <asm/msr.h>
-#if 0
-// These are already defined in kernel's msr.h
 #define rdtscl( low ) __asm__ __volatile__( "rdtsc" : "=a"( low ) : : "edx" )
 
+// These are already defined in kernel's msr.h
+#if 0
 #define rdtscll( val ) __asm__ __volatile__( "rdtsc" : "=A"( val ) )
 #endif
 

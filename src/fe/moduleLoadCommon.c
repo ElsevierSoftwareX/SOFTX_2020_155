@@ -258,4 +258,92 @@ attach_shared_memory( )
 
     return 0;
 }
+
+void
+send_io_info_to_mbuf( int totalcards, CDS_HARDWARE* pCds )
+{
+    int ii, jj, kk;
+
+    /// Wirte PCIe card info to mbuf for use by userapp models
+    // Clear out card model info in IO_MEM
+    for ( ii = 0; ii < MAX_IO_MODULES; ii++ )
+    {
+        ioMemData->model[ ii ] = -1;
+    }
+
+    /// Master send module counts to SLAVE via ipc shm
+    ioMemData->totalCards = totalcards;
+    ioMemData->adcCount = pCds->adcCount;
+    ioMemData->dacCount = pCds->dacCount;
+    ioMemData->bioCount = pCds->doCount;
+    // kk will act as ioMem location counter for mapping modules
+    kk = pCds->adcCount;
+    for ( ii = 0; ii < pCds->adcCount; ii++ )
+    {
+        // MASTER maps ADC modules first in ipc shm for SLAVES
+        ioMemData->model[ ii ] = pCds->adcType[ ii ];
+        ioMemData->ipc[ ii ] =
+            ii; // ioData memory buffer location for SLAVE to use
+    }
+    for ( ii = 0; ii < pCds->dacCount; ii++ )
+    {
+        // Pass DAC info to SLAVE processes
+        ioMemData->model[ kk ] = pCds->dacType[ ii ];
+        ioMemData->ipc[ kk ] = kk;
+        // Following used by MASTER to point to ipc memory for inputting DAC
+        // data from SLAVES
+        pCds->dacConfig[ ii ] = kk;
+        kk++;
+    }
+    // MASTER sends DIO module information to SLAVES
+    // Note that for DIO, SLAVE modules will perform the I/O directly and
+    // therefore need to know the PCIe address of these modules.
+    ioMemData->bioCount = pCds->doCount;
+    for ( ii = 0; ii < pCds->doCount; ii++ )
+    {
+        // MASTER needs to find Contec 1616 I/O card to control timing slave.
+        if ( pCds->doType[ ii ] == CON_1616DIO )
+        {
+            tdsControl[ tdsCount ] = ii;
+            tdsCount++;
+        }
+        ioMemData->model[ kk ] = pCds->doType[ ii ];
+        // Unlike ADC and DAC, where a memory buffer number is passed, a PCIe
+        // address is passed for DIO cards.
+        ioMemData->ipc[ kk ] = pCds->pci_do[ ii ];
+        kk++;
+    }
+    // Following section maps Reflected Memory, both VMIC hardware style and
+    // Dolphin PCIe network style. Slave units will perform I/O transactions
+    // with RFM directly ie MASTER does not do RFM I/O. Master unit only maps
+    // the RFM I/O space and passes pointers to SLAVES.
+
+    /// Map VMIC RFM cards, if any
+    ioMemData->rfmCount = pCds->rfmCount;
+    for ( ii = 0; ii < pCds->rfmCount; ii++ )
+    {
+        // Master sends RFM memory pointers to SLAVES
+        ioMemData->pci_rfm[ ii ] = pCds->pci_rfm[ ii ];
+        ioMemData->pci_rfm_dma[ ii ] = pCds->pci_rfm_dma[ ii ];
+    }
+#ifdef DOLPHIN_TEST
+    /// Send Dolphin addresses to user app processes
+    // dolphinCount is number of segments
+    ioMemData->dolphinCount = pCds->dolphinCount;
+    // dolphin read/write 0 is for local PCIe network traffic
+    ioMemData->dolphinRead[ 0 ] = pCds->dolphinRead[ 0 ];
+    ioMemData->dolphinWrite[ 0 ] = pCds->dolphinWrite[ 0 ];
+    // dolphin read/write 1 is for long range PCIe (RFM) traffic
+    ioMemData->dolphinRead[ 1 ] = pCds->dolphinRead[ 1 ];
+    ioMemData->dolphinWrite[ 1 ] = pCds->dolphinWrite[ 1 ];
+
+#else
+        // Clear Dolphin pointers so the slave sees NULLs
+        ioMemData->dolphinCount = 0;
+        ioMemData->dolphinRead[ 0 ] = 0;
+        ioMemData->dolphinWrite[ 0 ] = 0;
+        ioMemData->dolphinRead[ 1 ] = 0;
+        ioMemData->dolphinWrite[ 1 ] = 0;
+#endif
+}
 #endif

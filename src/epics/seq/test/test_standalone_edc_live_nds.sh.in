@@ -58,12 +58,12 @@ if [ ! -x "$FE_STREAM_CHECK_NDS" ]; then
   exit 1
 fi
 
-if [ ! -w /dev/gpstime ]; then
+if [ ! -r /dev/gpstime ]; then
   echo "the gpstime module must be loaded, configured, and accessible by this user"
   exit 1
 fi
 
-if [ ! -w /dev/mbuf ]; then
+if [ ! -r /dev/mbuf ]; then
   echo "the mbuf module must be loaded, configured, and accessible by this user"
   exit 1
 fi

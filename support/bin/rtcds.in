@@ -12,7 +12,9 @@ fi
 
 # this should define all USER_VARS (see below)
 ENV_FILE=${RTS_ENV:-/etc/advligorts/env}
+set -o allexport
 source "$ENV_FILE" 2>/dev/null || true
+set +o allexport
 
 SITE=${SITE^^*}
 site=${SITE,,*}
@@ -35,6 +37,10 @@ RCG_LIB_PATH=$RCG_LIB_PATH:${RCG_SRC}/src/epics/simLink/:${RCG_SRC}/src/epics/si
 USER_VARS=(SITE IFO RCG_LIB_PATH)
 LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RCG_TARGET)
 EXPORT_VARS=(${USER_VARS[@]} site ifo CDS_SRC CDS_IFO_SRC)
+
+# set the umask to ensure that all files and directories are made
+# group writable
+umask 0002
 
 ##################################################
 

@@ -175,12 +175,7 @@ CDS_HARDWARE cdsPciModules;
       initReflectiveMemory();
 #endif
       if (run_awg) {
-        if (geteuid() != 0) {
-	  printf ("Must be a superuser to run awgtpman\n");
-	  return 1;
-        } else {
-	  nice(-20);
-        }
+        nice(-20);
       }
 /*
                                 if ($::site =~ /^M/) {

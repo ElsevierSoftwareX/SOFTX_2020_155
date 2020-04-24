@@ -623,5 +623,6 @@ main( int argc, char** argv )
 
     simple_pv_server_destroy( &pcas_server );
 
-    exit( 0 );
+    // we never exit except for timeout or being killed
+    exit( 1 );
 }

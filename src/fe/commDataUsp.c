@@ -87,7 +87,6 @@ commData3Init(
         ipcInfo[ ii ].pIpcDataRead[ 0 ] = NULL;
         ipcInfo[ ii ].pIpcDataWrite[ 0 ] = NULL;
 
-#ifdef RFM_VIA_PCIE
         // Save pointers to the IPC communications memory locations.
         if ( ipcInfo[ ii ].netType == IRFM0 )
             ipcMemOffset = IPC_PCIE_BASE_OFFSET + RFM0_OFFSET;
@@ -113,70 +112,6 @@ commData3Init(
                                                         .dolphinRead[ 1 ] ) +
                                   ipcMemOffset );
         }
-#else
-        // Use traditional RFM network
-
-        // Save pointers to the IPC communications memory locations.
-        if ( ipcInfo[ ii ].netType ==
-             IRFM0 ) // VMIC Reflected Memory *******************************
-        {
-            if ( cdsPciModules.rfmCount > 0 )
-            {
-                // Send side will perform direct, individual writes to RFM
-                // Rcv side will use DMA, provided by IOP (Performance reasons
-                // ie without DMA, each read takes >2usec)
-#ifdef RFM_DIRECT_READ
-                ipcInfo[ ii ].pIpcDataRead[ 0 ] =
-                    (CDS_IPC_COMMS*)( cdsPciModules.pci_rfm[ 0 ] +
-                                      IPC_BASE_OFFSET );
-#else
-                ipcInfo[ ii ].pIpcDataRead[ 0 ] =
-                    (CDS_IPC_COMMS*)( cdsPciModules.pci_rfm_dma[ 0 ] );
-#endif
-                if ( ipcInfo[ ii ].mode == ISND )
-                    ipcInfo[ ii ].pIpcDataWrite[ 0 ] =
-                        (CDS_IPC_COMMS*)( cdsPciModules.pci_rfm[ 0 ] +
-                                          IPC_BASE_OFFSET );
-            }
-        }
-        if ( ipcInfo[ ii ].netType ==
-             IRFM1 ) // VMIC Reflected Memory *******************************
-        {
-            if ( cdsPciModules.rfmCount > 1 )
-            {
-#ifdef RFM_DIRECT_READ
-                ipcInfo[ ii ].pIpcDataRead[ 0 ] =
-                    (CDS_IPC_COMMS*)( cdsPciModules.pci_rfm[ 1 ] +
-                                      IPC_BASE_OFFSET );
-#else
-                ipcInfo[ ii ].pIpcDataRead[ 0 ] =
-                    (CDS_IPC_COMMS*)( cdsPciModules.pci_rfm_dma[ 1 ] );
-#endif
-                if ( ipcInfo[ ii ].mode == ISND )
-                    ipcInfo[ ii ].pIpcDataWrite[ 0 ] =
-                        (CDS_IPC_COMMS*)( cdsPciModules.pci_rfm[ 1 ] +
-                                          IPC_BASE_OFFSET );
-            }
-            // If there isn't a second card (like in the end stations), default
-            // to first card
-            if ( cdsPciModules.rfmCount == 1 )
-            {
-#ifdef RFM_DIRECT_READ
-                ipcInfo[ ii ].pIpcDataRead[ 0 ] =
-                    (CDS_IPC_COMMS*)( cdsPciModules.pci_rfm[ 0 ] +
-                                      IPC_BASE_OFFSET );
-#else
-                ipcInfo[ ii ].pIpcDataRead[ 0 ] =
-                    (CDS_IPC_COMMS*)( cdsPciModules.pci_rfm_dma[ 0 ] );
-#endif
-                if ( ipcInfo[ ii ].mode == ISND )
-                    ipcInfo[ ii ].pIpcDataWrite[ 0 ] =
-                        (CDS_IPC_COMMS*)( cdsPciModules.pci_rfm[ 0 ] +
-                                          IPC_BASE_OFFSET );
-            }
-        }
-
-#endif
         if ( ipcInfo[ ii ].netType ==
              ISHME ) // Computer shared memory ******************************
         {
@@ -316,14 +251,11 @@ INLINE void commData3Send(
                     .pIpcDataWrite[ 0 ]
                     ->dBlock[ sendBlock ][ ipcIndex ]
                     .timestamp = syncWord;
-#ifdef RFM_VIA_PCIE
                 lastPcie = ii;
-#endif
             }
         }
     }
 // Flush out the last PCIe transmission
-#ifdef RFM_VIA_PCIE_2
     if ( lastPcie >= 0 )
     {
         clflush_cache_range(
@@ -334,7 +266,6 @@ INLINE void commData3Send(
             16 );
     }
     lastPcie = -1;
-#endif
 #ifdef RFM_DELAY
     // We don't want to delay SHMEM or PCIe writes, so calc block as usual,
     // so need to recalc send block and syncWord.

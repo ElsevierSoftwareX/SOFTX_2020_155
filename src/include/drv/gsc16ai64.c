@@ -100,6 +100,7 @@ gsc16ai64Init( CDS_HARDWARE* pHardware, struct pci_dev* adcdev )
     pHardware->pci_adc[ devNum ] =
         (long)pci_alloc_consistent( adcdev, 0x2000, &adc_dma_handle[ devNum ] );
     pHardware->adcType[ devNum ] = GSC_16AI64SSA;
+    pHardware->adcChannels[ devNum ] = GSAI_CHAN_COUNT;
     pHardware->adcConfig[ devNum ] = adcPtr[ devNum ]->ASSC;
     pHardware->adcCount++;
     /// Return board enable status.

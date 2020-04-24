@@ -101,6 +101,7 @@ gsc18ai32Init( CDS_HARDWARE* pHardware, struct pci_dev* adcdev )
     pHardware->pci_adc[ devNum ] =
         (long)pci_alloc_consistent( adcdev, 0x2000, &adc_dma_handle[ devNum ] );
     pHardware->adcType[ devNum ] = GSC_18AI32SSC1M;
+    pHardware->adcChannels[ devNum ] = 8;
     pHardware->adcConfig[ devNum ] = adc18Ptr->ASSC;
     pHardware->adcCount++;
     /// Return board enable status.

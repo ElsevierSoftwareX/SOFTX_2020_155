@@ -10,9 +10,21 @@ current_time_fe( void )
 {
     struct timespec        t;
     extern struct timespec current_kernel_time( void );
+    unsigned long gpsoffset;
+    extern long ligo_get_gps_driver_offset( void );
+
     t = current_kernel_time( );
-    // Added leap second for July 1, 2015
-    t.tv_sec += -315964819 + 33 + 3 + 1;
+    gpsoffset = ligo_get_gps_driver_offset( );
+    if(gpsoffset == 0) 
+    { 
+        // IRIG-B installed so no offset reported
+        // Up to date with leap second for Jan 1, 2017
+        // Next leap second expected June 30, 2020
+        t.tv_sec += 37; 
+    } else {
+        t.tv_sec += gpsoffset;
+    }
+    t.tv_sec -= 315964819;
     return t.tv_sec;
 }
 

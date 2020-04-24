@@ -4,6 +4,7 @@ SHELL = /bin/sh
 
 top_srcdir := `readlink -m @top_srcdir@`
 srcdir := `readlink -m @srcdir@`
+linux_version := '@linux_version@'
 VPATH=$(srcdir)
 
 prefix      = @prefix@
@@ -49,6 +50,7 @@ DEVFLAGS=@DEVFLAGS@
 	@make -sC src/fe/$@ clean
 # copy IOP symbol file to build area if found
 	@cp src/fe/ModuleIOP.symvers src/fe/$@ > /dev/null 2>&1 || /bin/true
+	@cat /opt/DIS/lib/modules/$(linux_version)/*.symvers > src/fe/$@/Module.symvers || /bin/true
 # build it
 	@make -C src/fe/$@ >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 # save IOP symbol to file

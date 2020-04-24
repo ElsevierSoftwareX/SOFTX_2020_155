@@ -15,8 +15,8 @@
 ///	@brief Main scheduler program for compiled real-time kernal object. \n
 /// 	@detail More information can be found in the following DCC document:
 ///<	<a
-///<href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">T0900607
-///<CDS RT Sequencer Software</a>
+///< href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">T0900607
+///< CDS RT Sequencer Software</a>
 ///	@author R.Bork, A.Ivanov
 ///     @copyright Copyright (C) 2014 LIGO Project      \n
 ///<    California Institute of Technology              \n
@@ -505,7 +505,7 @@ fe_start_controller( void* arg )
         // **********************************************************************
         // Read ADC data
         status = iop_adc_read( padcinfo, cpuClock );
-        // Try synching to 1PPS on ADC[0][31] if not using IRIG-B or TDS
+        // Try synching to 1PPS on ADC[0][31] if not using TDS
         // Only try for 1 sec.
         if ( !sync21pps )
         {
@@ -537,29 +537,20 @@ fe_start_controller( void* arg )
             }
         }
 
-	// In normal operation, the following for loop runs only once per IOP code cycle.
-	// This for loop runs > once per cycle if ADC is clocking faster then IOP is running ie
-    // specifically added for fast 18bit ADC running at 128KS/sec and greater.
+        // In normal operation, the following for loop runs only once per IOP
+        // code cycle. This for loop runs > once per cycle if ADC is clocking
+        // faster then IOP is running ie
+        // specifically added for fast 18bit ADC running at 128KS/sec and
+        // greater.
         for ( usloop = 0; usloop < UNDERSAMPLE; usloop++ )
         {
-            // Move ADC data from read buffer to local buffer for passing to user code.
+            // Move ADC data from read buffer to local buffer for passing to
+            // user code.
             for ( ii = 0; ii < cdsPciModules.adcCount; ii++ )
             {
-                // If ADC is fast 18bit, then provide means to move oversampled ADC data
-                if ( cdsPciModules.adcType[ ii ] == GSC_18AI32SSC1M )
+                for ( jj = 0; jj < cdsPciModules.adcChannels[ ii ]; jj++ )
                 {
-                    for ( jj = 0; jj < 32; jj++ )
-                    {
-                        adcval[ ii ][ jj ] = dWord[ ii ][ jj ][ usloop ];
-                    }
-                }
-                else
-                {
-                    // This is standard ADC (not oversampled 18bit) data move
-                    for ( jj = 0; jj < 32; jj++ )
-                    {
-                        adcval[ ii ][ jj ] = dWord[ ii ][ jj ][ 0 ];
-                    }
+                    adcval[ ii ][ jj ] = dWord[ ii ][ jj ][ usloop ];
                 }
             }
             // **************************************************************************************
@@ -999,6 +990,7 @@ fe_start_controller( void* arg )
                 }
             }
 
+#ifndef TIME_SLAVE
             // *****************************************************************
             /// \> Cycle 400 to 400 + numDacModules, write DAC heartbeat to AI
             /// chassis (only for 18 bit DAC modules)
@@ -1037,7 +1029,6 @@ fe_start_controller( void* arg )
 // Check once per second on code cycle HKP_DAC_WD_CHK to dac count
 // Only one read per code cycle to reduce time
 // *****************************************************************
-#ifndef TIME_SLAVE
             if ( cycleNum >= HKP_DAC_WD_CHK &&
                  cycleNum < ( HKP_DAC_WD_CHK + cdsPciModules.dacCount ) )
             {

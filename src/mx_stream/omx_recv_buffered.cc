@@ -948,5 +948,6 @@ main( int argc, char** argv )
         //        nextCycle %= 16;
     } while ( keepRunning ); // End of infinite loop
 
-    return 0;
+    // we never exit except for timeout or being killed
+    return 1;
 }

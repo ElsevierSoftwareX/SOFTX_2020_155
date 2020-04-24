@@ -72,7 +72,7 @@ typedef struct CDS_REMOTE_NODES {
 #define OVERFLOW_LIMIT_20BIT    512240
 #define OVERFLOW_CNTR_LIMIT	0x1000000
 #define MAX_ADC_WAIT		1000000		// Max time (usec) to wait for ADC data transfer in iop app
-#define MAX_ADC_WAIT_CARD_0	23		// Max time (usec) to wait for 1st ADC card data ready
+#define MAX_ADC_WAIT_CARD_0	20		// Max time (usec) to wait for 1st ADC card data ready
 #define MAX_ADC_WAIT_C0_32K	36		// Max time (usec) to wait for 1st ADC card data ready on 32K IOP
 #define MAX_ADC_WAIT_CARD_S	5 		// Max time (usec) to wait for remaining ADC card data ready
 #define MAX_ADC_WAIT_ERR_SEC	3 		// Max number of times ADC time > WAIT per sec before alarm set.
@@ -227,6 +227,7 @@ typedef struct CDS_HARDWARE{
 	int adcCount;			/* Number of ADC modules found		*/
 	long pci_adc[MAX_ADC_MODULES];	/* Remapped addresses of ADC modules	*/
 	int adcType[MAX_ADC_MODULES];
+    int adcChannels[MAX_ADC_MODULES];
 	int adcConfig[MAX_ADC_MODULES];
 	int doCount;			/* Number of DIO modules found		*/
 	unsigned short pci_do[MAX_DIO_MODULES];	/* io registers of DIO	*/
