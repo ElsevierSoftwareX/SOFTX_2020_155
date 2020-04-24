@@ -1,6 +1,0 @@
-# set network
-config_eth0="noop"
-config_eth1="noop"
-# set route
-routes_eth0="default via 10.144.0.1"
-
