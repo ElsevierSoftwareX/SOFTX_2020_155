@@ -45,6 +45,7 @@ Architecture: any
 Depends:
  advligorts-common,
  ${misc:Depends},
+ ${shlibs:Depends},
 Description: advLigoRTS mbuf kernel module
  Core component of advLigoRTS.
  .

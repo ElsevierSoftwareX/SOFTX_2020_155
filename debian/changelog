@@ -1,3 +1,10 @@
+advligorts (4.0.0~dev8-1) unstable; urgency=medium
+
+  * New dev release
+  * Add new mbuf_probe to mbuf dkms package
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Thu, 23 Apr 2020 14:59:15 -0700
+
 advligorts (4.0.0~dev7-1) unstable; urgency=medium
 
   * New dev release
