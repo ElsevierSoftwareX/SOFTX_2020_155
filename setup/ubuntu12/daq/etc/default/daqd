@@ -1,5 +1,0 @@
-TARGET_BASE=/opt/rtcds/llo/l1/target
-
-TARGET=$TARGET_BASE/`hostname`
-
-LOGDIR=$TARGET/logs
