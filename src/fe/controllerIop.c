@@ -65,7 +65,7 @@ int getGpsTime( unsigned int* tsyncSec, unsigned int* tsyncUsec );
 // Include C code modules
 #include "moduleLoad.c"
 
-#ifdef TIME_SLAVE
+#if defined( RUN_WO_IO_MODULES ) || defined( TIME_SLAVE )
 #include "mapVirtual.c"
 #include <drv/time_slave_io.c>
 #else
@@ -193,6 +193,9 @@ fe_start_controller( void* arg )
 
 #ifdef NO_SYNC
     syncSource = SYNC_SRC_NONE;
+#endif
+#ifdef RUN_WO_IO_MODULES
+    syncSource = SYNC_SRC_TIMER;
 #endif
 
 #ifdef TIME_MASTER
@@ -376,8 +379,7 @@ fe_start_controller( void* arg )
         /// \n
         /// - --------- DAC timing diags will later check FIFO sizes to verify
         /// synchrounous timing.
-        // #ifndef NO_DAC_PRELOAD
-#if !defined( NO_DAC_PRELOAD ) && !defined( TIME_SLAVE )
+#ifndef NO_DAC_PRELOAD
         status = iop_dac_preload( dacPtr );
 #endif
         /// - ---- Start the timing clocks\n
@@ -395,8 +397,7 @@ fe_start_controller( void* arg )
         }
         break;
     case SYNC_SRC_1PPS:
-// #ifndef NO_DAC_PRELOAD
-#if !defined( NO_DAC_PRELOAD ) && !defined( TIME_SLAVE )
+#ifndef NO_DAC_PRELOAD
         gsc16ai64Enable( &cdsPciModules );
         status = iop_dac_preload( dacPtr );
 #endif
@@ -410,6 +411,9 @@ fe_start_controller( void* arg )
         sync21pps = 1;
         break;
     case SYNC_SRC_DOLPHIN:
+        sync21pps = 1;
+        break;
+    case SYNC_SRC_TIMER:
         sync21pps = 1;
         break;
     default:
@@ -431,6 +435,11 @@ fe_start_controller( void* arg )
     timeSec = remote_time( (struct CDS_EPICS*)pLocalEpics );
 #elif TIME_SLAVE
     timeSec = sync2master( pcieTimer );
+    sync21pps = 1;
+#elif RUN_WO_IO_MODULES
+    // printk("Sync to cpu\n");
+    timeSec = sync2cpuclock( );
+    // printk("Sync to cpu %old\n",timeSec);
     sync21pps = 1;
 #else
     timeSec = current_time_fe( ) - 1;
@@ -457,22 +466,6 @@ fe_start_controller( void* arg )
 // *****************************************************************************************
 // NORMAL OPERATION -- Wait for ADC data ready
 // *****************************************************************************************
-#ifndef RFM_DIRECT_READ
-        /// \> If IOP and RFM DMA selected, block transfer data from GeFanuc RFM
-        /// cards.
-        // Used in block transfers of data from GEFANUC RFM
-        /// - ---- Want to start the DMA ASAP, before ADC data starts coming in.
-        /// - ----  Note that data only xferred every 4th cycle of IOP, so max
-        /// data rate on RFM is 16K.
-        if ( ( cycleNum % 4 ) == 0 )
-        {
-            if ( cdsPciModules.pci_rfm[ 0 ] )
-                vmic5565DMA( &cdsPciModules, 0, ( cycleNum % IPC_BLOCKS ) );
-            if ( cdsPciModules.pci_rfm[ 1 ] )
-                vmic5565DMA( &cdsPciModules, 1, ( cycleNum % IPC_BLOCKS ) );
-        }
-#endif
-
         /// \> On 1PPS mark \n
         if ( cycleNum == 0 )
         {
@@ -496,10 +489,12 @@ fe_start_controller( void* arg )
             cycle_gps_time = timeSec;
         }
 #ifdef NO_CPU_SHUTDOWN
+#ifndef RUN_WO_IO_MODULES
         if ( ( cycleNum % 2048 ) == 0 )
         {
             usleep_range( 1, 3 );
         }
+#endif
 #endif
         // Start of ADC Read
         // **********************************************************************
@@ -990,7 +985,7 @@ fe_start_controller( void* arg )
                 }
             }
 
-#ifndef TIME_SLAVE
+#if !defined( RUN_WO_IO_MODULES ) && !defined( TIME_SLAVE )
             // *****************************************************************
             /// \> Cycle 400 to 400 + numDacModules, write DAC heartbeat to AI
             /// chassis (only for 18 bit DAC modules)
@@ -1071,8 +1066,7 @@ fe_start_controller( void* arg )
 /// code.
 // This code runs once per second.
 // *****************************************************************
-// #ifndef NO_DAC_PRELOAD
-#if !defined( NO_DAC_PRELOAD ) && !defined( TIME_SLAVE )
+#ifndef NO_DAC_PRELOAD
             if ( cycleNum >= HKP_DAC_FIFO_CHK &&
                  cycleNum < ( HKP_DAC_FIFO_CHK + cdsPciModules.dacCount ) )
             {

@@ -174,6 +174,8 @@ sub parseParams {
 				$::requireIOcnt = $spp[1];
 			} elsif ($spp[0] eq "virtualIOP") { 
 				$::virtualiop = $spp[1];
+			} elsif ($spp[0] eq "use_shm_ipc") { 
+				$::force_shm_ipc = $spp[1];
 			} elsif ($spp[0] eq "adcclock") { 
 				$::adcclock = $spp[1];
 			} elsif ($spp[0] eq "clock_div") { 
