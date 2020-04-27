@@ -326,7 +326,7 @@ iop_dac_write( void )
         /// - -- Point to DAC memory buffer
         pDacData = (unsigned int*)( cdsPciModules.pci_dac[ jj ] );
         // Advance to the correct point in the one second memory buffer
-        pDacData += num_outs * cycleNum;
+        //pDacData += num_outs * cycleNum;
         /// - -- For each DAC channel
         for ( ii = 0; ii < num_outs; ii++ )
         {

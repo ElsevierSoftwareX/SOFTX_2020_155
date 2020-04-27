@@ -281,7 +281,11 @@ for ($ii = 0; $ii < $i; $ii++) {
    if ($::partType[$ii] =~ /^IPCx/) {
       # Add signal name to info table
       $::ipcxParts[$::ipcxCnt][0] = $::xpartName[$ii];
+      print "$::ipcxBlockTags[$ii] \n";
 
+      if ($::virtualiop == 1 or $::force_shm_ipc) {
+        $::ipcxBlockTags[$ii] = "cdsIPCx_SHMEM";
+      }
       $::ipcxCommMech = substr($::ipcxBlockTags[$ii], 8, 4);
       # Add IPC net type to info table
       $::ipcxParts[$::ipcxCnt][1] = "I" . $::ipcxCommMech;
@@ -486,7 +490,7 @@ $ipcxRcvrCnt = 0;
             $typeComp = $::ipcxParts[$ii][1];
 
             if ($ipcxData[$jj][1] ne $typeComp) {
-               die "***ERROR: IPCx type mis-match for IPCx component $::ipcxParts[$ii][0] $::ipcxParts[$ii][1] : $typeComp vs\. $ipcxData[$jj][1]\n";
+               die "***ERROR: IPCx type mis-match for IPCx component $::ipcxParts[$ii][0] $::ipcxParts[$ii][1] : $typeComp vs\. $ipcxData[$jj][1] force = $::force_shm_ipc\n";
             }
 
             #
@@ -590,11 +594,17 @@ $ipcxRcvrCnt = 0;
             $ipcxTypeIndex = -999;
 
             $::ipcxCommMech = substr($::ipcxParts[$ipcxAdd[$jj][0]][1], 1, 4);
+            if ($::virtualiop == 1 or $::force_shm_ipc) {
+                $::ipcxCommMech = "SHMEM";
+            }
 
             for ($kk = 0; $kk < 4; $kk++) {
                if ($::ipcxCommMech eq substr($ipcxType[$kk], 0, 4) ) {
                   $ipcxTypeIndex = $kk;
                }
+            }
+            if ($::virtualiop == 1 or $::force_shm_ipc) {
+                $ipcxTypeIndex = 0;
             }
 
             if ($ipcxTypeIndex < 0) {

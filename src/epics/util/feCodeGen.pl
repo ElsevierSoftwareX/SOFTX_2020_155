@@ -128,6 +128,7 @@ $flipSignals = 0;
 $ipcrate = 0;
 $ipccycle = 0;
 $virtualiop = 0;
+$force_shm_ipc = 0;
 $no_cpu_shutdown = 0;
 $edcu = 0;
 $casdf = 0;
@@ -2612,6 +2613,8 @@ if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
 #Following set to run as standard kernel module
   if ($no_cpu_shutdown > 0) {
     print OUTM "EXTRA_CFLAGS += -DNO_CPU_SHUTDOWN\n";
+  } else {
+    print OUTM "#EXTRA_CFLAGS += -DNO_CPU_SHUTDOWN\n";
   }
   # ADD DAC_AUTOCAL to IOPs
   print OUTM "EXTRA_CFLAGS += -DDAC_AUTOCAL\n";
@@ -2637,6 +2640,7 @@ if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
   }
 # Set IOP to map Dolphin Networks
 # Dolphin Gen2 is the default
+ if ($virtualiop != 1) {
   if ($pciNet > 0) {
         if ($dolphinGen == 2) {
           print OUTM "#Enable use of PCIe RFM Network Gen 2\n";
@@ -2650,6 +2654,7 @@ if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
           print OUTM "EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
         }
   }
+ }
 
   if ($::optimizeIO) {
     print OUTM "EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
@@ -2812,10 +2817,12 @@ if ($flipSignals) {
   print OUTM "CFLAGS += -DFLIP_SIGNALS=1\n";
 }
 
+ if ($virtualiop != 1) {
 if ($pciNet > 0) {
 print OUTM "#Enable use of PCIe RFM Network Gen 2\n";
 print OUTM "DOLPHIN_PATH = /opt/srcdis\n";
 print OUTM "CFLAGS += -DHAVE_CONFIG_H -I\$(DOLPHIN_PATH)/src/include/dis -I\$(DOLPHIN_PATH)/src/include -I\$(DOLPHIN_PATH)/src/SISCI/cmd/test/lib -I\$(DOLPHIN_PATH)/src/SISCI/src -I\$(DOLPHIN_PATH)/src/SISCI/api -I\$(DOLPHIN_PATH)/src/SISCI/cmd/include -I\$(DOLPHIN_PATH)/src/IRM_GX/drv/src -I\$(DOLPHIN_PATH)/src/IRM_GX/drv/src/LINUX -DOS_IS_LINUX=196616 -DLINUX -DUNIX  -DLITTLE_ENDIAN -DDIS_LITTLE_ENDIAN -DCPU_WORD_IS_64_BIT -DCPU_ADDR_IS_64_BIT -DCPU_WORD_SIZE=64 -DCPU_ADDR_SIZE=64 -DCPU_ARCH_IS_X86_64 -DADAPTER_IS_IX   -m64 -D_REENTRANT\n";
+}
 }
 
 if ($specificCpu > -1) {
@@ -2879,7 +2886,7 @@ print OUTM "\n";
 print OUTM "\n";
 
 print OUTM "CFLAGS += -I\$(SUBDIRS)/../../include -I$rcg_src_dir\/src/drv -I$rcg_src_dir\/src/include \n";
-if ($pciNet > 0) {
+if ($pciNet > 0 && $virtualiop != 1) {
 print OUTM "LDFLAGS = -L \$(API_LIB_PATH) -lsisci\n";
 } else {
 print OUTM "LDFLAGS = -L \$(API_LIB_PATH) \n";

@@ -1,6 +1,22 @@
 Software in this directory is used to build the FE computer code.
 
-IOP Kernel Module Software ************************
+The RCG supports 2 basic Matlab model configurations:
+1) IOP model: Purpose is to provide:
+    a) FE synchronization to Timing Distribution System (TDS)
+    b) Read data from ADC modules 
+    c) Write data to DAC modules 
+    d) Provide pointers to digial I/O and real-time IPC (Dolphin) network
+2) User Application Models which provide the actual control algorithms
+
+There are various configuration options to both of these model types. The
+options are set using the Parameter Block settings in the Matlab file.
+Secion I below describes the IOP options.
+Section II below describes the User App options.
+ 
+
+********************************************************************************
+SECTION I: IOP Kernel Module Software ******************************************
+********************************************************************************
     *** Required C Code Files:
     controllerIop.c   - Primary infinite control loop; controls I/O and timing
     moduleLoad.c      - Handles kernel module loading and unloading
@@ -10,7 +26,8 @@ IOP Kernel Module Software ************************
     include/drv/iop_dac_functions   - Handles DAC I/O
     include/drv/dac_info.c          - Provides DAC card status info
     include/drv/adc_info.c          - Provides ADC card status info
-    ***
+    ****
+    The RCG uses model Parameter block entries to obtian compile options.
     REQUIRED Model Parameter Block Entries for all IOP configurations:
     ***
     site=IFO_DESIGNATOR eg L1,H1,X2
@@ -22,53 +39,119 @@ IOP Kernel Module Software ************************
     ***
     Parameter Block Entries for Specific Use Cases::
     ***
-    1) Long Range IOP Configuration ***************************************
+    1) Standard LIGO Configuration (SLC)  **************************************
+        This is defined as a FE computer that has an I/O chassis (IOC) connected,
+        via a PCIe or short range fiber optic cable. The IOC contains all of 
+        the following:
+            a) LIGO timing slave module connected to the LIGO
+               Timing Distribution System (TDS).
+            b) Contec1616 binary I/O (BIO) to control the timing slave
+            c) IRIG-B time code receiver connected to TDS IRIG timing 
+            d) At least one ADC module 
+            e) No more than combined total of ADC/DAC modules
+        There are a number of compile options for the SLC:
+            a) pciRfm=1: Used in most LIGO systems, indicates connection
+               to the Dolphin network for real-time comms between FE
+               computers.
+            b) dolphingen=1: Used in conjunctions with pciRfm. By default,
+               FE code with use Dolphin Gen2 drivers. This option is set
+               if Dolphin Gen1 is desired. 
+            c) time_master=1: This IOP will send GPS time (seconds) and 
+               cycle count (0-65535). This is used to trigger IOP timing
+               for FE computers that do not have IOC connected.
+               WORNING: THERE CAN ONLY BE ONE TIME MASTER ON THE DOLPHIN
+                        NETWORK.
+
+    2) Standard configuration EXCEPT no LIGO TDS  ******************************
+        In this configuration, an ADC/DAC clocking signal is provided via a
+        a non-LIGO TDS ie the clock for I/O modules is provided by some
+        other method than via a LIGO timing slave. Options here are:
+        a) A 64K clock is provided to clock the I/O module and a 1PPS sync 
+           signal is provided on the last channel of the first ADC. 
+           No special Parameter block setting is required.  
+           On IOP startup, if it does not find a Contec1616
+           module to control the timing signal, it will fail over to 
+           trying to sync to a 1PPS signal.
+        b) A 64K clock is provided without 1PPS sync. This is the configuration
+           commonly referred to as a Cymac. Any 65536Hz TTL clock can be used.
+           For this confiuration, set the following Parameter:
+            1) no_sync=1
+            WARNING: If there are multiple ADC modules in the system, the IOP
+                     may have issues getting all of them to start on the same
+                     clock cycle. This would be noticed by long IOP cycle times.
+                     An IOP restart may, or may not, correct this.
+
+    3) FE computer without an IOC or I/O modules connected.  **********************
+        There are 2 options for running an IOP on a FE withoutI/O modules:
+            a) As an FE connected to a Dolphin network on a distributed system.
+               In LIGO production systems, this is used on FE that use IPC
+               inputs from other FE exclusively in performing their 
+               calculations and only use IPCs to output control signals.
+               Parameter block entries required for this use case:
+                    1) pciRfm=1
+                    2) time_slave=1
+            b) As a "virtual" machine for testing on a standalone computer. 
+               In this mode, the IOP will use the CPU time to control its
+               timing.
+               Parameter block entries required for this use case:
+                    1) virtualIOP=1
+               NOTES:
+                    1) ADC input signals will be static. The value for each ADC
+                       card input will equal its channel number eg chan 0 = 0, 
+                       chan 1 = 1, etc. Ability to change ADC input values
+                       dynaically is on the TODO list.
+                    2) Any IPCs defined in the IOP model will be set to use
+                        shared memory (SHM) type, regardless of type setting
+                        in the .mdl file. Since there are no I/O cards, this
+                        is the only option.
+
+
+    4) Long Range IOP Configuration ********************************************
        When the IO chassis is connected over a long range fiber, such as mid
-       station PEM:, set the following:
-            - rate=64K
-            - clock_div=2
-        In this configuration, IOP waits for 2 adc samples/chan to begin
+       station PEM:, set the following in the Parameter block:
+            1) rate=64K
+            2) clock_div=2
+        In this configuration, the IOP waits for 2 adc samples/chan to begin
         a processing cycle, instead of the usual one sample. The code
-        will run thru 2 complete signals everytime it is triggered and
-        continue to pass ADC data to user models at standard 64K rate.  
-    2) High Speed ADC Configuration ***************************************
+        will run thru 2 complete cycles everytime it is triggered and
+        continue to pass ADC data to user models at the standard 64K rate.  
+
+    5) High Speed ADC Configuration (512KHz Clock) *****************************
         WARNING: TESTING OF THIS CONFIGURATION IS NOT COMPLETE
         For a specific A+ application, a 1MS/sec ADC is clocked at 512KHz.
         The IOP gets triggered every 8 samples, processes data at 512K, and 
         passes data to user models at the standard 64K rate (no downsample 
         filtering).
         Necessary Parameter Block settings for this configuration.
-            - rate=512K
-            - clock_div=8
-    3) TIME MASTER / TIME SLAVE Configuration *****************************
-        This configuration provides the capability to connect FE computers
-        without IO chassis to a distribued system interconnected via a
-        Dolphine network. In this configuration, time and 64K clock cycle 
-        are sent over the Dolphin IPC network to provide control model
-        timing in lieu of the usual ADC clocking.
-        There must be one, and only one, TIME MASTER, which sends the timing
-        info on the Dolphin network:
-        Necessary Parameter Block settings for TIME MASTER.
-            - rate=64K : Time master must have IO chassis and run at 64K
-            - time_master=1
-        Necessary Parameter Block settings for TIME SLAVE (FE w/o IOC).
-            - rate=64K : Time slave IOP must run at 64K
-            - time_slave=1
-        
-    4) Non_LIGO Timing System Configuration *****************************
-        This configuration is designed to support test systems, such as 
-        CYMAC standalone lab test systems, that do not receive their 
-        ADC/DAC clocks from a LIGO timing slave. 
-        Necessary Parameter Block settings for this configuration.
-            - no_sync=1
-        
-    5) Running without hardware (Virtual) Configuration *****************
-        This configuration is designed to support running on a computer
-        that does not have any I/O modules.  It is intended as a test mode.
-            - virtualiop=1
+            1) rate=512K
+            2) clock_div=8
+        NOTE: LIGO standard 16bit ADC modules can coexist with the high
+              speed ADC cards. However, they must still be clocked at the
+              LIGO standard 64KHz. Therefore, the IOC must be provided 
+              with both a 512KHz clock for fast ADCs and 64K clocks for 
+              standard ADCs.
+    6) Non-LICO standard clock rate configuration (UNDER DEVELOPMENT) **********
 
+    7) Addional Optional IOP Parameter Block Settings **************************
+        a) optimizeIO=1 : When set, the IOP will not preload the DAC FIFOs with
+            the usual 2 samples at startup. This can provide for lower phase
+            delay for 2 clock cycles, or 30 usec at the typical 64K IOP rate.
+        b) requireIOcnt=1 : When set, IOP will not run unless it finds all of the
+            I/O cards specified in the control model. This is provided as a
+            safety factor for code running on production system.s
+        c) ref_delay=1 : Due to the long transmission delays between LIGO corner
+            and end station computers, it may be desirable in some cases to
+            allow extra IPC transmission time. The transmitting model will use
+            this setting to provide 1 extra code cycle delay for IPC receivers.
+        d) no_cpu_shutdown=1 : At runtime, code will be assigned to the CPU core
+            specified in the Matlab model but the core will not be locked ie
+            code installed as a typical kernel module. This is useful when
+            testing a model on a computer that does not have the LIGO CDS realtime
+            patch installed in the kernel.
 
-User Application Kernel Module Configurations ************************
+*********************************************************************************
+SECTION II: User Application Kernel Module Configurations ***********************
+*********************************************************************************
     *** This is the standard production configuration for non-IOP models 
     controllerApp.c         - Primary infinite control loop; controls I/O and timing
     moduleLoad.c            - Handles kernel module loading and unloading
@@ -77,5 +160,35 @@ User Application Kernel Module Configurations ************************
     drv/app_dac_functions.c - Handles DAC I/O
     drv/app_dio_routines.c  - Provides DIO card I/O
 
-Following are due for deletion once dependent codes have been cleaned up to no longer use:
-    - controllerCymac.c -> Simple ifdef change to controllerIop.c ????
+    ****
+    The RCG uses model Parameter block entries to obtian compile options.
+    REQUIRED Model Parameter Block Entries for all IOP configurations:
+    ***
+    site=IFO_DESIGNATOR eg L1,H1,X2
+    rate=MODEL_CYCLE_RATE, 2K, 4K, 16K, 32K, 64K
+    dcuid=DCUID, a system unique number for data acquisition
+        - NOTE: 1 thru 6 and 14,15 are reserved for DAQ and may not be used
+    adcSlave=1 : Indicates this model is to be compiled as an IOP
+    host=COMPUTER_HOST_NAME : Name of computer on which this code is to run
+    ***
+    ***
+    Unlike the IOP, the User App really only has a single run time configuration.
+    It is compatable with all IOP configurations. However, there are a few
+    compile options intended for test systems:
+        1) no_zero_pad=1 : In performing upsampling of DAC outputs to match IOP
+            rate, the user app code using zero padding in its upsample filtering.
+            If this option is set, zero padding is disabled.
+        2) no_cpu_shutdown=1 : At runtime, code will be assigned to the CPU core
+            specified in the Matlab model but the core will not be locked ie
+            code installed as a typical kernel module. This is useful when
+            testing a model on a computer that does not have the LIGO CDS realtime
+            patch installed in the kernel.
+        3) use_shm_ipc=1 : Regardless of IPC type definition in the Matlab model,
+            the RCG will force all IPCs to be defined as SHMEM type. This can be
+            useful in running a production system model, most of which use PCIe 
+            type IPC, in a standlone system for testing. IPC receivers in
+            the model still need to find the channels in your IFO.ipc file. A quick
+            way to to this is:
+                1) Copy over theproduction system IPC file 
+                2) Use sed, or similar, to change all ipcType=SHMEM
+                3) Use sed, or similar, to change all ipcHost="Your computer name"
