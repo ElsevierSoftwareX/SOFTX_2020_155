@@ -139,15 +139,27 @@ SECTION I: IOP Kernel Module Software ******************************************
         b) requireIOcnt=1 : When set, IOP will not run unless it finds all of the
             I/O cards specified in the control model. This is provided as a
             safety factor for code running on production system.s
-        c) ref_delay=1 : Due to the long transmission delays between LIGO corner
+        c) rfm_delay=1 : Due to the long transmission delays between LIGO corner
             and end station computers, it may be desirable in some cases to
             allow extra IPC transmission time. The transmitting model will use
             this setting to provide 1 extra code cycle delay for IPC receivers.
+            NOTE: This setting should be done in the IPC transmitter model.
         d) no_cpu_shutdown=1 : At runtime, code will be assigned to the CPU core
             specified in the Matlab model but the core will not be locked ie
             code installed as a typical kernel module. This is useful when
             testing a model on a computer that does not have the LIGO CDS realtime
             patch installed in the kernel.
+        e) ipc_rate=x, where x is 2048,4096,8192,16384, or 32768 and <= 1/2 model
+            rate set in the Parameter block.
+            By default, a control model transmits its IPC signals at the same rate 
+            as defined in the model rate parameter. If desired, the IPC send rate
+            can be reduced by setting this parameter.  This may be useful in 
+            reducing Dolphin network traffic where the receiver model does not
+            require the signal at full rate. An example is the SUS IOP models
+            sending watchdog signals to SEI IOP models at 64K, but signal is
+            not acted on at anywhere near this rate.
+            NOTE: If set, all IPC will be sent at this rate ie is not a per IPC 
+            channel setting.
 
 *********************************************************************************
 SECTION II: User Application Kernel Module Configurations ***********************
@@ -162,7 +174,7 @@ SECTION II: User Application Kernel Module Configurations **********************
 
     ****
     The RCG uses model Parameter block entries to obtian compile options.
-    REQUIRED Model Parameter Block Entries for all IOP configurations:
+    REQUIRED Model Parameter Block Entries for all user app configurations:
     ***
     site=IFO_DESIGNATOR eg L1,H1,X2
     rate=MODEL_CYCLE_RATE, 2K, 4K, 16K, 32K, 64K
