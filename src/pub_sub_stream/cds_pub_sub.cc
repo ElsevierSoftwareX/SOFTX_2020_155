@@ -37,6 +37,7 @@
 #include <cds-pubsub/pub.hh>
 #include <cds-pubsub/sub.hh>
 #include <sub_plugin_rmipc.hh>
+#include <pub_plugin_daq_m.hh>
 
 #include "args.h"
 
@@ -268,10 +269,15 @@ public:
         const std::vector< std::string >& publisher_strings )
         : publisher_{}, memory_arena_( 5 )
     {
+        std::cout << "Setting up the data recorder (publisher)" << std::endl;
+        publisher_.load_plugin(
+            std::make_shared< cds_plugins::PubPluginDaqMApi >( ) );
         std::for_each( publisher_strings.begin( ),
                        publisher_strings.end( ),
                        [this]( const std::string& pub_string ) {
                            publisher_.add_destination( pub_string );
+                           std::cout << "Adding publish destination "
+                                     << pub_string << std::endl;
                        } );
     }
 
@@ -296,9 +302,12 @@ public:
         }
 
         memcpy( msg_buffer.get( ), &input_data, data_size );
-        pub_sub::KeyType key =
-            ( input_data.header.dcuheader[ 0 ].timeSec << 8 ) +
-            input_data.header.dcuheader[ 0 ].cycle;
+        pub_sub::KeyType key = ( static_cast< pub_sub::KeyType >(
+                                     input_data.header.dcuheader[ 0 ].timeSec )
+                                 << 4 ) +
+            ( input_data.header.dcuheader[ 0 ].cycle & 0x0f );
+        // std::cout << "Publishing " << key << " - " << (key >> 4) << ":" <<
+        // (key&0x0f) << std::endl;
         publisher_.publish(
             key, pub_sub::Message( std::move( msg_buffer ), data_size ) );
     }
@@ -458,7 +467,7 @@ main( int argc, char** argv )
                          "File with 1 output/publishing strings per line, if "
                          "present, present, this superceeds -o",
                          &pubs_file,
-                         "" );
+                         nullptr );
     args_add_string_ptr( arg_parser,
                          'l',
                          ARGS_NO_LONG,
@@ -847,13 +856,13 @@ main( int argc, char** argv )
 
     data_recorder recorder( publishing_strings );
 
-    auto rmapi_plugin= std::make_shared<cps_plugins::SubPluginRmIpcApi>();
+    auto rmapi_plugin = std::make_shared< cps_plugins::SubPluginRmIpcApi >( );
     std::vector< std::unique_ptr< pub_sub::Subscriber > > subscribers{};
     subscribers.reserve( subscription_strings.size( ) );
     if ( !thread_per_sub )
     {
         subscribers.emplace_back( make_unique_ptr< pub_sub::Subscriber >( ) );
-        subscribers.back()->load_plugin(rmapi_plugin);
+        subscribers.back( )->load_plugin( rmapi_plugin );
     }
     for ( const auto& conn_str : subscription_strings )
     {
@@ -861,7 +870,7 @@ main( int argc, char** argv )
         {
             subscribers.emplace_back(
                 make_unique_ptr< pub_sub::Subscriber >( ) );
-            subscribers.back()->load_plugin(rmapi_plugin);
+            subscribers.back( )->load_plugin( rmapi_plugin );
         }
         subscribers.front( )->SetupDebugHooks( &debug );
         fprintf( stderr, "Beginning subscription on %s\n", conn_str.c_str( ) );
@@ -886,7 +895,7 @@ main( int argc, char** argv )
     int64_t min_recv_time = 0;
     int     recv_buckets[ ( MAX_DELAY_MS / 5 ) + 2 ];
 
-    gps_key last_received;
+    gps_key last_received{};
 
     missed_flag = 1;
     memset( &missed_nsys[ 0 ], 0, sizeof( missed_nsys ) );
@@ -899,13 +908,18 @@ main( int argc, char** argv )
     do
     {
 
-        gps_key latest_in_buffer;
+        gps_key latest_in_buffer{};
         do
         {
             usleep( 2000 );
             latest_in_buffer = circular_buffer.latest( );
         } while ( latest_in_buffer == last_received );
 
+        // std::cout << "latest in buffer = " << latest_in_buffer.gps() << ":"
+        // << latest_in_buffer.cycle() << std::endl; std::cout << "last received
+        // = " << last_received.gps() << ":" << last_received.cycle() <<
+        // std::endl;
+        last_received = latest_in_buffer;
         usleep( delay_cycles );
 
         gps_key process_at = latest_in_buffer;

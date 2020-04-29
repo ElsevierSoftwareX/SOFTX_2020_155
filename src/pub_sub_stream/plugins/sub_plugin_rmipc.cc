@@ -3,6 +3,7 @@
  * @brief a subscription interface to the mbuf based rmIpcStr data
  */
 
+#include <iostream>
 #include "sub_plugin_rmipc.hh"
 #include <array>
 #include <atomic>
@@ -23,13 +24,12 @@
 #include "daq_core.h"
 #include "../../drv/gpstime/gpstime.h"
 #include "arena.hh"
-//#include "../../drv/crc.c"
-extern unsigned int crc_ptr(char*, unsigned int, unsigned int);
-extern unsigned int crc_len(unsigned int, unsigned int);
+#include "drv/shmem.h"
 
-extern "C" {
-void* findSharedMemory( const char* );
-}
+//#include "../../drv/crc.c"
+extern unsigned int crc_ptr( char*, unsigned int, unsigned int );
+extern unsigned int crc_len( unsigned int, unsigned int );
+
 namespace cps_plugins
 {
     namespace detail
@@ -78,7 +78,8 @@ namespace cps_plugins
                 for ( const auto& name : mbuf_names )
                 {
                     std::string shmem_fname = name + "_daq";
-                    void* dcu_addr = findSharedMemory( shmem_fname.c_str( ) );
+                    void*       dcu_addr = (void*)shmem_open_segment(
+                        shmem_fname.c_str( ), 64 * 1024 * 1024 );
                     if ( !dcu_addr )
                     {
                         throw std::runtime_error(
@@ -93,10 +94,8 @@ namespace cps_plugins
                         (struct
                          cdsDaqNetGdsTpNum*)( (char*)dcu_addr +
                                               CDS_DAQ_NET_GDS_TP_TABLE_OFFSET );
-                    auto status = getmodelrate( &modelrates[ i ],
-                                                &dcuid[ i ],
-                                                name.c_str( ),
-                                                nullptr );
+                    auto status = getmodelrate(
+                        &modelrates[ i ], &dcuid[ i ], name.c_str( ), nullptr );
                     if ( status != 0 || modelrates[ i ] == 0 )
                     {
                         std::ostringstream os;
@@ -275,7 +274,7 @@ namespace cps_plugins
                     if ( shmIpcPtr[ 0 ]->cycle == cyclereq )
                     {
                         iopRunning = 1;
-                        data_ready[ 0 ] = false;
+                        data_ready[ 0 ] = true;
                     }
                     timeout += 1;
                 } while ( !iopRunning && timeout < 500 );
@@ -291,7 +290,7 @@ namespace cps_plugins
                              !data_ready[ ii ] )
                             threads_rdy++;
                         if ( shmIpcPtr[ ii ]->cycle == cyclereq )
-                            data_ready[ ii ] = 1;
+                            data_ready[ ii ] = true;
                     }
                     timeout += 1;
                 } while ( threads_rdy < subscriptions_ && timeout < 20 );
@@ -464,8 +463,11 @@ namespace cps_plugins
                     //                            sendLength, ixDataBlock );
 
                     pub_sub::KeyType key =
-                        ( multi_data->header.dcuheader->timeSec << 4 ) |
-                        nextCycle;
+                        ( static_cast< pub_sub::KeyType >(
+                              multi_data->header.dcuheader->timeSec )
+                          << 4 ) |
+                        ( nextCycle & 0x0f );
+                    // std::cout << "Sending messge " << key << std::endl;
                     handler_( pub_sub::SubMessage(
                         sub_id( ),
                         key,
