@@ -2207,7 +2207,7 @@ close($fg);
 
 for($ii=0;$ii<$adcCnt;$ii++)
 {
-   ("CDS::Adc::createAdcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii,@adcScreen);
+   ("CDS::Adc::createAdcMedm") -> ($epicsScreensDir,$sysname,$adcMaster,$usite,$dcuId,$medmTarget,$ii,@adcScreen);
 }
 # ******************************************************************************************
 #//		- GENERATE DAC SCREENS

@@ -33,6 +33,7 @@ gsc16ai64Init( CDS_HARDWARE* pHardware, struct pci_dev* adcdev )
     char* _adc_add; /// @param *_adc_add ADC register address space
     int   pedStatus; /// @param pedStatus Status return from call to enable
                    /// device.
+    int autocal = 0;
 
     /// Get index into CDS_HARDWARE struct based on total number of ADC cards
     /// found by mapping routine in map.c
@@ -90,7 +91,17 @@ gsc16ai64Init( CDS_HARDWARE* pHardware, struct pci_dev* adcdev )
     /// Wait for internal calibration to complete.
     do
     {
+        autocal ++;
+        udelay(100);
     } while ( ( adcPtr[ devNum ]->BCR & GSAI_AUTO_CAL ) != 0 );
+    if( ( adcPtr[ devNum ]->BCR & GSAI_AUTO_CAL_PASS ) == 0 )
+    {
+        printk("ADC AUTOCAL FAIL %d\n",autocal);
+        autocal = 0;
+    } else {
+        printk("ADC AUTOCAL PASS %d\n",autocal);
+        autocal = GSAI_AUTO_CAL_PASS;
+    }
     adcPtr[ devNum ]->RAG |= GSAI_SAMPLE_START;
     adcPtr[ devNum ]->IDBC = ( GSAI_CLEAR_BUFFER | GSAI_THRESHOLD );
     adcPtr[ devNum ]->SSC = ( GSAI_64_CHANNEL | GSAI_EXTERNAL_SYNC );
@@ -102,6 +113,7 @@ gsc16ai64Init( CDS_HARDWARE* pHardware, struct pci_dev* adcdev )
     pHardware->adcType[ devNum ] = GSC_16AI64SSA;
     pHardware->adcChannels[ devNum ] = GSAI_CHAN_COUNT;
     pHardware->adcConfig[ devNum ] = adcPtr[ devNum ]->ASSC;
+    pHardware->adcConfig[ devNum ] |= autocal;
     pHardware->adcCount++;
     /// Return board enable status.
     return ( pedStatus );

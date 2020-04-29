@@ -38,7 +38,10 @@ iop_adc_init( adcInfo_t* adcinfo )
         // ie no upper bits should be set in channel 31.
         *adcDummyData = DUMMY_ADC_VAL;
         // Set ADC Present Flag
-        pLocalEpics->epicsOutput.statAdc[ jj ] = 1;
+        pLocalEpics->epicsOutput.statAdc[ jj ] = ADC_MAPPED;
+        // Set ADC AutoCal Pass/Fail Flag
+        if((cdsPciModules.adcConfig [ jj ] & GSAI_AUTO_CAL_PASS) != 0) 
+            pLocalEpics->epicsOutput.statAdc[ jj ] |= ADC_CAL_PASS;
         // Reset Diag Info
         adcinfo->adcRdTimeErr[ jj ] = 0;
         adcinfo->adcChanErr[ jj ] = 0;

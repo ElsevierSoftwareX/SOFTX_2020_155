@@ -82,22 +82,22 @@ app_adc_status_update( adcInfo_t* adcinfo )
         // SET/CLR Channel Hopping Error
         if ( adcinfo->adcChanErr[ jj ] )
         {
-            pLocalEpics->epicsOutput.statAdc[ jj ] &= ~( 2 );
+            pLocalEpics->epicsOutput.statAdc[ jj ] &= ~( ADC_CHAN_HOP );
             status |= FE_ERROR_ADC;
             ;
         }
         else
-            pLocalEpics->epicsOutput.statAdc[ jj ] |= 2;
+            pLocalEpics->epicsOutput.statAdc[ jj ] |= ADC_CHAN_HOP;
         adcinfo->adcChanErr[ jj ] = 0;
         // SET/CLR Overflow Error
         if ( adcinfo->adcOF[ jj ] )
         {
-            pLocalEpics->epicsOutput.statAdc[ jj ] &= ~( 4 );
+            pLocalEpics->epicsOutput.statAdc[ jj ] &= ~( ADC_OVERFLOW );
             status |= FE_ERROR_OVERFLOW;
             ;
         }
         else
-            pLocalEpics->epicsOutput.statAdc[ jj ] |= 4;
+            pLocalEpics->epicsOutput.statAdc[ jj ] |= ADC_OVERFLOW;
         adcinfo->adcOF[ jj ] = 0;
         for ( ii = 0; ii < 32; ii++ )
         {
