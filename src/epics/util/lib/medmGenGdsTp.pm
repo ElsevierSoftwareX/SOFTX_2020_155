@@ -435,11 +435,18 @@ sub createGdsMedm
 	$mdlNamelc = lc($mdlName);
 	$xpos = 205; $ypos = 200; $width = 40; $height = 20;
 	$bxpos = 255; $bypos = 201; $bwidth = 21; $bheight = 18;
+    if($adcMaster == 1) {
+	$bxpos = 255; $bypos = 201; $bwidth = 28; $bheight = 18;
+    }
 	for($ii=0;$ii<$adcCnt;$ii++)
 	{
 		$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_MONITOR_ADC$::adcCardNum[$ii].adl";
         	$medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{brown},"A$::adcCardNum[$ii]");
+    if($adcMaster == 1) {
+		$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$bwidth,$bheight,"$site\:FEC-$dcuid\_ADC_STAT_$ii","0","3",$ecolors{green},$ecolors{red});
+    } else {
 		$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$bwidth,$bheight,"$site\:FEC-$dcuid\_ADC_STAT_$ii","0","2",$ecolors{green},$ecolors{red});
+    }
 		$ypos += 22;
 		$bypos += 22;
 		$totalCards ++;

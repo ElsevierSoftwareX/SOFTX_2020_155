@@ -86,6 +86,11 @@ typedef struct CDS_REMOTE_NODES {
 #define DAC_DUOTONE_CHAN	30
 #define ADC_BUS_DELAY		1
 #define ADC_SHORT_CYCLE		2
+#define ADC_MAPPED  		1
+#define ADC_CHAN_HOP  		2
+#define ADC_OVERFLOW  		4
+#define ADC_CAL_PASS  		8
+
 
 typedef struct MEM_DATA_BLOCK{
 	int timeSec;

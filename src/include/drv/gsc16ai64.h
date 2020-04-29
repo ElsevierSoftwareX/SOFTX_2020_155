@@ -55,6 +55,7 @@ typedef struct GSA_ADC_REG{
 #define GSAI_CLEAR_BUFFER       0x40000
 #define GSAI_THRESHOLD          0x001f
 #define GSAI_AUTO_CAL           0x2000
+#define GSAI_AUTO_CAL_PASS      0x4000
 #define GSAI_DMA_DEMAND_MODE    0x80000
 #define GSAI_18BIT_DATA         0x100000
 #define GSAI_DATA_CODE_OFFSET   0x8000

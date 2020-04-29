@@ -110,11 +110,12 @@ mapPciModules( CDS_HARDWARE* pCds )
             }
             if ( use_it )
             {
-                printk( "18-bit dac card on bus %x; device %x\n",
-                        dacdev->bus->number,
-                        PCI_SLOT( dacdev->devfn ) );
                 status = gsc18ao8Init( pCds, dacdev );
                 modCount++;
+                printk( "18-bit dac card on bus %x; device %x status %d\n",
+                        dacdev->bus->number,
+                        PCI_SLOT( dacdev->devfn ),
+                        status );
             }
             dac_18bit_cnt++;
         }
@@ -139,11 +140,12 @@ mapPciModules( CDS_HARDWARE* pCds )
             }
             if ( use_it )
             {
-                printk( "20-bit dac card on bus %x; device %x\n",
-                        dacdev->bus->number,
-                        PCI_SLOT( dacdev->devfn ) );
                 status = gsc20ao8Init( pCds, dacdev );
                 modCount++;
+                printk( "20-bit dac card on bus %x; device %x status %d\n",
+                        dacdev->bus->number,
+                        PCI_SLOT( dacdev->devfn ),
+                        status );
             }
             dac_20bit_cnt++;
         }
@@ -173,11 +175,12 @@ mapPciModules( CDS_HARDWARE* pCds )
             }
             if ( use_it )
             {
-                printk( "dac card on bus %x; device %x\n",
-                        dacdev->bus->number,
-                        PCI_SLOT( dacdev->devfn ) );
                 status = gsc16ao16Init( pCds, dacdev );
                 modCount++;
+                printk( "16 bit dac card on bus %x; device %x status %d\n",
+                        dacdev->bus->number,
+                        PCI_SLOT( dacdev->devfn ),
+                        status );
             }
             dac_cnt++;
         }
@@ -208,13 +211,12 @@ mapPciModules( CDS_HARDWARE* pCds )
             }
             if ( use_it )
             {
-                /*printk("adc card on bus %x; device %x prim %x\n",
-                      dacdev->bus->number,
-                      PCI_SLOT(dacdev->devfn),
-                      dacdev->bus->secondary);
-                      */
                 status = gsc16ai64Init( pCds, dacdev );
                 modCount++;
+                printk("adc card on bus %x; device %x status %d\n",
+                      dacdev->bus->number,
+                      PCI_SLOT(dacdev->devfn),
+                      status);
             }
             adc_cnt++;
         }
