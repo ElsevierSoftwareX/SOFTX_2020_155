@@ -84,6 +84,7 @@ if (libcds-pubsub_FOUND)
     configure_file(test_pub_sub_xmit_recv.sh.in test_pub_sub_xmit_recv.sh @ONLY)
     configure_file(test_pub_sub.sh.in test_pub_sub.sh @ONLY)
     configure_file(test_pub_sub_rmipc_to_daqm.sh.in test_pub_sub_rmipc_to_daqm.sh @ONLY)
+    configure_file(test_pub_sub_daqm_to_daqm.sh.in test_pub_sub_daqm_to_daqm.sh @ONLY)
 
     add_test(NAME "test_pub_sub_xmit_recv"
             COMMAND /bin/bash ./test_pub_sub_xmit_recv.sh
@@ -96,6 +97,10 @@ if (libcds-pubsub_FOUND)
     add_test(NAME "test_pub_sub_rmipc_to_daqm"
         COMMAND /bin/bash ./test_pub_sub_rmipc_to_daqm.sh
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+    add_test(NAME "test_pub_sub_daqm_to_daqm"
+            COMMAND /bin/bash ./test_pub_sub_daqm_to_daqm.sh
+            WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
     install(TARGETS cps_xmit DESTINATION bin)
     install(TARGETS cps_recv DESTINATION bin)

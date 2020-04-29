@@ -36,7 +36,10 @@
 
 #include <cds-pubsub/pub.hh>
 #include <cds-pubsub/sub.hh>
+
 #include <sub_plugin_rmipc.hh>
+
+#include <sub_plugin_daq_m.hh>
 #include <pub_plugin_daq_m.hh>
 
 #include "args.h"
@@ -271,7 +274,7 @@ public:
     {
         std::cout << "Setting up the data recorder (publisher)" << std::endl;
         publisher_.load_plugin(
-            std::make_shared< cds_plugins::PubPluginDaqMApi >( ) );
+            std::make_shared< cps_plugins::PubPluginDaqMApi >( ) );
         std::for_each( publisher_strings.begin( ),
                        publisher_strings.end( ),
                        [this]( const std::string& pub_string ) {
@@ -351,6 +354,18 @@ parse_pub_sub_strings( const char* pub_subs_file, const char* pub_subs )
             conn_strings, pub_subs, boost::algorithm::is_space( ) );
     }
     return conn_strings;
+}
+
+template < typename Cont >
+void
+load_sub_plugins( pub_sub::Subscriber& subscriber, Cont& plugins )
+{
+    std::for_each(
+        plugins.begin( ),
+        plugins.end( ),
+        [&subscriber](
+            std::shared_ptr< pub_sub::plugins::SubscriptionPluginApi >&
+                plugin ) { subscriber.load_plugin( plugin ); } );
 }
 
 // *************************************************************************
@@ -856,13 +871,18 @@ main( int argc, char** argv )
 
     data_recorder recorder( publishing_strings );
 
-    auto rmapi_plugin = std::make_shared< cps_plugins::SubPluginRmIpcApi >( );
+    std::vector< std::shared_ptr< pub_sub::plugins::SubscriptionPluginApi > >
+        sub_plugins{};
+    sub_plugins.emplace_back(
+        std::make_shared< cps_plugins::SubPluginRmIpcApi >( ) );
+    sub_plugins.emplace_back(
+        std::make_shared< cps_plugins::SubPluginDaqMApi >( ) );
     std::vector< std::unique_ptr< pub_sub::Subscriber > > subscribers{};
     subscribers.reserve( subscription_strings.size( ) );
     if ( !thread_per_sub )
     {
         subscribers.emplace_back( make_unique_ptr< pub_sub::Subscriber >( ) );
-        subscribers.back( )->load_plugin( rmapi_plugin );
+        load_sub_plugins( *subscribers.back( ).get( ), sub_plugins );
     }
     for ( const auto& conn_str : subscription_strings )
     {
@@ -870,7 +890,7 @@ main( int argc, char** argv )
         {
             subscribers.emplace_back(
                 make_unique_ptr< pub_sub::Subscriber >( ) );
-            subscribers.back( )->load_plugin( rmapi_plugin );
+            load_sub_plugins( *subscribers.back( ).get( ), sub_plugins );
         }
         subscribers.front( )->SetupDebugHooks( &debug );
         fprintf( stderr, "Beginning subscription on %s\n", conn_str.c_str( ) );

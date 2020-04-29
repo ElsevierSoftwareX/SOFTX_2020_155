@@ -5,7 +5,7 @@
 
 #include "make_unique.hh"
 
-namespace cds_plugins
+namespace cps_plugins
 {
     namespace detail
     {
@@ -119,4 +119,4 @@ namespace cds_plugins
         return make_unique_ptr< detail::DaqMPublisherInstance >(
             name, buffer_size_mb );
     }
-} // namespace cds_plugins
+} // namespace cps_plugins

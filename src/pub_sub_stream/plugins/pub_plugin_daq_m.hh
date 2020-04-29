@@ -1,12 +1,12 @@
 //
 // Created by jonathan.hanks on 4/28/20.
 //
-#ifndef DAQD_TRUNK_SUB_PLUGIN_DAQ_M_HH
-#define DAQD_TRUNK_SUB_PLUGIN_DAQ_M_HH
+#ifndef DAQD_TRUNK_PUB_PLUGIN_DAQ_M_HH
+#define DAQD_TRUNK_PUB_PLUGIN_DAQ_M_HH
 
 #include <cds-pubsub/pub_plugin.hh>
 
-namespace cds_plugins
+namespace cps_plugins
 {
     class PubPluginDaqMApi : public pub_sub::plugins::PublisherPluginApi
     {
@@ -20,6 +20,6 @@ namespace cds_plugins
         publish( const std::string&        address,
                  pub_sub::PubDebugNotices& debug_hooks ) override;
     };
-} // namespace cds_plugins
+} // namespace cps_plugins
 
-#endif /* DAQD_TRUNK_SUB_PLUGIN_DAQ_M_HH */
+#endif /* DAQD_TRUNK_PUB_PLUGIN_DAQ_M_HH */

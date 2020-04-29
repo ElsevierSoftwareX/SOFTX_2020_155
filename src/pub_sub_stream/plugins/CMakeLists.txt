@@ -1,6 +1,7 @@
 add_library(pub_sub_plugins
         sub_plugin_rmipc.cc
-        pub_plugin_daq_m.cc)
+        pub_plugin_daq_m.cc
+        sub_plugin_daq_m.cc)
 Message("Current source dir ${CMAKE_CURRENT_SOURCE_DIR}")
 target_include_directories(pub_sub_plugins PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
