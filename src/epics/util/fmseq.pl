@@ -204,8 +204,8 @@ while (<IN>) {
 	print "testpoints are @testpoints\n";
     } elsif (substr($_,0,10) eq "gds_config") {
 	$gds_rmid = 0;
-	$site = "";
-	($junk, $gds_excnum_base, $gds_tpnum_base, $gds_exc_sys_inc, $gds_tp_sys_inc, $gds_rmid, $site, $gds_datarate, $dcuId, $ifoid) = split(/\s+/, $_);
+	$ifo = "";
+	($junk, $gds_excnum_base, $gds_tpnum_base, $gds_exc_sys_inc, $gds_tp_sys_inc, $gds_rmid, $ifo, $gds_datarate, $dcuId, $ifoid) = split(/\s+/, $_);
 	$gds_specified = 1;
 	if ($gds_datarate eq undef) {
 	  $gds_datarate = $gds_excnum_base < 10000? 16384: 2048;
@@ -218,8 +218,8 @@ while (<IN>) {
 	}
 	$gds_ifo = 1;
 	print "GDS NODE  $gds_rmid\n";
-	if ($site eq undef || $site eq "") {
-	  $site = "M1";
+	if ($ifo eq undef || $ifo eq "") {
+	  $ifo = "M1";
 	}
 	$gds_exc_dcu_id = 13 + (int ($gds_excnum_base >= 10000)) * 2;
 	$gds_tp_dcu_id = 13 + int ($gds_tpnum_base / 10000);
@@ -572,7 +572,7 @@ while (<IN>) {
 #	$vupdate .= "\tpvPut(evar_$temp\_RI);\n";
 	$vupdate .= "%%\tshort s[1];\n";
 	$vupdate .= "%%\ts[0] = 0;\n";
-	$vupdate .= "%%\tezcaPut(\"$site:$v_name\", ezcaShort,1,s);\n";
+	$vupdate .= "%%\tezcaPut(\"$ifo:$v_name\", ezcaShort,1,s);\n";
 	$vupdate .= "}\n";
 
 	if ($top_name) {
@@ -824,9 +824,9 @@ while (<IN>) {
 
     die "Invalid DAQ channel $name rate $rate; system rate is $gds_datarate" if $rate > $gds_datarate;
     if (is_top_name($name)) {
-    	$name = "$site:" . top_name_transform($name);
+    	$name = "$ifo:" . top_name_transform($name);
     } else {
-    	$name = "$site:$systems[0]$name";
+    	$name = "$ifo:$systems[0]$name";
     }
 
     $DAQ_Channels{$name} = $rate;
@@ -1106,11 +1106,11 @@ if ($gds_specified) {
     	my $tv_name;
     	if ($top_name) {
 	 $tv_name = top_name_transform($i);
-	 print "[$site:${tv_name}_EXC]\n";
-	 $edcuFiltName = "[$site:${tv_name}";
+	 print "[$ifo:${tv_name}_EXC]\n";
+	 $edcuFiltName = "[$ifo:${tv_name}";
 	} else {
-	 print "[$site:${systm}${i}_EXC]\n";
-	 $edcuFiltName = "[$site:${systm}${i}";
+	 print "[$ifo:${systm}${i}_EXC]\n";
+	 $edcuFiltName = "[$ifo:${systm}${i}";
 	}
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
@@ -1145,9 +1145,9 @@ if ($gds_specified) {
     	my $tv_name;
     	if ($top_name) {
 	 $tv_name = top_name_transform($i);
-	 print "[$site:${tv_name}]\n";
+	 print "[$ifo:${tv_name}]\n";
 	} else {
-	 print "[$site:${systm}${i}]\n";
+	 print "[$ifo:${systm}${i}]\n";
 	}
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
@@ -1170,9 +1170,9 @@ if ($gds_specified) {
     	my $tv_name;
     	if ($top_name) {
 	 $tv_name = top_name_transform($i);
-	 print "[$site:${tv_name}_IN1]\n";
+	 print "[$ifo:${tv_name}_IN1]\n";
 	} else {
-	 print "[$site:${systm}${i}_IN1]\n";
+	 print "[$ifo:${systm}${i}_IN1]\n";
 	}
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
@@ -1182,9 +1182,9 @@ if ($gds_specified) {
 	print "datarate = $gds_datarate\n\n";
 	$tpnum++;
     	if ($top_name) {
-	 print "[$site:${tv_name}_IN2]\n";
+	 print "[$ifo:${tv_name}_IN2]\n";
 	} else {
-	 print "[$site:${systm}${i}_IN2]\n";
+	 print "[$ifo:${systm}${i}_IN2]\n";
 	}
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
@@ -1194,9 +1194,9 @@ if ($gds_specified) {
 	print "datarate = $gds_datarate\n\n";
 	$tpnum++;
     	if ($top_name) {
-	 print "[$site:${tv_name}_OUT]\n";
+	 print "[$ifo:${tv_name}_OUT]\n";
 	} else {
-	 print "[$site:${systm}${i}_OUT]\n";
+	 print "[$ifo:${systm}${i}_OUT]\n";
  	}
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
@@ -1212,9 +1212,9 @@ if ($gds_specified) {
     	my $tv_name;
     	if ($top_name) {
 	 $tv_name = top_name_transform($i);
-	 print "[$site:${tv_name}]\n";
+	 print "[$ifo:${tv_name}]\n";
 	} else {
-	 print "[$site:${systm}${i}]\n";
+	 print "[$ifo:${systm}${i}]\n";
 	}
 	print "ifoid = $gds_ifo\n";
 	print "rmid = $gds_rmid\n";
@@ -1247,9 +1247,9 @@ units=undef
 END
 ;
 print OUTG $header;
-$edcuEntryI =~ s/%SITE%/$site/g;
+$edcuEntryI =~ s/%SITE%/$ifo/g;
 $edcuEntryI =~ s/%SYS%/$systems[0]/g;
-$edcuEntryD =~ s/%SITE%/$site/g;
+$edcuEntryD =~ s/%SITE%/$ifo/g;
 $edcuEntryD =~ s/%SYS%/$systems[0]/g;
 print OUTG $edcuEntryI;
 print OUTG $edcuEntryD;
@@ -1349,7 +1349,7 @@ close OUTG;
 open(PROC, ">$ARGV[0]_proc.h") || die "cannot open $ARGV[0]_proc.h file for writing";
 print PROC "struct proc_dir_entry *proc_epics_entry[$vproc_size];\n";
 print PROC "struct proc_epics proc_epics[] = {\n";
-$vproc =~ s/%SITE%/$site/g;
+$vproc =~ s/%SITE%/$ifo/g;
 $vproc =~ s/%SYS%/$systems[0]/g;
 print PROC $vproc;
 print PROC "};\n";

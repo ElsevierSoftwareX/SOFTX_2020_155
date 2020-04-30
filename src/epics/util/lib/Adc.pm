@@ -172,7 +172,7 @@ sub frontEndCode {
 #// This code requires /lib/medmGen.pm \n\n
 sub createAdcMedm
 {
-        my ($medmDir,$mdlName,$adcMaster,$site,$dcuid,$medmTarget,$adcNum,@adcChannel) = @_;
+        my ($medmDir,$mdlName,$adcMaster,$ifo,$dcuid,$medmTarget,$adcNum,@adcChannel) = @_;
  # Define colors to be sent to screen gen.
         my %ecolors = ( "white" => "0",
              "black" => "14",
@@ -208,7 +208,7 @@ sub createAdcMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$mdlName\_MONITOR_ADC$adcNum",$ecolors{white});
         # Add time string to banner
         $xpos = 730; $ypos = 4; $width = 200; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_TIME_STRING",$ecolors{white},$ecolors{blue},"static");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_TIME_STRING",$ecolors{white},$ecolors{blue},"static");
 
 
         # ************* Create Background **************************************************************************
@@ -246,9 +246,9 @@ sub createAdcMedm
 			$xpos = 300; $width = 60;
 			$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$adcChannel[$adcNum][$ii]",$ecolors{white},$ecolors{blue},"static");
 			$xpos = 370;
-        		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_ADC_OVERFLOW_$adcNum\_$ii",$ecolors{white},$ecolors{blue},"static");
+        		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_OVERFLOW_$adcNum\_$ii",$ecolors{white},$ecolors{blue},"static");
 			$xpos = 440;
-        		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_ADC_OVERFLOW_ACC_$adcNum\_$ii",$ecolors{white},$ecolors{blue},"static");
+        		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_OVERFLOW_ACC_$adcNum\_$ii",$ecolors{white},$ecolors{blue},"static");
 		}
 		$ypos += 20;
 	}
@@ -266,9 +266,9 @@ sub createAdcMedm
 			$xpos = 780; $width = 60;
 			$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$adcChannel[$adcNum][$ii]",$ecolors{white},$ecolors{blue},"static");
 			$xpos = 850;
-        		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_ADC_OVERFLOW_$adcNum\_$ii",$ecolors{white},$ecolors{blue},"static");
+        		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_OVERFLOW_$adcNum\_$ii",$ecolors{white},$ecolors{blue},"static");
 			$xpos = 920;
-        		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_ADC_OVERFLOW_ACC_$adcNum\_$ii",$ecolors{white},$ecolors{blue},"static");
+        		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_OVERFLOW_ACC_$adcNum\_$ii",$ecolors{white},$ecolors{blue},"static");
 		}
 		$ypos += 20;
 	}
@@ -290,15 +290,15 @@ sub createAdcMedm
     }
 
     $xpos = 250; $ypos = 460; $width = 40; $height = 15;
-    $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_ADC_STAT_$adcNum","0","0",$ecolors{green},$ecolors{red});
+    $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_STAT_$adcNum","0","0",$ecolors{green},$ecolors{red});
     $xpos = 250; $ypos = 480; $width = 40; $height = 15;
-    $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_ADC_STAT_$adcNum","1","1",$ecolors{green},$ecolors{red});
+    $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_STAT_$adcNum","1","1",$ecolors{green},$ecolors{red});
     $xpos = 250; $ypos = 500; $width = 40; $height = 15;
-    $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_ADC_STAT_$adcNum","2","2",$ecolors{green},$ecolors{red});
+    $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_STAT_$adcNum","2","2",$ecolors{green},$ecolors{red});
 
     if($adcMaster == 1) {
     $xpos = 250; $ypos = 520; $width = 40; $height = 15;
-    $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_ADC_STAT_$adcNum","3","3",$ecolors{green},$ecolors{red});
+    $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_STAT_$adcNum","3","3",$ecolors{green},$ecolors{red});
     }
 
 print OUTMEDM "$medmdata \n";

@@ -24,36 +24,37 @@ sub parseParams {
 	for (@sp) {
 		@spp = split(/=/);
 		if (@spp == 2) {
-			if ($spp[0] eq "site") {
+			if ($spp[0] eq "site" ) {
+                $::sitedepwarning = 1;
+            }
+			if (($spp[0] eq "site") or ($spp[0] eq "ifo") ) {
 				$spp[1] =~ s/,/ /g;
 
-                                if (lc($spp[1]) ne $::ifo) {
+                                if (lc($spp[1]) ne $::ifo_from_mdl_name) {
                                    $errmsg = "***ERROR: Model <ifo> name part does not match cdsParameters: ";
                                    $errmsg .= $::ifo . ", " . $spp[1] . "\n";
 
-                                #   die $errmsg;
                                     die $errmsg;
                                 }
 
-				print "Site is set to $spp[1]\n";
-				$::site = $spp[1];
-			        if ($::site =~ /^M/) {
+				$::ifo = $spp[1];
+			        if ($::ifo =~ /^M/) {
                 			$::location = "mit";
-        			} elsif ($::site =~ /^A/) {
+        			} elsif ($::ifo =~ /^A/) {
                 			$::location = "lao";
-        			} elsif ($::site =~ /^G/) {
+        			} elsif ($::ifo =~ /^G/) {
                 			$::location = "geo";
-        			} elsif ($::site =~ /^H/) {
+        			} elsif ($::ifo =~ /^H/) {
                 			$::location = "lho";
-        			} elsif ($::site =~ /^L/) {
+        			} elsif ($::ifo =~ /^L/) {
                 			$::location = "llo";
-        			} elsif ($::site =~ /^C/) {
+        			} elsif ($::ifo =~ /^C/) {
                 			$::location = "caltech";
-        			} elsif ($::site =~ /^S/) {
+        			} elsif ($::ifo =~ /^S/) {
                 			$::location = "stn";
-        			} elsif ($::site =~ /^K/) {
+        			} elsif ($::ifo =~ /^K/) {
                 			$::location = "kamioka";
-        			} elsif ($::site =~ /^X/) {
+        			} elsif ($::ifo =~ /^X/) {
                 			$::location = "tst";
         			}
 			} elsif ($spp[0] eq "rate") {

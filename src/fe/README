@@ -30,7 +30,11 @@ SECTION I: IOP Kernel Module Software ******************************************
     The RCG uses model Parameter block entries to obtian compile options.
     REQUIRED Model Parameter Block Entries for all IOP configurations:
     ***
-    site=IFO_DESIGNATOR eg L1,H1,X2
+    ifo=IFO_DESIGNATOR eg L1,H1,X2
+    NOTE: 'site' was the previous designator for this, but erroneously named. While
+        following old site parameter is still recognized, in leau of ifo, it
+        will soon be deprecated.
+            site=IFO_DESIGNATOR eg L1,H1,X2
     rate=MODEL_CYCLE_RATE, standard 64K for production systems
     dcuid=DCUID, a system unique number for data acquisition
         - NOTE: 1 thru 6 and 14,15 are reserved for DAQ and may not be used
@@ -176,7 +180,11 @@ SECTION II: User Application Kernel Module Configurations **********************
     The RCG uses model Parameter block entries to obtian compile options.
     REQUIRED Model Parameter Block Entries for all user app configurations:
     ***
-    site=IFO_DESIGNATOR eg L1,H1,X2
+    ifo=IFO_DESIGNATOR eg L1,H1,X2
+    NOTE: 'site' was the previous designator for this, but erroneously named. While
+        following old site parameter is still recognized, in leau of ifo, it
+        will soon be deprecated.
+            site=IFO_DESIGNATOR eg L1,H1,X2
     rate=MODEL_CYCLE_RATE, 2K, 4K, 16K, 32K, 64K
     dcuid=DCUID, a system unique number for data acquisition
         - NOTE: 1 thru 6 and 14,15 are reserved for DAQ and may not be used

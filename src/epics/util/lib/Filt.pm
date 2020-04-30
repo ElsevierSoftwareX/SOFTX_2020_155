@@ -99,7 +99,7 @@ sub frontEndCode {
 }
 sub createFiltMedm
 {
-        my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$filterName,$filtChan,$relDisp) = @_;
+        my ($medmDir,$mdlName,$ifo,$dcuid,$medmTarget,$filterName,$filtChan,$relDisp) = @_;
  # Define colors to be sent to screen gen.
         my %ecolors = ( "white" => "0",
              "black" => "14",
@@ -139,7 +139,7 @@ sub createFiltMedm
         $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,$title,$ecolors{white});
 	# Add time string to banner
         $xpos = 770; $ypos = 4; $width = 200; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_TIME_STRING",$ecolors{white},$ecolors{black},"static");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_TIME_STRING",$ecolors{white},$ecolors{black},"static");
 
  	# ************* Create Background **************************************************************************
         # Add Background rectangles
@@ -369,7 +369,7 @@ sub createFiltMedm
         $xpos = 81; $ypos = 165; $width = 100; $height = 20;
 	$relDisp .= "/src/epics/util/FILTALH.adl";
 	$filtName = substr $filtChan, 3;
-	$dargs = "FPREFIX=$site,FNAME=$filtName,DCUID=$dcuid";
+	$dargs = "FPREFIX=$ifo,FNAME=$filtName,DCUID=$dcuid";
         $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{brown},"GUARDIAN SET",$dargs);
 
 	print OUTMEDM "$medmdata \n";
