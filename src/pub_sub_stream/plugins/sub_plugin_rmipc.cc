@@ -70,6 +70,7 @@ namespace cps_plugins
                   memory_arena_( 5 ), stopping_{ false }, th_{}
             {
                 std::size_t i = 0;
+                size_t FE_MBUF_SIZE = 64*1024*1024;
 
                 if ( !symmetricom_fd.get( ) )
                 {
@@ -79,7 +80,7 @@ namespace cps_plugins
                 {
                     std::string shmem_fname = name + "_daq";
                     void*       dcu_addr = (void*)shmem_open_segment(
-                        shmem_fname.c_str( ), 64 * 1024 * 1024 );
+                        shmem_fname.c_str( ), FE_MBUF_SIZE );
                     if ( !dcu_addr )
                     {
                         throw std::runtime_error(

@@ -1,6 +1,6 @@
 /*!
  * @file
- * @brief a subscription interface to the mbuf based rmIpcStr data
+ * @brief a subscription interface to the mbuf based daq_m data
  */
 
 #include <iostream>
