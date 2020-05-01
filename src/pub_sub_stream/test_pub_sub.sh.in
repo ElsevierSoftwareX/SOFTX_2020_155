@@ -1,0 +1,111 @@
+#!/bin/bash
+
+CWD="@CMAKE_CURRENT_BINARY_DIR@"
+
+TDIR=""
+PID_STREAM=0
+PID_PUB_SUB=0
+PID_SUB_RECV=0
+
+function kill_proc {
+    if [ $1 -gt 0 ]; then
+        echo "Closing process $1"
+        kill $1
+    fi
+}
+
+function cleanup {
+    if [ "x$TDIR" != "x" ]; then
+        if [ -d $TDIR ]; then
+            rm -rf "$TDIR"
+        fi
+    fi
+    kill_proc $PID_STREAM
+    kill_proc $PID_PUB_SUB
+    kill_proc $PID_SUB_RECV
+}
+
+PUB_SUB="$CWD/cds_pub_sub"
+if [ ! -x "$PUB_SUB" ]; then
+    echo "cds_pub_sub is required"
+    exit 1
+fi
+
+SUB_RECV="$CWD/cps_recv"
+if [ ! -x "$SUB_RECV" ]; then
+    echo "cps_recv is required"
+    exit 1
+fi
+
+FE_STREAM_CHECK="$CWD/../fe_stream_test/fe_stream_check"
+if [ ! -x "$FE_STREAM_CHECK" ]; then
+  echo "fe_stream_check is required"
+  exit 1
+fi
+
+FE_MULTI_STREAM_TEST="$CWD/../fe_stream_test/fe_multi_stream_test"
+if [ ! -x "$FE_MULTI_STREAM_TEST" ]; then
+  echo "fe_multi_stream_test is required"
+  exit 1
+fi
+
+if [ ! -r /dev/gpstime ]; then
+  echo "the gpstime module must be loaded, configured, and accessible by this user"
+  exit 1
+fi
+
+if [ ! -r /dev/mbuf ]; then
+  echo "the mbuf module must be loaded, configured, and accessible by this user"
+  exit 1
+fi
+
+PYTHON=""
+which python > /dev/null
+if [ $? -eq 0 ]; then
+    PYTHON=`which python`
+else
+    which python3 > /dev/null
+    if [ $? -eq 0 ]; then
+        PYTHON=`which python3`
+    else
+        echo "Cannot find python or python3"
+        exit 1
+    fi
+fi
+
+trap cleanup EXIT
+
+TDIR=`$PYTHON -c "from __future__ import print_function; import tempfile; print(tempfile.mkdtemp())"`
+mkdir "$TDIR/ini_files"
+mkdir "$TDIR/logs"
+
+echo "Ini dir = $TDIR/ini_files"
+
+"$FE_MULTI_STREAM_TEST" -S -i "$TDIR/ini_files" -M "$TDIR/ini_files/master" -k 2048 -D 5,6,255 > "$TDIR/logs/models" &
+PID_STREAM=$!
+
+sleep 2
+
+echo "Streamer PID = $PID_STREAM"
+
+GDS_TP_DIR="$TDIR/ini_files"
+export GDS_TP_DIR
+"$PUB_SUB" -i "rmipc://mod5,mod6,mod255" -o "tcp://127.0.0.1:9000" > "$TDIR/logs/pub_xmit.log" &
+PID_PUB_SUB=$!
+
+sleep 1
+
+"$SUB_RECV" -b "sub_recv" -m 100 -s "tcp://127.0.0.1:9000" > "$TDIR/logs/sub_recv.log" &
+PID_SUB_RECV=$!
+
+sleep 2
+
+"$FE_STREAM_CHECK" -m sub_recv -s 100 -v -c "$TDIR/ini_files/mod5.ini" "$TDIR/ini_files/tpchn_mod5.par" \
+-c "$TDIR/ini_files/mod6.ini" "$TDIR/ini_files/tpchn_mod6.par" \
+-c "$TDIR/ini_files/mod255.ini" "$TDIR/ini_files/tpchn_mod255.par"
+RESULT=$?
+
+exit $?
+#echo "Press enter to continue..."
+#DUMMY=""
+#read DUMMY
