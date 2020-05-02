@@ -171,7 +171,9 @@ CDS_HARDWARE cdsPciModules;
       }
       if(rate_hz)  //if getmodelrate() fails to get the rate, it'll still be zero.
       {
-          sys_freq_mult = rate_hz >> 14;  //rate is in Hz but sys_freq_mult is times 2^14 kHz.
+          sys_freq_mult = rate_hz >> 14;  //rate is in Hz but sys_freq_mult is times 2^14 Hz.
+          (sys_freq_mult > 0) ? sys_freq_mult : 1;  //rate can be less than 16kHz
+                                                    //but awgtpman still set to 16kHz
       }
       else
       {
