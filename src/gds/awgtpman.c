@@ -104,7 +104,7 @@ CDS_HARDWARE cdsPciModules;
       }
    
       system_name[0] = 0;
-      while ((c = getopt (argc, argv, "h?ta01248ws:l:")) != EOF) {
+      while ((c = getopt (argc, argv, "h?ta01248wsr:l:")) != EOF) {
          switch (c) {
 	    case 'w':
 		lckall = 1;
