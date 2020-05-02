@@ -18,8 +18,10 @@ getmodelrate( int*        rate,
     char*       token = 0;
     const char* search = "=";
     char        line[ 80 ];
-    char*       s = 0;
-    char*       s1 = 0;
+    char*       ifo_val = 0;
+    char        ifo[16];
+    char*       site_val = 0;
+    char        site[16];
 
     if ( !gds_tp_dir )
     {
@@ -34,22 +36,30 @@ getmodelrate( int*        rate,
     {
         /// Need to get IFO and SITE info from environment
         /// variables.
-        s = getenv( "IFO" );
-        for ( ii = 0; s[ ii ] != '\0'; ii++ )
+        ifo_val = getenv( "IFO" );
+        for ( ii = 0; ii < sizeof(ifo)-1 && ifo_val && ifo_val[ ii ] != '\0'; ii++ )
         {
-            if ( isupper( s[ ii ] ) )
-                s[ ii ] = (char)tolower( s[ ii ] );
+            if ( isupper( ifo_val[ ii ] ) )
+                ifo[ ii ] = (char)tolower( ifo_val[ ii ] );
+            else
+                ifo[ ii ] = ifo_val[ ii ];
         }
-        s1 = getenv( "SITE" );
-        for ( ii = 0; s1[ ii ] != '\0'; ii++ )
+        ifo[ ii ] = 0;
+
+        site_val = getenv( "SITE" );
+        for ( ii = 0; ii < sizeof(site)-1 && site_val && site_val[ ii ] != '\0'; ii++ )
         {
-            if ( isupper( s1[ ii ] ) )
-                s1[ ii ] = (char)tolower( s1[ ii ] );
+            if ( isupper( site_val[ ii ] ) )
+                site[ ii ] = (char)tolower( site_val[ ii ] );
+            else
+                site[ ii ] = site_val [ ii ];
         }
+        site[ ii ] = 0;
+
         sprintf( gdsfile,
                  "/opt/rtcds/%s/%s/target/gds/param/tpchn_%s.par",
-                 s1,
-                 s,
+                 site,
+                 ifo,
                  modelname );
     }
     f = fopen( gdsfile, "rt" );

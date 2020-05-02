@@ -15,6 +15,7 @@ static char *versionId = "Version $Id$" ;
 #include "dtt/gdsprm.h"
 #include "rmapi.h"
 #include "drv/cdsHardware.h"
+#include "modelrate.h"
 
 #ifdef OS_VXWORKS
 #define _PRIORITY_TPMAN		40
@@ -68,7 +69,19 @@ CDS_HARDWARE cdsPciModules;
       int		run_awg = 1;
       int		run_tpman = 1;
       int 		lckall = 0;
+      int               sys_freq_mult_cmdline = 1;
 
+      /* awgtpman by default tries to read the model rate from the INI files
+       * for the model.  failing that, it assumes a 16 kHz (actually 2^14 Hz)
+       * rate that is modified by numerical arguments.  -2 would make the assumed
+       * rate 32 Khz, -4 is 64 kHz, -8 128 kHz etc.  The numerical args stack
+       * multiplicitively so that -2 -4 is also 128 kHz
+       * If the flag below is set, the model rate is first read from file.
+       * If cleared, the the attempt to read from file is skipped and the
+       * rate as set by command line arguments is used.
+       *
+       * Setting the -r command line option sets this flag */
+      int               use_file_model_rate = 1;
 
 #if defined(OS_SOLARIS)
       run_awg = 0;
@@ -130,21 +143,41 @@ CDS_HARDWARE cdsPciModules;
 			stderr = stdout;
 			break;
 		}
+            case 'r':
+                {
+                    use_file_model_rate = 0;
+                    break;
+                }
 	    case '1':
 	    case '2':
 	    case '4':
 	    case '8':
 	       {
-		 sys_freq_mult *= c - '0';
+		 sys_freq_mult_cmdline *= c - '0';
 		 break;
 	       }
 	    case '0':
 	    	{
-			sys_freq_mult = 1;
+			sys_freq_mult_cmdline = 1;
 			break;
 	 	}
          }
       }
+
+      int rate_hz=0, dcuid=0;
+      if(use_file_model_rate)
+      {
+          getmodelrate(&rate_hz, &dcuid, system_name, NULL);
+      }
+      if(rate_hz)  //if getmodelrate() fails to get the rate, it'll still be zero.
+      {
+          sys_freq_mult = rate_hz >> 14;  //rate is in Hz but sys_freq_mult is times 2^14 kHz.
+      }
+      else
+      {
+          sys_freq_mult = sys_freq_mult_cmdline;
+      }
+
       printf("%d kHz system\n", 16 * sys_freq_mult);
    
       /* help */
@@ -156,11 +189,18 @@ CDS_HARDWARE cdsPciModules;
 		"	-s system_name : specify control system name\n"
 		"	-t : run tpman, no awg\n"
 		"	-a : run awg, no tpman\n"
+                "	-w : lock all pages in memory\n"
+                "\n"
+                "awgtpman tries to determine the model rate from files in the\n"
+                "    TARGET directory. Failing that, awgtpman uses a 16 kHz rate\n"
+                "    unless modified by one or more numerical arguments.\n"
+                "\n"
+                "       -r : override file model rate.  Use 16 kHz modified by \n"
+                "            any numerical arguments\n"
 		"	-2 : run awg at 32 kHz\n"
 		"	-4 : run awg at 64 kHz\n"
 		"	-8 : run awg at 128 kHz\n"
-		"	-8 -2 : run awg at 256 kHz\n"
-		"	-w : lock all pages in memory\n");
+		"	-8 -2 : run awg at 256 kHz\n");
          return 1;
       }
    
