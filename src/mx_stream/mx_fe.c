@@ -25,7 +25,7 @@
 #include "myriexpress.h"
 #include "mx_extensions.h"
 #include <pthread.h>
-#include "modelrate.h"
+#include "../include/modelrate.h"
 
 #define MX_MUTEX_T pthread_mutex_t
 #define MX_MUTEX_INIT(mutex_) pthread_mutex_init(mutex_, 0)
