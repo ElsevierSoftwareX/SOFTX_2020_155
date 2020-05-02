@@ -11,3 +11,4 @@ CapabilityBoundingSet=CAP_SYS_NICE
 AmbientCapabilities=CAP_SYS_NICE
 ExecStart=/usr/bin/rts_awgtpman_exec %i
 Restart=always
+EnvironmentFile=/etc/advligorts/systemd_env
