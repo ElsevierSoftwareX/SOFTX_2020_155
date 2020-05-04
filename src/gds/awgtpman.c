@@ -37,7 +37,8 @@ char site_name_lower[16]; // geo
 char ifo_prefix_lower[3];  // g1
 char myParFile[256];
 
-/* How many times over 16 kHz is the front-end system? */
+/* How many times over 16 kHz is the front-end system?
+ * 2 kHz for slow models */
 int sys_freq_mult = 1;
 
 /* Control system name */
@@ -167,20 +168,35 @@ CDS_HARDWARE cdsPciModules;
       int rate_hz=0, dcuid=0;
       if(use_file_model_rate)
       {
-          getmodelrate(&rate_hz, &dcuid, system_name, NULL);
+          get_model_rate_dcuid( &rate_hz, &dcuid, system_name, NULL );
       }
-      if(rate_hz)  //if getmodelrate() fails to get the rate, it'll still be zero.
+      if(rate_hz)  //if get_model_rate_dcuid() fails to get the rate, it'll still be zero.
       {
-          sys_freq_mult = rate_hz >> 14;  //rate is in Hz but sys_freq_mult is times 2^14 Hz.
-          (sys_freq_mult > 0) ? sys_freq_mult : 1;  //rate can be less than 16kHz
-                                                    //but awgtpman still set to 16kHz
+          // in high rate models >= 16 kHz, multiplier is x 16 kHz.
+          // for slow rate models, it's times 2 kHz (2^11 Hz)
+          if(rate_hz >= 1<<14)
+          {
+              sys_freq_mult = rate_hz >> 14;
+
+          }
+          else
+          {
+              sys_freq_mult = rate_hz >> 11;
+          }
+
+          if(sys_freq_mult <= 0)
+          {
+              fprintf(stderr, "Calculated multiplier of %d from model rate %d Hz. Multiplier must be greater than zero.",
+                sys_freq_mult, rate_hz);
+          }
+
       }
       else
       {
           sys_freq_mult = sys_freq_mult_cmdline;
       }
 
-      printf("%d kHz system\n", 16 * sys_freq_mult);
+      printf("%d or %d kHz system\n", 2 * sys_freq_mult, 16 * sys_freq_mult);
    
       /* help */
       if (errflag) {
@@ -197,12 +213,12 @@ CDS_HARDWARE cdsPciModules;
                 "    TARGET directory. Failing that, awgtpman uses a 16 kHz rate\n"
                 "    unless modified by one or more numerical arguments.\n"
                 "\n"
-                "       -r : override file model rate.  Use 16 kHz modified by \n"
-                "            any numerical arguments\n"
-		"	-2 : run awg at 32 kHz\n"
-		"	-4 : run awg at 64 kHz\n"
-		"	-8 : run awg at 128 kHz\n"
-		"	-8 -2 : run awg at 256 kHz\n");
+                "       -r : override file model rate.  Use 16 kHz or 2 kHz\n"
+                "            modified by any numerical arguments\n"
+		"	-<n> : a single digit that's a multiple of 2 (1,2,4,8).\n"
+                "              The model rate is a base rate, either 2 or 16 kHz\n"
+                "              multiplied by <n>.  More than one argument can be\n"
+                "              given to reach higher rates.\n");
          return 1;
       }
    

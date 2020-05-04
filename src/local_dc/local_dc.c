@@ -23,7 +23,7 @@
 #include "../include/daq_core.h"
 #include "../drv/gpstime/gpstime.h"
 #include <pthread.h>
-#include "../include/modelrate.h"
+#include "modelrate.h"
 
 #define MSG_BUF_SIZE 0x200000
 
@@ -560,7 +560,7 @@ int __CDECL
     // Get model rates to get GDS TP data sizes.
     for ( ii = 0; ii < nsys; ii++ )
     {
-        status = getmodelrate(
+        status = get_model_rate_dcuid(
             &modelrates[ ii ], &dcuid[ ii ], modelnames[ ii ], gds_tp_dir );
         fprintf( stderr,
                  "Model %s rate = %d dcuid = %d\n",

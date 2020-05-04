@@ -1,0 +1,5433 @@
+#x2hpiham4a excitations
+[X2:HPI-HAM4_WITNESS_P4_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20001
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P3_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20002
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20003
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20004
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_Z_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20005
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_Y_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20006
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_X_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20007
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_VP_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20008
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_RZ_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20009
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_RY_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20010
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_RX_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20011
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_HP_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20012
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_MATCH_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20013
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_MATCH_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20014
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_MATCH_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20015
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_GND_SPARE_FILT_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20016
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_EQ_FILT1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20017
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_EQ_FILT2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20018
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_EQ_FILT3_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20019
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20020
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20021
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT3_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20022
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT4_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20023
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_UNCOR_FILT1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20024
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_UNCOR_FILT2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20025
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_WNR_LOCAL_STS_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20026
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_WNR_NORM_STS_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20027
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_WNR_UNCOR_STS_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20028
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_EQ_FILT1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20029
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_EQ_FILT2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20030
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_EQ_FILT3_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20031
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20032
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20033
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT3_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20034
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT4_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20035
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_UNCOR_FILT1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20036
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_UNCOR_FILT2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20037
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_WNR_LOCAL_STS_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20038
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_WNR_NORM_STS_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20039
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_WNR_UNCOR_STS_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20040
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_EQ_FILT1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20041
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_EQ_FILT2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20042
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_EQ_FILT3_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20043
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20044
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20045
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT3_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20046
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT4_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20047
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_UNCOR_FILT1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20048
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_UNCOR_FILT2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20049
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_WNR_LOCAL_STS_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20050
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_WNR_NORM_STS_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20051
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_WNR_UNCOR_STS_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20052
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V4_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20053
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V3_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20054
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20055
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20056
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H4_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20057
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H3_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20058
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20059
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20060
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V4_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20061
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V3_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20062
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20063
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20064
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H4_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20065
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H3_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20066
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20067
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20068
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_Z_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20069
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_Y_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20070
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_X_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20071
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_VP_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20072
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_RZ_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20073
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_RY_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20074
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_RX_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20075
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_HP_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20076
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_Z_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20077
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_Y_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20078
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_X_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20079
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_VP_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20080
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_RZ_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20081
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_RY_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20082
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_RX_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20083
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_HP_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20084
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCINF_YAW_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20085
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCINF_PITCH_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20086
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCINF_LONG_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20087
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V4_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20088
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V3_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20089
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20090
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20091
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H4_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20092
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H3_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20093
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H2_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20094
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H1_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20095
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_Z_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20096
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_Y_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20097
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_X_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20098
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_VP_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20099
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_RZ_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20100
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_RY_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20101
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_RX_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20102
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_HP_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20103
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_Z_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20104
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_Y_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20105
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_X_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20106
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_VP_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20107
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_RZ_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20108
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_RY_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20109
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_RX_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20110
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_HP_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20111
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_Z_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20112
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_Y_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20113
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_X_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20114
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_VP_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20115
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_RZ_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20116
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_RY_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20117
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_RX_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20118
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_HP_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20119
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_C_Z_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20120
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_C_Y_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20121
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_C_X_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20122
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_B_Z_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20123
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_B_Y_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20124
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_B_X_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20125
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_A_Z_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20126
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_A_Y_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20127
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_A_X_EXC]
+ifoid = 1
+rmid = 59
+dcuid = 15
+chnnum = 20128
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P4_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30001
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P4_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30002
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P4_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30003
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P3_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30004
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P3_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30005
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P3_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30006
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30007
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30008
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30009
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30010
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30011
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WITNESS_P1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30012
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_Z_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30013
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_Z_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30014
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_Z_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30015
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_Y_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30016
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_Y_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30017
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_Y_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30018
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_X_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30019
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_X_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30020
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_X_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30021
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_VP_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30022
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_VP_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30023
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_VP_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30024
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_RZ_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30025
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_RZ_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30026
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_RZ_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30027
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_RY_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30028
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_RY_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30029
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_RY_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30030
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_RX_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30031
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_RX_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30032
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_RX_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30033
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_HP_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30034
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_HP_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30035
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_FB_HP_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30036
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_MATCH_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30037
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_MATCH_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30038
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_MATCH_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30039
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_MATCH_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30040
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_MATCH_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30041
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_MATCH_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30042
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_MATCH_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30043
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_MATCH_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30044
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_MATCH_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30045
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_GND_SPARE_FILT_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30046
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_GND_SPARE_FILT_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30047
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_GND_SPARE_FILT_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30048
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_EQ_FILT1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30049
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_EQ_FILT1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30050
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_EQ_FILT1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30051
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_EQ_FILT2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30052
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_EQ_FILT2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30053
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_EQ_FILT2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30054
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_EQ_FILT3_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30055
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_EQ_FILT3_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30056
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_EQ_FILT3_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30057
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30058
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30059
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30060
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30061
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30062
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30063
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT3_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30064
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT3_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30065
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT3_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30066
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT4_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30067
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT4_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30068
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_NORM_FILT4_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30069
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_UNCOR_FILT1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30070
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_UNCOR_FILT1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30071
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_UNCOR_FILT1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30072
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_UNCOR_FILT2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30073
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_UNCOR_FILT2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30074
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_UNCOR_FILT2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30075
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_WNR_LOCAL_STS_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30076
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_WNR_LOCAL_STS_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30077
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_WNR_LOCAL_STS_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30078
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_WNR_NORM_STS_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30079
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_WNR_NORM_STS_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30080
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_WNR_NORM_STS_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30081
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_WNR_UNCOR_STS_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30082
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_WNR_UNCOR_STS_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30083
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_WNR_UNCOR_STS_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30084
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_EQ_FILT1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30085
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_EQ_FILT1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30086
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_EQ_FILT1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30087
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_EQ_FILT2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30088
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_EQ_FILT2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30089
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_EQ_FILT2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30090
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_EQ_FILT3_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30091
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_EQ_FILT3_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30092
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_EQ_FILT3_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30093
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30094
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30095
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30096
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30097
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30098
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30099
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT3_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30100
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT3_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30101
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT3_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30102
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT4_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30103
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT4_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30104
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_NORM_FILT4_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30105
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_UNCOR_FILT1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30106
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_UNCOR_FILT1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30107
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_UNCOR_FILT1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30108
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_UNCOR_FILT2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30109
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_UNCOR_FILT2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30110
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_UNCOR_FILT2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30111
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_WNR_LOCAL_STS_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30112
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_WNR_LOCAL_STS_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30113
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_WNR_LOCAL_STS_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30114
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_WNR_NORM_STS_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30115
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_WNR_NORM_STS_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30116
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_WNR_NORM_STS_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30117
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_WNR_UNCOR_STS_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30118
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_WNR_UNCOR_STS_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30119
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_WNR_UNCOR_STS_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30120
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_EQ_FILT1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30121
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_EQ_FILT1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30122
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_EQ_FILT1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30123
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_EQ_FILT2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30124
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_EQ_FILT2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30125
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_EQ_FILT2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30126
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_EQ_FILT3_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30127
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_EQ_FILT3_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30128
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_EQ_FILT3_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30129
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30130
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30131
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30132
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30133
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30134
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30135
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT3_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30136
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT3_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30137
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT3_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30138
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT4_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30139
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT4_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30140
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_NORM_FILT4_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30141
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_UNCOR_FILT1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30142
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_UNCOR_FILT1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30143
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_UNCOR_FILT1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30144
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_UNCOR_FILT2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30145
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_UNCOR_FILT2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30146
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_UNCOR_FILT2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30147
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_WNR_LOCAL_STS_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30148
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_WNR_LOCAL_STS_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30149
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_WNR_LOCAL_STS_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30150
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_WNR_NORM_STS_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30151
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_WNR_NORM_STS_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30152
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_WNR_NORM_STS_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30153
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_WNR_UNCOR_STS_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30154
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_WNR_UNCOR_STS_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30155
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_WNR_UNCOR_STS_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30156
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V4_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30157
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V4_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30158
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V4_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30159
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V3_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30160
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V3_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30161
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V3_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30162
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30163
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30164
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30165
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30166
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30167
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_V1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30168
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H4_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30169
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H4_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30170
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H4_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30171
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H3_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30172
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H3_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30173
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H3_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30174
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30175
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30176
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30177
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30178
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30179
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUTF_H1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30180
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V4_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30181
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V4_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30182
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V4_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30183
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V3_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30184
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V3_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30185
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V3_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30186
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30187
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30188
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30189
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30190
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30191
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_V1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30192
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H4_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30193
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H4_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30194
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H4_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30195
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H3_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30196
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H3_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30197
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H3_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30198
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30199
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30200
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30201
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30202
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30203
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_L4CINF_H1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30204
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_Z_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30205
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_Z_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30206
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_Z_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30207
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_Y_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30208
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_Y_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30209
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_Y_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30210
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_X_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30211
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_X_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30212
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_X_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30213
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_VP_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30214
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_VP_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30215
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_VP_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30216
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_RZ_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30217
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_RZ_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30218
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_RZ_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30219
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_RY_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30220
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_RY_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30221
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_RY_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30222
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_RX_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30223
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_RX_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30224
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_RX_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30225
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_HP_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30226
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_HP_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30227
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISO_HP_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30228
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_Z_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30229
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_Z_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30230
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_Z_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30231
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_Y_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30232
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_Y_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30233
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_Y_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30234
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_X_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30235
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_X_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30236
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_X_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30237
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_VP_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30238
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_VP_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30239
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_VP_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30240
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_RZ_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30241
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_RZ_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30242
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_RZ_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30243
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_RY_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30244
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_RY_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30245
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_RY_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30246
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_RX_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30247
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_RX_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30248
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_RX_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30249
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_HP_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30250
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_HP_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30251
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCMON_HP_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30252
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCINF_YAW_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30253
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCINF_YAW_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30254
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCINF_YAW_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30255
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCINF_PITCH_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30256
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCINF_PITCH_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30257
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCINF_PITCH_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30258
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCINF_LONG_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30259
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCINF_LONG_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30260
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ISCINF_LONG_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30261
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V4_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30262
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V4_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30263
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V4_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30264
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V3_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30265
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V3_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30266
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V3_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30267
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30268
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30269
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30270
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30271
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30272
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_V1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30273
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H4_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30274
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H4_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30275
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H4_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30276
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H3_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30277
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H3_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30278
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H3_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30279
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H2_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30280
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H2_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30281
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H2_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30282
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H1_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30283
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H1_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30284
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPSINF_H1_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30285
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_Z_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30286
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_Z_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30287
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_Z_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30288
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_Y_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30289
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_Y_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30290
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_Y_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30291
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_X_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30292
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_X_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30293
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_X_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30294
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_VP_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30295
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_VP_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30296
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_VP_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30297
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_RZ_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30298
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_RZ_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30299
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_RZ_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30300
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_RY_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30301
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_RY_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30302
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_RY_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30303
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_RX_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30304
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_RX_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30305
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_RX_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30306
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_HP_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30307
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_HP_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30308
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_L4C_HP_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30309
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_Z_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30310
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_Z_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30311
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_Z_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30312
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_Y_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30313
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_Y_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30314
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_Y_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30315
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_X_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30316
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_X_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30317
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_X_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30318
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_VP_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30319
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_VP_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30320
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_VP_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30321
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_RZ_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30322
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_RZ_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30323
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_RZ_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30324
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_RY_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30325
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_RY_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30326
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_RY_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30327
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_RX_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30328
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_RX_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30329
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_RX_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30330
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_HP_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30331
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_HP_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30332
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_IPS_HP_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30333
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_Z_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30334
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_Z_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30335
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_Z_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30336
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_Y_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30337
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_Y_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30338
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_Y_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30339
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_X_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30340
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_X_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30341
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_X_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30342
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_VP_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30343
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_VP_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30344
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_VP_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30345
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_RZ_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30346
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_RZ_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30347
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_RZ_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30348
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_RY_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30349
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_RY_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30350
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_RY_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30351
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_RX_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30352
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_RX_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30353
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_RX_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30354
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_HP_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30355
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_HP_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30356
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4C_FF_HP_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30357
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_C_Z_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30358
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_C_Z_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30359
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_C_Z_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30360
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_C_Y_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30361
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_C_Y_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30362
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_C_Y_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30363
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_C_X_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30364
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_C_X_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30365
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_C_X_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30366
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_B_Z_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30367
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_B_Z_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30368
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_B_Z_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30369
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_B_Y_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30370
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_B_Y_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30371
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_B_Y_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30372
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_B_X_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30373
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_B_X_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30374
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_B_X_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30375
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_A_Z_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30376
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_A_Z_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30377
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_A_Z_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30378
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_A_Y_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30379
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_A_Y_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30380
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_A_Y_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30381
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_A_X_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30382
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_A_X_IN2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30383
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_3DL4CINF_A_X_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30384
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH0]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30385
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30386
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30387
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH3]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30388
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH4]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30389
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH5]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30390
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH6]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30391
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH7]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30392
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH8]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30393
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH9]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30394
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH10]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30395
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH11]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30396
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH12]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30397
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH13]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30398
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH14]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30399
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4A_MDAC0_TP_CH15]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30400
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WD_ACT_THRESH_MAX_MON]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30401
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WD_IPS_THRESH_MAX_MON]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30402
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WD_L4C_THRESH_MAX_MON]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30403
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WD_MON_STATE_IN1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30404
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_WD_STS_THRESH_MAX_MON]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30405
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_OUT_Z]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30406
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_OUT_Y]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30407
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_OUT_X]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30408
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_OUT_VP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30409
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_OUT_RZ]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30410
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_OUT_RY]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30411
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_OUT_RX]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30412
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_OUT_HP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30413
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_IN_Z]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30414
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_IN_Y]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30415
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_IN_X]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30416
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_IN_VP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30417
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_IN_RZ]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30418
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_IN_RY]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30419
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_IN_RX]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30420
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TWIST_UD_IN_HP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30421
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_TC_IN_Z]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30422
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_TC_IN_Y]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30423
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_TC_IN_X]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30424
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_TC_IN_VP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30425
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_TC_IN_RZ]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30426
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_TC_IN_RY]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30427
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_TC_IN_RX]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30428
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_TC_IN_HP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30429
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_OUT_Z]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30430
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_OUT_Y]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30431
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_OUT_X]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30432
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_OUT_VP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30433
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_OUT_RZ]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30434
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_OUT_RY]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30435
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_OUT_RX]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30436
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_OUT_HP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30437
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_L4C_IN_Z]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30438
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_L4C_IN_Y]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30439
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_L4C_IN_X]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30440
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_L4C_IN_VP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30441
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_L4C_IN_RZ]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30442
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_L4C_IN_RY]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30443
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_L4C_IN_RX]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30444
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_TCSUM_L4C_IN_HP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30445
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SYNCERR_ISC_YAW]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30446
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SYNCERR_ISC_PITCH]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30447
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SYNCERR_ISC_LONG]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30448
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SYNCERR_3DL4C_C_Z]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30449
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SYNCERR_3DL4C_C_Y]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30450
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SYNCERR_3DL4C_C_X]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30451
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SYNCERR_3DL4C_B_Z]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30452
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SYNCERR_3DL4C_B_Y]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30453
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SYNCERR_3DL4C_B_X]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30454
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SYNCERR_3DL4C_A_Z]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30455
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SYNCERR_3DL4C_A_Y]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30456
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SYNCERR_3DL4C_A_X]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30457
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_COMMON_MODE]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30458
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_FADE_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30459
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_LOCAL_DIFF]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30460
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_SENSCOR_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30461
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_X_WNR_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30462
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_COMMON_MODE]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30463
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_FADE_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30464
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_LOCAL_DIFF]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30465
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_SENSCOR_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30466
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Y_WNR_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30467
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_COMMON_MODE]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30468
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_FADE_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30469
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_LOCAL_DIFF]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30470
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_SENSCOR_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30471
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SENSCOR_Z_WNR_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30472
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SCSUM_STS_IN_Z]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30473
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SCSUM_STS_IN_Y]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30474
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SCSUM_STS_IN_X]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30475
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SCSUM_IPS_IN_Z]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30476
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SCSUM_IPS_IN_Y]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30477
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_SCSUM_IPS_IN_X]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30478
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUT_UD_OUT_V4]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30479
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUT_UD_OUT_V3]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30480
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUT_UD_OUT_V2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30481
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUT_UD_OUT_V1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30482
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUT_UD_OUT_H4]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30483
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUT_UD_OUT_H3]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30484
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUT_UD_OUT_H2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30485
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_OUT_UD_OUT_H1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30486
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ODC_CHANNEL_OUT]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30487
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_PREWD_V4]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30488
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_PREWD_V3]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30489
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_PREWD_V2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30490
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_PREWD_V1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30491
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_PREWD_H4]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30492
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_PREWD_H3]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30493
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_PREWD_H2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30494
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_PREWD_H1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30495
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_OUT_V4]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30496
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_OUT_V3]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30497
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_OUT_V2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30498
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_OUT_V1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30499
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_OUT_H4]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30500
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_OUT_H3]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30501
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_OUT_H2]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30502
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_MASTER_OUT_H1]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30503
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_HP_BIAS_RAMP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30504
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_HP_LOCATION]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30505
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_HP_RESIDUAL]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30506
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_RX_BIAS_RAMP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30507
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_RX_LOCATION]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30508
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_RX_RESIDUAL]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30509
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_RY_BIAS_RAMP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30510
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_RY_LOCATION]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30511
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_RY_RESIDUAL]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30512
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_RZ_BIAS_RAMP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30513
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_RZ_LOCATION]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30514
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_RZ_RESIDUAL]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30515
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_VP_BIAS_RAMP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30516
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_VP_LOCATION]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30517
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_VP_RESIDUAL]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30518
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_X_BIAS_RAMP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30519
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_X_LOCATION]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30520
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_X_RESIDUAL]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30521
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_Y_BIAS_RAMP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30522
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_Y_LOCATION]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30523
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_Y_RESIDUAL]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30524
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_Z_BIAS_RAMP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30525
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_Z_LOCATION]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30526
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_IPS_Z_RESIDUAL]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30527
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_SUPS_Z]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30528
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_SUPS_Y]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30529
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_SUPS_X]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30530
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_SUPS_VP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30531
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_SUPS_RZ]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30532
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_SUPS_RY]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30533
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_SUPS_RX]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30534
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_BLND_SUPS_HP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30535
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD1_Z]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30536
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD1_Y]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30537
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD1_X]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30538
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD1_VP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30539
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD1_RZ]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30540
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD1_RY]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30541
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD1_RX]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30542
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD1_HP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30543
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD_Z]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30544
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD_Y]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30545
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD_X]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30546
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD_VP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30547
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD_RZ]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30548
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD_RY]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30549
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD_RX]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30550
+datatype = 4
+datarate = 2048
+
+[X2:HPI-HAM4_ADD_HP]
+ifoid = 1
+rmid = 59
+dcuid = 16
+chnnum = 30551
+datatype = 4
+datarate = 2048
+

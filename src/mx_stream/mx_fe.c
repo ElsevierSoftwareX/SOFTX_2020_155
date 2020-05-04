@@ -25,7 +25,7 @@
 #include "myriexpress.h"
 #include "mx_extensions.h"
 #include <pthread.h>
-#include "../include/modelrate.h"
+#include "modelrate.h"
 
 #define MX_MUTEX_T pthread_mutex_t
 #define MX_MUTEX_INIT(mutex_) pthread_mutex_init(mutex_, 0)
@@ -617,7 +617,7 @@ main(int argc,char *argv[])
 
 	// Get model rates to get GDS TP data sizes.
     for (ii = 0; ii < nsys; ii++) {
-        status = getmodelrate(&modelrates[ii],&dcuid[ii],modelnames[ii], gds_tp_dir);
+        status = get_model_rate_dcuid(&modelrates[ii],&dcuid[ii],modelnames[ii], gds_tp_dir);
 		fprintf(stderr,"Model %s rate = %d dcuid = %d\n",modelnames[ii],modelrates[ii],dcuid[ii]);
 	    if (status != 0) {
 		fprintf(stderr, "Unable to determine the rate of %s\n", modelnames[ii]);

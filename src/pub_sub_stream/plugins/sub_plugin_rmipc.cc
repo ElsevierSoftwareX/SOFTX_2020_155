@@ -96,7 +96,7 @@ namespace cps_plugins
                         (struct
                          cdsDaqNetGdsTpNum*)( (char*)dcu_addr +
                                               CDS_DAQ_NET_GDS_TP_TABLE_OFFSET );
-                    auto status = getmodelrate(
+                    auto status = get_model_rate_dcuid(
                         &modelrates[ i ], &dcuid[ i ], name.c_str( ), nullptr );
                     if ( status != 0 || modelrates[ i ] == 0 )
                     {

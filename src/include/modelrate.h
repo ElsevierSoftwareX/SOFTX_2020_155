@@ -5,9 +5,25 @@
 #ifndef _UTIL_MODELRATE_H
 #define _UTIL_MODELRATE_H
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif //__cplusplus
+
+/*!
+ * @brief get a string from the environment and return a copy coverted to
+ * lowercase
+ * @param env_name the name of the environment variable
+ * @param dest destination buffer (non-null)
+ * @param dest_size size of dest (must be > 1)
+ * @details If the environment variable env_name is not set, sets dest to the
+ * empty string, else copies the value into dest and converts it to lowercase.
+ * @note This truncates the value if needed to fit in dest.  Dest is always a
+ * null terminated string after this call.
+ */
+extern void
+get_env_lower( const char* env_name, char* dest, size_t dest_size );
 
 /**
  * Get control model loop rates and dcuid from GDS param files
@@ -27,8 +43,7 @@ extern "C" {
  * containing the GDS param files.
  * @return always returns 0.
  */
-int
-getmodelrate( int*        rate,
+extern int get_model_rate_dcuid( int*        rate,
               int*        dcuid,
               const char* modelname,
               char*       gds_tp_dir );
