@@ -11,6 +11,7 @@ add_subdirectory(drv)
 add_subdirectory(local_dc)
 add_subdirectory(fe_stream_test)
 add_subdirectory(pub_sub_stream)
+add_subdirectory(util)
 
 if (${DOLPHIN_FOUND})
     add_subdirectory(ix_stream)

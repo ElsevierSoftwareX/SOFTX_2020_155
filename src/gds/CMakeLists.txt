@@ -235,7 +235,7 @@ add_dependencies(gds_cc _gds_rpc_gen_hdrs)
 
 
 add_executable(awgtpman $<TARGET_OBJECTS:gds_c> $<TARGET_OBJECTS:gds_cc> ${CMAKE_CURRENT_BINARY_DIR}/gds_includes ${RPC_INCLUDE_DIRS})
-target_link_libraries(awgtpman ${CMAKE_THREAD_LIBS_INIT} ${RPC_LIBRARIES})
+target_link_libraries(awgtpman ${CMAKE_THREAD_LIBS_INIT} ${RPC_LIBRARIES} util)
 
 
 #######
