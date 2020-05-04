@@ -197,7 +197,7 @@ sub createGdsMedm
 	$medmdata .= ("CDS::medmGen::medmGenTextDyn") -> ($xpos,$ypos,$width,$height,"TIMER",$ecolors{green},"A&16","$ifo\:FEC-$dcuid\_TIME_ERR");
 	# Add NO SYNC Alaram Monitor
 	$xpos = 125; $ypos = 111; $width = 50; $height = 16;
-	$medmdata .= ("CDS::medmGen::medmGenTextDyn") -> ($xpos,$ypos,$width,$height,"ExtClk",$ecolors{red},"(A&255) == 0","$ifo\:FEC-$dcuid\_TIME_ERR");
+	$medmdata .= ("CDS::medmGen::medmGenTextDyn") -> ($xpos,$ypos,$width,$height,"ExtClk",$ecolors{green},"(A&255) == 0","$ifo\:FEC-$dcuid\_TIME_ERR");
 
     # Add Uptime
 	$xpos = 680; $ypos = 46; $width = 100; $height = 21;

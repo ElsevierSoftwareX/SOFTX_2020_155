@@ -232,6 +232,8 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
         mask = GSAI_DATA_MASK;
         num_outs = cdsPciModules.adcChannels[ card ];
         loops = UNDERSAMPLE;
+        if ( cdsPciModules.adcType[ card ] == GSC_16AI64SSA  && UNDERSAMPLE > 4)
+            loops = 1;
         /// - ---- Determine next ipc memory location to load ADC data
         ioMemCntr = ( ( cycleNum / ADC_MEMCPY_RATE ) % IO_MEMORY_SLOTS );
         iocycle = ( cycleNum / ADC_MEMCPY_RATE );
