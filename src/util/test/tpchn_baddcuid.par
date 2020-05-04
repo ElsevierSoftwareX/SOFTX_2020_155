@@ -1,0 +1,8 @@
+#x2hpiham4a excitations
+[X2:HPI-HAM4_WITNESS_P4_EXC]
+ifoid = 1
+rmid = abcd
+dcuid = 15
+chnnum = 20001
+datatype = 4
+datarate = 2048

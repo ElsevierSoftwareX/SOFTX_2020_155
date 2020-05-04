@@ -23,7 +23,7 @@ if (OPENMX_FOUND)
 			${CMAKE_CURRENT_SOURCE_DIR}
 			${CMAKE_CURRENT_SOURCE_DIR}/../common
 			${CMAKE_CURRENT_SOURCE_DIR}/../common/bsd)
-	target_link_libraries(mx_fe PUBLIC openmx::openmx args ${MAKE_THREAD_LIBS_INIT})
+	target_link_libraries(mx_fe PUBLIC openmx::openmx args util ${MAKE_THREAD_LIBS_INIT})
 	set_target_properties(mx_fe PROPERTIES LINKER_LANGUAGE CXX)
 
 
