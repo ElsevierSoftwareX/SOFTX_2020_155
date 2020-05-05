@@ -1,7 +1,0 @@
-file /target/pid_control.db
-{
-pattern
-{P,        PID,       INP,         OUT,        LOPR,  HOPR,  DRVL,  DRVH,  PREC,   KP,  KI,   KD,  SCAN}
-{stdTest:, PID1,    adc0,   dac0,   -10000,    10000,     -50000,    50000,     3,     0.2,  3.,   0.,  ".1 second"}
-}
-

@@ -1,9 +1,0 @@
-Athena II board development for Ben
-Uses
-
-/opt/synApps_5_4_1/ /opt/epics-3.14.10-linux/
-
-
-To enable PID processing 
-ezcawrite stdTest:PID1.FBON 1
-
