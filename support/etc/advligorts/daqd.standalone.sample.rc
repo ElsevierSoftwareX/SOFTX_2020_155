@@ -54,7 +54,7 @@ set minute-trend-num-dirs=10;
 set minute-trend-frames-per-dir=24;
 set minute-trend-frame-dir="/frames/trend/minute", "X-X1_M-", ".gwf";
 
-# writing minute trends these should be uncommented
+# uncomment these two lines to write minute trends
 #set raw-minute-trend-dir="/frames/trend/minute_raw";
 #set raw_minute_trend_saving_period=5;
 
