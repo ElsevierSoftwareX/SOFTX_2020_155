@@ -83,7 +83,7 @@ sync frame-saver;
 # start the trender thread.  Note this is not the trend writer, but the thread which
 # takes raw data, and makes the trends internally.
 # start trender <seconds in a second trend frame> <seconds in a m-trend>
-# The '60' is implicit, and cane be left out, but it cannot be set to a value different
+# The '60' is implicit, and can be left out, but it cannot be set to a value different
 # than 60.
 start trender 600 60;
 start trend profiler;
