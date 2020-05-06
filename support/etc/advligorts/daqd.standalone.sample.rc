@@ -11,6 +11,9 @@ set dcu_status_check=1;
 set debug=0;
 set log=6;
 
+# zero_bad_data is set to 1 to zero the data block if it there
+# is not valid data.  The production systems have run with this
+# as 0.
 set zero_bad_data=0;
 # a GDS broadcaster should set the gds channel list before
 # loading the main channel list.
@@ -28,7 +31,6 @@ status dcu;
 
 # Set some basic parameters that get
 # encoded into the frame.
-set gps_leaps = 820108813;
 set detector_name="TST";
 set detector_prefix="X1";
 set detector_longitude=-90.7742403889;
@@ -42,6 +44,7 @@ set detector_midpoints=2000.0, 2000.0;
 set num_dirs = 10;
 set frames_per_dir=225;
 set full_frames_per_file=1;
+# full_frames_blocks_per_frame is the number of seconds in a raw frame
 set full_frames_blocks_per_frame=16;
 set frame_dir="/frames/full", "X-X1_R-", ".gwf";
 
@@ -57,10 +60,6 @@ set minute-trend-frame-dir="/frames/trend/minute", "X-X1_M-", ".gwf";
 # uncomment these two lines to write minute trends
 #set raw-minute-trend-dir="/frames/trend/minute_raw";
 #set raw_minute_trend_saving_period=5;
-
-# Only modify this if you use a non-default nds process
-# setup
-#set nds-jobs-dir="/run/nds";
 
 # the daqd reads from a shared memory buffer, set the
 # input buffer name and size (in bytes).
