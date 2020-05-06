@@ -1,3 +1,7 @@
+# set the default size for threads
+# the OS defaults have shown to be too small
+# this setting comes from
+# https://alog.ligo-la.caltech.edu/TST/index.php?callRep=13356
 set thread_stack_size=102400;
 set dcu_status_check=1;
 
@@ -67,10 +71,12 @@ set parameter "shmem_size" = "104857600";
 # starting the i/o code
 #set parameter "GDS_BROADCAST" = "1";
 
-# The 'start' commands start up daqd threads
-# this starts the main thread which owns the circular buffer
-# with a 5 second buffer.  Increasing the buffer length drives the
-# memory usage of the daqd.  The size should be at least as long as the
+# The 'start' commands start up daqd threads.
+# This start comand starts the main thread with a buffer size.
+# The buffer is the main circular buffer and the size is given as
+# a number of 1s segments that make up the circular buffer.
+# Increasing the buffer length drives the memory usage of the daqd.
+# The size should be at least as long as the
 # frames (for a frame writer) + some buffering.
 start main 20;
 # profiler threads give status and health checks
@@ -82,10 +88,8 @@ sync frame-saver;
 
 # start the trender thread.  Note this is not the trend writer, but the thread which
 # takes raw data, and makes the trends internally.
-# start trender <seconds in a second trend frame> <seconds in a m-trend>
-# The '60' is implicit, and can be left out, but it cannot be set to a value different
-# than 60.
-start trender 600 60;
+# start trender <seconds in a second trend frame>
+start trender 600;
 start trend profiler;
 # This start/sync pair start the second trend frame writer
 start trend-frame-saver;
@@ -99,12 +103,15 @@ sync minute-trend-frame-saver;
 # GDS broadcasters would use this to enable the broadcast of the
 # gds data stream.
 #start frame-writer "10.120.0.255" broadcast="10.120.0.0" all;
+
+# give a moment for the threads to start up
 sleep 2;
 
 # now that the other threads are started, start the producer, which
 # brings data in from the shared memory buffer and puts it into the
 # main circular buffer
 start producer;
+
 # start the epics CA server (not the edcu) which gives status information
 # via epics.
 start epics server "X1:DAQ-SHM0_" "X1:DAQ-SHM0_";
@@ -113,6 +120,7 @@ start epics server "X1:DAQ-SHM0_" "X1:DAQ-SHM0_";
 # 8087 is the more 'text' based protocol, it is not strictly needed anymore.  But is meant
 # for admins/developers to query the system and get responses that are more human readable.
 start listener 8087;
+
 # '8088 1' this is the main interface that speaks nds1.  The '1' marks this as the binary
 # protocol.  This is the interface used by control room tools.  8088 is the port number.
 start listener 8088 1;
