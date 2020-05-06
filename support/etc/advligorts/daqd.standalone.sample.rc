@@ -69,7 +69,7 @@ set parameter "shmem_size" = "104857600";
 
 # The 'start' commands start up daqd threads
 # this starts the main thread which owns the circular buffer
-# with a 5 second buffer.  Increasing the buffer length drives them
+# with a 5 second buffer.  Increasing the buffer length drives the
 # memory usage of the daqd.  The size should be at least as long as the
 # frames (for a frame writer) + some buffering.
 start main 20;
