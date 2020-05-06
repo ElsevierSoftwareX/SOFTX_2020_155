@@ -1,6 +1,13 @@
 FIND_PROGRAM(UNAME_PROG uname)
 FIND_PROGRAM(DATE_PROG date)
 
+FIND_PATH(FLEX_LEXER_PATH FlexLexer.h
+		HINTS /usr/include)
+message("Flex lexer path = '${FLEX_LEXER_PATH}'")
+if (NOT FLEX_LEXER_PATH)
+	message(FATAL_ERROR "FlexLexer.h is not found.  On debian this is in the libfl-dev package")
+endif (NOT FLEX_LEXER_PATH)
+
 INCLUDE(Cpp11)
 INCLUDE(CheckCXXSourceCompiles)
 
