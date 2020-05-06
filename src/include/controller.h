@@ -136,6 +136,8 @@ char fp[ 64 * 1024 ];
 #define DAQ_RATE ( DAQ_16K_SAMPLE_SIZE * 8 )
 #define NET_SEND_WAIT 655360
 #define CYCLE_TIME_ALRM 7
+#define CYCLE_TIME_ALRM_HI 9
+#define CYCLE_TIME_ALRM_LO 1
 #define EPICS_128_SYNC 1024
 #define DAC_PRELOAD_CNT 0
 #endif

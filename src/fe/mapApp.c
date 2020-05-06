@@ -47,6 +47,17 @@ mapPciModules( CDS_HARDWARE* pCds )
                     status++;
                 }
                 break;
+            case GSC_18AI32SSC1M:
+                if ( ( pCds->cards_used[ jj ].type == GSC_18AI32SSC1M ) &&
+                     ( pCds->cards_used[ jj ].instance == adcCnt ) )
+                {
+                    kk = pCds->adcCount;
+                    pCds->adcType[ kk ] = GSC_18AI32SSC1M;
+                    pCds->adcConfig[ kk ] = ioMemData->ipc[ ii ];
+                    pCds->adcCount++;
+                    status++;
+                }
+                break;
             case GSC_16AO16:
                 if ( ( pCds->cards_used[ jj ].type == GSC_16AO16 ) &&
                      ( pCds->cards_used[ jj ].instance == dacCnt ) )
@@ -166,6 +177,8 @@ mapPciModules( CDS_HARDWARE* pCds )
             }
         }
         if ( ioMemData->model[ ii ] == GSC_16AI64SSA )
+            adcCnt++;
+        if ( ioMemData->model[ ii ] == GSC_18AI32SSC1M )
             adcCnt++;
         if ( ioMemData->model[ ii ] == GSC_16AO16 )
             dacCnt++;

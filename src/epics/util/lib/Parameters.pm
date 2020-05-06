@@ -62,29 +62,40 @@ sub parseParams {
         			my $param_speed = $spp[1];
         			if ($param_speed eq "2K") {
                 			$::rate = 480;
+                			$::modelrate = 2;
+                			$::servoflag = "-DSERVO2K";
         			} elsif ($param_speed eq "4K") {
                 			$::rate = 240;
+                			$::modelrate = 4;
+                			$::servoflag = "-DSERVO4K";
         			} elsif ($param_speed eq "16K") {
                 			$::rate = 60;
                 			$::modelrate = 16;
+                			$::servoflag = "-DSERVO16K";
         			} elsif ($param_speed eq "32K") {
                 			$::rate = 30;
                 			$::modelrate = 32;
+                			$::servoflag = "-DSERVO32K";
         			} elsif ($param_speed eq "64K") {
                 			$::rate = 15;
                 			$::modelrate = 64;
+                			$::servoflag = "-DSERVO64K";
         			} elsif ($param_speed eq "128K") {
                 			$::rate = 8;
                 			$::modelrate = 128;
+                			$::servoflag = "-DSERVO128K";
         			} elsif ($param_speed eq "256K") {
                 			$::rate = 4;
                 			$::modelrate = 256;
+                			$::servoflag = "-DSERVO256K";
         			} elsif ($param_speed eq "512K") {
                 			$::rate = 2;
                 			$::modelrate = 512;
+                			$::servoflag = "-DSERVO512K";
         			} elsif ($param_speed eq "1024K") {
                 			$::rate = 1;
                 			$::modelrate = 1024;
+                			$::servoflag = "-DSERVO1024K";
         			} else  { die "Invalid speed $param_speed specified\n"; }
 
 			} elsif ($spp[0] eq "dcuid") {
