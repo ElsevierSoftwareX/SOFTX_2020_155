@@ -155,6 +155,7 @@ $requireIOcnt = 0;
 #Following provide for non standard IOP clock rates
 $adcclock = 64;
 $modelrate = 64;
+$servoflag = "-DSERVO64K";
 $clock_div = 1;
 
 # Load model name without .mdl extension.
@@ -1474,7 +1475,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 
 	#$gdsXstart = ($dcuId - 5) * 1250;
 	#$gdsTstart = $gdsXstart + 10000;
-	if($rate == 480 || $rate == 240) {
+	if($modelrate == 2 || $modelrate == 4) {
 	  $gdsXstart = 20001;
 	  $gdsTstart = 30001;
 	} else {
@@ -2213,23 +2214,7 @@ sub debug {
 #// \b sub \b get_freq \n
 #// Determine user code sample rate \n\n
 sub get_freq {
-	if($rate == 480) {
-		return 2*1024;
-	} elsif ($rate == 240) {
-		return 4*1024;
-	} elsif ($rate == 60) {
-		return 16*1024;
-	} elsif ($rate == 30) {
-		return 32*1024;
-	} elsif ($rate == 15) {
-		return 64*1024;
-	} elsif ($rate == 4) {
-		return 256*1024;
-	} elsif ($rate == 2) {
-		return 512*1024;
-	} elsif ($rate == 1) {
-		return 1024*1024;
-	}
+    return $modelrate * 1024;
 }
 
 #// \b sub \b init_vars \n
@@ -2450,16 +2435,7 @@ print OUTM "KBUILD_EXTRA_SYMBOLS += \$(PWD)/ModuleIOP.symvers\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
 print OUTM "EXTRA_CFLAGS += -O -w -I../../include\n";
 
-if($rate == 480) { print OUTM "EXTRA_CFLAGS += -DSERVO2K\n"; }
-elsif($rate == 240) { print OUTM "EXTRA_CFLAGS += -DSERVO4K\n"; }
-elsif($rate == 60) { print OUTM "EXTRA_CFLAGS += -DSERVO16K\n"; }
-elsif($rate == 30) { print OUTM "EXTRA_CFLAGS += -DSERVO32K\n"; }
-elsif($rate == 15) { print OUTM "EXTRA_CFLAGS += -DSERVO64K\n"; }
-elsif($rate == 7) { print OUTM "EXTRA_CFLAGS += -DSERVO128K\n"; }
-elsif($rate == 4) { print OUTM "EXTRA_CFLAGS += -DSERVO256K\n"; }
-elsif($rate == 2) { print OUTM "EXTRA_CFLAGS += -DSERVO512K\n"; }
-elsif($rate == 1) { print OUTM "EXTRA_CFLAGS += -DSERVO1024K\n"; }
-
+print OUTM "EXTRA_CFLAGS += $servoflag \n";
 
 print OUTM "EXTRA_CFLAGS += -D";
 print OUTM "\U$skeleton";
@@ -2505,24 +2481,6 @@ if ($no_daq) {
 # SHMEM_DAQ set as the default for RCG V2.8 - No longer support GM
   print OUTM "#Comment out to disable local frame builder connection\n";
   print OUTM "EXTRA_CFLAGS += -DSHMEM_DAQ\n";
-
-# Use oversampling code if not 64K system
-if($rate > 15) {
-  if ($no_oversampling) {
-    print OUTM "#Uncomment to oversample A/D inputs\n";
-    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE\n";
-    print OUTM "#Uncomment to interpolate D/A outputs\n";
-    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
-  } else {
-    print OUTM "#Comment out to stop A/D oversampling\n";
-    print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE\n";
-    if ($no_dac_interpolation) {
-    } else {
-      print OUTM "#Comment out to stop interpolating D/A outputs\n";
-      print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
-    }
-  }
-}
 # Set to flip polarity of ADC input signals
 if ($flipSignals) {
   print OUTM "EXTRA_CFLAGS += -DFLIP_SIGNALS=1\n";
@@ -2619,7 +2577,25 @@ if ($adcSlave > -1) {   #************ SETUP FOR USER APP ***************
   if ($::noZeroPad) {
     print OUTM "EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
   }
+
+# Use oversampling code if not 64K system
+if($modelrate < 64) {
+  if ($no_oversampling) {
+    print OUTM "#Uncomment to oversample A/D inputs\n";
+    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE\n";
+    print OUTM "#Uncomment to interpolate D/A outputs\n";
+    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
+  } else {
+    print OUTM "#Comment out to stop A/D oversampling\n";
+    print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE\n";
+    if ($no_dac_interpolation) {
+    } else {
+      print OUTM "#Comment out to stop interpolating D/A outputs\n";
+      print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
+    }
+  }
 }
+}  #******************* END SETUP FOR USER APP
 
 
 
@@ -2655,15 +2631,7 @@ print OUTM "# User Space Linux\n";
 print OUTM "CFLAGS += -O -w -I../../include\n";
 print OUTM "CFLAGS += -I/opt/mx/include\n";
 
-if($rate == 480) { print OUTM "CFLAGS += -DSERVO2K\n"; }
-elsif($rate == 240) { print OUTM "CFLAGS += -DSERVO4K\n"; }
-elsif($rate == 60) { print OUTM "CFLAGS += -DSERVO16K\n"; }
-elsif($rate == 30) { print OUTM "CFLAGS += -DSERVO32K\n"; }
-elsif($rate == 15) { print OUTM "CFLAGS += -DSERVO64K\n"; }
-elsif($rate == 7) { print OUTM "CFLAGS += -DSERVO128K\n"; }
-elsif($rate == 4) { print OUTM "CFLAGS += -DSERVO256K\n"; }
-elsif($rate == 2) { print OUTM "CFLAGS += -DSERVO512K\n"; }
-elsif($rate == 1) { print OUTM "CFLAGS += -DSERVO1024K\n"; }
+print OUTM "EXTRA_CFLAGS += $servoflag \n";
 
 print OUTM "CFLAGS += -D";
 print OUTM "\U$skeleton";
@@ -2704,7 +2672,7 @@ if ($no_daq) {
   print OUTM "CFLAGS += -DSHMEM_DAQ\n";
 
 # Use oversampling code if not 64K system
-if($rate > 15) {
+if($modelrate < 64) {
   if ($no_oversampling) {
     print OUTM "#Uncomment to oversample A/D inputs\n";
     print OUTM "#CFLAGS += -DOVERSAMPLE\n";

@@ -102,7 +102,7 @@ sync_adc_2_1pps( )
 inline int
 iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
 {
-    int           kk;
+    int           ii,kk;
     volatile int* packedData;
     int           limit;
     int           mask;
@@ -256,6 +256,15 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
                 // dWord is the double representation of the ADC data
                 // This is the value used by the rest of the code calculations.
                 dWord[ card ][ chan ][ kk ] = adcinfo->adcData[ card ][ chan ];
+                // If running with fast ADC at 512K and gsc16ai64 at 64K, then:
+                // fill in the missing data by doing data copy
+                if ( cdsPciModules.adcType[ card ] == GSC_16AI64SSA &&
+                     UNDERSAMPLE > 4 )
+                {
+                    for ( ii = 1; ii < UNDERSAMPLE; ii++ )
+                        dWord[ card ][ chan ][ ii ] = 
+                            adcinfo->adcData[ card ][ chan ];
+                }
                 /// - ----  Load ADC value into ipc memory buffer
                 ioMemData->iodata[ card ][ ioMemCntr ].data[ chan ] =
                     adcinfo->adcData[ card ][ chan ];
@@ -272,14 +281,31 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
                 packedData++;
             }
 
+            // For normal IOP ADC undersampling ie not a mixed fast 512K adc and
+            // normal 64K adc
+            if ( UNDERSAMPLE < 5 )
+            {
+                /// - ---- Write GPS time and cycle count as indicator to slave
+                /// that adc data is ready
+                ioMemData->gpsSecond = timeSec;
+                ioMemData->iodata[ card ][ ioMemCntr ].timeSec = timeSec;
+                ioMemData->iodata[ card ][ ioMemCntr ].cycle = iocycle;
+                ioMemCntr++;
+                iocycle++;
+                iocycle %= 65536;
+            }
+
+        }
+
+        // For ADC undersampling when running with a fast ADC at 512K
+        // to limit rate to user apps at 64K
+        if ( UNDERSAMPLE > 4 )
+        {
             /// - ---- Write GPS time and cycle count as indicator to slave that
             /// adc data is ready
             ioMemData->gpsSecond = timeSec;
             ioMemData->iodata[ card ][ ioMemCntr ].timeSec = timeSec;
             ioMemData->iodata[ card ][ ioMemCntr ].cycle = iocycle;
-            ioMemCntr++;
-            iocycle++;
-            iocycle %= 65536;
         }
 
         /// - ---- Clear out last ADC data read for test on next cycle
