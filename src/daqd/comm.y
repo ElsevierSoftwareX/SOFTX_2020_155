@@ -2347,7 +2347,7 @@ start_trend_bailout:
 
 #ifndef NO_BROADCAST
 	 nw -> broadcast = (long) $6;
-	 nw -> mcast_interface = ((long) $6 > 1)? strdup ($6): 0;
+	 nw -> set_mcast_interface( $6 );
 #endif
 	 if ((unsigned long) $6 > 1)
 		free ($6);

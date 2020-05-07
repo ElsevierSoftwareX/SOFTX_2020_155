@@ -1437,6 +1437,31 @@ net_writer_c::transient_consumer( )
     return NULL;
 }
 
+void
+net_writer_c::set_mcast_interface( const char* mcast_interface_and_port )
+{
+    if ( !mcast_interface_and_port )
+    {
+        mcast_interface = "";
+        mcast_port = default_mcast_port;
+        return;
+    }
+    std::string interface{ mcast_interface_and_port };
+    auto        sep = interface.find( ':' );
+    int         new_port = default_mcast_port;
+    if ( sep != std::string::npos )
+    {
+        new_port = atoi( interface.c_str( ) + sep + 1 );
+        if ( new_port == 0 )
+        {
+            new_port = default_mcast_port;
+        }
+        interface.resize( sep );
+    }
+    mcast_interface.swap( interface );
+    mcast_port = new_port;
+}
+
 int
 net_writer_c::connect_srvr_addr( int ssize )
 {
@@ -1448,6 +1473,14 @@ net_writer_c::connect_srvr_addr( int ssize )
     {
         char  buf[ 256 ];
         char* istr = net_writer_c::inet_ntoa( srvr_addr.sin_addr, buf );
+
+        if ( mcast_interface.empty( ) )
+        {
+            system_log( 1,
+                        "Broadcaster requested without an broadcast interface "
+                        "being specified" );
+            return DAQD_ERROR;
+        }
 
         // allocate transmit buffers, if first time
 
@@ -1465,37 +1498,16 @@ net_writer_c::connect_srvr_addr( int ssize )
             }
         }
 
-#ifdef DATA_CONCENTRATOR
-        // open connection
-        if ( !radio.open( istr, mcast_interface, concentrator_broadcast_port ) )
-        {
-            system_log( 1, "framexmit open failed" );
-            return DAQD_ERROR;
-        }
-        DEBUG1( cerr << "opened framexmit addr=" << istr << " iface="
-                     << ( mcast_interface ? mcast_interface : "" ) << endl );
-
-        if ( !radio_tp.open(
-                 istr, mcast_interface, concentrator_broadcast_port_tp ) )
-        {
-            system_log( 1, "TP framexmit open failed" );
-            return DAQD_ERROR;
-        }
-        DEBUG1( cerr << "opened TP framexmit addr=" << istr << " iface="
-                     << ( mcast_interface ? mcast_interface : "" ) << endl );
-#else
         // open connection
         printf( "WARNING: DMT broadcaster opened on non-standard port %d\n",
-                diag::frameXmitPort + 2 );
-        if ( !radio.open( istr, mcast_interface, diag::frameXmitPort ) )
+                mcast_port );
+        if ( !radio.open( istr, mcast_interface.c_str( ), mcast_port ) )
         {
             system_log( 1, "framexmit open failed" );
             return DAQD_ERROR;
         }
-        DEBUG1( cerr << "opened framexmit addr=" << istr << " iface="
-                     << ( mcast_interface ? mcast_interface : "" ) << endl );
-
-#endif
+        DEBUG1( cerr << "opened framexmit addr=" << istr
+                     << " iface=" << mcast_interface << endl );
 
         fileno = -1; // socket is used by framexmit privately
         system_log( 1, "framexmit connected to %s", istr );

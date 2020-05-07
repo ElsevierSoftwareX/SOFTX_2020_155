@@ -77,7 +77,8 @@ public:
     } radio_buffer;
 
     int             broadcast;
-    char*           mcast_interface;
+    int             mcast_port;
+    std::string     mcast_interface;
     diag::frameSend radio;
 #if defined( DATA_CONCENTRATOR )
     // Broadcasting at 16Hz needs smaller buffers
@@ -94,11 +95,7 @@ public:
     int* first_adc_ptr;
 #endif
 
-#if defined( USE_BROADCAST ) || defined( DATA_CONCENTRATOR )
-    // concentrator is using next two ports for its broadcast
-    static const int concentrator_broadcast_port = diag::frameXmitPort + 1;
-    static const int concentrator_broadcast_port_tp = diag::frameXmitPort + 2;
-#endif
+    static const int default_mcast_port = diag::frameXmitPort + 2;
 
 #ifdef GDS_TESTPOINTS
     int clear_testpoints;
@@ -129,7 +126,8 @@ public:
 
 #ifndef NO_BROADCAST
           ,
-          broadcast( 0 ), mcast_interface( 0 ), radio( radio_buf_num - 1 )
+          broadcast( 0 ), mcast_interface( "" ),
+          mcast_port( default_mcast_port ), radio( radio_buf_num - 1 )
 #if defined( DATA_CONCENTRATOR )
           ,
           radio_tp( radio_buf_num - 1 )
@@ -164,6 +162,15 @@ public:
         pthread_mutex_destroy( &tl );
         free_vars( );
     }
+
+    /*!
+     * @brief set the multicast/broadcast interface and port.
+     * @param mcast_interface_and_port The interface (and optionally port)
+     * to use as the multicast/broadcast. It is formatted as "interaface:port"
+     * @note if a port is not specified it is defaulted to
+     * default_mcast_port.
+     */
+    void set_mcast_interface( const char* mcast_interface_and_port );
 
     //  pthread_mutex_t lock;
 
