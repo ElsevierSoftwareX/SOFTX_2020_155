@@ -1452,7 +1452,7 @@ net_writer_c::set_mcast_interface( const char* mcast_interface_and_port )
     if ( sep != std::string::npos )
     {
         new_port = atoi( interface.c_str( ) + sep + 1 );
-        if ( new_port == 0 )
+        if ( new_port <= 0 )
         {
             new_port = default_mcast_port;
         }
