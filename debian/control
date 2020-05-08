@@ -16,7 +16,7 @@ Build-Depends:
  libboost-all-dev,
  libbz2-dev,
  libc-dev-bin,
- libcds-pubsub-dev,
+ libcds-pubsub-dev (>= 0.1.0),
  libfl-dev,
  libmotif-dev,
  libnds2-client-dev,
@@ -148,7 +148,7 @@ Package: advligorts-transport-pubsub
 Architecture: any
 Depends:
  advligorts-transport-common,
- libcds-pubsub,
+ libcds-pubsub (>= 0.1.0),
  ${misc:Depends},
  ${shlibs:Depends},
 Description: advLigoRTS pub/sub based transport
