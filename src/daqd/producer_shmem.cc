@@ -203,8 +203,8 @@ producer::frame_writer( )
     }
 
     ShMemReceiver shmem_receiver(
-        daqd.parameters( ).get( "shmem_input", "" ),
-        daqd.parameters( ).get< size_t >( "shmem_size", 21041152 ) );
+        daqd.parameters( ).get( "shmem_input", "local_dc" ),
+        daqd.parameters( ).get< size_t >( "shmem_size", 104857600 ) );
 
     sleep( 1 );
 
