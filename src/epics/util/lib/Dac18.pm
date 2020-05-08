@@ -170,7 +170,7 @@ sub frontEndCode {
 #// This code requires /lib/medmGen.pm \n\n
 sub createDac18Medm
 {
-        my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$dacNum) = @_;
+        my ($medmDir,$mdlName,$ifo,$dcuid,$medmTarget,$dacNum) = @_;
  # Define colors to be sent to screen gen.
         my %ecolors = ( "white" => "0",
              "black" => "14",
@@ -241,19 +241,19 @@ sub createDac18Medm
         $xpos = 50; $ypos = 238; $width = 45; $height = 15;
 	for($ii=0;$ii<8;$ii++)
 	{
-        	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_OUTPUT_$dacNum\_$ii",$ecolors{white},$ecolors{blue},"static");
+        	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_OUTPUT_$dacNum\_$ii",$ecolors{white},$ecolors{blue},"static");
 		$ypos += 20;
 	}
         $xpos = 110; $ypos = 238; $width = 45; $height = 15;
 	for($ii=0;$ii<8;$ii++)
 	{
-        	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_OVERFLOW_$dacNum\_$ii",$ecolors{white},$ecolors{blue},"static");
+        	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_OVERFLOW_$dacNum\_$ii",$ecolors{white},$ecolors{blue},"static");
 		$ypos += 20;
 	}
         $xpos = 160; $ypos = 238; $width = 55; $height = 15;
 	for($ii=0;$ii<8;$ii++)
 	{
-        	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_OVERFLOW_ACC_$dacNum\_$ii",$ecolors{white},$ecolors{blue},"static");
+        	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_OVERFLOW_ACC_$dacNum\_$ii",$ecolors{white},$ecolors{blue},"static");
 		$ypos += 20;
 	}
 
@@ -261,21 +261,21 @@ sub createDac18Medm
 	if($::adcMaster == 1) {
         # Add On Line Status Monitor
         $xpos = 26; $ypos = 52; $width = 12; $height = 12;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","0","0",$ecolors{green},$ecolors{red});
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$dacNum","0","0",$ecolors{green},$ecolors{red});
 	}
         # Add Watchdog Status Monitor
         $xpos = 26; $ypos = 67; $width = 12; $height = 12;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","1","1",$ecolors{green},$ecolors{red});
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$dacNum","1","1",$ecolors{green},$ecolors{red});
         # Add Overrange Status Monitor
         $xpos = 26; $ypos = 82; $width = 12; $height = 12;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","2","2",$ecolors{green},$ecolors{red});
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$dacNum","2","2",$ecolors{green},$ecolors{red});
 	if($::adcMaster == 1) {
         # Add AI Chassis WD Status Monitor
         $xpos = 26; $ypos = 97; $width = 12; $height = 12;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","4","4",$ecolors{green},$ecolors{red});
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$dacNum","4","4",$ecolors{green},$ecolors{red});
         # Add FIFO Status Monitor
         $xpos = 26; $ypos = 112; $width = 12; $height = 12;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_DAC_STAT_$dacNum","3","3",$ecolors{green},$ecolors{red});
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$dacNum","3","3",$ecolors{green},$ecolors{red});
 	# Add ON LINE Label
         $xpos = 51; $ypos = 52; $width = 100; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"ON LINE",$ecolors{black});

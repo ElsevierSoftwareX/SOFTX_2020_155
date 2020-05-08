@@ -7,5 +7,8 @@ PartOf=rts@%i.target
 [Service]
 User=advligorts
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_SYS_NICE
+AmbientCapabilities=CAP_SYS_NICE
+EnvironmentFile=/etc/advligorts/systemd_env
 ExecStart=/usr/bin/rts_awgtpman_exec %i
 Restart=always

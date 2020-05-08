@@ -165,6 +165,12 @@ print_io_info( CDS_HARDWARE* cdsp )
         printf( "**************************************************************"
                 "*************\n" );
     }
+    for ( ii = 0; ii < cdsp->dolphinCount; ii++ )
+    {
+        printf( "\tDolphin found %d\n",ii);
+        printf( "Read address is 0x%lx\n", cdsp->dolphinRead[ ii ] );
+        printf( "Write address is 0x%lx\n", cdsp->dolphinWrite[ ii ] );
+    }
 }
 
 void

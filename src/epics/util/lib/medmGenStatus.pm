@@ -13,7 +13,7 @@ require "lib/medmGen.pm";
 
 sub createStatusMedm
 {
-	my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dactype) = @_;
+	my ($medmDir,$mdlName,$ifo,$dcuid,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dactype) = @_;
  # Define colors to be sent to screen gen.
         my %ecolors = ( "white" => "0",
              "black" => "14",
@@ -54,14 +54,14 @@ sub createStatusMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"RCG #",$ecolors{white});
 	# Add RCG Number
 	$xpos = 160; $ypos = 60; $width = 50; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_RCG_VERSION",$ecolors{white},$ecolors{black},"static");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_RCG_VERSION",$ecolors{white},$ecolors{black},"static");
 	# Add SVN label
 	# Add build date label
 	$xpos = 60; $ypos = 80; $width = 45; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"BUILD DATE:",$ecolors{white});
 	# Add build date
 	$xpos = 160; $ypos = 80; $width = 150; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_BUILD_DATE",$ecolors{white},$ecolors{black},"static");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_BUILD_DATE",$ecolors{white},$ecolors{black},"static");
 
 
 	# Add proc info label
@@ -72,7 +72,7 @@ sub createStatusMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"GPS START",$ecolors{white});
 	# Add GPS Start Time Monitor
 	$xpos = 160; $ypos = 160; $width = 100; $height = 15;
-    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_START_GPS",$ecolors{white},$ecolors{black},"static");
+    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_START_GPS",$ecolors{white},$ecolors{black},"static");
 	# Add uptime label
 	$xpos = 60; $ypos = 200; $width = 50; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"UPTIME",$ecolors{white});
@@ -84,11 +84,11 @@ sub createStatusMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"Min",$ecolors{white});
 	# Add up Time Monitors
 	$xpos = 160; $ypos = 200; $width = 30; $height = 15;
-    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_UPTIME_DAY",$ecolors{white},$ecolors{black},"static");
+    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_DAY",$ecolors{white},$ecolors{black},"static");
 	$xpos = 210; $ypos = 200; $width = 30; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_UPTIME_HOUR",$ecolors{white},$ecolors{black},"static");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_HOUR",$ecolors{white},$ecolors{black},"static");
 	$xpos = 260; $ypos = 200; $width = 30; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_UPTIME_MINUTE",$ecolors{white},$ecolors{black},"static");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_MINUTE",$ecolors{white},$ecolors{black},"static");
 
 
 
@@ -97,7 +97,7 @@ sub createStatusMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$mdlName\_FE_STAT",$ecolors{white});
 	# Add time string to banner
 	$xpos = 270; $ypos = 4; $width = 200; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$site\:FEC-$dcuid\_TIME_STRING",$ecolors{white},$ecolors{blue},"static");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_TIME_STRING",$ecolors{white},$ecolors{blue},"static");
 
 
 print OUTMEDM "$medmdata \n";

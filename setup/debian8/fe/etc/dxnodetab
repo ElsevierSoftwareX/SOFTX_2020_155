@@ -1,8 +1,0 @@
-# Table of Dolphin DX nodes
-# <hostname>  <switch> where switch is C,X,Y
-x2lsc0     C
-x2oaf0     C
-x2susex    C
-x2seiex    C
-x2iscex    C
-

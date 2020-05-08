@@ -103,6 +103,9 @@ double twoKAvgCoeff[ 9 ] = { 7.705446e-9,      -1.97673337437048,
 #ifdef SERVO256K
 #define FE_RATE 262144
 #endif
+#ifdef SERVO128K
+#define FE_RATE 131072
+#endif
 #ifdef SERVO64K
 #define FE_RATE 65536
 #endif

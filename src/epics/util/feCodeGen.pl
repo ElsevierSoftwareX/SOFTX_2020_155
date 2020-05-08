@@ -62,7 +62,7 @@ require "lib/Dac20.pm";
 #// <b>BASIC CODE SEQUENCE:</b>: \n
 #//	
 
-die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<site>] [<speed>]\n\t" . "site is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
+die "Usage: $PROGRAM_NAME <MDL file> <Output file name> [<DCUID number>] [<ifo>] [<speed>]\n\t" . "ifo is (e.g.) H1, M1; speed is 2K, 16K, 32K or 64K\n"
         if (@ARGV != 2 && @ARGV != 3 && @ARGV != 4 && @ARGV != 5);
 
 #Setup current working directory and pointer to RCG source directory.
@@ -109,7 +109,8 @@ my @mdmNum = ($mdmStr =~ m/(\d+)/);
 $maxDioMod = pop(@mdmNum);
 
 # Initialize default settings.
-$site = "M1"; # Default value for the site name
+$sitedepwarning = 0;
+$ifo = "M1"; # Default value for the ifo name
 $location = "mit"; # Default value for the location name
 $rate = "60"; # In microseconds (default setting)
 $brate = "52";
@@ -128,6 +129,7 @@ $flipSignals = 0;
 $ipcrate = 0;
 $ipccycle = 0;
 $virtualiop = 0;
+$force_shm_ipc = 0;
 $no_cpu_shutdown = 0;
 $edcu = 0;
 $casdf = 0;
@@ -150,67 +152,11 @@ $remoteGpsPart = 0;
 $remoteGPS = 0;
 $daq2dc = 0;
 $requireIOcnt = 0;
+#Following provide for non standard IOP clock rates
 $adcclock = 64;
 $modelrate = 64;
+$servoflag = "-DSERVO64K";
 $clock_div = 1;
-
-# Normally, ARGV !> 2, so the following are not invoked in a standard make
-# This is legacy.
-if (@ARGV > 2) {
-	$dcuId = $ARGV[2];
-}
-if (@ARGV > 3) {
-	$site = $ARGV[3];
-	if ($site =~ /^M/) {
-		$location = "mit";
-	} elsif ($site =~ /^G/) {
-		$location = "geo";
-	} elsif ($site =~ /^H/) {
-		$location = "lho";
-	} elsif ($site =~ /^L/) {
-		$location = "llo";
-	} elsif ($site =~ /^C/) {
-		$location = "caltech";
-	} elsif ($site =~ /^S/) {
-		$location = "stn";
-	} elsif ($site =~ /^K/) {
-		$location = "kamioka";
-	} elsif ($site =~ /^X/) {
-		$location = "tst";
-	} elsif ($site =~ /^A/) {
-		$location = "anu";
-	} elsif ($site =~ /^I/) {
-		$location = "indigo";
-	} elsif ($site =~ /^U/) {
-		$location = "uwa";
-	} elsif ($site =~ /^W/) {
-		$location = "cardiff";
-	} elsif ($site =~ /^B/) {
-		$location = "bham";
-	}
-}
-if (@ARGV > 4) {
-	my $param_speed = $ARGV[4];
-	if ($param_speed eq "2K") {
-		$rate = 480;
-	} elsif ($param_speed eq "4K") {
-		$rate = 240;
-	} elsif ($param_speed eq "16K") {
-		$rate = 60;
-	} elsif ($param_speed eq "32K") {
-		$rate = 30;
-	} elsif ($param_speed eq "64K") {
-		$rate = 15;
-	} elsif ($param_speed eq "256K") {
-		$rate = 4;
-	} elsif ($param_speed eq "512K") {
-		$rate = 2; 
-	} elsif ($param_speed eq "1024K") {
-		$rate = 1;
-	} else  { die "Invalid speed $param_speed specified\n"; }
-}
-
-
 
 # Load model name without .mdl extension.
 $skeleton = $ARGV[1];
@@ -221,7 +167,7 @@ if ($skeleton !~ m/^[acghiklmsuwx]\d.*/) {
 }
 
 # First two chars of model name must be IFO, such as h1, l1, h2, etc.
-$ifo = substr($skeleton, 0, 2);
+$ifo_from_mdl_name = substr($skeleton, 0, 2);
 
 #//	- Create the paths for RCG output files. \n
 print "file out is $skeleton\n";
@@ -352,6 +298,10 @@ close(IN);
 if(($adcMaster == 1) and ($adcrate > $adcclock)) 
 {
 	die "Error:\nModel rate $adcrate > ADC clock $adcclock\nFix adcclock in Param Block\n*****\n";
+}
+if($sitedepwarning == 1) {
+	print WARNINGS "WARNING: The 'site=' designator in the model parameter block\n\t is scheduled for deprecation in future releases. \n";
+	print WARNINGS "*******: Please replace site=$ifo designator with ifo=$ifo \n";
 }
 
 #//	
@@ -1203,7 +1153,7 @@ if($frate <= 15)
 	$brate = $frate;
 	$mrate = $rate;
 }
-$cpuM = $site . ":FEC-" . $dcuId . "_CPU_METER";
+$cpuM = $ifo . ":FEC-" . $dcuId . "_CPU_METER";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$mrate\") field(LOPR,\"0\") field(HIHI,\"$mrate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\") field(EGU,\"usec\")\n";
 
 print OUTH "\tint cpuMeterMax;\n";
@@ -1525,7 +1475,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 
 	#$gdsXstart = ($dcuId - 5) * 1250;
 	#$gdsTstart = $gdsXstart + 10000;
-	if($rate == 480 || $rate == 240) {
+	if($modelrate == 2 || $modelrate == 4) {
 	  $gdsXstart = 20001;
 	  $gdsTstart = 30001;
 	} else {
@@ -1561,7 +1511,7 @@ for($ii=0;$ii<$partCnt;$ii++)
     if($gdsrate > 524768) {
         $gdsrate = 524768;
     }
-	print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $site $gdsrate $dcuId $ifoid\n";
+	print EPICS "gds_config $gdsXstart $gdsTstart 1250 1250 $gdsNodeId $ifo $gdsrate $dcuId $ifoid\n";
 	print EPICS "\n\n";
 	close EPICS;
 
@@ -1802,20 +1752,10 @@ print "\tPart number is $remoteGpsPart\n";
 
 }
 
-if($virtualiop == 1) {
-print OUT "#include \"$rcg_src_dir/src/fe/controllerVirtual.c\"\n";
-} elsif ($virtualiop == 2) {
-  print OUT "#include \"$rcg_src_dir/src/fe/controllerIop.c\"\n";
-} elsif ($virtualiop == 3) {
-print OUT "#include \"$rcg_src_dir/src/fe/controllerLR.c\"\n";
-} elsif ($virtualiop == 4) {
-print OUT "#include \"$rcg_src_dir/src/fe/controllerCymac.c\"\n";
+if($adcMaster == 1) {
+	print OUT "#include \"$rcg_src_dir/src/fe/controllerIop.c\"\n";
 } else {
-  if($adcMaster == 1) {
-  	print OUT "#include \"$rcg_src_dir/src/fe/controllerIop.c\"\n";
-  } else {
   	print OUT "#include \"$rcg_src_dir/src/fe/controllerApp.c\"\n";
-  }
 }
 
 
@@ -1875,7 +1815,7 @@ mkpath $configFilesDir, 0, 0755;
 $jj = $filtCnt / 40;
 $jj ++;
 #print OUTG "$jj lines to print\n";
-my $filtFile = $configFilesDir . "/$site" . uc($skeleton) . "\.txt";
+my $filtFile = $configFilesDir . "/$ifo" . uc($skeleton) . "\.txt";
 open(OUTG, ">" . $filtFile) || die "cannot open  $filtFile file for writing";
 print OUTG "# FILTERS FOR ONLINE SYSTEM\n".
 	"#\n".
@@ -1924,21 +1864,21 @@ $ffmedm .= "\\/";
 
 mkpath $epicsScreensDir, 0, 0755;
 
-my $usite = uc $site;
-my $lsite = lc $site;
+my $uifo = uc $ifo;
+my $lifo = lc $ifo;
 my $sysname = "FEC";
-my $medmDir = "\\/opt\\/rtcds\\/" . $location . "\\/" . $lsite . "\\/medm\\/" . $skeleton . "\\/";
-$sed_arg = "s/SITE_NAME/$site/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($sysname) . "/g;s/GDS_NODE_ID/" . $gdsNodeId . "/g;";
+my $medmDir = "\\/opt\\/rtcds\\/" . $location . "\\/" . $lifo . "\\/medm\\/" . $skeleton . "\\/";
+$sed_arg = "s/SITE_NAME/$ifo/g;s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;s/SYSTEM_NAME/" . uc($sysname) . "/g;s/GDS_NODE_ID/" . $gdsNodeId . "/g;";
 $sed_arg .= "s/LOCATION_NAME/$location/g;";
 $sed_arg .= "s/DCU_NODE_ID/$dcuId/g;";
 $sysname = uc($skeleton);
 $sed_arg .= "s/FBID/$sysname/g;";
 $sed_arg .= "s/MEDMDIR/$skeleton/g;";
-$sed_arg .= "s/IFO_LC/$lsite/g;";
+$sed_arg .= "s/IFO_LC/$lifo/g;";
 $sed_arg .= "s/MODEL_LC/$skeleton/g;";
 $sed_arg .= "s/TARGET_MEDM/$medmDir/g;";
 $sed_arg .= "s/RCGDIR/$ffmedm/g;";
-$sitelc = lc($site);
+$ifolc = lc($ifo);
 $mxpt = 215;
 $mypt = 172;
 $mbxpt = 32 + $mxpt;
@@ -2031,12 +1971,12 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 		if (is_top_name($basename)) {
 
 		  my $tn = top_name_transform($basename);
-		  my $basename1 = $usite . ":" . $tn . "_";
-		  my $filtername1 = $usite . $basename;
+		  my $basename1 = $uifo . ":" . $tn . "_";
+		  my $filtername1 = $uifo . $basename;
 		  if ($partType[$cur_part_num] eq "FiltMuxMatrix") {
-		    my $subDirName = "$epicsScreensDir/$usite" . "$basename";
+		    my $subDirName = "$epicsScreensDir/$uifo" . "$basename";
 		    mkdir $subDirName;
-		    system("$rcg_src_dir/src/epics/util/mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite" . $basename . ".adl");
+		    system("$rcg_src_dir/src/epics/util/mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$uifo" . $basename . ".adl");
 		    for ($row = 1; $row < $outcnt+1; $row ++) {
 		      for ($col = 1; $col < $incnt+1; $col ++) {
 			my $filt_name = "$partName[$cur_part_num]" . "_" . "$row" . "_" . "$col";
@@ -2050,30 +1990,30 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 			my $tfn = top_name_transform($filt_name);
 			my $nsys = system_name_part($tfn);
 			$sargs = "s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;";
-			$sargs .= "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . $nsys . "/g;";
+			$sargs .= "s/SITE_NAME/$ifo/g;s/SYSTEM_NAME/" . $nsys . "/g;";
                         $sargs .= "s/LOCATION_NAME/$location/g;";
 			$sargs .= "s/FILTERNAME/$tfn/g;";
 			$sargs .= "s/RCGDIR/$ffmedm/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
-			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite" . $filt_name . ".adl");
+			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$uifo" . $filt_name . ".adl");
 		      }
 		    }
 		  } elsif ($partType[$cur_part_num] eq "RampMuxMatrix") {
-			system("$rcg_src_dir/src/epics/util/mkrampmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
+			system("$rcg_src_dir/src/epics/util/mkrampmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$uifo" . $basename . ".adl");
 		  } else {
-		    system("$rcg_src_dir/src/epics/util/mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite" . $basename . ".adl");
+		    system("$rcg_src_dir/src/epics/util/mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$uifo" . $basename . ".adl");
 		  }
 
 	  
 		} else {
 		  $sysname = substr($sysname, 2, 3);
-		  my $basename1 = $usite . ":" .$sysname ."-" . $basename . "_";
-		  my $filtername1 = $usite . $sysname . "_" . $basename;
+		  my $basename1 = $uifo . ":" .$sysname ."-" . $basename . "_";
+		  my $filtername1 = $uifo . $sysname . "_" . $basename;
 		  #print "Matrix $basename $incnt X $outcnt\n";
 		  if ($partType[$cur_part_num] eq "FiltMuxMatrix") {
-		    my $subDirName = "$epicsScreensDir/$usite" . "$sysname" . "_" . "$basename";
+		    my $subDirName = "$epicsScreensDir/$uifo" . "$sysname" . "_" . "$basename";
 		    mkdir $subDirName;
-		    system("$rcg_src_dir/src/epics/util/mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
+		    system("$rcg_src_dir/src/epics/util/mkfiltmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 --filterbase=$filtername1 > $epicsScreensDir/$uifo$sysname" . "_" . $basename . ".adl");
                     for ($row = 1; $row < $outcnt+1; $row ++) {
 		      for ($col = 1; $col < $incnt+1; $col ++) {
 			my $filt_name = "$partName[$cur_part_num]" . "_" . "$row" . "_" . "$col";
@@ -2086,13 +2026,13 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 			$sargs = $sed_arg . "s/FILTERNAME/$sysname-$filt_name/g;";
 			$sargs .= "s/RCGDIR/$ffmedm/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
-			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$usite$sysname" . "_" . $filt_name . ".adl");
+			system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $subDirName/$uifo$sysname" . "_" . $filt_name . ".adl");
 		      }
 		    }
 		  } elsif ($partType[$cur_part_num] eq "RampMuxMatrix") {
-			system("$rcg_src_dir/src/epics/util/mkrampmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
+			system("$rcg_src_dir/src/epics/util/mkrampmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$uifo$sysname" . "_" . $basename . ".adl");
 		  } else {
-		    system("$rcg_src_dir/src/epics/util/mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$usite$sysname" . "_" . $basename . ".adl");
+		    system("$rcg_src_dir/src/epics/util/mkmatrix.pl --cols=$incnt --collabels=$collabels --rows=$outcnt --rowlabels=$rowlabels --chanbase=$basename1 > $epicsScreensDir/$uifo$sysname" . "_" . $basename . ".adl");
 		  }
 		}
 	}
@@ -2114,21 +2054,21 @@ foreach $cur_part_num (0 .. $partCnt-1) {
 			my $tfn = top_name_transform($filt_name);
 			my $nsys = system_name_part($tfn);
 			$sargs = "s/CONTROL_SYSTEM_SYSTEM_NAME/" . uc($skeleton) . "/g;";
-			$sargs .= "s/SITE_NAME/$site/g;s/SYSTEM_NAME/" . $nsys . "/g;";
+			$sargs .= "s/SITE_NAME/$ifo/g;s/SYSTEM_NAME/" . $nsys . "/g;";
                         $sargs .= "s/LOCATION_NAME/$location/g;";
 			$sargs .= "s/FILTERNAME/$tfn/g;";
 			$sargs .= "s/RCGDIR/$ffmedm/g;";
 			$sargs .= "s/DCU_NODE_ID/$dcuId/g";
 			if ($partType[$cur_part_num] =~ /^InputFilter1/) {
-				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				system("cat INPUT_FILTER1.adl | sed '$sargs' > $epicsScreensDir/$ifo" . $filt_name . ".adl");
 			} elsif ($partType[$cur_part_num] =~ /^InputFilt/) {
-				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/INPUT_FILTER.adl | sed '$sargs' > $epicsScreensDir/$ifo" . $filt_name . ".adl");
 			} elsif ($partType[$cur_part_num] =~ /^FiltCtrl2/) {
-				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL_2.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL_2.adl | sed '$sargs' > $epicsScreensDir/$ifo" . $filt_name . ".adl");
 			} elsif ($partType[$cur_part_num] =~ /^FiltCtrl/) {
-				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/FILTER_CTRL.adl | sed '$sargs' > $epicsScreensDir/$ifo" . $filt_name . ".adl");
 			} else {
-				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$site" . $filt_name . ".adl");
+				system("cat $rcg_src_dir/src/epics/util/FILTER.adl | sed '$sargs' > $epicsScreensDir/$ifo" . $filt_name . ".adl");
 			}
 		} else {
 		  	$sys_name = substr($sys_name, 2, 3);
@@ -2159,24 +2099,24 @@ system ("sort $adcFile -k 1,1n -k 2,2n > $adcFileSorted");
 
 # ******************************************************************************************
 #//		- GENERATE IPC SCREENS
-	("CDS::IPCx::createIpcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ipcxCnt);
+	("CDS::IPCx::createIpcMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$ipcxCnt);
 # ******************************************************************************************
 #//		- GENERATE GDS_TP SCREEN
 if($daq2dc == 0) {
 	require "lib/medmGenGdsTp.pm";
-	my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
-	my $scriptTarget = "/opt/rtcds/$location/$lsite/chans/tmp/$sysname\.diff";
-	my $scriptArgs = "-s $location -i $lsite -m $skeleton -d $dcuId &"; 
-	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,$virtualiop,@dacType);
+	my $medmTarget = "/opt/rtcds/$location/$lifo/medm";
+	my $scriptTarget = "/opt/rtcds/$location/$lifo/chans/tmp/$sysname\.diff";
+	my $scriptArgs = "-s $location -i $lifo -m $skeleton -d $dcuId &"; 
+	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,$virtualiop,@dacType);
 }else {
 	require "lib/medmGenGdsTp2dc.pm";
-	my $medmTarget = "/opt/rtcds/$location/$lsite/medm";
-	my $scriptTarget = "/opt/rtcds/$location/$lsite/chans/tmp/$sysname\.diff";
-	my $scriptArgs = "-s $location -i $lsite -m $skeleton -d $dcuId &"; 
-	("CDS::medmGenGdsTp2dc::createGdsMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dacType);
+	my $medmTarget = "/opt/rtcds/$location/$lifo/medm";
+	my $scriptTarget = "/opt/rtcds/$location/$lifo/chans/tmp/$sysname\.diff";
+	my $scriptArgs = "-s $location -i $lifo -m $skeleton -d $dcuId &"; 
+	("CDS::medmGenGdsTp2dc::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dacType);
 }
 	require "lib/medmGenStatus.pm";
-	("CDS::medmGenStatus::createStatusMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$scriptTarget,$scriptArgs);
+	("CDS::medmGenStatus::createStatusMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs);
 
 
 # ******************************************************************************************
@@ -2196,10 +2136,10 @@ while (my $line = <$fh>) {
         my @word = split /\t/,$line;
         $ii = $word[0];
         $jj = $word[1];
-	$adcSname = $site . "\:$sname-" . $word[2];
+	$adcSname = $ifo . "\:$sname-" . $word[2];
 	if (is_top_name($word[2])) {
                   my $tn = top_name_transform($word[2]);
-                  $adcSname = $site . "\:" . $tn;
+                  $adcSname = $ifo . "\:" . $tn;
         } 
 	# If this is a Filter type part, need to add INMON to get EPICS channel 
 	if (($word[3] =~ /^Filt/)
@@ -2216,18 +2156,18 @@ close($fg);
 
 for($ii=0;$ii<$adcCnt;$ii++)
 {
-   ("CDS::Adc::createAdcMedm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii,@adcScreen);
+   ("CDS::Adc::createAdcMedm") -> ($epicsScreensDir,$sysname,$adcMaster,$uifo,$dcuId,$medmTarget,$ii,@adcScreen);
 }
 # ******************************************************************************************
 #//		- GENERATE DAC SCREENS
 for($ii=0;$ii<$dacCnt;$ii++)
 {
    if ($dacType[$ii] eq "GSC_16AO16") {
-      ("CDS::Dac::createDac16Medm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii);
+      ("CDS::Dac::createDac16Medm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$ii);
    } elsif ($dacType[$ii] eq "GSC_20AO8") {
-      ("CDS::Dac20::createDac20Medm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii);
+      ("CDS::Dac20::createDac20Medm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$ii);
    } else {
-      ("CDS::Dac18::createDac18Medm") -> ($epicsScreensDir,$sysname,$usite,$dcuId,$medmTarget,$ii);
+      ("CDS::Dac18::createDac18Medm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$ii);
    }
 }
 
@@ -2274,23 +2214,7 @@ sub debug {
 #// \b sub \b get_freq \n
 #// Determine user code sample rate \n\n
 sub get_freq {
-	if($rate == 480) {
-		return 2*1024;
-	} elsif ($rate == 240) {
-		return 4*1024;
-	} elsif ($rate == 60) {
-		return 16*1024;
-	} elsif ($rate == 30) {
-		return 32*1024;
-	} elsif ($rate == 15) {
-		return 64*1024;
-	} elsif ($rate == 4) {
-		return 256*1024;
-	} elsif ($rate == 2) {
-		return 512*1024;
-	} elsif ($rate == 1) {
-		return 1024*1024;
-	}
+    return $modelrate * 1024;
 }
 
 #// \b sub \b init_vars \n
@@ -2440,22 +2364,22 @@ sub createEpicsMakefile {
 	print OUTME "$skeleton";
 	print OUTME "1\.db\n";
 	print OUTME "\n";
-	print OUTME "IFO = $site\n";
+	print OUTME "IFO = $ifo\n";
 	print OUTME "SITE = $location\n";
 	print OUTME "\n";
 	# The CA SDF build does not need a SEQUENCER added
 	if ($casdf==0) {
 	print OUTME "SEQ += \'";
 	print OUTME "$skeleton";
-	print OUTME ",(\"ifo=$site, site=$location, sys=\U$systemName\, \Lsysnum=$dcuId\, \Lsysfile=\U$skeleton \")\'\n";
+	print OUTME ",(\"ifo=$ifo, site=$location, sys=\U$systemName\, \Lsysnum=$dcuId\, \Lsysfile=\U$skeleton \")\'\n";
 	}
-	#print OUTME "SEQ += \'get_local_time,(\"ifo=$site, sys=\U$systemName\")\'\n";
+	#print OUTME "SEQ += \'get_local_time,(\"ifo=$ifo, sys=\U$systemName\")\'\n";
 	for($ii=0;$ii<$useWd;$ii++)
 	{
 	print OUTME "SEQ += \'";
 	print OUTME "hepiWatchdog";
 	print OUTME "\U$useWdName[$ii]";
-	print OUTME ",(\"ifo=$site, sys=\U$systemName\,\Lsubsys=\U$useWdName[$ii]\")\'\n";
+	print OUTME ",(\"ifo=$ifo, sys=\U$systemName\,\Lsubsys=\U$useWdName[$ii]\")\'\n";
 	}
 	print OUTME "\n";
 	print OUTME "EXTRA_CFLAGS += -D";
@@ -2499,6 +2423,7 @@ sub createEpicsMakefile {
 #// Generate the user C code Makefile  \n\n
 sub createCmakefile{
 
+# Compile options common to all runtime configurations
 system ("/bin/cp GNUmakefile  ../../fe/$skeleton");
 open(OUTM,">./".$mFile) || die "cannot open Makefile file for writing";
 
@@ -2510,24 +2435,15 @@ print OUTM "KBUILD_EXTRA_SYMBOLS += \$(PWD)/ModuleIOP.symvers\n";
 print OUTM "ALL \+= user_mmap \$(TARGET_RTL)\n";
 print OUTM "EXTRA_CFLAGS += -O -w -I../../include\n";
 
-if($rate == 480) { print OUTM "EXTRA_CFLAGS += -DSERVO2K\n"; }
-elsif($rate == 240) { print OUTM "EXTRA_CFLAGS += -DSERVO4K\n"; }
-elsif($rate == 60) { print OUTM "EXTRA_CFLAGS += -DSERVO16K\n"; }
-elsif($rate == 30) { print OUTM "EXTRA_CFLAGS += -DSERVO32K\n"; }
-elsif($rate == 15) { print OUTM "EXTRA_CFLAGS += -DSERVO64K\n"; }
-elsif($rate == 7) { print OUTM "EXTRA_CFLAGS += -DSERVO128K\n"; }
-elsif($rate == 4) { print OUTM "EXTRA_CFLAGS += -DSERVO256K\n"; }
-elsif($rate == 2) { print OUTM "EXTRA_CFLAGS += -DSERVO512K\n"; }
-elsif($rate == 1) { print OUTM "EXTRA_CFLAGS += -DSERVO1024K\n"; }
-
+print OUTM "EXTRA_CFLAGS += $servoflag \n";
 
 print OUTM "EXTRA_CFLAGS += -D";
 print OUTM "\U$skeleton";
 print OUTM "_CODE\n";
 print OUTM "EXTRA_CFLAGS += -DFE_SRC=\\\"\L$skeleton/\L$skeleton.c\\\"\n";
 print OUTM "EXTRA_CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
-#print OUTM "EXTRA_CFLAGS += -DFE_PROC_FILE=\\\"\L${skeleton}_proc.h\\\"\n";
 
+# Model uses FIR filters
 if($systemName eq "sei" || $useFIRs)
 {
 print OUTM "EXTRA_CFLAGS += -DFIR_FILTERS\n";
@@ -2547,13 +2463,6 @@ if ($requireIOcnt) {
   print OUTM "#Uncomment to enable exact IO module count requirement\n";
   print OUTM "#EXTRA_CFLAGS += -DREQUIRE_IO_CNT\n";
 }
-if ($no_sync) {
-  print OUTM "#Comment out to enable 1PPS synchronization\n";
-  print OUTM "EXTRA_CFLAGS += -DNO_SYNC\n";
-} else {
-  print OUTM "#Uncomment to disable 1PPS signal sinchronization (channel 31 (last), ADC 0)\n";
-  print OUTM "#EXTRA_CFLAGS += -DNO_SYNC\n";
-}
 if (0 == $dac_testpoint_names && 0 == $::extraTestPoints && 0 == $filtCnt) {
 	print "Not compiling DAQ into the front-end\n";
 	$no_daq = 1;
@@ -2572,24 +2481,26 @@ if ($no_daq) {
 # SHMEM_DAQ set as the default for RCG V2.8 - No longer support GM
   print OUTM "#Comment out to disable local frame builder connection\n";
   print OUTM "EXTRA_CFLAGS += -DSHMEM_DAQ\n";
-
-# Use oversampling code if not 64K system
-if($rate > 15) {
-  if ($no_oversampling) {
-    print OUTM "#Uncomment to oversample A/D inputs\n";
-    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE\n";
-    print OUTM "#Uncomment to interpolate D/A outputs\n";
-    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
-  } else {
-    print OUTM "#Comment out to stop A/D oversampling\n";
-    print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE\n";
-    if ($no_dac_interpolation) {
-    } else {
-      print OUTM "#Comment out to stop interpolating D/A outputs\n";
-      print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
-    }
-  }
+# Set to flip polarity of ADC input signals
+if ($flipSignals) {
+  print OUTM "EXTRA_CFLAGS += -DFLIP_SIGNALS=1\n";
 }
+# Set CPU core for runtime
+if ($specificCpu > -1) {
+  print OUTM "#Comment out to run on first available CPU\n";
+  print OUTM "EXTRA_CFLAGS += -DSPECIFIC_CPU=$specificCpu\n";
+}
+
+# Set BIQUAD as default starting RCG V2.8
+  print OUTM "EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
+
+if ($::rfmDelay) {
+  print OUTM "#Comment out to run without RFM Delayed by 1 cycle\n";
+  print OUTM "EXTRA_CFLAGS += -DRFM_DELAY=1\n";
+}
+
+#********* END OF COMMON COMPILE OPTIONS
+
 if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
   print OUTM "EXTRA_CFLAGS += -DADC_MASTER\n";
   $modelType = "MASTER";
@@ -2608,45 +2519,35 @@ if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
 #Following set to run as standard kernel module
   if ($no_cpu_shutdown > 0) {
     print OUTM "EXTRA_CFLAGS += -DNO_CPU_SHUTDOWN\n";
+  } else {
+    print OUTM "#EXTRA_CFLAGS += -DNO_CPU_SHUTDOWN\n";
   }
   # ADD DAC_AUTOCAL to IOPs
   print OUTM "EXTRA_CFLAGS += -DDAC_AUTOCAL\n";
-} else { 
-  print OUTM "#Uncomment to run on an I/O Master \n";
-  print OUTM "#EXTRA_CFLAGS += -DADC_MASTER\n";
-}
 
-if ($adcSlave > -1) {   #************ SETUP FOR USER APP ***************
-  print OUTM "EXTRA_CFLAGS += -DADC_SLAVE\n";
-  print OUTM "EXTRA_CFLAGS += -DUNDERSAMPLE=1\n";
-  print OUTM "EXTRA_CFLAGS += -DADC_MEMCPY_RATE=1\n";
-  $modelType = "SLAVE";
-} else {
-  print OUTM "#Uncomment to run on an I/O slave process\n";
-  print OUTM "#EXTRA_CFLAGS += -DADC_SLAVE\n";
-}
-if ($timeMaster > -1) {
-  print OUTM "EXTRA_CFLAGS += -DTIME_MASTER=1\n";
-} else {
-  print OUTM "#Uncomment to build a time master\n";
-  print OUTM "#EXTRA_CFLAGS += -DTIME_MASTER=1\n";
-}
-if ($timeSlave > -1 or $virtualiop == 2) {
-  print OUTM "EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
-} else {
-  print OUTM "#Uncomment to build a time slave\n";
-  print OUTM "#EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
-}
-if ($rfmTimeSlave > -1) {
-  print OUTM "EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
-} else {
-  print OUTM "#Uncomment to build an RFM time slave\n";
-  print OUTM "#EXTRA_CFLAGS += -DRFM_TIME_SLAVE=1\n";
-}
-if ($flipSignals) {
-  print OUTM "EXTRA_CFLAGS += -DFLIP_SIGNALS=1\n";
-}
-if ($pciNet > 0) {
+# Set to run without LIGO timing system
+  if ($no_sync) {
+    print OUTM "#Comment out to enable 1PPS synchronization\n";
+    print OUTM "EXTRA_CFLAGS += -DNO_SYNC\n";
+  }  
+# Set to run IOP as time master for the Dolphin Network
+  if ($timeMaster > -1) {
+    print OUTM "EXTRA_CFLAGS += -DTIME_MASTER=1\n";
+  }
+# Set to run IOP as time slave on the Dolphin Network
+  if ($timeSlave > -1 or $virtualiop == 2) {
+    print OUTM "EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
+    print OUTM "EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
+  }
+# Set to run IOP on internal clock ie no IO modules
+  if ($virtualiop == 1) {
+    print OUTM "EXTRA_CFLAGS += -DRUN_WO_IO_MODULES=1\n";
+    print OUTM "EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
+  }
+# Set IOP to map Dolphin Networks
+# Dolphin Gen2 is the default
+ if ($virtualiop != 1) {
+  if ($pciNet > 0) {
         if ($dolphinGen == 2) {
           print OUTM "#Enable use of PCIe RFM Network Gen 2\n";
           print OUTM "DISDIR = /opt/srcdis\n";
@@ -2658,53 +2559,44 @@ if ($pciNet > 0) {
           print OUTM "KBUILD_EXTRA_SYMBOLS += \$(DISDIR)/src/SCI_SOCKET/ksocket/lib/LINUX/Module.symvers\n";
           print OUTM "EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_KERNEL=1 -I\$(DISDIR)/src/IRM/drv/src -I\$(DISDIR)/src/IRM/drv/src/LINUX -I\$(DISDIR)/src/include -I\$(DISDIR)/src/include/dis -DDOLPHIN_TEST=1  -DDIS_BROADCAST=0x80000000\n";
         }
-}
-if ($specificCpu > -1) {
-  print OUTM "#Comment out to run on first available CPU\n";
-  print OUTM "EXTRA_CFLAGS += -DSPECIFIC_CPU=$specificCpu\n";
-} else {
-  print OUTM "#Uncomment to run on a specific CPU\n";
-  print OUTM "#EXTRA_CFLAGS += -DSPECIFIC_CPU=2\n";
-}
+  }
+ }
 
-# Set BIQUAD as default starting RCG V2.8
-  print OUTM "#Comment out to go back to old iir_filter calculation form\n";
-  print OUTM "EXTRA_CFLAGS += -DALL_BIQUAD=1 -DCORE_BIQUAD=1\n";
-
-if ($::directDacWrite) {
-  print OUTM "EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
-} else {
-  print OUTM "#EXTRA_CFLAGS += -DDIRECT_DAC_WRITE=1\n";
+  if ($::optimizeIO) {
+    print OUTM "EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
+  }
 }
+# End of IOP compile options
 
-if ($::noZeroPad) {
-  print OUTM "EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
-} else {
-  print OUTM "#EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
-}
+if ($adcSlave > -1) {   #************ SETUP FOR USER APP ***************
+  print OUTM "EXTRA_CFLAGS += -DADC_SLAVE\n";
+  print OUTM "EXTRA_CFLAGS += -DUNDERSAMPLE=1\n";
+  print OUTM "EXTRA_CFLAGS += -DADC_MEMCPY_RATE=1\n";
+  $modelType = "SLAVE";
 
-if ($::optimizeIO) {
-  print OUTM "EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
-} else {
-  print OUTM "#EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
-}
-  
+  if ($::noZeroPad) {
+    print OUTM "EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
+  }
 
-if ($::rfmDma) {
-  print OUTM "#Comment out to run with RFM DMA\n";
-  print OUTM "#EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
-} else {
-  print OUTM "#Comment out to run with RFM DMA\n";
-  print OUTM "EXTRA_CFLAGS += -DRFM_DIRECT_READ=1\n";
+# Use oversampling code if not 64K system
+if($modelrate < 64) {
+  if ($no_oversampling) {
+    print OUTM "#Uncomment to oversample A/D inputs\n";
+    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE\n";
+    print OUTM "#Uncomment to interpolate D/A outputs\n";
+    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
+  } else {
+    print OUTM "#Comment out to stop A/D oversampling\n";
+    print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE\n";
+    if ($no_dac_interpolation) {
+    } else {
+      print OUTM "#Comment out to stop interpolating D/A outputs\n";
+      print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
+    }
+  }
 }
+}  #******************* END SETUP FOR USER APP
 
-if ($::rfmDelay) {
-  print OUTM "#Comment out to run without RFM Delayed by 1 cycle\n";
-  print OUTM "EXTRA_CFLAGS += -DRFM_DELAY=1\n";
-} else {
-  print OUTM "#Clear comment to run with RFM Delayed by 1 cycle\n";
-  print OUTM "#EXTRA_CFLAGS += -DRFM_DELAY=1\n";
-}
 
 
 print OUTM "\n";
@@ -2739,15 +2631,7 @@ print OUTM "# User Space Linux\n";
 print OUTM "CFLAGS += -O -w -I../../include\n";
 print OUTM "CFLAGS += -I/opt/mx/include\n";
 
-if($rate == 480) { print OUTM "CFLAGS += -DSERVO2K\n"; }
-elsif($rate == 240) { print OUTM "CFLAGS += -DSERVO4K\n"; }
-elsif($rate == 60) { print OUTM "CFLAGS += -DSERVO16K\n"; }
-elsif($rate == 30) { print OUTM "CFLAGS += -DSERVO32K\n"; }
-elsif($rate == 15) { print OUTM "CFLAGS += -DSERVO64K\n"; }
-elsif($rate == 7) { print OUTM "CFLAGS += -DSERVO128K\n"; }
-elsif($rate == 4) { print OUTM "CFLAGS += -DSERVO256K\n"; }
-elsif($rate == 2) { print OUTM "CFLAGS += -DSERVO512K\n"; }
-elsif($rate == 1) { print OUTM "CFLAGS += -DSERVO1024K\n"; }
+print OUTM "EXTRA_CFLAGS += $servoflag \n";
 
 print OUTM "CFLAGS += -D";
 print OUTM "\U$skeleton";
@@ -2788,7 +2672,7 @@ if ($no_daq) {
   print OUTM "CFLAGS += -DSHMEM_DAQ\n";
 
 # Use oversampling code if not 64K system
-if($rate > 15) {
+if($modelrate < 64) {
   if ($no_oversampling) {
     print OUTM "#Uncomment to oversample A/D inputs\n";
     print OUTM "#CFLAGS += -DOVERSAMPLE\n";
@@ -2849,10 +2733,12 @@ if ($flipSignals) {
   print OUTM "CFLAGS += -DFLIP_SIGNALS=1\n";
 }
 
+ if ($virtualiop != 1) {
 if ($pciNet > 0) {
 print OUTM "#Enable use of PCIe RFM Network Gen 2\n";
 print OUTM "DOLPHIN_PATH = /opt/srcdis\n";
 print OUTM "CFLAGS += -DHAVE_CONFIG_H -I\$(DOLPHIN_PATH)/src/include/dis -I\$(DOLPHIN_PATH)/src/include -I\$(DOLPHIN_PATH)/src/SISCI/cmd/test/lib -I\$(DOLPHIN_PATH)/src/SISCI/src -I\$(DOLPHIN_PATH)/src/SISCI/api -I\$(DOLPHIN_PATH)/src/SISCI/cmd/include -I\$(DOLPHIN_PATH)/src/IRM_GX/drv/src -I\$(DOLPHIN_PATH)/src/IRM_GX/drv/src/LINUX -DOS_IS_LINUX=196616 -DLINUX -DUNIX  -DLITTLE_ENDIAN -DDIS_LITTLE_ENDIAN -DCPU_WORD_IS_64_BIT -DCPU_ADDR_IS_64_BIT -DCPU_WORD_SIZE=64 -DCPU_ADDR_SIZE=64 -DCPU_ARCH_IS_X86_64 -DADAPTER_IS_IX   -m64 -D_REENTRANT\n";
+}
 }
 
 if ($specificCpu > -1) {
@@ -2916,7 +2802,7 @@ print OUTM "\n";
 print OUTM "\n";
 
 print OUTM "CFLAGS += -I\$(SUBDIRS)/../../include -I$rcg_src_dir\/src/drv -I$rcg_src_dir\/src/include \n";
-if ($pciNet > 0) {
+if ($pciNet > 0 && $virtualiop != 1) {
 print OUTM "LDFLAGS = -L \$(API_LIB_PATH) -lsisci\n";
 } else {
 print OUTM "LDFLAGS = -L \$(API_LIB_PATH) \n";

@@ -4,6 +4,8 @@ After=network-online.target
 
 [Service]
 User=advligorts
+CapabilityBoundingSet=CAP_SYS_NICE
+AmbientCapabilities=CAP_SYS_NICE
 ExecStart=/usr/bin/daqd -c /etc/advligorts/daqdrc
 Restart=always
 

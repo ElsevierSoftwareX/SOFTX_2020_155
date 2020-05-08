@@ -43,6 +43,7 @@ dix_xmit
 dix_recv
 cps_xmit
 cps_recv
+cds_pub_sub
 local_dc
 run_number_server
 
@@ -173,3 +174,36 @@ set parameter "shmem_input" = "local_dc";
 set parameter "shmem_size" = "104857600";
 
 This MUST be set prior to the producer being started, and should just be set before any start ... calls in the daqdrc.
+
+
+cds_pub_sub
+
+Cds_pub_sub is a new 'plugin based' streamer.  It is in initial testing but will eventually allow replacing local_dc + most
+ xmit/recv processes.  Presently it has the following plugins:
+
+Subscription plugins:
+
+rmipc:// -> takes a comma seperated list of buffers and reads from the FE model output.
+   ex: rmipc://x1iopsusex_daq,x1susexmodel1_daq
+daqm:// -> This reads a mbuf shared memory segment formatted for consumption by the daqd
+   ex: daqm://local_dc:100      (the :100 means 100MB [which is the default])
+tcp:// -> subscribe to a tcp unicast broadcast (same as cps_recv)
+udp:// -> subscribe to a udp broadcast (same as cps_recv)
+multi:// -> subscribe to a udp multicast (same as cps_recv)
+
+Publishing plugins
+
+daqm:// -> Output to a mbuf shared memory segment formatted for consumption by the daqd
+  ex: daqm://local_dc:100
+tcp:// -> publish to a tcp unicast broadcast (same as cps_xmit)
+udp:// -> publish to a udp broadcast (same as cps_xmit)
+multi:// -> publish to a udp multicast (same as cps_xmit)
+
+Using cds_pub_sub
+
+cds_pub_sub -i "space seperated list of input subscriptions" -o "space separated list output publishers"
+
+Multiple subscriber and publisher types can be used.  So to consume two FE computers via tcp and to publish to local memory and
+over the network the following would work.
+
+cds_pub_sub -i "tcp://10.12.0.5:9000 tcp://10.12.0.6:9000" -o "daqm://local_dc:100 tcp://10.13.0.5:9000"

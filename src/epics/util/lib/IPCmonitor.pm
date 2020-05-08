@@ -220,7 +220,7 @@ my @ipcxMaxNum = (-999,-999,-999,-999);
 
    #
    # This model does include IPCx parts, so extract location and
-   # site from cdsParameters and read the IPCx parameter file
+   # ifo from cdsParameters and read the IPCx parameter file
    #
    ("CDS::Parameters::printHeaderStruct") -> ($oo);
 
@@ -230,9 +230,9 @@ my @ipcxMaxNum = (-999,-999,-999,-999);
 	my $iFile = "/opt/rtcds/";
 	$iFile .= $::location;
         $iFile .= "/";
-        $iFile .= lc $::site;
+        $iFile .= lc $::ifo;
 	$iFile .= "/chans/ipc/";
-	$iFile .= $::site;
+	$iFile .= $::ifo;
 	$iFile .= "\.ipc";
    # Open and input data from IPC parameter file
    open(IPCIN, "<$iFile") || die "***ERROR: IPCx parameter file $iFile not found\n";
@@ -356,7 +356,7 @@ print "Found $::ipcxCnt IPC CONNECTS \n";
 		$ss =~ s/\:/_/;
 		$ss =~ s/\-/_/;
 
-		my $eVar = $::site;
+		my $eVar = $::ifo;
 		$eVar .= ":";
 		$eVar .= "FEC-";
 		$eVar .= $::dcuId;
@@ -373,7 +373,7 @@ print "Found $::ipcxCnt IPC CONNECTS \n";
 # Subroutine to create IPC RCV status screen for all models
 sub createIpcMedm 
 {
-my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$ipcxCnt1) = @_;
+my ($medmDir,$mdlName,$ifo,$dcuid,$medmTarget,$ipcxCnt1) = @_;
 	# Define colors to be sent to screen gen.
 	my %ecolors = ( "white" => "0",
              "black" => "14",
@@ -406,7 +406,7 @@ my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$ipcxCnt1) = @_;
 	# Put blue rectangle banner at top of screen
 	$medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{blue});
 	# Add time string to banner
-	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ("540","3","160","15","$::site\:FEC-$::dcuId\_TIME_STRING",$ecolors{white},$ecolors{blue});
+	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ("540","3","160","15","$::ifo\:FEC-$::dcuId\_TIME_STRING",$ecolors{white},$ecolors{blue});
 	# Add screen title to banner
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ("310","3","100","15","IPC RCV STATUS",$ecolors{white});
 	# Add the IPC column headings

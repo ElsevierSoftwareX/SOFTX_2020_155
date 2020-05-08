@@ -281,7 +281,11 @@ for ($ii = 0; $ii < $i; $ii++) {
    if ($::partType[$ii] =~ /^IPCx/) {
       # Add signal name to info table
       $::ipcxParts[$::ipcxCnt][0] = $::xpartName[$ii];
+      print "$::ipcxBlockTags[$ii] \n";
 
+      if ($::virtualiop == 1 or $::force_shm_ipc) {
+        $::ipcxBlockTags[$ii] = "cdsIPCx_SHMEM";
+      }
       $::ipcxCommMech = substr($::ipcxBlockTags[$ii], 8, 4);
       # Add IPC net type to info table
       $::ipcxParts[$::ipcxCnt][1] = "I" . $::ipcxCommMech;
@@ -306,7 +310,7 @@ for ($ii = 0; $ii < $i; $ii++) {
       $::ipcxCnt++;
    }
    #
-   # We will need the location and site parameters from
+   # We will need the location and ifo parameters from
    # cdsParameters, so keep track of this part as well
    #
    elsif ($::partType[$ii] eq "Parameters") {
@@ -321,7 +325,7 @@ if ($::ipcxCnt > 0) {
 	   ($maxIpcCount, $maxRfmIpcCount) = CDS::Util::findDefine("src/include/commData3.h", "MAX_IPC", "MAX_IPC_RFM");
    #
    # This model does include IPCx parts, so extract location and
-   # site from cdsParameters and read the IPCx parameter file
+   # ifo from cdsParameters and read the IPCx parameter file
    #
    ("CDS::Parameters::printHeaderStruct") -> ($oo);
 
@@ -331,9 +335,9 @@ if ($::ipcxCnt > 0) {
 	my $iFile = "/opt/rtcds/";
 	$iFile .= $::location;
         $iFile .= "/";
-        $iFile .= lc $::site;
+        $iFile .= lc $::ifo;
 	$iFile .= "/chans/ipc/";
-	$iFile .= $::site;
+	$iFile .= $::ifo;
 	$iFile .= "\.ipc";
    # Open and input data from IPC parameter file
    open(IPCIN, "<$iFile") || die "***ERROR: IPCx parameter file $iFile not found\n";
@@ -486,7 +490,7 @@ $ipcxRcvrCnt = 0;
             $typeComp = $::ipcxParts[$ii][1];
 
             if ($ipcxData[$jj][1] ne $typeComp) {
-               die "***ERROR: IPCx type mis-match for IPCx component $::ipcxParts[$ii][0] $::ipcxParts[$ii][1] : $typeComp vs\. $ipcxData[$jj][1]\n";
+               die "***ERROR: IPCx type mis-match for IPCx component $::ipcxParts[$ii][0] $::ipcxParts[$ii][1] : $typeComp vs\. $ipcxData[$jj][1] force = $::force_shm_ipc\n";
             }
 
             #
@@ -511,7 +515,7 @@ $ipcxRcvrCnt = 0;
 		$ss =~ s/\:/_/;
 		$ss =~ s/\-/_/;
 
-		my $eVar = $::site;
+		my $eVar = $::ifo;
 		$eVar .= ":";
 		$eVar .= "FEC-";
 		$eVar .= $::dcuId;
@@ -590,11 +594,17 @@ $ipcxRcvrCnt = 0;
             $ipcxTypeIndex = -999;
 
             $::ipcxCommMech = substr($::ipcxParts[$ipcxAdd[$jj][0]][1], 1, 4);
+            if ($::virtualiop == 1 or $::force_shm_ipc) {
+                $::ipcxCommMech = "SHMEM";
+            }
 
             for ($kk = 0; $kk < 4; $kk++) {
                if ($::ipcxCommMech eq substr($ipcxType[$kk], 0, 4) ) {
                   $ipcxTypeIndex = $kk;
                }
+            }
+            if ($::virtualiop == 1 or $::force_shm_ipc) {
+                $ipcxTypeIndex = 0;
             }
 
             if ($ipcxTypeIndex < 0) {
@@ -670,7 +680,7 @@ $ipcxRcvrCnt = 0;
 # Subroutine to create IPC RCV status screen for all models
 sub createIpcMedm 
 {
-my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$ipcxCnt1) = @_;
+my ($medmDir,$mdlName,$ifo,$dcuid,$medmTarget,$ipcxCnt1) = @_;
 	# Define colors to be sent to screen gen.
 	my %ecolors = ( "white" => "0",
              "black" => "14",
@@ -703,7 +713,7 @@ my ($medmDir,$mdlName,$site,$dcuid,$medmTarget,$ipcxCnt1) = @_;
 	# Put blue rectangle banner at top of screen
 	$medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{blue});
 	# Add time string to banner
-	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ("540","3","160","15","$::site\:FEC-$::dcuId\_TIME_STRING",$ecolors{white},$ecolors{blue});
+	$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ("540","3","160","15","$::ifo\:FEC-$::dcuId\_TIME_STRING",$ecolors{white},$ecolors{blue});
 	# Add screen title to banner
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ("310","3","100","15","IPC RCV STATUS",$ecolors{white});
 	# Add the IPC column headings

@@ -24,36 +24,37 @@ sub parseParams {
 	for (@sp) {
 		@spp = split(/=/);
 		if (@spp == 2) {
-			if ($spp[0] eq "site") {
+			if ($spp[0] eq "site" ) {
+                $::sitedepwarning = 1;
+            }
+			if (($spp[0] eq "site") or ($spp[0] eq "ifo") ) {
 				$spp[1] =~ s/,/ /g;
 
-                                if (lc($spp[1]) ne $::ifo) {
+                                if (lc($spp[1]) ne $::ifo_from_mdl_name) {
                                    $errmsg = "***ERROR: Model <ifo> name part does not match cdsParameters: ";
                                    $errmsg .= $::ifo . ", " . $spp[1] . "\n";
 
-                                #   die $errmsg;
                                     die $errmsg;
                                 }
 
-				print "Site is set to $spp[1]\n";
-				$::site = $spp[1];
-			        if ($::site =~ /^M/) {
+				$::ifo = $spp[1];
+			        if ($::ifo =~ /^M/) {
                 			$::location = "mit";
-        			} elsif ($::site =~ /^A/) {
+        			} elsif ($::ifo =~ /^A/) {
                 			$::location = "lao";
-        			} elsif ($::site =~ /^G/) {
+        			} elsif ($::ifo =~ /^G/) {
                 			$::location = "geo";
-        			} elsif ($::site =~ /^H/) {
+        			} elsif ($::ifo =~ /^H/) {
                 			$::location = "lho";
-        			} elsif ($::site =~ /^L/) {
+        			} elsif ($::ifo =~ /^L/) {
                 			$::location = "llo";
-        			} elsif ($::site =~ /^C/) {
+        			} elsif ($::ifo =~ /^C/) {
                 			$::location = "caltech";
-        			} elsif ($::site =~ /^S/) {
+        			} elsif ($::ifo =~ /^S/) {
                 			$::location = "stn";
-        			} elsif ($::site =~ /^K/) {
+        			} elsif ($::ifo =~ /^K/) {
                 			$::location = "kamioka";
-        			} elsif ($::site =~ /^X/) {
+        			} elsif ($::ifo =~ /^X/) {
                 			$::location = "tst";
         			}
 			} elsif ($spp[0] eq "rate") {
@@ -61,29 +62,40 @@ sub parseParams {
         			my $param_speed = $spp[1];
         			if ($param_speed eq "2K") {
                 			$::rate = 480;
+                			$::modelrate = 2;
+                			$::servoflag = "-DSERVO2K";
         			} elsif ($param_speed eq "4K") {
                 			$::rate = 240;
+                			$::modelrate = 4;
+                			$::servoflag = "-DSERVO4K";
         			} elsif ($param_speed eq "16K") {
                 			$::rate = 60;
                 			$::modelrate = 16;
+                			$::servoflag = "-DSERVO16K";
         			} elsif ($param_speed eq "32K") {
                 			$::rate = 30;
                 			$::modelrate = 32;
+                			$::servoflag = "-DSERVO32K";
         			} elsif ($param_speed eq "64K") {
                 			$::rate = 15;
                 			$::modelrate = 64;
+                			$::servoflag = "-DSERVO64K";
         			} elsif ($param_speed eq "128K") {
                 			$::rate = 8;
                 			$::modelrate = 128;
+                			$::servoflag = "-DSERVO128K";
         			} elsif ($param_speed eq "256K") {
                 			$::rate = 4;
                 			$::modelrate = 256;
+                			$::servoflag = "-DSERVO256K";
         			} elsif ($param_speed eq "512K") {
                 			$::rate = 2;
                 			$::modelrate = 512;
+                			$::servoflag = "-DSERVO512K";
         			} elsif ($param_speed eq "1024K") {
                 			$::rate = 1;
                 			$::modelrate = 1024;
+                			$::servoflag = "-DSERVO1024K";
         			} else  { die "Invalid speed $param_speed specified\n"; }
 
 			} elsif ($spp[0] eq "dcuid") {
@@ -174,6 +186,8 @@ sub parseParams {
 				$::requireIOcnt = $spp[1];
 			} elsif ($spp[0] eq "virtualIOP") { 
 				$::virtualiop = $spp[1];
+			} elsif ($spp[0] eq "use_shm_ipc") { 
+				$::force_shm_ipc = $spp[1];
 			} elsif ($spp[0] eq "adcclock") { 
 				$::adcclock = $spp[1];
 			} elsif ($spp[0] eq "clock_div") { 
