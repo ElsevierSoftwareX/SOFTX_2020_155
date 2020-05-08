@@ -12,9 +12,10 @@ set debug=0;
 set log=6;
 
 # zero_bad_data is set to 1 to zero the data block if it there
-# is not valid data.  The production systems have run with this
-# as 0.
-set zero_bad_data=0;
+# is not valid data.  Set this to 0 to not clear bad (missing) data
+# (it is not clear why you would do this).
+set zero_bad_data=1;
+
 # a GDS broadcaster should set the gds channel list before
 # loading the main channel list.
 #set broadcast_config = "/opt/rtcds/tst/x1/target/x1broadcast0/broadcaster.ini";
@@ -61,10 +62,17 @@ set minute-trend-frame-dir="/frames/trend/minute", "X-X1_M-", ".gwf";
 #set raw-minute-trend-dir="/frames/trend/minute_raw";
 #set raw_minute_trend_saving_period=5;
 
+# The nds service and daqd must coordinate their communication
+# to function.  The defaults work out of the box.  Only change this
+# if you change how the nds server is running.
+#set nds-jobs-dir="/run/nds";
+
 # the daqd reads from a shared memory buffer, set the
 # input buffer name and size (in bytes).
-set parameter "shmem_input" = "local_dc";
-set parameter "shmem_size" = "104857600";
+# The daqd has the following defaults, you only need to
+# specify these if you need something different.
+#set parameter "shmem_input" = "local_dc";
+#set parameter "shmem_size" = "104857600";
 
 # a gds broadcaster would need to set this prior to
 # starting the i/o code
