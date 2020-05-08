@@ -5,7 +5,7 @@ Maintainer: Jameson Graef Rollins <jameson.rollins@ligo.org>
 Build-Depends:
  bison,
  cmake,
- debhelper (>= 9),
+ debhelper-compat (= 12),
  dkms,
  dolphin-sisci-ix-devel,
  epics-dev,
@@ -25,8 +25,9 @@ Build-Depends:
  libxt-dev,
  pkg-config,
  rapidjson-dev,
-Standards-Version: 3.9.8
+Standards-Version: 4.5.0
 Vcs-Git: https://git.ligo.org/cds/advLigoRTS
+Rules-Requires-Root: no
 
 Package: advligorts-common
 Architecture: all
