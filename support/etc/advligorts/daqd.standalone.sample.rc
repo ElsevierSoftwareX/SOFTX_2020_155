@@ -1,3 +1,9 @@
+#
+# This is the config file for the daqd process.  This is
+# done with the daqd command language and is a script where
+# order matters.
+#
+
 # set the default size for threads
 # the OS defaults have shown to be too small
 # this setting comes from
