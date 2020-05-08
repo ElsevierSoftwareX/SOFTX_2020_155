@@ -96,7 +96,7 @@ Depends:
  ${misc:Depends},
  ${perl:Depends},
 Recommends:
- advligorts-rcg,
+ advligorts-fe,
 Description: advLigoRTS real-time code generator (RCG)
  Core component of advLigoRTS.
  .
