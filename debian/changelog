@@ -1,3 +1,11 @@
+advligorts (4.0.0~dev9-1) unstable; urgency=medium
+
+  * New dev release
+  * Add cds_pub_sub binary
+  * Move to debhelper-compat 12
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Fri, 08 May 2020 14:39:43 -0700
+
 advligorts (4.0.0~dev8-1) unstable; urgency=medium
 
   * New dev release
