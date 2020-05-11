@@ -82,17 +82,11 @@ echo Installing $TARGET;
 if test -e $TARGET/bin/${system}.ko; then
     mv -f $TARGET/bin/${system}.ko $TARGET/archive/${system}fe_${cur_date}.ko || exit 4
 fi
-if test -e $TARGET/bin/${system}.rtl; then
-    mv -f $TARGET/bin/${system}.ko $TARGET/archive/${system}fe_${cur_date}.rtl || exit 4
-fi
 if test -e src/fe/${system}/${system}.ko; then
     cp -fp src/fe/${system}/${system}.ko $TARGET/bin/
 fi
 if test -e src/fe/${system}_usp/${system}; then
     cp -fp src/fe/${system}_usp/${system} $TARGET/bin/
-fi
-if test -e src/fe/${system}/${system}.rtl; then
-    cp -fp src/fe/${system}/${system}.rtl $TARGET/bin/
 fi
 if test -e $TARGET/bin/${system}.ko; then
     echo 'sudo /sbin/insmod' $TARGET/bin/${system}.ko ' >  '$TARGET/logs/log.txt ' 2>& 1 &' > $TARGET/scripts/startup${ifo}rt
@@ -101,10 +95,6 @@ fi
 if test -e $TARGET/bin/${system}; then
     echo  'taskset -c '$targetcpu $TARGET/bin/${system} '-m ' ${system} ' >  '$TARGET/logs/log.txt ' 2>& 1 &' > $TARGET/scripts/startup${ifo}usp
     chmod +x $TARGET/scripts/startup${ifo}usp
-fi
-if test -e $TARGET/bin/${system}.rtl; then
-    echo sudo $TARGET/bin/${system}.rtl ' >  '$TARGET/logs/log.txt ' 2>& 1 &' > $TARGET/scripts/startup${ifo}rt
-    chmod +x $TARGET/scripts/startup${ifo}rt
 fi
 
 
