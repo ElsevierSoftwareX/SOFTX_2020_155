@@ -94,8 +94,8 @@ if test -e $RTCDS/medm/${system}; then
 fi
 
 mkdir -p $RTCDS/medm/${system}
-(cd build/${system}epics/medm; find . -name "*.adl" | xargs cp --parents -r -t $RTCDS/medm/${system};)
-(cd build/${system}epics/medm; find . -name "*.ui" | xargs cp --parents -r -t $RTCDS/medm/${system};)
+(cd build/${system}epics/medm; find . -name "*.adl" | xargs -r cp --parents -r -t $RTCDS/medm/${system})
+(cd build/${system}epics/medm; find . -name "*.ui" | xargs -r cp --parents -r -t $RTCDS/medm/${system})
 
 ##########
 
