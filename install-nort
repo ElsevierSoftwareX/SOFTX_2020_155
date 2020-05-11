@@ -133,10 +133,6 @@ chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
 
 EOF
 
-/bin/sed 's/caltech/'$site'/' $srcdir/src/epics/util/daqconfig.tcl > build/${system}epics/config/daqconfig
-/bin/sed -i 's/ifolower/'${lower_ifo}'/' build/${system}epics/config/daqconfig
-/usr/bin/install   build/${system}epics/config/daqconfig  /opt/rtcds/$site/${lower_ifo}/scripts
-
 
 
 gds_node=`grep rmid build/${system}epics/${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`
