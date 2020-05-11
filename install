@@ -43,74 +43,77 @@ lower_ifo=`echo $ifo | tr A-Z a-z`
 cur_date=$(tconvert now 2>/dev/null)
 cur_date=${cur_date:-`date +%y%m%d_%H%M%S`}
 
-mkdir -p /opt/rtcds/$site/${lower_ifo}/chans
+RTCDS=$RTCDS
+TARGET=$RTCDS/target/${system}
+
+mkdir -p $RTCDS/chans
 echo Installing system=$system site=$site ifo=$ifo,$lower_ifo
-echo Installing /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt
-mkdir -p /opt/rtcds/$site/${lower_ifo}/chans/filter_archive/$system
-if test -e /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt; then
-	cp  /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt /opt/rtcds/$site/${lower_ifo}/chans/filter_archive/$system/${upper_system}_${cur_date}_install.txt || exit 1
-	head -4 build/${system}epics/config/${ifo}${upper_system}.txt > /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt
-	grep '^# MODULES' build/${system}epics/config/${ifo}${upper_system}.txt >> /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt
-	tail -n +5 /opt/rtcds/$site/${lower_ifo}/chans/filter_archive/$system/${upper_system}_${cur_date}_install.txt | grep -v '^# MODULES' >> /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt
+echo Installing $RTCDS/chans/${upper_system}.txt
+mkdir -p $RTCDS/chans/filter_archive/$system
+if test -e $RTCDS/chans/${upper_system}.txt; then
+	cp  $RTCDS/chans/${upper_system}.txt $RTCDS/chans/filter_archive/$system/${upper_system}_${cur_date}_install.txt || exit 1
+	head -4 build/${system}epics/config/${ifo}${upper_system}.txt > $RTCDS/chans/${upper_system}.txt
+	grep '^# MODULES' build/${system}epics/config/${ifo}${upper_system}.txt >> $RTCDS/chans/${upper_system}.txt
+	tail -n +5 $RTCDS/chans/filter_archive/$system/${upper_system}_${cur_date}_install.txt | grep -v '^# MODULES' >> $RTCDS/chans/${upper_system}.txt
 else
-	cp -p build/${system}epics/config/${ifo}${upper_system}.txt  /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt
+	cp -p build/${system}epics/config/${ifo}${upper_system}.txt  $RTCDS/chans/${upper_system}.txt
 fi
-echo Installing /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}; then
-	mkdir -p /opt/rtcds/$site/${lower_ifo}/target_archive/${system}; mv -f /opt/rtcds/$site/${lower_ifo}/target/${system} /opt/rtcds/$site/${lower_ifo}/target_archive/${system}/${system}_$cur_date || exit 2
+echo Installing $TARGET/${system}epics
+if test -e $TARGET; then
+	mkdir -p $RTCDS/target_archive/${system}; mv -f $TARGET $RTCDS/target_archive/${system}/${system}_$cur_date || exit 2
 fi
-mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}
-mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/bin
-mkdir -m 775 -p /opt/rtcds/$site/${lower_ifo}/target/${system}/logs
-mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts
-mkdir -p /opt/rtcds/$site/${lower_ifo}/target_archive/${system}
-mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/burt
-if [ -e /opt/rtcds/$site/${lower_ifo}/target_archive/${system}/${system}_$cur_date/${system}epics/burt ]; then
-	cp -pr /opt/rtcds/$site/${lower_ifo}/target_archive/${system}/${system}_$cur_date/${system}epics/burt /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics 
+mkdir -p $TARGET
+mkdir -p $TARGET/bin
+mkdir -m 775 -p $TARGET/logs
+mkdir -p $TARGET/scripts
+mkdir -p $RTCDS/target_archive/${system}
+mkdir -p $TARGET/${system}epics/burt
+if [ -e $RTCDS/target_archive/${system}/${system}_$cur_date/${system}epics/burt ]; then
+	cp -pr $RTCDS/target_archive/${system}/${system}_$cur_date/${system}epics/burt $TARGET/${system}epics 
 fi
-mkdir -p /opt/rtcds/$site/${lower_ifo}/target
-cp -pr target/${system}epics /opt/rtcds/$site/${lower_ifo}/target/${system}
-mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/src /opt/rtcds/$site/${lower_ifo}/target/${system}
-chmod -R a-w /opt/rtcds/$site/${lower_ifo}/target/${system}/src
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/db/*/autoBurt.req; then
-	mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/db/*/autoBurt.req /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics || exit 3
+mkdir -p $RTCDS/target
+cp -pr target/${system}epics $TARGET
+mv -f $TARGET/${system}epics/src $TARGET
+chmod -R a-w $TARGET/src
+if test -e $TARGET/${system}epics/db/*/autoBurt.req; then
+	mv -f $TARGET/${system}epics/db/*/autoBurt.req $TARGET/${system}epics || exit 3
 fi
-echo Installing /opt/rtcds/$site/${lower_ifo}/target/${system};
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko; then
-	mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko /opt/rtcds/$site/${lower_ifo}/target/${system}/archive/${system}fe_${cur_date}.ko || exit 4
+echo Installing $TARGET;
+if test -e $TARGET/bin/${system}.ko; then
+	mv -f $TARGET/bin/${system}.ko $TARGET/archive/${system}fe_${cur_date}.ko || exit 4
 fi
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.rtl; then
-	mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko /opt/rtcds/$site/${lower_ifo}/target/${system}/archive/${system}fe_${cur_date}.rtl || exit 4
+if test -e $TARGET/bin/${system}.rtl; then
+	mv -f $TARGET/bin/${system}.ko $TARGET/archive/${system}fe_${cur_date}.rtl || exit 4
 fi
 if test -e src/fe/${system}/${system}.ko; then
-	cp -fp src/fe/${system}/${system}.ko /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/
+	cp -fp src/fe/${system}/${system}.ko $TARGET/bin/
 fi
 if test -e src/fe/${system}_usp/${system}; then
-	cp -fp src/fe/${system}_usp/${system} /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/
+	cp -fp src/fe/${system}_usp/${system} $TARGET/bin/
 fi
 if test -e src/fe/${system}/${system}.rtl; then
-	cp -fp src/fe/${system}/${system}.rtl /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/
+	cp -fp src/fe/${system}/${system}.rtl $TARGET/bin/
 fi
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko; then
-	echo 'sudo /sbin/insmod' /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko ' >  '/opt/rtcds/$site/${lower_ifo}/target/${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
-	chmod +x /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
+if test -e $TARGET/bin/${system}.ko; then
+	echo 'sudo /sbin/insmod' $TARGET/bin/${system}.ko ' >  '$TARGET/logs/log.txt ' 2>& 1 &' > $TARGET/scripts/startup${ifo}rt
+	chmod +x $TARGET/scripts/startup${ifo}rt
 fi
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}; then
-	echo  'taskset -c '$targetcpu /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system} '-m ' ${system} ' >  '/opt/rtcds/$site/${lower_ifo}/target/${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}usp
-	chmod +x /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}usp
+if test -e $TARGET/bin/${system}; then
+	echo  'taskset -c '$targetcpu $TARGET/bin/${system} '-m ' ${system} ' >  '$TARGET/logs/log.txt ' 2>& 1 &' > $TARGET/scripts/startup${ifo}usp
+	chmod +x $TARGET/scripts/startup${ifo}usp
 fi
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.rtl; then
-	echo sudo /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.rtl ' >  '/opt/rtcds/$site/${lower_ifo}/target/${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
-	chmod +x /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
+if test -e $TARGET/bin/${system}.rtl; then
+	echo sudo $TARGET/bin/${system}.rtl ' >  '$TARGET/logs/log.txt ' 2>& 1 &' > $TARGET/scripts/startup${ifo}rt
+	chmod +x $TARGET/scripts/startup${ifo}rt
 fi
 echo Installing start and stop scripts
-mkdir -p /opt/rtcds/$site/${lower_ifo}/scripts
+mkdir -p $RTCDS/scripts
 
-touch /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-chmod +x /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
+touch $RTCDS/scripts/kill${system}
+chmod +x $RTCDS/scripts/kill${system}
 
-echo /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-cat > /opt/rtcds/$site/${lower_ifo}/scripts/kill${system} << EOF
+echo $RTCDS/scripts/kill${system}
+cat > $RTCDS/scripts/kill${system} << EOF
 #!/bin/bash
 #
 
@@ -125,11 +128,11 @@ if [ "x\${res}" != x ]; then
 fi
 EOF
 
-echo /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-touch /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-chmod +x /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
+echo $RTCDS/scripts/start${system}
+touch $RTCDS/scripts/start${system}
+chmod +x $RTCDS/scripts/start${system}
 if [ ${rtflag} -eq 0 ];then
-cat > /opt/rtcds/$site/${lower_ifo}/scripts/start${system} << EOF
+cat > $RTCDS/scripts/start${system} << EOF
 #!/bin/bash
 #
 
@@ -138,9 +141,9 @@ if [ \`hostname\` != '${hostname}' ]; then
 	exit 1
 fi
 
-/opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
+$RTCDS/scripts/kill${system}
 sleep 5
-(cd /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics && ./startup${ifo})
+(cd $TARGET/${system}epics && ./startup${ifo})
 
 EOF
 
@@ -148,7 +151,7 @@ fi
 
 if [ ${rtflag} -eq 1 ];then
 
-cat > /opt/rtcds/$site/${lower_ifo}/scripts/start${system} << EOF
+cat > $RTCDS/scripts/start${system} << EOF
 #!/bin/bash
 #
 
@@ -157,7 +160,7 @@ if [ \`hostname\` != '${hostname}' ]; then
 	exit 1
 fi
 
-/opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
+$RTCDS/scripts/kill${system}
 sleep 5
 
 ADC_COUNT=\`lspci -v -n | grep 3101 | wc -l\`
@@ -188,9 +191,9 @@ if (( \$DAC20_COUNT < $daccount20 )); then
         exit 1
 fi
 
-(cd /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics && ./startup${ifo})
+(cd $TARGET/${system}epics && ./startup${ifo})
 sleep 5
-/opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
+$TARGET/scripts/startup${ifo}rt
 # wait until real-time is active 
 gpsbad=true
 numsec=0
@@ -210,21 +213,21 @@ if (( $nodaq < 1)); then
 	if [ -e /var/run/init.d/awgtpman_${system} ]; then
 		sudo /var/run/init.d/awgtpman_${system} start
 	else
-		(cd /opt/rtcds/$site/${lower_ifo}/target/gds && ./awgtpman_startup/awgtpman_${system}.cmd)
+		(cd $RTCDS/target/gds && ./awgtpman_startup/awgtpman_${system}.cmd)
 	fi
 fi
-touch /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
-chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
+touch $TARGET/logs/reboot.log
+chmod 777 $TARGET/logs/reboot.log
 
 EOF
 
 fi
 
-echo /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp
-touch /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp
-chmod +x /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp
+echo $RTCDS/scripts/start${system}_usp
+touch $RTCDS/scripts/start${system}_usp
+chmod +x $RTCDS/scripts/start${system}_usp
 
-cat > /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp << EOF
+cat > $RTCDS/scripts/start${system}_usp << EOF
 #!/bin/bash
 #
 
@@ -233,21 +236,21 @@ if [ \`hostname\` != '${hostname}' ]; then
 	exit 1
 fi
 
-/opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
+$RTCDS/scripts/kill${system}
 sleep 5
 
-(cd /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics && ./startup${ifo})
+(cd $TARGET/${system}epics && ./startup${ifo})
 sleep 5
-/opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}usp
+$TARGET/scripts/startup${ifo}usp
 sleep 10
 if [ -e /var/run/init.d/awgtpman_${system} ]; then
 	sudo /var/run/init.d/awgtpman_${system} start
 else
-	(cd /opt/rtcds/$site/${lower_ifo}/target/gds && ./awgtpman_startup/awgtpman_${system}.cmd)
+	(cd $RTCDS/target/gds && ./awgtpman_startup/awgtpman_${system}.cmd)
 fi
 
-touch /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
-chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
+touch $TARGET/logs/reboot.log
+chmod 777 $TARGET/logs/reboot.log
 
 EOF
 
@@ -285,7 +288,7 @@ if test -e /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par;
 	mv -f /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/tpchn_${system}_${cur_date}.par || exit 1
 fi
 cp -p build/${system}epics/${system}.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par 
-mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/param
+mkdir -p $TARGET/param
 cp -p build/${system}epics/${system}.par /opt/rtcds/${site}/${lower_ifo}/target/${system}/param/tpchn_${system}.par
 mkdir -p  /opt/rtcds/${site}/${lower_ifo}/chans/adc 
 cp -p build/${system}epics/config/adcListSorted.txt  /opt/rtcds/${site}/${lower_ifo}/chans/adc/${system}_adclist.txt
@@ -295,8 +298,8 @@ then
 else 
   datarate_mult_flag=
 fi
-mkdir -p /opt/rtcds/$site/${lower_ifo}/target/gds/awgtpman_startup
-mkdir -p /opt/rtcds/$site/${lower_ifo}/target/gds/awgtpman_logs
+mkdir -p $RTCDS/target/gds/awgtpman_startup
+mkdir -p $RTCDS/target/gds/awgtpman_logs
 echo '#!/bin/bash' > /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd 
 echo 'if [ -e /var/log/init.d/awgtpman_'${system}' ]' > /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd 
 echo 'then' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd 
@@ -333,13 +336,13 @@ fi
 
 echo Installing Epics MEDM screens
 
-mkdir -p /opt/rtcds/$site/${lower_ifo}/medm/archive
-if test -e /opt/rtcds/$site/${lower_ifo}/medm/${system}; then
-	cp -a /opt/rtcds/$site/${lower_ifo}/medm/${system} /opt/rtcds/$site/${lower_ifo}/medm/archive/${system}_${cur_date} || exit 1
+mkdir -p $RTCDS/medm/archive
+if test -e $RTCDS/medm/${system}; then
+	cp -a $RTCDS/medm/${system} $RTCDS/medm/archive/${system}_${cur_date} || exit 1
 fi
-mkdir -p /opt/rtcds/$site/${lower_ifo}/medm/${system}
-(cd build/${system}epics/medm; find . -name "*.adl" | xargs cp --parents -r -t /opt/rtcds/$site/${lower_ifo}/medm/${system};)
-(cd build/${system}epics/medm; find . -name "*.ui" | xargs cp --parents -r -t /opt/rtcds/$site/${lower_ifo}/medm/${system};)
+mkdir -p $RTCDS/medm/${system}
+(cd build/${system}epics/medm; find . -name "*.adl" | xargs cp --parents -r -t $RTCDS/medm/${system};)
+(cd build/${system}epics/medm; find . -name "*.ui" | xargs cp --parents -r -t $RTCDS/medm/${system};)
 
 if [ -e $srcdir/src/epics/util/post_build_script.py ]; then
 	echo Running post-build script
