@@ -121,37 +121,37 @@ if [ x$gds_node != "x" ]; then
     else
 	datarate_mult=`expr ${datarate} / 16384 `
     fi
-    mkdir -p  /opt/rtcds/${site}/${lower_ifo}/target/gds/
+    mkdir -p  $RTCDS/target/gds/
     edcu_name=`echo ${upper_system} | sed s/^${ifo}//g`
     edcu_name=${ifo}EDCU_${edcu_name}
-    mkdir -p  /opt/rtcds/${site}/${lower_ifo}/target/gds/param/
-    mkdir -p  /opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive
+    mkdir -p  $RTCDS/target/gds/param/
+    mkdir -p  $RTCDS/target/gds/param/archive
 
     ##########
 
     echo Updating testpoint.par config file
-    echo /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par
-    if test -e /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par; then
-	mv -f /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/testpoint_${cur_date}.par || exit 1
-	testpoint_par_infname=/opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/testpoint_${cur_date}.par
+    echo $RTCDS/target/gds/param/testpoint.par
+    if test -e $RTCDS/target/gds/param/testpoint.par; then
+	mv -f $RTCDS/target/gds/param/testpoint.par $RTCDS/target/gds/param/archive/testpoint_${cur_date}.par || exit 1
+	testpoint_par_infname=$RTCDS/target/gds/param/archive/testpoint_${cur_date}.par
     else
 	testpoint_par_infname=/dev/null
     fi
     echo $srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost}
-    ($srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost} > /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par || (cp /opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/testpoint_${cur_date}.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par && exit 1)) || exit 1
+    ($srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost} > $RTCDS/target/gds/param/testpoint.par || (cp $RTCDS/target/gds/param/archive/testpoint_${cur_date}.par $RTCDS/target/gds/param/testpoint.par && exit 1)) || exit 1
 
     ##########
 
     echo Installing GDS node ${gds_node} configuration file
-    echo /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par
-    if test -e /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par; then
-	mv -f /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/tpchn_${system}_${cur_date}.par || exit 1
+    echo $RTCDS/target/gds/param/tpchn_${system}.par
+    if test -e $RTCDS/target/gds/param/tpchn_${system}.par; then
+	mv -f $RTCDS/target/gds/param/tpchn_${system}.par $RTCDS/target/gds/param/archive/tpchn_${system}_${cur_date}.par || exit 1
     fi
-    cp -p build/${system}epics/${system}.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par
+    cp -p build/${system}epics/${system}.par $RTCDS/target/gds/param/tpchn_${system}.par
     mkdir -p $TARGET/param
-    cp -p build/${system}epics/${system}.par /opt/rtcds/${site}/${lower_ifo}/target/${system}/param/tpchn_${system}.par
-    mkdir -p  /opt/rtcds/${site}/${lower_ifo}/chans/adc
-    cp -p build/${system}epics/config/adcListSorted.txt  /opt/rtcds/${site}/${lower_ifo}/chans/adc/${system}_adclist.txt
+    cp -p build/${system}epics/${system}.par $RTCDS/target/${system}/param/tpchn_${system}.par
+    mkdir -p  $RTCDS/chans/adc
+    cp -p build/${system}epics/config/adcListSorted.txt  $RTCDS/chans/adc/${system}_adclist.txt
     if test ${datarate_mult} -gt 1 ; then
         datarate_mult_flag=-${datarate_mult}
     else
@@ -159,37 +159,37 @@ if [ x$gds_node != "x" ]; then
     fi
     mkdir -p $RTCDS/target/gds/awgtpman_startup
     mkdir -p $RTCDS/target/gds/awgtpman_logs
-    echo '#!/bin/bash' > /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    echo 'if [ -e /var/log/init.d/awgtpman_'${system}' ]' > /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    echo 'then' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    echo ' sudo  /var/log/init.d/awgtpman_'${system}' stop' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    echo 'else' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    echo ' sudo /opt/rtcds/'${site}'/'${lower_ifo}'/target/gds/bin/awgtpman -s '${system}' '${datarate_mult_flag}' -l /opt/rtcds/'${site}'/'${lower_ifo}'/target/gds/awgtpman_logs/'${system}'.log&' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    echo 'fi' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    chmod +x /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd
+    echo '#!/bin/bash' > $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
+    echo 'if [ -e /var/log/init.d/awgtpman_'${system}' ]' > $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
+    echo 'then' >> $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
+    echo ' sudo  /var/log/init.d/awgtpman_'${system}' stop' >> $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
+    echo 'else' >> $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
+    echo ' sudo /opt/rtcds/'${site}'/'${lower_ifo}'/target/gds/bin/awgtpman -s '${system}' '${datarate_mult_flag}' -l /opt/rtcds/'${site}'/'${lower_ifo}'/target/gds/awgtpman_logs/'${system}'.log&' >> $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
+    echo 'fi' >> $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
+    chmod +x $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
     echo Installing auto-generated DAQ configuration file
-    echo /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini
-    mkdir -p  /opt/rtcds/${site}/${lower_ifo}/chans/daq
-    mkdir -p  /opt/rtcds/${site}/${lower_ifo}/chans/daq/archive
-    if test -e /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini ; then
-        mv -f /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/archive/${upper_system}_${cur_date}.ini || exit 2
+    echo $RTCDS/chans/daq/${upper_system}.ini
+    mkdir -p  $RTCDS/chans/daq
+    mkdir -p  $RTCDS/chans/daq/archive
+    if test -e $RTCDS/chans/daq/${upper_system}.ini ; then
+        mv -f $RTCDS/chans/daq/${upper_system}.ini $RTCDS/chans/daq/archive/${upper_system}_${cur_date}.ini || exit 2
         #
         # Do not update anything now, file is generated from the model
-        #echo $srcdir/src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/${site}/${lower_ifo}/chans/daq/archive/${upper_system}_${cur_date}.ini -old=/opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/tpchn_${system}.par -new=build/${system}epics/${system}.par -daq=build/${system}epics/${system}.ini 
-        # $srcdir/src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/${site}/${lower_ifo}/chans/daq/archive/${upper_system}_${cur_date}.ini -old=/opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/tpchn_${system}_${cur_date}.par -new=build/${system}epics/${system}.par -daq=build/${system}epics/${system}.ini > /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini 
+        #echo $srcdir/src/epics/util/updateDaqConfig1.pl -daq_old=$RTCDS/chans/daq/archive/${upper_system}_${cur_date}.ini -old=$RTCDS/target/gds/param/archive/tpchn_${system}.par -new=build/${system}epics/${system}.par -daq=build/${system}epics/${system}.ini 
+        # $srcdir/src/epics/util/updateDaqConfig1.pl -daq_old=$RTCDS/chans/daq/archive/${upper_system}_${cur_date}.ini -old=$RTCDS/target/gds/param/archive/tpchn_${system}_${cur_date}.par -new=build/${system}epics/${system}.par -daq=build/${system}epics/${system}.ini > $RTCDS/chans/daq/${upper_system}.ini 
         #else
-        #  cp -p build/${system}epics/${system}.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini
+        #  cp -p build/${system}epics/${system}.ini $RTCDS/chans/daq/${upper_system}.ini
     fi
-    cp -p build/${system}epics/${system}.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini
+    cp -p build/${system}epics/${system}.ini $RTCDS/chans/daq/${upper_system}.ini
 
-    cp /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini /opt/rtcds/${site}/${lower_ifo}/target/${system}/param/${upper_system}.ini
+    cp $RTCDS/chans/daq/${upper_system}.ini $RTCDS/target/${system}/param/${upper_system}.ini
     #echo Installing EDCU ini file
-    #if test -e /opt/rtcds/${site}/${lower_ifo}/chans/daq/${edcu_name}.ini
+    #if test -e $RTCDS/chans/daq/${edcu_name}.ini
     #then
-    #  mv -f /opt/rtcds/${site}/${lower_ifo}/chans/daq/${edcu_name}.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/archive/${edcu_name}_${cur_date}.ini || exit 2
+    #  mv -f $RTCDS/chans/daq/${edcu_name}.ini $RTCDS/chans/daq/archive/${edcu_name}_${cur_date}.ini || exit 2
     #fi
-    #cp -p target/${system}epics/db/${ifo}/auto.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/${edcu_name}.ini
-    #echo /opt/rtcds/${site}/${lower_ifo}/chans/daq/${edcu_name}.ini
+    #cp -p target/${system}epics/db/${ifo}/auto.ini $RTCDS/chans/daq/${edcu_name}.ini
+    #echo $RTCDS/chans/daq/${edcu_name}.ini
 fi
 
 echo Installing Epics MEDM screens
