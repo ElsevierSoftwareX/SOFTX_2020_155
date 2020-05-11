@@ -39,9 +39,7 @@ if test ${site} = bham; then site_letter=B; fi
 ifo=`grep ifo= target/${system}epics/${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`
 lower_ifo=`echo $ifo | tr A-Z a-z`
 
-# Use the GPS seconds (if tconvert is found) or %y%m%d_%H%M%S otherwise
-cur_date=$(tconvert now 2>/dev/null)
-cur_date=${cur_date:-`date +%y%m%d_%H%M%S`}
+cur_date=`date +%y%m%d_%H%M%S`
 
 RTCDS=$RTCDS
 TARGET=$RTCDS/target/${system}
