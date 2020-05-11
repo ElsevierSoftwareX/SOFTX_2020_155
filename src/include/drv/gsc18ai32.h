@@ -69,6 +69,7 @@ typedef struct GSA_ADC_18BIT_REG{
 #define GSAF_CLEAR_BUFFER       0x40000
 #define GSAF_THRESHOLD          0x001f
 #define GSAF_AUTO_CAL           0x2000
+#define GSAF_AUTO_CAL_PASS      0x4000
 #define GSAF_DMA_DEMAND_MODE    0x80000
 #define GSAF_18BIT_DATA         0x100000
 #define GSAF_DATA_CODE_OFFSET   0x8000

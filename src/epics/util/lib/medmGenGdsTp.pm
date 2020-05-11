@@ -13,7 +13,7 @@ require "lib/medmGen.pm";
 
 sub createGdsMedm
 {
-	my ($medmDir,$mdlName,$ifo,$dcuid,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,$ioptype,@dactype) = @_;
+	my ($medmDir,$mdlName,$ifo,$dcuid,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,$ioptype,$dac,$adc) = @_;
  # Define colors to be sent to screen gen.
         my %ecolors = ( "white" => "0",
              "black" => "14",
@@ -29,6 +29,9 @@ sub createGdsMedm
 	     "warning" => "31"
            );
 
+    my @adctype = @{ $adc };
+    my @dactype = @{ $dac };
+    
 
 	my $fname = "$mdlName\_GDS_TP.adl";
         print "creating file $medmDir\/$fname \n";
@@ -267,7 +270,7 @@ sub createGdsMedm
     $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_BUILD_DATE",$ecolors{white},$ecolors{blue},"static");
 
 	# Following only for IOP
-	if($adcMaster == 1 and $ioptype != 4 and $ioptype != 2)
+	if($adcMaster == 1 and $ioptype == 0 )
 	{
 		# Add ADC Duotone Diag label
 		$xpos = 18; $ypos = 240; $width = 50; $height = 15;
@@ -440,8 +443,13 @@ sub createGdsMedm
     }
 	for($ii=0;$ii<$adcCnt;$ii++)
 	{
-		$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_MONITOR_ADC$::adcCardNum[$ii].adl";
+		$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_MONITOR_ADC$ii.adl";
+        print "adctype = $adctype[$ii] \n";
+		if($adctype[$ii] eq "GSC_16AI64SSA" ) {
         	$medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{brown},"A$::adcCardNum[$ii]");
+        } else {
+        	$medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{black},"A$::adcCardNum[$ii]");
+        }
     if($adcMaster == 1) {
 		$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$bwidth,$bheight,"$ifo\:FEC-$dcuid\_ADC_STAT_$ii","0","3",$ecolors{green},$ecolors{red});
     } else {
