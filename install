@@ -88,10 +88,6 @@ fi
 if test -e src/fe/${system}_usp/${system}; then
     cp -fp src/fe/${system}_usp/${system} $TARGET/bin/
 fi
-if test -e $TARGET/bin/${system}.ko; then
-    echo 'sudo /sbin/insmod' $TARGET/bin/${system}.ko ' >  '$TARGET/logs/log.txt ' 2>& 1 &' > $TARGET/scripts/startup${ifo}rt
-    chmod +x $TARGET/scripts/startup${ifo}rt
-fi
 if test -e $TARGET/bin/${system}; then
     echo  'taskset -c '$targetcpu $TARGET/bin/${system} '-m ' ${system} ' >  '$TARGET/logs/log.txt ' 2>& 1 &' > $TARGET/scripts/startup${ifo}usp
     chmod +x $TARGET/scripts/startup${ifo}usp
