@@ -39,7 +39,7 @@ upper_system=`echo $system | tr a-z A-Z`
 targetcpu=`grep TARGET_CPU src/include/${system}.h | head -1 | awk '{print $3}'`
 cur_date=`date +%y%m%d_%H%M%S`
 
-RTCDS=$RTCDS
+RTCDS=/opt/rtcds/${site,,*}/${ifo,,*}
 TARGET=$RTCDS/target/${system}
 ARCHIVE=$RTCDS/target_archive/${system}/${system}_$cur_date
 
@@ -83,6 +83,19 @@ chmod -R a-w $TARGET/src
 if test -e $TARGET/${system}epics/db/*/autoBurt.req; then
     mv -f $TARGET/${system}epics/db/*/autoBurt.req $TARGET/${system}epics || exit 3
 fi
+
+##########
+
+echo "Installing EPICS screens..."
+
+if test -e $RTCDS/medm/${system}; then
+    mkdir -p $RTCDS/medm/archive
+    cp -a $RTCDS/medm/${system} $RTCDS/medm/archive/${system}_${cur_date} || exit 1
+fi
+
+mkdir -p $RTCDS/medm/${system}
+(cd build/${system}epics/medm; find . -name "*.adl" | xargs cp --parents -r -t $RTCDS/medm/${system};)
+(cd build/${system}epics/medm; find . -name "*.ui" | xargs cp --parents -r -t $RTCDS/medm/${system};)
 
 ##########
 
@@ -177,15 +190,7 @@ if [ x$gds_node != "x" ]; then
     #echo $RTCDS/chans/daq/${edcu_name}.ini
 fi
 
-echo Installing Epics MEDM screens
-
-mkdir -p $RTCDS/medm/archive
-if test -e $RTCDS/medm/${system}; then
-    cp -a $RTCDS/medm/${system} $RTCDS/medm/archive/${system}_${cur_date} || exit 1
-fi
-mkdir -p $RTCDS/medm/${system}
-(cd build/${system}epics/medm; find . -name "*.adl" | xargs cp --parents -r -t $RTCDS/medm/${system};)
-(cd build/${system}epics/medm; find . -name "*.ui" | xargs cp --parents -r -t $RTCDS/medm/${system};)
+##########
 
 if [ -e $srcdir/src/epics/util/post_build_script.py ]; then
     echo "Running post-build script..."
