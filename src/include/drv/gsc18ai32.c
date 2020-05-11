@@ -30,6 +30,7 @@ gsc18ai32Init( CDS_HARDWARE* pHardware, struct pci_dev* adcdev )
     int   pedStatus; /// @param pedStatus Status return from call to enable
                    /// device.
     volatile GSA_ADC_18BIT_REG* adc18Ptr;
+    int autocal = 0;
 
     /// Get index into CDS_HARDWARE struct based on total number of ADC cards
     /// found by mapping routine in map.c
@@ -90,7 +91,19 @@ gsc18ai32Init( CDS_HARDWARE* pHardware, struct pci_dev* adcdev )
     /// Wait for internal calibration to complete.
     do
     {
+        autocal ++;
+        udelay(100);
     } while ( ( adc18Ptr->BCR & GSAF_AUTO_CAL ) != 0 ); // 0x2000
+    if( ( adc18Ptr->BCR & GSAF_AUTO_CAL_PASS ) == 0 )
+    {
+        printk("ADC AUTOCAL FAIL %d\n",autocal);
+        autocal = 0;
+    } else {
+        printk("ADC AUTOCAL PASS %d\n",autocal);
+        autocal = GSAF_AUTO_CAL_PASS;
+    }
+    // End AutoCal
+
     adc18Ptr->RAG |= GSAF_SAMPLE_START; // 0x10000
     adc18Ptr->IDBC = ( GSAF_CLEAR_BUFFER | GSAF_THRESHOLD ); // 0x40000 | 0x001f
     adc18Ptr->SSC =
@@ -103,6 +116,7 @@ gsc18ai32Init( CDS_HARDWARE* pHardware, struct pci_dev* adcdev )
     pHardware->adcType[ devNum ] = GSC_18AI32SSC1M;
     pHardware->adcChannels[ devNum ] = 8;
     pHardware->adcConfig[ devNum ] = adc18Ptr->ASSC;
+    pHardware->adcConfig[ devNum ] |= autocal;
     pHardware->adcCount++;
     /// Return board enable status.
     return ( pedStatus );

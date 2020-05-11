@@ -4,15 +4,17 @@ inline int app_adc_status_update( adcInfo_t* );
 inline int
 app_adc_read( int ioMemCtr, int ioClk, adcInfo_t* adcinfo, int cpuClk[] )
 {
-    int ii, jj;
     int limit = OVERFLOW_LIMIT_16BIT;
     int mm;
+    int num_chans = 32;
+    int card = 0;
+    int chan = 0;
 
     /// \> SLAVE gets its adc data from MASTER via ipc shared memory\n
     /// \> For each ADC defined:
-    for ( jj = 0; jj < cdsPciModules.adcCount; jj++ )
+    for ( card = 0; card < cdsPciModules.adcCount; card++ )
     {
-        mm = cdsPciModules.adcConfig[ jj ];
+        mm = cdsPciModules.adcConfig[ card ];
         cpuClk[ CPU_TIME_RDY_ADC ] = rdtsc_ordered( );
         /// - ---- Wait for proper timestamp in shared memory, indicating data
         /// ready.
@@ -36,33 +38,35 @@ app_adc_read( int ioMemCtr, int ioClk, adcInfo_t* adcinfo, int cpuClk[] )
         /// channel reservation and exit the code.
         if ( adcinfo->adcWait >= MAX_ADC_WAIT_SLAVE )
             return 1;
-        for ( ii = 0; ii < MAX_ADC_CHN_PER_MOD; ii++ )
+        if(cdsPciModules.adcType[ card ] == GSC_18AI32SSC1M) num_chans = 8;
+        else num_chans = MAX_ADC_CHN_PER_MOD;
+        for ( chan = 0; chan < num_chans; chan++ )
         {
             /// - ---- Read data from shared memory.
-            adcinfo->adcData[ jj ][ ii ] =
-                ioMemData->iodata[ mm ][ ioMemCtr ].data[ ii ];
+            adcinfo->adcData[ card ][ chan ] =
+                ioMemData->iodata[ mm ][ ioMemCtr ].data[ chan ];
 #ifdef FLIP_SIGNALS
-            adcinfo->adcData[ jj ][ ii ] *= -1;
+            adcinfo->adcData[ card ][ chan ] *= -1;
 #endif
-            dWord[ jj ][ ii ] = adcinfo->adcData[ jj ][ ii ];
+            dWord[ card ][ chan ] = adcinfo->adcData[ card ][ chan ];
 #ifdef OVERSAMPLE
             /// - ---- Downsample ADC data from 64K to rate of user application
-            if ( dWordUsed[ jj ][ ii ] )
+            if ( dWordUsed[ card ][ chan ] )
             {
-                dWord[ jj ][ ii ] =
-                    iir_filter_biquad( dWord[ jj ][ ii ],
+                dWord[ card ][ chan ] =
+                    iir_filter_biquad( dWord[ card ][ chan ],
                                        FE_OVERSAMPLE_COEFF,
                                        2,
-                                       &dHistory[ ii + jj * 32 ][ 0 ] );
+                                       &dHistory[ chan + card * num_chans ][ 0 ] );
             }
             /// - ---- Check for ADC data over/under range
-            if ( ( adcinfo->adcData[ jj ][ ii ] > limit ) ||
-                 ( adcinfo->adcData[ jj ][ ii ] < -limit ) )
+            if ( ( adcinfo->adcData[ card ][ chan ] > limit ) ||
+                 ( adcinfo->adcData[ card ][ chan ] < -limit ) )
             {
-                adcinfo->overflowAdc[ jj ][ ii ]++;
-                pLocalEpics->epicsOutput.overflowAdcAcc[ jj ][ ii ]++;
+                adcinfo->overflowAdc[ card ][ chan ]++;
+                pLocalEpics->epicsOutput.overflowAdcAcc[ card ][ chan ]++;
                 overflowAcc++;
-                adcinfo->adcOF[ jj ] = 1;
+                adcinfo->adcOF[ card ] = 1;
                 odcStateWord |= ODC_ADC_OVF;
             }
 #endif
@@ -74,41 +78,43 @@ app_adc_read( int ioMemCtr, int ioClk, adcInfo_t* adcinfo, int cpuClk[] )
 inline int
 app_adc_status_update( adcInfo_t* adcinfo )
 {
-    int ii, jj;
     int status = 0;
+    int card = 0;
+    int chan = 0;
+    int num_chans = 0;
 
-    for ( jj = 0; jj < cdsPciModules.adcCount; jj++ )
+    for ( card = 0; card < cdsPciModules.adcCount; card++ )
     {
         // SET/CLR Channel Hopping Error
-        if ( adcinfo->adcChanErr[ jj ] )
+        if ( adcinfo->adcChanErr[ card ] )
         {
-            pLocalEpics->epicsOutput.statAdc[ jj ] &= ~( ADC_CHAN_HOP );
+            pLocalEpics->epicsOutput.statAdc[ card ] &= ~( ADC_CHAN_HOP );
             status |= FE_ERROR_ADC;
-            ;
         }
         else
-            pLocalEpics->epicsOutput.statAdc[ jj ] |= ADC_CHAN_HOP;
-        adcinfo->adcChanErr[ jj ] = 0;
+            pLocalEpics->epicsOutput.statAdc[ card ] |= ADC_CHAN_HOP;
+        adcinfo->adcChanErr[ card ] = 0;
         // SET/CLR Overflow Error
-        if ( adcinfo->adcOF[ jj ] )
+        if ( adcinfo->adcOF[ card ] )
         {
-            pLocalEpics->epicsOutput.statAdc[ jj ] &= ~( ADC_OVERFLOW );
+            pLocalEpics->epicsOutput.statAdc[ card ] &= ~( ADC_OVERFLOW );
             status |= FE_ERROR_OVERFLOW;
-            ;
         }
         else
-            pLocalEpics->epicsOutput.statAdc[ jj ] |= ADC_OVERFLOW;
-        adcinfo->adcOF[ jj ] = 0;
-        for ( ii = 0; ii < 32; ii++ )
+            pLocalEpics->epicsOutput.statAdc[ card ] |= ADC_OVERFLOW;
+        adcinfo->adcOF[ card ] = 0;
+        if(cdsPciModules.adcType[ card ] == GSC_18AI32SSC1M) num_chans = 8;
+        else num_chans = MAX_ADC_CHN_PER_MOD;
+        for ( chan = 0; chan < num_chans; chan++ )
         {
-            if ( pLocalEpics->epicsOutput.overflowAdcAcc[ jj ][ ii ] >
+            if ( pLocalEpics->epicsOutput.overflowAdcAcc[ card ][ chan ] >
                  OVERFLOW_CNTR_LIMIT )
             {
-                pLocalEpics->epicsOutput.overflowAdcAcc[ jj ][ ii ] = 0;
+                pLocalEpics->epicsOutput.overflowAdcAcc[ card ][ chan ] = 0;
             }
-            pLocalEpics->epicsOutput.overflowAdc[ jj ][ ii ] =
-                adcinfo->overflowAdc[ jj ][ ii ];
-            adcinfo->overflowAdc[ jj ][ ii ] = 0;
+            pLocalEpics->epicsOutput.overflowAdc[ card ][ chan ] =
+                adcinfo->overflowAdc[ card ][ chan ];
+            adcinfo->overflowAdc[ card ][ chan ] = 0;
         }
     }
     return status;
