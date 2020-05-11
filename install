@@ -157,16 +157,6 @@ if [ x$gds_node != "x" ]; then
     else
         datarate_mult_flag=
     fi
-    mkdir -p $RTCDS/target/gds/awgtpman_startup
-    mkdir -p $RTCDS/target/gds/awgtpman_logs
-    echo '#!/bin/bash' > $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    echo 'if [ -e /var/log/init.d/awgtpman_'${system}' ]' > $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    echo 'then' >> $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    echo ' sudo  /var/log/init.d/awgtpman_'${system}' stop' >> $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    echo 'else' >> $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    echo ' sudo /opt/rtcds/'${site}'/'${lower_ifo}'/target/gds/bin/awgtpman -s '${system}' '${datarate_mult_flag}' -l /opt/rtcds/'${site}'/'${lower_ifo}'/target/gds/awgtpman_logs/'${system}'.log&' >> $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    echo 'fi' >> $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-    chmod +x $RTCDS/target/gds/awgtpman_startup/awgtpman_${system}.cmd
     echo Installing auto-generated DAQ configuration file
     echo $RTCDS/chans/daq/${upper_system}.ini
     mkdir -p  $RTCDS/chans/daq

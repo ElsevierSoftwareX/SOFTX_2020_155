@@ -102,9 +102,6 @@ clean-%:
         /bin/rm -rf target/$${system}epics build/$${system}epics; \
         (make -siC src/fe/$${system}/Makefile clean 2>/dev/null); echo Done
 
-install-noawg-%:
-	@system=$(subst install-noawg-,,$@); $(srcdir)/install-noawg $${system} $(srcdir)
-
 install-nort-%:
 	@system=$(subst install-nort-,,$@); $(srcdir)/install-nort $${system} $(srcdir)
 
