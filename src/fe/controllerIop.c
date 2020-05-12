@@ -443,6 +443,13 @@ fe_start_controller( void* arg )
     sync21pps = 1;
 #else
     timeSec = current_time_fe( ) - 1;
+    if ( cdsPciModules.gpsType == TSYNC_RCVR )
+    {
+        timeSec = getGpsSecTsync( );
+        gps_receiver_locked = getGpsuSecTsync( &usec );
+        timeSec --;
+    } 
+
 #endif
 
     adcinfo.adcTime = rdtsc_ordered( );
