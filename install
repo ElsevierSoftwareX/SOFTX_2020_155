@@ -1,33 +1,30 @@
-#!/bin/bash
+#!/bin/bash -e
 #
 # Install one system
 
 if [ "$#" -ne 2 ];then
-	echo "pls state the name of the system to install and the source code directory";
-	exit 1;
+    echo "Please specify the name of the system to install and the source code directory." >&2
+    exit 1
 else
-	system=$1;
-	srcdir=$2;
+    system=$1
+    srcdir=$2
 fi
 
-upper_system=`echo $system | tr a-z A-Z`
-hostname=`grep TARGET_HOST_NAME src/include/${system}.h | head -1 | awk '{print $3}'`
-adccount=`grep TARGET_ADC_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
-daccount16=`grep TARGET_DAC16_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
-daccount18=`grep TARGET_DAC18_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
-daccount20=`grep TARGET_DAC20_COUNT src/include/${system}.h | head -1 | awk '{print $3}'`
-nodaq=`grep TARGET_DAQ_FLAG src/include/${system}.h | head -1 | awk '{print $3}'`
-rtflag=`grep TARGET_RT_FLAG src/include/${system}.h | head -1 | awk '{print $3}'`
-targetcpu=`grep TARGET_CPU src/include/${system}.h | head -1 | awk '{print $3}'`
-cpumeter=`grep TARGET_METER src/include/${system}.h | head -1 | awk '{print $3}'`
+if ! test -e target/${system}epics/${system}epics; then
+    echo "Please make $system first." >&2
+    exit 1
+fi
 site=`grep site= target/${system}epics/${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`
-if test ${site}no = no; then echo Please make $system first; exit 1; fi
-upper_site=`echo $site | tr a-z A-Z`
-site_letter=M
+ifo=`grep ifo= target/${system}epics/${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`
+if [ -z "$site" ] || [ -z "$ifo" ] ; then
+    echo "Could not determine site or ifo." >&2
+    exit 1
+fi
 if test ${site} = llo; then site_letter=L; fi
 if test ${site} = lho; then site_letter=H; fi
 if test ${site} = geo; then site_letter=G; fi
 if test ${site} = caltech; then site_letter=C; fi
+if test ${site} = mit; then site_letter=M; fi
 if test ${site} = tst; then site_letter=X; fi
 if test ${site} = stn; then site_letter=S; fi
 if test ${site} = kamioka; then site_letter=K; fi
@@ -36,312 +33,166 @@ if test ${site} = anu; then site_letter=A; fi
 if test ${site} = uwa; then site_letter=U; fi
 if test ${site} = cardiff; then site_letter=W; fi
 if test ${site} = bham; then site_letter=B; fi
-ifo=`grep ifo= target/${system}epics/${system}epics*.cmd | head -1 |sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`
-lower_ifo=`echo $ifo | tr A-Z a-z`
+site=${site^^*}
+ifo=${ifo^^*}
+upper_system=`echo $system | tr a-z A-Z`
+targetcpu=`grep TARGET_CPU src/include/${system}.h | head -1 | awk '{print $3}'`
+cur_date=`date +%y%m%d_%H%M%S`
 
-# Use the GPS seconds (if tconvert is found) or %y%m%d_%H%M%S otherwise
-cur_date=$(tconvert now 2>/dev/null)
-cur_date=${cur_date:-`date +%y%m%d_%H%M%S`}
+RTCDS=/opt/rtcds/${site,,*}/${ifo,,*}
+TARGET=$RTCDS/target/${system}
+ARCHIVE=$RTCDS/target_archive/${system}/${system}_$cur_date
 
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/chans
-echo Installing system=$system site=$site ifo=$ifo,$lower_ifo
-echo Installing /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/chans/filter_archive/$system
-if test -e /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt; then
-	/bin/cp  /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt /opt/rtcds/$site/${lower_ifo}/chans/filter_archive/$system/${upper_system}_${cur_date}_install.txt || exit 1
-	head -4 build/${system}epics/config/${ifo}${upper_system}.txt > /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt
-	/bin/grep '^# MODULES' build/${system}epics/config/${ifo}${upper_system}.txt >> /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt
-	tail -n +5 /opt/rtcds/$site/${lower_ifo}/chans/filter_archive/$system/${upper_system}_${cur_date}_install.txt | grep -v '^# MODULES' >> /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt
+echo "Installing system=$system site=$site ifo=$ifo"
+
+mkdir -p $TARGET
+
+##########
+
+echo "Installing channel file..."
+
+mkdir -p $RTCDS/chans/filter_archive/$system
+
+if test -e $RTCDS/chans/${upper_system}.txt; then
+    cp  $RTCDS/chans/${upper_system}.txt $RTCDS/chans/filter_archive/$system/${upper_system}_${cur_date}_install.txt || exit 1
+    head -4 build/${system}epics/config/${ifo}${upper_system}.txt > $RTCDS/chans/${upper_system}.txt
+    grep '^# MODULES' build/${system}epics/config/${ifo}${upper_system}.txt >> $RTCDS/chans/${upper_system}.txt
+    tail -n +5 $RTCDS/chans/filter_archive/$system/${upper_system}_${cur_date}_install.txt | grep -v '^# MODULES' >> $RTCDS/chans/${upper_system}.txt
 else
-	/bin/cp -p build/${system}epics/config/${ifo}${upper_system}.txt  /opt/rtcds/$site/${lower_ifo}/chans/${upper_system}.txt
+    cp -p build/${system}epics/config/${ifo}${upper_system}.txt  $RTCDS/chans/${upper_system}.txt
 fi
-echo Installing /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}; then
-	/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target_archive/${system}; /bin/mv -f /opt/rtcds/$site/${lower_ifo}/target/${system} /opt/rtcds/$site/${lower_ifo}/target_archive/${system}/${system}_$cur_date || exit 2
+
+##########
+
+echo "Installing EPICS sequencer..."
+
+if test -e $TARGET; then
+    mkdir -p $RTCDS/target_archive/${system}
+    mv -f $TARGET $RTCDS/target_archive/${system}/${system}_$cur_date || exit 2
 fi
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/bin
-/bin/mkdir -m 775 -p /opt/rtcds/$site/${lower_ifo}/target/${system}/logs
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target_archive/${system}
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/burt
-if [ -e /opt/rtcds/$site/${lower_ifo}/target_archive/${system}/${system}_$cur_date/${system}epics/burt ]; then
-	/bin/cp -pr /opt/rtcds/$site/${lower_ifo}/target_archive/${system}/${system}_$cur_date/${system}epics/burt /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics 
+
+mkdir -p $TARGET/{bin,scripts,logs}
+chmod 775 $TARGET/logs
+mkdir -p $TARGET/${system}epics/burt
+if [ -e $RTCDS/target_archive/${system}/${system}_$cur_date/${system}epics/burt ]; then
+    cp -pr $RTCDS/target_archive/${system}/${system}_$cur_date/${system}epics/burt $TARGET/${system}epics
 fi
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target
-/bin/cp -pr target/${system}epics /opt/rtcds/$site/${lower_ifo}/target/${system}
-/bin/mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/src /opt/rtcds/$site/${lower_ifo}/target/${system}
-/bin/chmod -R a-w /opt/rtcds/$site/${lower_ifo}/target/${system}/src
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/db/*/autoBurt.req; then
-	/bin/mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics/db/*/autoBurt.req /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics || exit 3
+cp -pr target/${system}epics $TARGET
+mv -f $TARGET/${system}epics/src $TARGET
+chmod -R a-w $TARGET/src
+if test -e $TARGET/${system}epics/db/*/autoBurt.req; then
+    mv -f $TARGET/${system}epics/db/*/autoBurt.req $TARGET/${system}epics || exit 3
 fi
-echo Installing /opt/rtcds/$site/${lower_ifo}/target/${system};
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko; then
-	/bin/mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko /opt/rtcds/$site/${lower_ifo}/target/${system}/archive/${system}fe_${cur_date}.ko || exit 4
+
+##########
+
+echo "Installing EPICS screens..."
+
+if test -e $RTCDS/medm/${system}; then
+    mkdir -p $RTCDS/medm/archive
+    cp -a $RTCDS/medm/${system} $RTCDS/medm/archive/${system}_${cur_date} || exit 1
 fi
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.rtl; then
-	/bin/mv -f /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko /opt/rtcds/$site/${lower_ifo}/target/${system}/archive/${system}fe_${cur_date}.rtl || exit 4
+
+mkdir -p $RTCDS/medm/${system}
+(cd build/${system}epics/medm; find . -name "*.adl" | xargs -r cp --parents -r -t $RTCDS/medm/${system})
+(cd build/${system}epics/medm; find . -name "*.ui" | xargs -r cp --parents -r -t $RTCDS/medm/${system})
+
+##########
+
+echo "Installing RT components..."
+
+if test -e $TARGET/bin/${system}.ko; then
+    mv -f $TARGET/bin/${system}.ko $TARGET/archive/${system}fe_${cur_date}.ko || exit 4
 fi
 if test -e src/fe/${system}/${system}.ko; then
-	/bin/cp -fp src/fe/${system}/${system}.ko /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/
+    cp -fp src/fe/${system}/${system}.ko $TARGET/bin/
 fi
 if test -e src/fe/${system}_usp/${system}; then
-	/bin/cp -fp src/fe/${system}_usp/${system} /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/
+    cp -fp src/fe/${system}_usp/${system} $TARGET/bin/
 fi
-if test -e src/fe/${system}/${system}.rtl; then
-	/bin/cp -fp src/fe/${system}/${system}.rtl /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/
-fi
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko; then
-	echo 'sudo /sbin/insmod' /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.ko ' >  '/opt/rtcds/$site/${lower_ifo}/target/${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
-	/bin/chmod +x /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
-fi
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}; then
-	echo  'taskset -c '$targetcpu /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system} '-m ' ${system} ' >  '/opt/rtcds/$site/${lower_ifo}/target/${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}usp
-	/bin/chmod +x /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}usp
-fi
-if test -e /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.rtl; then
-	echo sudo /opt/rtcds/$site/${lower_ifo}/target/${system}/bin/${system}.rtl ' >  '/opt/rtcds/$site/${lower_ifo}/target/${system}/logs/log.txt ' 2>& 1 &' > /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
-	/bin/chmod +x /opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
-fi
-echo Installing start and stop scripts
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/scripts
-
-/bin/touch /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-/bin/chmod +x /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-
-echo /opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-cat > /opt/rtcds/$site/${lower_ifo}/scripts/kill${system} << EOF
-#!/bin/bash
-#
-
-sudo killall ${system}
-sudo killall ${system}epics
-sudo /sbin/rmmod ${system} 2&>/dev/null
-
-res=\`ps h -C awgtpman | grep "${system} "\`
-if [ "x\${res}" != x ]; then
-	num=\$(echo \${res} | awk '{print \$1}')
-	sudo kill \$num
-fi
-EOF
-
-echo /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-/bin/touch /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-/bin/chmod +x /opt/rtcds/$site/${lower_ifo}/scripts/start${system}
-if [ ${rtflag} -eq 0 ];then
-cat > /opt/rtcds/$site/${lower_ifo}/scripts/start${system} << EOF
-#!/bin/bash
-#
-
-if [ \`hostname\` != '${hostname}' ]; then
-	echo Cannot run \`basename \$0\` on \`hostname\` computer
-	exit 1
+if test -e $TARGET/bin/${system}; then
+    echo  'taskset -c '$targetcpu $TARGET/bin/${system} '-m ' ${system} ' >  '$TARGET/logs/log.txt ' 2>& 1 &' > $TARGET/scripts/startup${ifo}usp
+    chmod +x $TARGET/scripts/startup${ifo}usp
 fi
 
-/opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-sleep 5
-(cd /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics && ./startup${ifo})
+##########
 
-EOF
-
-fi
-
-if [ ${rtflag} -eq 1 ];then
-
-cat > /opt/rtcds/$site/${lower_ifo}/scripts/start${system} << EOF
-#!/bin/bash
-#
-
-if [ \`hostname\` != '${hostname}' ]; then
-	echo Cannot run \`basename \$0\` on \`hostname\` computer
-	exit 1
-fi
-
-/opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-sleep 5
-
-ADC_COUNT=\`lspci -v -n | grep 3101 | wc -l\`
-DAC16_COUNT=\`lspci -v -n | grep 3120 | wc -l\`
-DAC18_COUNT=\`lspci -v -n | grep 3357 | wc -l\`
-DAC20_COUNT=\`lspci -v -n | grep 3574 | wc -l\`
-echo Number of ADC cards on bus = \$ADC_COUNT 
-echo Number of DAC16 cards on bus = \$DAC16_COUNT 
-echo Number of DAC18 cards on bus = \$DAC18_COUNT 
-echo Number of DAC20 cards on bus = \$DAC20_COUNT 
-if (( \$ADC_COUNT < $adccount )); then
-        echo Cannot run: Expected $adccount ADC cards, but only found \$ADC_COUNT cards on bus
-        exit 1
-fi
-
-if (( \$DAC16_COUNT < $daccount16 )); then
-        echo Cannot run: Expected $daccount16 16bitDAC cards, but only found \$DAC16_COUNT cards on bus
-        exit 1
-fi
-
-if (( \$DAC18_COUNT < $daccount18 )); then
-        echo Cannot run: Expected $daccount18 16bitDAC cards, but only found \$DAC18 cards on bus
-        exit 1
-fi
-
-if (( \$DAC20_COUNT < $daccount20 )); then
-        echo Cannot run: Expected $daccount20 20bitDAC cards, but only found \$DAC20 cards on bus
-        exit 1
-fi
-
-(cd /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics && ./startup${ifo})
-sleep 5
-/opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}rt
-# wait until real-time is active 
-gpsbad=true
-numsec=0
-if (( $nodaq < 1)); then
-	while [ \$gpsbad = true ] && ((\$numsec < 80))
-	do
-	  sleep 1
-	  numsec=\$((\$numsec+1))
-	  CPU=\$(caget -t $cpumeter)
-	  if [ \$CPU \> 0 ]; then
-	  	echo '${system} RT ready in '\$numsec
-		gpsbad=false
-	  fi
-	done
-	#
-	sudo killall -q daqd
-	if [ -e /var/run/init.d/awgtpman_${system} ]; then
-		sudo /var/run/init.d/awgtpman_${system} start
-	else
-		(cd /opt/rtcds/$site/${lower_ifo}/target/gds && ./awgtpman_startup/awgtpman_${system}.cmd)
-	fi
-fi
-touch /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
-chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
-
-EOF
-
-fi
-
-echo /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp
-/bin/touch /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp
-/bin/chmod +x /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp
-
-cat > /opt/rtcds/$site/${lower_ifo}/scripts/start${system}_usp << EOF
-#!/bin/bash
-#
-
-if [ \`hostname\` != '${hostname}' ]; then
-	echo Cannot run \`basename \$0\` on \`hostname\` computer
-	exit 1
-fi
-
-/opt/rtcds/$site/${lower_ifo}/scripts/kill${system}
-sleep 5
-
-(cd /opt/rtcds/$site/${lower_ifo}/target/${system}/${system}epics && ./startup${ifo})
-sleep 5
-/opt/rtcds/$site/${lower_ifo}/target/${system}/scripts/startup${ifo}usp
-sleep 10
-if [ -e /var/run/init.d/awgtpman_${system} ]; then
-	sudo /var/run/init.d/awgtpman_${system} start
-else
-	(cd /opt/rtcds/$site/${lower_ifo}/target/gds && ./awgtpman_startup/awgtpman_${system}.cmd)
-fi
-
-touch /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
-chmod 777 /opt/rtcds/$site/${lower_ifo}/target/${system}/logs/reboot.log
-
-EOF
-
-
-
-
-gds_node=`grep rmid build/${system}epics/${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`
+gds_node=`grep rmid build/${system}epics/${system}.par | head -1 | sed 's/[^0-9]*\([0-9]*\)/\1/'`
 if [ x$gds_node != "x" ]; then
-echo Performing install-daq
-datarate=`grep datarate build/${system}epics/${system}.par | head -1| sed 's/[^0-9]*\([0-9]*\)/\1/'`
-targethost=`grep TARGET_HOST_NAME src/include/${system}.h | head -1 | awk '{print $3}'`
-if test ${datarate} -lt 16384; then
+
+    echo "Installing GDS components..."
+
+    datarate=`grep datarate build/${system}epics/${system}.par | head -1 | sed 's/[^0-9]*\([0-9]*\)/\1/'`
+    targethost=`grep TARGET_HOST_NAME src/include/${system}.h | head -1 | awk '{print $3}'`
+    if test ${datarate} -lt 16384; then
 	datarate_mult=`expr ${datarate} / 2048`
-else
+    else
 	datarate_mult=`expr ${datarate} / 16384 `
-fi
-/bin/mkdir -p  /opt/rtcds/${site}/${lower_ifo}/target/gds/ 
-edcu_name=`echo ${upper_system} | sed s/^${ifo}//g`
-edcu_name=${ifo}EDCU_${edcu_name}
-/bin/mkdir -p  /opt/rtcds/${site}/${lower_ifo}/target/gds/param/ 
-/bin/mkdir -p  /opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive 
-echo Updating testpoint.par config file 
-echo /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par 
-if test -e /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par; then
-	/bin/mv -f /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/testpoint_${cur_date}.par || exit 1;
-	testpoint_par_infname=/opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/testpoint_${cur_date}.par
-else
+    fi
+    mkdir -p  $RTCDS/target/gds/
+    edcu_name=`echo ${upper_system} | sed s/^${ifo}//g`
+    edcu_name=${ifo}EDCU_${edcu_name}
+    mkdir -p  $RTCDS/target/gds/param/
+    mkdir -p  $RTCDS/target/gds/param/archive
+
+    ##########
+
+    echo "Updating testpoint config file..."
+
+    if test -e $RTCDS/target/gds/param/testpoint.par; then
+	mv -f $RTCDS/target/gds/param/testpoint.par $RTCDS/target/gds/param/archive/testpoint_${cur_date}.par || exit 1
+	testpoint_par_infname=$RTCDS/target/gds/param/archive/testpoint_${cur_date}.par
+    else
 	testpoint_par_infname=/dev/null
-fi
-echo $srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost}
-($srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost} > /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par || (cp /opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/testpoint_${cur_date}.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/testpoint.par && exit 1)) || exit 1
-echo Installing GDS node ${gds_node} configuration file 
-echo /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par 
-if test -e /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par; then
-	/bin/mv -f /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/tpchn_${system}_${cur_date}.par || exit 1
-fi
-/bin/cp -p build/${system}epics/${system}.par /opt/rtcds/${site}/${lower_ifo}/target/gds/param/tpchn_${system}.par 
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/${system}/param
-/bin/cp -p build/${system}epics/${system}.par /opt/rtcds/${site}/${lower_ifo}/target/${system}/param/tpchn_${system}.par
-/bin/mkdir -p  /opt/rtcds/${site}/${lower_ifo}/chans/adc 
-/bin/cp -p build/${system}epics/config/adcListSorted.txt  /opt/rtcds/${site}/${lower_ifo}/chans/adc/${system}_adclist.txt
-if test ${datarate_mult} -gt 1
-then 
-  datarate_mult_flag=-${datarate_mult}
-else 
-  datarate_mult_flag=
-fi
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/gds/awgtpman_startup
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/target/gds/awgtpman_logs
-echo '#!/bin/bash' > /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd 
-echo 'if [ -e /var/log/init.d/awgtpman_'${system}' ]' > /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd 
-echo 'then' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd 
-echo ' sudo  /var/log/init.d/awgtpman_'${system}' stop' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd ;\
-echo 'else' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-echo ' sudo /opt/rtcds/'${site}'/'${lower_ifo}'/target/gds/bin/awgtpman -s '${system}' '${datarate_mult_flag}' -l /opt/rtcds/'${site}'/'${lower_ifo}'/target/gds/awgtpman_logs/'${system}'.log&' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-echo 'fi' >> /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd 
-/bin/chmod +x /opt/rtcds/${site}/${lower_ifo}/target/gds/awgtpman_startup/awgtpman_${system}.cmd
-echo Installing auto-generated DAQ configuration file
-echo /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini 
-/bin/mkdir -p  /opt/rtcds/${site}/${lower_ifo}/chans/daq 
-/bin/mkdir -p  /opt/rtcds/${site}/${lower_ifo}/chans/daq/archive
-if test -e /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini
-then 
-  /bin/mv -f /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/archive/${upper_system}_${cur_date}.ini || exit 2 
-#
-# Do not update anything now, file is generated from the model
-#echo $srcdir/src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/${site}/${lower_ifo}/chans/daq/archive/${upper_system}_${cur_date}.ini -old=/opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/tpchn_${system}.par -new=build/${system}epics/${system}.par -daq=build/${system}epics/${system}.ini 
-# $srcdir/src/epics/util/updateDaqConfig1.pl -daq_old=/opt/rtcds/${site}/${lower_ifo}/chans/daq/archive/${upper_system}_${cur_date}.ini -old=/opt/rtcds/${site}/${lower_ifo}/target/gds/param/archive/tpchn_${system}_${cur_date}.par -new=build/${system}epics/${system}.par -daq=build/${system}epics/${system}.ini > /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini 
-#else 
-#  /bin/cp -p build/${system}epics/${system}.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini 
-fi
-/bin/cp -p build/${system}epics/${system}.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini 
+    fi
+    ($srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost} > $RTCDS/target/gds/param/testpoint.par || (cp $RTCDS/target/gds/param/archive/testpoint_${cur_date}.par $RTCDS/target/gds/param/testpoint.par && exit 1)) || exit 1
 
-/bin/cp /opt/rtcds/${site}/${lower_ifo}/chans/daq/${upper_system}.ini /opt/rtcds/${site}/${lower_ifo}/target/${system}/param/${upper_system}.ini
-#echo Installing EDCU ini file
-#if test -e /opt/rtcds/${site}/${lower_ifo}/chans/daq/${edcu_name}.ini
-#then
-#  /bin/mv -f /opt/rtcds/${site}/${lower_ifo}/chans/daq/${edcu_name}.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/archive/${edcu_name}_${cur_date}.ini || exit 2 
-#fi
-#/bin/cp -p target/${system}epics/db/${ifo}/auto.ini /opt/rtcds/${site}/${lower_ifo}/chans/daq/${edcu_name}.ini
-#echo /opt/rtcds/${site}/${lower_ifo}/chans/daq/${edcu_name}.ini
+    ##########
+
+    echo "Installing GDS node config file..."
+
+    if test -e $RTCDS/target/gds/param/tpchn_${system}.par; then
+	mv -f $RTCDS/target/gds/param/tpchn_${system}.par $RTCDS/target/gds/param/archive/tpchn_${system}_${cur_date}.par || exit 1
+    fi
+    cp -p build/${system}epics/${system}.par $RTCDS/target/gds/param/tpchn_${system}.par
+    mkdir -p $TARGET/param
+    cp -p build/${system}epics/${system}.par $TARGET/param/tpchn_${system}.par
+    mkdir -p  $RTCDS/chans/adc
+    cp -p build/${system}epics/config/adcListSorted.txt  $RTCDS/chans/adc/${system}_adclist.txt
+    if test ${datarate_mult} -gt 1; then
+        datarate_mult_flag=-${datarate_mult}
+    else
+        datarate_mult_flag=
+    fi
+
+    echo "Installing auto-generated DAQ config file..."
+
+    mkdir -p  $RTCDS/chans/daq
+    mkdir -p  $RTCDS/chans/daq/archive
+    if test -e $RTCDS/chans/daq/${upper_system}.ini; then
+        mv -f $RTCDS/chans/daq/${upper_system}.ini $RTCDS/chans/daq/archive/${upper_system}_${cur_date}.ini || exit 2
+        #
+        # Do not update anything now, file is generated from the model
+        #echo $srcdir/src/epics/util/updateDaqConfig1.pl -daq_old=$RTCDS/chans/daq/archive/${upper_system}_${cur_date}.ini -old=$RTCDS/target/gds/param/archive/tpchn_${system}.par -new=build/${system}epics/${system}.par -daq=build/${system}epics/${system}.ini 
+        # $srcdir/src/epics/util/updateDaqConfig1.pl -daq_old=$RTCDS/chans/daq/archive/${upper_system}_${cur_date}.ini -old=$RTCDS/target/gds/param/archive/tpchn_${system}_${cur_date}.par -new=build/${system}epics/${system}.par -daq=build/${system}epics/${system}.ini > $RTCDS/chans/daq/${upper_system}.ini 
+        #else
+        #  cp -p build/${system}epics/${system}.ini $RTCDS/chans/daq/${upper_system}.ini
+    fi
+    cp -p build/${system}epics/${system}.ini $RTCDS/chans/daq/${upper_system}.ini
+
+    cp $RTCDS/chans/daq/${upper_system}.ini $TARGET/param/${upper_system}.ini
+    #echo Installing EDCU ini file
+    #if test -e $RTCDS/chans/daq/${edcu_name}.ini
+    #then
+    #  mv -f $RTCDS/chans/daq/${edcu_name}.ini $RTCDS/chans/daq/archive/${edcu_name}_${cur_date}.ini || exit 2
+    #fi
+    #cp -p target/${system}epics/db/${ifo}/auto.ini $RTCDS/chans/daq/${edcu_name}.ini
+    #echo $RTCDS/chans/daq/${edcu_name}.ini
 fi
 
-echo Installing Epics MEDM screens
-
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/medm/archive
-if test -e /opt/rtcds/$site/${lower_ifo}/medm/${system}; then
-	/bin/cp -a /opt/rtcds/$site/${lower_ifo}/medm/${system} /opt/rtcds/$site/${lower_ifo}/medm/archive/${system}_${cur_date} || exit 1
-fi
-/bin/mkdir -p /opt/rtcds/$site/${lower_ifo}/medm/${system}
-(cd build/${system}epics/medm; find . -name "*.adl" | xargs cp --parents -r -t /opt/rtcds/$site/${lower_ifo}/medm/${system};)
-(cd build/${system}epics/medm; find . -name "*.ui" | xargs cp --parents -r -t /opt/rtcds/$site/${lower_ifo}/medm/${system};)
+##########
 
 if [ -e $srcdir/src/epics/util/post_build_script.py ]; then
-	echo Running post-build script
-	$srcdir/src/epics/util/post_build_script.py -q ${system} 
+    echo "Running post-build script..."
+    $srcdir/src/epics/util/post_build_script.py -q ${system}
 fi
