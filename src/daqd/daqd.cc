@@ -2038,16 +2038,20 @@ main( int argc, char* argv[] )
         }
     }
 
-    int set_nice = nice( -20 );
-    if ( set_nice != 0 )
+    const int nice_val = -20;
+    errno = 0;
+    int set_nice = nice( nice_val );
+    if ( errno != 0 )
     {
         system_log( 1,
-                    "Unable to set to nice = -20 -error %s\n",
-                    strerror( set_nice ) );
+                    "Unable to set to nice %d -error %s\n",
+                    nice_val,
+                    strerror( errno ) );
     }
     else
     {
-        system_log( 1, "Set daqd to nice = -20\n" );
+        system_log(
+            1, "Set daqd to nice %d returned %d\n", nice_val, set_nice );
     }
     // Switch effective to real user ID -- can always switch back to saved
     // effective seteuid (getuid ());
