@@ -22,7 +22,6 @@ typedef struct
     unsigned int run; ///< Run number
     time_t gps, gps_n; ///< GPS system timestamp is seconds and nanosec residual
     unsigned long seq_num; ///< Set to `puts' value when created
-    int           leap_seconds; ///< TAI-UTC for this data block
     int           altzone; ///< Local seasonal time minus UTC (negative for USA)
 #ifndef NO_BROADCAST
     int gds_signal_refresh;

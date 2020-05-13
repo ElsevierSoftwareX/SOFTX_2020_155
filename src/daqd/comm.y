@@ -347,27 +347,7 @@ CommandLine: /* Nothing */
 		daqd.do_fsync = $4;
 	}
 	| SET GPS_LEAPS '=' INTNUM OptionalIntnum OptionalIntnum OptionalIntnum OptionalIntnum OptionalIntnum OptionalIntnum OptionalIntnum OptionalIntnum OptionalIntnum OptionalIntnum OptionalIntnum OptionalIntnum OptionalIntnum OptionalIntnum OptionalIntnum {
-		// Assign all leapseconds; 0 is assigned if unspecified
-		daqd.gps_leaps[0] = $4;
-		daqd.gps_leaps[1] = $5;
-		daqd.gps_leaps[2] = $6;
-		daqd.gps_leaps[3] = $7;
-		daqd.gps_leaps[4] = $8;
-		daqd.gps_leaps[5] = $9;
-		daqd.gps_leaps[6] = $10;
-		daqd.gps_leaps[7] = $11;
-		daqd.gps_leaps[8] = $12;
-		daqd.gps_leaps[9] = $13;
-		daqd.gps_leaps[10] = $14;
-		daqd.gps_leaps[11] = $15;
-		daqd.gps_leaps[12] = $16;
-		daqd.gps_leaps[13] = $17;
-		daqd.gps_leaps[14] = $18;
-		daqd.gps_leaps[15] = $19;
-
-		for (daqd.nleaps = 0;
-		     daqd.nleaps < 16 && daqd.gps_leaps[daqd.nleaps];
-		     daqd.nleaps++);
+		// This is a no-op now.  This gps leapseconds come from the ldas tools code automatically.
 	}
 
 	| SET PARALLEL_PRODUCERS '=' INTNUM {
