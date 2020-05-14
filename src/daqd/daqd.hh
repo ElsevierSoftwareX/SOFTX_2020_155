@@ -269,10 +269,10 @@ public:
           frames_per_file( 1 ), blocks_per_frame( 1 ), cksum_file( (char*)"" ),
           zero_bad_data( 1 ), master_config( (char*)"" ),
           broadcast_config( (char*)"" ), crc_debug( 0 ), cit_40m( 0 ),
-          nleaps( 0 ), do_fsync( 0 ), do_directio( 0 ),
-          controller_dcu( DCU_ID_SUS_1 ), avoid_reconnect( 0 ), tp_allow( -1 ),
-          no_myrinet( 0 ), allow_tpman_connect_failure( 0 ),
-          no_compression( 0 ), symm_gps_offset( 0 ), cycle_delay( 4 ),
+          do_fsync( 0 ), do_directio( 0 ), controller_dcu( DCU_ID_SUS_1 ),
+          avoid_reconnect( 0 ), tp_allow( -1 ), no_myrinet( 0 ),
+          allow_tpman_connect_failure( 0 ), no_compression( 0 ),
+          symm_gps_offset( 0 ), cycle_delay( 4 ),
           old_raw_minute_trend_dirs( "" ),
           _checksum_file_transform_initted( false )
 
@@ -699,20 +699,6 @@ public:
 
     /// 40M flag
     int cit_40m;
-
-    /// leapseconds table
-    unsigned int gps_leaps[ 16 ]; ///< gps leap seconds
-    int          nleaps; ///< leapseconds table size
-
-    inline unsigned int
-    gps_leap_seconds( unsigned int gps_time )
-    {
-        unsigned int leaps = LEAP_SECONDS;
-        for ( int i = 0; i < nleaps; i++ )
-            if ( gps_time >= gps_leaps[ i ] )
-                leaps++;
-        return leaps;
-    }
 
     /// Whether to do fsync() calls or not when saving raw minute trend files
     int do_fsync;

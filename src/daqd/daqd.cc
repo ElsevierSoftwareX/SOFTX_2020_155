@@ -1168,7 +1168,7 @@ daqd_c::framer( int science )
         time_t        frame_start;
         unsigned int  run;
         time_t        gps, gps_n;
-        int           altzone, leap_seconds;
+        int           altzone;
         struct tm     tms;
 
         time_t tdata = time( 0 );
@@ -1215,7 +1215,6 @@ daqd_c::framer( int science )
                             gps = prop->prop.gps;
                             gps_n = prop->prop.gps_n;
                             altzone = prop->prop.altzone;
-                            leap_seconds = prop->prop.leap_seconds;
 
                             //		    frame_start = prop -> timestamp;
                             frame_start = gps;
@@ -1350,7 +1349,6 @@ daqd_c::framer( int science )
         */
 
         cur_buf->frame->SetGTime( FrameCPP::Version::GPSTime( gps, gps_n ) );
-        // frame -> SetULeapS(leap_seconds);
 
         DEBUG( 1,
                cerr << "adding frame @ " << gps << " to "
