@@ -14,8 +14,8 @@ if ! test -e target/${system}epics/${system}epics; then
     echo "Please make $system first." >&2
     exit 1
 fi
-site=`grep site= target/${system}epics/${system}epics*.cmd | sed 's/.*site=\([a-z]*\).*/\1/g'`
-ifo=`grep ifo= target/${system}epics/${system}epics*.cmd | head -1 | sed 's/.*ifo=\([a-zA-Z0-9]*\).*/\1/g'`
+site=`grep -i -E 'site(=|\s)' target/${system}epics/${system}epics*.cmd | head -1 | sed 's/.*site\(=\|[    ]\)\([a-z]*\).*/\2/ig'`
+ifo=`grep -i -E 'ifo(=|\s)' target/${system}epics/${system}epics*.cmd | head -1 | sed 's/.*ifo\(=\|[ ]\)\([a-zA-Z0-9]*\).*/\2/ig'`
 if [ -z "$site" ] || [ -z "$ifo" ] ; then
     echo "Could not determine site or ifo." >&2
     exit 1
