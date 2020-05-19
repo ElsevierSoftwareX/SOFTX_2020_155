@@ -8,11 +8,7 @@ import os
 import argparse
 import threading
 
-# get CDS EPICS environment
-sys.path.append('/opt/cdscfg')
 import subprocess
-import stdenv as cds
-cds.INIT_ENV()
 
 # now get EPICS python
 from pcaspy import SimpleServer, Driver
