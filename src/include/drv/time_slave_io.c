@@ -25,8 +25,9 @@ inline unsigned int
 sync2master( volatile TIMING_SIGNAL* timePtr )
 {
     int loop = 0;
-    int cycle = 0;
+    int cycle = 65535;
 
+printk("sync to master %d\n",timePtr->gps_time);
     do
     {
         udelay( 5 );
@@ -103,7 +104,7 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
     int           iocycle = 0;
 
     // Read ADC data
-#ifdef TIMIE_SLAVE
+#ifdef TIME_SLAVE
     missedCycle = waitPcieTimingSignal( pcieTimer, cycleNum );
     timeSec = pcieTimer->gps_time;
 #else
