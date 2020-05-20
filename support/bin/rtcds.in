@@ -22,7 +22,8 @@ IFO=${IFO^^*}
 ifo=${IFO,,*}
 
 RCG_SRC=${RCG_SRC:-/usr/share/advligorts/src}
-RCG_BUILDD=${RCG_BUILDD:-/var/cache/advligorts/rcg-$RTS_VERSION}
+RCG_BUILD_ROOT=${RCG_BUILD_ROOT:-/var/cache/advligorts}
+RCG_BUILDD=${RCG_BUILDD:-$RCG_BUILT_ROOT/rcg-$RTS_VERSION}
 # FIXME: the RCG hard-codes /opt/rtcds as the root
 RCG_TARGET=/opt/rtcds/${site}/${ifo}
 
@@ -35,7 +36,7 @@ CDS_IFO_SRC=${CDS_IFO_SRC:-$CDS_SRC}
 RCG_LIB_PATH=$RCG_LIB_PATH:${RCG_SRC}/src/epics/simLink/:${RCG_SRC}/src/epics/simLink/lib
 
 USER_VARS=(SITE IFO RCG_LIB_PATH)
-LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILDD RCG_TARGET)
+LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILD_ROOT RCG_BUILDD RCG_TARGET)
 EXPORT_VARS=(${USER_VARS[@]} site ifo CDS_SRC CDS_IFO_SRC)
 
 # set the umask to ensure that all files and directories are made
