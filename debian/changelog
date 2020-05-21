@@ -1,3 +1,10 @@
+advligorts (4.0.0~dev10-1) unstable; urgency=medium
+
+  * New dev release
+  * Include cdsrfm source
+
+ -- Jameson Graef Rollins <jameson.rollins@ligo.org>  Thu, 21 May 2020 14:01:27 -0700
+
 advligorts (4.0.0~dev9-1) unstable; urgency=medium
 
   * New dev release
