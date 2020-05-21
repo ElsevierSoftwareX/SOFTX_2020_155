@@ -12,6 +12,7 @@ EXTRA_CFLAGS += -DOS_IS_LINUX=1 -D_DIS_KERNEL_=1 -I$(DISDIR)/src/IRM_GX/drv/src 
 obj-m += cdsrfmswitch.o
 
 all:
+	cat /opt/DIS/lib/modules/$(shell uname -r)/*.symvers > Module.symvers
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 
 clean:

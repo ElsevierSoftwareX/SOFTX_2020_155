@@ -1168,7 +1168,7 @@ daqd_c::framer( int science )
         time_t        frame_start;
         unsigned int  run;
         time_t        gps, gps_n;
-        int           altzone, leap_seconds;
+        int           altzone;
         struct tm     tms;
 
         time_t tdata = time( 0 );
@@ -1215,7 +1215,6 @@ daqd_c::framer( int science )
                             gps = prop->prop.gps;
                             gps_n = prop->prop.gps_n;
                             altzone = prop->prop.altzone;
-                            leap_seconds = prop->prop.leap_seconds;
 
                             //		    frame_start = prop -> timestamp;
                             frame_start = gps;
@@ -1350,7 +1349,6 @@ daqd_c::framer( int science )
         */
 
         cur_buf->frame->SetGTime( FrameCPP::Version::GPSTime( gps, gps_n ) );
-        // frame -> SetULeapS(leap_seconds);
 
         DEBUG( 1,
                cerr << "adding frame @ " << gps << " to "
@@ -2038,16 +2036,20 @@ main( int argc, char* argv[] )
         }
     }
 
-    int set_nice = nice( -20 );
-    if ( set_nice != 0 )
+    const int nice_val = -20;
+    errno = 0;
+    int set_nice = nice( nice_val );
+    if ( errno != 0 )
     {
         system_log( 1,
-                    "Unable to set to nice = -20 -error %s\n",
-                    strerror( set_nice ) );
+                    "Unable to set to nice %d -error %s\n",
+                    nice_val,
+                    strerror( errno ) );
     }
     else
     {
-        system_log( 1, "Set daqd to nice = -20\n" );
+        system_log(
+            1, "Set daqd to nice %d returned %d\n", nice_val, set_nice );
     }
     // Switch effective to real user ID -- can always switch back to saved
     // effective seteuid (getuid ());

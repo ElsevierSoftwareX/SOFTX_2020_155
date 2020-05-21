@@ -88,6 +88,8 @@ namespace check_gap
         auto first = true;
         auto prev_sample_time = std::chrono::steady_clock::now( );
         int  cycles = 0;
+        int  prev_dcu_count = 0;
+        int  dcu_count = 0;
 
         while ( true )
         {
@@ -95,6 +97,12 @@ namespace check_gap
             cycle_sample_t new_sample =
                 wait_for_time_change( multi_header->header );
             auto sample_time = std::chrono::steady_clock::now( );
+
+            auto cycle_size = multi_header->header.cycleDataSize;
+            auto offset = multi_header->header.curCycle * cycle_size;
+            auto header = reinterpret_cast< volatile daq_dc_data_t* >(
+                &multi_header->dataBlock[ offset ] );
+            dcu_count = header->header.dcuTotalModels;
             if ( !first )
             {
                 auto duration =
@@ -106,8 +114,14 @@ namespace check_gap
                     std::cout << "Bad duration, cycle took "
                               << duration.count( ) << "ms\n";
                 }
+                if ( dcu_count != prev_dcu_count )
+                {
+                    std::cout << "Bad dcu count, prev = " << prev_dcu_count
+                              << " cur = " << dcu_count << "\n";
+                }
             }
             prev_sample_time = sample_time;
+            prev_dcu_count = dcu_count;
             first = false;
 
             if ( new_sample.cycle !=
@@ -153,7 +167,7 @@ namespace check_gap
                 std::cout << "Sample " << new_sample.gps << ":"
                           << new_sample.gps_cycle << " - deltat = "
                           << ( new_sample.time_ms - cur_sample.time_ms )
-                          << std::endl;
+                          << " dcu count = " << dcu_count << std::endl;
                 ++cycles;
             }
             if ( error )

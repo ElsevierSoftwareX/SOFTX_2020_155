@@ -9,6 +9,7 @@ mapPciModules( CDS_HARDWARE* pCds )
     int ii, jj, kk; /// @param ii,jj,kk default loop counters
     int cards; /// @param cards Number of PCIe cards found on bus
     int adcCnt = 0; /// @param adcCnt Number of ADC cards found by slave model.
+    int fastadcCnt = 0; /// @param adcCnt Number of ADC cards found by slave model.
     int dacCnt = 0; /// @param dacCnt Number of 16bit DAC cards found by slave
                     /// model.
     int dac18Cnt = 0; /// @param dac18Cnt Number of 18bit DAC cards found by
@@ -49,7 +50,7 @@ mapPciModules( CDS_HARDWARE* pCds )
                 break;
             case GSC_18AI32SSC1M:
                 if ( ( pCds->cards_used[ jj ].type == GSC_18AI32SSC1M ) &&
-                     ( pCds->cards_used[ jj ].instance == adcCnt ) )
+                     ( pCds->cards_used[ jj ].instance == fastadcCnt ) )
                 {
                     kk = pCds->adcCount;
                     pCds->adcType[ kk ] = GSC_18AI32SSC1M;
@@ -179,7 +180,7 @@ mapPciModules( CDS_HARDWARE* pCds )
         if ( ioMemData->model[ ii ] == GSC_16AI64SSA )
             adcCnt++;
         if ( ioMemData->model[ ii ] == GSC_18AI32SSC1M )
-            adcCnt++;
+            fastadcCnt++;
         if ( ioMemData->model[ ii ] == GSC_16AO16 )
             dacCnt++;
         if ( ioMemData->model[ ii ] == GSC_18AO8 )

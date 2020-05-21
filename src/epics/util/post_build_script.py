@@ -47,34 +47,35 @@ simulink_reference=["dsparch4","simulink"]
 print("")
 #Grab some basic env information to be able to set default paths
 try:
-  site = os.environ['site']
+  site = os.environ['SITE']
 except KeyError:
-  sys.stderr.write("ERROR: No environment variable 'site' defined\n")
+  sys.stderr.write("ERROR: environment variable SITE not defined\n")
   error = True
 
 try:
   ifo = os.environ['IFO']
 except KeyError:
-  sys.stderr.write("ERROR: No environment variable IFO defined\n")
+  sys.stderr.write("ERROR: environment variable IFO not defined\n")
   error = True
 
 if error:
   sys.stderr.write("Exiting due to ERRORs\n")
   sys.exit(1)
 
+rtcds_path = os.path.join('/opt/rtcds', site.lower(), ifo.lower())
+
 #Default Paths
 #FIX ME: JCB
-rcg_lib_path = os.path.join('/opt/rtcds',site,ifo.lower(),'core/release/src/epics/simLink/lib/') + ":" + os.path.join('/opt/rtcds',site,ifo.lower(),'core/release/src/epics/simLink/')
+rcg_lib_path = os.path.join(rtcds_path, 'core/release/src/epics/simLink/lib/') + ":" + os.path.join(rtcds_path, 'core/release/src/epics/simLink/')
 
-medm_target = os.path.join('/opt/rtcds',site,ifo.lower(),'medm',model_name)
+medm_target = os.path.join(rtcds_path, 'medm', model_name)
 
-cds_medm_path = '/'.join(['/opt/rtcds',site,ifo.lower(),'medm/templates/'])
-cds_scripts_path = '/'.join(['/opt/rtcds',site,ifo.lower(),'/scripts/post_build/'])
+cds_medm_path = os.path.join(rtcds_path, 'medm', 'templates')
+cds_scripts_path = os.path.join(rtcds_path, 'scripts', 'post_build')
 
-tmp = model_name + 'epics/burt'
-epics_sdf_file = '/'.join(['/opt/rtcds',site,ifo.lower(),'target',model_name,tmp,'safe.snap'])
-tmp = model_name + 'epics'
-epics_burt_file = '/'.join(['/opt/rtcds',site,ifo.lower(),'target',model_name,tmp,'autoBurt.req'])
+epics_name = model_name + 'epics'
+epics_sdf_file = os.path.join(rtcds_path, 'target', model_name, epics_name, 'burt', 'safe.snap')
+epics_burt_file = os.path.join(rtcds_path, 'target', model_name, epics_name, 'autoBurt.req')
 
 #Try to update default paths with actual environment variables
 

@@ -24,7 +24,7 @@ current_time_fe( void )
     } else {
         t.tv_sec += gpsoffset;
     }
-    t.tv_sec -= 315964819;
+    // t.tv_sec -= 315964819;
     return t.tv_sec;
 }
 

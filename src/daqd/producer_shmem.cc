@@ -664,7 +664,6 @@ producer::frame_writer( )
 
         cur_prop->gps_n = 1000000000 / 16 * ( i % 16 );
         // printf("before put %d %d %d\n", prop.gps, prop.gps_n, frac);
-        cur_prop->leap_seconds = daqd.gps_leap_seconds( gps );
 
         // std::cout << "about to call put16th_dpscattered with " << vmic_pv_len
         // << " entries. prop.gps = " << prop.gps << " prop.gps_n = " <<

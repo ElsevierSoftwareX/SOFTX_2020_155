@@ -150,7 +150,6 @@ $dacKillModCnt[0] = undef;
 $dkTimesCalled = 0;
 $remoteGpsPart = 0;
 $remoteGPS = 0;
-$daq2dc = 0;
 $requireIOcnt = 0;
 #Following provide for non standard IOP clock rates
 $adcclock = 64;
@@ -2102,19 +2101,12 @@ system ("sort $adcFile -k 1,1n -k 2,2n > $adcFileSorted");
 	("CDS::IPCx::createIpcMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$ipcxCnt);
 # ******************************************************************************************
 #//		- GENERATE GDS_TP SCREEN
-if($daq2dc == 0) {
 	require "lib/medmGenGdsTp.pm";
 	my $medmTarget = "/opt/rtcds/$location/$lifo/medm";
 	my $scriptTarget = "/opt/rtcds/$location/$lifo/chans/tmp/$sysname\.diff";
 	my $scriptArgs = "-s $location -i $lifo -m $skeleton -d $dcuId &"; 
-	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,$virtualiop,@dacType);
-}else {
-	require "lib/medmGenGdsTp2dc.pm";
-	my $medmTarget = "/opt/rtcds/$location/$lifo/medm";
-	my $scriptTarget = "/opt/rtcds/$location/$lifo/chans/tmp/$sysname\.diff";
-	my $scriptArgs = "-s $location -i $lifo -m $skeleton -d $dcuId &"; 
-	("CDS::medmGenGdsTp2dc::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dacType);
-}
+    my $ioptimediag = $virtualiop + $no_sync;
+	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,$ioptimediag,\@dacType,\@adcType);
 	require "lib/medmGenStatus.pm";
 	("CDS::medmGenStatus::createStatusMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs);
 
@@ -2450,9 +2442,6 @@ print OUTM "EXTRA_CFLAGS += -DFIR_FILTERS\n";
 }
 print OUTM "EXTRA_CFLAGS += -g\n";
 
-if ($daq2dc) {
-  print OUTM "EXTRA_CFLAGS += -DDUAL_DAQ_DC\n";
-}
 if ($remoteGPS) {
   print OUTM "EXTRA_CFLAGS += -DREMOTE_GPS\n";
 }
@@ -2642,9 +2631,6 @@ print OUTM "CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
 
 print OUTM "EXTRA_CFLAGS += -g\n";
 
-if ($daq2dc) {
-  print OUTM "CFLAGS += -DDUAL_DAQ_DC\n";
-}
 if ($remoteGPS) {
   print OUTM "CFLAGS += -DREMOTE_GPS\n";
 }

@@ -43,6 +43,9 @@
 #define OPSWITCH_OUTPUT_ENABLE 0x4000000
 #define OPSWITCH_HOLD_ENABLE 0x8000000
 
+#define OPSWITCH_LIMITER_RAMPING 0x20000000
+#define OPSWITCH_GAIN_RAMPING    0x10000000
+
 /// Quick look up table for power of 2 calcs
 const UINT32 pow2_in[ 10 ] = { 0x10,   0x40,    0x100,   0x400,    0x1000,
                                0x4000, 0x10000, 0x40000, 0x100000, 0x400000 };
@@ -910,6 +913,7 @@ filterModuleD2( FILT_MOD* pFilt, /* Filter module data  */
     double     fmInput;
     int        id = 0; /* System number (HEPI) */
     extern int cycleNum;
+    unsigned int swstat = 0;
 
     /* Do the shift to match the bits in the the opSwitchE variable so I can do
      * "==" comparisons */
@@ -995,7 +999,7 @@ filterModuleD2( FILT_MOD* pFilt, /* Filter module data  */
                            pFilt->inputs[ modNum ].offset,
                            pFilt->inputs[ modNum ].gain_ramp_time,
                            rate );
-            pFilt->inputs[ modNum ].opSwitchP |= 0x20000000;
+            pFilt->inputs[ modNum ].opSwitchP |= OPSWITCH_LIMITER_RAMPING;
         }
     }
     else
@@ -1006,12 +1010,12 @@ filterModuleD2( FILT_MOD* pFilt, /* Filter module data  */
                            0.0,
                            pFilt->inputs[ modNum ].gain_ramp_time,
                            rate );
-            pFilt->inputs[ modNum ].opSwitchP |= 0x20000000;
+            pFilt->inputs[ modNum ].opSwitchP |= OPSWITCH_LIMITER_RAMPING;
         }
     }
     if ( offset_ramp[ modNum ][ id ].isRamping == 0 )
     {
-        pFilt->inputs[ modNum ].opSwitchP &= ~0x20000000;
+        pFilt->inputs[ modNum ].opSwitchP &= ~OPSWITCH_LIMITER_RAMPING;
     }
     fmInput += RampParamUpdate( &offset_ramp[ modNum ][ id ] );
 
@@ -1224,11 +1228,11 @@ filterModuleD2( FILT_MOD* pFilt, /* Filter module data  */
                            pFilt->inputs[ modNum ].outgain,
                            pFilt->inputs[ modNum ].gain_ramp_time,
                            rate );
-            pFilt->inputs[ modNum ].opSwitchP |= 0x10000000;
+            pFilt->inputs[ modNum ].opSwitchP |= OPSWITCH_GAIN_RAMPING;
         }
         if ( gain_ramp[ modNum ][ id ].isRamping == 0 )
         {
-            pFilt->inputs[ modNum ].opSwitchP &= ~0x10000000;
+            pFilt->inputs[ modNum ].opSwitchP &= ~OPSWITCH_GAIN_RAMPING;
         }
 
         output = fmInput * RampParamUpdate( &gain_ramp[ modNum ][ id ] );
@@ -1247,7 +1251,20 @@ filterModuleD2( FILT_MOD* pFilt, /* Filter module data  */
 
         /* Set Output Test Point */
         pFilt->data[ modNum ].testpoint = output;
-        pFilt->data[ modNum ].swStatus = filtCtrlBitConvert( opSwitchE );
+
+        // Send swstat info to EPICS
+        swstat = filtCtrlBitConvert( opSwitchE );
+        // Add Limit is ramping bit
+        if(pFilt->inputs[ modNum ].opSwitchP & OPSWITCH_LIMITER_RAMPING)
+            swstat |=  OPSWITCH_LIMITER_RAMPING ;
+        else
+            swstat &= ~OPSWITCH_LIMITER_RAMPING;
+        // Add Gain is ramping bit
+        if(pFilt->inputs[ modNum ].opSwitchP & OPSWITCH_GAIN_RAMPING)
+            swstat |=  OPSWITCH_GAIN_RAMPING ;
+        else
+            swstat &= ~OPSWITCH_GAIN_RAMPING;
+        pFilt->data[ modNum ].swStatus = swstat;
 
         /* Test Output Switch and output hold on/off */
         if ( opSwitchE & OPSWITCH_HOLD_ENABLE )
