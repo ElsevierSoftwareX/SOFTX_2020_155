@@ -640,18 +640,9 @@ trender_c::minute_trend( )
     trend_block_t ttb[ num_channels ]; // minute trend local storage
     unsigned long npoints[ num_channels ]; // number of data points processed
 
-    for ( nc = 0;; )
+    for ( nc = 0; !stopping(); )
     {
         circ_buffer_block_prop_t prop;
-
-        // Request to shut us down received from consumer
-        //
-        if ( stopping() )
-        {
-            // FIXME -- synchronize with the demise of the trender
-            //	  shutdown_buffer ();
-            continue;
-        }
 
         nb = tb->get( mcnum );
         {
@@ -1438,52 +1429,11 @@ trender_c::trend( )
     circ_buffer* ltb = this->tb;
     sem_post( &trender_sem );
 
-#ifdef not_def
-    // Find out how to split the work with worker thread
-    {
-        unsigned long trend_load_size = 0;
-        // Calculate summary trender data load
-        for ( unsigned int i = 0; i < num_channels; i++ )
-            trend_load_size += channels[ i ].bytes;
-
-        system_log( 1, "Trend's work load is %d bytes", trend_load_size );
-        unsigned long bsize = trend_load_size / 2;
-        unsigned long load_size = 0;
-        for ( worker_first_channel = 0; worker_first_channel < num_channels;
-              worker_first_channel++ )
-        {
-            load_size += channels[ worker_first_channel ].bytes;
-            if ( load_size > bsize )
-                break;
-        }
-        system_log( 1,
-                    "Trend Worker's first channel is #%d (%s)",
-                    worker_first_channel,
-                    channels[ worker_first_channel ].name );
-    }
-#endif
-
-    for ( ;; )
+    for ( ;!stopping(); )
     {
         circ_buffer_block_prop_t prop;
 
-#ifdef not_def
-        pthread_mutex_lock( &lock );
-        ltb = this->tb;
-        pthread_mutex_unlock( &lock );
-
-        if ( ltb ) /* There is a trend buffer, so we need to process data */
-#endif
-
         {
-            // Request to shut us down received from consumer
-            //
-            if ( stopping() )
-            {
-                // FIXME -- synchronize with the demise of the minute trender
-                shutdown_buffer( );
-                continue;
-            }
 
             nb = daqd.b1->get( cnum );
             {
@@ -1557,21 +1507,9 @@ trender_c::trend( )
 
             DEBUG( 3, cerr << "trender consumer " << prop.gps << endl );
 
-#ifdef not_def
-            for ( register int j = 0; j < num_channels; j++ )
-            {
-                ttb[ j ].min.F = ttb[ j ].max.F = j;
-                ttb[ j ].rms = j;
-            }
-#endif
             ltb->put( (char*)ttb, block_size, &prop );
         }
-#ifdef not_def
-        else /* Do stuff required for the synchronization */
-            daqd.b1->noop( cnum );
-#endif
     }
-
     return NULL;
 }
 

@@ -84,6 +84,19 @@ public:
 
     ~trender_c( )
     {
+        {
+            circ_buffer* oldb;
+
+            oldb = tb;
+            tb = 0;
+            oldb->~circ_buffer( );
+            free( (void*)oldb );
+
+            oldb = mtb;
+            mtb = 0;
+            oldb->~circ_buffer( );
+            free( (void*)oldb );
+        }
         pthread_cond_destroy( &worker_done );
         pthread_cond_destroy( &worker_notempty );
         pthread_mutex_destroy( &worker_lock );
@@ -346,22 +359,6 @@ private:
     stopping() const
     {
         return shutdown_now_.load();
-    }
-    /// kill the buffer and close the socket
-    void
-    shutdown_buffer( )
-    {
-        circ_buffer* oldb;
-
-        oldb = tb;
-        tb = 0;
-        oldb->~circ_buffer( );
-        free( (void*)oldb );
-
-        oldb = mtb;
-        mtb = 0;
-        oldb->~circ_buffer( );
-        free( (void*)oldb );
     }
 }; // class trender_c
 
