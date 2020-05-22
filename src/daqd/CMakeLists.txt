@@ -113,7 +113,7 @@ add_executable(daqd
 		daqd.cc
 		comm_impl.cc
 		checksum_crc32.cc
-		thread_launcher.cc
+        daqd_thread.cc
 		../include/daq_core.h
 		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
 		${CMAKE_CURRENT_BINARY_DIR}/comm-lex.cc
@@ -150,8 +150,8 @@ install(TARGETS daqd DESTINATION bin)
 add_executable(test_daqd_unit_tests tests/test_main.cc
 		tests/test_daqd_cmask_t.cc
 		tests/test_shmem_recv.cc
-		tests/test_thread_launcher.cc
-		thread_launcher.cc
+		tests/test_daqd_thread.cc
+        daqd_thread.cc
 		)
 target_include_directories(test_daqd_unit_tests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ../include)
 target_link_libraries(test_daqd_unit_tests PUBLIC ${CMAKE_THREAD_LIBS_INIT})
