@@ -4,6 +4,7 @@
 #include "daqd.hh"
 #include "profiler.hh"
 #include "stats/stats.hh"
+#include <atomic>
 
 /// Trend circular buffer block structure
 /// Do not put any shorts in this structure, because compiler puts holes in to
@@ -94,8 +95,7 @@ public:
     }
 
     trender_c( )
-        : shutdown_now( 0 ), shutdown_minute_now( 0 ),
-          minute_trend_buffer_blocks( 60 ), mtb( 0 ), mt_stats( ),
+        : minute_trend_buffer_blocks( 60 ), mtb( 0 ), mt_stats( ),
           mt_file_stats( ), tb( 0 ), num_channels( 0 ), num_trend_channels( 0 ),
           block_size( 0 ), ascii_output( 0 ), frames_per_file( 1 ),
           trend_buffer_blocks( 60 ), profile( (char*)"trend" ),
@@ -287,6 +287,7 @@ public:
         return ( (trender_c*)a )->raw_minute_saver( );
     };
 
+    std::atomic_bool stopping_{false};
     profile_c    profile; ///< profile on trend circular buffer.
     profile_c    profile_mt; ///< profile on minute trend circular buffer.
     unsigned int raw_minute_trend_saving_period;
@@ -334,17 +335,17 @@ public:
 
 private:
     int _configuration_number;
-    int shutdown_now;
-    int shutdown_minute_now;
+    std::atomic_bool shutdown_now_{false};
     void
     shutdown_trender( )
     {
-        shutdown_now = 1;
+        shutdown_now_ = false;
     }
-    void
-    shutdown_minute_trender( )
+
+    bool
+    stopping() const
     {
-        shutdown_minute_now = 1;
+        return shutdown_now_.load();
     }
     /// kill the buffer and close the socket
     void
@@ -361,8 +362,6 @@ private:
         mtb = 0;
         oldb->~circ_buffer( );
         free( (void*)oldb );
-
-        shutdown_now = 0;
     }
 }; // class trender_c
 

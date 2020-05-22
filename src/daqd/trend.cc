@@ -224,7 +224,7 @@ trender_c::raw_minute_saver( )
     }
 
     // signal to the producer that we are done
-    this->shutdown_minute_trender( );
+    this->shutdown_trender( );
     return NULL;
 }
 
@@ -282,7 +282,7 @@ trender_c::minute_framer( )
     catch ( ... )
     {
         system_log( 1, "Couldn't create minute trend frame" );
-        this->shutdown_minute_trender( );
+        this->shutdown_trender( );
         return NULL;
     }
 
@@ -614,7 +614,7 @@ trender_c::minute_framer( )
     }
 
     // signal to the producer that we are done
-    this->shutdown_minute_trender( );
+    this->shutdown_trender( );
     return NULL;
 }
 
@@ -646,7 +646,7 @@ trender_c::minute_trend( )
 
         // Request to shut us down received from consumer
         //
-        if ( shutdown_minute_now )
+        if ( stopping() )
         {
             // FIXME -- synchronize with the demise of the trender
             //	  shutdown_buffer ();
@@ -1478,7 +1478,7 @@ trender_c::trend( )
         {
             // Request to shut us down received from consumer
             //
-            if ( shutdown_now )
+            if ( stopping() )
             {
                 // FIXME -- synchronize with the demise of the minute trender
                 shutdown_buffer( );
