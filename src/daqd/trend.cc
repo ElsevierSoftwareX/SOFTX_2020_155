@@ -640,7 +640,7 @@ trender_c::minute_trend( )
     trend_block_t ttb[ num_channels ]; // minute trend local storage
     unsigned long npoints[ num_channels ]; // number of data points processed
 
-    for ( nc = 0; !stopping(); )
+    for ( nc = 0; !stopping( ); )
     {
         circ_buffer_block_prop_t prop;
 
@@ -1429,7 +1429,7 @@ trender_c::trend( )
     circ_buffer* ltb = this->tb;
     sem_post( &trender_sem );
 
-    for ( ;!stopping(); )
+    for ( ; !stopping( ); )
     {
         circ_buffer_block_prop_t prop;
 

@@ -300,10 +300,10 @@ public:
         return ( (trender_c*)a )->raw_minute_saver( );
     };
 
-    std::atomic_bool stopping_{false};
-    profile_c    profile; ///< profile on trend circular buffer.
-    profile_c    profile_mt; ///< profile on minute trend circular buffer.
-    unsigned int raw_minute_trend_saving_period;
+    std::atomic_bool stopping_{ false };
+    profile_c        profile; ///< profile on trend circular buffer.
+    profile_c        profile_mt; ///< profile on minute trend circular buffer.
+    unsigned int     raw_minute_trend_saving_period;
 
     /// worked thread does processing from this channel until the last one
     unsigned int worker_first_channel;
@@ -347,8 +347,8 @@ public:
     }
 
 private:
-    int _configuration_number;
-    std::atomic_bool shutdown_now_{false};
+    int              _configuration_number;
+    std::atomic_bool shutdown_now_{ false };
     void
     shutdown_trender( )
     {
@@ -356,9 +356,9 @@ private:
     }
 
     bool
-    stopping() const
+    stopping( ) const
     {
-        return shutdown_now_.load();
+        return shutdown_now_.load( );
     }
 }; // class trender_c
 
