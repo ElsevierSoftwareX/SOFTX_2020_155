@@ -54,10 +54,16 @@ launch_pthread( pthread_t&            tid,
 
 thread_handler_t::~thread_handler_t( )
 {
+    clear();
+}
+
+void
+thread_handler_t::clear()
+{
     stopper_( );
     std::lock_guard< std::mutex > l_{ m_ };
     std::for_each(
-        thread_ids_.begin( ), thread_ids_.end( ), []( pthread_t& cur_tid ) {
-            pthread_join( cur_tid, nullptr );
-        } );
+            thread_ids_.begin( ), thread_ids_.end( ), []( pthread_t& cur_tid ) {
+                pthread_join( cur_tid, nullptr );
+            } );
 }

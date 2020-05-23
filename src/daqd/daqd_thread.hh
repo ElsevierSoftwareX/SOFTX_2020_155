@@ -62,13 +62,19 @@ private:
  * @brief a RAII wrapper for pthread_attr_t, ensuring that it is always
  * destroyed.
  */
-class thread_attr_t
-{
+class thread_attr_t {
 public:
-    thread_attr_t( ) : attr_{}
-    {
-        pthread_attr_init( &attr_ );
+    thread_attr_t() : attr_{} {
+        pthread_attr_init(&attr_);
     }
+
+    template<typename T, typename... Args>
+    explicit thread_attr_t(T t,Args... args): attr_{}
+    {
+        pthread_attr_init(&attr_);
+        set(t, args...);
+    }
+
     thread_attr_t( const thread_attr_t& ) = delete;
     thread_attr_t( thread_attr_t&& ) = delete;
 
@@ -89,6 +95,13 @@ public:
     set( thread_stacksize_t stack_size )
     {
         pthread_attr_setstacksize( &attr_, stack_size.get( ) );
+    }
+    template <typename T, typename... Args>
+    void
+    set(T t, Args... args)
+    {
+        set(t);
+        set(args...);
     }
 
     pthread_attr_t&
@@ -118,7 +131,7 @@ class thread_handler_t
 public:
     using stop_funtion_t = std::function< void( void ) >;
 
-    explicit thread_handler_t( stop_funtion_t& stopper )
+    explicit thread_handler_t( stop_funtion_t stopper )
         : stopper_{ std::move( stopper ) } {};
     thread_handler_t( const thread_handler_t& ) = delete;
     thread_handler_t( thread_handler_t&& ) = delete;
@@ -141,6 +154,8 @@ public:
         }
         thread_ids_.swap( ids );
     }
+
+    void clear();
 
 private:
     std::vector< pthread_t > thread_ids_{};
