@@ -71,7 +71,7 @@ prep_buildd() {
     log "creating RCG_BUILDD $RCG_BUILDD..."
     if ! mkdir -p "$RCG_BUILDD" 2>/dev/null ; then
         log "Could not create build directory '$RCG_BUILDD'."
-        log "Please create manually (with correct permissions) to continue."
+        log "Please create manually (with correct permissions) and try again."
         exit 1
     fi
     log "configuring RCG_BUILDD $RCG_BUILDD..."
@@ -86,7 +86,7 @@ prep_target(){
     log "creating RCG_TARGET $RCG_TARGET..."
     if ! mkdir -p "$RCG_TARGET" 2>/dev/null ; then
         log "Could not create target directory '$RCG_TARGET'."
-        log "Please create manually (with correct permissions) to continue."
+        log "Please create manually (with correct permissions) and try again."
         exit 1
     fi
     mkdir -p ${RCG_TARGET}/{target,chans/tmp}
