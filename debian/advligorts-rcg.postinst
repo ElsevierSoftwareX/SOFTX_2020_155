@@ -14,9 +14,11 @@ if [ -e "$ENVFILE" ] ; then
 
    if [ "$SITE" ] && [ "$IFO" ] ; then
        TARGET=$(echo -n /opt/rtcds/${SITE}/${IFO} | tr [A-Z] [a-z])
-       mkdir -p "$TARGET"
-       chgrp advligorts "$TARGET"
-       chmod g+ws "$TARGET"
+       if ! [ -d "$TARGET" ] ; then
+           mkdir -p "$TARGET"
+           chgrp advligorts "$TARGET"
+           chmod g+ws "$TARGET"
+       fi
    fi
 
    db_get advligorts/rcg_lib_path
