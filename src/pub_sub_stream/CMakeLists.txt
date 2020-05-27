@@ -81,6 +81,13 @@ if (libcds-pubsub_FOUND)
 #            sub_plugin_rmipc)
 #    target_requires_cpp11(cds_pub_sub_asan PUBLIC)
 
+    add_executable(test_buffer_entry tests/test_buffer_entry.cc)
+    target_include_directories(test_buffer_entry PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_CURRENT_BINARY_DIR}
+            ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+    target_requires_cpp11(test_buffer_entry PUBLIC)
+
     configure_file(test_pub_sub_xmit_recv.sh.in test_pub_sub_xmit_recv.sh @ONLY)
     configure_file(test_pub_sub.sh.in test_pub_sub.sh @ONLY)
     configure_file(test_pub_sub_rmipc_to_daqm.sh.in test_pub_sub_rmipc_to_daqm.sh @ONLY)
@@ -101,6 +108,10 @@ if (libcds-pubsub_FOUND)
     add_test(NAME "test_pub_sub_daqm_to_daqm"
             COMMAND /bin/bash ./test_pub_sub_daqm_to_daqm.sh
             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+    add_test(NAME "test_buffer_entry"
+            COMMAND test_buffer_entry)
+
 
     install(TARGETS cps_xmit DESTINATION bin)
     install(TARGETS cps_recv DESTINATION bin)
