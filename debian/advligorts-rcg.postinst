@@ -13,7 +13,7 @@ if [ -e "$ENVFILE" ] ; then
    . "$ENVFILE" || true
 
    if [ "$SITE" ] && [ "$IFO" ] ; then
-       TARGET=$(echo -n /opt/rtcds/${SITE}/${IFO} | tr [A-Z] [a-z])
+       TARGET=`echo -n /opt/rtcds/${SITE}/${IFO} | tr [A-Z] [a-z]`
        if ! [ -d "$TARGET" ] ; then
            mkdir -p "$TARGET"
            chgrp advligorts "$TARGET"

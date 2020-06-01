@@ -21,7 +21,7 @@ DAQFILE=/etc/advligorts/daqdrc
 
 if [ ! -e $DAQFILE ] && [ -e $ENVFILE ] ; then
     . $ENVFILE
-    D=$(echo -n $IFO | cut -c 1)
+    D=`echo -n $IFO | cut -c 1`
     sed -e "s/TST/${SITE}/g" -e "s/X-X1/${D}-${IFO}/g" -e "s/X1/${IFO}/g" \
 	< /usr/share/doc/advligorts-daqd/examples/daqd.standalone.sample.rc \
 	> $DAQFILE
