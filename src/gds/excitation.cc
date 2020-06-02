@@ -16,7 +16,6 @@ static const char *versionId = "Version $Id$" ;
 #include "dtt/testpointinfo.h"
 #include "dtt/rmorg.h"
 #include "dtt/awgfunc.h"
-#include "dtt/awgapi.h"
 #include "dtt/epics.h"
 #include "dtt/gdsdatum.hh"
 #include "dtt/testpointmgr.hh"

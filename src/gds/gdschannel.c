@@ -1025,60 +1025,11 @@ static char *versionId = "Version $Id$" ;
       if (chninfosize > _CHNLIST_SIZE) {
          resizeChnInfo (_CHNLIST_SIZE);
       }
-   
-      /* read in channel information */
-   #if (_CHANNEL_DB == _CHN_DB_PARAM) 
-   #if !defined (_CONFIG_DYNAMIC)
-      if (readChnFile (PRM_FILE) <= -10) {
-         char		msg[256];
-         MUTEX_RELEASE (chnmux);
-         sprintf (msg, "Unable to load channel information from %s\n", 
-                 PRM_FILE);
-      #ifdef _AWG_LIB
-         gdsWarningMessage (msg);
-      #else
-         gdsError (GDS_ERR_MISSING, msg);
-      #endif
-         return 0;
-      }
-   #endif
-   #else /* (_CHANNEL_DB == _CHN_DB_PARAM) */
-   #ifndef OS_VXWORKS
-      /* get NDS parameters */
-   #if !defined (_CONFIG_DYNAMIC)
-      if (!daqSetUser) {
-         strcpy (daqServer, DAQD_SERVER);
-         loadStringParam (PRM_FILE2, SEC_SERVER, PRM_SERVERNAME, daqServer);
-         daqPort = DAQD_PORT;
-         loadIntParam (PRM_FILE2, SEC_SERVER, PRM_SERVERPORT, &daqPort);
-      }
-   #endif
-      /* read from NDS */
-      ret = readChnDAQServer (daqServer, daqPort);
-      if (ret < 0) {
-         char		msg[256];
-         MUTEX_RELEASE (chnmux);
-         sprintf (msg, "Unable to load channel information from "
-                 "%s / %i\n", daqServer, daqPort);
-      #ifdef _AWG_LIB
-         gdsWarningMessage (msg);
-      #else
-         gdsError (GDS_ERR_MISSING, msg);
-      #endif
-         return 0;
-      }
-      tpLoaded = (ret > 0);
-   #endif /* OS_VXWORKS */
-   #endif /* (_CHANNEL_DB == _CHN_DB_PARAM) */
-   
+
       /* sort entries */
       qsort ((void*) chninfo, chninfonum, sizeof (gdsChnInfo_t), 
             (int (*) (const void*, const void*)) gds_strcasecmp);
-   
-      /* if (tpLoaded) {
-         MUTEX_RELEASE (chnmux);
-         return 0;
-      } */
+
    
       /* read in test point information */
    #ifndef _NO_TESTPOINTS
@@ -1193,20 +1144,6 @@ static char *versionId = "Version $Id$" ;
                MUTEX_RELEASE (chnmux);
                return -1;
       }
-
-#if 0
-      {
-         int		ifo;
-         char		filename[1024];
-         for (ifo = 0; ifo < TP_MAXIFO; ifo++) {
-            sprintf (filename, TP_FILE, ifo + 1);
-            if (readChnFile (filename) <= -10) {
-               MUTEX_RELEASE (chnmux);
-               return -1;
-            }
-         }
-      }
-#endif
 
    #endif
       /* sort entries */

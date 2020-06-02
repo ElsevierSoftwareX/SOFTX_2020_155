@@ -73,7 +73,6 @@ static char *versionId = "Version $Id$" ;
 #include "dtt/rmapi.h"
 #endif	
 #include "dtt/awg.h"
-#include "dtt/awgapi.h"
 #include "dtt/rawgapi.h"
 #include "dtt/confserver.h"
 #include "dtt/awg_server.h"
@@ -944,7 +943,6 @@ extern int testpoint_manager_rpc;
       static confServices conf;		/* configuration service */
       static char	confbuf[256];	/* configuration buffer */
       struct in_addr	host;		/* local host address */
-      char		section[30];	/* section name */
 
       /* test if low level init */
       gdsDebug ("start awg server client");
@@ -975,9 +973,6 @@ extern int testpoint_manager_rpc;
       /* get rpc parameters from parameter file */
       prognum = RPC_PROGNUM_AWG;
       progver = RPC_PROGVER_AWG;
-
-      /* make section header */
-      sprintf (section, "%s-awg%i", ifo_prefix,  testpoint_manager_node);
       
       if ((prognum == 0) || (progver == 0)) {
          return -5;
