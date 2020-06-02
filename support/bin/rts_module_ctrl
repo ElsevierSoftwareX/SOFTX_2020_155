@@ -3,8 +3,16 @@
 cmd="$1"
 sys="$2"
 if [ -z "$sys" ] ; then
-    echo "usage: $(basename $0) start|stop <sys>"
+    echo "usage: $(basename $0) start|stop <sys>" >&2
     exit 1
+fi
+if [ -z "$SITE" ] ; then
+    echo "SITE variable not specified." >&2
+    exit 2
+fi
+if [ -z "$IFO" ] ; then
+    echo "IFO variable not specified." >&2
+    exit 2
 fi
 TARGET=/opt/rtcds/${SITE,,*}/${IFO,,*}
 case $cmd in

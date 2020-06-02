@@ -2,11 +2,19 @@
 . /etc/advligorts/env
 sys="$1"
 if [ -z "$sys" ] ; then
-    echo "usage: $(basename $0) <sys>"
+    echo "usage: $(basename $0) <sys>" >&2
     exit 1
 fi
+if [ -z "$SITE" ] ; then
+    echo "SITE variable not specified." >&2
+    exit 2
+fi
+if [ -z "$IFO" ] ; then
+    echo "IFO variable not specified." >&2
+    exit 2
+fi
 export EPICS_DB_INCLUDE_PATH=/usr/lib/epics/dbd
-TARGET=/opt/rtcds/${SITE,,*}/${IFO,,*}
+export TARGET=/opt/rtcds/${SITE,,*}/${IFO,,*}
 ETARGET=${TARGET}/target/${sys}/${sys}epics
 cd ${ETARGET}
 exec ./${sys}epics ${sys}epics${IFO}.cmd

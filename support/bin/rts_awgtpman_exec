@@ -2,13 +2,16 @@
 . /etc/advligorts/env
 sys="$1"
 if [ -z "$sys" ] ; then
-    echo "usage: $(basename $0) <sys>"
+    echo "usage: $(basename $0) <sys>" >&2
     exit 1
 fi
-# add 
-if [[ $sys == *iop* ]] ; then
-    rate=${AWG_IOP_RATE:=-4}
+if [ -z "$SITE" ] ; then
+    echo "SITE variable not specified." >&2
+    exit 2
 fi
-exec awgtpman \
-    -s $sys \
-    $rate
+if [ -z "$IFO" ] ; then
+    echo "IFO variable not specified." >&2
+    exit 2
+fi
+export TARGET=${TARGET:=/opt/rtcds/${SITE,,*}/${IFO,,*}}
+exec awgtpman -s $sys
