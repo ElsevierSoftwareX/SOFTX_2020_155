@@ -241,9 +241,24 @@ CDS_HARDWARE cdsPciModules;
       site_prefix_storage[1] = 0;
       site_prefix_storage[0] = toupper(system_name[0]);
 
-      snprintf(target, sizeof(target),"/opt/rtcds/%s/%s", tolower(getenv("SITE")), tolower(getenv("IFO")));
+      char site_upper[4], site_lower[4];
+      char ifo_upper[3], ifo_lower[3];
+
+      printf("Getting paths\n");
+      snprintf(site_upper, sizeof site_upper, "%s", getenv("SITE"));
+      snprintf(ifo_upper, sizeof ifo_upper, "%s", getenv("IFO"));
+      printf("SITE=%s, IFO=%s\n", site_upper, ifo_upper);
+      int lc=0;
+      while( site_lower[lc] = tolower(site_upper[lc++]));
+      lc=0;
+      while( ifo_lower[lc] = tolower(ifo_upper[lc++]));
+
+      snprintf(target, sizeof(target),"/opt/rtcds/%s/%s", site_lower, ifo_lower);
+      printf("Target directory is %s\n", target);
       snprintf(myParFile, sizeof(myParFile),"%s/target/gds/param/tpchn_%s.par", target, system_name);
       printf("My config file is %s\n", myParFile);
+      snprintf(archive_storage, sizeof archive_storage, "%s/target/gds", target);
+      printf("Archive storage is %s\n", archive);
 
       printf("IPC at 0x%p\n", rmBoardAddress(2));
       ioMemData = (IO_MEM_DATA *)(rmBoardAddress(2) + IO_MEM_DATA_OFFSET);
