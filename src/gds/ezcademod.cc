@@ -86,7 +86,6 @@ static const char *versionId = "Version $Id$" ;
 #include <iomanip>
 #include "tconv.h"
 #include "dtt/testpoint.h"
-#include "dtt/awgapi.h"
 #include "dtt/awgtype.h"
 #include "DAQSocket.hh"
 
