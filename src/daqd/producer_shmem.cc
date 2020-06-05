@@ -60,7 +60,7 @@ using namespace std;
 #include "circ.h"
 #include "daq_core.h"
 #include "shmem_receiver.hh"
-#include "thread_launcher.hh"
+#include "daqd_thread.hh"
 
 extern daqd_c       daqd;
 extern int          shutdown_server( );

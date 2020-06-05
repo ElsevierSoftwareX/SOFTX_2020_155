@@ -4,7 +4,7 @@
 #include <chrono>
 #include <thread>
 
-#include "thread_launcher.hh"
+#include "daqd_thread.hh"
 
 TEST_CASE( "You can launch a pthread with the launch_pthread call" )
 {

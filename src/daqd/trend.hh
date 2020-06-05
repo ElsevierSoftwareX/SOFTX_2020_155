@@ -4,6 +4,8 @@
 #include "daqd.hh"
 #include "profiler.hh"
 #include "stats/stats.hh"
+#include "daqd_thread.hh"
+#include <atomic>
 
 /// Trend circular buffer block structure
 /// Do not put any shorts in this structure, because compiler puts holes in to
@@ -83,6 +85,28 @@ public:
 
     ~trender_c( )
     {
+        // stop the threads before the rest of the cleanup.
+        threads_.clear( );
+
+        {
+            circ_buffer* oldb;
+
+            if ( tb )
+            {
+                oldb = tb;
+                tb = 0;
+                oldb->~circ_buffer( );
+                free( (void*)oldb );
+            }
+
+            if ( mtb )
+            {
+                oldb = mtb;
+                mtb = 0;
+                oldb->~circ_buffer( );
+                free( (void*)oldb );
+            }
+        }
         pthread_cond_destroy( &worker_done );
         pthread_cond_destroy( &worker_notempty );
         pthread_mutex_destroy( &worker_lock );
@@ -94,7 +118,7 @@ public:
     }
 
     trender_c( )
-        : shutdown_now( 0 ), shutdown_minute_now( 0 ),
+        : threads_{ [this]( ) { shutdown_trender( ); } },
           minute_trend_buffer_blocks( 60 ), mtb( 0 ), mt_stats( ),
           mt_file_stats( ), tb( 0 ), num_channels( 0 ), num_trend_channels( 0 ),
           block_size( 0 ), ascii_output( 0 ), frames_per_file( 1 ),
@@ -170,15 +194,19 @@ public:
     circ_buffer*    mtb; ///< minute trend circular buffer object
     class stats     mt_stats; ///< minute trend period stats
     class stats     mt_file_stats; ///< minute trend file saving stats
-    pthread_t       tsaver; ///< This thread saves trend data into the `fname'
-    pthread_t mtsaver; ///< This thread saves minute trend data into the `fname'
-    pthread_t mtraw; ///< This thread saves minute trend data to raw minute
-                     ///< trend files
-    pthread_t consumer; ///< Thread reads data from the main circular buffer,
-                        ///< calculates trend and puts it into `tb'
-    pthread_t
-        mconsumer; ///< Thread reads data from the trend circular buffer, `tb',
-                   ///< calculates minute trend and puts it into `mtb'
+
+    /*!
+     * manage the threads
+     *  mconsumer - Thread reads data from the trend circular buffer, `tb',
+     *               calculates minute trend and puts it into `mtb'
+     *  worker_tid
+     *  consumer - Thread reads data from the main circular buffer, calculates
+     *             trend and puts it into `tb'
+     *  mtraw - This thread saves minute trend data to raw minute trend files
+     *  mtsaver - This thread saves minute trend data into the `fname'
+     *  tsaver - This thread saves trend data into the `fname'
+     */
+    thread_handler_t threads_;
     int ascii_output; ///< If set, no frame files, just plain ascii trend file
                       ///< is created
     ofstream* fout;
@@ -250,42 +278,14 @@ public:
         return ( (trender_c*)a )->trend( );
     };
     void* trend_worker( );
-    static void*
-    trend_worker_static( void* a )
-    {
-        return ( (trender_c*)a )->trend_worker( );
-    };
+
     void* saver( );
-    static void*
-    saver_static( void* a )
-    {
-        return ( (trender_c*)a )->saver( );
-    };
     void* framer( );
-    static void*
-    trend_framer_static( void* a )
-    {
-        return ( (trender_c*)a )->framer( );
-    };
 
     void* minute_trend( );
-    static void*
-    minute_trend_static( void* a )
-    {
-        return ( (trender_c*)a )->minute_trend( );
-    };
+
     void* minute_framer( );
     void* raw_minute_saver( );
-    static void*
-    minute_trend_framer_static( void* a )
-    {
-        return ( (trender_c*)a )->minute_framer( );
-    };
-    static void*
-    raw_minute_trend_saver_static( void* a )
-    {
-        return ( (trender_c*)a )->raw_minute_saver( );
-    };
 
     profile_c    profile; ///< profile on trend circular buffer.
     profile_c    profile_mt; ///< profile on minute trend circular buffer.
@@ -306,8 +306,6 @@ public:
     /// worker signals to trender on cond var when it is done processing
     pthread_cond_t worker_done;
     unsigned int   worker_busy; ///< worker clears it when it is finished
-
-    pthread_t worker_tid;
 
     /// worker will start processing channels in the direction from the end to
     /// the start trender will do from the start to the end. They will meet at
@@ -333,36 +331,44 @@ public:
     }
 
 private:
-    int _configuration_number;
-    int shutdown_now;
-    int shutdown_minute_now;
+    int              _configuration_number;
+    std::atomic_bool shutdown_now_{ false };
     void
     shutdown_trender( )
     {
-        shutdown_now = 1;
+        shutdown_now_ = false;
     }
-    void
-    shutdown_minute_trender( )
+
+    bool
+    stopping( ) const
     {
-        shutdown_minute_now = 1;
+        return shutdown_now_.load( );
     }
-    /// kill the buffer and close the socket
-    void
-    shutdown_buffer( )
+
+    /*!
+     * @brief helper to do a get from a buffer that can time out if stopping()
+     * @param cbuffer buffer to check
+     * @param consumer_number
+     * @return -1 if stopping() else the next buffer number
+     * @note on -1 it calls cbuffer.unlock()
+     */
+    int
+    time_get_helper( circ_buffer& cbuffer, int consumer_number )
     {
-        circ_buffer* oldb;
-
-        oldb = tb;
-        tb = 0;
-        oldb->~circ_buffer( );
-        free( (void*)oldb );
-
-        oldb = mtb;
-        mtb = 0;
-        oldb->~circ_buffer( );
-        free( (void*)oldb );
-
-        shutdown_now = 0;
+        int nb = -1;
+        do
+        {
+            timespec ts{};
+            timespec_get( &ts, TIME_UTC );
+            ts.tv_sec++;
+            nb = cbuffer.timed_get( consumer_number, &ts );
+            if ( stopping( ) )
+            {
+                cbuffer.unlock( consumer_number );
+                return -1;
+            }
+        } while ( nb < 0 );
+        return nb;
     }
 }; // class trender_c
 

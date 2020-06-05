@@ -55,7 +55,7 @@ using namespace std;
 #include "daqd.hh"
 #include "sing_list.hh"
 #include "net_writer.hh"
-#include "thread_launcher.hh"
+#include "daqd_thread.hh"
 
 #include <stdio.h>
 #include <stdarg.h>

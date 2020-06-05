@@ -131,6 +131,7 @@ public:
                                int,
                                circ_buffer_block_prop_t* a = 0 );
     int  get( int );
+    int  timed_get( int, timespec* ts);
     int  get_nowait( int );
     void unlock( int );
     void unlock16th( int );
