@@ -80,8 +80,8 @@ circ_buffer::buffer_malloc( int    consumers,
 }
 
 // circ_buffer::circ_buffer (int consumers = 1, int blocks = 100, long
-// block_size = 10240, time_t block_period = 1, mem_choice mem_flagp=flag_malloc,
-// char *param1 = NULL)
+// block_size = 10240, time_t block_period = 1, mem_choice
+// mem_flagp=flag_malloc, char *param1 = NULL)
 circ_buffer::circ_buffer( int        consumers,
                           int        blocks,
                           long       block_size,
@@ -324,7 +324,7 @@ circ_buffer::put16th_dpscattered( struct put_dpvec*         pv,
                     memor4( dst + pv[ i ].dest_status_idx, &status );
                 }
                 //	*((int *)(dst + pv [i].dest_status_idx) + 1 + nbi16th) =
-                //status;
+                // status;
                 memcpy( (char*)( dst + pv[ i ].dest_status_idx +
                                  sizeof( int ) * ( 1 + nbi16th ) ),
                         &status,
@@ -661,19 +661,21 @@ circ_buffer::get( int cnum )
    returns -1 on timeout.
 */
 int
-circ_buffer::timed_get( int cnum, timespec* ts)
+circ_buffer::timed_get( int cnum, timespec* ts )
 {
     int nbo;
 
-    raii::lock_guard<pthread_mutex_t> l_(pbuffer->block[ pbuffer->next_block_out[ cnum ] ].lock);
+    raii::lock_guard< pthread_mutex_t > l_(
+        pbuffer->block[ pbuffer->next_block_out[ cnum ] ].lock );
 
     assert( invariant( ) );
 
     nbo = pbuffer->next_block_out[ cnum ];
     while ( !( pbuffer->block[ nbo ].busy.get( cnum ) ) )
     {
-        if (pthread_cond_wait(&pbuffer->block[nbo].notempty,
-                          &pbuffer->block[nbo].lock) == ETIMEDOUT)
+        if ( pthread_cond_timedwait( &pbuffer->block[ nbo ].notempty,
+                                     &pbuffer->block[ nbo ].lock,
+                                     ts ) == ETIMEDOUT )
         {
             return -1;
         }

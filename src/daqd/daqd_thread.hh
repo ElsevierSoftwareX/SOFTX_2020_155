@@ -161,9 +161,9 @@ private:
 class thread_handler_t
 {
 public:
-    using stop_funtion_t = std::function< void( void ) >;
+    using stop_function_t = std::function< void( void ) >;
 
-    explicit thread_handler_t( stop_funtion_t stopper )
+    explicit thread_handler_t( stop_function_t stopper )
         : stopper_{ std::move( stopper ) } {};
     thread_handler_t( const thread_handler_t& ) = delete;
     thread_handler_t( thread_handler_t&& ) = delete;
@@ -192,7 +192,7 @@ public:
 private:
     std::vector< pthread_t > thread_ids_{};
     std::mutex               m_{};
-    stop_funtion_t           stopper_;
+    stop_function_t          stopper_;
 };
 
 #endif // DAQD_TRUNK_DAQD_THREAD_HH
