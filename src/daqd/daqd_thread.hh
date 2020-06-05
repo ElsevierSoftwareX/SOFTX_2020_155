@@ -27,12 +27,19 @@ extern int launch_pthread( pthread_t&            tid,
                            const pthread_attr_t& attr,
                            thread_action_t       handler );
 
+/*!
+ * @brief wrap the pthread scope macros in a enum to
+ * bring them into the C++ type system.
+ */
 enum class thread_scope_t
 {
     SYSTEM = PTHREAD_SCOPE_SYSTEM,
     PROCESS = PTHREAD_SCOPE_PROCESS,
 };
 
+/*!
+ * @brief a strong type for a stacksize.
+ */
 class thread_stacksize_t
 {
 public:
@@ -60,19 +67,29 @@ private:
 
 /*!
  * @brief a RAII wrapper for pthread_attr_t, ensuring that it is always
- * destroyed.
+ * destroyed.  The constructor also uses strong types to all an arbitrary
+ * set of attributes to be set at construction time.
  */
-class thread_attr_t {
+class thread_attr_t
+{
 public:
-    thread_attr_t() : attr_{} {
-        pthread_attr_init(&attr_);
+    thread_attr_t( ) : attr_{}
+    {
+        pthread_attr_init( &attr_ );
     }
 
-    template<typename T, typename... Args>
-    explicit thread_attr_t(T t,Args... args): attr_{}
+    /*!
+     * @brief construct a thread_attr_t and set attributes on it.
+     * @tparam T one of the attribute types that can be set
+     * @tparam Args list of additional attribute types
+     * @param t the first attribute to set
+     * @param args additional (0 or more) attributes to set
+     */
+    template < typename T, typename... Args >
+    explicit thread_attr_t( T t, Args... args ) : attr_{}
     {
-        pthread_attr_init(&attr_);
-        set(t, args...);
+        pthread_attr_init( &attr_ );
+        set( t, args... );
     }
 
     thread_attr_t( const thread_attr_t& ) = delete;
@@ -86,22 +103,37 @@ public:
     thread_attr_t& operator=( const thread_attr_t& ) = delete;
     thread_attr_t& operator=( thread_attr_t&& ) = delete;
 
+    /*!
+     * @brief set the PTHREAD_SCOPE value
+     * @param scope the scope value as an enum
+     */
     void
     set( thread_scope_t scope )
     {
         pthread_attr_setscope( &attr_, static_cast< int >( scope ) );
     }
+    /*!
+     * @brief set the stack size
+     * @param stack_size the size of the stack
+     */
     void
     set( thread_stacksize_t stack_size )
     {
         pthread_attr_setstacksize( &attr_, stack_size.get( ) );
     }
-    template <typename T, typename... Args>
+    /*!
+     * @brief take an arbitrary list of attribute types and set them.
+     * @tparam T First attribute type to set
+     * @tparam Args Additional (0+) types of attributes
+     * @param t the first attribute
+     * @param args additional attributes
+     */
+    template < typename T, typename... Args >
     void
-    set(T t, Args... args)
+    set( T t, Args... args )
     {
-        set(t);
-        set(args...);
+        set( t );
+        set( args... );
     }
 
     pthread_attr_t&
@@ -155,7 +187,7 @@ public:
         thread_ids_.swap( ids );
     }
 
-    void clear();
+    void clear( );
 
 private:
     std::vector< pthread_t > thread_ids_{};
