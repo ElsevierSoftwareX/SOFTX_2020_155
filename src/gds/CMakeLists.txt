@@ -11,6 +11,7 @@ endif (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 
 
 SET (GDS_SRC
+        awgapi.c
         awgfunc.c
         awg.c
         awg_server.c
@@ -53,6 +54,7 @@ SET (GDS_CC_SRC
         )
 
 SET (GDS_HDR
+        awgapi.h
         awgfunc.h
         awg.h
         awg_server.h
