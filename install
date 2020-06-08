@@ -138,15 +138,15 @@ if [ x$gds_node != "x" ]; then
     ##########
 
     echo "Updating testpoint config file..."
-
-    if test -e $RTCDS/target/gds/param/testpoint.par; then
-	mv -f $RTCDS/target/gds/param/testpoint.par $RTCDS/target/gds/param/archive/testpoint_${cur_date}.par || exit 1
-	testpoint_par_infname=$RTCDS/target/gds/param/archive/testpoint_${cur_date}.par
-    else
-	testpoint_par_infname=/dev/null
+    if test -e src/fe/${system}/${system}.ko; then
+      if test -e $RTCDS/target/gds/param/testpoint.par; then
+        mv -f $RTCDS/target/gds/param/testpoint.par $RTCDS/target/gds/param/archive/testpoint_${cur_date}.par || exit 1
+        testpoint_par_infname=$RTCDS/target/gds/param/archive/testpoint_${cur_date}.par
+      else
+        testpoint_par_infname=/dev/null
+      fi
+      ($srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost} > $RTCDS/target/gds/param/testpoint.par || (cp $RTCDS/target/gds/param/archive/testpoint_${cur_date}.par $RTCDS/target/gds/param/testpoint.par && exit 1)) || exit 1
     fi
-    ($srcdir/src/epics/util/updateTestpointPar.pl -par_file=${testpoint_par_infname}  -gds_node=${gds_node} -site_letter=${site_letter} -system=${system} -host=${targethost} > $RTCDS/target/gds/param/testpoint.par || (cp $RTCDS/target/gds/param/archive/testpoint_${cur_date}.par $RTCDS/target/gds/param/testpoint.par && exit 1)) || exit 1
-
     ##########
 
     echo "Installing GDS node config file..."
