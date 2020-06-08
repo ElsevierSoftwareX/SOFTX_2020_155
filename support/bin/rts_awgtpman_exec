@@ -13,5 +13,7 @@ if [ -z "$IFO" ] ; then
     echo "IFO variable not specified." >&2
     exit 2
 fi
+export SITE
+export IFO
 export TARGET=${TARGET:=/opt/rtcds/${SITE,,*}/${IFO,,*}}
 exec awgtpman -s $sys
