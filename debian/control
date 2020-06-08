@@ -7,7 +7,6 @@ Build-Depends:
  cmake,
  debhelper-compat (= 12),
  dkms,
- dolphin-sisci-ix-devel,
  epics-dev,
  flex,
  grace,
@@ -23,6 +22,7 @@ Build-Depends:
  libtool,
  libxpm-dev,
  libxt-dev,
+ ligo-dolphin-dev,
  pkg-config,
  rapidjson-dev,
 Standards-Version: 4.5.0
@@ -135,8 +135,7 @@ Package: advligorts-transport-dix
 Architecture: any
 Depends:
  advligorts-transport-common,
- dolphin-ix,
- dolphin-sisci-ix,
+ ligo-dolphin-ix-dkms,
  ${misc:Depends},
  ${shlibs:Depends},
 Description: advLigoRTS Dolphin IX PCI shared memory transport
