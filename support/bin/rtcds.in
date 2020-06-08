@@ -71,7 +71,7 @@ prep_buildd() {
     log "creating RCG_BUILDD $RCG_BUILDD..."
     if ! mkdir -p "$RCG_BUILDD" 2>/dev/null ; then
         log "Could not create build directory '$RCG_BUILDD'."
-        log "Please create manually (with correct permissions) to continue."
+        log "Please create manually (with correct permissions) and try again."
         exit 1
     fi
     log "configuring RCG_BUILDD $RCG_BUILDD..."
@@ -86,7 +86,7 @@ prep_target(){
     log "creating RCG_TARGET $RCG_TARGET..."
     if ! mkdir -p "$RCG_TARGET" 2>/dev/null ; then
         log "Could not create target directory '$RCG_TARGET'."
-        log "Please create manually (with correct permissions) to continue."
+        log "Please create manually (with correct permissions) and try again."
         exit 1
     fi
     mkdir -p ${RCG_TARGET}/{target,chans/tmp}
@@ -128,12 +128,24 @@ build_sys() {
     done
 }
 
+build_world() {
+    cd $RCG_BUILDD
+    log "### building world..."
+    make World
+}
+
 install_sys() {
     cd $RCG_BUILDD
     for sys ; do
 	log "### installing $sys..."
 	make install-$sys
     done
+}
+
+install_world() {
+    cd $RCG_BUILDD
+    log "### installing world..."
+    make installWorld
 }
 
 start_sys() {
@@ -168,11 +180,10 @@ disable_sys() {
 _lsmod() {
     local systems=($(list_host_sys))
     local rts=(mbuf gpstime)
-    local omx=(open_mx)
-    local dis=(dis_kosif dis_dx dis_irm)
+    local dolphin=(dis_kosif dis_ix_ntb dis_ix_dma dis_irm)
 
     # FIXME: how to test for needed modules?
-    modules=(${rts[*]} ${omx[*]} ${dis[*]})
+    modules=(${rts[*]} ${dolpin[*]})
     
     local allloaded=
     for m in ${modules[*]}; do
@@ -250,7 +261,11 @@ case $cmd in
 	fi
 	check_env
 	prep_buildd
-	build_sys $@
+        if [[ "$1" == '--all' ]] ; then
+            build_world
+        else
+	    build_sys $@
+        fi
 	;;
     'install')
 	if [ -z "$1" ] ; then
@@ -259,7 +274,11 @@ case $cmd in
 	fi
 	check_env
 	prep_target
-	install_sys $@
+        if [[ "$1" == '--all' ]] ; then
+            install_world
+        else
+	    install_sys $@
+        fi
 	;;
     'start')
 	if [ -z "$1" ] ; then

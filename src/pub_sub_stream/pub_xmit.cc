@@ -279,31 +279,17 @@ send_to_local_memory( const std::string& conn_string, int send_delay_ms )
 int
 main( int argc, char* argv[] )
 {
-    int         counter = 0;
-    int         nsys = 1;
-    int         dcuId[ 10 ];
-    int         ii = 0;
-    const char* gds_tp_dir = 0;
     int         max_data_size_mb = 64;
     int         max_data_size = 0;
-    int         error = 0;
     const char* publish_conn = nullptr;
     const char* buffer_name = "local_dc";
     int         send_delay_ms = 0;
     args_handle arg_parser = NULL;
 
-    int         my_eid;
-    const char* rem_host;
-    const char* sysname;
     const char* logfname = 0;
-
-    rem_host = NULL;
-    sysname = NULL;
 
     fprintf(
         stderr, "\n %s compiled %s : %s\n\n", argv[ 0 ], __DATE__, __TIME__ );
-
-    ii = 0;
 
     arg_parser =
         args_create_parser( "Transmit data between a LIGO FE computer and the "
@@ -342,13 +328,6 @@ main( int argc, char* argv[] )
                          0 );
     args_add_flag(
         arg_parser, 'v', ARGS_NO_LONG, "Verbose output", &do_verbose );
-    args_add_string_ptr( arg_parser,
-                         'd',
-                         ARGS_NO_LONG,
-                         "directory",
-                         "Path to the gds tp dir used to lookup models",
-                         &gds_tp_dir,
-                         0 );
     args_add_int(
         arg_parser,
         'D',

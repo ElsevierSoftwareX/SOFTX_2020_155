@@ -27,15 +27,15 @@ static char *versionId = "Version $Id$" ;
 #define _TPMAN_NAME		"tTPmgr"
 #define _AWG_NAME		"tAWGmgr"
 
-char ifo_prefix_storage[3];
-char site_prefix_storage[2];
-char archive_storage[256];
-char *ifo_prefix = ifo_prefix_storage; // G1
-char *site_prefix = site_prefix_storage; // G
-char *archive = archive_storage; // /opt/rtcds/geo/g1/target/gds/
-char site_name_lower[16]; // geo
-char ifo_prefix_lower[3];  // g1
 char myParFile[256];
+
+char archive_storage[256];
+char *archive = archive_storage;
+
+char site_prefix_storage[2];
+char *site_prefix = site_prefix_storage;
+
+char target[256];
 
 /* How many times over 16 kHz is the front-end system?
  * 2 kHz for slow models */
@@ -235,91 +235,30 @@ CDS_HARDWARE cdsPciModules;
       if (run_awg) {
         nice(-20);
       }
-/*
-                                if ($::site =~ /^M/) {
-                                        $::location = "mit";
-                                } elsif ($::site =~ /^G/) {
-                                        $::location = "geo";
-                                } elsif ($::site =~ /^H/) {
-                                        $::location = "lho";
-                                } elsif ($::site =~ /^L/) {
-                                        $::location = "llo";
-                                } elsif ($::site =~ /^C/) {
-                                        $::location = "caltech";
-                                } elsif ($::site =~ /^S/) {
-                                        $::location = "stn";
-                                } elsif ($::site =~ /^K/) {
-                                        $::location = "kamioka";
-                                } elsif ($::site =~ /^X/) {
-                                        $::location = "tst";
-                                }
 
-*/
-      char st[3]; st[0] = system_name[0]; st[1] = system_name[1]; st[2] = 0;
-      switch(st[0]) {
-	case 'm':
-		strcpy(site_prefix_storage, "M");
-		strcpy(site_name_lower, "mit");
-		break;
-	case 'g':
-		strcpy(site_prefix_storage, "G");
-		strcpy(site_name_lower, "geo");
-		break;
-	case 'h':
-		strcpy(site_prefix_storage, "H");
-		strcpy(site_name_lower, "lho");
-		break;
-	case 'l':
-		strcpy(site_prefix_storage, "L");
-		strcpy(site_name_lower, "llo");
-		break;
-	case 'c':
-		strcpy(site_prefix_storage, "C");
-		strcpy(site_name_lower, "caltech");
-		break;
-	case 's':
-		strcpy(site_prefix_storage, "S");
-		strcpy(site_name_lower, "stn");
-		break;
-	case 'k':
-		strcpy(site_prefix_storage, "K");
-		strcpy(site_name_lower, "kamioka");
-		break;
-	case 'i':
-		strcpy(site_prefix_storage, "I");
-		strcpy(site_name_lower, "indigo");
-		break;
-	case 'a':
-		strcpy(site_prefix_storage, "A");
-		strcpy(site_name_lower, "anu");
-		break;
-	case 'u':
-		strcpy(site_prefix_storage, "U");
-		strcpy(site_name_lower, "uwa");
-		break;
-	case 'w':
-		strcpy(site_prefix_storage, "W");
-		strcpy(site_name_lower, "cardiff");
-		break;
-	case 'b':
-		strcpy(site_prefix_storage, "B");
-		strcpy(site_name_lower, "bham");
-		break;
-	case 'x':
-		strcpy(site_prefix_storage, "X");
-		strcpy(site_name_lower, "tst");
-		break;
-	default:
-		fprintf(stderr, "Unknown location: %s\n",  st);
-		exit(1);
-		break;
-      }
-      strcpy(ifo_prefix_lower, st);
-      strcpy(ifo_prefix_storage, st);
-      ifo_prefix_storage[0] = toupper(ifo_prefix_storage[0]);
-      sprintf(archive_storage, "/opt/rtcds/%s/%s/target/gds", site_name_lower, ifo_prefix_lower);
-      sprintf(myParFile, "%s/param/tpchn_%s.par", archive, system_name);
+
+      // site_prefix takes on the first letter of the system name (as upper case)
+      site_prefix_storage[1] = 0;
+      site_prefix_storage[0] = toupper(system_name[0]);
+
+      char site_upper[4], site_lower[4];
+      char ifo_upper[3], ifo_lower[3];
+
+      printf("Getting paths\n");
+      snprintf(site_upper, sizeof site_upper, "%s", getenv("SITE"));
+      snprintf(ifo_upper, sizeof ifo_upper, "%s", getenv("IFO"));
+      printf("SITE=%s, IFO=%s\n", site_upper, ifo_upper);
+      int lc=0;
+      while( site_lower[lc] = tolower(site_upper[lc++]));
+      lc=0;
+      while( ifo_lower[lc] = tolower(ifo_upper[lc++]));
+
+      snprintf(target, sizeof(target),"/opt/rtcds/%s/%s", site_lower, ifo_lower);
+      printf("Target directory is %s\n", target);
+      snprintf(myParFile, sizeof(myParFile),"%s/target/gds/param/tpchn_%s.par", target, system_name);
       printf("My config file is %s\n", myParFile);
+      snprintf(archive_storage, sizeof archive_storage, "%s/target/gds", target);
+      printf("Archive storage is %s\n", archive);
 
       printf("IPC at 0x%p\n", rmBoardAddress(2));
       ioMemData = (IO_MEM_DATA *)(rmBoardAddress(2) + IO_MEM_DATA_OFFSET);

@@ -80,7 +80,7 @@ extern "C" {
 /**@name Arbitrary Waveform Generator Type Definitions
    This module defines the constants and types used by the arbitrary 
    waveform generators. Waveform parameters are configured and 
-   controlled through routines defined in "awg.h" and "awgapi.h".
+   controlled through routines defined in "awg.h".
    
    Waveforms are specified by sums of components.
    Valid component configurations are.

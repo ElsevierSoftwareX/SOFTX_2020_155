@@ -323,6 +323,8 @@ struct buffer_entry
             return;
         }
         cb( ifo_data );
+        // anything received after this point is late.
+        is_late_ = true;
     }
 
     void
@@ -346,6 +348,7 @@ private:
         ifo_data.header.dcuTotalModels = 0;
         ifo_data.header.fullDataBlockSize = 0;
         data = &ifo_data.dataBlock[ 0 ];
+        is_late_ = false;
     }
 };
 

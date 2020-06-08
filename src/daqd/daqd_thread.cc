@@ -1,8 +1,10 @@
 //
 // Created by jonathan.hanks on 3/26/20.
 //
-#include "thread_launcher.hh"
+#include "daqd_thread.hh"
 #include "raii.hh"
+
+#include <algorithm>
 
 namespace
 {
@@ -23,8 +25,8 @@ namespace
     void*
     thread_trampoline( void* arg )
     {
-        std::unique_ptr< thread_handler_t > arg_ptr{
-            reinterpret_cast< thread_handler_t* >( arg )
+        std::unique_ptr< thread_action_t > arg_ptr{
+            reinterpret_cast< thread_action_t* >( arg )
         };
         ( *arg_ptr )( );
         return nullptr;
@@ -34,10 +36,10 @@ namespace
 int
 launch_pthread( pthread_t&            tid,
                 const pthread_attr_t& attr,
-                thread_handler_t      handler )
+                thread_action_t       handler )
 {
     auto arg_ptr =
-        raii::make_unique_ptr< thread_handler_t >( std::move( handler ) );
+        raii::make_unique_ptr< thread_action_t >( std::move( handler ) );
     auto result = pthread_create( &tid,
                                   &attr,
                                   thread_trampoline,
@@ -48,4 +50,20 @@ launch_pthread( pthread_t&            tid,
         arg_ptr.release( );
     }
     return result;
+}
+
+thread_handler_t::~thread_handler_t( )
+{
+    clear();
+}
+
+void
+thread_handler_t::clear()
+{
+    stopper_( );
+    std::lock_guard< std::mutex > l_{ m_ };
+    std::for_each(
+            thread_ids_.begin( ), thread_ids_.end( ), []( pthread_t& cur_tid ) {
+                pthread_join( cur_tid, nullptr );
+            } );
 }

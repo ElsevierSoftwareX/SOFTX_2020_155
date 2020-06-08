@@ -15,6 +15,7 @@ using namespace std;
 #include <errno.h>
 #include <stdio.h>
 #include "circ.hh"
+#include "raii.hh"
 
 #ifndef SCOPE_PROGRAM
 #include "daqd.hh"
@@ -79,8 +80,8 @@ circ_buffer::buffer_malloc( int    consumers,
 }
 
 // circ_buffer::circ_buffer (int consumers = 1, int blocks = 100, long
-// block_size = 10240, time_t block_period = 1, mem_choice mem_flagp=flag_malloc,
-// char *param1 = NULL)
+// block_size = 10240, time_t block_period = 1, mem_choice
+// mem_flagp=flag_malloc, char *param1 = NULL)
 circ_buffer::circ_buffer( int        consumers,
                           int        blocks,
                           long       block_size,
@@ -323,7 +324,7 @@ circ_buffer::put16th_dpscattered( struct put_dpvec*         pv,
                     memor4( dst + pv[ i ].dest_status_idx, &status );
                 }
                 //	*((int *)(dst + pv [i].dest_status_idx) + 1 + nbi16th) =
-                //status;
+                // status;
                 memcpy( (char*)( dst + pv[ i ].dest_status_idx +
                                  sizeof( int ) * ( 1 + nbi16th ) ),
                         &status,
@@ -635,6 +636,50 @@ circ_buffer::get( int cnum )
         pthread_cond_wait( &pbuffer->block[ nbo ].notempty,
                            &pbuffer->block[ nbo ].lock );
     pthread_mutex_unlock( &pbuffer->block[ nbo ].lock );
+
+    return nbo;
+}
+
+/*
+   Get next data block index for consumer number `cnum'.  With a timeout at
+   absolute time ts.
+
+   This will hang on while the block is not filled.
+   Must be followed as soon as possible by the call to circ_buffer::unlock(),
+   or producer will block.
+
+   avi Tue Jan  6 11:05:45 PST 1998
+   It seems that the race condition possible in the situation with one slow
+   consumer one fast consumer and fast producer -- fast producer will make full
+   circle on the buffer and catches up with the slow consumer; it will decrease
+   `busy' flag between slow consumer `get' and `unlock' calls. Slow consumer
+   then either sets `busy' negative or reads data from the buffer while producer
+   puts new block in. This could be managed by having `busy' flags for every
+   consumer.
+   **** fixed by using bit flags in `busy', one for each consumer ***
+
+   returns -1 on timeout.
+*/
+int
+circ_buffer::timed_get( int cnum, timespec* ts )
+{
+    int nbo;
+
+    raii::lock_guard< pthread_mutex_t > l_(
+        pbuffer->block[ pbuffer->next_block_out[ cnum ] ].lock );
+
+    assert( invariant( ) );
+
+    nbo = pbuffer->next_block_out[ cnum ];
+    while ( !( pbuffer->block[ nbo ].busy.get( cnum ) ) )
+    {
+        if ( pthread_cond_timedwait( &pbuffer->block[ nbo ].notempty,
+                                     &pbuffer->block[ nbo ].lock,
+                                     ts ) == ETIMEDOUT )
+        {
+            return -1;
+        }
+    }
 
     return nbo;
 }
