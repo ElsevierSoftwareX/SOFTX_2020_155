@@ -128,12 +128,24 @@ build_sys() {
     done
 }
 
+build_world() {
+    cd $RCG_BUILDD
+    log "### building world..."
+    make World
+}
+
 install_sys() {
     cd $RCG_BUILDD
     for sys ; do
 	log "### installing $sys..."
 	make install-$sys
     done
+}
+
+install_world() {
+    cd $RCG_BUILDD
+    log "### installing world..."
+    make installWorld
 }
 
 start_sys() {
@@ -249,7 +261,11 @@ case $cmd in
 	fi
 	check_env
 	prep_buildd
-	build_sys $@
+        if [[ "$1" == '--all' ]] ; then
+            build_world
+        else
+	    build_sys $@
+        fi
 	;;
     'install')
 	if [ -z "$1" ] ; then
@@ -258,7 +274,11 @@ case $cmd in
 	fi
 	check_env
 	prep_target
-	install_sys $@
+        if [[ "$1" == '--all' ]] ; then
+            install_world
+        else
+	    install_sys $@
+        fi
 	;;
     'start')
 	if [ -z "$1" ] ; then
