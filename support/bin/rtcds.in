@@ -168,11 +168,10 @@ disable_sys() {
 _lsmod() {
     local systems=($(list_host_sys))
     local rts=(mbuf gpstime)
-    local omx=(open_mx)
-    local dis=(dis_kosif dis_dx dis_irm)
+    local dolphin=(dis_kosif dis_ix_ntb dis_ix_dma dis_irm)
 
     # FIXME: how to test for needed modules?
-    modules=(${rts[*]} ${omx[*]} ${dis[*]})
+    modules=(${rts[*]} ${dolpin[*]})
     
     local allloaded=
     for m in ${modules[*]}; do
