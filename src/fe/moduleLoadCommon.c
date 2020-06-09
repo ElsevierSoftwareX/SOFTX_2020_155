@@ -216,6 +216,19 @@ print_exit_messages( int error_type, int error_sub )
 
 #ifndef USER_SPACE
 int
+detach_shared_memory( )
+{
+    int  ret;
+    char fname[ 128 ];
+
+    ret = mbuf_release_area( SYSTEM_NAME_STRING_LOWER, _epics_shm );
+    ret = mbuf_release_area( "ipc", _ipc_shm );
+    ret = mbuf_release_area( "shmipc", _shmipc_shm  );
+    sprintf( fname, "%s_daq", SYSTEM_NAME_STRING_LOWER );
+    ret = mbuf_release_area( fname, _daq_shm );
+    return ret;
+}
+int
 attach_shared_memory( )
 {
     int  ret;
@@ -236,7 +249,7 @@ attach_shared_memory( )
     pLocalEpics->epicsOutput.fe_status = 0;
 
     /// Allocate IPC memory area
-    ret = mbuf_allocate_area( "ipc", 16 * 1024 * 1024, 0 );
+    ret = mbuf_allocate_area( "ipc", 32 * 1024 * 1024, 0 );
     if ( ret < 0 )
     {
         printk( "" SYSTEM_NAME_STRING_LOWER
@@ -248,6 +261,17 @@ attach_shared_memory( )
 
     // Assign pointer to IOP/USER app comms space
     ioMemData = (IO_MEM_DATA*)( _ipc_shm + 0x4000 );
+
+    /// Allocate Shared memory IPC comms memory area
+    ret = mbuf_allocate_area( "shmipc", 16 * 1024 * 1024, 0 );
+    if ( ret < 0 )
+    {
+        printk( "" SYSTEM_NAME_STRING_LOWER
+                ": ERROR: mbuf_allocate_area(shmipc) failed; ret = %d\n",
+                ret );
+        return -12;
+    }
+    _shmipc_shm = (unsigned char*)( kmalloc_area[ ret ] );
 
     /// Allocate DAQ memory area
     sprintf( fname, "%s_daq", SYSTEM_NAME_STRING_LOWER );

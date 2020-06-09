@@ -23,7 +23,7 @@ extern unsigned int CDIO1616InputInput[ MAX_DIO_MODULES ];
 extern unsigned int CDIO6464InputInput[ MAX_DIO_MODULES ];
 extern double*      testpoint[ 500 ];
 extern double       xExc[ 50 ];
-extern char*        _ipc_shm;
+extern char*        _shmipc_shm;
 extern int          startGpsTime;
 extern CDS_HARDWARE cdsPciModules;
 extern unsigned int ipcErrBits;

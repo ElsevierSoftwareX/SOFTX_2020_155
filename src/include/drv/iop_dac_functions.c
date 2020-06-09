@@ -1,6 +1,6 @@
 inline int iop_dac_init( int[] );
 inline int iop_dac_preload( volatile GSC_DAC_REG*[] );
-inline int iop_dac_write( void );
+inline int iop_dac_write( int );
 
 inline int
 iop_dac_init( int errorPend[] )
@@ -77,42 +77,41 @@ iop_dac_preload( volatile GSC_DAC_REG* dacReg[] )
 }
 
 inline int
-iop_dac_recover( int loops, volatile GSC_DAC_REG* dacReg[] )
+iop_dac_recover( int samples, volatile GSC_DAC_REG* dacReg[] )
 {
     volatile GSA_18BIT_DAC_REG* dac18Ptr;
     volatile GSA_20BIT_DAC_REG* dac20Ptr;
     volatile GSC_DAC_REG*       dac16Ptr;
-    int                         ii, jj, kk;
-    for ( kk = 0; kk < loops; kk++ )
-    {
-        for ( jj = 0; jj < cdsPciModules.dacCount; jj++ )
+    int                         kk;
+    int                         card;   
+    int                         chan;
+        for ( card = 0; card < cdsPciModules.dacCount; card++ )
         {
-            if ( cdsPciModules.dacType[ jj ] == GSC_18AO8 )
+            if ( cdsPciModules.dacType[ card ] == GSC_18AO8 )
             {
-                dac18Ptr = (volatile GSA_18BIT_DAC_REG*)( dacReg[ jj ] );
-                for ( ii = 0; ii < GSAO_18BIT_CHAN_COUNT; ii++ )
-                    dac18Ptr->OUTPUT_BUF = dacOutEpics[ jj ][ ii ];
+                dac18Ptr = (volatile GSA_18BIT_DAC_REG*)( dacReg[ card ] );
+                for ( chan = 0; chan < (GSAO_18BIT_CHAN_COUNT * samples); chan++ )
+                    dac18Ptr->OUTPUT_BUF = dacOutEpics[ card ][ chan ];
             }
-            else if ( cdsPciModules.dacType[ jj ] == GSC_20AO8 )
+            else if ( cdsPciModules.dacType[ card ] == GSC_20AO8 )
             {
-                dac20Ptr = (volatile GSA_20BIT_DAC_REG*)( dacReg[ jj ] );
-                for ( ii = 0; ii < GSAO_20BIT_CHAN_COUNT; ii++ )
-                    dac20Ptr->OUTPUT_BUF = dacOutEpics[ jj ][ ii ];
+                dac20Ptr = (volatile GSA_20BIT_DAC_REG*)( dacReg[ card ] );
+                for ( chan = 0; chan < (GSAO_20BIT_CHAN_COUNT * samples); chan++ )
+                    dac20Ptr->OUTPUT_BUF = dacOutEpics[ card ][ chan ];
             }
             else
             {
-                dac16Ptr = dacReg[ jj ];
-                for ( ii = 0; ii < GSAO_16BIT_CHAN_COUNT; ii++ )
-                    dac16Ptr->ODB = dacOutEpics[ jj ][ ii ];
+                dac16Ptr = dacReg[ card ];
+                for ( chan = 0; chan < (GSAO_16BIT_CHAN_COUNT * samples * 2); chan++ )
+                    dac16Ptr->ODB = dacOutEpics[ card ][ chan ];
             }
         }
-    }
 
     return 0;
 }
 
 inline int
-iop_dac_write( )
+iop_dac_write( int in_delay)
 {
     unsigned int* pDacData;
     int           mm;
@@ -128,7 +127,7 @@ iop_dac_write( )
     /// - -- Code will require restart to clear.
     // COMMENT OUT NEX LINE FOR TEST STAND w/bad DAC cards.
     /// \> Loop thru all DAC modules
-    if ( dacWriteEnable > 4 )
+    if ( (dacWriteEnable > 4) && (in_delay < 2) )
     {
         for ( card = 0; card < cdsPciModules.dacCount; card++ )
         {
@@ -138,7 +137,7 @@ iop_dac_write( )
             mm = cdsPciModules.dacConfig[ card ];
             /// - -- Determine if memory block has been set with the correct
             /// cycle count by Slave app.
-            if ( ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle == ioClockDac )
+            if ( ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle == ioClockDac || (in_delay  == 1))
             {
                 dacEnable |= pBits[ card ];
             }
@@ -167,15 +166,17 @@ iop_dac_write( )
             /// - -- For each DAC channel
             for ( chan = 0; chan < num_outs;chan++ )
             {
-#ifdef FLIP_SIGNALS
-                dacOut[ card ][ chan ] *= -1;
-#endif
                 /// - ---- Read DAC output value from shared memory and reset
                 /// memory to zero
                 if ( ( !dacChanErr[ card ] ) && ( iopDacEnable ) )
                 {
-                    dac_out =
-                        ioMemData->iodata[ mm ][ ioMemCntrDac ].data[ chan ];
+                    if ( !in_delay )
+                    {
+                        dac_out =
+                            ioMemData->iodata[ mm ][ ioMemCntrDac ].data[ chan ];
+                    } else {
+                        dac_out = dac_out_last[ card ][chan];
+                    }
                     /// - --------- Zero out data in case user app dies by next
                     /// cycle when two or more apps share same DAC module.
                     ioMemData->iodata[ mm ][ ioMemCntrDac ].data[ chan ] = 0;
@@ -238,6 +239,7 @@ iop_dac_write( )
                 /// - ---- Load last values to EPICS channels for monitoring on
                 /// GDS_TP screen.
                 dacOutEpics[ card ][ chan ] = dac_out;
+                dac_out_last[ card ][ chan ] = dac_out;
 
                 /// - ---- Load DAC testpoints
                 floatDacOut[ 16 * card + chan ] = dac_out;

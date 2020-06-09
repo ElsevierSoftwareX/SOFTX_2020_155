@@ -156,6 +156,7 @@ $adcclock = 64;
 $modelrate = 64;
 $servoflag = "-DSERVO64K";
 $clock_div = 1;
+$dolphin_recover = 0;
 
 # Load model name without .mdl extension.
 $skeleton = $ARGV[1];
@@ -1128,6 +1129,7 @@ if($diagTest > -1)
 {
 print OUTH "\tint bumpCycle;\n";
 print OUTH "\tint bumpAdcRd;\n";
+print OUTH "\tint longAdcRd;\n";
 }
 print OUTH "} CDS_EPICS_IN;\n\n";
 print OUTH "typedef struct CDS_EPICS_OUT {\n";
@@ -1325,9 +1327,10 @@ print EPICS "DUMMY FEC\_$dcuId\_UPTIME_MINUTE int ao 0\n";
 # The following code is in solely for automated testing.
 if($diagTest > -1)
 {
-print OUTH "\tint timingTest[10];\n";
+print OUTH "\tint timingTest[11];\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_CYCLE epicsInput.bumpCycle int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_ADC epicsInput.bumpAdcRd int ao 0\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_LONG_ADC epicsInput.longAdcRd int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_64K epicsOutput.timingTest[0] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32K epicsOutput.timingTest[1] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16K epicsOutput.timingTest[2] int ao 0\n";
@@ -1338,6 +1341,7 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32KA epicsOutput.timingTest[6]
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16KA epicsOutput.timingTest[7] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04KA epicsOutput.timingTest[8] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02KA epicsOutput.timingTest[9] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_DELAY epicsOutput.timingTest[10] int ao 0\n";
 }
 
 print OUTH "} CDS_EPICS_OUT;\n\n";
@@ -1716,17 +1720,18 @@ print OUT "\n";
 print OUT "    // Unit delays\n";
 print OUT "$unitDelayCode";
 #//			- Add all IPC Output code.
-print OUT "    // All IPC outputs\n";
-print OUT "    if (_ipc_shm != 0) {\n";
-print OUT "$ipcOutputCode";
-print OUT "    }\n";
-print OUT "$feTailCode";
+#print OUT "    // All IPC outputs\n";
+#print OUT "    if (_shmipc_shm != 0) {\n";
+#print OUT "$ipcOutputCode";
+#print OUT "    }\n";
+#print OUT "$feTailCode";
 
 # IPCx PART CODE
 # The actual sending of IPCx data is to occur
 # as the last step of the processing loop
 #
 if ($ipcxCnt > 0) {
+print OUT "    // All IPC outputs\n";
    print OUT "      if(!cycle && pLocalEpics->epicsInput.ipcDiagReset) pLocalEpics->epicsInput.ipcDiagReset = 0;\n";
 
    if($ipccycle > 0) {
@@ -2495,6 +2500,9 @@ if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
   $modelType = "MASTER";
   if($diagTest > -1) {
   print OUTM "EXTRA_CFLAGS += -DDIAG_TEST\n";
+  }
+  if($dolphin_recover > -1) {
+  print OUTM "EXTRA_CFLAGS += -DDOLPHIN_RECOVERY\n";
   }
 # Invoked if IOP cycle rate slower than ADC clock rate
   print OUTM "EXTRA_CFLAGS += -DUNDERSAMPLE=$clock_div\n";

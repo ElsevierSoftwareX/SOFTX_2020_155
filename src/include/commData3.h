@@ -99,7 +99,7 @@ typedef struct CDS_DOLPHIN_INFO
 #define IRFM0 2
 #define IRFM1 3
 #define IPC_BUFFER_SIZE sizeof( struct CDS_IPC_COMMS )
-#define IPC_BASE_OFFSET 0x800000
+#define IPC_BASE_OFFSET 0x0
 #define IPC_PCIE_TIME_OFFSET 0x80
 #define IPC_PCIE_BASE_OFFSET 0x100
 #define IPC_TOTAL_ALLOC_SIZE                                                   \

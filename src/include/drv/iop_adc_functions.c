@@ -128,6 +128,20 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
             packedData += GSAI_64_OFFSET;
 
         cpuClk[ CPU_TIME_RDY_ADC ] = rdtsc_ordered( );
+#ifdef DIAG_TEST
+        // For DIAGS ONLY !!!!!!!!
+        // This will change ADC DMA BYTE count
+        // -- Greater than normal will result in channel hopping.
+        // -- Less than normal will result in ADC timeout.
+        // In both cases, real-time kernel code should exit with errors to dmesg
+        int mydelay = 0;
+        if ( pLocalEpics->epicsInput.longAdcRd != 0 )
+        {
+            mydelay = pLocalEpics->epicsInput.longAdcRd;
+            udelay( mydelay );
+            pLocalEpics->epicsInput.longAdcRd = 0;
+        }
+#endif
         do
         {
             /// - ---- Need to delay if not ready as constant banging of the
@@ -148,10 +162,12 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
             adcinfo->adcRdTime[ card ] = ( cpuClk[ CPU_TIME_ADC_WAIT ] -
                                            cpuClk[ CPU_TIME_CYCLE_START ] ) /
                 CPURATE;
-            if ( adcinfo->adcRdTime[ card ] > 1000 )
-                adcStat = ADC_BUS_DELAY;
-            if ( adcinfo->adcRdTime[ card ] < 13 )
-                adcStat = ADC_SHORT_CYCLE;
+            if ( adcinfo->adcRdTime[ card ] > 500 )
+                // Return a guestimate of how many cycles were delayed
+                adcStat = adcinfo->adcRdTime[ card ] / 14;
+            if ( adcinfo->adcRdTime[ card ] < 10 )
+                // Indicate short cycle during recovery from long cycle
+                adcStat = -1;
 #ifdef TIME_MASTER
             pcieTimer->gps_time = timeSec;
             pcieTimer->cycle = cycleNum;
