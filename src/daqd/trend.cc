@@ -1556,7 +1556,7 @@ trender_c::trend_worker( )
     {
         // get control from the trender thread
         pthread_mutex_lock( &worker_lock );
-        while ( !worker_busy || !stopping( ) )
+        while ( !worker_busy && !stopping( ) )
         {
             timespec ts{};
             timespec_get( &ts, TIME_UTC );

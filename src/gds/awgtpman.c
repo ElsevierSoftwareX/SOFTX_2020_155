@@ -73,7 +73,8 @@ CDS_HARDWARE cdsPciModules;
       int               sys_freq_mult_cmdline = 1;
 
       /* awgtpman by default tries to read the model rate from the INI files
-       * for the model.  failing that, it assumes a 16 kHz (actually 2^14 Hz)
+       * for the model.  If the -r agrument is specified,
+       * it assumes a 16 kHz (actually 2^14 Hz)
        * rate that is modified by numerical arguments.  -2 would make the assumed
        * rate 32 Khz, -4 is 64 kHz, -8 128 kHz etc.  The numerical args stack
        * multiplicitively so that -2 -4 is also 128 kHz
@@ -165,13 +166,91 @@ CDS_HARDWARE cdsPciModules;
          }
       }
 
+       if (errflag) {
+           printf ("Usage: awgtpman\n"
+                   "	Starts awg and tpman on a unix machine\n"
+                   "	-h : help\n"
+                   "	-l file_name : specify log file name\n"
+                   "	-s system_name : specify control system name\n"
+                   "	-t : run tpman, no awg\n"
+                   "	-a : run awg, no tpman\n"
+                   "	-w : lock all pages in memory\n"
+                   "\n"
+                   "awgtpman tries to determine the model rate from files in the\n"
+                   "    TARGET directory by default. With the '-r' argument,\n"
+                   "    awgtpman uses a rate derived from command line arguments\n"
+                   "\n"
+                   "       -r   : override file model rate.  Use 16 kHz or 2 kHz\n"
+                   "              modified by any numerical arguments\n"
+                   "       -<n> : a single digit that's a multiple of 2 (1,2,4,8).\n"
+                   "              The model rate is a base rate, either 2 or 16 kHz\n"
+                   "              multiplied by <n>.  More than one argument can be\n"
+                   "              given to reach higher rates.\n");
+           return 1;
+       }
+
+
+       //setup the target directory.  Look for TARGET env, first, then failing that, build an
+      //old style directory, then just fail.
+      if(getenv("TARGET"))
+      {
+          snprintf(target, sizeof(target), "%s", getenv("TARGET"));
+      }
+      else if(getenv("IFO") && getenv("SITE"))
+      {
+          char site_upper[4], site_lower[4];
+          char ifo_upper[3], ifo_lower[3];
+
+          printf("WARNING: TARGET environment variable not found\n");
+          printf("\tBuilding an old style target path\n");
+          snprintf(site_upper, sizeof site_upper, "%s", getenv("SITE"));
+          snprintf(ifo_upper, sizeof ifo_upper, "%s", getenv("IFO"));
+          printf("SITE=%s, IFO=%s\n", site_upper, ifo_upper);
+          int lc=0;
+          while(( site_lower[lc] = (char)tolower(site_upper[lc])))
+          {
+              lc++;
+          }
+          lc=0;
+          while(( ifo_lower[lc] = (char)tolower(ifo_upper[lc])))
+          {
+              lc++;
+          }
+          printf("site=%s, ifo=%s\n", site_lower, ifo_lower);
+          snprintf( target,
+                    sizeof( target ),
+                    "/opt/rtcds/%s/%s",
+                    site_lower,
+                    ifo_lower );
+      }
+      else
+      {
+          fprintf(stderr, "ERROR: TARGET environment variable not found.\n"
+            "\tTARGET must be set to the base target directory for the IFO\n"
+            "\te.g. /opt/rtcds/tst/x2, so that \"$TARGET/target/gds/param\"\n"
+            "\tis a directory containing the \".par\" parameter files.\n");
+          exit(2);
+      }
+      printf("Target directory is %s\n", target);
+
       int rate_hz=0, dcuid=0;
       if(use_file_model_rate)
       {
-          get_model_rate_dcuid( &rate_hz, &dcuid, system_name, NULL );
-      }
-      if(rate_hz)  //if get_model_rate_dcuid() fails to get the rate, it'll still be zero.
-      {
+          char tpdir[256];
+          snprintf(tpdir, sizeof tpdir, "%s/target/gds/param", target);
+          printf("Looking for model rate in %s\n", tpdir);
+          get_model_rate_dcuid( &rate_hz, &dcuid, system_name, tpdir);
+
+          if(!rate_hz)
+          {
+              fprintf(stderr, "ERROR: model rate for %s could not be read from param file.\n", system_name);
+              fprintf(stderr, "\tCheck the spelling of the system name (argument to -s).\n");
+              fprintf(stderr, "\tCheck that the TARGET environment variable is set so that the directory\n"
+                               "\t\"$TARGET/target/gds/param\" contains the parameter files for the model.\n");
+              fprintf(stderr, "\tUse the -r argument to specify the model rate from the command line.\n");
+              exit(-1);
+          }
+
           // in high rate models >= 16 kHz, multiplier is x 16 kHz.
           // for slow rate models, it's times 2 kHz (2^11 Hz)
           if(rate_hz >= 1<<14)
@@ -199,29 +278,7 @@ CDS_HARDWARE cdsPciModules;
       printf("%d or %d kHz system\n", 2 * sys_freq_mult, 16 * sys_freq_mult);
    
       /* help */
-      if (errflag) {
-         printf ("Usage: awgtpman\n"
-	        "	Starts awg and tpman on a unix machine\n"
-                "	-h : help\n"
-                "	-l file_name : specify log file name\n"
-		"	-s system_name : specify control system name\n"
-		"	-t : run tpman, no awg\n"
-		"	-a : run awg, no tpman\n"
-                "	-w : lock all pages in memory\n"
-                "\n"
-                "awgtpman tries to determine the model rate from files in the\n"
-                "    TARGET directory. Failing that, awgtpman uses a 16 kHz rate\n"
-                "    unless modified by one or more numerical arguments.\n"
-                "\n"
-                "       -r : override file model rate.  Use 16 kHz or 2 kHz\n"
-                "            modified by any numerical arguments\n"
-		"	-<n> : a single digit that's a multiple of 2 (1,2,4,8).\n"
-                "              The model rate is a base rate, either 2 or 16 kHz\n"
-                "              multiplied by <n>.  More than one argument can be\n"
-                "              given to reach higher rates.\n");
-         return 1;
-      }
-   
+
       if (!run_awg && !run_tpman) exit(0);
 
       if (lckall) {
@@ -236,25 +293,10 @@ CDS_HARDWARE cdsPciModules;
         nice(-20);
       }
 
-
       // site_prefix takes on the first letter of the system name (as upper case)
       site_prefix_storage[1] = 0;
       site_prefix_storage[0] = toupper(system_name[0]);
 
-      char site_upper[4], site_lower[4];
-      char ifo_upper[3], ifo_lower[3];
-
-      printf("Getting paths\n");
-      snprintf(site_upper, sizeof site_upper, "%s", getenv("SITE"));
-      snprintf(ifo_upper, sizeof ifo_upper, "%s", getenv("IFO"));
-      printf("SITE=%s, IFO=%s\n", site_upper, ifo_upper);
-      int lc=0;
-      while( site_lower[lc] = tolower(site_upper[lc++]));
-      lc=0;
-      while( ifo_lower[lc] = tolower(ifo_upper[lc++]));
-
-      snprintf(target, sizeof(target),"/opt/rtcds/%s/%s", site_lower, ifo_lower);
-      printf("Target directory is %s\n", target);
       snprintf(myParFile, sizeof(myParFile),"%s/target/gds/param/tpchn_%s.par", target, system_name);
       printf("My config file is %s\n", myParFile);
       snprintf(archive_storage, sizeof archive_storage, "%s/target/gds", target);
