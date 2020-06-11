@@ -193,6 +193,7 @@ rt_fe_init( void )
 void
 rt_fe_cleanup( void )
 {
+    int ret;
 #ifndef NO_CPU_SHUTDOWN
     extern int cpu_up( unsigned int cpu );
 
@@ -228,6 +229,7 @@ rt_fe_cleanup( void )
 
     // Print out any error messages from FE code on exit
     print_exit_messages( fe_status_return, fe_status_return_subcode );
+    ret = detach_shared_memory( );
 }
 
 module_init( rt_fe_init );

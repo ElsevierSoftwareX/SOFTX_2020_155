@@ -149,6 +149,8 @@ sub parseParams {
 				$::adcSlave = $spp[1];
 			} elsif ($spp[0] eq "time_master") {
 				$::timeMaster = $spp[1];
+			} elsif ($spp[0] eq "dolphin_recover") {
+				$::dolphin_recover = $spp[1];
 			} elsif ($spp[0] eq "time_slave") {
 				$::timeSlave = $spp[1];
 			} elsif ($spp[0] eq "iop_time_slave") {

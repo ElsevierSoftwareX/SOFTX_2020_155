@@ -271,7 +271,8 @@ extern int     iop_rfm_valid;
 volatile char* _epics_shm; ///< Ptr to EPICS shared memory area
 char*          _ipc_shm; ///< Ptr to inter-process communication area
 char*          _daq_shm; ///< Ptr to frame builder comm shared mem area
-char*          _gds_shm; ///< Ptr to frame builder comm shared mem area
+// char*          _gds_shm; ///< Ptr to frame builder comm shared mem area
+char*          _shmipc_shm; ///< Ptr to IOP I/O data to/from User app shared mem area
 char*          _io_shm; ///< Ptr to user space I/O area
 int            daq_fd; ///< File descriptor to share memory file
 

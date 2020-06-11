@@ -57,6 +57,7 @@ int        dacTimingErrorPending[ MAX_DAC_MODULES ];
 static int dacTimingError = 0;
 int        dacWatchDog = 0;
 int        dac_out = 0;
+int        dac_out_last[ MAX_DAC_MODULES ][16];
 
 int pBits[ 9 ] = { 1, 2, 4, 8, 16, 32, 64, 128, 256 };
 
@@ -139,6 +140,11 @@ fe_start_controller( void* arg )
     int        usloop = 1;
     double     adcval[ MAX_ADC_MODULES ][ MAX_ADC_CHN_PER_MOD ];
     adcInfo_t* padcinfo;
+    int        expect_delays = 0;
+
+#ifdef DIAG_TEST
+        int delay_cycles = 0;
+#endif
 
     /// **********************************************************************************************\n
     /// Start Initialization Process \n
@@ -507,6 +513,29 @@ fe_start_controller( void* arg )
         // **********************************************************************
         // Read ADC data
         status = iop_adc_read( padcinfo, cpuClock );
+#ifdef DOLPHIN_RECOVERY
+        if( (status >  0)  && (dacWriteEnable > 6))
+        {
+            expect_delays = 2;
+            delay_cycles = 0;
+        }
+
+        if( expect_delays == 2 ) delay_cycles ++;
+        if( ( expect_delays == 2 )  && (status == 0))
+        {
+            pLocalEpics->epicsOutput.timingTest[10] = delay_cycles;
+            expect_delays = 1;
+            delay_cycles = 0;
+            status = iop_dac_recover(2,dacPtr);
+        }
+        if(  expect_delays == 1 )
+        {
+            delay_cycles --;
+            if(  delay_cycles < 1 ) {
+                expect_delays = 0;
+            }
+        }
+#endif
         // Try synching to 1PPS on ADC[0][31] if not using TDS
         // Only try for 1 sec.
         if ( !sync21pps )
@@ -592,7 +621,7 @@ fe_start_controller( void* arg )
 #endif
             // Write out data to DAC modules
             if ( usloop == 0 )
-                dkiTrip = iop_dac_write( );
+                dkiTrip = iop_dac_write( expect_delays );
 
             // ***********************************************************************
             /// BEGIN HOUSEKEEPING
@@ -1077,7 +1106,7 @@ fe_start_controller( void* arg )
             if ( cycleNum >= HKP_DAC_FIFO_CHK &&
                  cycleNum < ( HKP_DAC_FIFO_CHK + cdsPciModules.dacCount ) )
             {
-                status = check_dac_buffers( cycleNum );
+                if(!expect_delays) status = check_dac_buffers( cycleNum );
             }
             if ( dacTimingError )
                 feStatus |= FE_ERROR_DAC;

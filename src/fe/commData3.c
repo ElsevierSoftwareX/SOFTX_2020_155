@@ -112,10 +112,10 @@ commData3Init(
         {
             if ( ipcInfo[ ii ].mode == ISND )
                 ipcInfo[ ii ].pIpcDataWrite[ 0 ] =
-                    (CDS_IPC_COMMS*)( _ipc_shm + IPC_BASE_OFFSET );
+                    (CDS_IPC_COMMS*)( _shmipc_shm + IPC_BASE_OFFSET );
             else
                 ipcInfo[ ii ].pIpcDataRead[ 0 ] =
-                    (CDS_IPC_COMMS*)( _ipc_shm + IPC_BASE_OFFSET );
+                    (CDS_IPC_COMMS*)( _shmipc_shm + IPC_BASE_OFFSET );
         }
         // PCIe communications requires one pointer for sending data and a
         // second one for receiving data.
