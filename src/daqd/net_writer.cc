@@ -308,47 +308,6 @@ net_writer_c::send_files( void )
         }
     }
 
-#if 0
-  // FIXME: temporary solution
-  // transmit current calibration values if this is a request for minute trend data
-  //
-  if (source_buffptr == daqd.trender.mtb) {
-    int written;
-    unsigned long rh [5];
-    rh [0] = htonl (4 * sizeof (unsigned long)
-		    + num_channels*(2*sizeof(float)+sizeof(int)));
-    rh [1] = rh [2] = rh [3] = rh [4] = htonl(0xffffffff);
-
-    written = basic_io::writen(fileno, rh, sizeof(rh));
-    if (written != sizeof(rh)) {
-      close(socketfd);
-      system_log(1, "failed to send reconfig header; %s", errmsgbuf);
-      return 1;
-    }
-    for (int k = 0; k < num_channels; k++) {
-      written = basic_io::writen(fileno, (char *) &channels[k].signal_offset, sizeof(float));
-      if (written != sizeof(float)) {
-	close(socketfd);
-	system_log(1, "failed to send reconfig data; %s", errmsgbuf);
-	return 1;
-      }
-      written = basic_io::writen(fileno, (char *) &channels[k].signal_slope, sizeof(float));
-      if (written != sizeof(float)) {
-	close(socketfd);
-	system_log(1, "failed to send reconfig data; %s", errmsgbuf);
-	return 1;
-      }
-      unsigned int status = 0;
-      written = basic_io::writen(fileno, (char *) &status, sizeof(int));
-      if (written != sizeof(int)) {
-	close(socketfd);
-	system_log(1, "failed to send reconfig data; %s", errmsgbuf);
-	return false;
-      }
-    }
-  }
-#endif
-
     // send data connection fd to the NDS
     struct msghdr msg;
     struct iovec  iov[ 1 ];
@@ -1557,32 +1516,6 @@ net_writer_c::connect_srvr_addr( int ssize )
 
         int flag = 1;
 
-#if 0
-  // Defeats Nagle buffering algorithm
-  int result = setsockopt(sockfd,            /* socket affected */
-			  IPPROTO_TCP,     /* set option at TCP level */
-			  TCP_NODELAY,     /* name of option */
-			  (char *) &flag,  /* the cast is historical
-					      cruft */
-			  sizeof(int));    /* length of option value */
-#endif
-
-#if 0
-  int rcvbuf_size = 1024 * 10;  
-  if (setsockopt (sockfd, SOL_SOCKET, SO_RCVBUF, (const char *) &rcvbuf_size, sizeof (rcvbuf_size)))
-    fprintf (stderr, "setsockopt(%d, %d); %s\n", sockfd, rcvbuf_size, errmsgbuf);
-
-  {
-    int sendbuf_size_len = 4;
-    sendbuf_size = -1;
-    if (getsockopt (sockfd, SOL_SOCKET, SO_RCVBUF, (const char *) &sendbuf_size, &sendbuf_size_len))
-      fprintf (stderr, "getsockopt(%d, %d); %s\n", sockfd, sendbuf_size, errmsgbuf);
-    else {
-      system_log(1,"RCVBUF size is %d\n", sendbuf_size);
-    }
-  }
-#endif
-
         if ( connect( sockfd, (struct sockaddr*)&srvr_addr, srvr_addr_len ) <
              0 )
         {
@@ -1755,23 +1688,6 @@ net_writer_c::start_net_writer( ostream*     yyout,
         DEBUG1( cerr << "frame net writer consumer thread started; tid="
                      << consumer_tid << endl );
     }
-
-#if 0
-  else if (name_writer == writer_type)
-    {
-      daqd.net_writers.insert_first (this);
-
-      pthread_attr_t attr;
-      pthread_attr_init (&attr);
-      pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-      pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
-      pthread_attr_setstacksize (&attr, daqd.thread_stack_size);
-      pthread_create (&consumer_tid, &attr, (void *(*)(void *)) name_consumer_static, (void *) this);
-      pthread_attr_destroy (&attr);
-      DEBUG1(cerr << "name writer consumer thread started; tid=" << consumer_tid << endl);
-    }
-#endif
-
     else
     {
         bool no_consumer_buffer = false;
@@ -2217,17 +2133,6 @@ net_writer_c::shutdown_net_writer( )
 #endif
     disconnect_srvr_addr( );
     shutdown_now = 1;
-
-#ifndef NO_BROADCAST
-// Do not close the broadcaster stuff
-// This seems to cause segfaults on fb0
-// due to broadcast variable corruption by unknown causes.
-#if 0
-  if (broadcast) {
-    radio.close ();
-  }
-#endif
-#endif
 }
 
 // Send some data to the client
