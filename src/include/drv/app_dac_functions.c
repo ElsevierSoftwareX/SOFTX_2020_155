@@ -196,7 +196,7 @@ app_dac_write( int ioMemCtrDac, int ioClkDac, dacInfo_t* dacinfo )
                 memCtr = ( ioMemCtrDac + kk ) % IO_MEMORY_SLOTS;
                 /// - ---- Write DAC output to shared memory. \n
                 /// - --------- Only write to DAC channels being used to allow
-                /// two or more slaves to write to same DAC module.
+                /// two or more control models to write to same DAC module.
                 if ( dacOutUsed[ jj ][ ii ] )
                     ioMemData->iodata[ mm ][ memCtr ].data[ ii ] = dac_out;
             }

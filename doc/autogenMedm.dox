@@ -31,7 +31,7 @@ Shown is an example GDS_TP screen, further exploded into the 3 primary sections,
 <b> 4. Sync Source:</b> The source of synchonization for the real-time code.
 	- Normal Indication:
 		- IOP process: TDS (Timing Distribution System) or 1PPS. Note for aLIGO systems, this should always be TDS.
-		- User App (Slave) process: IOP, indicating code is being synchronized by the IOP process on that computer.
+		- User App (control) process: IOP, indicating code is being synchronized by the IOP process on that computer.
 	- Fault Indication: NO SYNC, indicating that the code is free-running on internal computer time.
 	
 <b> 5. Cycle time:</b> time, in usec, between code cycle triggers. This value switches once per second between:
@@ -131,7 +131,7 @@ For an IOP, three status bits are shown:
 	- Bit 1: ADC timing is correct.
 	- Bit 2: ADC overflow ie input signal is beyond the input range of the ADC.
 	
-For a slave (user app) process, only two status bits are provided:
+For a control (user app) process, only two status bits are provided:
 	- Bit 0: Communications established with IOP to receive ADC data.
 	- Bit 1: ADC overflow indicator.
 
@@ -140,12 +140,12 @@ For a slave (user app) process, only two status bits are provided:
 	
 For an IOP, a \ref dacUse5 "related display" button and status indicators will be provided for each DAC module installed in the I/O chassis and defined in the IOP model. The number of status bits is dependent on the DAC type, ie 16bit or 18 bit. The status bits are defined as:
 	- Bit 0: DAC is present and was mapped and initialized by the IOP code.
-	- Bit 1: A slave (user app) model is writing to the DAC, is in sync with IOP. This bit may also indicate bad (Red) if DACKILL part in user model is tripped.
+	- Bit 1: A control (user app) model is writing to the DAC, is in sync with IOP. This bit may also indicate bad (Red) if DACKILL part in user model is tripped.
 	- Bit 2: Overflow indicator. If code is trying to write value beyond the limits of the DAC, this indicator will go red.
 	- Bit 3: DAC FIFO empty/full: If DAC clocking is correct and synched to IOP, this indicator is green (OK). If the DAC FIFO becomes empty or full, indicator will be red (error). More info can be found on the computer on which the IOP is running by checking its /proc/<iopmodelname> file.
 	- Bit 4: (18 bit DAC only) Digital I/O built into these modules is used to reset a watchdog bit (at 1Hz) rate in the suspension control AI chassis. The WD setting is then read back and indicated in this bit (green=ok, red=fault). 
 
-	For a slave (user app) model, related display and status indicators only appear for those DAC modules defined in the model. There are also only 2 status bits for each DAC:
+	For a control (user app) model, related display and status indicators only appear for those DAC modules defined in the model. There are also only 2 status bits for each DAC:
 	- Bit 0: Communication of DAC data established with IOP.
 	- Bit 1: Overflow indicator, same definition as Bit 2 for an IOP above.
 

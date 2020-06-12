@@ -48,7 +48,7 @@ unsigned int CDIO6464LastOutState[ MAX_DIO_MODULES ]; // Current requested value
 /// Contec6464 values to be written to the output register
 unsigned int CDIO6464Output[ MAX_DIO_MODULES ]; // Binary output bits
 
-// This Contect 16 input / 16 output DIO card is used to control timing slave by
+// This Contect 16 input / 16 output DIO card is used to control timing receiver by
 // IOP
 /// Contec1616 input register values
 unsigned int CDIO1616InputInput[ MAX_DIO_MODULES ]; // Binary input bits

@@ -168,7 +168,7 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
             if ( adcinfo->adcRdTime[ card ] < 10 )
                 // Indicate short cycle during recovery from long cycle
                 adcStat = -1;
-#ifdef TIME_MASTER
+#ifdef XMIT_DOLPHIN_TIME
             pcieTimer->gps_time = timeSec;
             pcieTimer->cycle = cycleNum;
             clflush_cache_range( (void*)&pcieTimer->gps_time, 16 );
@@ -301,7 +301,7 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
             // normal 64K adc
             if ( UNDERSAMPLE < 5 )
             {
-                /// - ---- Write GPS time and cycle count as indicator to slave
+                /// - ---- Write GPS time and cycle count as indicator to control app
                 /// that adc data is ready
                 ioMemData->gpsSecond = timeSec;
                 ioMemData->iodata[ card ][ ioMemCntr ].timeSec = timeSec;
@@ -317,7 +317,7 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
         // to limit rate to user apps at 64K
         if ( UNDERSAMPLE > 4 )
         {
-            /// - ---- Write GPS time and cycle count as indicator to slave that
+            /// - ---- Write GPS time and cycle count as indicator to control app that
             /// adc data is ready
             ioMemData->gpsSecond = timeSec;
             ioMemData->iodata[ card ][ ioMemCntr ].timeSec = timeSec;

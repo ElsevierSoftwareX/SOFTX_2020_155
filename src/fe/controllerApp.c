@@ -45,7 +45,7 @@ int getGpsTime( unsigned int* tsyncSec, unsigned int* tsyncUsec );
 int killipc = 0;
 
 // Clear DAC channel shared memory map,
-// used to keep track of non-overlapping DAC channels among slave models
+// used to keep track of non-overlapping DAC channels among control models
 //
 void
 deallocate_dac_channels( void )
@@ -67,8 +67,8 @@ deallocate_dac_channels( void )
 /// This function is the main real-time sequencer or scheduler for all code
 /// built using the RCG. \n There are two primary modes of operation, based on
 /// two compile options: \n
-///	- ADC_MASTER: Software is compiled as an I/O Processor (IOP).
-///	- ADC_SLAVE: Normal user control process.
+///	- IOP_MODEL: Software is compiled as an I/O Processor (IOP).
+///	- CONTROL_MODEL: Normal user control process.
 /// This code runs in a continuous loop at the rate specified in the RCG model.
 /// The loop is synchronized and triggered by the arrival of ADC data, the ADC
 /// module in turn is triggered to sample by the 64KHz clock provided by the
@@ -277,7 +277,7 @@ fe_start_controller( void* arg )
     pLocalEpics->epicsOutput.tpCnt = 0;
 
     /// \> Read Dio card initial values
-    /// - ---- SLAVE units read/write their own DIO \n
+    /// - ---- Control units read/write their own DIO \n
     /// - ---- MASTER units ignore DIO for speed reasons \n
     status = app_dio_init( );
 
@@ -311,8 +311,8 @@ fe_start_controller( void* arg )
         pLocalEpics->epicsOutput.statAdc[ jj ] = 1;
     }
 
-    // SLAVE needs to sync with MASTER by looking for cycle 0 count in ipc
-    // memory Find memory buffer of first ADC to be used in SLAVE application.
+    // Control model needs to sync with MASTER by looking for cycle 0 count in ipc
+    // memory Find memory buffer of first ADC to be used in control application.
     ll = cdsPciModules.adcConfig[ 0 ];
     cpuClock[ CPU_TIME_CYCLE_START ] = rdtsc_ordered( );
 

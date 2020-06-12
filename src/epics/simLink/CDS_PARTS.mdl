@@ -5396,7 +5396,7 @@ Library {
     }
     Block {
       BlockType		      Reference
-      Name		      "site=M1\nrate=32K\ndcuid=10\nhost=unknown\nspecific_cpu=2\nadcSlave=1"
+      Name		      "site=M1\nrate=32K\ndcuid=10\nhost=unknown\nspecific_cpu=2"
       SID		      "202"
       Tag		      "cdsParameters"
       Description	      "Purpose:                                                                                     "

@@ -18,7 +18,7 @@ iop_dac_init( int errorPend[] )
             dacOutUsed[ ii ][ jj ] = 0;
             dacOutBufSize[ ii ] = 0;
             // Zero out DAC channel map in the shared memory
-            // to be used to check on slaves' channel allocation
+            // to be used to check on control apps' channel allocation
             ioMemData->dacOutUsed[ ii ][ jj ] = 0;
         }
     }
@@ -136,7 +136,7 @@ iop_dac_write( int in_delay)
             /// - -- locate the proper DAC memory block
             mm = cdsPciModules.dacConfig[ card ];
             /// - -- Determine if memory block has been set with the correct
-            /// cycle count by Slave app.
+            /// cycle count by control app.
             if ( ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle == ioClockDac || (in_delay  == 1))
             {
                 dacEnable |= pBits[ card ];
@@ -250,7 +250,7 @@ iop_dac_write( int in_delay)
                 pDacData++;
             }
             /// - -- Mark cycle count as having been used -1 \n
-            /// - --------- Forces slaves to mark this cycle or will not be used
+            /// - --------- Forces control apps to mark this cycle or will not be used
             /// again by Master
             ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle = -1;
             /// - -- DMA Write data to DAC module

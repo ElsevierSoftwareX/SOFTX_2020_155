@@ -783,7 +783,7 @@ Bug Fixes:
 - compile correctly within subsystem parts.
 - Use pvPut instead of EZCA for performance reasons (plus EZCA not supported in latest EPICS).
 2) Removal of SVN tag from BURT file ie BURT restore would overwrite latest SVN tag).
-3) Fix to slave model DAC status info on GDS TP screens (false error indicator).
+3) Fix to control model DAC status info on GDS TP screens (false error indicator).
 4) Change in CDS_PARTS.mdl bus selector part to set use to "Require input signal names to match signals below", instead of "Inheri
 t bus signal names from input ports". This is required to make BUS parts work with new, multi-level BUS parser in RCG.
 

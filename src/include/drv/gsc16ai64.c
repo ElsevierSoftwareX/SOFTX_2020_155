@@ -159,7 +159,7 @@ gsc16ai64WaitDmaDone( int module, volatile int* data )
 /// \brief Function clears ADC buffer and starts acquisition via external clock.
 ///< Also sets up ADC for Demand DMA mode and set GO bit in DMA Mode Register.
 ///< NOTE: In normal operation, this code should only be called while the clocks
-///< from the timing slave are turned OFF ie during initialization process.
+///< from the timing receiver are turned OFF ie during initialization process.
 ///	@param[in] adcCount Total number of ADC modules to start DMA.
 // *****************************************************************************
 int

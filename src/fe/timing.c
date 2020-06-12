@@ -32,7 +32,7 @@ current_time_fe( void )
 /// \brief Calculate ADC/DAC duotone offset for diagnostics. \n
 ///< Code should only run on IOP
 //***********************************************************************
-#ifdef ADC_MASTER
+#ifdef IOP_MODEL
 inline float
 duotime( int count, float meanVal, float data[] )
 {

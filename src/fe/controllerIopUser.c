@@ -71,7 +71,7 @@ unsigned int CDIO6464LastOutState[ MAX_DIO_MODULES ]; // Current requested value
 /// Contec6464 values to be written to the output register
 unsigned int CDIO6464Output[ MAX_DIO_MODULES ]; // Binary output bits
 
-// This Contect 16 input / 16 output DIO card is used to control timing slave by
+// This Contect 16 input / 16 output DIO card is used to control timing control by
 // IOP
 /// Contec1616 input register values
 unsigned int CDIO1616InputInput[ MAX_DIO_MODULES ]; // Binary input bits
@@ -149,8 +149,8 @@ initDacModules( void )
 /// This function is the main real-time sequencer or scheduler for all code
 /// built using the RCG. \n There are two primary modes of operation, based on
 /// two compile options: \n
-///	- ADC_MASTER: Software is compiled as an I/O Processor (IOP).
-///	- ADC_SLAVE: Normal user control process.
+///	- IOP_MODEL: Software is compiled as an I/O Processor (IOP).
+///	- CONTROL_MODEL: Normal user control process.
 /// This code runs in a continuous loop at the rate specified in the RCG model.
 /// The loop is synchronized and triggered by the arrival of ADC data, the ADC
 /// module in turn is triggered to sample by the 64KHz clock provided by the
@@ -293,7 +293,7 @@ fe_start_iop_user( )
             dacOutUsed[ ii ][ jj ] = 0;
             dacInfo.dacOutBufSize[ ii ] = 0;
             // Zero out DAC channel map in the shared memory
-            // to be used to check on slaves' channel allocation
+            // to be used to check on control models' channel allocation
             ioMemData->dacOutUsed[ ii ][ jj ] = 0;
         }
     }
@@ -320,7 +320,7 @@ fe_start_iop_user( )
 
     /// \> Init code synchronization source.
     // Look for DIO card or IRIG-B Card
-    // if Contec 1616 BIO present, TDS slave will be used for timing.
+    // if Contec 1616 BIO present, TDS receiver will be used for timing.
     syncSource = SYNC_SRC_TIMER;
 
     printf( "Sync source = %d\n", syncSource );
@@ -530,7 +530,7 @@ fe_start_iop_user( )
         myTimer[ 0 ].tv_nsec = myTimer[ 1 ].tv_nsec;
 
         ioMemCntr = ( cycleNum % IO_MEMORY_SLOTS );
-        // Write GPS time and cycle count as indicator to slave that adc data is
+        // Write GPS time and cycle count as indicator to control app that adc data is
         // ready
         for ( jj = 0; jj < cdsPciModules.adcCount; jj++ )
         {
@@ -589,9 +589,9 @@ fe_start_iop_user( )
 
 /// WRITE DAC OUTPUTS ***************************************** \n
 /// Writing of DAC outputs is dependent on code compile option: \n
-/// - -- IOP (ADC_MASTER) reads DAC output values from memory shared with user
+/// - -- IOP (IOP_MODEL) reads DAC output values from memory shared with user
 /// apps and writes to DAC hardware. \n
-/// - -- USER APP (ADC_SLAVE) sends output values to memory shared with IOP. \n
+/// - -- USER APP (CONTROL_MODEL) sends output values to memory shared with IOP. \n
 
 /// START OF IOP DAC WRITE ***************************************** \n
 /// \> If DAC FIFO error, always output zero to DAC modules. \n
@@ -611,7 +611,7 @@ fe_start_iop_user( )
             /// - -- locate the proper DAC memory block
             mm = cdsPciModules.dacConfig[ jj ];
             /// - -- Determine if memory block has been set with the correct
-            /// cycle count by Slave app.
+            /// cycle count by control app.
             if ( ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle == ioClockDac )
             {
                 dacEnable |= pBits[ jj ];
@@ -692,7 +692,7 @@ fe_start_iop_user( )
                 // pDacData ++;
             }
             /// - -- Mark cycle count as having been used -1 \n
-            /// - --------- Forces slaves to mark this cycle or will not be used
+            /// - --------- Forces control apps to mark this cycle or will not be used
             /// again by Master
             ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle = -1;
             /// - -- DMA Write data to DAC module
@@ -999,7 +999,7 @@ fe_start_iop_user( )
         pLocalEpics->epicsOutput.startgpstime = startGpsTime;
         // Calc the max time of one cycle of the user code
         // For IOP, more interested in time to get thru ADC read code and send
-        // to slave apps
+        // to control apps
         timeinfo.usrTime = BILLION *
                 ( cpuClock[ CPU_TIME_USR_END ].tv_sec -
                   cpuClock[ CPU_TIME_CYCLE_START ].tv_sec ) +

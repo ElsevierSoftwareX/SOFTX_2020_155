@@ -34,8 +34,7 @@ This module must appear once, and only once, at the top level of an RCG applicat
 
 5) Specific_cpu=X, where X is 1, if an IOP task, or >1 for all other applications to run on the same computer. Note also that no two tasks assigned to the same computer shall have the same cpu number.
 
-6) adcSlave=1 (if a user application model or adcMaster=1 (If model is to run as an IOP).
-7) shmem_daq=1: With RCG version 1.9 thru V2.6, this is a required field and setting. After V2.6, this was made default in software and no longer required.
+6) shmem_daq=1: With RCG version 1.9 thru V2.6, this is a required field and setting. After V2.6, this was made default in software and no longer required.
 
 For items 3 and 4 above, the site system administrator should be contacted for proper id. numbers if this code is to operate on an integrated CDS computer.
 
@@ -47,10 +46,8 @@ In addition to the above fields, there are additional optional entries. Each of 
 	o ADC overflow accumulator value.
 ➢ no_daq
 	o System is to run without data acquisition capabilities. 
-➢ adcMaster=1
+➢ iop_model=1
 	o Front-end will run as an I/O processor (IOP).
-➢ adcSlave=1
-	o Default for user applications that run as “slaves” to an IOP. 
 ➢ pciRfm=1
 	o Front-end will run with PCIE Reflected Memory (RFM) network. This flag is only set in an IOP model if the computer is to be connected to the CDS PCIe real-time network. This flag should never be set in a user application.
 ➢ rfm_dma=1

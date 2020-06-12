@@ -41,12 +41,12 @@ In the case of an IOP model, the I/O parts are NOT required to have connections,
 
 GO TIt is required that the IOP model contain:
 	- \ref ParameterUse "cdsParameter" Block with following settings:
-		- adcMaster=1: This is what defines a model as an IOP model to the RCG.
+		- iop_model=1: This is what defines a model as an IOP model to the RCG.
 		- specific_cpu=1 or not defined (as in example). The IOP must always be assigned to CPU core 1 on an FE computer. CPU 0 is reserved for Linux and CPU core 2 up to total number of available cores is reserved for user model applications.
 		- If this FE computer is to be connected to the Dolphin real-time network, then pciRfm=1 must be set. This is only ever set in an IOP model ie not required for user models.
 		- rate=64K: An IOP must always run at the ADC input clock frequency.
 	- All of the \ref rcgSect71 "I/O modules" that will be installed in the I/O chassis connected to this FE computer. The primary purpose of the generated code will be to map and control all I/O devices that are to be addressed by user code running on this FE.
-	- A Contec1616dio part. This particular module will be used to control the timing slave within the I/O chassis. It will not be available for use in user application models.
+	- A Contec1616dio part. This particular module will be used to control the timing receiver within the I/O chassis. It will not be available for use in user application models.
 
 <b> NOTE: The IOP model only writes data to the DAC modules relayed from the user applications ie an IOP model can not be set up to write its own data to DAC channels. Also, I/O to binary I/O modules is done directly by the user application, with the IOP only providing memory mapping and initialization functions.</b>
 
@@ -54,7 +54,7 @@ GO TIt is required that the IOP model contain:
 
 \subsection iop2 Level 2
 Within the next level, the ADC channels are broken out and applied to the next subsystem level. There are also two filter modules shown which support two primary diagnostics:
-	- ADC Duotone: The timing slave provides a duotone signal to the last channel of the first ADC in the I/O chassis (960Hz/961Hz). The IOP code will check the zero crossing time of this signal once per second to verify correct timing in the system.
+	- ADC Duotone: The timing receiver provides a duotone signal to the last channel of the first ADC in the I/O chassis (960Hz/961Hz). The IOP code will check the zero crossing time of this signal once per second to verify correct timing in the system.
 	- DAC Duotone: On operator request, the ADC duotone signal will be fed to the last output channel of the first DAC module, which is then directly connected back to the next to last channel of the first ADC module. Similar to the ADC duotone signal, a zero crossing calculation is done. This provides a total loopback time indication to verify DAC modules are clocking on time.
 
 \image html RCGexampl2.png "Example I/O Processor Model - Subsystem Level 1"
@@ -69,7 +69,6 @@ At the lowest level, an \ref EpicsOutputUse "EPICS Output" and \ref ExcTpUse "Te
 \section ex2 Example User Application Model
 A user application model is built in a similar fashion as the IOP model, example below.  The primary differences are:
 	- \ref ParameterUse "cdsParameter" Block:
-		- Must have adcSlave=1 set.
 		- specific_cpu= must be set to 2 or higher, up to the number of cores available on the FE computer.
 	- While IOP does not require connections to all I/O parts, user models do. Note, however, that not every channel of an I/O part needs to be connected. In the example, only one channel of two DAC modules are connected. The RCG allows sharing of DAC modules, ie another model running on the same FE may have the same DAC modules defined with connections to different channels. Verfication that two user models are not trying to use the same channel on the same DAC module is done at runtime. For ADC modules, any number of models may share the same modules and channels.
 
