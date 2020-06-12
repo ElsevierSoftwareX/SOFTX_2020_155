@@ -641,7 +641,7 @@ unsigned int curDaqBlockSize;
       extern volatile unsigned int *ioMemDataGPS;
 
       // Sync up to the master clock
-      // Find memory buffer of first ADC to be used in SLAVE application.
+      // Find memory buffer of first ADC to be used in secondary application.
       printf("waiting to sync %d\n", *ioMemDataCycle);
       //rdtscl(cpuClock[0]);
       // Spin until cycle 0 detected in first ADC buffer location.

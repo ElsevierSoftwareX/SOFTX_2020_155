@@ -549,7 +549,7 @@ extern "C" {
 /* base address - base address of board					*/
 /* address modifier - VME address modifier of board			*/
 /* master - if non-zero indicates a baord with a GPS receiver, 		*/
-/*          otherwise it is just an IRIG B slave			*/
+/*          otherwise it is just an IRIG B secondary			*/
 /* int source - source of interrupt					*/
 /* 		type 0 - interrupt generated @ 16Hz by other Baja	*/
 /* 		type 1 - interrupt generated @ 64Hz by GPS board	*/
