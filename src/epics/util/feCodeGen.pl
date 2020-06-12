@@ -2504,7 +2504,7 @@ if ($iopModel > -1) {  #************ SETUP FOR IOP ***************
   if($diagTest > -1) {
   print OUTM "EXTRA_CFLAGS += -DDIAG_TEST\n";
   }
-  if($dolphin_recover > -1) {
+  if($dolphin_recover > 0) {
   print OUTM "EXTRA_CFLAGS += -DDOLPHIN_RECOVERY\n";
   }
 # Invoked if IOP cycle rate slower than ADC clock rate
