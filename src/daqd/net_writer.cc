@@ -868,148 +868,6 @@ net_writer_c::consumer( )
             this->shutdown_net_writer( );
 #endif
             return NULL;
-#ifdef DATA_CONCENTRATOR
-        }
-        else if ( broadcast )
-        {
-
-            // The header comes in front of the data in the transmission buffer
-            // This header specifies DCU numbers and for each DCU it sends
-            // dcuid, data size, and data CRC, config CRC, status. The receiver
-            // will use this information to check the data and set its own DCU
-            // status
-            //
-            static const unsigned int header_size =
-                BROADCAST_HEADER_SIZE; // Header has fixed size
-            char* tbuf = (char*)malloc( transmission_block_size + header_size );
-            if ( tbuf == 0 )
-                abort( ); // Memory allocation failed for some reason, we can't
-                          // continue
-            unsigned int* hptr =
-                (unsigned int*)tbuf; // Pointer into header area
-            unsigned int ndcu =
-                0; // Count how many DCUs will be included in the transmission
-            unsigned int tidx = 1; // table index (integers)
-
-            for ( int ifo = 0; ifo < daqd.data_feeds; ifo++ )
-            {
-                for ( int i = DCU_ID_EDCU; i < DCU_COUNT; i++ )
-                {
-                    if ( IS_TP_DCU( i ) )
-                        continue; // Skip TP and EXC DCUs
-                    if ( daqd.dcuSize[ ifo ][ i ] == 0 )
-                        continue; // Skip unconfigured DCUs
-                    printf( "DCU %d IFO %d; size=%d\n",
-                            i,
-                            ifo,
-                            daqd.dcuSize[ ifo ][ i ] );
-                    ndcu++;
-                    // DCU number
-                    hptr[ tidx++ ] = htonl( i + ifo * DCU_COUNT );
-                    // DCU size
-                    hptr[ tidx++ ] = htonl( daqd.dcuDAQsize[ ifo ][ i ] );
-                    // DCU config file CRC
-                    hptr[ tidx++ ] = htonl( daqd.dcuConfigCRC[ ifo ][ i ] );
-                    // DCU data block CRC (will patch it in for each data block)
-                    hptr[ tidx++ ] = htonl( 0 );
-                    // DCU status (will patch in later)
-                    hptr[ tidx++ ] = htonl( 0 );
-                    // DCU cycle (will patch in later)
-                    hptr[ tidx++ ] = htonl( 0 );
-                }
-            }
-            // Make sure that the total number of DCUs is less the maximum
-            if ( ndcu > MAX_BROADCAST_DCU_NUM )
-            {
-                printf( "Too many DCUs configured. Have %d max is %d\n",
-                        ndcu,
-                        MAX_BROADCAST_DCU_NUM );
-                exit( 1 );
-            }
-            *hptr = htonl(
-                ndcu ); // Assign the number of DCUs after they're counted
-
-            do
-            {
-                int bytes;
-                nb = buffptr->get16th( cnum );
-                int nb16th = nb & 0xf;
-                nb >>= 4;
-                circ_buffer_block_prop_t& prop =
-                    buffptr->block_prop( nb )->prop16th[ nb16th ];
-                if ( !( bytes = buffptr->block_prop( nb )->bytes ) )
-                    break;
-                // bytes -= 4 * num_channels; // Subtract the size of the status
-                // words
-                bytes = transmission_block_size + header_size;
-
-                // send samples
-                DEBUG1( cerr << "net_writer_c::consumer(): sending block " << nb
-                             << " of " << bytes << " bytes" << endl );
-
-                char*           ptr = buffptr->block_ptr( nb );
-                struct put_vec* pv = pvec16th[ nb16th ];
-                unsigned int    dlen = header_size;
-
-                // Copy all DAQ configured channels over to our transmission
-                // buffer
-                for ( int i = 0; i < pvec_len; i++ )
-                {
-                    // printf("%d %d\n", transmission_block_size, dlen + pv
-                    // [i].vec_len);
-                    memcpy(
-                        tbuf + dlen, ptr + pv[ i ].vec_idx, pv[ i ].vec_len );
-                    dlen += pv[ i ].vec_len;
-                }
-                // Make sure we didn't overwrite the buffer boundary
-                if ( dlen > bytes )
-                    abort( );
-
-                // Assign DCU status data into the header
-                tidx = 1;
-                for ( int ifo = 0; ifo < daqd.data_feeds; ifo++ )
-                {
-                    for ( int i = DCU_ID_EDCU; i < DCU_COUNT; i++ )
-                    {
-                        if ( IS_TP_DCU( i ) )
-                            continue; // Skip TP and EXC DCUs
-                        if ( daqd.dcuSize[ ifo ][ i ] == 0 )
-                            continue; // Skip unconfigured DCUs
-                        // DCU number
-                        // DCU size
-                        // DCU config file CRC
-                        tidx += 3;
-                        // DCU data block CRC
-                        hptr[ tidx++ ] =
-                            htonl( prop.dcu_data[ i + ifo * DCU_COUNT ].crc );
-                        // DCU status
-                        hptr[ tidx++ ] = htonl(
-                            prop.dcu_data[ i + ifo * DCU_COUNT ].status );
-                        // DCU cycle
-                        hptr[ tidx++ ] =
-                            htonl( prop.dcu_data[ i + ifo * DCU_COUNT ].cycle );
-                    }
-                }
-                if ( send_to_client( tbuf, bytes, prop.gps, prop.gps_n ) )
-                    return NULL;
-                int tpdata_len = 0;
-
-#ifdef GDS_TESTPOINTS
-                // Build test points data block
-                char* tpdata =
-                    daqd.gds.build_tp_data( &tpdata_len, ptr, nb16th );
-
-                if ( send_to_client(
-                         tpdata, tpdata_len, prop.gps, prop.gps_n, 1 ) )
-                    return NULL;
-#endif
-
-                num_sent++;
-
-                if ( nb16th == 0xf )
-                    buffptr->unlock16th( cnum );
-            } while ( 1 );
-#endif
         }
         else
         {
@@ -1424,8 +1282,6 @@ net_writer_c::set_mcast_interface( const char* mcast_interface_and_port )
 int
 net_writer_c::connect_srvr_addr( int ssize )
 {
-#ifndef NO_BROADCAST
-
     // Initialize Framexmit connection for broadcast
 
     if ( broadcast )
@@ -1472,7 +1328,6 @@ net_writer_c::connect_srvr_addr( int ssize )
         system_log( 1, "framexmit connected to %s", istr );
     }
     else
-#endif
     {
         // error message buffer
         char errmsgbuf[ 80 ];
@@ -1632,7 +1487,6 @@ net_writer_c::start_net_writer( ostream*     yyout,
             close( fileno );
             return DAQD_SETSOCKOPT;
         }
-#ifndef NO_BROADCAST
         // Cancel request if IP address isn't specified, since I cannot
         // broadcast into the client's incoming TCP connection's IP address.
 
@@ -1643,13 +1497,15 @@ net_writer_c::start_net_writer( ostream*     yyout,
                 "must specify broadcast/multicast IP address in the request" );
             return DAQD_ERROR;
         }
-#endif
     }
     else
     {
         // Establish data connection
-        if ( res = connect_srvr_addr( transmission_block_size ) )
+        res = connect_srvr_addr( transmission_block_size );
+        if ( res )
+        {
             return res;
+        }
     }
 
     source_buffptr = src_buffer;
@@ -1692,15 +1548,7 @@ net_writer_c::start_net_writer( ostream*     yyout,
     {
         bool no_consumer_buffer = false;
 
-#ifdef DATA_CONCENTRATOR
-        if ( broadcast )
-        {
-            // Concentrator reads data directly from the main buffer
-            buffptr = source_buffptr;
-        }
-        else
-#endif
-            if ( no_online == 0 || online_writer )
+        if ( no_online == 0 || online_writer )
         {
             int buffer_blocks;
 
@@ -1760,44 +1608,35 @@ net_writer_c::start_net_writer( ostream*     yyout,
             if ( ( cnum = source_buffptr->add_consumer( writer_type ==
                                                         fast_writer ) ) >= 0 )
             {
-#ifdef DATA_CONCENTRATOR
-                if ( !broadcast )
+                pthread_attr_t attr;
+                pthread_attr_init( &attr );
+                pthread_attr_setscope( &attr, PTHREAD_SCOPE_SYSTEM );
+                pthread_attr_setdetachstate( &attr, PTHREAD_CREATE_DETACHED );
+                pthread_attr_setstacksize( &attr, daqd.thread_stack_size );
+                int err_no;
+                if ( err_no = pthread_create( &producer_tid,
+                                              &attr,
+                                              (void* (*)(void*))producer_static,
+                                              (void*)this ) )
                 {
-#endif
-                    pthread_attr_t attr;
-                    pthread_attr_init( &attr );
-                    pthread_attr_setscope( &attr, PTHREAD_SCOPE_SYSTEM );
-                    pthread_attr_setdetachstate( &attr,
-                                                 PTHREAD_CREATE_DETACHED );
-                    pthread_attr_setstacksize( &attr, daqd.thread_stack_size );
-                    int err_no;
-                    if ( err_no =
-                             pthread_create( &producer_tid,
-                                             &attr,
-                                             (void* (*)(void*))producer_static,
-                                             (void*)this ) )
-                    {
-                        strerror_r( err_no, errmsgbuf, sizeof( errmsgbuf ) );
-                        system_log( 1,
-                                    "couldn't create net-writer producer "
-                                    "thread; pthread_create() err = %s",
-                                    errmsgbuf );
-                        source_buffptr->delete_consumer( cnum );
-                        cnum = 0;
-                        disconnect_srvr_addr( );
-                        buffptr->~circ_buffer( );
-                        free( (void*)buffptr );
-                        buffptr = 0;
-                        pthread_attr_destroy( &attr );
-                        return DAQD_THREAD_CREATE;
-                    }
-
+                    strerror_r( err_no, errmsgbuf, sizeof( errmsgbuf ) );
+                    system_log( 1,
+                                "couldn't create net-writer producer "
+                                "thread; pthread_create() err = %s",
+                                errmsgbuf );
+                    source_buffptr->delete_consumer( cnum );
+                    cnum = 0;
+                    disconnect_srvr_addr( );
+                    buffptr->~circ_buffer( );
+                    free( (void*)buffptr );
+                    buffptr = 0;
                     pthread_attr_destroy( &attr );
-                    DEBUG1( cerr << "network writer created; tid="
-                                 << producer_tid << endl );
-#ifdef DATA_CONCENTRATOR
+                    return DAQD_THREAD_CREATE;
                 }
-#endif
+
+                pthread_attr_destroy( &attr );
+                DEBUG1( cerr << "network writer created; tid=" << producer_tid
+                             << endl );
             }
             else
             {
@@ -1809,60 +1648,58 @@ net_writer_c::start_net_writer( ostream*     yyout,
                 return DAQD_BUSY;
             }
 
-            pthread_attr_t attr1;
-            pthread_attr_init( &attr1 );
-            pthread_attr_setscope( &attr1, PTHREAD_SCOPE_SYSTEM );
-            pthread_attr_setdetachstate( &attr1, PTHREAD_CREATE_DETACHED );
-            pthread_attr_setstacksize( &attr1, daqd.thread_stack_size );
-
-#ifdef DATA_CONCENTRATOR
+            /* The only broadcaster sends frames, we do not need a consumer for
+             * that*/
             if ( !broadcast )
             {
-#endif
+                pthread_attr_t attr1;
+                pthread_attr_init( &attr1 );
+                pthread_attr_setscope( &attr1, PTHREAD_SCOPE_SYSTEM );
+                pthread_attr_setdetachstate( &attr1, PTHREAD_CREATE_DETACHED );
+                pthread_attr_setstacksize( &attr1, daqd.thread_stack_size );
+
                 // Lower this thread's priority
                 struct sched_param sparam;
                 int                policy;
                 pthread_getschedparam( pthread_self( ), &policy, &sparam );
                 sparam.sched_priority--;
                 pthread_attr_setschedparam( &attr1, &sparam );
-#ifdef DATA_CONCENTRATOR
-            }
-#endif
 
-            // Start consumer thread, which transmits data blocks
-            int err_no;
-        try_again:
-            if ( err_no = pthread_create( &consumer_tid,
-                                          &attr1,
-                                          (void* (*)(void*))consumer_static,
-                                          (void*)this ) )
-            {
-                strerror_r( err_no, errmsgbuf, sizeof( errmsgbuf ) );
-                system_log( 1,
-                            "Couldn't create net-writer consumer thread; "
-                            "pthread_create() err = %s",
-                            errmsgbuf );
-                if ( err_no == EAGAIN || err_no == ENOMEM )
+                // Start consumer thread, which transmits data blocks
+                int err_no;
+            try_again:
+                if ( err_no = pthread_create( &consumer_tid,
+                                              &attr1,
+                                              (void* (*)(void*))consumer_static,
+                                              (void*)this ) )
                 {
-                    sleep( 5 );
-                    goto try_again;
+                    strerror_r( err_no, errmsgbuf, sizeof( errmsgbuf ) );
+                    system_log( 1,
+                                "Couldn't create net-writer consumer thread; "
+                                "pthread_create() err = %s",
+                                errmsgbuf );
+                    if ( err_no == EAGAIN || err_no == ENOMEM )
+                    {
+                        sleep( 5 );
+                        goto try_again;
+                    }
+
+                    // FIXME: must cancel producer thread somehow.
+                    abort( );
+
+                    source_buffptr->delete_consumer( cnum );
+                    disconnect_srvr_addr( );
+                    buffptr->~circ_buffer( );
+                    free( (void*)buffptr );
+                    buffptr = 0;
+                    pthread_attr_destroy( &attr1 );
+                    return DAQD_THREAD_CREATE;
                 }
-
-                // FIXME: must cancel producer thread somehow.
-                abort( );
-
-                source_buffptr->delete_consumer( cnum );
-                disconnect_srvr_addr( );
-                buffptr->~circ_buffer( );
-                free( (void*)buffptr );
-                buffptr = 0;
+                DEBUG1( cerr << "net writer consumer thread started; tid="
+                             << consumer_tid << endl );
                 pthread_attr_destroy( &attr1 );
-                return DAQD_THREAD_CREATE;
             }
-            pthread_attr_destroy( &attr1 );
             daqd.net_writers.insert_first( this );
-            DEBUG1( cerr << "net writer consumer thread started; tid="
-                         << consumer_tid << endl );
         }
         else // send data for the specified time period
         {
@@ -2137,34 +1974,28 @@ net_writer_c::shutdown_net_writer( )
 
 // Send some data to the client
 int
-net_writer_c::send_to_client(
-    char* data, unsigned long len, unsigned long gps, int period, int tp )
+net_writer_c::send_to_client( char*         data,
+                              unsigned long len,
+                              unsigned long gps,
+                              int           period )
 {
     // error message buffer
     char errmsgbuf[ 80 ];
-#ifndef NO_BROADCAST
 
     if ( broadcast )
     {
         // look for a free data buffer
         radio_buffer* buf = 0;
 
-#ifndef DATA_CONCENTRATOR
-        if ( len <= ( sizeof( int ) * 5 ) )
+        for ( radio_buffer* b = radio_bufs; b < radio_bufs + radio_buf_num;
+              b++ )
         {
-            return 0;
-        }
-        else
-#endif
-            for ( radio_buffer* b = radio_bufs; b < radio_bufs + radio_buf_num;
-                  b++ )
+            if ( !radio.isUsed( b->inUse ) )
             {
-                if ( !radio.isUsed( b->inUse ) )
-                {
-                    buf = b;
-                    break;
-                }
+                buf = b;
+                break;
             }
+        }
 
         if ( buf == 0 )
         {
@@ -2182,27 +2013,12 @@ net_writer_c::send_to_client(
 
         memcpy( buf->data, data, len );
 
-#ifdef DATA_CONCENTRATOR
-        if ( tp )
-        {
-            // send data buffer
-            radio_tp.send( buf->data, len, &buf->inUse, false, gps, period );
-            DEBUG1( cerr << "tp framexmit write gps=" << gps
-                         << " period=" << period << endl );
-        }
-        else
-#endif
-        {
-            // send data buffer
-            radio.send( buf->data, len, &buf->inUse, false, gps, period );
-            DEBUG1( cerr << "framexmit write gps=" << gps
-                         << " period=" << period << endl );
-        }
+        // send data buffer
+        radio.send( buf->data, len, &buf->inUse, false, gps, period );
+        DEBUG1( cerr << "framexmit write gps=" << gps << " period=" << period
+                     << endl );
     }
-    else
-#endif
-
-        if ( basic_io::writen( fileno, (char*)data, len ) != len )
+    else if ( basic_io::writen( fileno, (char*)data, len ) != len )
     {
         strerror_r( errno, errmsgbuf, sizeof( errmsgbuf ) );
         // Write failed -- shutdown this thread and destroy this circular buffer
