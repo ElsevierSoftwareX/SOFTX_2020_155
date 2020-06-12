@@ -495,7 +495,7 @@ knetd		2053/tcp			# Kerberos de-multiplexor
 #
 # Kerberos 5 services, also not registered with IANA
 #
-krb5_prop	754/tcp				# Kerberos slave propagation
+krb5_prop	754/tcp				# Kerberos secondary propagation
 eklogin		2105/tcp			# Kerberos encrypted rlogin
 
 #

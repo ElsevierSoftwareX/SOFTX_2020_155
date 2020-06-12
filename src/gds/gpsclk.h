@@ -241,7 +241,7 @@ extern "C" {
 /** Returns true if board is a GPS master. 
 
     @param ID board ID 
-    @return true of master, false if slave
+    @return true of master, false if secondary
     @author DS, July 98 
     @see GPS clock API
 ************************************************************************/
@@ -250,7 +250,7 @@ extern "C" {
 
 /** Initializes the GPS board. This routine initializes the 
     VME-SYNCCLOK32 board and sets the year information for IRIG-B
-    slave modules. If a NULL pointer is provided for the year
+    secondary modules. If a NULL pointer is provided for the year
     information, neither the year, nor the leap year information 
     is set. Master boards ignore the provided year information.
 
@@ -337,7 +337,7 @@ extern "C" {
 
 /** Returns GPS information. This routine returns the number of 
     satellites, longitude, latitude, altitude, speed and direction.
-    This routine fails for slave boards. If a NULL pointer is 
+    This routine fails for secondary boards. If a NULL pointer is
     specified, only the number of tracked satellites is returned.
 
     @param ID board ID
