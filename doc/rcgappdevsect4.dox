@@ -68,12 +68,12 @@ loaded by Linux. Code scheduling in now entirely controlled by the special case 
 \subsubsection sect4311 4.3.1.1 IOP
 \verbatim
 The IOP task is essentially the real-time scheduler for the FE computer. It is triggered by the arrival of data from the 
-ADC modules, which are in turn slaved to the timing system (65536Hz clocks), which is locked to the GPS. It is also the  
+ADC modules, which are in turn tied to the timing system (65536Hz clocks), which is locked to the GPS. It is also the  
 conduit for passed data ADC and DAC data between the PCIe modules and the user applications.  
 Key functions of the IOP include:
 	• Initialization and setup all PCIe I/O devices. 
 	• Timing control, including:
-		o Starting the clocks from the Timing Slave module in the I/O chassis such that startup begins synchronous 
+		o Starting the clocks from the Timing Receiver module in the I/O chassis such that startup begins synchronous 
 		  with the GPS 1PPS mark.
 		o Monitoring ADC data ready, caused by a GPS clock cycle, and initiating a real-time code cycle. 
 		  This information is passed on to the user applications to synchronously trigger their code cycles.

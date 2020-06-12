@@ -36,7 +36,7 @@
 #include "dolphin.c"
 #endif
 
-#if defined( TIME_MASTER ) || defined( TIME_SLAVE )
+#if defined( XMIT_DOLPHIN_TIME ) || defined( USE_DOLPHIN_TIMING )
 volatile TIMING_SIGNAL* pcieTimer;
 #endif
 
@@ -66,9 +66,9 @@ int getGpsTime( unsigned int* tsyncSec, unsigned int* tsyncUsec );
 // Include C code modules
 #include "moduleLoad.c"
 
-#if defined( RUN_WO_IO_MODULES ) || defined( TIME_SLAVE )
+#if defined( RUN_WO_IO_MODULES ) || defined( USE_DOLPHIN_TIMING )
 #include "mapVirtual.c"
-#include <drv/time_slave_io.c>
+#include <drv/no_ioc_timing.c>
 #else
 #include "map.c"
 #include <drv/iop_adc_functions.c>
@@ -85,8 +85,8 @@ int getGpsTime( unsigned int* tsyncSec, unsigned int* tsyncUsec );
 /// This function is the main real-time sequencer or scheduler for all code
 /// built using the RCG. \n There are two primary modes of operation, based on
 /// two compile options: \n
-///	- ADC_MASTER: Software is compiled as an I/O Processor (IOP).
-///	- ADC_SLAVE: Normal user control process.
+///	- IOP_MODEL: Software is compiled as an I/O Processor (IOP).
+///	- CONTROL_MODEL: Normal user control process.
 /// This code runs in a continuous loop at the rate specified in the RCG model.
 /// The loop is synchronized and triggered by the arrival of ADC data, the ADC
 /// module in turn is triggered to sample by the 64KHz clock provided by the
@@ -191,7 +191,7 @@ fe_start_controller( void* arg )
 
     /// \> Init code synchronization source.
     // Look for DIO card or IRIG-B Card
-    // if Contec 1616 BIO present, TDS slave will be used for timing.
+    // if Contec 1616 BIO present, TDS receiver will be used for timing.
     if ( cdsPciModules.cDio1616lCount )
         syncSource = SYNC_SRC_TDS;
     else
@@ -204,13 +204,13 @@ fe_start_controller( void* arg )
     syncSource = SYNC_SRC_TIMER;
 #endif
 
-#ifdef TIME_MASTER
+#ifdef XMIT_DOLPHIN_TIME
     pcieTimer =
         (volatile TIMING_SIGNAL*)( (volatile char*)( cdsPciModules
                                                          .dolphinWrite[ 0 ] ) +
                                    IPC_PCIE_TIME_OFFSET );
 #endif
-#ifdef TIME_SLAVE
+#ifdef USE_DOLPHIN_TIMING
     pcieTimer =
         (volatile TIMING_SIGNAL*)( (volatile char*)( cdsPciModules
                                                          .dolphinRead[ 0 ] ) +
@@ -358,7 +358,7 @@ fe_start_controller( void* arg )
     /// \>\> For SYNC_SRC_TDS, initialize system for synchronous start on 1PPS
     /// mark:
     case SYNC_SRC_TDS:
-        /// - ---- Turn off TDS slave unit timing clocks, in turn removing
+        /// - ---- Turn off TDS receiver unit timing clocks, in turn removing
         /// clocks from ADC/DAC modules.
         for ( ii = 0; ii < tdsCount; ii++ )
         {
@@ -389,8 +389,8 @@ fe_start_controller( void* arg )
         status = iop_dac_preload( dacPtr );
 #endif
         /// - ---- Start the timing clocks\n
-        /// - --------- Send start command to TDS slave.\n
-        /// - --------- TDS slave will begin sending 64KHz clocks synchronous to
+        /// - --------- Send start command to TDS receiver.\n
+        /// - --------- TDS receiver will begin sending 64KHz clocks synchronous to
         /// next 1PPS mark.
         // CDIO1616Output[tdsControl] = 0x7B00000;
         for ( ii = 0; ii < tdsCount; ii++ )
@@ -439,7 +439,7 @@ fe_start_controller( void* arg )
     onePpsTime = cycleNum;
 #ifdef REMOTE_GPS
     timeSec = remote_time( (struct CDS_EPICS*)pLocalEpics );
-#elif TIME_SLAVE
+#elif USE_DOLPHIN_TIMING
     timeSec = sync2master( pcieTimer );
     sync21pps = 1;
 #elif RUN_WO_IO_MODULES
@@ -841,7 +841,7 @@ fe_start_controller( void* arg )
                     if ( ( ii == 0 ) || ( ii == 5 ) )
                         pLocalEpics->epicsOutput.timingTest[ ii ] =
                             cycleNum * 15.26;
-                    // Slaves do not see 1pps until after IOP signal loops
+                    // Control apps do not see 1pps until after IOP signal loops
                     // around and back into ADC channel 0, therefore, need to
                     // subtract IOP loop time.
                     else
@@ -1021,7 +1021,7 @@ fe_start_controller( void* arg )
                 }
             }
 
-#if !defined( RUN_WO_IO_MODULES ) && !defined( TIME_SLAVE )
+#if !defined( RUN_WO_IO_MODULES ) && !defined( USE_DOLPHIN_TIMING )
             // *****************************************************************
             /// \> Cycle 400 to 400 + numDacModules, write DAC heartbeat to AI
             /// chassis (only for 18 bit DAC modules)
@@ -1133,7 +1133,7 @@ fe_start_controller( void* arg )
                 adcinfo.adcTime = cpuClock[ CPU_TIME_CYCLE_START ];
                 // Calc the max time of one cycle of the user code
                 // For IOP, more interested in time to get thru ADC read code
-                // and send to slave apps
+                // and send to control apps
                 timeinfo.usrTime = ( cpuClock[ CPU_TIME_USR_START ] -
                                      cpuClock[ CPU_TIME_CYCLE_START ] ) /
                     CPURATE;

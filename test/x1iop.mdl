@@ -223,7 +223,7 @@ Model {
     }
     ExternalFileReference {
       Reference		      "cdsParameters/Subsystem"
-      Path		      "x1iop/host=@HOSTNAME@ site=X1 rate=16K dcuid=1 shmem_daq=1 adcMaster=1 specific_cpu=2 no_rfm_dma=1"
+      Path		      "x1iop/host=@HOSTNAME@ ifo=X1 rate=64K dcuid=1 shmem_daq=1 iop_model=1 specific_cpu=2 no_rfm_dma=1"
       SID		      "927"
       Type		      "LIBRARY_BLOCK"
     }
@@ -2716,7 +2716,7 @@ Model {
     }
     Block {
       BlockType		      Reference
-      Name		      "host=@HOSTNAME@\nsite=X1\nrate=16K\ndcuid=1\nshmem_daq=1\nadcMaster=1\nspecific_cpu=2\nno_rfm_dma=1"
+      Name		      "host=@HOSTNAME@\nifo=X1\nrate=64K\ndcuid=1\nshmem_daq=1\niop_model=1\nspecific_cpu=2\nno_rfm_dma=1"
       SID		      "927"
       Tag		      "cdsParameters"
       Ports		      [1, 1]

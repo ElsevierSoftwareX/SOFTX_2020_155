@@ -151,7 +151,7 @@ char fp[ 64 * 1024 ];
 #define CYCLE_TIME_ALRM_HI (20 * UNDERSAMPLE)
 #define CYCLE_TIME_ALRM_LO 10
 #define EPICS_128_SYNC 512
-#ifdef ADC_SLAVE
+#ifdef CONTROL_MODEL
 #define DAC_PRELOAD_CNT 1
 #else
 #define DAC_PRELOAD_CNT 0
@@ -167,7 +167,7 @@ char fp[ 64 * 1024 ];
 #define CYCLE_TIME_ALRM_LO 25
 #define CYCLE_TIME_ALRM 31
 #define EPICS_128_SYNC 256
-#ifdef ADC_SLAVE
+#ifdef CONTROL_MODEL
 #define DAC_PRELOAD_CNT 2
 #else
 #define DAC_PRELOAD_CNT 1
@@ -320,7 +320,7 @@ VME_COEF* pCoeff[ NUM_SYSTEMS ]; // Ptr to SFM coeffs in shmem
 
 // ADC Variables
 /// Array of ADC values
-#ifdef ADC_MASTER
+#ifdef IOP_MODEL
 double dWord[ MAX_ADC_MODULES ][ MAX_ADC_CHN_PER_MOD ][ 16 ]; // ADC read values
 #else
 double dWord[ MAX_ADC_MODULES ][ MAX_ADC_CHN_PER_MOD ]; // ADC read values
@@ -335,7 +335,7 @@ unsigned int dWordUsed[ MAX_ADC_MODULES ]
 int iopDacEnable; // Returned by feCode to allow writing values or zeros to DAC
                   // modules
 int dacChanErr[ MAX_DAC_MODULES ];
-#ifdef ADC_MASTER
+#ifdef IOP_MODEL
 int dacOutBufSize[ MAX_DAC_MODULES ];
 #endif
 /// Array of DAC output values.
@@ -356,9 +356,9 @@ double floatDacOut[ 160 ]; // DAC outputs stored as floats, to be picked up as
 /// Counter for total ADC/DAC overflows
 int overflowAcc = 0; // Total ADC/DAC overflow counter
 
-#ifndef ADC_MASTER
+#ifndef IOP_MODEL
 // Variables for Digital I/O board values
-// DIO board I/O is handled in slave (user) applications for timing reasons
+// DIO board I/O is handled in control (user) applications for timing reasons
 // (longer I/O access times)
 /// Read value from Acces I/O 24bit module
 int dioInput[ MAX_DIO_MODULES ];

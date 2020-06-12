@@ -110,6 +110,7 @@ $maxDioMod = pop(@mdmNum);
 
 # Initialize default settings.
 $sitedepwarning = 0;
+$adcmasterdepwarning = 0;
 $ifo = "M1"; # Default value for the ifo name
 $location = "mit"; # Default value for the location name
 $rate = "60"; # In microseconds (default setting)
@@ -118,12 +119,10 @@ $dcuId = 10; # Default dcu Id
 $targetHost = "localhost"; # Default target host name
 $edcusync = "none";
 $specificCpu = -1; # Defaults is to run the FE on the first available CPU
-$adcMaster = -1;
+$iopModel = -1;
 $dacWdOverride = -1;
-$adcSlave = -1;
-$timeMaster = -1;
-$timeSlave = -1;
-$rfmTimeSlave = -1;
+$dolphin_time_xmit = -1;
+$dolphinTiming = -1;
 $diagTest = -1;
 $flipSignals = 0;
 $ipcrate = 0;
@@ -295,13 +294,17 @@ die unless CDS::Parser::sortDacs();
 
 close(IN);
 
-if(($adcMaster == 1) and ($adcrate > $adcclock)) 
+if(($iopModel == 1) and ($adcrate > $adcclock)) 
 {
 	die "Error:\nModel rate $adcrate > ADC clock $adcclock\nFix adcclock in Param Block\n*****\n";
 }
 if($sitedepwarning == 1) {
 	print WARNINGS "WARNING: The 'site=' designator in the model parameter block\n\t is scheduled for deprecation in future releases. \n";
 	print WARNINGS "*******: Please replace site=$ifo designator with ifo=$ifo \n";
+}
+if($adcmasterdepwarning == 1) {
+	print WARNINGS "WARNING: The 'adcMaster=' designator in the model parameter block\n\t is scheduled for deprecation in future releases. \n";
+	print WARNINGS "*******: Please replace adcMaster=1 designator with iop_model=1 \n";
 }
 
 #//	
@@ -1295,7 +1298,7 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_STATE_WORD_FE epicsOutput.stateWord int ao
 print OUTH "\tint epicsSync;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_EPICS_SYNC epicsOutput.epicsSync int ao 0\n";
 
-if($adcMaster > -1)
+if($iopModel > -1)
 {
 print OUTH "\tint dtTime;\n";
 print OUTH "\tint dacDtTime;\n";
@@ -1428,7 +1431,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUTH "\#define TARGET_DAC18_COUNT $dac18Cnt\n";
 		print OUTH "\#define TARGET_DAC20_COUNT $dac20Cnt\n";
 	} else {
-		if($virtualiop == 0 and $adcMaster == 1) {
+		if($virtualiop == 0 and $iopModel == 1) {
 			print OUTH "\#define TARGET_ADC_COUNT 1\n";
 		} else {
 			print OUTH "\#define TARGET_ADC_COUNT 0\n";
@@ -1756,7 +1759,7 @@ print "\tPart number is $remoteGpsPart\n";
 
 }
 
-if($adcMaster == 1) {
+if($iopModel == 1) {
 	print OUT "#include \"$rcg_src_dir/src/fe/controllerIop.c\"\n";
 } else {
   	print OUT "#include \"$rcg_src_dir/src/fe/controllerApp.c\"\n";
@@ -1789,13 +1792,13 @@ while(my $line = <OUT>) {
 		print OUT2 "#include \"feuser.h\" \n";
 		print OUT2 "#include \<stdbool.h\> \n";
 	} 
-	elsif(index($line,"COMMDATA_INLINE") != -1 && $adcMaster != 1) {
+	elsif(index($line,"COMMDATA_INLINE") != -1 && $iopModel != 1) {
 		print OUT2 "#define COMMDATA_USP\n";
 	}
-	elsif(index($line,"controller") != -1 && $adcMaster != 1) {
+	elsif(index($line,"controller") != -1 && $iopModel != 1) {
 		print OUT2 "#include \"$rcg_src_dir/src/fe/controllerAppUser.c\"\n";
 	}
-	elsif(index($line,"controller") != -1 && $adcMaster == 1) {
+	elsif(index($line,"controller") != -1 && $iopModel == 1) {
 		print OUT2 "#include \"$rcg_src_dir/src/fe/controllerIopUser.c\"\n";
 	} else {
 		print OUT2 "$line";
@@ -2111,7 +2114,7 @@ system ("sort $adcFile -k 1,1n -k 2,2n > $adcFileSorted");
 	my $scriptTarget = "/opt/rtcds/$location/$lifo/chans/tmp/$sysname\.diff";
 	my $scriptArgs = "-s $location -i $lifo -m $skeleton -d $dcuId &"; 
     my $ioptimediag = $virtualiop + $no_sync;
-	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,$ioptimediag,\@dacType,\@adcType);
+	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$iopModel,$ioptimediag,\@dacType,\@adcType);
 	require "lib/medmGenStatus.pm";
 	("CDS::medmGenStatus::createStatusMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs);
 
@@ -2153,7 +2156,7 @@ close($fg);
 
 for($ii=0;$ii<$adcCnt;$ii++)
 {
-   ("CDS::Adc::createAdcMedm") -> ($epicsScreensDir,$sysname,$adcMaster,$uifo,$dcuId,$medmTarget,$ii,@adcScreen);
+   ("CDS::Adc::createAdcMedm") -> ($epicsScreensDir,$sysname,$iopModel,$uifo,$dcuId,$medmTarget,$ii,@adcScreen);
 }
 # ******************************************************************************************
 #//		- GENERATE DAC SCREENS
@@ -2495,9 +2498,9 @@ if ($::rfmDelay) {
 
 #********* END OF COMMON COMPILE OPTIONS
 
-if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
-  print OUTM "EXTRA_CFLAGS += -DADC_MASTER\n";
-  $modelType = "MASTER";
+if ($iopModel > -1) {  #************ SETUP FOR IOP ***************
+  print OUTM "EXTRA_CFLAGS += -DIOP_MODEL\n";
+  $modelType = "IOP";
   if($diagTest > -1) {
   print OUTM "EXTRA_CFLAGS += -DDIAG_TEST\n";
   }
@@ -2528,12 +2531,12 @@ if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
     print OUTM "EXTRA_CFLAGS += -DNO_SYNC\n";
   }  
 # Set to run IOP as time master for the Dolphin Network
-  if ($timeMaster > -1) {
-    print OUTM "EXTRA_CFLAGS += -DTIME_MASTER=1\n";
+  if ($dolphin_time_xmit > -1) {
+    print OUTM "EXTRA_CFLAGS += -DXMIT_DOLPHIN_TIME=1\n";
   }
-# Set to run IOP as time slave on the Dolphin Network
-  if ($timeSlave > -1 or $virtualiop == 2) {
-    print OUTM "EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
+# Set to run IOP as time receiver on the Dolphin Network
+  if ($dolphinTiming > -1 or $virtualiop == 2) {
+    print OUTM "EXTRA_CFLAGS += -DUSE_DOLPHIN_TIMING\n";
     print OUTM "EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
   }
 # Set to run IOP on internal clock ie no IO modules
@@ -2565,11 +2568,11 @@ if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
 }
 # End of IOP compile options
 
-if ($adcSlave > -1) {   #************ SETUP FOR USER APP ***************
-  print OUTM "EXTRA_CFLAGS += -DADC_SLAVE\n";
+if ($iopModel < 1) {   #************ SETUP FOR USER APP ***************
+  print OUTM "EXTRA_CFLAGS += -DCONTROL_MODEL\n";
   print OUTM "EXTRA_CFLAGS += -DUNDERSAMPLE=1\n";
   print OUTM "EXTRA_CFLAGS += -DADC_MEMCPY_RATE=1\n";
-  $modelType = "SLAVE";
+  $modelType = "CONTROL";
 
   if ($::noZeroPad) {
     print OUTM "EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
@@ -2683,9 +2686,8 @@ if($modelrate < 64) {
   }
 }
     print OUTM "CFLAGS += -DUNDERSAMPLE=1\n";
-if ($adcMaster > -1) {
-  #print OUTM "CFLAGS += -DADC_MASTER\n";
-  $modelType = "MASTER";
+if ($iopModel > -1) {
+  $modelType = "IOP";
   if($diagTest > -1) {
   print OUTM "CFLAGS += -DDIAG_TEST\n";
   }
@@ -2696,33 +2698,18 @@ if ($adcMaster > -1) {
   print OUTM "CFLAGS += -DDAC_AUTOCAL\n";
 } else {
   print OUTM "#Uncomment to run on an I/O Master \n";
-  print OUTM "#CFLAGS += -DADC_MASTER\n";
+  print OUTM "#CFLAGS += -DIOP_MODEL\n";
 }
-if ($adcSlave > -1) {
-  print OUTM "CFLAGS += -DADC_SLAVE\n";
-  $modelType = "SLAVE";
-} else {
-  print OUTM "#Uncomment to run on an I/O slave process\n";
-  print OUTM "#CFLAGS += -DADC_SLAVE\n";
-}
-if ($timeMaster > -1) {
-  print OUTM "CFLAGS += -DTIME_MASTER=1\n";
-} else {
-  print OUTM "#Uncomment to build a time master\n";
-  print OUTM "#CFLAGS += -DTIME_MASTER=1\n";
-}
-if ($timeSlave > -1) {
-  print OUTM "CFLAGS += -DTIME_SLAVE=1\n";
-} else {
-  print OUTM "#Uncomment to build a time slave\n";
-  print OUTM "#CFLAGS += -DTIME_SLAVE=1\n";
-}
-if ($rfmTimeSlave > -1) {
-  print OUTM "CFLAGS += -DRFM_TIME_SLAVE=1\n";
-} else {
-  print OUTM "#Uncomment to build an RFM time slave\n";
-  print OUTM "#CFLAGS += -DRFM_TIME_SLAVE=1\n";
-}
+if ($iopModel < 1) {
+  print OUTM "CFLAGS += -DCONTROL_MODEL\n";
+  $modelType = "CONTROL";
+} 
+if ($dolphin_time_xmit > -1) {
+  print OUTM "CFLAGS += -DXMIT_DOLPHIN_TIME=1\n";
+} 
+if ($dolphinTiming > -1) {
+  print OUTM "CFLAGS += -DUSE_DOLPHIN_TIMING=1\n";
+} 
 if ($flipSignals) {
   print OUTM "CFLAGS += -DFLIP_SIGNALS=1\n";
 }

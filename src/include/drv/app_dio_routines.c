@@ -8,8 +8,8 @@ app_dio_init( )
     int ii, kk;
 
     /// \> Read Dio card initial values
-    /// - ---- SLAVE units read/write their own DIO \n
-    /// - ---- MASTER units ignore DIO for speed reasons \n
+    /// - ---- Control units read/write their own DIO \n
+    /// - ---- IOP units ignore DIO for speed reasons \n
     for ( kk = 0; kk < cdsPciModules.doCount; kk++ )
     {
         ii = cdsPciModules.doInstance[ kk ];

@@ -13,7 +13,7 @@ require "lib/medmGen.pm";
 
 sub createStatusMedm
 {
-	my ($medmDir,$mdlName,$ifo,$dcuid,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,@dactype) = @_;
+	my ($medmDir,$mdlName,$ifo,$dcuid,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$iopModel,@dactype) = @_;
  # Define colors to be sent to screen gen.
         my %ecolors = ( "white" => "0",
              "black" => "14",

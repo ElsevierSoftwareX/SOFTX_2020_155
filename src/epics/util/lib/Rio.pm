@@ -50,7 +50,7 @@ sub printFrontEndVars  {
 # Check inputs are connected
 sub checkInputConnect {
         my ($i) = @_;
-        if($::adcMaster) { return ""; }
+        if($::iopModel) { return ""; }
 	if($::partInCnt[$i] < 1) {
                 print ::CONN_ERRORS "***\n$::partType[$i] with name $::xpartName[$i] has no input connected.\n\n";
         return "ERROR";
@@ -86,7 +86,7 @@ sub fromExp {
 # Returns calculated code string
 
 sub frontEndCode {
-	if($::adcMaster != 1) {
+	if($::iopModel != 1) {
 		my ($i) = @_;
 		my $l = length($::partName[$i][$j]);
 		my $rioNum = substr($::partName[$i], ($l-1), 1);

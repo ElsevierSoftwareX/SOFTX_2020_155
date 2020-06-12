@@ -8,26 +8,26 @@ mapPciModules( CDS_HARDWARE* pCds )
     int status = 0;
     int ii, jj, kk; /// @param ii,jj,kk default loop counters
     int cards; /// @param cards Number of PCIe cards found on bus
-    int adcCnt = 0; /// @param adcCnt Number of ADC cards found by slave model.
-    int fastadcCnt = 0; /// @param adcCnt Number of ADC cards found by slave model.
-    int dacCnt = 0; /// @param dacCnt Number of 16bit DAC cards found by slave
+    int adcCnt = 0; /// @param adcCnt Number of ADC cards found by control model.
+    int fastadcCnt = 0; /// @param adcCnt Number of ADC cards found by control model.
+    int dacCnt = 0; /// @param dacCnt Number of 16bit DAC cards found by control
                     /// model.
     int dac18Cnt = 0; /// @param dac18Cnt Number of 18bit DAC cards found by
-                      /// slave model.
+                      /// control model.
     int dac20Cnt = 0; /// @param dac20Cnt Number of 20bit DAC cards found by
-                      /// slave model.
+                      /// control model.
     int doCnt = 0; /// @param doCnt Total number of digital I/O cards found by
-                   /// slave model.
+                   /// control model.
     int do32Cnt = 0; /// @param do32Cnt Total number of Contec 32 bit DIO cards
-                     /// found by slave model.
+                     /// found by control model.
     int doIIRO16Cnt = 0; /// @param doIIRO16Cnt Total number of Acces I/O 16 bit
-                         /// relay cards found by slave model.
+                         /// relay cards found by control model.
     int doIIRO8Cnt = 0; /// @param doIIRO8Cnt Total number of Acces I/O 8 bit
-                        /// relay cards found by slave model.
+                        /// relay cards found by control model.
     int cdo64Cnt = 0; /// @param cdo64Cnt Total number of Contec 6464 DIO card
-                      /// 32bit output sections mapped by slave model.
+                      /// 32bit output sections mapped by control model.
     int cdi64Cnt = 0; /// @param cdo64Cnt Total number of Contec 6464 DIO card
-                      /// 32bit input sections mapped by slave model.
+                      /// 32bit input sections mapped by control model.
 
     // Have to search thru all cards and find desired instance for application
     // Master will map ADC cards first, then DAC and finally DIO
@@ -197,11 +197,11 @@ mapPciModules( CDS_HARDWARE* pCds )
             doIIRO8Cnt++;
     }
 
-    // Dolphin PCIe network style. Slave units will perform I/O transactions
+    // Dolphin PCIe network style. Control units will perform I/O transactions
     // with RFM directly ie MASTER does not do RFM I/O. Master unit only maps
-    // the RFM I/O space and passes pointers to SLAVES.
+    // the RFM I/O space and passes pointers to control models.
 
-    // Slave gets RFM module count from MASTER.
+    // Control app gets RFM module count from MASTER.
     cdsPciModules.rfmCount = ioMemData->rfmCount;
     // dolphinCount is number of segments
     cdsPciModules.dolphinCount = ioMemData->dolphinCount;

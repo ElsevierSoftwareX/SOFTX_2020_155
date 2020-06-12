@@ -76,7 +76,7 @@ typedef struct CDS_REMOTE_NODES {
 #define MAX_ADC_WAIT_C0_32K	36		// Max time (usec) to wait for 1st ADC card data ready on 32K IOP
 #define MAX_ADC_WAIT_CARD_S	5 		// Max time (usec) to wait for remaining ADC card data ready
 #define MAX_ADC_WAIT_ERR_SEC	3 		// Max number of times ADC time > WAIT per sec before alarm set.
-#define MAX_ADC_WAIT_SLAVE	100000		// Max time (usec) to wait for ADC data transfer in slave app
+#define MAX_ADC_WAIT_CONTROL	100000		// Max time (usec) to wait for ADC data transfer in control app
 #define MAX_ADC_WAIT_CYCLE	17
 #define DUMMY_ADC_VAL		0xf000000	// Dummy value for test last ADC channel has arrived
 #define ADC_1ST_CHAN_MARKER	0xf0000		// Only first ADC channel should have upper bits set as first chan marker.
@@ -113,7 +113,7 @@ typedef struct IO_MEM_DATA{
 	volatile unsigned long *dolphinRead[4]; /* read and write Dolphin memory */
 	volatile unsigned long *dolphinWrite[4]; /* read and write Dolphin memory */
 	MEM_DATA_BLOCK iodata[MAX_IO_MODULES][IO_MEMORY_SLOTS];
-	// Combined DAC channels map; used to check on slaves DAC channel allocations
+	// Combined DAC channels map; used to check on control app DAC channel allocations
 	unsigned int dacOutUsed[MAX_DAC_MODULES][16];
 	unsigned int ipcDetect[2][8];
 }IO_MEM_DATA;
@@ -134,14 +134,14 @@ typedef struct IO_MEM_DATA_IOP{
 	volatile unsigned long *dolphinRead[4]; /* read and write Dolphin memory */
 	volatile unsigned long *dolphinWrite[4]; /* read and write Dolphin memory */
 	MEM_DATA_BLOCK iodata[6][65536];
-	// Combined DAC channels map; used to check on slaves DAC channel allocations
+	// Combined DAC channels map; used to check on control app DAC channel allocations
 	unsigned int dacOutUsed[MAX_DAC_MODULES][16];
 	unsigned int ipcDetect[2][8];
 }IO_MEM_DATA_IOP;
 
 
 
-// Timing control register definitions for use with Contec1616 control of timing slave.
+// Timing control register definitions for use with Contec1616 control of timing receiver.
 
 #define TDS_STOP_CLOCKS			0x3700000
 #define TDS_START_ADC_NEG_DAC_POS	0x7700000

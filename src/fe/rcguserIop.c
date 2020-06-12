@@ -62,23 +62,23 @@ main( int argc, char** argv )
     char fname[ 128 ]; /// @param fname[128] Name of shared mem area to allocate
                        /// for DAQ data
     int cards; /// @param cards Number of PCIe cards found on bus
-    int adcCnt; /// @param adcCnt Number of ADC cards found by slave model.
-    int dacCnt; /// @param dacCnt Number of 16bit DAC cards found by slave
+    int adcCnt; /// @param adcCnt Number of ADC cards found by control model.
+    int dacCnt; /// @param dacCnt Number of 16bit DAC cards found by control
                 /// model.
-    int dac18Cnt; /// @param dac18Cnt Number of 18bit DAC cards found by slave
+    int dac18Cnt; /// @param dac18Cnt Number of 18bit DAC cards found by control
                   /// model.
-    int doCnt; /// @param doCnt Total number of digital I/O cards found by slave
+    int doCnt; /// @param doCnt Total number of digital I/O cards found by control
                /// model.
     int do32Cnt; /// @param do32Cnt Total number of Contec 32 bit DIO cards
-                 /// found by slave model.
+                 /// found by control model.
     int doIIRO16Cnt; /// @param doIIRO16Cnt Total number of Acces I/O 16 bit
-                     /// relay cards found by slave model.
+                     /// relay cards found by control model.
     int doIIRO8Cnt; /// @param doIIRO8Cnt Total number of Acces I/O 8 bit relay
-                    /// cards found by slave model.
+                    /// cards found by control model.
     int cdo64Cnt; /// @param cdo64Cnt Total number of Contec 6464 DIO card 32bit
-                  /// output sections mapped by slave model.
+                  /// output sections mapped by control model.
     int cdi64Cnt; /// @param cdo64Cnt Total number of Contec 6464 DIO card 32bit
-                  /// input sections mapped by slave model.
+                  /// input sections mapped by control model.
     int ret; /// @param ret Return value from various Malloc calls to allocate
              /// memory.
     int   cnt;
@@ -192,7 +192,7 @@ main( int argc, char** argv )
     cdsPciModules.dioCount = 0;
     cdsPciModules.doCount = 0;
 
-    // If running as a slave process, I/O card information is via ipc shared
+    // If running as a control process, I/O card information is via ipc shared
     // memory
     printf( "%d PCI cards found\n", cards );
     status = 0;
@@ -273,14 +273,14 @@ main( int argc, char** argv )
             break;
         }
     }
-    // If no ADC cards were found, then SLAVE cannot run
+    // If no ADC cards were found, then control models cannot run
     if ( !cdsPciModules.adcCount )
     {
         printf( "No ADC cards found - exiting\n" );
         return -1;
     }
     // This did not quite work for some reason
-    // Need to find a way to handle skipped DAC cards in slaves
+    // Need to find a way to handle skipped DAC cards in controllers
     // cdsPciModules.dacCount = ioMemData->dacCount;
 
     printf( "%d PCI cards found \n", status );
@@ -296,7 +296,7 @@ main( int argc, char** argv )
     // Print out all the I/O information
     printf( "******************************************************************"
             "*********\n" );
-    // Master send module counds to SLAVE via ipc shm
+    // Master send module counds to control models via ipc shm
     ioMemData->totalCards = status;
     ioMemData->adcCount = cdsPciModules.adcCount;
     ioMemData->dacCount = cdsPciModules.dacCount;
@@ -306,13 +306,13 @@ main( int argc, char** argv )
     printf( "%d ADC cards found\n", cdsPciModules.adcCount );
     for ( ii = 0; ii < cdsPciModules.adcCount; ii++ )
     {
-        // MASTER maps ADC modules first in ipc shm for SLAVES
+        // MASTER maps ADC modules first in ipc shm for control models
         ioMemData->model[ ii ] = cdsPciModules.adcType[ ii ];
         ioMemData->ipc[ ii ] =
-            ii; // ioData memory buffer location for SLAVE to use
+            ii; // ioData memory buffer location for control models to use
         ioMemDataIop->model[ ii ] = cdsPciModules.adcType[ ii ];
         ioMemDataIop->ipc[ ii ] =
-            ii; // ioData memory buffer location for SLAVE to use
+            ii; // ioData memory buffer location for control models to use
         for ( jj = 0; jj < 65536; jj++ )
         {
             for ( mm = 0; mm < 32; mm++ )
@@ -377,11 +377,11 @@ main( int argc, char** argv )
             printf( "\t\tFirmware Rev = %d \n\n",
                     ( cdsPciModules.dacConfig[ ii ] & 0xfff ) );
         }
-        // Pass DAC info to SLAVE processes
+        // Pass DAC info to control processes
         ioMemData->model[ kk ] = cdsPciModules.dacType[ ii ];
         ioMemData->ipc[ kk ] = kk;
-        // Following used by MASTER to point to ipc memory for inputting DAC
-        // data from SLAVES
+        // Following used by IOP to point to ipc memory for inputting DAC
+        // data from control models
         cdsPciModules.dacConfig[ ii ] = kk;
         printf( "MASTER DAC SLOT %d %d\n", ii, cdsPciModules.dacConfig[ ii ] );
         kk++;
@@ -405,13 +405,13 @@ main( int argc, char** argv )
     printf( "%d Contec PCIe DIO6464 cards found\n",
             cdsPciModules.cDio6464lCount );
     printf( "%d DO cards found\n", cdsPciModules.doCount );
-    // MASTER sends DIO module information to SLAVES
-    // Note that for DIO, SLAVE modules will perform the I/O directly and
+    // IOP sends DIO module information to control models
+    // Note that for DIO, control modules will perform the I/O directly and
     // therefore need to know the PCIe address of these modules.
     ioMemData->bioCount = cdsPciModules.doCount;
     for ( ii = 0; ii < cdsPciModules.doCount; ii++ )
     {
-        // MASTER needs to find Contec 1616 I/O card to control timing slave.
+        // MASTER needs to find Contec 1616 I/O card to control timing receiver.
         if ( cdsPciModules.doType[ ii ] == CON_1616DIO )
         {
             tdsControl[ tdsCount ] = ii;
@@ -428,9 +428,9 @@ main( int argc, char** argv )
     printf( "******************************************************************"
             "*********\n" );
     // Following section maps Reflected Memory, both VMIC hardware style and
-    // Dolphin PCIe network style. Slave units will perform I/O transactions
-    // with RFM directly ie MASTER does not do RFM I/O. Master unit only maps
-    // the RFM I/O space and passes pointers to SLAVES.
+    // Dolphin PCIe network style. Control units will perform I/O transactions
+    // with RFM directly ie IOP does not do RFM I/O. Master unit only maps
+    // the RFM I/O space and passes pointers to control models.
 
     printf( "%d RFM cards found\n", cdsPciModules.rfmCount );
     ioMemData->rfmCount = cdsPciModules.rfmCount;
@@ -441,7 +441,7 @@ main( int argc, char** argv )
                 cdsPciModules.rfmType[ ii ],
                 cdsPciModules.rfmConfig[ ii ] );
         printf( "address is 0x%lx\n", cdsPciModules.pci_rfm[ ii ] );
-        // Master sends RFM memory pointers to SLAVES
+        // Master sends RFM memory pointers to control models
         ioMemData->pci_rfm[ ii ] = cdsPciModules.pci_rfm[ ii ];
         ioMemData->pci_rfm_dma[ ii ] = cdsPciModules.pci_rfm_dma[ ii ];
     }
@@ -452,7 +452,7 @@ main( int argc, char** argv )
     ioMemData->dolphinWrite[ 0 ] = cdsPciModules.dolphinWrite[ 0 ];
 
 #else
-    // Clear Dolphin pointers so the slave sees NULLs
+    // Clear Dolphin pointers so the control app sees NULLs
     ioMemData->dolphinCount = 0;
     ioMemData->dolphinRead[ 0 ] = 0;
     ioMemData->dolphinWrite[ 0 ] = 0;

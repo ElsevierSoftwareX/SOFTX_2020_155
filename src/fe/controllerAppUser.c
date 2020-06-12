@@ -72,7 +72,7 @@ unsigned int CDIO6464LastOutState[ MAX_DIO_MODULES ]; // Current requested value
 // /// Contec6464 values to be written to the output register
 unsigned int CDIO6464Output[ MAX_DIO_MODULES ]; // Binary output bits
 //
-// // This Contect 16 input / 16 output DIO card is used to control timing slave
+// // This Contect 16 input / 16 output DIO card is used to control timing receiver
 // by IOP
 // /// Contec1616 input register values
 unsigned int CDIO1616InputInput[ MAX_DIO_MODULES ]; // Binary input bits
@@ -91,7 +91,7 @@ int             timeHoldHold =
 struct timespec myTimer[ 2 ]; ///< Used in code cycle timing
 
 // Clear DAC channel shared memory map,
-// used to keep track of non-overlapping DAC channels among slave models
+// used to keep track of non-overlapping DAC channels among control models
 //
 void
 deallocate_dac_channels( void )
@@ -133,8 +133,8 @@ getGpsTimeProc( )
 /// This function is the main real-time sequencer or scheduler for all code
 /// built using the RCG. \n There are two primary modes of operation, based on
 /// two compile options: \n
-///	- ADC_MASTER: Software is compiled as an I/O Processor (IOP).
-///	- ADC_SLAVE: Normal user control process.
+///	- IOP_MODEL: Software is compiled as an I/O Processor (IOP).
+///	- CONTROL_MODEL: Normal user control process.
 /// This code runs in a continuous loop at the rate specified in the RCG model.
 /// The loop is synchronized and triggered by the arrival of ADC data, the ADC
 /// module in turn is triggered to sample by the 64KHz clock provided by the
@@ -446,8 +446,8 @@ fe_start_app_user( )
         pLocalEpics->epicsOutput.statAdc[ jj ] = 1;
     }
 
-    // SLAVE needs to sync with MASTER by looking for cycle 0 count in ipc
-    // memory Find memory buffer of first ADC to be used in SLAVE application.
+    // Control model needs to sync with MASTER by looking for cycle 0 count in ipc
+    // memory Find memory buffer of first ADC to be used in control application.
     pLocalEpics->epicsOutput.fe_status = INIT_SYNC;
     ll = cdsPciModules.adcConfig[ 0 ];
     printf( "waiting to sync %d\n", ioMemData->iodata[ ll ][ 0 ].cycle );
@@ -521,7 +521,7 @@ fe_start_app_user( )
         }
         for ( ll = 0; ll < sampleCount; ll++ )
         {
-            /// \> SLAVE gets its adc data from MASTER via ipc shared memory\n
+            /// \> Control model gets its adc data from MASTER via ipc shared memory\n
             for ( jj = 0; jj < cdsPciModules.adcCount; jj++ )
             {
                 mm = cdsPciModules.adcConfig[ jj ];
@@ -541,7 +541,7 @@ fe_start_app_user( )
                     adcInfo.adcWait /= 1000;
                 } while (
                     ( ioMemData->iodata[ mm ][ ioMemCntr ].cycle != ioClock ) &&
-                    ( adcInfo.adcWait < MAX_ADC_WAIT_SLAVE ) );
+                    ( adcInfo.adcWait < MAX_ADC_WAIT_CONTROL ) );
                 timeSec = ioMemData->iodata[ mm ][ ioMemCntr ].timeSec;
                 if ( cycle_gps_time == 0 )
                 {
@@ -553,7 +553,7 @@ fe_start_app_user( )
 
                 /// - --------- If data not ready in time, set error, release
                 /// DAC channel reservation and exit the code.
-                if ( adcInfo.adcWait >= MAX_ADC_WAIT_SLAVE )
+                if ( adcInfo.adcWait >= MAX_ADC_WAIT_CONTROL )
                 {
                     printf( "ADC TIMEOUT %d %d %d %d\n",
                             mm,
@@ -628,9 +628,9 @@ fe_start_app_user( )
         /// WRITE DAC OUTPUTS ***************************************** \n
 
         /// Writing of DAC outputs is dependent on code compile option: \n
-        /// - -- IOP (ADC_MASTER) reads DAC output values from memory shared
+        /// - -- IOP (IOP_MODEL) reads DAC output values from memory shared
         /// with user apps and writes to DAC hardware. \n
-        /// - -- USER APP (ADC_SLAVE) sends output values to memory shared with
+        /// - -- USER APP (CONTROL_MODEL) sends output values to memory shared with
         /// IOP. \n
 
         /// START OF USER APP DAC WRITE

@@ -73,7 +73,7 @@ mapPciModules( CDS_HARDWARE* pCds )
     int                    status;
     int                    i;
     int                    modCount = 0;
-#ifndef ADC_SLAVE
+#ifndef CONTROL_MODEL
     int fast_adc_cnt = 0;
     int adc_cnt = 0;
 #endif
@@ -185,7 +185,7 @@ mapPciModules( CDS_HARDWARE* pCds )
             dac_cnt++;
         }
         // if found, check if it is an ADC module
-#ifndef ADC_SLAVE
+#ifndef CONTROL_MODEL
         if ( ( dacdev->subsystem_device == ADC_SS_ID ) &&
              ( dacdev->subsystem_vendor == PLX_VID ) )
         {

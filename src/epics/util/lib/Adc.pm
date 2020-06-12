@@ -172,7 +172,7 @@ sub frontEndCode {
 #// This code requires /lib/medmGen.pm \n\n
 sub createAdcMedm
 {
-        my ($medmDir,$mdlName,$adcMaster,$ifo,$dcuid,$medmTarget,$adcNum,@adcChannel) = @_;
+        my ($medmDir,$mdlName,$iopModel,$ifo,$dcuid,$medmTarget,$adcNum,@adcChannel) = @_;
  # Define colors to be sent to screen gen.
         my %ecolors = ( "white" => "0",
              "black" => "14",
@@ -284,7 +284,7 @@ sub createAdcMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"ADC CHANNEL HOP",$ecolors{black});
     $xpos = 60; $ypos = 500; $width = 140; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"ADC OVERFLOW ",$ecolors{black});
-    if($adcMaster == 1) {
+    if($iopModel == 1) {
     $xpos = 60; $ypos = 520; $width = 140; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"ADC AUTOCAL ",$ecolors{black});
     }
@@ -296,7 +296,7 @@ sub createAdcMedm
     $xpos = 250; $ypos = 500; $width = 40; $height = 15;
     $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_STAT_$adcNum","2","2",$ecolors{green},$ecolors{red});
 
-    if($adcMaster == 1) {
+    if($iopModel == 1) {
     $xpos = 250; $ypos = 520; $width = 40; $height = 15;
     $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_STAT_$adcNum","3","3",$ecolors{green},$ecolors{red});
     }
