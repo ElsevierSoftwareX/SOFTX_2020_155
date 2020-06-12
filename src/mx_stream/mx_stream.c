@@ -1,7 +1,7 @@
 //
 ///	@file mx_stream.c
 ///	@brief  Open-MX data sender, supports sending data
-///< from the IOP as well as from the user models
+///< from the IOP as well as from the usermodels
 //
 
 #include "myriexpress.h"
