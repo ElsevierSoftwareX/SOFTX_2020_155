@@ -5,7 +5,7 @@ After=network-online.target
 [Service]
 User=advligorts
 StateDirectory=advligorts
-ExecStart=/usr/bin/run_number_server -v --file $STATE_DIRECTORY/run_number
+ExecStart=/usr/bin/run_number_server -v --file /var/lib/advligorts/run_number
 Restart=on-failure
 
 [Install]
