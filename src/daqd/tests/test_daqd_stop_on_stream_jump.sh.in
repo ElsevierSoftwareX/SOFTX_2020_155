@@ -122,10 +122,6 @@ sleep 4
 echo "checking to see if daqd is still running"
 if [ -d "/proc/$PID_DAQD" ]; then
     echo "daqd process did not terminate when expected"
-    DUMMY=""
-    echo "PAUSING"
-    read DUMMY
-    PID_DAQD=0
     exit 1
 fi
 echo "Pid $PID_DAQD does not exist, as expected"
