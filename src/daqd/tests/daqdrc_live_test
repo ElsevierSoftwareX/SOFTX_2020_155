@@ -60,7 +60,7 @@ start profiler;
 
 #start frame-saver;
 #sync frame-saver;
-#start trender;
+start trender;
 #start trend-frame-saver;
 #sync trend-frame-saver;
 #start minute-trend-frame-saver;
