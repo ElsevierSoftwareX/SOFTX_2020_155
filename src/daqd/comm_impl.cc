@@ -44,9 +44,8 @@ namespace comm_impl
             {
                 if ( !IS_TP_DCU( cur_dcu ) && !IS_MYRINET_DCU( cur_dcu ) )
                 {
-                    std::cerr
-                        << "requested DCUID not in the standard range: "
-                        << cur_dcu << std::endl;
+                    std::cerr << "requested DCUID not in the standard range: "
+                              << cur_dcu << std::endl;
                     exit( 1 );
                 }
             }
@@ -165,6 +164,49 @@ namespace comm_impl
 
                     daqd.trender.num_channels++;
                 }
+            }
+        }
+
+        if ( !daqd.broadcast_set.empty( ) )
+        {
+            std::vector< std::string > missing_broadcast_channels{};
+            std::for_each( daqd.broadcast_set.begin( ),
+                           daqd.broadcast_set.end( ),
+                           [&missing_broadcast_channels](
+                               const std::string& cur_broadcast_channel ) {
+                               const channel_t* start = daqd.channels;
+                               const auto       end = start + daqd.num_channels;
+
+                               auto it = std::find_if(
+                                   start,
+                                   end,
+                                   [&cur_broadcast_channel](
+                                       const channel_t& cur_channel ) -> bool {
+                                       // only active non tp channels are marked
+                                       // with trend != 0, so check the name,
+                                       // tp, and active state
+                                       return cur_broadcast_channel ==
+                                           cur_channel.name &&
+                                           cur_channel.trend;
+                                   } );
+                               if ( it == end )
+                               {
+                                   missing_broadcast_channels.emplace_back(
+                                       cur_broadcast_channel );
+                               }
+                           } );
+            if ( !missing_broadcast_channels.empty( ) )
+            {
+                std::cerr << "The GDS broadcast list requests channels that "
+                             "are not available"
+                          << std::endl;
+                std::copy(
+                    missing_broadcast_channels.begin( ),
+                    missing_broadcast_channels.end( ),
+                    std::ostream_iterator< std::string >( std::cerr, "\n" ) );
+                std::cerr << std::endl;
+                throw std::runtime_error( "The GDS broadcast list requests "
+                                          "channels that are not available" );
             }
         }
 
