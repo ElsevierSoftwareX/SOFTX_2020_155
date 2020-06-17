@@ -183,6 +183,11 @@ add_test(NAME test_crc32_table_lookup
 
 if (libNDS2Client_FOUND)
 
+	configure_file(tests/test_daqd_stop_on_stream_jump.sh.in ${CMAKE_CURRENT_BINARY_DIR}/test_daqd_stop_on_stream_jump.sh @ONLY)
+	add_test(NAME test_daqd_stop_on_stream_jump
+			COMMAND /bin/bash ./test_daqd_stop_on_stream_jump.sh
+			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
 	configure_file(tests/daqdrc_live_test ${CMAKE_CURRENT_BINARY_DIR}/daqdrc_live_test COPYONLY)
 	configure_file(tests/test_daqd_live_nds.sh.in ${CMAKE_CURRENT_BINARY_DIR}/test_daqd_live_nds.sh @ONLY)
 
