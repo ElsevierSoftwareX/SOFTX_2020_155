@@ -271,7 +271,7 @@ iop_dac_init( int errorPend[] )
 }
 
 inline int
-iop_dac_write( void )
+iop_dac_write( int in_delay )
 {
     unsigned int* pDacData;
     int           ii, jj, mm;
