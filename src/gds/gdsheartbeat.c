@@ -689,7 +689,7 @@ unsigned int curDaqBlockSize;
 	   }
         } while(timeCycle?
 		*ioMemDataCycle < timeCycle:
-		*ioMemDataCycle > (65536 - 4096));
+		*ioMemDataCycle > (32768));
 
       //int timeSec = ioMemData->gpsSecond;
       //printf("TimeSec=%d; timeCycle=%d,  cycle=%d\n", timeSec, timeCycle, ioMemData->iodata[ll][0].cycle);
