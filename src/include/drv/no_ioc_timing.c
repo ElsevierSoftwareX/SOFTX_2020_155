@@ -235,7 +235,7 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
             ioMemData->iodata[ card ][ ioMemCntr ].cycle = cycleNum;
             ioMemCntr++;
             iocycle++;
-            iocycle %= 65536;
+            iocycle %= IOP_IO_RATE;
         }
     }
     return adcStat;
@@ -271,7 +271,7 @@ iop_dac_init( int errorPend[] )
 }
 
 inline int
-iop_dac_write( int in_delay )
+iop_dac_write( void )
 {
     unsigned int* pDacData;
     int           ii, jj, mm;

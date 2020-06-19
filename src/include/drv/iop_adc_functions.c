@@ -308,7 +308,7 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
                 ioMemData->iodata[ card ][ ioMemCntr ].cycle = iocycle;
                 ioMemCntr++;
                 iocycle++;
-                iocycle %= 65536;
+                iocycle %= IOP_IO_RATE;
             }
 
         }
