@@ -138,7 +138,7 @@ if [ x$gds_node != "x" ]; then
     ##########
 
     echo "Updating testpoint config file..."
-    if test -e src/fe/${system}/${system}.ko; then
+    if [[ $gds_node -lt 256 ]] && test -e src/fe/${system}/${system}.ko; then
       if test -e $RTCDS/target/gds/param/testpoint.par; then
         mv -f $RTCDS/target/gds/param/testpoint.par $RTCDS/target/gds/param/archive/testpoint_${cur_date}.par || exit 1
         testpoint_par_infname=$RTCDS/target/gds/param/archive/testpoint_${cur_date}.par
