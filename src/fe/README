@@ -92,7 +92,7 @@ SECTION I: IOP Kernel Module Software ******************************************
                calculations and only use IPCs to output control signals.
                Parameter block entries required for this use case:
                     1) pciRfm=1
-                    2) dolphin_timing=1
+                    2) dolphin_time_rime_rcvr=1
             b) As a "virtual" machine for testing on a standalone computer. 
                In this mode, the IOP will use the CPU time to control its
                timing.
