@@ -294,9 +294,9 @@ die unless CDS::Parser::sortDacs();
 
 close(IN);
 
-if(($iopModel == 1) and ($adcrate > $adcclock)) 
+if(($iopModel == 1) and ($modelrate > $adcclock) and ($clock_div == 1)) 
 {
-	die "Error:\nModel rate $adcrate > ADC clock $adcclock\nFix adcclock in Param Block\n*****\n";
+	die "Error:\nModel rate $modelrate > ADC clock $adcclock\nFix adcclock in Param Block\n*****\n";
 }
 if($sitedepwarning == 1) {
 	print WARNINGS "WARNING: The 'site=' designator in the model parameter block\n\t is scheduled for deprecation in future releases. \n";
@@ -1147,16 +1147,10 @@ print OUTH "\tint tpCnt;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TP_CNT epicsOutput.tpCnt int ao 0\n";
 
 print OUTH "\tint cpuMeter;\n";
-$frate = $rate;
-if($frate <= 15)
-{
-	$brate =  13;
-	$mrate = 15;
-} else {
-	$frate =  $rate * .85;
-	$brate = $frate;
-	$mrate = $rate;
-}
+
+$frate =  $rate * $clock_div * 0.85;
+$brate = $frate;
+$mrate = $rate * $clock_div;
 $cpuM = $ifo . ":FEC-" . $dcuId . "_CPU_METER";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$mrate\") field(LOPR,\"0\") field(HIHI,\"$mrate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\") field(EGU,\"usec\")\n";
 
@@ -2512,6 +2506,13 @@ if ($iopModel > -1) {  #************ SETUP FOR IOP ***************
   $adccopyrate = $modelrate / $adcclock;
   print OUTM "EXTRA_CFLAGS += -DADC_MEMCPY_RATE=$adccopyrate\n";
 
+#Following used for IOP running at 128K 
+  if($adcclock ==128) {
+  print OUTM "EXTRA_CFLAGS += -DIOP_IO_RATE=131072\n";
+  } else {
+  print OUTM "EXTRA_CFLAGS += -DIOP_IO_RATE=65536\n";
+  }
+
 #Following used for testing 
   if($dacWdOverride > -1) {
   print OUTM "EXTRA_CFLAGS += -DDAC_WD_OVERRIDE\n";
@@ -2578,23 +2579,36 @@ if ($iopModel < 1) {   #************ SETUP FOR USER APP ***************
     print OUTM "EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
   }
 
-# Use oversampling code if not 64K system
-if($modelrate < 64) {
-  if ($no_oversampling) {
-    print OUTM "#Uncomment to oversample A/D inputs\n";
-    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE\n";
-    print OUTM "#Uncomment to interpolate D/A outputs\n";
-    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
-  } else {
-    print OUTM "#Comment out to stop A/D oversampling\n";
-    print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE\n";
-    if ($no_dac_interpolation) {
-    } else {
-      print OUTM "#Comment out to stop interpolating D/A outputs\n";
-      print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
+#Following used with IOP running at 128K 
+  if($adcclock ==128) {
+    print OUTM "EXTRA_CFLAGS += -DIOP_IO_RATE=131072\n";
+    if($modelrate < 128) {
+        my $drate = 128/$modelrate;
+        if($drate == 8 or $drate == 2 or $drate > 32) {
+            die "RCG does not support a user model rate $modelrate" . "K with IOP data at $adcclock" ."K\n"  ;
+        }
+        print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE\n";
+        print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
+        print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_TIMES=$drate\n";
+        print OUTM "EXTRA_CFLAGS += -DFE_OVERSAMPLE_COEFF=feCoeff$drate"."x\n";
     }
   }
-}
+
+#Following used with IOP running at 64K (NORMAL) 
+  if($adcclock ==64) {
+    print OUTM "EXTRA_CFLAGS += -DIOP_IO_RATE=65536\n";
+    if($modelrate < 64) {
+        my $drate = 64/$modelrate;
+        if($drate == 8 or $drate > 32) {
+            die "RCG does not support a user model rate $modelrate" . "K with IOP data at $adcclock" ."K\n"  ;
+        }
+        print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE\n";
+        print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
+        print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_TIMES=$drate\n";
+        print OUTM "EXTRA_CFLAGS += -DFE_OVERSAMPLE_COEFF=feCoeff$drate"."x\n";
+    }
+  }
+
 }  #******************* END SETUP FOR USER APP
 
 

@@ -57,10 +57,9 @@ SECTION I: IOP Kernel Module Software ******************************************
             a) pciRfm=1: Used in most LIGO systems, indicates connection
                to the Dolphin network for real-time comms between FE
                computers.
-            b) dolphingen=1: Used in conjunctions with pciRfm. By default,
                FE code with use Dolphin Gen2 drivers. This option is set
                if Dolphin Gen1 is desired. 
-            c) time_master=1: This IOP will send GPS time (seconds) and 
+            b) dolphin_time_xmit=1: This IOP will send GPS time (seconds) and 
                cycle count (0-65535). This is used to trigger IOP timing
                for FE computers that do not have IOC connected.
                WORNING: THERE CAN ONLY BE ONE TIME MASTER ON THE DOLPHIN
@@ -93,7 +92,7 @@ SECTION I: IOP Kernel Module Software ******************************************
                calculations and only use IPCs to output control signals.
                Parameter block entries required for this use case:
                     1) pciRfm=1
-                    2) dolphin_timing=1
+                    2) dolphin_time_rime_rcvr=1
             b) As a "virtual" machine for testing on a standalone computer. 
                In this mode, the IOP will use the CPU time to control its
                timing.
@@ -134,7 +133,14 @@ SECTION I: IOP Kernel Module Software ******************************************
               LIGO standard 64KHz. Therefore, the IOC must be provided 
               with both a 512KHz clock for fast ADCs and 64K clocks for 
               standard ADCs.
-    6) Non-LICO standard clock rate configuration (UNDER DEVELOPMENT) **********
+    6) IOP running with a 128KHz ADC clock  ************************************
+        The RCG now supports running an IOP with an ADC clock at 128KHz with
+        the General Standards 16ai64 ADC module. This requires the Parameter
+        block settings of:
+            1) rate=128K
+            2) adcclock=128
+        The IOP will now pass data to/from user control models at this rate,
+        so those models require a new Parameter setting to run with this IOP.
 
     7) Addional Optional IOP Parameter Block Settings **************************
         a) optimizeIO=1 : When set, the IOP will not preload the DAC FIFOs with
@@ -177,7 +183,11 @@ SECTION II: User Application Kernel Module Configurations **********************
     drv/app_dio_routines.c  - Provides DIO card I/O
 
     ****
-    The RCG uses model Parameter block entries to obtian compile options.
+    The User App control model has 2 configurations:
+        1) Standard: IOP passing data at 64KS/sec.
+        2) Fast IOP: IOP passing data at > 64KS/sec
+    ****
+    The RCG uses model Parameter block entries to obtain compile options.
     REQUIRED Model Parameter Block Entries for all user app configurations:
     ***
     ifo=IFO_DESIGNATOR eg L1,H1,X2
@@ -190,10 +200,11 @@ SECTION II: User Application Kernel Module Configurations **********************
         - NOTE: 1 thru 6 and 14,15 are reserved for DAQ and may not be used
     host=COMPUTER_HOST_NAME : Name of computer on which this code is to run
     ***
+    For use with an IOP passing data at 128KS/sec, add the following option:
+        adcclock=128
     ***
-    Unlike the IOP, the User App really only has a single run time configuration.
-    It is compatable with all IOP configurations. However, there are a few
-    compile options intended for test systems:
+    
+    Additional compile options intended for CDS code test systems:
         1) no_zero_pad=1 : In performing upsampling of DAC outputs to match IOP
             rate, the user app code using zero padding in its upsample filtering.
             If this option is set, zero padding is disabled.

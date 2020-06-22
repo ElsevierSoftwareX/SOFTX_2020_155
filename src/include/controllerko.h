@@ -32,7 +32,6 @@
 #include "drv/daqLib.c" // DAQ/GDS connection software
 #endif
 
-#include "drv/map.h" // PCI hardware defs
 #include "drv/epicsXfer.c" // User defined EPICS to/from FE data transfer function
 #include "../fe/timing.c" // timing module / IRIG-B  functions
 
