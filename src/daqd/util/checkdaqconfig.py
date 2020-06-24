@@ -45,9 +45,9 @@ parser.add_argument('-m', dest="master_template",
                     help="path to master file template, default: $target/target/daq/master.in", default="")
 parser.add_argument('-i', dest="ini_path", help="path to .ini files, default: $target/chans/daq", default="")
 parser.add_argument('-p', dest="par_path", help="path to .par files, default: $target/target/gds/param", default="")
-parser.add_argument('-d', dest="daq_name", help="name of DAQ (daq0, daq1)", required=True, default="")
 parser.add_argument('-b', dest="daq_base_path",
                     help="base path for daq running directories, default: $target", default="")
+parser.add_argument('daq_name', help="name of DAQ (daq0, daq1)")
 
 args = parser.parse_args()
 
@@ -88,7 +88,7 @@ daq_name = args.daq_name
 if target_path == "" and used_target:
     print("WARNING: target path is empty.", file=sys.stderr)
     print("Either a default path could not be created, or an empty target path was specified.", file=sys.stderr)
-    print("Specify a non-epty target directory with the -t option\n")
+    print("Specify a non-empty target directory with the -t option\n")
 
 # Print all paths
 print("Target directory:\t" + target_path)
@@ -103,11 +103,35 @@ os.makedirs(hash_archives, exist_ok=True)
 
 # do they exist?
 
-missing_paths = [p for p in [archive_path, master_template, ini_path, par_path, daq_base_path] if not path.exists(p)]
+missing_paths = [p for p in [archive_path, master_template, daq_base_path] if not path.exists(p)]
 
 if missing_paths:
     print("ERROR: could not find " + "\nERROR: could not find ".join(missing_paths), file=sys.stderr)
     sys.exit(2)
+
+if not path.exists(ini_path):
+    print(f"WARNING: {ini_path} does not exist.  Paths to .ini file must be hardcoded in master template.")
+
+if not path.exists(par_path):
+    print(f"WARNING: {par_path} does not exist.  Paths to .par file must be hardcoded in master template.")
+
+def replace_dummy_path(file_path, default_path):
+    """
+    Replace a possible dummy path in file_path with default_path.
+    Replace the path only if file_path does not exist.
+    If default_path/file_path also doesn't exist, throw an exception.
+
+    :param file_path: an absolute path to a file
+    :param default_path:
+    :return: if file_path exists, return file_poth, or else return default_path/basename(fname)
+    """
+
+    if path.exists(file_path):
+        return file_path
+    new_path = path.join(default_path, path.basename(file_path))
+    if path.exists(new_path):
+        return new_path
+    raise Exception(f"{file_path} could not be found and {new_path} could not be found")
 
 # get paths to all files in master file.
 try:
@@ -117,9 +141,12 @@ except IOError as e:
     print(f"Failed to open {master_template}: " + str(e), file=sys.stderr)
     sys.exit(1)
 
-master_names = [path.basename(i.strip()) for i in master_lines if i.strip()[0] != "#"]
-ini_files = [f"{ini_path}/{i}" for i in master_names if i[-3:] == "ini"]
-par_files = [f"{par_path}/{i}" for i in master_names if i[-3:] == "par"]
+master_paths = [i.strip() for i in master_lines if i.strip()[0] != "#"]
+ini_files = [replace_dummy_path(i, ini_path) for i in master_paths if i[-3:] == "ini"]
+par_files = [replace_dummy_path(i, par_path) for i in master_paths if i[-3:] == "par"]
+
+
+
 for f in par_files:
     print(f)
 ini_files.sort()
@@ -284,21 +311,19 @@ with open(lockfile, "w") as lock_f:
     new_hash_file = f"{hash_archives}/{new_archive_basename}/{hash_file_name}"
     os.makedirs(new_archive)
 
-    # create master file
-    with open(master_template) as mf:
-        master_contents = mf.read()
-
-    with open(new_master, "w") as mf:
-        t_vars = {"base_path": new_archive}
-        mf.write(Template(master_contents).substitute(t_vars))
-
     # copy in config files
     print("copy in config files")
+    master_entries = []
     for f in ini_files + par_files:
         fb = path.basename(f)
         dest = f"{new_archive}/{fb}"
         shutil.copyfile(f, dest)
+        master_entries.append(dest)
     print("copy complete")
+
+    # create master file
+    with open(new_master, "w") as mf:
+        mf.write("\n".join(master_entries))
 
     # link to master
     create_link(new_archive, master_link)
