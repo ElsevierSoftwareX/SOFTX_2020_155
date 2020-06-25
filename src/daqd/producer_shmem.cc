@@ -28,8 +28,9 @@
 #include <fstream>
 #include <algorithm>
 #include <array>
-#include <cctype> // old <ctype.h>
+#include <cctype>
 #include <memory>
+#include <numeric>
 #include <sys/prctl.h>
 
 #ifdef USE_SYMMETRICOM
@@ -76,6 +77,36 @@ struct ToLower
         return std::tolower( c );
     }
 };
+
+/*!
+ * @brief return a pointer to the first dcu_msg_header_t in the
+ * daq_multi_dcu_header_t structure
+ * @param headers the headers structure
+ * @return pointer to the first message header.
+ * @note added so that standard algorithms could be used with the set of
+ * populated dcu headers in a block
+ */
+inline daq_msg_header_t*
+begin( daq_multi_dcu_header_t& headers )
+{
+    return headers.dcuheader;
+}
+
+/*!
+ * @brief return a pointer just past the last used dcu_msg_header_t in the
+ * daq_multi_dcu_header_t structure
+ * @param headers the headers structure
+ * @return pointer just passed the last used message header (as denoted by the
+ * dcuTotalModels field)
+ * @note added so that standard algorithms could be used with the set of
+ * populated dcu headers in a block
+ * @note this does not check for an invalid dcuTotalModels value
+ */
+inline daq_msg_header_t*
+end( daq_multi_dcu_header_t& headers )
+{
+    return begin( headers ) + headers.dcuTotalModels;
+}
 
 /* GM and shared memory communication area */
 
@@ -246,6 +277,17 @@ producer::frame_writer( )
     PV::set_pv( PV::PV_UPTIME_SECONDS, 0 );
     PV::set_pv( PV::PV_GPS, 0 );
 
+    std::array< std::uint8_t, DCU_COUNT > dcu_recv_mask{};
+    std::uint32_t                         dcu_recv_count = 0;
+    std::uint64_t                         data_in_kb = 0;
+    std::uint64_t                         data_regular_in_kb = 0;
+    std::uint64_t                         data_tp_in_kb = 0;
+    PV::set_pv( PV::PV_PRDCR_UNIQUE_DCU_REPORTED_PER_S, 0 );
+    PV::set_pv( PV::PV_PRDCR_TOTAL_DCU_REPORTED_PER_S, 0 );
+    PV::set_pv( PV::PV_PRDCR_TOTAL_DATA_RATE_KB_PER_S, 0 );
+    PV::set_pv( PV::PV_PRDCR_TP_DATA_RATE_KB_PER_S, 0 );
+    PV::set_pv( PV::PV_PRDCR_MODEL_DATA_RATE_KB_PER_S, 0 );
+
     int prev_controller_cycle = -1;
     int dcu_cycle = 0;
     int resync = 0;
@@ -274,6 +316,41 @@ producer::frame_writer( )
         stat_recv.sample( );
         daq_dc_data_t* data_block = shmem_receiver.receive_data( );
         stat_recv.tick( );
+
+        if ( i % 16 == 0 )
+        {
+            unsigned int tp_count = 0;
+            for ( const auto& dcu_header : data_block->header )
+            {
+                tp_count += dcu_header.tpCount;
+            }
+            PV::set_pv( PV::PV_PRDCR_OPEN_TP_COUNT, tp_count );
+            PV::set_pv( PV::PV_PRDCR_UNIQUE_DCU_REPORTED_PER_S,
+                        std::accumulate( dcu_recv_mask.begin( ),
+                                         dcu_recv_mask.end( ),
+                                         static_cast< std::uint32_t >( 0 ) ) );
+            PV::set_pv( PV::PV_PRDCR_TOTAL_DCU_REPORTED_PER_S, dcu_recv_count );
+            PV::set_pv( PV::PV_PRDCR_TOTAL_DATA_RATE_KB_PER_S,
+                        data_in_kb / 1024 );
+            PV::set_pv( PV::PV_PRDCR_TP_DATA_RATE_KB_PER_S,
+                        data_tp_in_kb / 1024 );
+            PV::set_pv( PV::PV_PRDCR_MODEL_DATA_RATE_KB_PER_S,
+                        data_regular_in_kb / 1024 );
+            std::fill( dcu_recv_mask.begin( ), dcu_recv_mask.end( ), 0 );
+            dcu_recv_count = 0;
+            data_in_kb = 0;
+            data_tp_in_kb = 0;
+            data_regular_in_kb = 0;
+        }
+        data_in_kb += data_block->header.fullDataBlockSize;
+        dcu_recv_count += data_block->header.dcuTotalModels;
+        for ( const auto& dcu_header : data_block->header )
+        {
+            dcu_header.tpCount;
+            dcu_recv_mask[ dcu_header.dcuId ] = 1;
+            data_tp_in_kb += dcu_header.tpBlockSize;
+            data_regular_in_kb += dcu_header.dataBlockSize;
+        }
 
         producer_buf* cur_buffer =
             work_queue->get_from_queue( RECV_THREAD_INPUT );
