@@ -645,11 +645,13 @@ trender_c::minute_trend( )
                                  SAVER_THREAD_PRIORITY,
                                  MINUTE_TRENDER_CPUAFFINITY );
 
-    int           tblen = mtb->blocks( ); // trend buffer length
-    int           nc; // number of trend samples accumulated
-    int           nb; // trend buffer block number
-    trend_block_t ttb[ num_channels ]; // minute trend local storage
-    unsigned long npoints[ num_channels ]; // number of data points processed
+    int                          tblen = mtb->blocks( ); // trend buffer length
+    int                          nc; // number of trend samples accumulated
+    int                          nb; // trend buffer block number
+    std::vector< trend_block_t > ttb(
+        num_channels ); // minute trend local storage
+    std::vector< unsigned long > npoints(
+        num_channels, 0 ); // number of data points processed
 
     for ( nc = 0; !stopping( ); )
     {
@@ -678,8 +680,10 @@ trender_c::minute_trend( )
             {
                 prop =
                     tb->block_prop( nb )->prop; // remember initial properties
-                memset( ttb, 0, sizeof( ttb[ 0 ] ) * num_channels );
-                memset( npoints, 0, sizeof( npoints[ 0 ] ) * num_channels );
+                std::fill( ttb.begin( ),
+                           ttb.end( ),
+                           trend_block_t{ 0, 0, 0, 0., 0. } );
+                std::fill( npoints.begin( ), npoints.end( ), 0 );
                 // Check GPS time; it must be aligned on 60 secs boundary
                 // correct if wrong
                 if ( prop.gps % tblen )
@@ -766,7 +770,7 @@ trender_c::minute_trend( )
 #endif
             nc = 0;
             DEBUG( 3, cerr << "minute trender consumer " << prop.gps << endl );
-            mtb->put( (char*)ttb, block_size, &prop );
+            mtb->put( (char*)ttb.data( ), block_size, &prop );
         }
     }
     return NULL;

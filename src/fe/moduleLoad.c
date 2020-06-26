@@ -16,7 +16,7 @@ struct task_struct* sthread;
 extern void set_fe_code_idle( void* ( *ptr )(void*), unsigned int cpu );
 extern void msleep( unsigned int );
 
-#ifdef ADC_MASTER
+#ifdef IOP_MODEL
 int need_to_load_IOP_first;
 EXPORT_SYMBOL( need_to_load_IOP_first );
 #else
@@ -71,7 +71,7 @@ rt_fe_init( void )
 #endif
 
     jj = 0;
-#ifdef ADC_SLAVE
+#ifdef CONTROL_MODEL
     need_to_load_IOP_first = 0;
 #endif
 
@@ -130,7 +130,7 @@ rt_fe_init( void )
     }
 #endif
 
-#ifdef ADC_MASTER
+#ifdef IOP_MODEL
     /// Wirte PCIe card info to mbuf for use by userapp models
     send_io_info_to_mbuf( status, &cdsPciModules );
 #endif
@@ -193,6 +193,7 @@ rt_fe_init( void )
 void
 rt_fe_cleanup( void )
 {
+    int ret;
 #ifndef NO_CPU_SHUTDOWN
     extern int cpu_up( unsigned int cpu );
 
@@ -228,6 +229,7 @@ rt_fe_cleanup( void )
 
     // Print out any error messages from FE code on exit
     print_exit_messages( fe_status_return, fe_status_return_subcode );
+    ret = detach_shared_memory( );
 }
 
 module_init( rt_fe_init );

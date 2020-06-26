@@ -67,39 +67,25 @@ private:
     };
 
 public:
-#if defined( NO_BROADCAST )
-    static const int broadcast = 0;
-#else
     typedef struct
     {
         bool  inUse;
         char* data;
     } radio_buffer;
 
-    int             broadcast;
-    int             mcast_port;
-    std::string     mcast_interface;
-    diag::frameSend radio;
-#if defined( DATA_CONCENTRATOR )
-    // Broadcasting at 16Hz needs smaller buffers
-    static const int radio_buf_len = 6 * 1024 * 1024;
-    static const int radio_buf_num = 300;
-    // Testpoint broadcaster, using different port
-    diag::frameSend radio_tp;
-#else
+    int              broadcast;
+    int              mcast_port;
+    std::string      mcast_interface;
+    diag::frameSend  radio;
     static const int radio_buf_len = 64 * 1024 * 1024;
     static const int radio_buf_num = 20;
-#endif
-    radio_buffer    radio_bufs[ radio_buf_num ];
+    radio_buffer     radio_bufs[ radio_buf_num ];
 
     int* first_adc_ptr;
-#endif
 
     static const int default_mcast_port = diag::frameXmitPort + 2;
 
-#ifdef GDS_TESTPOINTS
     int clear_testpoints;
-#endif
 
     // Scattered data vector type for data decimation
     struct dec_put_vec
@@ -122,22 +108,9 @@ public:
         : num_channels( 0 ), shutdown_now( 0 ), buffptr( 0 ), block_size( 0 ),
           transmission_block_size( 0 ), transient( 0 ), pvec_len( 0 ),
           dec_vec_len( 0 ), writer_type( slow_writer ), seq_num( 0 ),
-          channels( 0 ), pvec( 0 ), dec_vec( 0 ), s_link( nid )
-
-#ifndef NO_BROADCAST
-          ,
-          broadcast( 0 ), mcast_interface( "" ),
-          mcast_port( default_mcast_port ), radio( radio_buf_num - 1 )
-#if defined( DATA_CONCENTRATOR )
-          ,
-          radio_tp( radio_buf_num - 1 )
-#endif
-#endif
-#ifdef GDS_TESTPOINTS
-          ,
-          clear_testpoints( 0 )
-#endif
-          ,
+          channels( 0 ), pvec( 0 ), dec_vec( 0 ), s_link( nid ), broadcast( 0 ),
+          mcast_interface( "" ), mcast_port( default_mcast_port ),
+          radio( radio_buf_num - 1 ), clear_testpoints( 0 ),
           decimation_requested( false ), need_send_reconfig_block( false ),
           no_averaging( false )
     {
@@ -145,15 +118,15 @@ public:
         pthread_mutex_init( &bm, NULL );
         pthread_mutex_init( &tl, NULL );
 
-#ifndef NO_BROADCAST
         for ( int i = 0; i < radio_buf_num; i++ )
         {
             radio_bufs[ i ].data = 0;
             radio_bufs[ i ].inUse = false;
         }
-#endif
         for ( int i = 0; i < 16; i++ )
+        {
             pvec16th[ i ] = 0;
+        }
     };
     ~net_writer_c( )
     {
@@ -437,8 +410,7 @@ public:
     int send_to_client( char*         data,
                         unsigned long len,
                         unsigned long gps = 0,
-                        int           period = 0,
-                        int           tp = 0 );
+                        int           period = 0 );
 
     /// Send ACK to the client + net-writer ID
     int
@@ -547,12 +519,6 @@ public:
             char            buf[ 2048 ];
 
             // Try to resolve name into IP address
-#if 0
-       int gethostbyname_r(const char *name,
-         struct hostent *ret, char *buf, size_t buflen,
-         struct hostent **result, int *h_errnop);
-#endif
-
             if ( gethostbyname_r( str, &hent, buf, 2048, &hp, &error ) )
                 return -1;
 

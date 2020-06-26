@@ -10,7 +10,7 @@ app_adc_read( int ioMemCtr, int ioClk, adcInfo_t* adcinfo, int cpuClk[] )
     int card = 0;
     int chan = 0;
 
-    /// \> SLAVE gets its adc data from MASTER via ipc shared memory\n
+    /// \> Control model gets its adc data from MASTER via ipc shared memory\n
     /// \> For each ADC defined:
     for ( card = 0; card < cdsPciModules.adcCount; card++ )
     {
@@ -25,7 +25,7 @@ app_adc_read( int ioMemCtr, int ioClk, adcInfo_t* adcinfo, int cpuClk[] )
                 ( cpuClk[ CPU_TIME_ADC_WAIT ] - cpuClk[ CPU_TIME_RDY_ADC ] ) /
                 CPURATE;
         } while ( ( ioMemData->iodata[ mm ][ ioMemCtr ].cycle != ioClk ) &&
-                  ( adcinfo->adcWait < MAX_ADC_WAIT_SLAVE ) );
+                  ( adcinfo->adcWait < MAX_ADC_WAIT_CONTROL ) );
         timeSec = ioMemData->iodata[ mm ][ ioMemCtr ].timeSec;
         if ( cycle_gps_time == 0 )
         {
@@ -36,7 +36,7 @@ app_adc_read( int ioMemCtr, int ioClk, adcInfo_t* adcinfo, int cpuClk[] )
 
         /// - --------- If data not ready in time, set error, release DAC
         /// channel reservation and exit the code.
-        if ( adcinfo->adcWait >= MAX_ADC_WAIT_SLAVE )
+        if ( adcinfo->adcWait >= MAX_ADC_WAIT_CONTROL )
             return 1;
         if(cdsPciModules.adcType[ card ] == GSC_18AI32SSC1M) num_chans = 8;
         else num_chans = MAX_ADC_CHN_PER_MOD;

@@ -104,7 +104,7 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
     int           iocycle = 0;
 
     // Read ADC data
-#ifdef TIME_SLAVE
+#ifdef USE_DOLPHIN_TIMING
     missedCycle = waitPcieTimingSignal( pcieTimer, cycleNum );
     timeSec = pcieTimer->gps_time;
 #else
@@ -228,14 +228,14 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
                 packedData++;
             }
 
-            /// - ---- Write GPS time and cycle count as indicator to slave that
+            /// - ---- Write GPS time and cycle count as indicator to control app that
             /// adc data is ready
             ioMemData->gpsSecond = timeSec;
             ioMemData->iodata[ card ][ ioMemCntr ].timeSec = timeSec;
             ioMemData->iodata[ card ][ ioMemCntr ].cycle = cycleNum;
             ioMemCntr++;
             iocycle++;
-            iocycle %= 65536;
+            iocycle %= IOP_IO_RATE;
         }
     }
     return adcStat;
@@ -257,7 +257,7 @@ iop_dac_init( int errorPend[] )
             dacOutUsed[ ii ][ jj ] = 0;
             dacOutBufSize[ ii ] = 0;
             // Zero out DAC channel map in the shared memory
-            // to be used to check on slaves' channel allocation
+            // to be used to check on control apps' channel allocation
             ioMemData->dacOutUsed[ ii ][ jj ] = 0;
         }
     }
@@ -271,7 +271,7 @@ iop_dac_init( int errorPend[] )
 }
 
 inline int
-iop_dac_write( void )
+iop_dac_write( int in_delay )
 {
     unsigned int* pDacData;
     int           ii, jj, mm;
@@ -282,9 +282,9 @@ iop_dac_write( void )
     /// WRITE DAC OUTPUTS ***************************************** \n
 
     /// Writing of DAC outputs is dependent on code compile option: \n
-    /// - -- IOP (ADC_MASTER) reads DAC output values from memory shared with
+    /// - -- IOP (IOP_MODEL) reads DAC output values from memory shared with
     /// user apps and writes to DAC hardware. \n
-    /// - -- USER APP (ADC_SLAVE) sends output values to memory shared with IOP.
+    /// - -- USER APP sends output values to memory shared with IOP.
     /// \n
 
     /// START OF IOP DAC WRITE ***************************************** \n
@@ -300,7 +300,7 @@ iop_dac_write( void )
         /// - -- locate the proper DAC memory block
         mm = cdsPciModules.dacConfig[ jj ];
         /// - -- Determine if memory block has been set with the correct cycle
-        /// count by Slave app.
+        /// count by control app.
         if ( ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle == ioClockDac )
         {
             dacEnable |= pBits[ jj ];
@@ -376,7 +376,7 @@ iop_dac_write( void )
             pDacData++;
         }
         /// - -- Mark cycle count as having been used -1 \n
-        /// - --------- Forces slaves to mark this cycle or will not be used
+        /// - --------- Forces control apps to mark this cycle or will not be used
         /// again by Master
         ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle = -1;
         /// - -- DMA Write data to DAC module

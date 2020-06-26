@@ -260,7 +260,7 @@ sub createDac20Medm
 	}
 
         # ************* Add Data Monitors  ***************************************************************************
-	if($::adcMaster == 1) {
+	if($::iopModel == 1) {
         # Add On Line Status Monitor
         $xpos = 26; $ypos = 52; $width = 12; $height = 12;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$dacNum","0","0",$ecolors{green},$ecolors{red});
@@ -271,7 +271,7 @@ sub createDac20Medm
         # Add Overrange Status Monitor
         $xpos = 26; $ypos = 82; $width = 12; $height = 12;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$dacNum","2","2",$ecolors{green},$ecolors{red});
-	if($::adcMaster == 1) {
+	if($::iopModel == 1) {
         # Add AI Chassis WD Status Monitor
         $xpos = 26; $ypos = 97; $width = 12; $height = 12;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$dacNum","4","4",$ecolors{green},$ecolors{red});
@@ -288,7 +288,7 @@ sub createDac20Medm
 	# Add OVERRANGE Label
         $xpos = 51; $ypos = 82; $width = 100; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"OVERRANGE",$ecolors{black});
-	if($::adcMaster == 1) {
+	if($::iopModel == 1) {
 	# Add AI CHASSIS WD Label
         $xpos = 51; $ypos = 97; $width = 100; $height = 15;
         $medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"AI CHASSIS WD",$ecolors{black});

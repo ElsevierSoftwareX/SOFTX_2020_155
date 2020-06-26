@@ -15,7 +15,7 @@ Runtime products include:
 			-  Reading in all ADC module data and writing out all DAC module data and communicating this information with user application processes.
 			- Reading data from Reflected Memory (RFM) realtime network interface modules.
 			-  Synchronization of user applications.
-		-  User application (compile option ADC_SLAVE=1). This is the typical application built for user application models. 
+		-  User application . This is the typical application built for user application models. 
 	- EPICS sequencer: This is an application, based on EPICS State Notation Language (SNL), which passes data between EPICS database records and the real-time application via shared memory. The RT application will trigger this sequencer to update all EPICS information at 16Hz. Note, however, that this code is not running in a real-time context, and therefore not guaranteed to run at 16Hz.
 	- EPICS Database: Standard EPICS database records which allow communication to other computers, primarily operator stations, via EPICS channel access network protocol.
 

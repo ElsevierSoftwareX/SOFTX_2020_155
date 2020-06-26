@@ -216,6 +216,19 @@ print_exit_messages( int error_type, int error_sub )
 
 #ifndef USER_SPACE
 int
+detach_shared_memory( )
+{
+    int  ret;
+    char fname[ 128 ];
+
+    ret = mbuf_release_area( SYSTEM_NAME_STRING_LOWER, _epics_shm );
+    ret = mbuf_release_area( "ipc", _ipc_shm );
+    ret = mbuf_release_area( "shmipc", _shmipc_shm  );
+    sprintf( fname, "%s_daq", SYSTEM_NAME_STRING_LOWER );
+    ret = mbuf_release_area( fname, _daq_shm );
+    return ret;
+}
+int
 attach_shared_memory( )
 {
     int  ret;
@@ -236,7 +249,7 @@ attach_shared_memory( )
     pLocalEpics->epicsOutput.fe_status = 0;
 
     /// Allocate IPC memory area
-    ret = mbuf_allocate_area( "ipc", 16 * 1024 * 1024, 0 );
+    ret = mbuf_allocate_area( "ipc", 32 * 1024 * 1024, 0 );
     if ( ret < 0 )
     {
         printk( "" SYSTEM_NAME_STRING_LOWER
@@ -248,6 +261,17 @@ attach_shared_memory( )
 
     // Assign pointer to IOP/USER app comms space
     ioMemData = (IO_MEM_DATA*)( _ipc_shm + 0x4000 );
+
+    /// Allocate Shared memory IPC comms memory area
+    ret = mbuf_allocate_area( "shmipc", 16 * 1024 * 1024, 0 );
+    if ( ret < 0 )
+    {
+        printk( "" SYSTEM_NAME_STRING_LOWER
+                ": ERROR: mbuf_allocate_area(shmipc) failed; ret = %d\n",
+                ret );
+        return -12;
+    }
+    _shmipc_shm = (unsigned char*)( kmalloc_area[ ret ] );
 
     /// Allocate DAQ memory area
     sprintf( fname, "%s_daq", SYSTEM_NAME_STRING_LOWER );
@@ -277,7 +301,7 @@ send_io_info_to_mbuf( int totalcards, CDS_HARDWARE* pCds )
         ioMemData->model[ ii ] = -1;
     }
 
-    /// Master send module counts to SLAVE via ipc shm
+    /// Master send module counts to control model via ipc shm
     ioMemData->totalCards = totalcards;
     ioMemData->adcCount = pCds->adcCount;
     ioMemData->dacCount = pCds->dacCount;
@@ -286,28 +310,28 @@ send_io_info_to_mbuf( int totalcards, CDS_HARDWARE* pCds )
     kk = pCds->adcCount;
     for ( ii = 0; ii < pCds->adcCount; ii++ )
     {
-        // MASTER maps ADC modules first in ipc shm for SLAVES
+        // MASTER maps ADC modules first in ipc shm for control models
         ioMemData->model[ ii ] = pCds->adcType[ ii ];
         ioMemData->ipc[ ii ] =
-            ii; // ioData memory buffer location for SLAVE to use
+            ii; // ioData memory buffer location for control model to use
     }
     for ( ii = 0; ii < pCds->dacCount; ii++ )
     {
-        // Pass DAC info to SLAVE processes
+        // Pass DAC info to control processes
         ioMemData->model[ kk ] = pCds->dacType[ ii ];
         ioMemData->ipc[ kk ] = kk;
         // Following used by MASTER to point to ipc memory for inputting DAC
-        // data from SLAVES
+        // data from control models
         pCds->dacConfig[ ii ] = kk;
         kk++;
     }
-    // MASTER sends DIO module information to SLAVES
-    // Note that for DIO, SLAVE modules will perform the I/O directly and
+    // MASTER sends DIO module information to control models
+    // Note that for DIO, control modules will perform the I/O directly and
     // therefore need to know the PCIe address of these modules.
     ioMemData->bioCount = pCds->doCount;
     for ( ii = 0; ii < pCds->doCount; ii++ )
     {
-        // MASTER needs to find Contec 1616 I/O card to control timing slave.
+        // MASTER needs to find Contec 1616 I/O card to control timing card.
         if ( pCds->doType[ ii ] == CON_1616DIO )
         {
             tdsControl[ tdsCount ] = ii;
@@ -320,15 +344,15 @@ send_io_info_to_mbuf( int totalcards, CDS_HARDWARE* pCds )
         kk++;
     }
     // Following section maps Reflected Memory, both VMIC hardware style and
-    // Dolphin PCIe network style. Slave units will perform I/O transactions
+    // Dolphin PCIe network style. Control units will perform I/O transactions
     // with RFM directly ie MASTER does not do RFM I/O. Master unit only maps
-    // the RFM I/O space and passes pointers to SLAVES.
+    // the RFM I/O space and passes pointers to control models.
 
     /// Map VMIC RFM cards, if any
     ioMemData->rfmCount = pCds->rfmCount;
     for ( ii = 0; ii < pCds->rfmCount; ii++ )
     {
-        // Master sends RFM memory pointers to SLAVES
+        // Master sends RFM memory pointers to control models
         ioMemData->pci_rfm[ ii ] = pCds->pci_rfm[ ii ];
         ioMemData->pci_rfm_dma[ ii ] = pCds->pci_rfm_dma[ ii ];
     }
@@ -344,7 +368,7 @@ send_io_info_to_mbuf( int totalcards, CDS_HARDWARE* pCds )
     ioMemData->dolphinWrite[ 1 ] = pCds->dolphinWrite[ 1 ];
 
 #else
-        // Clear Dolphin pointers so the slave sees NULLs
+        // Clear Dolphin pointers so the controller process sees NULLs
         ioMemData->dolphinCount = 0;
         ioMemData->dolphinRead[ 0 ] = 0;
         ioMemData->dolphinWrite[ 0 ] = 0;

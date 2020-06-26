@@ -2,7 +2,7 @@
 ///     \brief File contain subroutines for initializing and read/write ops
 ///<            for Contec 16input/16output digital I/O modules. \n
 ///<		This module is supported solely for use in controlling timing
-///<slave 		modules in I/O chassis ie it is not intended for general use as a
+///<receivers 		modules in I/O chassis ie it is not intended for general use as a
 ///<		digital I/O board for users. \n
 ///< For board info, see <a
 ///< href="http://www.contec.com/product.php?id=1611">DIO-1616L-PE Manual</a>

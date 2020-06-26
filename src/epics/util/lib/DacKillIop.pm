@@ -30,7 +30,7 @@ use Exporter;
 #// \n
 #// \b Restrictions: \n
 #// - As presently coded, this part may only be used in an IOP model.
-#//		- For use in a user application model, the controller.c code with 'ifdef ADC_SLAVE' must be changed in the DAC write code section.
+#//		- For use in a user application model, the controller.c code with 'ifdef CONTROL_MODEL' must be changed in the DAC write code section.
 #//
 #// \n
 
@@ -44,7 +44,7 @@ use Exporter;
 #// Returns DacKillIop \n\n
 sub partType {
 	my ($i,$j) = @_;
-	if($::adcMaster < 0) {
+	if($::iopModel < 0) {
                 die "***ERROR: DACKILL IOP parts can only be used in IOP models\n";
         }
 	my $desc = ${$i->{FIELDS}}{"Description"};

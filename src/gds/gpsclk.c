@@ -152,7 +152,7 @@
 /*                                                         		*/
 /* External Procedure Name: gpsMaster					*/
 /*                                                         		*/
-/* Procedure Description: True if GPS master, false if slave board	*/
+/* Procedure Description: True if GPS master, false if secondary board	*/
 /*                                                         		*/
 /* Procedure Arguments: board ID					*/
 /*                                                         		*/
@@ -296,7 +296,7 @@
             }
          }
       }
-      else { /* gps slave board or ignore year */
+      else { /* gps secondary board or ignore year */
          if (currentYear == 0) {
             struct tm	utc;		/* utc time from clock */
          #if 0 && defined(OS_VXWORKS) && defined(PROCESSOR_BAJA47)
@@ -329,7 +329,7 @@
             }
             currentYear = 1900 + utc.tm_year;
             /*currentYear = 2004;*/
-         /* write year info to gps board if slave */
+         /* write year info to gps board if secondary */
             if (!gpsMaster (ID) &&
                setYearInformation (0, currentYear) != 0) {
                currentYear = 0;
@@ -497,7 +497,7 @@
       }
       else {
          printf ("Brandywine syncclock32 (GPS %s) installed at %x\n",
-                gpsMaster(ID) ? "master" : "slave", (int) addr);
+                gpsMaster(ID) ? "master" : "secondary", (int) addr);
       }
    
       /* set real-time clock to UTC */
@@ -506,7 +506,7 @@
       taskDelay (60);
       /* wait until synchronized to input */
    
-      /* set the year information if a slave */
+      /* set the year information if a secondary */
       if (!gpsMaster (ID)) {
       /* set year */
          if (year != NULL) {

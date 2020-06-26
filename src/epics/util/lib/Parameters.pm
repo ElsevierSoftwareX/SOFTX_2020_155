@@ -27,6 +27,9 @@ sub parseParams {
 			if ($spp[0] eq "site" ) {
                 $::sitedepwarning = 1;
             }
+			if ($spp[0] eq "adcMaster" ) {
+                $::adcmasterdepwarning = 1;
+            }
 			if (($spp[0] eq "site") or ($spp[0] eq "ifo") ) {
 				$spp[1] =~ s/,/ /g;
 
@@ -137,26 +140,24 @@ sub parseParams {
 				$::specificCpu = $spp[1];
 			} elsif ($spp[0] eq "adcMaster") {
 				print "FE will run as IOP\n";
-				$::adcMaster = $spp[1];
+				$::iopModel = $spp[1];
+			} elsif ($spp[0] eq "iop_model") {
+				print "FE will run as IOP\n";
+				$::iopModel = $spp[1];
 			} elsif ($spp[0] eq "diagTest") {
 				print "FE Compiles as DIAG TEST CODE\n";
 				$::diagTest = $spp[1];
 			} elsif ($spp[0] eq "dacwdoverride") {
 				print "FE Compiles with override of bad DAC error\n";
 				$::dacWdOverride = $spp[1];
-			} elsif ($spp[0] eq "adcSlave") {
-				print "FE will run as SLAVE to IOP\n";
-				$::adcSlave = $spp[1];
-			} elsif ($spp[0] eq "time_master") {
-				$::timeMaster = $spp[1];
-			} elsif ($spp[0] eq "time_slave") {
-				$::timeSlave = $spp[1];
-			} elsif ($spp[0] eq "iop_time_slave") {
-				$::iopTimeSlave = $spp[1];
+			} elsif ($spp[0] eq "dolphin_time_xmit") {
+				$::dolphin_time_xmit = $spp[1];
+			} elsif ($spp[0] eq "dolphin_recover") {
+				$::dolphin_recover = $spp[1];
+			} elsif ($spp[0] eq "dolphin_time_rcvr") {
+				$::dolphinTiming = $spp[1];
 			} elsif ($spp[0] eq "no_cpu_shutdown") {
 				$::no_cpu_shutdown = $spp[1];
-			} elsif ($spp[0] eq "rfm_time_slave") {
-				$::rfmTimeSlave = $spp[1];
 			} elsif ($spp[0] eq "pciRfm") {
 				print "FE will run with PCIE RFM Network\n";
 				$::pciNet = $spp[1];

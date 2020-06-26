@@ -36,3 +36,6 @@ src/daqd/autom4te.cache
 
 #kernel module build files
 modules.order
+
+#python compile files
+*__pycache__*

@@ -336,7 +336,7 @@ private:
     void
     shutdown_trender( )
     {
-        shutdown_now_ = false;
+        shutdown_now_ = true;
     }
 
     bool

@@ -1,4 +1,4 @@
-///	\file map.c
+///	\file mapVirtual.h
 ///	\brief This file contains the software to find PCIe devices on the bus.
 
 #include <linux/types.h>

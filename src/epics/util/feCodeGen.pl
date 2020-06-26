@@ -110,6 +110,7 @@ $maxDioMod = pop(@mdmNum);
 
 # Initialize default settings.
 $sitedepwarning = 0;
+$adcmasterdepwarning = 0;
 $ifo = "M1"; # Default value for the ifo name
 $location = "mit"; # Default value for the location name
 $rate = "60"; # In microseconds (default setting)
@@ -118,12 +119,10 @@ $dcuId = 10; # Default dcu Id
 $targetHost = "localhost"; # Default target host name
 $edcusync = "none";
 $specificCpu = -1; # Defaults is to run the FE on the first available CPU
-$adcMaster = -1;
+$iopModel = -1;
 $dacWdOverride = -1;
-$adcSlave = -1;
-$timeMaster = -1;
-$timeSlave = -1;
-$rfmTimeSlave = -1;
+$dolphin_time_xmit = -1;
+$dolphinTiming = -1;
 $diagTest = -1;
 $flipSignals = 0;
 $ipcrate = 0;
@@ -156,6 +155,7 @@ $adcclock = 64;
 $modelrate = 64;
 $servoflag = "-DSERVO64K";
 $clock_div = 1;
+$dolphin_recover = 0;
 
 # Load model name without .mdl extension.
 $skeleton = $ARGV[1];
@@ -294,13 +294,17 @@ die unless CDS::Parser::sortDacs();
 
 close(IN);
 
-if(($adcMaster == 1) and ($adcrate > $adcclock)) 
+if(($iopModel == 1) and ($modelrate > $adcclock) and ($clock_div == 1)) 
 {
-	die "Error:\nModel rate $adcrate > ADC clock $adcclock\nFix adcclock in Param Block\n*****\n";
+	die "Error:\nModel rate $modelrate > ADC clock $adcclock\nFix adcclock in Param Block\n*****\n";
 }
 if($sitedepwarning == 1) {
 	print WARNINGS "WARNING: The 'site=' designator in the model parameter block\n\t is scheduled for deprecation in future releases. \n";
 	print WARNINGS "*******: Please replace site=$ifo designator with ifo=$ifo \n";
+}
+if($adcmasterdepwarning == 1) {
+	print WARNINGS "WARNING: The 'adcMaster=' designator in the model parameter block\n\t is scheduled for deprecation in future releases. \n";
+	print WARNINGS "*******: Please replace adcMaster=1 designator with iop_model=1 \n";
 }
 
 #//	
@@ -1128,6 +1132,7 @@ if($diagTest > -1)
 {
 print OUTH "\tint bumpCycle;\n";
 print OUTH "\tint bumpAdcRd;\n";
+print OUTH "\tint longAdcRd;\n";
 }
 print OUTH "} CDS_EPICS_IN;\n\n";
 print OUTH "typedef struct CDS_EPICS_OUT {\n";
@@ -1142,16 +1147,10 @@ print OUTH "\tint tpCnt;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TP_CNT epicsOutput.tpCnt int ao 0\n";
 
 print OUTH "\tint cpuMeter;\n";
-$frate = $rate;
-if($frate <= 15)
-{
-	$brate =  13;
-	$mrate = 15;
-} else {
-	$frate =  $rate * .85;
-	$brate = $frate;
-	$mrate = $rate;
-}
+
+$frate =  $rate * $clock_div * 0.85;
+$brate = $frate;
+$mrate = $rate * $clock_div;
 $cpuM = $ifo . ":FEC-" . $dcuId . "_CPU_METER";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_CPU_METER epicsOutput.cpuMeter int ao 0 field(HOPR,\"$mrate\") field(LOPR,\"0\") field(HIHI,\"$mrate\") field(HHSV,\"MAJOR\") field(HIGH,\"$brate\") field(HSV,\"MINOR\") field(EGU,\"usec\")\n";
 
@@ -1293,7 +1292,7 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_STATE_WORD_FE epicsOutput.stateWord int ao
 print OUTH "\tint epicsSync;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_EPICS_SYNC epicsOutput.epicsSync int ao 0\n";
 
-if($adcMaster > -1)
+if($iopModel > -1)
 {
 print OUTH "\tint dtTime;\n";
 print OUTH "\tint dacDtTime;\n";
@@ -1325,9 +1324,10 @@ print EPICS "DUMMY FEC\_$dcuId\_UPTIME_MINUTE int ao 0\n";
 # The following code is in solely for automated testing.
 if($diagTest > -1)
 {
-print OUTH "\tint timingTest[10];\n";
+print OUTH "\tint timingTest[11];\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_CYCLE epicsInput.bumpCycle int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_ADC epicsInput.bumpAdcRd int ao 0\n";
+print EPICS "MOMENTARY FEC\_$dcuId\_LONG_ADC epicsInput.longAdcRd int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_64K epicsOutput.timingTest[0] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32K epicsOutput.timingTest[1] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16K epicsOutput.timingTest[2] int ao 0\n";
@@ -1338,6 +1338,7 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32KA epicsOutput.timingTest[6]
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16KA epicsOutput.timingTest[7] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04KA epicsOutput.timingTest[8] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02KA epicsOutput.timingTest[9] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_DELAY epicsOutput.timingTest[10] int ao 0\n";
 }
 
 print OUTH "} CDS_EPICS_OUT;\n\n";
@@ -1424,7 +1425,7 @@ for($ii=0;$ii<$partCnt;$ii++)
 		print OUTH "\#define TARGET_DAC18_COUNT $dac18Cnt\n";
 		print OUTH "\#define TARGET_DAC20_COUNT $dac20Cnt\n";
 	} else {
-		if($virtualiop == 0 and $adcMaster == 1) {
+		if($virtualiop == 0 and $iopModel == 1) {
 			print OUTH "\#define TARGET_ADC_COUNT 1\n";
 		} else {
 			print OUTH "\#define TARGET_ADC_COUNT 0\n";
@@ -1716,17 +1717,18 @@ print OUT "\n";
 print OUT "    // Unit delays\n";
 print OUT "$unitDelayCode";
 #//			- Add all IPC Output code.
-print OUT "    // All IPC outputs\n";
-print OUT "    if (_ipc_shm != 0) {\n";
-print OUT "$ipcOutputCode";
-print OUT "    }\n";
-print OUT "$feTailCode";
+#print OUT "    // All IPC outputs\n";
+#print OUT "    if (_shmipc_shm != 0) {\n";
+#print OUT "$ipcOutputCode";
+#print OUT "    }\n";
+#print OUT "$feTailCode";
 
 # IPCx PART CODE
 # The actual sending of IPCx data is to occur
 # as the last step of the processing loop
 #
 if ($ipcxCnt > 0) {
+print OUT "    // All IPC outputs\n";
    print OUT "      if(!cycle && pLocalEpics->epicsInput.ipcDiagReset) pLocalEpics->epicsInput.ipcDiagReset = 0;\n";
 
    if($ipccycle > 0) {
@@ -1751,7 +1753,7 @@ print "\tPart number is $remoteGpsPart\n";
 
 }
 
-if($adcMaster == 1) {
+if($iopModel == 1) {
 	print OUT "#include \"$rcg_src_dir/src/fe/controllerIop.c\"\n";
 } else {
   	print OUT "#include \"$rcg_src_dir/src/fe/controllerApp.c\"\n";
@@ -1784,13 +1786,13 @@ while(my $line = <OUT>) {
 		print OUT2 "#include \"feuser.h\" \n";
 		print OUT2 "#include \<stdbool.h\> \n";
 	} 
-	elsif(index($line,"COMMDATA_INLINE") != -1 && $adcMaster != 1) {
+	elsif(index($line,"COMMDATA_INLINE") != -1 && $iopModel != 1) {
 		print OUT2 "#define COMMDATA_USP\n";
 	}
-	elsif(index($line,"controller") != -1 && $adcMaster != 1) {
+	elsif(index($line,"controller") != -1 && $iopModel != 1) {
 		print OUT2 "#include \"$rcg_src_dir/src/fe/controllerAppUser.c\"\n";
 	}
-	elsif(index($line,"controller") != -1 && $adcMaster == 1) {
+	elsif(index($line,"controller") != -1 && $iopModel == 1) {
 		print OUT2 "#include \"$rcg_src_dir/src/fe/controllerIopUser.c\"\n";
 	} else {
 		print OUT2 "$line";
@@ -2106,7 +2108,7 @@ system ("sort $adcFile -k 1,1n -k 2,2n > $adcFileSorted");
 	my $scriptTarget = "/opt/rtcds/$location/$lifo/chans/tmp/$sysname\.diff";
 	my $scriptArgs = "-s $location -i $lifo -m $skeleton -d $dcuId &"; 
     my $ioptimediag = $virtualiop + $no_sync;
-	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$adcMaster,$ioptimediag,\@dacType,\@adcType);
+	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$iopModel,$ioptimediag,\@dacType,\@adcType);
 	require "lib/medmGenStatus.pm";
 	("CDS::medmGenStatus::createStatusMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs);
 
@@ -2148,7 +2150,7 @@ close($fg);
 
 for($ii=0;$ii<$adcCnt;$ii++)
 {
-   ("CDS::Adc::createAdcMedm") -> ($epicsScreensDir,$sysname,$adcMaster,$uifo,$dcuId,$medmTarget,$ii,@adcScreen);
+   ("CDS::Adc::createAdcMedm") -> ($epicsScreensDir,$sysname,$iopModel,$uifo,$dcuId,$medmTarget,$ii,@adcScreen);
 }
 # ******************************************************************************************
 #//		- GENERATE DAC SCREENS
@@ -2490,16 +2492,26 @@ if ($::rfmDelay) {
 
 #********* END OF COMMON COMPILE OPTIONS
 
-if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
-  print OUTM "EXTRA_CFLAGS += -DADC_MASTER\n";
-  $modelType = "MASTER";
+if ($iopModel > -1) {  #************ SETUP FOR IOP ***************
+  print OUTM "EXTRA_CFLAGS += -DIOP_MODEL\n";
+  $modelType = "IOP";
   if($diagTest > -1) {
   print OUTM "EXTRA_CFLAGS += -DDIAG_TEST\n";
+  }
+  if($dolphin_recover > 0) {
+  print OUTM "EXTRA_CFLAGS += -DDOLPHIN_RECOVERY\n";
   }
 # Invoked if IOP cycle rate slower than ADC clock rate
   print OUTM "EXTRA_CFLAGS += -DUNDERSAMPLE=$clock_div\n";
   $adccopyrate = $modelrate / $adcclock;
   print OUTM "EXTRA_CFLAGS += -DADC_MEMCPY_RATE=$adccopyrate\n";
+
+#Following used for IOP running at 128K 
+  if($adcclock ==128) {
+  print OUTM "EXTRA_CFLAGS += -DIOP_IO_RATE=131072\n";
+  } else {
+  print OUTM "EXTRA_CFLAGS += -DIOP_IO_RATE=65536\n";
+  }
 
 #Following used for testing 
   if($dacWdOverride > -1) {
@@ -2520,12 +2532,12 @@ if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
     print OUTM "EXTRA_CFLAGS += -DNO_SYNC\n";
   }  
 # Set to run IOP as time master for the Dolphin Network
-  if ($timeMaster > -1) {
-    print OUTM "EXTRA_CFLAGS += -DTIME_MASTER=1\n";
+  if ($dolphin_time_xmit > -1) {
+    print OUTM "EXTRA_CFLAGS += -DXMIT_DOLPHIN_TIME=1\n";
   }
-# Set to run IOP as time slave on the Dolphin Network
-  if ($timeSlave > -1 or $virtualiop == 2) {
-    print OUTM "EXTRA_CFLAGS += -DTIME_SLAVE=1\n";
+# Set to run IOP as time receiver on the Dolphin Network
+  if ($dolphinTiming > -1 or $virtualiop == 2) {
+    print OUTM "EXTRA_CFLAGS += -DUSE_DOLPHIN_TIMING\n";
     print OUTM "EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
   }
 # Set to run IOP on internal clock ie no IO modules
@@ -2557,33 +2569,46 @@ if ($adcMaster > -1) {  #************ SETUP FOR IOP ***************
 }
 # End of IOP compile options
 
-if ($adcSlave > -1) {   #************ SETUP FOR USER APP ***************
-  print OUTM "EXTRA_CFLAGS += -DADC_SLAVE\n";
+if ($iopModel < 1) {   #************ SETUP FOR USER APP ***************
+  print OUTM "EXTRA_CFLAGS += -DCONTROL_MODEL\n";
   print OUTM "EXTRA_CFLAGS += -DUNDERSAMPLE=1\n";
   print OUTM "EXTRA_CFLAGS += -DADC_MEMCPY_RATE=1\n";
-  $modelType = "SLAVE";
+  $modelType = "CONTROL";
 
   if ($::noZeroPad) {
     print OUTM "EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
   }
 
-# Use oversampling code if not 64K system
-if($modelrate < 64) {
-  if ($no_oversampling) {
-    print OUTM "#Uncomment to oversample A/D inputs\n";
-    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE\n";
-    print OUTM "#Uncomment to interpolate D/A outputs\n";
-    print OUTM "#EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
-  } else {
-    print OUTM "#Comment out to stop A/D oversampling\n";
-    print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE\n";
-    if ($no_dac_interpolation) {
-    } else {
-      print OUTM "#Comment out to stop interpolating D/A outputs\n";
-      print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
+#Following used with IOP running at 128K 
+  if($adcclock ==128) {
+    print OUTM "EXTRA_CFLAGS += -DIOP_IO_RATE=131072\n";
+    if($modelrate < 128) {
+        my $drate = 128/$modelrate;
+        if($drate == 8 or $drate == 2 or $drate > 32) {
+            die "RCG does not support a user model rate $modelrate" . "K with IOP data at $adcclock" ."K\n"  ;
+        }
+        print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE\n";
+        print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
+        print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_TIMES=$drate\n";
+        print OUTM "EXTRA_CFLAGS += -DFE_OVERSAMPLE_COEFF=feCoeff$drate"."x\n";
     }
   }
-}
+
+#Following used with IOP running at 64K (NORMAL) 
+  if($adcclock ==64) {
+    print OUTM "EXTRA_CFLAGS += -DIOP_IO_RATE=65536\n";
+    if($modelrate < 64) {
+        my $drate = 64/$modelrate;
+        if($drate == 8 or $drate > 32) {
+            die "RCG does not support a user model rate $modelrate" . "K with IOP data at $adcclock" ."K\n"  ;
+        }
+        print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE\n";
+        print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_DAC\n";
+        print OUTM "EXTRA_CFLAGS += -DOVERSAMPLE_TIMES=$drate\n";
+        print OUTM "EXTRA_CFLAGS += -DFE_OVERSAMPLE_COEFF=feCoeff$drate"."x\n";
+    }
+  }
+
 }  #******************* END SETUP FOR USER APP
 
 
@@ -2675,9 +2700,8 @@ if($modelrate < 64) {
   }
 }
     print OUTM "CFLAGS += -DUNDERSAMPLE=1\n";
-if ($adcMaster > -1) {
-  #print OUTM "CFLAGS += -DADC_MASTER\n";
-  $modelType = "MASTER";
+if ($iopModel > -1) {
+  $modelType = "IOP";
   if($diagTest > -1) {
   print OUTM "CFLAGS += -DDIAG_TEST\n";
   }
@@ -2688,33 +2712,18 @@ if ($adcMaster > -1) {
   print OUTM "CFLAGS += -DDAC_AUTOCAL\n";
 } else {
   print OUTM "#Uncomment to run on an I/O Master \n";
-  print OUTM "#CFLAGS += -DADC_MASTER\n";
+  print OUTM "#CFLAGS += -DIOP_MODEL\n";
 }
-if ($adcSlave > -1) {
-  print OUTM "CFLAGS += -DADC_SLAVE\n";
-  $modelType = "SLAVE";
-} else {
-  print OUTM "#Uncomment to run on an I/O slave process\n";
-  print OUTM "#CFLAGS += -DADC_SLAVE\n";
-}
-if ($timeMaster > -1) {
-  print OUTM "CFLAGS += -DTIME_MASTER=1\n";
-} else {
-  print OUTM "#Uncomment to build a time master\n";
-  print OUTM "#CFLAGS += -DTIME_MASTER=1\n";
-}
-if ($timeSlave > -1) {
-  print OUTM "CFLAGS += -DTIME_SLAVE=1\n";
-} else {
-  print OUTM "#Uncomment to build a time slave\n";
-  print OUTM "#CFLAGS += -DTIME_SLAVE=1\n";
-}
-if ($rfmTimeSlave > -1) {
-  print OUTM "CFLAGS += -DRFM_TIME_SLAVE=1\n";
-} else {
-  print OUTM "#Uncomment to build an RFM time slave\n";
-  print OUTM "#CFLAGS += -DRFM_TIME_SLAVE=1\n";
-}
+if ($iopModel < 1) {
+  print OUTM "CFLAGS += -DCONTROL_MODEL\n";
+  $modelType = "CONTROL";
+} 
+if ($dolphin_time_xmit > -1) {
+  print OUTM "CFLAGS += -DXMIT_DOLPHIN_TIME=1\n";
+} 
+if ($dolphinTiming > -1) {
+  print OUTM "CFLAGS += -DUSE_DOLPHIN_TIMING=1\n";
+} 
 if ($flipSignals) {
   print OUTM "CFLAGS += -DFLIP_SIGNALS=1\n";
 }
