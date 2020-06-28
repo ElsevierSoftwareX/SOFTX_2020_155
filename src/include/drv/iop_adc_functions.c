@@ -2,6 +2,7 @@ inline int iop_adc_init( adcInfo_t* );
 inline int iop_adc_read( adcInfo_t*, int[] );
 inline int sync_adc_2_1pps( void );
 
+// Routine for initializing ADC modules on startup
 inline int
 iop_adc_init( adcInfo_t* adcinfo )
 {
@@ -40,7 +41,7 @@ iop_adc_init( adcInfo_t* adcinfo )
         // Set ADC Present Flag
         pLocalEpics->epicsOutput.statAdc[ jj ] = ADC_MAPPED;
         // Set ADC AutoCal Pass/Fail Flag
-        if((cdsPciModules.adcConfig [ jj ] & GSAI_AUTO_CAL_PASS) != 0) 
+        if ( ( cdsPciModules.adcConfig[ jj ] & GSAI_AUTO_CAL_PASS ) != 0 )
             pLocalEpics->epicsOutput.statAdc[ jj ] |= ADC_CAL_PASS;
         // Reset Diag Info
         adcinfo->adcRdTimeErr[ jj ] = 0;
@@ -61,6 +62,8 @@ iop_adc_init( adcInfo_t* adcinfo )
     return 0;
 }
 
+// Routine to startup and synchronize ADC modules when 1PPS
+// signal is used for synch.
 inline int
 sync_adc_2_1pps( )
 {
@@ -72,37 +75,57 @@ sync_adc_2_1pps( )
     kk = 0;
     for ( jj = 0; jj < cdsPciModules.adcCount; jj++ )
     {
-        adcDummyData = (int*)cdsPciModules.pci_adc[ 0 ];
-        adcDummyData += 31;
+        adcDummyData = (int*)cdsPciModules.pci_adc[ jj ];
+        adcDummyData += ADC_DUOTONE_CHAN;
+        // Enable next ADC card
         gsc16ai64Enable1PPS( jj );
-        status = gsc16ai64WaitDmaDone( 0, adcDummyData );
+        // Wait for ADC read to complete
+        status = gsc16ai64WaitDmaDone( jj, adcDummyData );
+        // if(status == 44444) return -1;
         kk++;
         udelay( 2 );
+        // Rearm ADC boards that had been previously enables
         for ( ii = 0; ii < kk; ii++ )
         {
             gsc16ai64DmaEnable( ii );
         }
     }
-    // Need to do some dummy reads here to allow time for last ADC to arm
-    // as it takes two clock cycles past arm to actually deliver data.
-    for ( ii = 0; ii < cdsPciModules.adcCount; ii++ )
+
+    // Look for 1PPS signal for 1+ seconds
+    for ( jj = 0; jj < 75009; jj++ )
     {
-        // Want to verify ADC FIFOs are empty to ensure they are in sync.
-        status = gsc16ai64WaitDmaDone( 0, adcDummyData );
-        status = gsc16ai64CheckAdcBuffer( ii );
-        for ( jj = 0; jj < cdsPciModules.adcCount; jj++ )
+        // Wait until all ADC reads are complete
+        for ( ii = 0; ii < cdsPciModules.adcCount; ii++ )
         {
-            gsc16ai64DmaEnable( jj );
+            adcDummyData = (int*)cdsPciModules.pci_adc[ ii ];
+            adcDummyData += 31;
+            // Want to verify ADC FIFOs are empty to ensure they are in sync.
+            status = gsc16ai64WaitDmaDone( ii, adcDummyData );
+            status = gsc16ai64CheckAdcBuffer( ii );
         }
+        adcDummyData = (int*)cdsPciModules.pci_adc[ ADC_DUOTONE_BRD ];
+        adcDummyData += ADC_DUOTONE_CHAN;
+        // Check value of 1PPS channel
+        if ( *adcDummyData > ONE_PPS_THRESH )
+        {
+            // Found 1PPS sync signal
+            return 1;
+        }
+
+        // Rearm ADC boards
+        for ( ii = 0; ii < cdsPciModules.adcCount; ii++ )
+            gsc16ai64DmaEnable( ii );
     }
+    // Did not find 1PPS signal
     return 0;
 }
 
 // ADC Read *****************************************************************
+// Routine for reading data from ADC modules.
 inline int
 iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
 {
-    int           ii,kk;
+    int           ii, kk;
     volatile int* packedData;
     int           limit;
     int           mask;
@@ -169,6 +192,7 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
                 // Indicate short cycle during recovery from long cycle
                 adcStat = -1;
 #ifdef XMIT_DOLPHIN_TIME
+            // Send time on Dolphin net if this is the time xmitter.
             pcieTimer->gps_time = timeSec;
             pcieTimer->cycle = cycleNum;
             clflush_cache_range( (void*)&pcieTimer->gps_time, 16 );
@@ -196,7 +220,6 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
         /// is overflowing.
         if ( adcinfo->adcWait >= MAX_ADC_WAIT )
         {
-            // printk("timeout %d %d \n",jj,adcinfo->adcWait);
             pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
             pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
             pLocalEpics->epicsOutput.fe_status = ADC_TO_ERROR;
@@ -205,7 +228,6 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
             stop_working_threads = 1;
             vmeDone = 1;
             continue;
-            // return 0;
         }
 
         if ( card == 0 )
@@ -236,7 +258,6 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
         /// - ---- First, and only first, channel should have upper bit marker
         /// set. If not, have a channel hopping error.
         if ( (unsigned int)*packedData < 65535 )
-        // if(!((unsigned int)*packedData & ADC_1ST_CHAN_MARKER))
         {
             adcinfo->chanHop = 1;
             fe_status_return_subcode = card;
@@ -248,7 +269,7 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
         mask = GSAI_DATA_MASK;
         num_outs = cdsPciModules.adcChannels[ card ];
         loops = UNDERSAMPLE;
-        if ( cdsPciModules.adcType[ card ] == GSC_16AI64SSA  && UNDERSAMPLE > 4)
+        if ( cdsPciModules.adcType[ card ] == GSC_16AI64SSA && UNDERSAMPLE > 4 )
             loops = 1;
         /// - ---- Determine next ipc memory location to load ADC data
         ioMemCntr = ( ( cycleNum / ADC_MEMCPY_RATE ) % IO_MEMORY_SLOTS );
@@ -263,6 +284,8 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
                 adcinfo->adcData[ card ][ chan ] = ( *packedData & mask );
                 adcinfo->adcData[ card ][ chan ] -= offset;
 #ifdef DEC_TEST
+    // This only used on test system for checking decimation filters
+    // by providing an ADC signal via a GDS EXC signal
                 if ( chan == 0 )
                 {
                     adcinfo->adcData[ card ][ chan ] =
@@ -278,7 +301,7 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
                      UNDERSAMPLE > 4 )
                 {
                     for ( ii = 1; ii < UNDERSAMPLE; ii++ )
-                        dWord[ card ][ chan ][ ii ] = 
+                        dWord[ card ][ chan ][ ii ] =
                             adcinfo->adcData[ card ][ chan ];
                 }
                 /// - ----  Load ADC value into ipc memory buffer
@@ -301,8 +324,8 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
             // normal 64K adc
             if ( UNDERSAMPLE < 5 )
             {
-                /// - ---- Write GPS time and cycle count as indicator to control app
-                /// that adc data is ready
+                /// - ---- Write GPS time and cycle count as indicator to
+                /// control app that adc data is ready
                 ioMemData->gpsSecond = timeSec;
                 ioMemData->iodata[ card ][ ioMemCntr ].timeSec = timeSec;
                 ioMemData->iodata[ card ][ ioMemCntr ].cycle = iocycle;
@@ -310,15 +333,14 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
                 iocycle++;
                 iocycle %= IOP_IO_RATE;
             }
-
         }
 
         // For ADC undersampling when running with a fast ADC at 512K
         // to limit rate to user apps at 64K
         if ( UNDERSAMPLE > 4 )
         {
-            /// - ---- Write GPS time and cycle count as indicator to control app that
-            /// adc data is ready
+            /// - ---- Write GPS time and cycle count as indicator to control
+            /// app that adc data is ready
             ioMemData->gpsSecond = timeSec;
             ioMemData->iodata[ card ][ ioMemCntr ].timeSec = timeSec;
             ioMemData->iodata[ card ][ ioMemCntr ].cycle = iocycle;
