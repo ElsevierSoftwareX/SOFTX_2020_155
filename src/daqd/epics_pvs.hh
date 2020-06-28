@@ -39,6 +39,14 @@ namespace PV
         PV_SECOND_FRAME_SIZE,
         PV_MINUTE_FRAME_SIZE,
         PV_RETRANSMIT_TOTAL,
+        // DCU counts
+        PV_PRDCR_UNIQUE_DCU_REPORTED_PER_S,
+        PV_PRDCR_TOTAL_DCU_REPORTED_PER_S,
+        // Producer data rate information
+        PV_PRDCR_TOTAL_DATA_RATE_KB_PER_S,
+        PV_PRDCR_TP_DATA_RATE_KB_PER_S,
+        PV_PRDCR_MODEL_DATA_RATE_KB_PER_S,
+        PV_PRDCR_OPEN_TP_COUNT,
         // Main producer thread timings
         PV_PRDCR_TIME_FULL_MEAN_MS,
         PV_PRDCR_TIME_FULL_MIN_MS,
@@ -75,8 +83,8 @@ namespace PV
         // run/configuration numbers
         PV_CONFIGURATION_NUMBER,
         // raw trend writer state
-        PV_RAW_MTREND_TW_STATE,   // is the raw trend writer currently writing
-        PV_RAW_MTREND_TW_WRITE_SEC,     // processing time for raw trend data
+        PV_RAW_MTREND_TW_STATE, // is the raw trend writer currently writing
+        PV_RAW_MTREND_TW_WRITE_SEC, // processing time for raw trend data
         MAX_PV
     };
 
