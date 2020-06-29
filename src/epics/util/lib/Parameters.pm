@@ -115,12 +115,6 @@ sub parseParams {
 			} elsif ($spp[0] eq "plant_name") {
 				print "Plant name is set to $spp[1]\n";
 				$::plantName = $spp[1];
-			} elsif ($spp[0] eq "shmem_daq" && $spp[1] == 1) {
-                # This is no longer required as this is the default
-                # It is left here for now to avoid changing the many
-                # controls models which already specify this parameter
-				print "Shared memory DAQ connection (No Myrinet)\n";
-				$::shmem_daq = 1;
 			} elsif ($spp[0] eq "no_sync" && $spp[1] == 1) {
                 # This essentially set up IOP for a Cymac
 				print "Will not sync up to 1PPS\n";
@@ -168,8 +162,6 @@ sub parseParams {
 			} elsif ($spp[0] eq "remoteGPS") {
 				print "FE will run with EPICS for GPS Time\n";
 				$::remoteGPS = $spp[1];
-			} elsif ($spp[0] eq "rfm_dma") {
-				$::rfmDma = 1;
 			} elsif ($spp[0] eq "rfm_delay") {
 				$::rfmDelay = 1;
 			} elsif ($spp[0] eq "flip_signals") { 
@@ -180,9 +172,6 @@ sub parseParams {
 				$::globalsdf = $spp[1];
 			} elsif ($spp[0] eq "casdf") {
 				$::casdf = $spp[1];
-			} elsif ($spp[0] eq "biquad") { 
-				$::allBiquad = $spp[1];
-				print "AllBiquad set\n";
 			} elsif ($spp[0] eq "requireIOcnt") { 
 				$::requireIOcnt = $spp[1];
 			} elsif ($spp[0] eq "virtualIOP") { 

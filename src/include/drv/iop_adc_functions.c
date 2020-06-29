@@ -1,6 +1,6 @@
 inline int iop_adc_init( adcInfo_t* );
 inline int iop_adc_read( adcInfo_t*, int[] );
-inline int sync_adc_2_1pps( void );
+inline int sync_adc_2_1pps( int );
 
 // Routine for initializing ADC modules on startup
 inline int
@@ -65,11 +65,12 @@ iop_adc_init( adcInfo_t* adcinfo )
 // Routine to startup and synchronize ADC modules when 1PPS
 // signal is used for synch.
 inline int
-sync_adc_2_1pps( )
+sync_adc_2_1pps( int sync21pps)
 {
     int           ii, jj, kk;
     int           status;
     volatile int* adcDummyData;
+    int           search_cycles;
     // Arm ADC modules
     // This has to be done sequentially, one at a time.
     kk = 0;
@@ -91,8 +92,14 @@ sync_adc_2_1pps( )
         }
     }
 
+    if(sync21pps)
+    {
+        search_cycles = ADC_MEMCPY_RATE + 10000;
+    } else {
+        search_cycles = 2;
+    }
     // Look for 1PPS signal for 1+ seconds
-    for ( jj = 0; jj < 75009; jj++ )
+    for ( jj = 0; jj < search_cycles; jj++ )
     {
         // Wait until all ADC reads are complete
         for ( ii = 0; ii < cdsPciModules.adcCount; ii++ )
@@ -106,7 +113,7 @@ sync_adc_2_1pps( )
         adcDummyData = (int*)cdsPciModules.pci_adc[ ADC_DUOTONE_BRD ];
         adcDummyData += ADC_DUOTONE_CHAN;
         // Check value of 1PPS channel
-        if ( *adcDummyData > ONE_PPS_THRESH )
+        if ( *adcDummyData > ONE_PPS_THRESH && search_cycles > 10)
         {
             // Found 1PPS sync signal
             return 1;

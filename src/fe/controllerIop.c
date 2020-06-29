@@ -57,7 +57,7 @@ int        dacTimingErrorPending[ MAX_DAC_MODULES ];
 static int dacTimingError = 0;
 int        dacWatchDog = 0;
 int        dac_out = 0;
-int        dac_out_last[ MAX_DAC_MODULES ][16];
+int        dac_out_last[ MAX_DAC_MODULES ][ 16 ];
 
 int pBits[ 9 ] = { 1, 2, 4, 8, 16, 32, 64, 128, 256 };
 
@@ -140,9 +140,9 @@ fe_start_controller( void* arg )
     int        expect_delays = 0;
     int        delay_cycles = 0;
 #ifdef NO_DAC_PRELOAD
-        int dac_preload = 0;
+    int dac_preload = 0;
 #else
-        int dac_preload = 1;
+    int dac_preload = 1;
 #endif
 
     /// **********************************************************************************************\n
@@ -352,10 +352,6 @@ fe_start_controller( void* arg )
     /// \> Find the code syncrhonization source. \n
     /// - Standard aLIGO Sync source is the Timing Distribution System (TDS)
     /// (SYNC_SRC_TDS).
-#ifdef ONE_PPS_TEST
-// Only used to test 1pps synch on test system
-    syncSource = SYNC_SRC_1PPS;
-#endif
     switch ( syncSource )
     {
     /// \>\> For SYNC_SRC_TDS, initialize system for synchronous start on 1PPS
@@ -386,12 +382,12 @@ fe_start_controller( void* arg )
         /// \n
         /// - --------- DAC timing diags will later check FIFO sizes to verify
         /// synchrounous timing.
-        if(dac_preload)
+        if ( dac_preload )
             status = iop_dac_preload( dacPtr );
         /// - ---- Start the timing clocks\n
         /// - --------- Send start command to TDS receiver.\n
-        /// - --------- TDS receiver will begin sending 64KHz clocks synchronous to
-        /// next 1PPS mark.
+        /// - --------- TDS receiver will begin sending 64KHz clocks synchronous
+        /// to next 1PPS mark.
         for ( ii = 0; ii < tdsCount; ii++ )
         {
             // CDIO1616Output[ii] = TDS_START_ADC_NEG_DAC_POS;
@@ -402,27 +398,20 @@ fe_start_controller( void* arg )
         }
         break;
     case SYNC_SRC_1PPS:
-#ifdef ONE_PPS_TEST
-// Need to start clocks if testing on a system that has TDS receiver
-        for ( ii = 0; ii < tdsCount; ii++ )
-        {
-            // CDIO1616Output[ii] = TDS_START_ADC_NEG_DAC_POS;
-            CDIO1616Output[ ii ] =
-                TDS_START_ADC_NEG_DAC_POS | TDS_NO_DAC_DUOTONE;
-            CDIO1616Input[ ii ] = contec1616WriteOutputRegister(
-                &cdsPciModules, tdsControl[ ii ], CDIO1616Output[ ii ] );
-        }
-#endif
-        if(dac_preload)
+        // Preload values to DAC FIFOs
+        if ( dac_preload )
             status = iop_dac_preload( dacPtr );
-        // Arm ADC modules
-        // This has to be done sequentially, one at a time.
-        status = sync_adc_2_1pps( );
+        // Sequentially start ADC modules and sync to 1PPS signal
+        status = sync_adc_2_1pps( 1 );
         // Return status will be 1 if sync signal found
-        if(status == 1) {
+        if ( status == 1 )
+        {
             pLocalEpics->epicsOutput.timeErr = syncSource;
-        } else {
+        }
+        else
+        {
             pLocalEpics->epicsOutput.timeErr = SYNC_SRC_NONE;
+            // No 1PPS found, so disable future testing
             dac_preload = 0;
         }
         // Enable all DAC cards
@@ -431,12 +420,17 @@ fe_start_controller( void* arg )
         gsc16ao16Enable( &cdsPciModules );
         break;
     case SYNC_SRC_NONE:
-        // Enable all available ADC/DAC modules
-        gsc16ai64Enable( &cdsPciModules );
-        gsc18ai32Enable( &cdsPciModules );
+        // Preload values to DAC FIFOs
+        if ( dac_preload )
+            status = iop_dac_preload( dacPtr );
+        // Sequentially start ADC modules
+        // but don't look for 1PPS synch
+        status = sync_adc_2_1pps( 0 );
+        // Enable all available DAC modules
         gsc18ao8Enable( &cdsPciModules );
         gsc20ao8Enable( &cdsPciModules );
         gsc16ao16Enable( &cdsPciModules );
+        // No 1PPS, so disable future testing
         dac_preload = 0;
         break;
     case SYNC_SRC_DOLPHIN:
@@ -474,8 +468,8 @@ fe_start_controller( void* arg )
     {
         timeSec = getGpsSecTsync( );
         gps_receiver_locked = getGpsuSecTsync( &usec );
-        timeSec --;
-    } 
+        timeSec--;
+    }
 
 #endif
 
@@ -497,9 +491,9 @@ fe_start_controller( void* arg )
     while ( !vmeDone )
     { // Run forever until user hits reset
 #endif
-// *****************************************************************************************
-// NORMAL OPERATION -- Wait for ADC data ready
-// *****************************************************************************************
+        // *****************************************************************************************
+        // NORMAL OPERATION -- Wait for ADC data ready
+        // *****************************************************************************************
         /// \> On 1PPS mark \n
         if ( cycleNum == 0 )
         {
@@ -535,24 +529,26 @@ fe_start_controller( void* arg )
         // Read ADC data
         status = iop_adc_read( padcinfo, cpuClock );
 #ifdef DOLPHIN_RECOVERY
-        if( (status >  0)  && (dacWriteEnable > 6))
+        if ( ( status > 0 ) && ( dacWriteEnable > 6 ) )
         {
             expect_delays = 2;
             delay_cycles = 0;
         }
 
-        if( expect_delays == 2 ) delay_cycles ++;
-        if( ( expect_delays == 2 )  && (status == 0))
+        if ( expect_delays == 2 )
+            delay_cycles++;
+        if ( ( expect_delays == 2 ) && ( status == 0 ) )
         {
-            pLocalEpics->epicsOutput.timingTest[10] = delay_cycles;
+            pLocalEpics->epicsOutput.timingTest[ 10 ] = delay_cycles;
             expect_delays = 1;
             delay_cycles = 0;
-            status = iop_dac_recover(2,dacPtr);
+            status = iop_dac_recover( 2, dacPtr );
         }
-        if(  expect_delays == 1 )
+        if ( expect_delays == 1 )
         {
-            delay_cycles --;
-            if(  delay_cycles < 1 ) {
+            delay_cycles--;
+            if ( delay_cycles < 1 )
+            {
                 expect_delays = 0;
             }
         }
@@ -624,7 +620,8 @@ fe_start_controller( void* arg )
             /// - ---- Read IRIGB time if symmetricom card (this is not
             /// standard, but supported for earlier cards. \n
             // *****************************************************************
-            if ( cycleNum == HKP_READ_SYMCOM_IRIGB )
+            if ( cycleNum == HKP_READ_SYMCOM_IRIGB &&
+                 syncSource == SYNC_SRC_TDS )
             {
                 if ( cdsPciModules.gpsType == SYMCOM_RCVR )
                 {
@@ -637,9 +634,7 @@ fe_start_controller( void* arg )
                      cdsPciModules.gpsType != 0 )
                 {
                     diagWord |= TIME_ERR_IRIGB;
-                    ;
                     feStatus |= FE_ERROR_TIMING;
-                    ;
                 }
                 /// - ---- Calc duotone diagnostic mean values for past second
                 /// and reset.
@@ -654,7 +649,8 @@ fe_start_controller( void* arg )
             /// information.
             // *****************************************************************
             // if ( cycleNum == HKP_READ_TSYNC_IRIBB )
-            if ( cycleNum == HKP_READ_TSYNC_IRIBB  &&  syncSource == SYNC_SRC_TDS)
+            if ( cycleNum == HKP_READ_TSYNC_IRIBB &&
+                 syncSource == SYNC_SRC_TDS )
             {
                 if ( cdsPciModules.gpsType == TSYNC_RCVR )
                 {
@@ -975,42 +971,6 @@ fe_start_controller( void* arg )
                 }
             }
 
-            // *****************************************************************
-            /// \> Cycle 300, If IOP and RFM cards, check own data diagnostics
-            // *****************************************************************
-            // Deal with the own-data bits on the VMIC 5565 rfm cards
-            if ( cdsPciModules.rfmCount > 0 )
-            {
-                if ( cycleNum >= HKP_RFM_CHK_CYCLE &&
-                     cycleNum < ( HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount ) )
-                {
-                    int mod = cycleNum - HKP_RFM_CHK_CYCLE;
-                    status = vmic5565CheckOwnDataRcv( mod );
-                    if ( !status )
-                        ipcErrBits |= 4 + ( mod * 4 );
-                }
-                if ( cycleNum >=
-                         ( HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount ) &&
-                     cycleNum <
-                         ( HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount * 2 ) )
-                {
-                    int mod =
-                        cycleNum - HKP_RFM_CHK_CYCLE - cdsPciModules.rfmCount;
-                    vmic5565ResetOwnDataLight( mod );
-                }
-                if ( cycleNum >=
-                         ( HKP_RFM_CHK_CYCLE + 2 * cdsPciModules.rfmCount ) &&
-                     cycleNum <
-                         ( HKP_RFM_CHK_CYCLE + cdsPciModules.rfmCount * 3 ) )
-                {
-                    int mod = cycleNum - HKP_RFM_CHK_CYCLE -
-                        cdsPciModules.rfmCount * 2;
-                    // Write data out to the RFM to trigger the light
-                    ( (volatile long*)( cdsPciModules.pci_rfm[ mod ] ) )[ 2 ] =
-                        0;
-                }
-            }
-
 #if !defined( RUN_WO_IO_MODULES ) && !defined( USE_DOLPHIN_TIMING )
             // *****************************************************************
             /// \> Cycle 400 to 400 + numDacModules, write DAC heartbeat to AI
@@ -1043,13 +1003,13 @@ fe_start_controller( void* arg )
                 }
             }
 
-// *****************************************************************
-/// \> Cycle 500 to 500 + numDacModules, read back watchdog from AI chassis (18
-/// bit DAC only)
-// AI Chassis WD CHECK for 18 bit DAC modules
-// Check once per second on code cycle HKP_DAC_WD_CHK to dac count
-// Only one read per code cycle to reduce time
-// *****************************************************************
+            // *****************************************************************
+            /// \> Cycle 500 to 500 + numDacModules, read back watchdog from AI
+            /// chassis (18 bit DAC only)
+            // AI Chassis WD CHECK for 18 bit DAC modules
+            // Check once per second on code cycle HKP_DAC_WD_CHK to dac count
+            // Only one read per code cycle to reduce time
+            // *****************************************************************
             if ( cycleNum >= HKP_DAC_WD_CHK &&
                  cycleNum < ( HKP_DAC_WD_CHK + cdsPciModules.dacCount ) )
             {
@@ -1083,25 +1043,26 @@ fe_start_controller( void* arg )
             }
 #endif
 
-// *****************************************************************
-/// \> Cycle 600 to 600 + numDacModules, Check DAC FIFO Sizes to determine if
-/// DAC modules are synched to code
-/// - ---- 18bit DAC reads out FIFO size dirrectly, but 16bit module only has a
-/// 4 bit register area for FIFO empty, quarter full, etc. So, to make these
-/// bits useful in 16 bit module, code must set a proper FIFO size in map.c
-/// code.
-// This code runs once per second.
-// *****************************************************************
-            if(dac_preload) {
+            // *****************************************************************
+            /// \> Cycle 600 to 600 + numDacModules, Check DAC FIFO Sizes to
+            /// determine if DAC modules are synched to code
+            /// - ---- 18bit DAC reads out FIFO size dirrectly, but 16bit module
+            /// only has a 4 bit register area for FIFO empty, quarter full,
+            /// etc. So, to make these bits useful in 16 bit module, code must
+            /// set a proper FIFO size in map.c code.
+            // This code runs once per second.
+            // *****************************************************************
+            if ( dac_preload )
+            {
                 if ( cycleNum >= HKP_DAC_FIFO_CHK &&
-                    cycleNum < ( HKP_DAC_FIFO_CHK + cdsPciModules.dacCount ) )
+                     cycleNum < ( HKP_DAC_FIFO_CHK + cdsPciModules.dacCount ) )
                 {
-                    if(!expect_delays) status = check_dac_buffers( cycleNum );
+                    if ( !expect_delays )
+                        status = check_dac_buffers( cycleNum );
                 }
                 if ( dacTimingError )
                     feStatus |= FE_ERROR_DAC;
             }
-
 
             // *****************************************************************
             // Update end of cycle information

@@ -134,7 +134,6 @@ $edcu = 0;
 $casdf = 0;
 $globalsdf = 0;
 $pciNet = -1;
-$shmem_daq = 0; # Do not use shared memory DAQ connection
 $no_sync = 0; # Sync up to 1PPS by default
 $no_daq = 0; # Enable DAQ by default
 $gdsNodeId = 0;
@@ -1716,12 +1715,6 @@ print OUT "\n";
 #//			- Add all UNIT DELAY part code.
 print OUT "    // Unit delays\n";
 print OUT "$unitDelayCode";
-#//			- Add all IPC Output code.
-#print OUT "    // All IPC outputs\n";
-#print OUT "    if (_shmipc_shm != 0) {\n";
-#print OUT "$ipcOutputCode";
-#print OUT "    }\n";
-#print OUT "$feTailCode";
 
 # IPCx PART CODE
 # The actual sending of IPCx data is to occur
@@ -2245,8 +2238,6 @@ $cdsPart[0] = 0;	# $cdsPart[0 .. $partCnt]
 
 $ppFIR[0] = 0;          # Set to one for PPFIR filters
 
-$biQuad[0] = 0;          # Set to one for biquad IIR filters
-
 # Total number of inputs for each part
 # i.e. how many parts are connected to it with lines (branches)
 $partInCnt[0] = 0;	# $partInCnt[0 .. $partCnt]
@@ -2297,12 +2288,6 @@ $subSysPartStop[0] = 0;
 
 # IPC output code
 $ipcOutputCode = "";
-
-# Front-end tailing code
-$feTailCode = "";
-
-# Set if all filters are biquad
-$allBiquad = 0;
 
 # Set if doing direct DAC writed (no DMA)
 $directDacWrite = 0;
@@ -2383,7 +2368,6 @@ sub createEpicsMakefile {
 	if ($edcu) {
 	  print OUTME "EXTRA_CFLAGS += -DEDCU=1\n";
 	  print OUTME "EXTRA_CFLAGS += -DNO_DAQ_IN_SKELETON=1\n";
-	  print OUTME "SYNC_SRC = $edcusync\n";
 	}
 	if ($globalsdf) {
 	  print OUTME "EXTRA_CFLAGS += -DEDCU=1\n";
@@ -2469,9 +2453,6 @@ if ($no_daq) {
   print OUTM "#EXTRA_CFLAGS += -DNO_DAQ\n";
 }
 
-# SHMEM_DAQ set as the default for RCG V2.8 - No longer support GM
-  print OUTM "#Comment out to disable local frame builder connection\n";
-  print OUTM "EXTRA_CFLAGS += -DSHMEM_DAQ\n";
 # Set to flip polarity of ADC input signals
 if ($flipSignals) {
   print OUTM "EXTRA_CFLAGS += -DFLIP_SIGNALS=1\n";
@@ -2678,10 +2659,6 @@ if ($no_daq) {
   print OUTM "#CFLAGS += -DNO_DAQ\n";
 }
 
-# SHMEM_DAQ set as the default for RCG V2.8 - No longer support GM
-  print OUTM "#Comment out to disable local frame builder connection\n";
-  print OUTM "CFLAGS += -DSHMEM_DAQ\n";
-
 # Use oversampling code if not 64K system
 if($modelrate < 64) {
   if ($no_oversampling) {
@@ -2764,15 +2741,6 @@ if ($::optimizeIO) {
   print OUTM "CFLAGS += -DNO_DAC_PRELOAD=1\n";
 } else {
   print OUTM "#CFLAGS += -DNO_DAC_PRELOAD=1\n";
-}
-  
-
-if ($::rfmDma) {
-  print OUTM "#Comment out to run with RFM DMA\n";
-  print OUTM "#CFLAGS += -DRFM_DIRECT_READ=1\n";
-} else {
-  print OUTM "#Comment out to run with RFM DMA\n";
-  print OUTM "CFLAGS += -DRFM_DIRECT_READ=1\n";
 }
 
 if ($::rfmDelay) {
