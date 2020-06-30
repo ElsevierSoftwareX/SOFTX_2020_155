@@ -539,7 +539,7 @@ fe_start_controller( void* arg )
             delay_cycles++;
         if ( ( expect_delays == 2 ) && ( status == 0 ) )
         {
-            pLocalEpics->epicsOutput.timingTest[ 10 ] = delay_cycles;
+            pLocalEpics->epicsOutput.timingTest[ 15 ] = delay_cycles;
             expect_delays = 1;
             delay_cycles = 0;
             status = iop_dac_recover( 2, dacPtr );
@@ -814,17 +814,19 @@ fe_start_controller( void* arg )
 
 // Following is only used on automated test system
 #ifdef DIAG_TEST
-            for ( ii = 0; ii < 10; ii++ )
+            for ( ii = 0; ii < 15; ii++ )
             {
                 if ( ii < 5 )
                     onePpsTest = adcinfo.adcData[ 0 ][ ii ];
-                else
-                    onePpsTest = adcinfo.adcData[ 1 ][ ( ii - 5 ) ];
+                if ( ( ii > 4 ) && ( ii < 10 ) )
+                    onePpsTest = adcinfo.adcData[ 1 ][ ii - 5 ];
+                if ( ii > 9 )
+                    onePpsTest = adcinfo.adcData[ 1 ][ ( ii - 2 ) ];
                 if ( ( onePpsTest > 400 ) && ( onePpsHiTest[ ii ] == 0 ) )
                 {
                     onePpsTimeTest[ ii ] = cycleNum;
                     onePpsHiTest[ ii ] = 1;
-                    if ( ( ii == 0 ) || ( ii == 5 ) )
+                    if ( ( ii %  5 ) == 0 )
                         pLocalEpics->epicsOutput.timingTest[ ii ] =
                             cycleNum * 15.26;
                     // Control apps do not see 1pps until after IOP signal loops

@@ -71,17 +71,19 @@ sync_adc_2_1pps( int sync21pps)
     int           status;
     volatile int* adcDummyData;
     int           search_cycles;
+    int           mask = GSAI_DATA_MASK;
+    unsigned int  offset = GSAI_DATA_CODE_OFFSET;
+    int           data;
+
     // Arm ADC modules
     // This has to be done sequentially, one at a time.
     kk = 0;
     for ( jj = 0; jj < cdsPciModules.adcCount; jj++ )
     {
-        adcDummyData = (int*)cdsPciModules.pci_adc[ jj ];
-        adcDummyData += ADC_DUOTONE_CHAN;
         // Enable next ADC card
         gsc16ai64Enable1PPS( jj );
         // Wait for ADC read to complete
-        status = gsc16ai64WaitDmaDone( jj, adcDummyData );
+        status = gsc16ai64WaitDmaDone( jj );
         // if(status == 44444) return -1;
         kk++;
         udelay( 2 );
@@ -104,16 +106,15 @@ sync_adc_2_1pps( int sync21pps)
         // Wait until all ADC reads are complete
         for ( ii = 0; ii < cdsPciModules.adcCount; ii++ )
         {
-            adcDummyData = (int*)cdsPciModules.pci_adc[ ii ];
-            adcDummyData += 31;
-            // Want to verify ADC FIFOs are empty to ensure they are in sync.
-            status = gsc16ai64WaitDmaDone( ii, adcDummyData );
-            status = gsc16ai64CheckAdcBuffer( ii );
+            status = gsc16ai64WaitDmaDone( ii );
         }
+        // Get data from 1PPS channel
         adcDummyData = (int*)cdsPciModules.pci_adc[ ADC_DUOTONE_BRD ];
         adcDummyData += ADC_DUOTONE_CHAN;
+        data = ( *adcDummyData & mask );
+        data -= offset;
         // Check value of 1PPS channel
-        if ( *adcDummyData > ONE_PPS_THRESH && search_cycles > 10)
+        if ( data > ONE_PPS_THRESH && search_cycles > 10)
         {
             // Found 1PPS sync signal
             return 1;

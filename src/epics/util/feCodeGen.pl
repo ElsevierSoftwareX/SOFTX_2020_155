@@ -1323,7 +1323,7 @@ print EPICS "DUMMY FEC\_$dcuId\_UPTIME_MINUTE int ao 0\n";
 # The following code is in solely for automated testing.
 if($diagTest > -1)
 {
-print OUTH "\tint timingTest[11];\n";
+print OUTH "\tint timingTest[16];\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_CYCLE epicsInput.bumpCycle int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_ADC epicsInput.bumpAdcRd int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_LONG_ADC epicsInput.longAdcRd int ao 0\n";
@@ -1337,7 +1337,12 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32KA epicsOutput.timingTest[6]
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16KA epicsOutput.timingTest[7] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04KA epicsOutput.timingTest[8] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02KA epicsOutput.timingTest[9] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_DELAY epicsOutput.timingTest[10] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_64KB epicsOutput.timingTest[10] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32KB epicsOutput.timingTest[11] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16KB epicsOutput.timingTest[12] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04KB epicsOutput.timingTest[13] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02KB epicsOutput.timingTest[14] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_DELAY epicsOutput.timingTest[15] int ao 0\n";
 }
 
 print OUTH "} CDS_EPICS_OUT;\n\n";
