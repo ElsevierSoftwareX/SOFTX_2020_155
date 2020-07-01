@@ -888,12 +888,6 @@ fe_start_controller( void* arg )
                     mxStat = 1;
                 if ( ( mxDiag & 2 ) != ( mxDiagR & 2 ) )
                     mxStat += 2;
-#ifdef DUAL_DAQ_DC
-                if ( ( mxDiag & 4 ) != ( mxDiagR & 4 ) )
-                    mxStat += 4;
-                if ( ( mxDiag & 8 ) != ( mxDiagR & 8 ) )
-                    mxStat += 8;
-#endif
                 pLocalEpics->epicsOutput.fbNetStat = mxStat;
                 mxDiag = mxDiagR;
                 if ( mxStat != MX_OK )

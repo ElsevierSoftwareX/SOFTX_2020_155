@@ -13,7 +13,7 @@ require "lib/medmGen.pm";
 
 sub createGdsMedm
 {
-	my ($medmDir,$mdlName,$ifo,$dcuid,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$iopModel,$ioptype,$dac,$adc) = @_;
+	my ($medmDir,$mdlName,$ifo,$dcuid,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$iopModel,$ioptype,$daq_prefix,$dac,$adc) = @_;
  # Define colors to be sent to screen gen.
         my %ecolors = ( "white" => "0",
              "black" => "14",
@@ -359,9 +359,9 @@ sub createGdsMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DC",$ecolors{black});
 	# Add DAQ Status Monitor
 	$xpos = 407; $ypos = 112; $width = 14; $height = 15; $vis = "if zero"; $calc = "";
-        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{green},$vis,$calc,"$ifo\:DAQ-DC0\_$mdlName\_STATUS");
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{green},$vis,$calc,"$ifo\:DAQ-$daq_prefix\_$mdlName\_STATUS");
 	$xpos = 407; $ypos = 112; $width = 14; $height = 15; $vis = "if not zero"; $calc = "";
-        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{red},$vis,$calc,"$ifo\:DAQ-DC0\_$mdlName\_STATUS");
+        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{red},$vis,$calc,"$ifo\:DAQ-$daq_prefix\_$mdlName\_STATUS");
 	# Add DAQ Status label
 	$xpos = 387; $ypos = 146; $width = 24; $height = 12;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"FE",$ecolors{black});
@@ -374,13 +374,13 @@ sub createGdsMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"    NET CHN   DRATE  TRATE",$ecolors{black});
 	# Add DAQ DC chan count Monitor
 	$xpos = 424; $ypos = 112; $width = 35; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:DAQ-DC0_$mdlName\_STATUS",$ecolors{white},$ecolors{black},"alarm","hexadecimal");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:DAQ-$daq_prefix\_$mdlName\_STATUS",$ecolors{white},$ecolors{black},"alarm","hexadecimal");
 	# Add DAQ DC CRC Error Monitor
 	$xpos = 464; $ypos = 112; $width = 35; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:DAQ-DC0_$mdlName\_CRC_CPS",$ecolors{white},$ecolors{black},"alarm");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:DAQ-$daq_prefix\_$mdlName\_CRC_CPS",$ecolors{white},$ecolors{black},"alarm");
 	# Add DAQ DC CRC Error Sum Monitor
 	$xpos = 504; $ypos = 112; $width = 35; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:DAQ-DC0_$mdlName\_CRC_SUM",$ecolors{white},$ecolors{black},"alarm");
+        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:DAQ-$daq_prefix\_$mdlName\_CRC_SUM",$ecolors{white},$ecolors{black},"alarm");
 
 	# Add DAQ chan count Monitor
 	$xpos = 424; $ypos = 145; $width = 35; $height = 15;

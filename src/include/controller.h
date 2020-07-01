@@ -24,11 +24,7 @@ int dacOF[ MAX_DAC_MODULES ]; /// @param dacOF[]  DAC overrange counters
 char daqArea[ 2 * DAQ_DCU_SIZE ]; // Space allocation for daqLib buffers
 int  cpuId = 1;
 
-#ifdef DUAL_DAQ_DC
-#define MX_OK 15
-#else
 #define MX_OK 3
-#endif
 
 // Initial diag reset flag
 int initialDiagReset = 1;

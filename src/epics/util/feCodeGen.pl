@@ -155,6 +155,7 @@ $modelrate = 64;
 $servoflag = "-DSERVO64K";
 $clock_div = 1;
 $dolphin_recover = 0;
+$daq_prefix="DC0";
 
 # Load model name without .mdl extension.
 $skeleton = $ARGV[1];
@@ -2106,7 +2107,7 @@ system ("sort $adcFile -k 1,1n -k 2,2n > $adcFileSorted");
 	my $scriptTarget = "/opt/rtcds/$location/$lifo/chans/tmp/$sysname\.diff";
 	my $scriptArgs = "-s $location -i $lifo -m $skeleton -d $dcuId &"; 
     my $ioptimediag = $virtualiop + $no_sync;
-	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$iopModel,$ioptimediag,\@dacType,\@adcType);
+	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$iopModel,$ioptimediag,$daq_prefix,\@dacType,\@adcType);
 	require "lib/medmGenStatus.pm";
 	("CDS::medmGenStatus::createStatusMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs);
 
@@ -2453,9 +2454,6 @@ if ($edcu) {
 if ($no_daq) {
   print OUTM "#Comment out to enable DAQ\n";
   print OUTM "EXTRA_CFLAGS += -DNO_DAQ\n";
-} else {
-  print OUTM "#Uncomment to disable DAQ and testpoints\n";
-  print OUTM "#EXTRA_CFLAGS += -DNO_DAQ\n";
 }
 
 # Set to flip polarity of ADC input signals
@@ -2659,9 +2657,6 @@ if (0 == $dac_testpoint_names && 0 == $::extraTestPoints && 0 == $filtCnt) {
 if ($no_daq) {
   print OUTM "#Comment out to enable DAQ\n";
   print OUTM "CFLAGS += -DNO_DAQ\n";
-} else {
-  print OUTM "#Uncomment to disable DAQ and testpoints\n";
-  print OUTM "#CFLAGS += -DNO_DAQ\n";
 }
 
 # Use oversampling code if not 64K system

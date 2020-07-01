@@ -115,6 +115,8 @@ sub parseParams {
 			} elsif ($spp[0] eq "plant_name") {
 				print "Plant name is set to $spp[1]\n";
 				$::plantName = $spp[1];
+			} elsif ($spp[0] eq "daq_prefix")  {
+				$::daq_prefix = $spp[1];
 			} elsif ($spp[0] eq "no_sync" && $spp[1] == 1) {
                 # This essentially set up IOP for a Cymac
 				print "Will not sync up to 1PPS\n";
