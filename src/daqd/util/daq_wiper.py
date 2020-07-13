@@ -106,6 +106,7 @@ PEP8 and python3 compliant
 23jan2020 LHO D.Barker
 """
 import os
+import os.path
 import argparse
 from datetime import datetime
 
@@ -120,7 +121,7 @@ FULLFRAMEPATH = ""
 SECONDTRENDFRAMEPATH = ""
 MINUTETRENDFRAMEPATH = ""
 
-NUM_FULL_FRAME_FILES_PER_HOUR = 56  # one minute trend file every hour
+NUM_FULL_FRAME_FILES_PER_HOUR = 56  # raw frame files file every hour
 NUM_MINUTE_TREND_FILES_PER_HOUR = 1  # one minute trend file every hour
 NUM_SECOND_TREND_FILES_PER_HOUR = 6  # one second trend file every 10 minutes
 NUM_MINUTE_TREND_FILES_PER_DAY = 24 * NUM_MINUTE_TREND_FILES_PER_HOUR  # one minute trend file every hour
@@ -128,8 +129,16 @@ NUM_SECOND_TREND_FILES_PER_DAY = 24 * NUM_SECOND_TREND_FILES_PER_HOUR  # one sec
 MIN_NUM_MINUTE_TREND_FILES = 3 * NUM_MINUTE_TREND_FILES_PER_DAY  # keep at least 3 days of minute trend files
 MIN_NUM_SECOND_TREND_FILES = 30 * NUM_SECOND_TREND_FILES_PER_DAY  # keep at least 30 days of second trend files
 
+# a sample of frame sizes taken at LHO on 13 July 2020
+FULL_FRAME_SIZE = 1600000000  # 1556146015
+MINUTE_TREND_FRAME_SIZE = 420000000  # 412897483
+SECOND_TREND_FRAME_SIZE = 810000000  # 807695244
+
 # DB REQUIREDFREEBYTES = 2 * TERRABYTES # maintain at least this amount of free space
-REQUIREDFREEBYTES = int(0.25 * TERRABYTES)  # maintain at least this amount of free space
+REQUIREDFREETB = 0.25
+REQUIREDFREEBYTES = int(REQUIREDFREETB * TERRABYTES)  # maintain at least this amount of free space
+
+
 #  TODO: calculate this figure on the fly to represent one day of data.
 
 
@@ -214,17 +223,23 @@ def full_path(frame_file_name):
     gps_epoch = str(gps_time)[0:5]
     if "_R-" in frame_file_name:
         # Raw frame file
-        return FULLFRAMEPATH + '/' + gps_epoch + '/' + frame_file_name
+        return os.path.join(FULLFRAMEPATH, gps_epoch, frame_file_name)
     elif "_T-" in frame_file_name:
         # Second trend frame file
-        return SECONDTRENDFRAMEPATH + '/' + gps_epoch + '/' + frame_file_name
+        return os.path.join(SECONDTRENDFRAMEPATH, gps_epoch, + frame_file_name)
     elif "_M-" in frame_file_name:
         # Minute trend frame file
-        return MINUTETRENDFRAMEPATH + '/' + gps_epoch + '/' + frame_file_name
+        return os.path.join(MINUTETRENDFRAMEPATH, gps_epoch, frame_file_name)
     else:
         print("Error: unknown frame file type")
         print("File: {}".format(frame_file_name))
         exit(-1)
+
+
+def estimated_data_rate_per_hour():
+    return FULL_FRAME_SIZE * NUM_FULL_FRAME_FILES_PER_HOUR + \
+           MINUTE_TREND_FRAME_SIZE * NUM_MINUTE_TREND_FILES_PER_HOUR + \
+           SECOND_TREND_FRAME_SIZE * NUM_SECOND_TREND_FILES_PER_HOUR
 
 
 if __name__ == "__main__":
@@ -232,26 +247,31 @@ if __name__ == "__main__":
     global INDENT
     INDENT = '\t'
 
+    REQUIREDFREETB = (estimated_data_rate_per_hour() * 24) / TERRABYTES
+
     # Define and Parse arguments
     parser = argparse.ArgumentParser(description="daq_wiper: maintain frame files disk space",
                                      epilog="D.Barker LHO March 2017")
     parser.add_argument("-d", "--delete", action="store_true",
                         help="delete files to free disk space (in dry-run mode report what would have been deleted)")
     parser.add_argument("-v", "--verbose", action="store_true", help="turn on verbose output")
+    parser.add_argument("-t", "--terrabytes",
+                        help="Number of terrabytes of disk to ensure are free [{}]".format(REQUIREDFREETB),
+                        default=REQUIREDFREETB)
     parser.add_argument("framepath", help="path to frames directory, e.g. /cds-h1-frames/frames")
 
     args = parser.parse_args()
+
+    REQUIREDFREEBYTES = int(args.terrabytes * TERRABYTES)
 
     DELETE_FILES = False
     if args.delete is True:
         DELETE_FILES = True
     VERBOSE = args.verbose
     FRAMEPATH = str(args.framepath)
-    if not FRAMEPATH.endswith('/'):
-        FRAMEPATH += "/"
-    FULLFRAMEPATH = FRAMEPATH + "full"
-    SECONDTRENDFRAMEPATH = FRAMEPATH + "trend/second"
-    MINUTETRENDFRAMEPATH = FRAMEPATH + "trend/minute"
+    FULLFRAMEPATH = os.path.join(FRAMEPATH, "full")
+    SECONDTRENDFRAMEPATH = os.path.join(FRAMEPATH, "trend/second")
+    MINUTETRENDFRAMEPATH = os.path.join(FRAMEPATH, "trend/minute")
 
     # print program start information
     print(INDENT + " ")
