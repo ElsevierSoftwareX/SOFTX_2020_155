@@ -128,6 +128,8 @@ sub createStatusMedm
 	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"OVERRANGE",$ecolors{white});
     $ypos = 413;
 	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"AUTOCAL",$ecolors{white});
+    $ypos = 433;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"TIMING",$ecolors{white});
 
     # Add ADC status info
 	$xpos = 155; $ypos = 330; $width = 50; $height = 15;
@@ -147,6 +149,8 @@ sub createStatusMedm
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_STAT_$ii","2","2",$ecolors{green},$ecolors{yellow});
         $ypos += 20;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_STAT_$ii","3","3",$ecolors{green},$ecolors{red});
+        $ypos += 20;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_STAT_$ii","4","4",$ecolors{green},$ecolors{red});
 
         $xpos += 55;
         $ypos = 351;

@@ -17,6 +17,16 @@ adc_status_update( adcInfo_t* adcinfo )
         else
             pLocalEpics->epicsOutput.statAdc[ jj ] |= ADC_CHAN_HOP;
         adcinfo->adcChanErr[ jj ] = 0;
+
+        // Check ADC Timing
+        if ( adcinfo->adcRdTimeErr[ jj ] )
+            pLocalEpics->epicsOutput.statAdc[ jj ] &= ~( ADC_RD_TIME );
+        else
+            pLocalEpics->epicsOutput.statAdc[ jj ] |= ADC_RD_TIME;
+        if ( adcinfo->adcRdTimeErr[ jj ] > MAX_ADC_WAIT_ERR_SEC )
+            pLocalEpics->epicsOutput.stateWord |= FE_ERROR_ADC;
+        adcinfo->adcRdTimeErr[ jj ] = 0;
+
         // SET/CLR Overflow Error
         if ( adcinfo->adcOF[ jj ] )
         {
