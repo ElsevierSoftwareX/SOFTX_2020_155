@@ -117,6 +117,7 @@ sub createStatusMedm
 
 
 
+if($iopModel == 1) {
     # Add ADC status labels
 	$xpos = 10; $ypos = 330; $width = 100; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"ADC STATUS",$ecolors{white});
@@ -220,6 +221,7 @@ sub createStatusMedm
         $xpos += 55;
         $ypos = 483;
     }
+}
 
 print OUTMEDM "$medmdata \n";
 close OUTMEDM;
