@@ -2109,7 +2109,7 @@ system ("sort $adcFile -k 1,1n -k 2,2n > $adcFileSorted");
     my $ioptimediag = $virtualiop + $no_sync;
 	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$iopModel,$ioptimediag,$daq_prefix,\@dacType,\@adcType);
 	require "lib/medmGenStatus.pm";
-	("CDS::medmGenStatus::createStatusMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs);
+	("CDS::medmGenStatus::createStatusMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$iopModel,@dacType);
 
 
 # ******************************************************************************************

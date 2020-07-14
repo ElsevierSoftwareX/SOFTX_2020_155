@@ -268,6 +268,7 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
         if ( (unsigned int)*packedData < 65535 )
         {
             adcinfo->chanHop = 1;
+            adcinfo->adcChanErr[ card ] = 1;
             fe_status_return_subcode = card;
         }
 

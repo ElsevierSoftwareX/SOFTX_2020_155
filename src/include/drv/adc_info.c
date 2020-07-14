@@ -13,7 +13,6 @@ adc_status_update( adcInfo_t* adcinfo )
         {
             pLocalEpics->epicsOutput.statAdc[ jj ] &= ~( ADC_CHAN_HOP );
             status |= FE_ERROR_ADC;
-            ;
         }
         else
             pLocalEpics->epicsOutput.statAdc[ jj ] |= ADC_CHAN_HOP;
