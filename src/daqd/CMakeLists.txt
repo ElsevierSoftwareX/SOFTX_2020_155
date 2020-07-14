@@ -146,6 +146,12 @@ target_link_libraries(daqd PUBLIC
 		)
 
 install(TARGETS daqd DESTINATION bin)
+install(PROGRAMS util/daq_wiper.py
+		DESTINATION bin
+		RENAME daq_wiper)
+install(PROGRAMS util/checkdaqconfig.py
+		DESTINATION bin
+		RENAME checkdaqconfig)
 
 add_executable(test_daqd_unit_tests tests/test_main.cc
 		tests/test_daqd_cmask_t.cc

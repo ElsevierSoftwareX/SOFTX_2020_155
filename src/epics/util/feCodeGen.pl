@@ -134,7 +134,6 @@ $edcu = 0;
 $casdf = 0;
 $globalsdf = 0;
 $pciNet = -1;
-$shmem_daq = 0; # Do not use shared memory DAQ connection
 $no_sync = 0; # Sync up to 1PPS by default
 $no_daq = 0; # Enable DAQ by default
 $gdsNodeId = 0;
@@ -156,6 +155,7 @@ $modelrate = 64;
 $servoflag = "-DSERVO64K";
 $clock_div = 1;
 $dolphin_recover = 0;
+$daq_prefix="DC0";
 
 # Load model name without .mdl extension.
 $skeleton = $ARGV[1];
@@ -1324,7 +1324,7 @@ print EPICS "DUMMY FEC\_$dcuId\_UPTIME_MINUTE int ao 0\n";
 # The following code is in solely for automated testing.
 if($diagTest > -1)
 {
-print OUTH "\tint timingTest[11];\n";
+print OUTH "\tint timingTest[16];\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_CYCLE epicsInput.bumpCycle int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_ADC epicsInput.bumpAdcRd int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_LONG_ADC epicsInput.longAdcRd int ao 0\n";
@@ -1338,7 +1338,12 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32KA epicsOutput.timingTest[6]
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16KA epicsOutput.timingTest[7] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04KA epicsOutput.timingTest[8] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02KA epicsOutput.timingTest[9] int ao 0\n";
-print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_DELAY epicsOutput.timingTest[10] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_64KB epicsOutput.timingTest[10] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_32KB epicsOutput.timingTest[11] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16KB epicsOutput.timingTest[12] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04KB epicsOutput.timingTest[13] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02KB epicsOutput.timingTest[14] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_DELAY epicsOutput.timingTest[15] int ao 0\n";
 }
 
 print OUTH "} CDS_EPICS_OUT;\n\n";
@@ -1716,12 +1721,6 @@ print OUT "\n";
 #//			- Add all UNIT DELAY part code.
 print OUT "    // Unit delays\n";
 print OUT "$unitDelayCode";
-#//			- Add all IPC Output code.
-#print OUT "    // All IPC outputs\n";
-#print OUT "    if (_shmipc_shm != 0) {\n";
-#print OUT "$ipcOutputCode";
-#print OUT "    }\n";
-#print OUT "$feTailCode";
 
 # IPCx PART CODE
 # The actual sending of IPCx data is to occur
@@ -2108,7 +2107,7 @@ system ("sort $adcFile -k 1,1n -k 2,2n > $adcFileSorted");
 	my $scriptTarget = "/opt/rtcds/$location/$lifo/chans/tmp/$sysname\.diff";
 	my $scriptArgs = "-s $location -i $lifo -m $skeleton -d $dcuId &"; 
     my $ioptimediag = $virtualiop + $no_sync;
-	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$iopModel,$ioptimediag,\@dacType,\@adcType);
+	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$iopModel,$ioptimediag,$daq_prefix,\@dacType,\@adcType);
 	require "lib/medmGenStatus.pm";
 	("CDS::medmGenStatus::createStatusMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs);
 
@@ -2245,8 +2244,6 @@ $cdsPart[0] = 0;	# $cdsPart[0 .. $partCnt]
 
 $ppFIR[0] = 0;          # Set to one for PPFIR filters
 
-$biQuad[0] = 0;          # Set to one for biquad IIR filters
-
 # Total number of inputs for each part
 # i.e. how many parts are connected to it with lines (branches)
 $partInCnt[0] = 0;	# $partInCnt[0 .. $partCnt]
@@ -2297,12 +2294,6 @@ $subSysPartStop[0] = 0;
 
 # IPC output code
 $ipcOutputCode = "";
-
-# Front-end tailing code
-$feTailCode = "";
-
-# Set if all filters are biquad
-$allBiquad = 0;
 
 # Set if doing direct DAC writed (no DMA)
 $directDacWrite = 0;
@@ -2383,7 +2374,6 @@ sub createEpicsMakefile {
 	if ($edcu) {
 	  print OUTME "EXTRA_CFLAGS += -DEDCU=1\n";
 	  print OUTME "EXTRA_CFLAGS += -DNO_DAQ_IN_SKELETON=1\n";
-	  print OUTME "SYNC_SRC = $edcusync\n";
 	}
 	if ($globalsdf) {
 	  print OUTME "EXTRA_CFLAGS += -DEDCU=1\n";
@@ -2464,14 +2454,8 @@ if ($edcu) {
 if ($no_daq) {
   print OUTM "#Comment out to enable DAQ\n";
   print OUTM "EXTRA_CFLAGS += -DNO_DAQ\n";
-} else {
-  print OUTM "#Uncomment to disable DAQ and testpoints\n";
-  print OUTM "#EXTRA_CFLAGS += -DNO_DAQ\n";
 }
 
-# SHMEM_DAQ set as the default for RCG V2.8 - No longer support GM
-  print OUTM "#Comment out to disable local frame builder connection\n";
-  print OUTM "EXTRA_CFLAGS += -DSHMEM_DAQ\n";
 # Set to flip polarity of ADC input signals
 if ($flipSignals) {
   print OUTM "EXTRA_CFLAGS += -DFLIP_SIGNALS=1\n";
@@ -2673,14 +2657,7 @@ if (0 == $dac_testpoint_names && 0 == $::extraTestPoints && 0 == $filtCnt) {
 if ($no_daq) {
   print OUTM "#Comment out to enable DAQ\n";
   print OUTM "CFLAGS += -DNO_DAQ\n";
-} else {
-  print OUTM "#Uncomment to disable DAQ and testpoints\n";
-  print OUTM "#CFLAGS += -DNO_DAQ\n";
 }
-
-# SHMEM_DAQ set as the default for RCG V2.8 - No longer support GM
-  print OUTM "#Comment out to disable local frame builder connection\n";
-  print OUTM "CFLAGS += -DSHMEM_DAQ\n";
 
 # Use oversampling code if not 64K system
 if($modelrate < 64) {
@@ -2764,15 +2741,6 @@ if ($::optimizeIO) {
   print OUTM "CFLAGS += -DNO_DAC_PRELOAD=1\n";
 } else {
   print OUTM "#CFLAGS += -DNO_DAC_PRELOAD=1\n";
-}
-  
-
-if ($::rfmDma) {
-  print OUTM "#Comment out to run with RFM DMA\n";
-  print OUTM "#CFLAGS += -DRFM_DIRECT_READ=1\n";
-} else {
-  print OUTM "#Comment out to run with RFM DMA\n";
-  print OUTM "CFLAGS += -DRFM_DIRECT_READ=1\n";
 }
 
 if ($::rfmDelay) {

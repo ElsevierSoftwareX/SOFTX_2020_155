@@ -1,6 +1,6 @@
 [Unit]
 Description=Advanced LIGO RTS data acquisition daemon
-After=network-online.target
+After=network-online.target remote-fs.target
 
 [Service]
 User=advligorts

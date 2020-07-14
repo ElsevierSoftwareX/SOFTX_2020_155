@@ -1,6 +1,6 @@
 [Unit]
 Description=Advanced LIGO RTS NDS1 frame data retriever
-After=network-online.target
+After=network-online.target remote-fs.target
 
 [Service]
 RuntimeDirectory=nds

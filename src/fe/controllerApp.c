@@ -92,13 +92,6 @@ fe_start_controller( void* arg )
     int myGmError2 = 0; /// @param myGmError2 Myrinet error variable
     int status; /// @param status Typical function return value
     int onePpsTime = 0; /// @param onePpsTime One PPS diagnostic check
-#ifdef DIAG_TEST
-    float onePpsTest; /// @param onePpsTest Value of 1PPS signal, if used, for
-                      /// diagnostics
-    int onePpsHiTest[ 10 ]; /// @param onePpsHiTest[] One PPS diagnostic check
-    int onePpsTimeTest[ 10 ]; /// @param onePpsTimeTest[] One PPS diagnostic
-                              /// check
-#endif
     int dcuId; /// @param dcuId DAQ ID number for this process
     int diagWord =
         0; /// @param diagWord Code diagnostic bit pattern returned to EPICS
@@ -565,12 +558,6 @@ fe_start_controller( void* arg )
                 mxStat = 1;
             if ( ( mxDiag & 2 ) != ( mxDiagR & 2 ) )
                 mxStat += 2;
-#ifdef DUAL_DAQ_DC
-            if ( ( mxDiag & 4 ) != ( mxDiagR & 4 ) )
-                mxStat += 4;
-            if ( ( mxDiag & 8 ) != ( mxDiagR & 8 ) )
-                mxStat += 8;
-#endif
             pLocalEpics->epicsOutput.fbNetStat = mxStat;
             mxDiag = mxDiagR;
             if ( mxStat != MX_OK )

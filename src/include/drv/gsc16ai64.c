@@ -143,16 +143,17 @@ gsc16ai64CheckDmaDone( int module )
 /// Note: This function not presently used.
 // *****************************************************************************
 int
-gsc16ai64WaitDmaDone( int module, volatile int* data )
+gsc16ai64WaitDmaDone( int module )
 {
+    int ii = 0;
     do
     {
-    } while ( ( adcDma[ module ]->DMA_CSR & GSAI_DMA_DONE ) == 0 );
-    // First channel should be marked with an upper bit set
-    if ( *data == 0 )
-        return 0;
-    else
-        return 16;
+        ii ++;
+        udelay(1);
+    } while ( ( adcDma[ module ]->DMA_CSR & GSAI_DMA_DONE  == 0 ) && (ii < 100) );
+    // If DMA did not complete, return error
+    if(ii > 9999) return -1;
+    else return 0;
 }
 
 // *****************************************************************************
