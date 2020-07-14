@@ -16,7 +16,7 @@ pages:
     - cd doc2
     - make html latexpdf
     - mv _build/html ../public
-    - mv _build/advligorts.pdf ../public
+    - mv _build/latex/advLigoRTS.pdf ../public
   artifacts:
     paths:
     - public
