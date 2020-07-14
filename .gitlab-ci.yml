@@ -13,9 +13,10 @@ pages:
     - rm -rf public
     - apt-get update
     - apt-get install -y -qq python3-sphinx latexmk texlive texlive-latex-extra
+    - cd doc2
     - make html latexpdf
-    - mv docs/_build/html public
-    - mv docs/_build/advligorts.pdf public
+    - mv _build/html ../public
+    - mv _build/advligorts.pdf ../public
   artifacts:
     paths:
     - public
