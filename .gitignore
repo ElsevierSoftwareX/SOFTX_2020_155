@@ -34,8 +34,12 @@ src/daqd/autom4te.cache
 # srctrl
 *.srctrl*
 
-#kernel module build files
+# kernel module build files
 modules.order
 
-#python compile files
+# python compile files
 *__pycache__*
+
+# sphinx doc files
+*_build
+*_static
