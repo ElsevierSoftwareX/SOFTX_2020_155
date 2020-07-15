@@ -110,8 +110,8 @@ fe_start_controller( void* arg )
 #ifdef DIAG_TEST
     float onePpsTest; /// @param onePpsTest Value of 1PPS signal, if used, for
                       /// diagnostics
-    int onePpsHiTest[ 10 ]; /// @param onePpsHiTest[] One PPS diagnostic check
-    int onePpsTimeTest[ 10 ]; /// @param onePpsTimeTest[] One PPS diagnostic
+    int onePpsHiTest[ 16 ]; /// @param onePpsHiTest[] One PPS diagnostic check
+    int onePpsTimeTest[ 16 ]; /// @param onePpsTimeTest[] One PPS diagnostic
                               /// check
 #endif
     int        dcuId; /// @param dcuId DAQ ID number for this process
@@ -815,7 +815,7 @@ fe_start_controller( void* arg )
                 if ( ( ii > 4 ) && ( ii < 10 ) )
                     onePpsTest = adcinfo.adcData[ 1 ][ ii - 5 ];
                 if ( ii > 9 )
-                    onePpsTest = adcinfo.adcData[ 1 ][ ( ii - 2 ) ];
+                    onePpsTest = adcinfo.adcData[ 0 ][ ( ii - 2 ) ];
                 if ( ( onePpsTest > 400 ) && ( onePpsHiTest[ ii ] == 0 ) )
                 {
                     onePpsTimeTest[ ii ] = cycleNum;
