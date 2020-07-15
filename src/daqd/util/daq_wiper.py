@@ -221,12 +221,12 @@ def full_path(frame_file_name):
     gps_time = digit_list[0]
     # directory is named by first 5 digits
     gps_epoch = str(gps_time)[0:5]
-    if "_R-" in frame_file_name:
+    if "_R-" in frame_file_name or "_C-" in frame_file_name:
         # Raw frame file
         return os.path.join(FULLFRAMEPATH, gps_epoch, frame_file_name)
     elif "_T-" in frame_file_name:
         # Second trend frame file
-        return os.path.join(SECONDTRENDFRAMEPATH, gps_epoch, + frame_file_name)
+        return os.path.join(SECONDTRENDFRAMEPATH, gps_epoch, frame_file_name)
     elif "_M-" in frame_file_name:
         # Minute trend frame file
         return os.path.join(MINUTETRENDFRAMEPATH, gps_epoch, frame_file_name)
