@@ -1280,7 +1280,7 @@ update_diag_info( diag_thread_queues& queues )
         return;
     }
     diag_info_block* info = nullptr;
-    queues.free_queue.pop( &info );
+    queues.free_queue.pop( &info, 1);
 
     info->con_chans = daqd_edcu1.con_chans;
     std::copy( std::begin( daqd_edcu1.channel_status ),
@@ -1304,7 +1304,7 @@ get_diag_info( diag_thread_queues& queues, diag_info_block& dest )
         return;
     }
     diag_info_block* info = nullptr;
-    queues.msg_queue.pop( &info );
+    queues.msg_queue.pop( &info, 1 );
 
     dest = *info;
 
