@@ -107,7 +107,7 @@ echo "datarate = 16" >> "$TDIR/ini_files/tpchn_edc.par"
 
 sleep 1
 
-"$STANDALONE_EDC" -b edc_daq -i "$TDIR/ini_files/edcu.ini" -p X6: -l 127.0.0.1:9000 &> "$TDIR/logs/standalone_edc" &
+"$STANDALONE_EDC" -b edc -i "$TDIR/ini_files/edcu.ini" -p X6: -l 127.0.0.1:9000 &> "$TDIR/logs/standalone_edc" &
 PID_STANDALONE_EDC=$!
 
 "$LOCAL_DC" -b local_dc -m 100 -s edc -d "$TDIR/ini_files" &> "$TDIR/logs/local_dc" &
