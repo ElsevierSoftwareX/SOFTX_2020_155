@@ -5,7 +5,7 @@ After=network-online.target remote-fs.target
 [Service]
 User=advligorts
 EnvironmentFile=-/etc/advligorts/systemd_env
-ExecStart=/usr/bin/standalone_edc -i /etc/advligorts/edc.ini -I 0.0.0.0:9000 $standalone_edc_args
+ExecStart=/usr/bin/standalone_edc -i /etc/advligorts/edc.ini -l 0.0.0.0:9000 $standalone_edc_args
 Restart=always
 
 [Install]
