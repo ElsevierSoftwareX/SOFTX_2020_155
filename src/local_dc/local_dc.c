@@ -541,12 +541,9 @@ int __CDECL
 
     for ( ii = 0; ii < nsys; ++ii )
     {
-        tmp = strchr( modelnames[ ii ], ':' );
-        if ( tmp != NULL )
-        {
-            extract_dcu_rate_from_name( tmp, &dcuid[ ii ], &modelrates[ ii ] );
-            *tmp = '\0';
-        }
+        extract_dcu_rate_from_name(
+            modelnames[ ii ], &dcuid[ ii ], &modelrates[ ii ] );
+        trim_dcuid_and_rate_from_name( modelnames[ ii ] );
     }
 
     // Open file descriptor for the gpstime driver
@@ -593,7 +590,7 @@ int __CDECL
     // Get model rates to get GDS TP data sizes.
     for ( ii = 0; ii < nsys; ii++ )
     {
-        if ( modelrates[ ii ] != 0 )
+        if ( modelrates[ ii ] == 0 )
         {
             status = get_model_rate_dcuid(
                 &modelrates[ ii ], &dcuid[ ii ], modelnames[ ii ], gds_tp_dir );
