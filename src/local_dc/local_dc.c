@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
+#include "args.h"
 #include "../drv/crc.c"
 #include "../include/daqmap.h"
 #include "../include/drv/fb.h"
@@ -24,6 +25,7 @@
 #include "../drv/gpstime/gpstime.h"
 #include <pthread.h>
 #include "modelrate.h"
+#include "local_dc_utils.h"
 
 #define MSG_BUF_SIZE 0x200000
 
@@ -44,7 +46,6 @@ extern void* findSharedMemory( char* );
 extern void* findSharedMemorySize( char*, int );
 
 char                modelnames[ DAQ_TRANSIT_MAX_DCU ][ 64 ];
-char*               sysname;
 int                 do_verbose = 0;
 static volatile int keepRunning = 1;
 char*               ifo;
@@ -55,33 +56,6 @@ char msg_buffer[ MSG_BUF_SIZE ];
 
 int symmetricom_fd = -1;
 int daqStatBit[ 2 ];
-
-/*********************************************************************************/
-/*                                U S A G E */
-/*                                                                               */
-/*********************************************************************************/
-
-void
-Usage( )
-{
-    fprintf( stderr, "Usage of local_dc:\n" );
-    fprintf( stderr, "local_dc  -s <models> <OPTIONS>\n" );
-    fprintf( stderr,
-             " -b <buffer>    : Name of the mbuf to concentrate the data to "
-             "locally (defaults to ifo)\n" );
-    fprintf( stderr, " -s <value>     : Name of FE control models\n" );
-    fprintf( stderr,
-             " -m <value>     : Local memory buffer size in megabytes\n" );
-    fprintf( stderr, " -l <filename>  : log file name\n" );
-    fprintf( stderr, " -v 1           : Enable verbose output\n" );
-    fprintf( stderr,
-             " -d <directory> : Path to the gds tp dir used to lookup model "
-             "rates\n" );
-    fprintf( stderr,
-        " -w <value>     : Number of ms to wait for models to finish\n");
-    fprintf( stderr, " -h             : This helpscreen\n" );
-    fprintf( stderr, "\n" );
-}
 
 // **********************************************************************************************
 /// Get current GPS time from the symmetricom IRIG-B card
@@ -406,8 +380,9 @@ int __CDECL
 {
     int           counter = 0;
     int           nsys = 1;
-    int           dcuId[ 10 ];
     int           ii = 0;
+    char*         tmp = 0;
+    const char*   gds_tp_dir_ = 0;
     char*         gds_tp_dir = 0;
     int           max_data_size_mb = 64;
     int           max_data_size = 0;
@@ -417,77 +392,126 @@ int __CDECL
     int           gps_stt = 0;
     int           gps_ok = 0;
     unsigned long gps_time = 0;
-    char*         buffer_name = "local_dc";
+    char*         buffer_name = NULL;
+    const char*   buffer_name_ = NULL;
 
-    char*        sysname;
-    int          len;
-    int          iter;
-    int          do_wait = 1;
-    int          do_bothways;
-    extern char* optarg;
+    const char* sysname_;
+    char*       sysname;
+    const char* logfilename = NULL;
+    int         len;
+    int         iter;
+    int         do_wait = 1;
+    int         do_bothways;
+    args_handle arg_parser = NULL;
 
     sysname = NULL;
+    bzero( modelrates, sizeof( modelrates[ 0 ] ) * DAQ_TRANSIT_MAX_DCU );
+    bzero( dcuid, sizeof( dcuid[ 0 ] ) * DAQ_TRANSIT_MAX_DCU );
 
     fprintf(
         stderr, "\n %s compiled %s : %s\n\n", argv[ 0 ], __DATE__, __TIME__ );
 
     ii = 0;
 
-    if ( argc < 3 )
+    arg_parser = args_create_parser(
+        "The local_dc process concentrates or combines the shared memory "
+        "buffers from LIGO FE models into one buffer formated for injestion "
+        "into the daqd or transmission over the network.\n"
+        "The local_dc needs to get some information from the model .par files. "
+        "For systems (such as the standalone edc) that do not have .par files "
+        "the dcuid & rate may be specified with the model rate (ex edc:52:16 "
+        "or edc:52, if not specified the rate defaults to 16Hz).  Only do this "
+        "for special cases." );
+    if ( !arg_parser )
     {
-        Usage( );
-        return ( -1 );
+        return -1;
+    }
+    args_add_string_ptr( arg_parser,
+                         'b',
+                         ARGS_NO_LONG,
+                         "buffer",
+                         "Name of the mbuf to write data to locally",
+                         &buffer_name_,
+                         "local_dc" );
+    args_add_int( arg_parser,
+                  'm',
+                  ARGS_NO_LONG,
+                  "MB",
+                  "Local memory buffer size",
+                  &max_data_size_mb,
+                  100 );
+    args_add_string_ptr( arg_parser,
+                         's',
+                         ARGS_NO_LONG,
+                         "systems",
+                         "Space seperated list of systems.",
+                         &sysname_,
+                         "" );
+    args_add_string_ptr( arg_parser,
+                         'l',
+                         ARGS_NO_LONG,
+                         "file",
+                         "Log file name",
+                         &logfilename,
+                         "-" );
+    args_add_int( arg_parser,
+                  'v',
+                  ARGS_NO_LONG,
+                  "level",
+                  "Enable verbose output",
+                  &do_verbose,
+                  0 );
+    args_add_string_ptr( arg_parser,
+                         'd',
+                         ARGS_NO_LONG,
+                         "directory",
+                         "Path to the gds tp dir used to lookup model rates",
+                         &gds_tp_dir_,
+                         NULL );
+    args_add_int( arg_parser,
+                  'w',
+                  ARGS_NO_LONG,
+                  "ms",
+                  "Number of ms to wait for models to finish",
+                  &do_wait,
+                  1 );
+    if ( args_parse( arg_parser, argc, argv ) < 0 )
+    {
+        exit( 1 );
     }
 
-    /* Get the parameters */
-    while ( ( counter = getopt( argc, argv, "b:e:m:h:v:s:r:t:d:l:D:w:" ) ) !=
-            EOF )
-        switch ( counter )
+    buffer_name = malloc( strlen( buffer_name_ ) + 1 );
+    strncpy( buffer_name, buffer_name_, strlen( buffer_name_ ) + 1 );
+    sysname = malloc( strlen( sysname_ ) + 1 );
+    strncpy( sysname, sysname_, strlen( sysname_ ) + 1 );
+    if ( gds_tp_dir_ )
+    {
+        gds_tp_dir = malloc( strlen( gds_tp_dir_ ) + 1 );
+        strncpy( gds_tp_dir, gds_tp_dir_, strlen( gds_tp_dir_ ) + 1 );
+    }
+
+    if ( max_data_size_mb < 20 )
+    {
+        fprintf( stderr, "Min data block size is 20 MB\n" );
+        return -1;
+    }
+    if ( max_data_size_mb > 100 )
+    {
+        fprintf( stderr, "Max data block size is 100 MB\n" );
+        return -1;
+    }
+    fprintf( stderr, "sysnames = %s\n", sysname );
+
+    if ( strcmp( logfilename, "-" ) != 0 )
+    {
+        if ( 0 == freopen( logfilename, "w", stdout ) )
         {
-        case 'b':
-            buffer_name = optarg;
-            break;
-
-        case 'm':
-            max_data_size_mb = atoi( optarg );
-            if ( max_data_size_mb < 20 )
-            {
-                fprintf( stderr, "Min data block size is 20 MB\n" );
-                return -1;
-            }
-            if ( max_data_size_mb > 100 )
-            {
-                fprintf( stderr, "Max data block size is 100 MB\n" );
-                return -1;
-            }
-            break;
-
-        case 's':
-            sysname = optarg;
-            fprintf( stderr, "sysnames = %s\n", sysname );
-            continue;
-        case 'l':
-            if ( 0 == freopen( optarg, "w", stdout ) )
-            {
-                perror( "freopen" );
-                exit( 1 );
-            }
-            setvbuf( stdout, NULL, _IOLBF, 0 );
-            stderr = stdout;
-            break;
-        case 'v':
-            do_verbose = atoi( optarg );
-            break;
-        case 'd':
-            gds_tp_dir = optarg;
-            break;
-        case 'w':
-            do_wait = atoi( optarg );
-            break;
-        case 'h':
-            Usage( );
-            return ( 0 );
+            perror( "freopen" );
+            exit( 1 );
         }
+        setvbuf( stdout, NULL, _IOLBF, 0 );
+        stderr = stdout;
+    }
 
     max_data_size = max_data_size_mb * 1024 * 1024;
 
@@ -506,14 +530,23 @@ int __CDECL
             if ( !s )
                 break;
             sprintf( modelnames[ nsys ], "%s", s );
-            dcuId[ nsys ] = 0;
             nsys++;
         }
     }
     else
     {
-        Usage( );
+        args_fprint_usage( arg_parser, argv[ 0 ], stderr );
         return ( 0 );
+    }
+
+    for ( ii = 0; ii < nsys; ++ii )
+    {
+        tmp = strchr( modelnames[ ii ], ':' );
+        if ( tmp != NULL )
+        {
+            extract_dcu_rate_from_name( tmp, &dcuid[ ii ], &modelrates[ ii ] );
+            *tmp = '\0';
+        }
     }
 
     // Open file descriptor for the gpstime driver
@@ -560,20 +593,24 @@ int __CDECL
     // Get model rates to get GDS TP data sizes.
     for ( ii = 0; ii < nsys; ii++ )
     {
-        status = get_model_rate_dcuid(
-            &modelrates[ ii ], &dcuid[ ii ], modelnames[ ii ], gds_tp_dir );
+        if ( modelrates[ ii ] != 0 )
+        {
+            status = get_model_rate_dcuid(
+                &modelrates[ ii ], &dcuid[ ii ], modelnames[ ii ], gds_tp_dir );
+
+            if ( status != 0 || modelrates[ ii ] == 0 )
+            {
+                fprintf( stderr,
+                         "Unable to determine the rate of %s\n",
+                         modelnames[ ii ] );
+                exit( 1 );
+            }
+        }
         fprintf( stderr,
                  "Model %s rate = %d dcuid = %d\n",
                  modelnames[ ii ],
                  modelrates[ ii ],
                  dcuid[ ii ] );
-        if ( status != 0 || modelrates[ ii ] == 0 )
-        {
-            fprintf( stderr,
-                     "Unable to determine the rate of %s\n",
-                     modelnames[ ii ] );
-            exit( 1 );
-        }
     }
 
     // Get pointers to local DAQ mbuf
@@ -595,6 +632,9 @@ int __CDECL
         error = send_to_local_memory( nsys, len, do_wait );
     } while ( error == 0 && keepRunning == 1 );
 
+    free( (void*)gds_tp_dir_ );
+    free( (void*)sysname_ );
+    free( (void*)buffer_name );
     // local_dc never returns unless there is a timeout - ie an error
     // or a signal (ctrl-c) has been sent, so it is killed
     // always return an error code.

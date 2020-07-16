@@ -97,20 +97,12 @@ popd
 
 echo "$TDIR/ini_files/edcu.ini" > $TDIR/ini_files/master
 
-echo "[X6:EDCU-EXC_1]" > "$TDIR/ini_files/tpchn_edc.par"
-echo "ifoid = 1" >> "$TDIR/ini_files/tpchn_edc.par"
-echo "rmid = 52" >> "$TDIR/ini_files/tpchn_edc.par"
-echo "dcuid = 52" >> "$TDIR/ini_files/tpchn_edc.par"
-echo "chnnum = 1" >> "$TDIR/ini_files/tpchn_edc.par"
-echo "datatype = 4" >> "$TDIR/ini_files/tpchn_edc.par"
-echo "datarate = 16" >> "$TDIR/ini_files/tpchn_edc.par"
-
 sleep 1
 
 "$STANDALONE_EDC" -b edc -i "$TDIR/ini_files/edcu.ini" -p X6: -l 127.0.0.1:9000 &> "$TDIR/logs/standalone_edc" &
 PID_STANDALONE_EDC=$!
 
-"$LOCAL_DC" -b local_dc -m 100 -s edc -d "$TDIR/ini_files" &> "$TDIR/logs/local_dc" &
+"$LOCAL_DC" -b local_dc -m 100 -s edc:52 -d "$TDIR/ini_files" &> "$TDIR/logs/local_dc" &
 PID_LOCAL_DC=$!
 
 echo "Streamer PID = PID_LOCAL_DC"
