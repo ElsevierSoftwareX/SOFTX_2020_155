@@ -240,7 +240,7 @@ if($iopModel == 1) {
         $ypos += 15;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","1","1",$ecolors{green},$ecolors{red});
         $ypos += 15;
-        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_STAT_$ii","2","2",$ecolors{green},$ecolors{red});
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","2","2",$ecolors{green},$ecolors{red});
         $ypos += 15;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","4","4",$ecolors{green},$ecolors{red});
         $ypos += 15;
