@@ -209,10 +209,10 @@ disable_sys() {
 _lsmod() {
     local systems=($(list_host_sys))
     local rts=(mbuf gpstime)
-    local dolphin=(dis_kosif dis_ix_ntb dis_ix_dma dis_irm)
+    local dolphin=(dis_kosif dis_ix_ntb dis_ix_dma dis_irm dis_sisci dis_intel_dma)
 
     # FIXME: how to test for needed modules?
-    modules=(${rts[*]} ${dolpin[*]})
+    modules=(${rts[*]} ${dolphin[*]})
     
     local allloaded=
     for m in ${modules[*]}; do
@@ -236,6 +236,18 @@ _lsmod() {
 	    fi
 	done
     fi
+    echo
+    local processes=(local_dc cps_xmit)
+    for p in ${processes[*]}; do
+      md=$(ps -A -o comm= | grep "^${p}") || true
+      if [ -z "$md" ] ; then
+        printf "%-18s ***NOT LOADED***\n" "$p"
+        allloaded=1
+      else
+        echo "$md"
+      fi
+    done
+
     if [ "$allloaded" ] ; then
 	return 4
     fi
