@@ -5,6 +5,7 @@ log() {
 }
 
 RTS_VERSION=${RTS_VERSION:-__VERSION__}
+# comment the if block below to test rtcds.in directly
 if [[ "$RTS_VERSION" =~ ._VERSION_. ]] ; then
     log "RTS_VERSION variable not set."
     exit 1
@@ -105,14 +106,40 @@ list_host_sys() {
     _systemctl_list_units | grep -v 'iop' || true
 }
 
-check_host_sys() {
+check_host_sys_enabled() {
     for sys ; do
         if ! systemctl cat rts@${sys}.target > /dev/null ; then
             log "RTS front end systemd units don't seem to be available.  Is the advligorts-fe package installed?"
             exit 5
         fi
 	if ! systemctl is-enabled rts@${sys}.target > /dev/null ; then
-	    log "System '$sys' is not enabled on this system, first enable with 'enable ${sys}'."
+	    log "System '${sys}' is not enabled on this system, first enable with 'enable ${sys}'."
+	    exit 4
+	fi
+    done
+}
+
+check_host_sys_active() {
+    for sys ; do
+        if ! systemctl cat rts@${sys}.target > /dev/null ; then
+            log "RTS front end systemd units don't seem to be available.  Is the advligorts-fe package installed?"
+            exit 5
+        fi
+	if ! systemctl is-active rts@${sys}.target > /dev/null ; then
+	    log "System '${sys}' is not active on this system'."
+	    exit 4
+	fi
+    done
+}
+
+check_host_sys_inactive() {
+    for sys ; do
+        if ! systemctl cat rts@${sys}.target > /dev/null ; then
+            log "RTS front end systemd units don't seem to be available.  Is the advligorts-fe package installed?"
+            exit 5
+        fi
+	if systemctl is-active rts@${sys}.target > /dev/null ; then
+	    log "System '$sys' is already active on this system'."
 	    exit 4
 	fi
     done
@@ -131,7 +158,7 @@ build_sys() {
 build_world() {
     cd $RCG_BUILDD
     log "### building world..."
-    make World
+    make -i World
 }
 
 install_sys() {
@@ -152,6 +179,8 @@ start_sys() {
     for sys ; do
 	log "### starting $sys..."
 	sudo systemctl start rts@${sys}.target
+	# pause needed to avoid timing glitch when user model started immediately after IOP
+	sleep 15
     done
 }
 
@@ -288,7 +317,7 @@ case $cmd in
 	if [[ "$1" == '--all' ]] ; then
 	    start_sys $(list_host_sys)
 	else
-	    check_host_sys $@
+	    check_host_sys_inactive $@
 	    start_sys $@
 	fi
 	;;
@@ -302,7 +331,7 @@ case $cmd in
 	    stop_sys $(list_host_sys | tac)
 	    start_sys $(list_host_sys)
 	else
-	    check_host_sys $@
+	    check_host_sys_active $@
 	    stop_sys $@
 	    start_sys $@
 	fi
@@ -316,7 +345,7 @@ case $cmd in
 	    # we do this in reverse so the IOP is stopped last
 	    stop_sys $(list_host_sys | tac)
 	else
-	    check_host_sys $@
+	    check_host_sys_active $@
 	    stop_sys $@
 	fi
 	;;
