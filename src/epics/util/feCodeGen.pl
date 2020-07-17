@@ -1304,6 +1304,11 @@ $irighigh = $clock_div * 15 + 3;
 $iriglow =  $clock_div * 15 - 7;
 print EPICS "OUTVARIABLE FEC\_$dcuId\_IRIGB_TIME epicsOutput.irigbTime int ao 0 field(HIHI,\"$irighihi\") field(HHSV,\"MAJOR\") field(HIGH,\"$irighigh\") field(HSV,\"MINOR\") field(LOW,\"$iriglow\") field(LSV,\"MAJOR\")\n";
 }
+print OUTH "\tint bioMon[4];\n";
+for($ii=0;$ii<4;$ii++)
+{
+	print EPICS "OUTVARIABLE FEC\_$dcuId\_BIO_MON_$ii epicsOutput.bioMon\[$ii\] int ao 0\n";
+}
 print OUTH "\tint awgStat;\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_AWGTPMAN_STAT epicsOutput.awgStat int ao 0\n";
 print OUTH "\tint gdsMon[32];\n";
@@ -2109,7 +2114,7 @@ system ("sort $adcFile -k 1,1n -k 2,2n > $adcFileSorted");
     my $ioptimediag = $virtualiop + $no_sync;
 	("CDS::medmGenGdsTp::createGdsMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$iopModel,$ioptimediag,$daq_prefix,\@dacType,\@adcType);
 	require "lib/medmGenStatus.pm";
-	("CDS::medmGenStatus::createStatusMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs);
+	("CDS::medmGenStatus::createStatusMedm") -> ($epicsScreensDir,$sysname,$uifo,$dcuId,$medmTarget,$scriptTarget,$scriptArgs,$adcCnt,$dacCnt,$iopModel,@dacType);
 
 
 # ******************************************************************************************

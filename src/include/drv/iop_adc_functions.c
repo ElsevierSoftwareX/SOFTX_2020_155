@@ -231,6 +231,7 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
             pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
             pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
             pLocalEpics->epicsOutput.fe_status = ADC_TO_ERROR;
+            pLocalEpics->epicsOutput.statAdc[ card ] &= ~( ADC_RD_TIME );
             fe_status_return = ADC_TO_ERROR;
             fe_status_return_subcode = card;
             stop_working_threads = 1;
@@ -268,6 +269,7 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
         if ( (unsigned int)*packedData < 65535 )
         {
             adcinfo->chanHop = 1;
+            adcinfo->adcChanErr[ card ] = 1;
             fe_status_return_subcode = card;
         }
 

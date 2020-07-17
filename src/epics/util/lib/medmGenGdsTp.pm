@@ -170,7 +170,7 @@ sub createGdsMedm
 	$xpos = 14; $ypos = 93; $width = 85; $height = 72;
         $medmdata .= ("CDS::medmGen::medmGenMeter") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_CPU_METER",$ecolors{ltblue},$ecolors{mdblue});
 	# Add DIAG RESET button
-	$xpos = 210; $ypos = 142; $width = 86; $height = 18;
+	$xpos = 679; $ypos = 46; $width = 100; $height = 18;
         $medmdata .= ("CDS::medmGen::medmGenMessage") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DIAG_RESET",$ecolors{white},$ecolors{blue},"Diag Reset","1");
 
 	# Add GPS Time label
@@ -202,93 +202,80 @@ sub createGdsMedm
 	$xpos = 125; $ypos = 111; $width = 50; $height = 16;
 	$medmdata .= ("CDS::medmGen::medmGenTextDyn") -> ($xpos,$ypos,$width,$height,"ExtClk",$ecolors{green},"(A&255) == 0","$ifo\:FEC-$dcuid\_TIME_ERR");
 
-    # Add Uptime
-	$xpos = 680; $ypos = 46; $width = 100; $height = 21;
-        $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{black},"","","");
-	$xpos = 560; $ypos = 50; $width = 120; $height = 14;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"Uptime (D/H/M)",$ecolors{black});
-	$xpos = 683; $ypos = 49; $width = 25; $height = 15;
-    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_DAY",$ecolors{white},$ecolors{black},"static");
-	$xpos = 713; $ypos = 49; $width = 10; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height," : ",$ecolors{white});
-	$xpos = 721; $ypos = 49; $width = 25; $height = 15;
-    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_HOUR",$ecolors{white},$ecolors{black},"static");
-	$xpos = 747; $ypos = 49; $width = 10; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height," : ",$ecolors{white});
-	$xpos = 755; $ypos = 49; $width = 25; $height = 15;
-    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_MINUTE",$ecolors{white},$ecolors{black},"static");
 
-
-    # Add cycle labels
-	$xpos = 76; $ypos = 170; $width = 35; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"MIN",$ecolors{black});
-	$xpos = 117; $ypos = 170; $width = 35; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"MEAN",$ecolors{black});
-	$xpos = 157; $ypos = 170; $width = 35; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"MAX",$ecolors{black});
-
-	# Add cycle/user time label
-	$xpos = 18; $ypos = 186; $width = 50; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"CYCLE",$ecolors{black});
-	# Add Cycle Time Monitor
-	$xpos = 75; $ypos = 186; $width = 35; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_WAIT_MIN",$ecolors{white},$ecolors{black},"alarm");
-	$xpos = 115; $ypos = 186; $width = 35; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_WAIT",$ecolors{white},$ecolors{black},"alarm");
-	$xpos = 155; $ypos = 186; $width = 35; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_WAIT_MAX",$ecolors{white},$ecolors{black},"alarm");
+	# Following only for IOP
+	if($iopModel == 1 and $ioptype == 0 )
+    {
+        $yoffset = 0;
+    } else {
+        $yoffset = 17;
+    }
 
     # Add CPU labels
-	$xpos = 76; $ypos = 204; $width = 35; $height = 15;
+	$xpos = 76; $ypos = 170 + $yoffset; $width = 35; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"USER",$ecolors{black});
-	$xpos = 117; $ypos = 204; $width = 35; $height = 15;
+    $xpos += 39;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"TOTAL",$ecolors{black});
-	$xpos = 157; $ypos = 204; $width = 35; $height = 15;
+    $xpos += 40;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"MAX",$ecolors{black});
 
 	# Add cpu max time label
-	$xpos = 18; $ypos = 220; $width = 50; $height = 15;
+	$xpos = 18; $ypos = 186 + $yoffset; $width = 50; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"CPU",$ecolors{black});
 	# Add User Time Monitor
-	$xpos = 76; $ypos = 220; $width = 35; $height = 15;
-        $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_USR_TIME",$ecolors{white},$ecolors{black},"alarm");
+	$xpos = 76; $ypos = 186 + $yoffset; $width = 35; $height = 15;
+    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_USR_TIME",$ecolors{white},$ecolors{black},"alarm");
 
 	# Add CPU Time Monitor
-	$xpos = 117; $ypos = 220; $width = 35; $height = 15;
+	$xpos = 117;
         $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_CPU_METER",$ecolors{white},$ecolors{black},"alarm");
 	# Add CPU Time Max Monitor
-	$xpos = 157; $ypos = 220; $width = 35; $height = 15;
+	$xpos = 157; 
     $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_CPU_METER_MAX",$ecolors{white},$ecolors{black},"alarm");
 
-	$xpos = 10; $ypos = 331; $width = 45; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"RCG #",$ecolors{white});
-	$xpos = 55; $ypos = 331; $width = 50; $height = 15;
-    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_RCG_VERSION",$ecolors{white},$ecolors{blue},"static");
-	$xpos = 128; $ypos = 331; $width = 70; $height = 15;
-	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"BUILD DATE:",$ecolors{white});
-	$xpos = 206; $ypos = 331; $width = 150; $height = 15;
-    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_BUILD_DATE",$ecolors{white},$ecolors{blue},"static");
+# Add UPTIME INFO
+	$xpos = 18; $ypos = 221 + $yoffset; $width = 50; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"UPTIME",$ecolors{black});
+	$xpos = 76; $ypos = 205 + $yoffset; $width = 35; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DAY",$ecolors{black});
+	$xpos = 117; 
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"HOUR",$ecolors{black});
+	$xpos = 157; 
+	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"MIN",$ecolors{black});
+
+	$xpos = 76; $ypos = 221 + $yoffset; $width = 35; $height = 15;
+    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_DAY",$ecolors{white},$ecolors{black},"static");
+	$xpos = 117;
+    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_HOUR",$ecolors{white},$ecolors{black},"static");
+	$xpos = 157; 
+    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_MINUTE",$ecolors{white},$ecolors{black},"static");
+
+    # Add More Info related display link
+	$xpos = 18; $ypos = 326; $width = 125; $height = 25;
+	$mdlNamelc = lc($mdlName);
+	$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_FE_STATS.adl";
+        $medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{black},"More Info ");
 
 	# Following only for IOP
 	if($iopModel == 1 and $ioptype == 0 )
 	{
 		# Add ADC Duotone Diag label
-		$xpos = 18; $ypos = 240; $width = 50; $height = 15;
+		$xpos = 18; $ypos = 246; $width = 50; $height = 15;
 		$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DT/IRIG",$ecolors{black});
 		# Add ADC Duotone Monitor
-		$xpos = 75; $ypos = 240; $width = 35; $height = 15;
+		$xpos = 75; $ypos = 246; $width = 35; $height = 15;
 		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DUOTONE_TIME",$ecolors{white},$ecolors{black},"alarm");
 		# Add IRIG-B Monitor
-		$xpos = 115; $ypos = 240; $width = 35; $height = 15;
+		$xpos = 115; $ypos = 246; $width = 35; $height = 15;
 		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_IRIGB_TIME",$ecolors{white},$ecolors{black},"alarm");
 		# Add DAC Duotone Diag label
-		$xpos = 18; $ypos = 260; $width = 50; $height = 15;
+		$xpos = 18; $ypos = 268; $width = 50; $height = 15;
 		$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"DT DAC",$ecolors{black});
 		# Add DAC Duotone Monitor
-		$xpos = 75; $ypos = 285; $width = 35; $height = 15;
+		$xpos = 75; $ypos = 293; $width = 35; $height = 15;
 		$medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DUOTONE_TIME_DAC",$ecolors{white},$ecolors{black},"alarm");
 		# Add DAC DT On/Off
-		$xpos = 18; $ypos = 276; $width = 50; $height = 35;
+		$xpos = 18; $ypos = 284; $width = 50; $height = 35;
 		$medmdata .= ("CDS::medmGen::medmGenChoice") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DACDT_ENABLE",$ecolors{white},$ecolors{blue});
 	}
 

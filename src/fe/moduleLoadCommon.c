@@ -132,14 +132,18 @@ print_io_info( CDS_HARDWARE* cdsp )
     printf( "" SYSTEM_NAME_STRING_LOWER
             ":%d IIRO-16 Isolated DIO cards found\n",
             cdsp->iiroDio1Count );
+    pLocalEpics->epicsOutput.bioMon[0] = cdsp->iiroDio1Count;
     printf( "******************************************************************"
             "*********\n" );
     printf( "" SYSTEM_NAME_STRING_LOWER ":%d Contec 32ch PCIe DO cards found\n",
             cdsp->cDo32lCount );
+    pLocalEpics->epicsOutput.bioMon[1] = cdsp->cDo32lCount;
     printf( "" SYSTEM_NAME_STRING_LOWER ":%d Contec PCIe DIO1616 cards found\n",
             cdsp->cDio1616lCount );
+    pLocalEpics->epicsOutput.bioMon[2] = cdsp->cDio1616lCount;
     printf( "" SYSTEM_NAME_STRING_LOWER ":%d Contec PCIe DIO6464 cards found\n",
             cdsp->cDio6464lCount );
+    pLocalEpics->epicsOutput.bioMon[3] = cdsp->cDio6464lCount;
     printf( "" SYSTEM_NAME_STRING_LOWER ":%d DO cards found\n", cdsp->doCount );
     printf( "" SYSTEM_NAME_STRING_LOWER
             ":Total of %d I/O modules found and mapped\n",
