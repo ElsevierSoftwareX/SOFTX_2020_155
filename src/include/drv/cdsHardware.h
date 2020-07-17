@@ -89,6 +89,7 @@ typedef struct CDS_REMOTE_NODES {
 #define ADC_CHAN_HOP  		2
 #define ADC_OVERFLOW  		4
 #define ADC_CAL_PASS  		8
+#define ADC_RD_TIME  		16
 
 
 typedef struct MEM_DATA_BLOCK{

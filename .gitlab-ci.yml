@@ -1,0 +1,22 @@
+# https://docs.gitlab.com/ee/ci/yaml/#stages
+# https://docs.gitlab.com/ee/ci/yaml/#pages
+# https://wiki.ligo.org/DASWG/GitLigoOrg
+# https://wiki.ligo.org/viewauth/DASWG/GitLigoOrg#Accessing_GitLab_Pages
+# https://git.ligo.org/lscsoft/example-ci-project/wikis/automatically-produce-documentation
+
+pages:
+  stage: deploy
+  only:
+    - master
+  image: igwn/base:buster
+  script:
+    - rm -rf public
+    - apt-get update
+    - apt-get install -y -qq python3-sphinx latexmk texlive texlive-latex-extra
+    - cd doc2
+    - make html latexpdf
+    - mv _build/html ../public
+    - mv _build/latex/advLigoRTS.pdf ../public
+  artifacts:
+    paths:
+    - public

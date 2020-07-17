@@ -204,7 +204,7 @@ rt_fe_cleanup( void )
     // printk("Setting stop_working_threads to 1\n");
     // Stop the code and wait
 #ifdef NO_CPU_SHUTDOWN
-    int ret;
+    // int ret;
     ret = kthread_stop( sthread );
 #endif
     stop_working_threads = 1;

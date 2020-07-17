@@ -83,35 +83,36 @@ iop_dac_recover( int samples, volatile GSC_DAC_REG* dacReg[] )
     volatile GSA_20BIT_DAC_REG* dac20Ptr;
     volatile GSC_DAC_REG*       dac16Ptr;
     int                         kk;
-    int                         card;   
+    int                         card;
     int                         chan;
-        for ( card = 0; card < cdsPciModules.dacCount; card++ )
+    for ( card = 0; card < cdsPciModules.dacCount; card++ )
+    {
+        if ( cdsPciModules.dacType[ card ] == GSC_18AO8 )
         {
-            if ( cdsPciModules.dacType[ card ] == GSC_18AO8 )
-            {
-                dac18Ptr = (volatile GSA_18BIT_DAC_REG*)( dacReg[ card ] );
-                for ( chan = 0; chan < (GSAO_18BIT_CHAN_COUNT * samples); chan++ )
-                    dac18Ptr->OUTPUT_BUF = dacOutEpics[ card ][ chan ];
-            }
-            else if ( cdsPciModules.dacType[ card ] == GSC_20AO8 )
-            {
-                dac20Ptr = (volatile GSA_20BIT_DAC_REG*)( dacReg[ card ] );
-                for ( chan = 0; chan < (GSAO_20BIT_CHAN_COUNT * samples); chan++ )
-                    dac20Ptr->OUTPUT_BUF = dacOutEpics[ card ][ chan ];
-            }
-            else
-            {
-                dac16Ptr = dacReg[ card ];
-                for ( chan = 0; chan < (GSAO_16BIT_CHAN_COUNT * samples * 2); chan++ )
-                    dac16Ptr->ODB = dacOutEpics[ card ][ chan ];
-            }
+            dac18Ptr = (volatile GSA_18BIT_DAC_REG*)( dacReg[ card ] );
+            for ( chan = 0; chan < ( GSAO_18BIT_CHAN_COUNT * samples ); chan++ )
+                dac18Ptr->OUTPUT_BUF = dacOutEpics[ card ][ chan ];
         }
+        else if ( cdsPciModules.dacType[ card ] == GSC_20AO8 )
+        {
+            dac20Ptr = (volatile GSA_20BIT_DAC_REG*)( dacReg[ card ] );
+            for ( chan = 0; chan < ( GSAO_20BIT_CHAN_COUNT * samples ); chan++ )
+                dac20Ptr->OUTPUT_BUF = dacOutEpics[ card ][ chan ];
+        }
+        else
+        {
+            dac16Ptr = dacReg[ card ];
+            for ( chan = 0; chan < ( GSAO_16BIT_CHAN_COUNT * samples * 2 );
+                  chan++ )
+                dac16Ptr->ODB = dacOutEpics[ card ][ chan ];
+        }
+    }
 
     return 0;
 }
 
 inline int
-iop_dac_write( int in_delay)
+iop_dac_write( int in_delay )
 {
     unsigned int* pDacData;
     int           mm;
@@ -127,7 +128,7 @@ iop_dac_write( int in_delay)
     /// - -- Code will require restart to clear.
     // COMMENT OUT NEX LINE FOR TEST STAND w/bad DAC cards.
     /// \> Loop thru all DAC modules
-    if ( (dacWriteEnable > 4) && (in_delay < 2) )
+    if ( ( dacWriteEnable > 4 ) && ( in_delay < 2 ) )
     {
         for ( card = 0; card < cdsPciModules.dacCount; card++ )
         {
@@ -137,7 +138,8 @@ iop_dac_write( int in_delay)
             mm = cdsPciModules.dacConfig[ card ];
             /// - -- Determine if memory block has been set with the correct
             /// cycle count by control app.
-            if ( ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle == ioClockDac || (in_delay  == 1))
+            if ( ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle == ioClockDac ||
+                 ( in_delay == 1 ) )
             {
                 dacEnable |= pBits[ card ];
             }
@@ -164,7 +166,7 @@ iop_dac_write( int in_delay)
                 num_outs = GSAO_20BIT_CHAN_COUNT;
             }
             /// - -- For each DAC channel
-            for ( chan = 0; chan < num_outs;chan++ )
+            for ( chan = 0; chan < num_outs; chan++ )
             {
                 /// - ---- Read DAC output value from shared memory and reset
                 /// memory to zero
@@ -172,10 +174,12 @@ iop_dac_write( int in_delay)
                 {
                     if ( !in_delay )
                     {
-                        dac_out =
-                            ioMemData->iodata[ mm ][ ioMemCntrDac ].data[ chan ];
-                    } else {
-                        dac_out = dac_out_last[ card ][chan];
+                        dac_out = ioMemData->iodata[ mm ][ ioMemCntrDac ]
+                                      .data[ chan ];
+                    }
+                    else
+                    {
+                        dac_out = dac_out_last[ card ][ chan ];
                     }
                     /// - --------- Zero out data in case user app dies by next
                     /// cycle when two or more apps share same DAC module.
@@ -250,8 +254,8 @@ iop_dac_write( int in_delay)
                 pDacData++;
             }
             /// - -- Mark cycle count as having been used -1 \n
-            /// - --------- Forces control apps to mark this cycle or will not be used
-            /// again by Master
+            /// - --------- Forces control apps to mark this cycle or will not
+            /// be used again by Master
             ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle = -1;
             /// - -- DMA Write data to DAC module
             if ( dacWriteEnable > 4 )
@@ -311,29 +315,26 @@ check_dac_buffers( int cycleNum )
                 dacTimingErrorPending[ jj ] = 0;
             }
         }
+
+        // Set/unset FIFO empty,hi qtr, full diags
         if ( out_buf_size < 4 )
-        {
             pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_EMPTY;
-        }
         else
-        {
             pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_EMPTY );
-        }
-        if ( out_buf_size > 32 )
-        {
-            pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_FULL;
-        }
+        if ( out_buf_size > 24 )
+            pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_HI_QTR;
         else
-        {
+            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_HI_QTR );
+        if ( out_buf_size > 320 )
+            pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_FULL;
+        else
             pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_FULL );
-        }
     }
     if ( cdsPciModules.dacType[ jj ] == GSC_20AO8 )
     {
         dac20bitPtr = (volatile GSA_20BIT_DAC_REG*)( dacPtr[ jj ] );
         out_buf_size = dac20bitPtr->OUT_BUF_SIZE;
         dacOutBufSize[ jj ] = out_buf_size;
-        pLocalEpics->epicsOutput.buffDac[ jj ] = out_buf_size;
         pLocalEpics->epicsOutput.buffDac[ jj ] = out_buf_size;
         if ( ( out_buf_size > 24 ) )
         {
@@ -347,6 +348,16 @@ check_dac_buffers( int cycleNum )
             pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_BIT;
             dacTimingErrorPending[ jj ] = 0;
         }
+
+        // Set/unset FIFO empty,hi qtr, full diags
+        if ( out_buf_size > 24 )
+            pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_HI_QTR;
+        else
+            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_HI_QTR );
+        if ( out_buf_size > 500 )
+            pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_FULL;
+        else
+            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_FULL );
     }
     if ( cdsPciModules.dacType[ jj ] == GSC_16AO16 )
     {
@@ -367,30 +378,20 @@ check_dac_buffers( int cycleNum )
                 dacTimingErrorPending[ jj ] = 0;
             }
         }
+
+        // Set/unset FIFO empty,hi qtr, full diags
         if ( status & 1 )
-        {
             pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_EMPTY;
-        }
         else
-        {
             pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_EMPTY );
-        }
         if ( status & 8 )
-        {
             pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_FULL;
-        }
         else
-        {
             pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_FULL );
-        }
         if ( status & 4 )
-        {
             pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_HI_QTR;
-        }
         else
-        {
             pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_HI_QTR );
-        }
     }
     return 0;
 }

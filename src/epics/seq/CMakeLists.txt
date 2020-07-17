@@ -3,11 +3,16 @@ if (Boost_FOUND)
 add_executable(standalone_edc
         standalone_edcu.cc
         ${CMAKE_CURRENT_SOURCE_DIR}/../../drv/rfm.c)
+#target_compile_options(standalone_edc PRIVATE -fsanitize=address)
+#target_link_libraries(standalone_edc PRIVATE asan)
+#target_compile_options(standalone_edc PRIVATE
+#        -fstack-protector -fstack-protector-strong)
 target_include_directories(standalone_edc PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/../../include"
         "${CMAKE_CURRENT_SOURCE_DIR}/../../include/drv"
         ${Boost_INCLUDE_DIRS})
 target_link_libraries(standalone_edc PUBLIC
+        args
         epics::ca
         driver::ini_parsing
         ${Boost_LIBRARIES}
