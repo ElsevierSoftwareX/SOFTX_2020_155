@@ -36,6 +36,9 @@ CDS_IFO_SRC=${CDS_IFO_SRC:-$CDS_SRC}
 # FIXME: rename RCG_MOD_PATH
 RCG_LIB_PATH=$RCG_LIB_PATH:${RCG_SRC}/src/epics/simLink/:${RCG_SRC}/src/epics/simLink/lib
 
+#options from environment variables
+ALLOW_MODEL_ENABLE=${ALLOW_MODEL_ENABLE:-true}
+
 USER_VARS=(SITE IFO RCG_LIB_PATH)
 LIST_VARS=(RTS_VERSION ${USER_VARS[@]} RCG_SRC RCG_BUILD_ROOT RCG_BUILDD RCG_TARGET)
 EXPORT_VARS=(${USER_VARS[@]} site ifo CDS_SRC CDS_IFO_SRC)
@@ -256,6 +259,14 @@ _lsmod() {
 ############################################################
 
 usage() {
+
+  if $ALLOW_MODEL_ENABLE ; then
+    local enable_usage="enable <sys>...|--all      enable system start at boot
+  "
+  else
+    local enable_usage=""
+  fi
+
     echo "Usage: $(basename $0) <command> [args]
 
 Advanced LIGO Real Time System control interface.
@@ -266,11 +277,12 @@ Available commands:
   install <sys>              install system
 
   list|ls                    list systems for host
-  enable <sys>...|--all      enable system start at boot
+
+  ${enable_usage}disable <sys>...|--all     disable system start at boot
   start <sys>...|--all       start systems
   restart <sys>...|--all     restart running systems
   stop|kill <sys>...|--all   stop running systems
-  disable <sys>...|--all     disable system start at boot
+
   status <sys>               show status for system services
 
   log                        show logs for system services
@@ -362,6 +374,11 @@ case $cmd in
 	fi
 	;;
     'enable'|'disable')
+  if [[ ${cmd} == 'enable' ]] && ! $ALLOW_MODEL_ENABLE ]] ; then
+      log "Enabling models is not allowed on this host."
+      log "ALLOW_MODEL_ENABLE environment variable is set to false."
+      exit 2
+  fi
 	if [ -z "$1" ] ; then
 	    log "You must specify at least one system to $cmd (or '--all')."
 	    exit 2
