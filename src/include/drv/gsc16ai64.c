@@ -152,7 +152,7 @@ gsc16ai64WaitDmaDone( int module )
         udelay(1);
     } while ( ( adcDma[ module ]->DMA_CSR & GSAI_DMA_DONE  == 0 ) && (ii < 100) );
     // If DMA did not complete, return error
-    if(ii > 9999) return -1;
+    if(ii > 99) return -1;
     else return 0;
 }
 
