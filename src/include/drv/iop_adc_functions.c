@@ -74,6 +74,28 @@ sync_adc_2_1pps( int sync21pps)
     int           mask = GSAI_DATA_MASK;
     unsigned int  offset = GSAI_DATA_CODE_OFFSET;
     int           data;
+    int unsupported = 0;
+
+
+    // Code is not ready for synching to 18AI ADC
+    // so need to check if one exists in the list
+    // Note this is a temporary patch
+    for ( jj = 0; jj < cdsPciModules.adcCount; jj++ )
+    {
+        if ( cdsPciModules.adcType[ jj ] == GSC_18AI32SSC1M )
+        {
+            unsupported = 1;
+        }
+    }
+
+    // If 18AI ADC exists, then just enable all ADCs
+    // and return
+    if(unsupported) {
+        /// - ---- Arm ADC modules
+        gsc18ai32Enable( &cdsPciModules );
+        gsc16ai64Enable( &cdsPciModules );
+        return 0;
+    }
 
     // Arm ADC modules
     // This has to be done sequentially, one at a time.

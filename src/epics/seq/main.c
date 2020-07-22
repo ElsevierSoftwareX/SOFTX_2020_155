@@ -262,6 +262,7 @@ long droppedPVCount;
 // Function prototypes		****************************************************************************************
 int isAlarmChannel(char *);
 int checkFileCrc(char *);
+int checkFileMod( char* , time_t* , int );
 unsigned int filtCtrlBitConvert(unsigned int);
 void getSdfTime(char *, int size);
 void logFileEntry(char *);
@@ -590,26 +591,59 @@ int selectLine;
 	}
 }
 
+// Check for file modification time changes
+int
+checkFileMod( char* fName, time_t* last_mod_time, int gettime )
+{
+    struct stat statBuf;
+    if ( !stat( fName, &statBuf ) )
+    {
+        if ( gettime )
+        {
+            *last_mod_time = statBuf.st_mtime;
+            return 2;
+        }
+        if ( statBuf.st_mtime > *last_mod_time )
+        {
+            *last_mod_time = statBuf.st_mtime;
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 /// Common routine to check file CRC.
 ///	@param[in] *fName	Name of file to check.
 ///	@return File CRC or -1 if file not found.
 int checkFileCrc(char *fName)
 {
-char buffer[256];
-FILE *pipePtr=0;
-struct stat statBuf;
-long chkSum = -99999;
-      	strcpy(buffer, "cksum "); 
-      	strcat(buffer, fName); 
-      	if (!stat(fName, &statBuf) ) { 
-         	if ((pipePtr = popen(buffer, "r")) != NULL) {
-            	fgets(buffer, 256, pipePtr);
-            	pclose(pipePtr); 
-            	sscanf(buffer, "%ld", &chkSum);
-         	} 
-		return(chkSum);
-    	}    
-	return(-1);
+    char         cbuf[ 128 ];
+    char*        cp;
+    int          flen = 0;
+    int          clen = 0;
+    unsigned int crc = 0;
+    FILE*        fp = fopen( fName, "r" );
+    if ( fp == NULL )
+    {
+        return 0;
+    }
+
+    while ( ( cp = fgets( cbuf, 128, fp ) ) != NULL )
+    {
+        clen = strlen( cbuf );
+        flen += clen;
+        crc = crc_ptr( cbuf, clen, crc );
+    }
+    crc = crc_len( flen, crc );
+    fclose( fp );
+    return crc;
 }
 
 /// Quick convert of filter switch settings to match SWMASK
@@ -3001,6 +3035,10 @@ int main(int argc,char *argv[])
 	long prevFotonFileCrc = 0;
 	long prevCoeffFileCrc = 0;
 	long sdfFileCrc = 0;
+    time_t      daqFileMt;
+    time_t      coeffFileMt;
+    time_t      fotonFileMt;
+    time_t      sdfFileMt;
 	char modfilemsg[] = "Modified File Detected ";
 	struct stat st = {0};
 	int reqValid = 0;
@@ -3267,6 +3305,11 @@ sleep(5);
 	fotonFileCrc = checkFileCrc(fotonFile);
 	prevFotonFileCrc = fotonFileCrc;
 	prevCoeffFileCrc = coeffFileCrc;
+    // Initialize file modification times
+    status = checkFileMod( daqFile, &daqFileMt, 1 );
+    status = checkFileMod( coeffFile, &coeffFileMt, 1 );
+    status = checkFileMod( fotonFile, &fotonFileMt, 1 );
+
 	reportSetErrors(pref, 0,setErrTable,0,1);
 
 	sleep(1);       // Need to wait before first restore to allow sequencers time to do their initialization.
@@ -3340,6 +3383,8 @@ sleep(5);
 					// Get the file CRC for later checking if file changed.
 					sprintf(sdffileloaded, "%s%s%s", sdfDir, loadedSdf,".snap");
 					sdfFileCrc = checkFileCrc(sdffileloaded);
+                    // Get the file mod time
+                    status = checkFileMod( sdffileloaded, &sdfFileMt, 1 );
 					// Calculate and report the number of settings in the BURT file.
 					setChans = chNumP - alarmCnt;
 					status = dbPutField(&filesetcntaddr,DBR_LONG,&setChans,1);
@@ -3389,8 +3434,10 @@ sleep(5);
 					savesdffile(saveType,SAVE_TIME_NOW,sdfDir,modelname,sdfile,saveasfilename,loadedSdf,savefileaddr,savetimeaddr,reloadtimeaddr);
 				// Save the file
 				savesdffile(saveType,saveOpts,sdfDir,modelname,sdfile,saveasfilename,loadedSdf,savefileaddr,savetimeaddr,reloadtimeaddr);
-				if(saveOpts == SAVE_OVERWRITE) 
+				if(saveOpts == SAVE_OVERWRITE)  {
 						sdfFileCrc = checkFileCrc(sdffileloaded);
+                        status = checkFileMod( sdffileloaded, &sdfFileMt, 1 );
+                }
 			} else {
 				logFileEntry("Invalid SAVE File Request");
 			}
@@ -3449,6 +3496,7 @@ sleep(5);
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_OVERWRITE,sdfDir,modelname,sdfile,saveasfilename,
 							    backupName,savefileaddr,savetimeaddr,reloadtimeaddr);
 						sdfFileCrc = checkFileCrc(sdffileloaded);
+                        status = checkFileMod( sdffileloaded, &sdfFileMt, 1 );
 						status = writeTable2File(sdfDir,bufile,SDF_WITH_INIT_FLAG,cdTable);
 					}
 					clearTableSelections(sperror,setErrTable, selectCounter);
@@ -3511,6 +3559,7 @@ sleep(5);
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_OVERWRITE,sdfDir,modelname,sdfile,saveasfilename,
 							    backupName,savefileaddr,savetimeaddr,reloadtimeaddr);
 						sdfFileCrc = checkFileCrc(sdffileloaded);
+                        status = checkFileMod( sdffileloaded, &sdfFileMt, 1 );
 						status = writeTable2File(sdfDir,bufile,SDF_WITH_INIT_FLAG,cdTable);
 					}
 					clearTableSelections(chNotInit,uninitChans, selectCounter);
@@ -3558,6 +3607,7 @@ sleep(5);
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_OVERWRITE,sdfDir,modelname,sdfile,saveasfilename,
 							    backupName,savefileaddr,savetimeaddr,reloadtimeaddr);
 						sdfFileCrc = checkFileCrc(sdffileloaded);
+                        status = checkFileMod( sdffileloaded, &sdfFileMt, 1 );
 						status = writeTable2File(sdfDir,bufile,SDF_WITH_INIT_FLAG,cdTable);
 					}
 					// noMon = createSortTableEntries(chNum,wcVal,wcstring);
@@ -3602,6 +3652,7 @@ sleep(5);
 						savesdffile(SAVE_TABLE_AS_SDF,SAVE_OVERWRITE,sdfDir,modelname,sdfile,saveasfilename,
 							    backupName,savefileaddr,savetimeaddr,reloadtimeaddr);
 						sdfFileCrc = checkFileCrc(sdffileloaded);
+                        status = checkFileMod( sdffileloaded, &sdfFileMt, 1 );
 						status = writeTable2File(sdfDir,bufile,SDF_WITH_INIT_FLAG,cdTable);
 					}
 					clearTableSelections(cdSort,cdTableList, selectCounter);
@@ -3662,12 +3713,22 @@ sleep(5);
 		// Check file CRCs every 5 seconds.
 		// DAQ and COEFF file checking was moved from skeleton.st to here RCG V2.9.
 		if(!fivesectimer) {
+            // Check DAQ ini file modified
+            int fm_flag = checkFileMod( daqFile, &daqFileMt, 0 );
+            if ( fm_flag )
+            {
 			status = checkFileCrc(daqFile);
 			if(status != daqFileCrc) {
 				daqFileCrc = status;
 				status = dbPutField(&daqmsgaddr,DBR_STRING,modfilemsg,1);
 				logFileEntry("Detected Change to DAQ Config file.");
 			}
+            }
+            // Check Foton file modified
+            fm_flag = checkFileMod( fotonFile, &fotonFileMt, 0 );
+            int fm_flag1 = checkFileMod( coeffFile, &coeffFileMt, 0 );
+            if ( fm_flag  || fm_flag1)
+            {
 			coeffFileCrc = checkFileCrc(coeffFile);
 			fotonFileCrc = checkFileCrc(fotonFile);
 			if(fotonFileCrc != coeffFileCrc) {
@@ -3681,6 +3742,11 @@ sleep(5);
 				prevFotonFileCrc = fotonFileCrc;
 				prevCoeffFileCrc = coeffFileCrc;
 			}
+            }
+            // Check SDF file modified
+            fm_flag = checkFileMod( sdffileloaded, &sdfFileMt, 0 );
+            if ( fm_flag )
+            {
 			status = checkFileCrc(sdffileloaded);
 			if(status == -1) {
 				sdfFileCrc = status;
@@ -3692,6 +3758,7 @@ sleep(5);
 				logFileEntry("Detected Change to SDF file.");
 				dbPutField(&reloadtimeaddr,DBR_STRING,modfilemsg,1);
 			}
+            }
 		}
 		iterate_output_counter();
 	}
