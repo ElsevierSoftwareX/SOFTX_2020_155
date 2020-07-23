@@ -15,6 +15,7 @@ target_link_libraries(standalone_edc PUBLIC
         args
         epics::ca
         driver::ini_parsing
+        pv::simple_pv
         ${Boost_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT})
 target_requires_cpp11(standalone_edc PUBLIC)
