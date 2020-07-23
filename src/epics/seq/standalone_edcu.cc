@@ -97,18 +97,26 @@ make_address( const char* str )
 /*!
  * @brief manage the lifetime of a simple_pv server
  */
-class PvServerManager {
+class PvServerManager
+{
 public:
-    PvServerManager(const std::string& prefix, std::vector<SimplePV>& pvs):
-    server_{simple_pv_server_create(prefix.c_str(), pvs.data(), static_cast<int>(pvs.size()))}
-    {}
-    ~PvServerManager()
+    PvServerManager( const std::string& prefix, std::vector< SimplePV >& pvs )
+        : server_{ simple_pv_server_create(
+              prefix.c_str( ),
+              pvs.data( ),
+              static_cast< int >( pvs.size( ) ) ) }
     {
-        simple_pv_server_destroy(&server_);
     }
-    simple_pv_handle get() const {
+    ~PvServerManager( )
+    {
+        simple_pv_server_destroy( &server_ );
+    }
+    simple_pv_handle
+    get( ) const
+    {
         return server_;
     }
+
 private:
     simple_pv_handle server_;
 };
@@ -119,49 +127,63 @@ private:
  * channels to one place, so that we don't have off by one 'N' or other
  * errors littered through the code.
  */
-class InternalChanNames {
+class InternalChanNames
+{
 public:
-    InternalChanNames(const std::string& prefix):
-        prefix_{prefix},
-        chan_conn_{create_string_vector(prefix, chan_conn_suffix())},
-        chan_noconn_{create_string_vector(prefix, chan_noconn_suffix())},
-        chan_cnt_{create_string_vector(prefix, chan_cnt_suffix())}
+    InternalChanNames( const std::string& prefix )
+        : prefix_{ prefix }, chan_conn_{ create_string_vector(
+                                 prefix, chan_conn_suffix( ) ) },
+          chan_noconn_{ create_string_vector( prefix, chan_noconn_suffix( ) ) },
+          chan_cnt_{ create_string_vector( prefix, chan_cnt_suffix( ) ) }
     {
     }
-    const std::string& prefix() const
+    const std::string&
+    prefix( ) const
     {
         return prefix_;
     }
-    const char* chan_conn() const
+    const char*
+    chan_conn( ) const
     {
-        return chan_conn_.data();
+        return chan_conn_.data( );
     }
-    const char* chan_noconn() const
+    const char*
+    chan_noconn( ) const
     {
-        return chan_noconn_.data();
+        return chan_noconn_.data( );
     }
-    const char* chan_cnt() const {
-        return chan_cnt_.data();
+    const char*
+    chan_cnt( ) const
+    {
+        return chan_cnt_.data( );
     }
 
-    static const char* chan_conn_suffix() {
+    static const char*
+    chan_conn_suffix( )
+    {
         static const char* data = "EDCU_CHAN_CONN";
         return data;
     }
-    static const char* chan_noconn_suffix() {
+    static const char*
+    chan_noconn_suffix( )
+    {
         static const char* data = "EDCU_CHAN_NOCON";
         return data;
     }
-    static const char* chan_cnt_suffix() {
+    static const char*
+    chan_cnt_suffix( )
+    {
         static const char* data = "EDCU_CHAN_CNT";
         return data;
     }
+
 private:
-    static std::vector<char> create_string_vector(const std::string& prefix, const std::string& name)
+    static std::vector< char >
+    create_string_vector( const std::string& prefix, const std::string& name )
     {
-        std::vector<char> s(prefix.size() + name.size() + 1);
-        auto it = std::copy(prefix.begin(), prefix.end(), s.begin());
-        it = std::copy(name.begin(), name.end(), it);
+        std::vector< char > s( prefix.size( ) + name.size( ) + 1 );
+        auto it = std::copy( prefix.begin( ), prefix.end( ), s.begin( ) );
+        it = std::copy( name.begin( ), name.end( ), it );
         *it = '\0';
         return s;
     }
@@ -170,9 +192,9 @@ private:
     // c_str() returns something that should be
     // temporary, these needs to always be available
     // as const char* after they are intialized
-    std::vector<char> chan_conn_{};
-    std::vector<char> chan_noconn_{};
-    std::vector<char> chan_cnt_{};
+    std::vector< char > chan_conn_{};
+    std::vector< char > chan_noconn_{};
+    std::vector< char > chan_cnt_{};
 };
 
 // Function prototypes
@@ -251,12 +273,13 @@ int        nextTrig = 0;
  */
 struct diag_info_block
 {
-    diag_info_block( ) : con_chans( 0 ), nocon_chans(0), status( )
+    diag_info_block( ) : con_chans( 0 ), nocon_chans( 0 ), status( )
     {
         std::fill( std::begin( status ), std::end( status ), 0xbad );
     }
     diag_info_block( const diag_info_block& other )
-        : con_chans( other.con_chans ), nocon_chans(other.nocon_chans), status( )
+        : con_chans( other.con_chans ), nocon_chans( other.nocon_chans ),
+          status( )
     {
         std::copy( std::begin( other.status ),
                    std::end( other.status ),
@@ -502,7 +525,8 @@ struct diag_client_conn
 };
 
 // forward
-void diag_thread_mainloop( diag_thread_args* args, InternalChanNames* internal_names );
+void diag_thread_mainloop( diag_thread_args*  args,
+                           InternalChanNames* internal_names );
 void update_diag_info( diag_thread_queues& queues );
 
 // End Header ************************************************************
@@ -853,9 +877,10 @@ channel_is_edcu_special_chan( daqd_c* edc, const char* channel_name )
         return false;
     }
     const char* remainder = channel_name + pref_len;
-    return ( strcmp( remainder, InternalChanNames::chan_conn_suffix() ) == 0 ||
-             strcmp( remainder, InternalChanNames::chan_noconn_suffix() ) == 0 ||
-             strcmp( remainder, InternalChanNames::chan_cnt_suffix() ) == 0 );
+    return ( strcmp( remainder, InternalChanNames::chan_conn_suffix( ) ) == 0 ||
+             strcmp( remainder, InternalChanNames::chan_noconn_suffix( ) ) ==
+                 0 ||
+             strcmp( remainder, InternalChanNames::chan_cnt_suffix( ) ) == 0 );
 }
 
 int
@@ -922,16 +947,19 @@ channel_parse_callback( char*              channel_name,
 
 // **************************************************************************
 void
-edcuCreateChanList( daqd_c& daq, const char* daqfilename, unsigned long* crc, const InternalChanNames& internal_chans )
+edcuCreateChanList( daqd_c&                  daq,
+                    const char*              daqfilename,
+                    unsigned long*           crc,
+                    const InternalChanNames& internal_chans )
 {
     // **************************************************************************
     int           i = 0;
     int           status = 0;
     unsigned long dummy_crc = 0;
 
-    const char* chan_conn_name = internal_chans.chan_conn();
-    const char* chan_cnt_name = internal_chans.chan_cnt();
-    const char* chan_noconn_name = internal_chans.chan_noconn();
+    const char* chan_conn_name = internal_chans.chan_conn( );
+    const char* chan_cnt_name = internal_chans.chan_cnt( );
+    const char* chan_noconn_name = internal_chans.chan_noconn( );
 
     if ( !crc )
     {
@@ -964,19 +992,19 @@ edcuCreateChanList( daqd_c& daq, const char* daqfilename, unsigned long* crc, co
 
     for ( i = 0; i < daq.num_chans; i++ )
     {
-        if (strcmp(daq.channel_name[ i ], chan_cnt_name ) == 0 )
+        if ( strcmp( daq.channel_name[ i ], chan_cnt_name ) == 0 )
         {
             num_chans_index = i;
             internal_channel_count = internal_channel_count + 1;
             daq.channel_status[ i ] = 0;
         }
-        else if (strcmp(daq.channel_name[ i ], chan_conn_name ) == 0 )
+        else if ( strcmp( daq.channel_name[ i ], chan_conn_name ) == 0 )
         {
             con_chans_index = i;
             internal_channel_count = internal_channel_count + 1;
             daq.channel_status[ i ] = 0;
         }
-        else if (strcmp(daq.channel_name[ i ], chan_noconn_name ) == 0 )
+        else if ( strcmp( daq.channel_name[ i ], chan_noconn_name ) == 0 )
         {
             nocon_chans_index = i;
             internal_channel_count = internal_channel_count + 1;
@@ -1124,15 +1152,17 @@ edcuInitialize( const std::string& mbuf_name, const char* sync_source )
     void* sync_addr = 0;
     sipc = 0;
 
-    const std::string daq("_daq");
-    std::vector<char> shmem_fname;
-    shmem_fname.reserve(mbuf_name.size() + daq.size()+1);
-    std::copy(mbuf_name.begin(), mbuf_name.end(), std::back_inserter(shmem_fname));
-    std::copy(daq.begin(), daq.end(), std::back_inserter(shmem_fname));
-    shmem_fname.emplace_back('\0');
+    const std::string   daq( "_daq" );
+    std::vector< char > shmem_fname;
+    shmem_fname.reserve( mbuf_name.size( ) + daq.size( ) + 1 );
+    std::copy( mbuf_name.begin( ),
+               mbuf_name.end( ),
+               std::back_inserter( shmem_fname ) );
+    std::copy( daq.begin( ), daq.end( ), std::back_inserter( shmem_fname ) );
+    shmem_fname.emplace_back( '\0' );
 
     // Find start of DAQ shared memory
-    void* dcu_addr = (void*)findSharedMemory( shmem_fname.data() );
+    void* dcu_addr = (void*)findSharedMemory( shmem_fname.data( ) );
 
     // Find the IPC area to communicate with mxstream
     dipc = (struct rmIpcStr*)( (char*)dcu_addr + CDS_DAQ_NET_IPC_OFFSET );
@@ -1220,23 +1250,30 @@ main( int argc, char* argv[] )
 
         os << "The standalone edc is used to record epics data and put it in a "
               "memory buffer which can be consumed by the daqd tools.\n"
-              "Channels to record are listed in the input ini file.  The channels "
+              "Channels to record are listed in the input ini file.  The "
+              "channels "
               "may be:\n"
               "\t* 16 bit ints (data type=1)\n"
               "\t* 32 bit ints (data type=2)\n"
               "\t* 32 bit floats (data type=4)\n"
               "\t* 64 bit floats (data type=5)\n"
               "The channels must all be set with a data rate of 16Hz.\n"
-              "Some special channels are produced by the standalone edc, to record "
+              "Some special channels are produced by the standalone edc, to "
+              "record "
               "connection status "
               "(these channels may also be captured by the edc).\n"
-              "\t<prefix>" << InternalChanNames::chan_conn_suffix() << "\n\t<prefix>"
-              << InternalChanNames::chan_noconn_suffix() << "\n"
-              "\t<prefix>" << InternalChanNames::chan_cnt_suffix() << "\n"
-              "The standalone edc requires the LIGO mbuf and gpstime modules to be "
+              "\t<prefix>"
+           << InternalChanNames::chan_conn_suffix( ) << "\n\t<prefix>"
+           << InternalChanNames::chan_noconn_suffix( )
+           << "\n"
+              "\t<prefix>"
+           << InternalChanNames::chan_cnt_suffix( )
+           << "\n"
+              "The standalone edc requires the LIGO mbuf and gpstime modules "
+              "to be "
               "loaded.\n";
-        auto preamble = os.str();
-        arg_parser = args_create_parser(preamble.c_str());
+        auto preamble = os.str( );
+        arg_parser = args_create_parser( preamble.c_str( ) );
         if ( !arg_parser )
         {
             return -1;
@@ -1286,7 +1323,7 @@ main( int argc, char* argv[] )
         return -1;
     }
 
-    InternalChanNames internal_channels(daqd_edcu1.prefix);
+    InternalChanNames internal_channels( daqd_edcu1.prefix );
     diag_args.address = parse_address( listen_interface );
 
     // **********************************************
@@ -1333,7 +1370,8 @@ main( int argc, char* argv[] )
     int cyle = 0;
 
     update_diag_info( diag_args.queues );
-    std::thread diag_thread( diag_thread_mainloop, &diag_args, &internal_channels );
+    std::thread diag_thread(
+        diag_thread_mainloop, &diag_args, &internal_channels );
 
     // Start Infinite Loop
     // *******************************************************************************
@@ -1444,14 +1482,14 @@ get_diag_info_handler( boost::asio::deadline_timer& timer,
  * update that frequently, but to  keep the epics network code responsive.
  */
 void
-epics_timer_handler( boost::asio::deadline_timer &timer, simple_pv_handle server)
+epics_timer_handler( boost::asio::deadline_timer& timer,
+                     simple_pv_handle             server )
 {
-    simple_pv_server_update(server);
-    timer.expires_from_now(boost::posix_time::milliseconds(1000/8));
-    timer.async_wait(
-            [&timer, server](const boost::system::error_code&) {
-                epics_timer_handler( timer, server );
-            } );
+    simple_pv_server_update( server );
+    timer.expires_from_now( boost::posix_time::milliseconds( 1000 / 8 ) );
+    timer.async_wait( [&timer, server]( const boost::system::error_code& ) {
+        epics_timer_handler( timer, server );
+    } );
 }
 
 void accept_loop( io_context_t&          io_context,
@@ -1629,17 +1667,21 @@ handle_accept( io_context_t&                       io_context,
     {
         conn->data = cur_diag;
     }
-    //std::cerr << "Accepting a new connection\n";
-    //conn->io_context.post( [conn]( ) { start_client_write( conn ); } );
-    // We have seen some issues with web browsers thinking the connection is closed too early if we
-    // just write data out and close as soon as possible, so read some input (don't care what or how
-    // much) and then write the response.
-    conn->socket.async_read_some(boost::asio::buffer(conn->buffer), [conn](const boost::system::error_code& ec, std::size_t) {
-       if (!ec)
-       {
-           conn->io_context.post( [conn]( ) { start_client_write( conn ); } );
-       }
-    });
+    // std::cerr << "Accepting a new connection\n";
+    // conn->io_context.post( [conn]( ) { start_client_write( conn ); } );
+    // We have seen some issues with web browsers thinking the connection is
+    // closed too early if we just write data out and close as soon as possible,
+    // so read some input (don't care what or how much) and then write the
+    // response.
+    conn->socket.async_read_some(
+        boost::asio::buffer( conn->buffer ),
+        [conn]( const boost::system::error_code& ec, std::size_t ) {
+            if ( !ec )
+            {
+                conn->io_context.post(
+                    [conn]( ) { start_client_write( conn ); } );
+            }
+        } );
     accept_loop( io_context, acceptor, cur_diag );
 }
 
@@ -1663,50 +1705,51 @@ accept_loop( io_context_t&          io_context,
  * @param args Arguments to the diag thread
  */
 void
-diag_thread_mainloop( diag_thread_args* args, InternalChanNames* internal_names )
+diag_thread_mainloop( diag_thread_args*  args,
+                      InternalChanNames* internal_names )
 {
     diag_info_block cur_diag;
 
-    std::vector<SimplePV> pvInfo{
+    std::vector< SimplePV > pvInfo{
         SimplePV{
-            InternalChanNames::chan_conn_suffix(),
+            InternalChanNames::chan_conn_suffix( ),
             SIMPLE_PV_INT,
             &cur_diag.con_chans,
-            std::numeric_limits<int>::max(),
-            daqd_edcu1.num_chans-1,
-            std::numeric_limits<int>::max(),
-            daqd_edcu1.num_chans-1,
+            std::numeric_limits< int >::max( ),
+            daqd_edcu1.num_chans - 1,
+            std::numeric_limits< int >::max( ),
+            daqd_edcu1.num_chans - 1,
         },
         SimplePV{
-                InternalChanNames::chan_noconn_suffix(),
-                SIMPLE_PV_INT,
-                &cur_diag.nocon_chans,
-                1,
-                -1,
-                1,
-                -1,
+            InternalChanNames::chan_noconn_suffix( ),
+            SIMPLE_PV_INT,
+            &cur_diag.nocon_chans,
+            1,
+            -1,
+            1,
+            -1,
         },
         SimplePV{
-                InternalChanNames::chan_cnt_suffix(),
-                SIMPLE_PV_INT,
-                &daqd_edcu1.num_chans,
+            InternalChanNames::chan_cnt_suffix( ),
+            SIMPLE_PV_INT,
+            &daqd_edcu1.num_chans,
 
-                daqd_edcu1.num_chans+1,
-                daqd_edcu1.num_chans-1,
-                daqd_edcu1.num_chans+1,
-                daqd_edcu1.num_chans-1,
+            daqd_edcu1.num_chans + 1,
+            daqd_edcu1.num_chans - 1,
+            daqd_edcu1.num_chans + 1,
+            daqd_edcu1.num_chans - 1,
         }
     };
 
-    PvServerManager     epics_server(internal_names->prefix(), pvInfo);
+    PvServerManager    epics_server( internal_names->prefix( ), pvInfo );
     io_context_t       io_context;
     io_context_t::work net_work( io_context );
 
     boost::asio::deadline_timer diag_timer( io_context );
     get_diag_info_handler( diag_timer, args->queues, cur_diag );
 
-    boost::asio::deadline_timer epics_timer(io_context);
-    epics_timer_handler( epics_timer, epics_server.get());
+    boost::asio::deadline_timer epics_timer( io_context );
+    epics_timer_handler( epics_timer, epics_server.get( ) );
 
     tcp::acceptor acceptor(
         io_context,
