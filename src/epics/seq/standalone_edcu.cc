@@ -101,10 +101,10 @@ class PvServerManager
 {
 public:
     PvServerManager( const std::string& prefix, std::vector< SimplePV >& pvs )
-        : server_{ simple_pv_server_create(
+        : server_{ (prefix.empty() ? nullptr : simple_pv_server_create(
               prefix.c_str( ),
               pvs.data( ),
-              static_cast< int >( pvs.size( ) ) ) }
+              static_cast< int >( pvs.size( ) ) ) ) }
     {
     }
     ~PvServerManager( )
@@ -161,19 +161,19 @@ public:
     static const char*
     chan_conn_suffix( )
     {
-        static const char* data = "EDCU_CHAN_CONN";
+        static const char* data = "CHAN_CONN";
         return data;
     }
     static const char*
     chan_noconn_suffix( )
     {
-        static const char* data = "EDCU_CHAN_NOCON";
+        static const char* data = "CHAN_NOCON";
         return data;
     }
     static const char*
     chan_cnt_suffix( )
     {
-        static const char* data = "EDCU_CHAN_CNT";
+        static const char* data = "CHAN_CNT";
         return data;
     }
 
@@ -1262,6 +1262,7 @@ main( int argc, char* argv[] )
               "record "
               "connection status "
               "(these channels may also be captured by the edc).\n"
+              "These channels are only available if the prefix is specified.\n"
               "\t<prefix>"
            << InternalChanNames::chan_conn_suffix( ) << "\n\t<prefix>"
            << InternalChanNames::chan_noconn_suffix( )
