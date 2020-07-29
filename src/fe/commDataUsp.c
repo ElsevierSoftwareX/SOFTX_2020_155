@@ -19,10 +19,12 @@
 ///<    for more details.
 #include "commData3.h"
 #include <stddef.h>
+#ifdef DOLPHIN_TEST
 #include "sisci_types.h"
 #include "sisci_api.h"
 #include "sisci_error.h"
 #include "sisci_demolib.h"
+#endif
 
 // #include "isnan.h"
 // #include <asm/cacheflush.h>
@@ -117,10 +119,10 @@ commData3Init(
         {
             if ( ipcInfo[ ii ].mode == ISND )
                 ipcInfo[ ii ].pIpcDataWrite[ 0 ] =
-                    (CDS_IPC_COMMS*)( _ipc_shm + IPC_BASE_OFFSET );
+                    (CDS_IPC_COMMS*)( _shmipc_shm + IPC_BASE_OFFSET );
             else
                 ipcInfo[ ii ].pIpcDataRead[ 0 ] =
-                    (CDS_IPC_COMMS*)( _ipc_shm + IPC_BASE_OFFSET );
+                    (CDS_IPC_COMMS*)( _shmipc_shm + IPC_BASE_OFFSET );
         }
         // PCIe communications requires one pointer for sending data and a
         // second one for receiving data.
@@ -255,17 +257,6 @@ INLINE void commData3Send(
             }
         }
     }
-// Flush out the last PCIe transmission
-    if ( lastPcie >= 0 )
-    {
-        clflush_cache_range(
-            (void*)&( ipcInfo[ lastPcie ]
-                          .pIpcDataWrite[ 0 ]
-                          ->dBlock[ sendBlock ][ ipcInfo[ lastPcie ].ipcNum ]
-                          .data ),
-            16 );
-    }
-    lastPcie = -1;
 #ifdef RFM_DELAY
     // We don't want to delay SHMEM or PCIe writes, so calc block as usual,
     // so need to recalc send block and syncWord.
@@ -313,18 +304,6 @@ INLINE void commData3Send(
             }
         }
     }
-    // Flush out the last PCIe transmission
-#if 0
-    if ( lastPcie >= 0 )
-    {
-        clflush_cache_range(
-            (void*)&( ipcInfo[ lastPcie ]
-                          .pIpcDataWrite[ 0 ]
-                          ->dBlock[ sendBlock ][ ipcInfo[ lastPcie ].ipcNum ]
-                          .data ),
-            16 );
-    }
-#endif
 }
 
 // *************************************************************************************************
@@ -401,6 +380,7 @@ INLINE void commData3Receive(
                     else
                     {
                         ipcInfo[ ii ].errFlag++;
+                        //printf("bad IPC %ld %ld\n", syncWord, mySyncWord);
                     }
                 }
                 else
@@ -408,13 +388,6 @@ INLINE void commData3Receive(
                     ipcInfo[ ii ].errFlag++;
                 }
             }
-            // Send error per second output
-            // if(cycle == 0)
-            //{
-            // if (ipcInfo[ii].errFlag) ipcErrBits |= 1 <<
-            // (ipcInfo[ii].netType); else ipcErrBits &= ~(1 <<
-            // (ipcInfo[ii].netType)); ipcInfo[ii].errFlag = 0;
-            // }
         }
     }
     // On cycle 0, set error flags to send back to EPICS

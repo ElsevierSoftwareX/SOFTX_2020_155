@@ -37,11 +37,8 @@ findSharedMemory(char *sys_name)
 	sprintf(fname, "/rtl_mem_%s", sys);
 
 	int ss = 64*1024*1024;
-  	if (!strcmp(sys_name, "ipc")) ss = 4*1024*1024;
-  	if (strstr(sys_name, "gds") != NULL) {
-		ss = 16*1024*1024;
-		printf("Making gds area %s\n",sys);
-	}
+  	if (!strcmp(sys_name, "ipc")) ss = 32*1024*1024;
+  	if (!strcmp(sys_name, "shmipc")) ss = 16*1024*1024;
 
        if ((fd = open ("/dev/mbuf", O_RDWR | O_SYNC)) < 0) {
 		fprintf(stderr, "Couldn't open /dev/mbuf read/write\n");

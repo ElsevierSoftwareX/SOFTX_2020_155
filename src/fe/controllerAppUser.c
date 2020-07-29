@@ -36,7 +36,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <drv/cdsHardware.h>
+// #include <drv/cdsHardware.h>
 #include "inlineMath.h"
 
 #include "fm10Gen.h" // CDS filter module defs and C code
@@ -472,6 +472,7 @@ fe_start_app_user( )
     onePpsTime = cycleNum;
     // timeSec = current_time() -1;
     timeSec = ioMemData->gpsSecond;
+    timeSec--;
     // timeSec = ioMemData->iodata[0][0].timeSec;
     printf( "Using local GPS time %d \n", timeSec );
     pLocalEpics->epicsOutput.fe_status = NORMAL_RUN;

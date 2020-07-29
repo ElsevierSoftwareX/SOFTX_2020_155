@@ -18,7 +18,7 @@ extern unsigned int CDIO1616InputInput[ MAX_DIO_MODULES ];
 extern unsigned int CDIO6464InputInput[ MAX_DIO_MODULES ];
 extern double*      testpoint[ 500 ];
 extern double       xExc[ 50 ];
-extern char*        _ipc_shm;
+extern char*        _shmipc_shm;
 extern int          startGpsTime;
 extern CDS_HARDWARE cdsPciModules;
 extern unsigned int ipcErrBits;
@@ -31,6 +31,11 @@ int                 rioInput1[ MAX_DIO_MODULES ];
 int                 rioInputInput[ MAX_DIO_MODULES ];
 int gainRamp( float gainReq, int rampTime, int id, float* gain, int gainRate );
 unsigned int CDO32Output[ MAX_DIO_MODULES ];
+extern void RampParamInit( RampParamState* , double , const int  );
+extern double RampParamGetVal( RampParamState*  );
+extern int RampParamGetIsRamping( RampParamState*  );
+extern void RampParamLoad( RampParamState*,double,double,const int);
+extern double RampParamUpdate( RampParamState*);
 
 #if defined( SERVO256K )
 #define CYCLE_PER_SECOND ( 256 * 1024 )
