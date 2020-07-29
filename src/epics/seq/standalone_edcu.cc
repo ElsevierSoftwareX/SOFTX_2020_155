@@ -1319,7 +1319,7 @@ main( int argc, char* argv[] )
                   "Number of ms to wait after each 16Hz segment has started "
                   "before writing data (may be negative to start early)",
                   &delay_multiplier,
-                  -10 );
+                  -15 );
     args_add_string_ptr( arg_parser,
                          'p',
                          ARGS_NO_LONG,
