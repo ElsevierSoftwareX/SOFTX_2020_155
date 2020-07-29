@@ -1255,7 +1255,7 @@ main( int argc, char* argv[] )
     const char* daqsharedmemname = nullptr;
     const char* daqFile = nullptr;
     const char* listen_interface = nullptr;
-    int         delay_multiplier = 0;
+    int         delay_ms = 0;
 
     memset( (void*)&daqd_edcu1, 0, sizeof( daqd_edcu1 ) );
 
@@ -1318,7 +1318,7 @@ main( int argc, char* argv[] )
                   "ms",
                   "Number of ms to wait after each 16Hz segment has started "
                   "before writing data (may be negative to start early)",
-                  &delay_multiplier,
+                  &delay_ms,
                   -15 );
     args_add_string_ptr( arg_parser,
                          'p',
@@ -1339,7 +1339,7 @@ main( int argc, char* argv[] )
     {
         return -1;
     }
-    if ( delay_multiplier < -50 || delay_multiplier > 50 )
+    if (delay_ms < -50 || delay_ms > 50 )
     {
         std::cout << "Please keep the delay value between [-50, 50]"
                   << std::endl;
@@ -1390,15 +1390,15 @@ main( int argc, char* argv[] )
     ++transmit_time.sec;
     transmit_time.nanosec = 0;
 
-    if ( delay_multiplier < 0 )
+    if (delay_ms < 0 )
     {
         ++transmit_time.sec;
-        transmit_time.nanosec = 1000000000 + ms_to_ns( delay_multiplier );
+        transmit_time.nanosec = 1000000000 + ms_to_ns(delay_ms );
     }
 
     int cyle = 0;
 
-    int sleep_per_cycle = ( delay_multiplier > 0 ? delay_multiplier : 0 );
+    int sleep_per_cycle = (delay_ms > 0 ? delay_ms : 0 );
 
     update_diag_info( diag_args.queues );
     std::thread diag_thread(
@@ -1421,7 +1421,7 @@ main( int argc, char* argv[] )
         daqd_edcu1.gpsTime = now.sec;
         daqd_edcu1.epicsSync = cycle;
 
-        if ( delay_multiplier < 0 && cycle == 0 )
+        if (delay_ms < 0 && cycle == 0 )
         {
             // account for running early.
             // We need to nudge the time up on boundary conditions
