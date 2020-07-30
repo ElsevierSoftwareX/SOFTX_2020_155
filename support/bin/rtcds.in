@@ -100,19 +100,51 @@ _systemctl_list_units() {
 	| sed 's/^rts@\([a-z0-9]*\)\.target$/\1/'
 }
 
-list_host_sys() {
+list_host_sys_systemd() {
     _systemctl_list_units | grep 'iop' || true
     _systemctl_list_units | grep -v 'iop' || true
 }
 
-check_host_sys() {
+list_host_sys() {
+  if [[ -e /etc/rtsystab ]] && [[ -e /etc/rt_fe.sh ]] ; then
+    /etc/rt_fe.sh
+  else
+    list_host_sys_systemd
+  fi
+}
+
+check_unit_available() {
+  if ! systemctl cat rts@$1.target > /dev/null ; then
+    log "RTS front end systemd units don't seem to be available.  Is the advligorts-fe package installed?"
+    exit 5
+  fi
+}
+
+check_host_sys_enabled() {
     for sys ; do
-        if ! systemctl cat rts@${sys}.target > /dev/null ; then
-            log "RTS front end systemd units don't seem to be available.  Is the advligorts-fe package installed?"
-            exit 5
-        fi
+      check_unit_available ${sys}
 	if ! systemctl is-enabled rts@${sys}.target > /dev/null ; then
-	    log "System '$sys' is not enabled on this system, first enable with 'enable ${sys}'."
+	    log "System '${sys}' is not enabled on this system, first enable with 'enable ${sys}'."
+	    exit 4
+	fi
+    done
+}
+
+check_host_sys_active() {
+    for sys ; do
+        check_unit_available ${sys}
+	if ! systemctl is-active rts@${sys}.target > /dev/null ; then
+	    log "System '${sys}' is not active on this system'."
+	    exit 4
+	fi
+    done
+}
+
+check_host_sys_inactive() {
+    for sys ; do
+        check_unit_available ${sys}
+	if systemctl is-active rts@${sys}.target > /dev/null ; then
+	    log "System '$sys' is already active on this system'."
 	    exit 4
 	fi
     done
@@ -131,7 +163,7 @@ build_sys() {
 build_world() {
     cd $RCG_BUILDD
     log "### building world..."
-    make World
+    make -i World
 }
 
 install_sys() {
@@ -152,6 +184,10 @@ start_sys() {
     for sys ; do
 	log "### starting $sys..."
 	sudo systemctl start rts@${sys}.target
+	# pause needed to avoid timing glitch when user model started immediately after IOP
+	log "... waiting for start of ${sys} to complete"
+	sleep 15
+	log "${sys} started"
     done
 }
 
@@ -180,10 +216,10 @@ disable_sys() {
 _lsmod() {
     local systems=($(list_host_sys))
     local rts=(mbuf gpstime)
-    local dolphin=(dis_kosif dis_ix_ntb dis_ix_dma dis_irm)
+    local dolphin=(dis_kosif dis_ix_ntb dis_ix_dma dis_irm dis_sisci dis_intel_dma)
 
     # FIXME: how to test for needed modules?
-    modules=(${rts[*]} ${dolpin[*]})
+    modules=(${rts[*]} ${dolphin[*]})
     
     local allloaded=
     for m in ${modules[*]}; do
@@ -212,6 +248,108 @@ _lsmod() {
     fi
 }
 
+systems_status() {
+  local systems=$(list_host_sys)
+  local subsystems=(epics module awgtpman)
+  local systems_health=0
+
+  echo "System Status"
+
+  local header="system"
+  printf '%-15s' system
+  for subsys in ${subsystems[*]} ; do
+    printf '%-15s' ${subsys}
+  done
+  echo
+  echo "------------------------------------------------------"
+
+  for sys in ${systems[*]} ; do
+    printf '%-15s' $sys
+    for subsys in ${subsystems[*]} ; do
+      local subsysstatus='OFF'
+      if systemctl is-failed "rts-${subsys}@${sys}" > /dev/null ; then
+        subsysstatus='FAILED'
+        systems_health=10
+      else
+        if systemctl is-active "rts-${subsys}@${sys}" > /dev/null ; then
+          subsysstatus='ON'
+        else
+          systems_health=10
+        fi
+      fi
+      printf '%-15s' $subsysstatus
+    done
+    echo
+  done
+  return $systems_health
+}
+
+streamer_status() {
+  local services=(rts-local_dc rts-transport@cps_xmit)
+  local streamer_health=0
+
+  echo "Streamer Status"
+  for service in ${services[*]} ; do
+    local health="OFF"
+    if systemctl is-failed $service > /dev/null ; then
+      health="FAILED"
+      streamer_health=11
+    else
+      if systemctl is-active $service > /dev/null ; then
+        health="ON"
+      else
+        streamer_health=11
+      fi
+    fi
+    printf '%-25s%-15s\n' $service $health
+  done
+
+  return $streamer_health
+}
+
+global_status() {
+  echo "Kernel Module Status\n"
+
+
+  echo
+  local module_health=0
+  if _lsmod ; then
+    echo "Kernel Module Status = ALL LOADED"
+  else
+    module_health=12
+    echo "Kernel Module Status = SOME MISSING"
+  fi
+
+  echo
+  local systems_health=0
+  echo
+  if systems_status ; then
+    echo "Systems Status =       ALL ACTIVE"
+  else
+    echo "Systems Status =       DEGRADED"
+    systems_health=12
+  fi
+
+  echo
+  local streamer_health=0
+  echo
+  if streamer_status ; then
+    echo "Streamer Status =      ALL ACTIVE"
+  else
+    echo "Streamer Status =      DEGRADED"
+    streamer_health=12
+  fi
+
+  echo
+  if [[ $systems_health == 0 ]] && [[ $streamer_health == 0 ]] && [[ $module_health == 0 ]] ; then
+    echo "Overall Status =       OK"
+    return 0
+  else
+    echo "Overall Status =       DEGRADED"
+    return 12
+  fi
+}
+
 ############################################################
 
 usage() {
@@ -230,7 +368,7 @@ Available commands:
   restart <sys>...|--all     restart running systems
   stop|kill <sys>...|--all   stop running systems
   disable <sys>...|--all     disable system start at boot
-  status <sys>               show status for system services
+  status [<sys>]             show status for system services
 
   log                        show logs for system services
     -f                         follow logs
@@ -288,7 +426,7 @@ case $cmd in
 	if [[ "$1" == '--all' ]] ; then
 	    start_sys $(list_host_sys)
 	else
-	    check_host_sys $@
+	    check_host_sys_inactive $@
 	    start_sys $@
 	fi
 	;;
@@ -302,7 +440,7 @@ case $cmd in
 	    stop_sys $(list_host_sys | tac)
 	    start_sys $(list_host_sys)
 	else
-	    check_host_sys $@
+	    check_host_sys_active $@
 	    stop_sys $@
 	    start_sys $@
 	fi
@@ -316,7 +454,7 @@ case $cmd in
 	    # we do this in reverse so the IOP is stopped last
 	    stop_sys $(list_host_sys | tac)
 	else
-	    check_host_sys $@
+	    check_host_sys_active $@
 	    stop_sys $@
 	fi
 	;;
@@ -334,11 +472,11 @@ case $cmd in
 	;;
     'status')
 	if [ -z "$1" ] ; then
-	    log "You must specify one system to show status."
-	    exit 2
+	    global_status
+	else
+	    sys=$1
+	    systemctl status rts@${sys}.target rts-{awgtpman,epics,module}@${sys}.service
 	fi
-        sys=$1
-        systemctl status rts@${sys}.target rts-{awgtpman,epics,module}@${sys}.service
         ;;
     'log')
         args=
