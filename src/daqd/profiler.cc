@@ -46,7 +46,7 @@ profile_c::profiler( )
                 abort( );
             }
         }
-        PV::set_pv( PV::PV_PROFILER_FREE_SEGMENTS_MAIN_BUF, bfree );
+        PV::set_pv( reporting_dest, bfree );
 
         if ( counters )
             counters[ bfree ]++;

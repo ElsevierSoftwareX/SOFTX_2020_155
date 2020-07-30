@@ -66,6 +66,8 @@ namespace PV
         PV_PRDCR_CRC_TIME_XFER_MAX_MS,
         // Profiler buffer values
         PV_PROFILER_FREE_SEGMENTS_MAIN_BUF,
+        PV_PROFILER_FREE_SEGMENTS_STREND_BUF,
+        PV_PROFILER_FREE_SEGMENTS_MTREND_BUF,
         // Sate informatino for frame writers
         PV_RAW_FW_STATE, // frame writer IO thread state
         PV_RAW_FW_DATA_STATE, // frame writer data thread state

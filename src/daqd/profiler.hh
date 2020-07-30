@@ -1,6 +1,8 @@
 #ifndef PROFILER_HH
 #define PROFILER_HH
 
+#include "epics_pvs.hh"
+
 /// Statistic gathering for main or trend circ buffer
 class profile_c
 {
@@ -16,6 +18,7 @@ class profile_c
     int*        counters;
     int         profiling_period;
     int         coredump;
+    PV::PV_NAME reporting_dest;
     std::string name;
 
     /// Thread to collect program statistics
@@ -29,10 +32,10 @@ class profile_c
     void additional_checks( );
 
 public:
-    profile_c( string pname )
+    explicit profile_c( string pname, PV::PV_NAME reporting_pv = PV::PV_NAME::PV_PROFILER_FREE_SEGMENTS_MAIN_BUF )
         : main_avg_free( 0 ), main_min_free( -1 ), period( 0 ), started( 0 ),
-          shutdown( 0 ), counters( 0 ), cb( 0 ), profiling_period( 1 ),
-          coredump( 0 ), name( pname )
+          shutdown( 0 ), counters( nullptr ), num_counters(0), cb( 0 ), profiling_period( 1 ),
+          coredump( 0 ), reporting_dest(reporting_pv), name( std::move(pname) )
     {
     }
 
