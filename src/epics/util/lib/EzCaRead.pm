@@ -69,7 +69,7 @@ sub fromExp {
 	if ($fromPort == 0) {
         	return "pLocalEpics->" . $::systemName . "\." . $temp;
         } else {;
-		$temp .= "_ERR";
+		$temp .= "_CONN";
         	return "pLocalEpics->" . $::systemName . "\." . $temp;
         }
 }

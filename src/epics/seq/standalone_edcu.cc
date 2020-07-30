@@ -94,6 +94,20 @@ make_address( const char* str )
 }
 #endif
 
+const long MS_NS_MULTIPLIER = 1000000;
+
+long
+ms_to_ns( long ms )
+{
+    return ms * MS_NS_MULTIPLIER;
+}
+
+long
+ns_to_ms( long ns )
+{
+    return ns / MS_NS_MULTIPLIER;
+}
+
 /*!
  * @brief manage the lifetime of a simple_pv server
  */
@@ -101,10 +115,12 @@ class PvServerManager
 {
 public:
     PvServerManager( const std::string& prefix, std::vector< SimplePV >& pvs )
-        : server_{ simple_pv_server_create(
-              prefix.c_str( ),
-              pvs.data( ),
-              static_cast< int >( pvs.size( ) ) ) }
+        : server_{ ( prefix.empty( )
+                         ? nullptr
+                         : simple_pv_server_create(
+                               prefix.c_str( ),
+                               pvs.data( ),
+                               static_cast< int >( pvs.size( ) ) ) ) }
     {
     }
     ~PvServerManager( )
@@ -161,19 +177,19 @@ public:
     static const char*
     chan_conn_suffix( )
     {
-        static const char* data = "EDCU_CHAN_CONN";
+        static const char* data = "CHAN_CONN";
         return data;
     }
     static const char*
     chan_noconn_suffix( )
     {
-        static const char* data = "EDCU_CHAN_NOCON";
+        static const char* data = "CHAN_NOCON";
         return data;
     }
     static const char*
     chan_cnt_suffix( )
     {
-        static const char* data = "EDCU_CHAN_CNT";
+        static const char* data = "CHAN_CNT";
         return data;
     }
 
@@ -1239,7 +1255,7 @@ main( int argc, char* argv[] )
     const char* daqsharedmemname = nullptr;
     const char* daqFile = nullptr;
     const char* listen_interface = nullptr;
-    int         delay_multiplier = 0;
+    int         delay_ms = 0;
 
     memset( (void*)&daqd_edcu1, 0, sizeof( daqd_edcu1 ) );
 
@@ -1262,6 +1278,7 @@ main( int argc, char* argv[] )
               "record "
               "connection status "
               "(these channels may also be captured by the edc).\n"
+              "These channels are only available if the prefix is specified.\n"
               "\t<prefix>"
            << InternalChanNames::chan_conn_suffix( ) << "\n\t<prefix>"
            << InternalChanNames::chan_noconn_suffix( )
@@ -1300,9 +1317,9 @@ main( int argc, char* argv[] )
                   ARGS_NO_LONG,
                   "ms",
                   "Number of ms to wait after each 16Hz segment has started "
-                  "before writing data",
-                  &delay_multiplier,
-                  0 );
+                  "before writing data (may be negative to start early)",
+                  &delay_ms,
+                  -15 );
     args_add_string_ptr( arg_parser,
                          'p',
                          ARGS_NO_LONG,
@@ -1320,6 +1337,12 @@ main( int argc, char* argv[] )
 
     if ( args_parse( arg_parser, argc, argv ) < 0 )
     {
+        return -1;
+    }
+    if (delay_ms < -50 || delay_ms > 50 )
+    {
+        std::cout << "Please keep the delay value between [-50, 50]"
+                  << std::endl;
         return -1;
     }
 
@@ -1367,7 +1390,15 @@ main( int argc, char* argv[] )
     ++transmit_time.sec;
     transmit_time.nanosec = 0;
 
+    if (delay_ms < 0 )
+    {
+        ++transmit_time.sec;
+        transmit_time.nanosec = 1000000000 + ms_to_ns(delay_ms );
+    }
+
     int cyle = 0;
+
+    int sleep_per_cycle = (delay_ms > 0 ? delay_ms : 0 );
 
     update_diag_info( diag_args.queues );
     std::thread diag_thread(
@@ -1385,10 +1416,19 @@ main( int argc, char* argv[] )
             usleep( 1 );
             now = clock.now( );
         }
-        usleep( delay_multiplier * 1000 );
+        usleep( sleep_per_cycle * 1000 );
 
         daqd_edcu1.gpsTime = now.sec;
         daqd_edcu1.epicsSync = cycle;
+
+        if (delay_ms < 0 && cycle == 0 )
+        {
+            // account for running early.
+            // We need to nudge the time up on boundary conditions
+            // as gpsTime was captured | delay_multiplier | ms early
+            // so it is wrong
+            ++daqd_edcu1.gpsTime;
+        }
 
         edcuWriteData( daqd_edcu1.epicsSync,
                        daqd_edcu1.gpsTime,
