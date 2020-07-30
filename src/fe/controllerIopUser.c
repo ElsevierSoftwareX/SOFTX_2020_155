@@ -38,10 +38,10 @@
 #include <drv/cdsHardware.h>
 #include "inlineMath.h"
 
-#include "cds_types.h"
 #include "fm10Gen.h" // CDS filter module defs and C code
 #include "feComms.h" // Lvea control RFM network defs.
 #include "daqmap.h" // DAQ network layout
+#include "cds_types.h"
 #include "controller.h"
 
 #ifndef NO_DAQ

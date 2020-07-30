@@ -125,6 +125,10 @@ sub parseParams {
                 # Will compile code not to use DAQ
 				print "Will not connect to DAQ\n";
 				$::no_daq = 1;
+			} elsif ($spp[0] eq "enable_fir" && $spp[1] == 1) {
+                # Will compile code to use FIR filtes
+				print "Will use FIR filters\n";
+				$::useFIRs = 1;
 			} elsif ($spp[0] eq "no_oversampling" && $spp[1] == 1) {
 				print "Will not oversample\n";
 				$::no_oversampling = 1;

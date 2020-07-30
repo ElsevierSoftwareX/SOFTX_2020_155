@@ -2632,9 +2632,20 @@ open(OUTM,">./".$mFile2) || die "cannot open Makefile file for writing";
 
 print OUTM "# User Space Linux\n";
 print OUTM "CFLAGS += -O -w -I../../include\n";
-print OUTM "CFLAGS += -I/opt/mx/include\n";
 
-print OUTM "EXTRA_CFLAGS += $servoflag \n";
+print OUTM "CFLAGS += $servoflag \n";
+
+if ($iopModel > -1) {  #************ SETUP FOR IOP ***************
+#Following used for IOP running at 128K 
+  if($adcclock ==128) {
+  print OUTM "CFLAGS += -DIOP_IO_RATE=131072\n";
+  } else {
+  print OUTM "CFLAGS += -DIOP_IO_RATE=65536\n";
+  }
+# Invoked if IOP cycle rate slower than ADC clock rate
+  print OUTM "CFLAGS += -DUNDERSAMPLE=$clock_div\n";
+  print OUTM "CFLAGS += -DADC_MEMCPY_RATE=$adcclock\n";
+} 
 
 print OUTM "CFLAGS += -D";
 print OUTM "\U$skeleton";
@@ -2643,7 +2654,7 @@ print OUTM "CFLAGS += -DFE_SRC=\\\"\L$skeleton/\L$skeleton.c\\\"\n";
 print OUTM "CFLAGS += -DFE_HEADER=\\\"\L$skeleton.h\\\"\n";
 #print OUTM "CFLAGS += -DFE_PROC_FILE=\\\"\L${skeleton}_proc.h\\\"\n";
 
-print OUTM "EXTRA_CFLAGS += -g\n";
+print OUTM "CFLAGS += -g\n";
 
 if ($remoteGPS) {
   print OUTM "CFLAGS += -DREMOTE_GPS\n";
@@ -2665,19 +2676,37 @@ if ($no_daq) {
 }
 
 # Use oversampling code if not 64K system
+#if($modelrate < 64) {
+#  if ($no_oversampling) {
+#    print OUTM "#Uncomment to oversample A/D inputs\n";
+#    print OUTM "#CFLAGS += -DOVERSAMPLE\n";
+#    print OUTM "#Uncomment to interpolate D/A outputs\n";
+#    print OUTM "#CFLAGS += -DOVERSAMPLE_DAC\n";
+#  } else {
+#    print OUTM "#Comment out to stop A/D oversampling\n";
+#    print OUTM "CFLAGS += -DOVERSAMPLE\n";
+#    if ($no_dac_interpolation) {
+#    } else {
+#      print OUTM "#Comment out to stop interpolating D/A outputs\n";
+#      print OUTM "CFLAGS += -DOVERSAMPLE_DAC\n";
+#    }
+#  }
+#}
+
+#Following used with IOP running at 64K (NORMAL) 
 if($modelrate < 64) {
-  if ($no_oversampling) {
-    print OUTM "#Uncomment to oversample A/D inputs\n";
-    print OUTM "#CFLAGS += -DOVERSAMPLE\n";
-    print OUTM "#Uncomment to interpolate D/A outputs\n";
-    print OUTM "#CFLAGS += -DOVERSAMPLE_DAC\n";
-  } else {
-    print OUTM "#Comment out to stop A/D oversampling\n";
-    print OUTM "CFLAGS += -DOVERSAMPLE\n";
-    if ($no_dac_interpolation) {
-    } else {
-      print OUTM "#Comment out to stop interpolating D/A outputs\n";
-      print OUTM "CFLAGS += -DOVERSAMPLE_DAC\n";
+  if($adcclock ==64) {
+    print OUTM "CFLAGS += -DIOP_IO_RATE=65536\n";
+    if($modelrate < 64) {
+        my $drate = 64/$modelrate;
+        if($drate == 8 or $drate > 32) {
+            die "RCG does not support a user model rate $modelrate" . "K with IOP data at $adcclock" ."K\n"  ;
+        }
+        print OUTM "CFLAGS += -DOVERSAMPLE\n";
+        print OUTM "CFLAGS += -DOVERSAMPLE_DAC\n";
+        print OUTM "CFLAGS += -DOVERSAMPLE_TIMES=$drate\n";
+        print OUTM "CFLAGS += -DFE_OVERSAMPLE_COEFF=feCoeff$drate"."x\n";
+        print OUTM "CFLAGS += -DADC_MEMCPY_RATE=1\n";
     }
   }
 }

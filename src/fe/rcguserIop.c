@@ -17,6 +17,8 @@
 #include <string.h>
 #include <signal.h>
 
+#include "rcguserCommon.c"
+
 // These externs and "16" need to go to a header file (mbuf.h)
 extern int   fe_start_iop_user( );
 extern char  daqArea[ 2 * DAQ_DCU_SIZE ]; // Space allocation for daqLib buffers
@@ -67,6 +69,8 @@ main( int argc, char** argv )
                 /// model.
     int dac18Cnt; /// @param dac18Cnt Number of 18bit DAC cards found by control
                   /// model.
+    int dac20Cnt; /// @param dac20Cnt Number of 20bit DAC cards found by control
+                  /// model.
     int doCnt; /// @param doCnt Total number of digital I/O cards found by control
                /// model.
     int do32Cnt; /// @param do32Cnt Total number of Contec 32 bit DIO cards
@@ -89,6 +93,7 @@ main( int argc, char** argv )
 
     cycleOffset = 0;
 
+#if 0
     while ( ( c = getopt( argc, argv, "m:t:help" ) ) != EOF )
         switch ( c )
         {
@@ -105,75 +110,13 @@ main( int argc, char** argv )
             usage( );
             exit( 1 );
         }
+#endif
 
     kk = 0;
 
     jj = 0;
-    int   i = 0;
-    char* p = strtok( argv[ 0 ], "/" );
-    char* array[ 5 ];
 
-    while ( p != NULL )
-    {
-        array[ i++ ] = p;
-        p = strtok( NULL, "/" );
-    }
-    modelname = array[ i - 1 ];
-    sysname = array[ i - 1 ];
-
-    printf( "model name is %s \n", sysname );
-
-    sprintf( shm_name, "%s", sysname );
-    findSharedMemory( sysname );
-    _epics_shm = (char*)addr;
-    ;
-    if ( _epics_shm < 0 )
-    {
-        printf( "mbuf_allocate_area() failed; ret = %d\n", _epics_shm );
-        return -1;
-    }
-    printf( "EPICSM at 0x%lx\n", (long)_epics_shm );
-
-    sprintf( shm_name, "%s", "ipc" );
-    findSharedMemory( "ipc" );
-    _ipc_shm = (char*)addr;
-    if ( _ipc_shm < 0 )
-    {
-        printf( "mbuf_allocate_area(ipc) failed; ret = %d\n", _ipc_shm );
-        return -1;
-    }
-
-    printf( "IPC    at 0x%lx\n", (long)_ipc_shm );
-    ioMemData = (volatile IO_MEM_DATA*)( ( (char*)_ipc_shm ) + 0x4000 );
-    printf(
-        "IOMEM  at 0x%lx size 0x%x\n", (long)ioMemData, sizeof( IO_MEM_DATA ) );
-    printf( "%d PCI cards found\n", ioMemData->totalCards );
-
-    // If DAQ is via shared memory (Framebuilder code running on same machine or
-    // MX networking is used) attach DAQ shared memory location.
-    sprintf( shm_name, "%s_daq", sysname );
-    findSharedMemory( shm_name );
-    _daq_shm = (char*)addr;
-    if ( _daq_shm < 0 )
-    {
-        printf( "mbuf_allocate_area() failed; ret = %d\n", _daq_shm );
-        return -1;
-    }
-    // printf("Allocated daq shmem; set at 0x%x\n", _daq_shm);
-    printf( "DAQSM at 0x%lx\n", _daq_shm );
-    daqPtr = (struct rmIpcStr*)_daq_shm;
-
-    // Open new IO shared memory in support of no hardware I/O
-    sprintf( shm_name, "%s_io_space", sysname );
-    findSharedMemory( shm_name );
-    _io_shm = (char*)addr;
-    if ( _io_shm < 0 )
-    {
-        printf( "mbuf_allocate_area() failed; ret = %d\n", _io_shm );
-        return -1;
-    }
-    printf( "IO SPACE at 0x%lx\n", _io_shm );
-    ioMemDataIop = (volatile IO_MEM_DATA_IOP*)( ( (char*)_io_shm ) );
+    attach_shared_memory(SYSTEM_NAME_STRING_LOWER);
 
     // Find and initialize all PCI I/O modules
     // ******************************************************* Following I/O
@@ -199,6 +142,7 @@ main( int argc, char** argv )
     adcCnt = 0;
     dacCnt = 0;
     dac18Cnt = 0;
+    dac20Cnt = 0;
     doCnt = 0;
     do32Cnt = 0;
     cdo64Cnt = 0;
@@ -236,6 +180,12 @@ main( int argc, char** argv )
         case GSC_18AO8:
             kk = cdsPciModules.dacCount;
             cdsPciModules.dacType[ kk ] = GSC_18AO8;
+            cdsPciModules.dacCount++;
+            status++;
+            break;
+        case GSC_20AO8:
+            kk = cdsPciModules.dacCount;
+            cdsPciModules.dacType[ kk ] = GSC_20AO8;
             cdsPciModules.dacCount++;
             status++;
             break;
@@ -308,24 +258,17 @@ main( int argc, char** argv )
     {
         // MASTER maps ADC modules first in ipc shm for control models
         ioMemData->model[ ii ] = cdsPciModules.adcType[ ii ];
-        ioMemData->ipc[ ii ] =
-            ii; // ioData memory buffer location for control models to use
+        ioMemData->ipc[ ii ] = ii; 
+        // ioData memory buffer for virtual I/O cards
         ioMemDataIop->model[ ii ] = cdsPciModules.adcType[ ii ];
-        ioMemDataIop->ipc[ ii ] =
-            ii; // ioData memory buffer location for control models to use
+        ioMemDataIop->ipc[ ii ] = ii; 
+        // ioData fill virtual ADC mem with dummy data (65536 x 32 chans)
         for ( jj = 0; jj < 65536; jj++ )
         {
             for ( mm = 0; mm < 32; mm++ )
             {
                 ioMemDataIop->iodata[ ii ][ jj ].data[ mm ] = jj - 32767;
             }
-        }
-        if ( cdsPciModules.adcType[ ii ] == GSC_18AISS6C )
-        {
-            printf( "\tADC %d is a GSC_18AISS6C module\n", ii );
-            printf( "\t\tChannels = 6 \n" );
-            printf( "\t\tFirmware Rev = %d \n\n",
-                    ( cdsPciModules.adcConfig[ ii ] & 0xfff ) );
         }
         if ( cdsPciModules.adcType[ ii ] == GSC_16AI64SSA )
         {
@@ -427,25 +370,13 @@ main( int argc, char** argv )
     printf( "Total of %d I/O modules found and mapped\n", kk );
     printf( "******************************************************************"
             "*********\n" );
+    print_io_info(&cdsPciModules);
     // Following section maps Reflected Memory, both VMIC hardware style and
     // Dolphin PCIe network style. Control units will perform I/O transactions
     // with RFM directly ie IOP does not do RFM I/O. Master unit only maps
     // the RFM I/O space and passes pointers to control models.
 
-    printf( "%d RFM cards found\n", cdsPciModules.rfmCount );
-    ioMemData->rfmCount = cdsPciModules.rfmCount;
-    for ( ii = 0; ii < cdsPciModules.rfmCount; ii++ )
-    {
-        printf( "\tRFM %d is a VMIC_%x module with Node ID %d\n",
-                ii,
-                cdsPciModules.rfmType[ ii ],
-                cdsPciModules.rfmConfig[ ii ] );
-        printf( "address is 0x%lx\n", cdsPciModules.pci_rfm[ ii ] );
-        // Master sends RFM memory pointers to control models
-        ioMemData->pci_rfm[ ii ] = cdsPciModules.pci_rfm[ ii ];
-        ioMemData->pci_rfm_dma[ ii ] = cdsPciModules.pci_rfm_dma[ ii ];
-    }
-    // ioMemData->dolphinCount = 0;
+    ioMemData->rfmCount = 9;
 #ifdef DOLPHIN_TEST
     ioMemData->dolphinCount = cdsPciModules.dolphinCount;
     ioMemData->dolphinRead[ 0 ] = cdsPciModules.dolphinRead[ 0 ];
@@ -457,19 +388,12 @@ main( int argc, char** argv )
     ioMemData->dolphinRead[ 0 ] = 0;
     ioMemData->dolphinWrite[ 0 ] = 0;
 #endif
-    printf( "******************************************************************"
-            "*********\n" );
-    if ( cdsPciModules.gps )
-    {
-        printf( "IRIG-B card found %d\n", cdsPciModules.gpsType );
-        printf( "**************************************************************"
-                "*************\n" );
-    }
 
     // Initialize buffer for daqLib.c code
     printf( "Initializing space for daqLib buffers\n" );
     daqBuffer = (long)&daqArea[ 0 ];
 
+    // Wait for SDF restore
     pLocalEpics = (CDS_EPICS*)&( (RFM_FE_COMMS*)_epics_shm )->epicsSpace;
     for ( cnt = 0; cnt < 10 && pLocalEpics->epicsInput.burtRestore == 0; cnt++ )
     {
