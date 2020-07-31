@@ -2659,6 +2659,10 @@ print OUTM "CFLAGS += -g\n";
 if ($remoteGPS) {
   print OUTM "CFLAGS += -DREMOTE_GPS\n";
 }
+if($systemName eq "sei" || $useFIRs)
+{
+print OUTM "CFLAGS += -DFIR_FILTERS\n";
+}
 if ($no_sync) {
   print OUTM "#Comment out to enable 1PPS synchronization\n";
   print OUTM "CFLAGS += -DNO_SYNC\n";
