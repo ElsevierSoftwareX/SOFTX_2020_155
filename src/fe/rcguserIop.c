@@ -64,25 +64,12 @@ main( int argc, char** argv )
     char fname[ 128 ]; /// @param fname[128] Name of shared mem area to allocate
                        /// for DAQ data
     int cards; /// @param cards Number of PCIe cards found on bus
-    int adcCnt; /// @param adcCnt Number of ADC cards found by control model.
-    int dacCnt; /// @param dacCnt Number of 16bit DAC cards found by control
-                /// model.
-    int dac18Cnt; /// @param dac18Cnt Number of 18bit DAC cards found by control
-                  /// model.
-    int dac20Cnt; /// @param dac20Cnt Number of 20bit DAC cards found by control
-                  /// model.
-    int doCnt; /// @param doCnt Total number of digital I/O cards found by control
-               /// model.
-    int do32Cnt; /// @param do32Cnt Total number of Contec 32 bit DIO cards
+    int do32Cnt = 0; /// @param do32Cnt Total number of Contec 32 bit DIO cards
                  /// found by control model.
-    int doIIRO16Cnt; /// @param doIIRO16Cnt Total number of Acces I/O 16 bit
+    int doIIRO16Cnt = 0; /// @param doIIRO16Cnt Total number of Acces I/O 16 bit
                      /// relay cards found by control model.
-    int doIIRO8Cnt; /// @param doIIRO8Cnt Total number of Acces I/O 8 bit relay
+    int doIIRO8Cnt = 0; /// @param doIIRO8Cnt Total number of Acces I/O 8 bit relay
                     /// cards found by control model.
-    int cdo64Cnt; /// @param cdo64Cnt Total number of Contec 6464 DIO card 32bit
-                  /// output sections mapped by control model.
-    int cdi64Cnt; /// @param cdo64Cnt Total number of Contec 6464 DIO card 32bit
-                  /// input sections mapped by control model.
     int ret; /// @param ret Return value from various Malloc calls to allocate
              /// memory.
     int   cnt;
@@ -117,6 +104,7 @@ main( int argc, char** argv )
     jj = 0;
 
     attach_shared_memory(SYSTEM_NAME_STRING_LOWER);
+    pLocalEpics = (CDS_EPICS*)&( (RFM_FE_COMMS*)_epics_shm )->epicsSpace;
 
     // Find and initialize all PCI I/O modules
     // ******************************************************* Following I/O
@@ -134,21 +122,18 @@ main( int argc, char** argv )
     cdsPciModules.dacCount = 0;
     cdsPciModules.dioCount = 0;
     cdsPciModules.doCount = 0;
+    cdsPciModules.iiroDioCount = 0;
+    cdsPciModules.iiroDio1Count = 0;
+    cdsPciModules.cDo32lCount = 0;
+    cdsPciModules.cDio1616lCount = 0;
+    cdsPciModules.cDio6464lCount = 0;
+    cdsPciModules.rfmCount = 0;
+    cdsPciModules.dolphinCount = 0;
 
     // If running as a control process, I/O card information is via ipc shared
     // memory
     printf( "%d PCI cards found\n", cards );
     status = 0;
-    adcCnt = 0;
-    dacCnt = 0;
-    dac18Cnt = 0;
-    dac20Cnt = 0;
-    doCnt = 0;
-    do32Cnt = 0;
-    cdo64Cnt = 0;
-    cdi64Cnt = 0;
-    doIIRO16Cnt = 0;
-    doIIRO8Cnt = 0;
 
     ioMemData->totalCards = cards;
 
@@ -394,7 +379,6 @@ main( int argc, char** argv )
     daqBuffer = (long)&daqArea[ 0 ];
 
     // Wait for SDF restore
-    pLocalEpics = (CDS_EPICS*)&( (RFM_FE_COMMS*)_epics_shm )->epicsSpace;
     for ( cnt = 0; cnt < 10 && pLocalEpics->epicsInput.burtRestore == 0; cnt++ )
     {
         printf( "Epics burt restore is %d\n",
