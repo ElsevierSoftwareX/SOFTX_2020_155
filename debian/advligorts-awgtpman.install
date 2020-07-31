@@ -1,0 +1,3 @@
+support/bin/rts_awgtpman_exec usr/bin
+support/systemd/rts-awgtpman@.service lib/systemd/system
+usr/bin/awgtpman

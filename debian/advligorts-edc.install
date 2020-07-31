@@ -1,0 +1,3 @@
+support/systemd/rts-edc.service lib/systemd/system
+usr/bin/standalone_edc
+support/bin/build_edc_ini usr/bin

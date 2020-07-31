@@ -109,6 +109,9 @@ Depends:
  advligorts-common,
  advligorts-gpstime-dkms,
  advligorts-mbuf-dkms,
+ advligorts-local-dc,
+ advligorts-awgtpman,
+ advligorts-edc,
  sudo,
  ${misc:Depends},
  ${shlibs:Depends},
@@ -118,6 +121,51 @@ Description: advLigoRTS front end support
  Core component of advLigoRTS.
  .
  Binaries and systemd services for advLigoRTS front end systems.
+
+Package: advligorts-local-dc
+Architecture: any
+Depends:
+ advligorts-common,
+ advligorts-gpstime-dkms,
+ advligorts-mbuf-dkms,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: advLigoRTS local data concentrator
+ Core component of advLigoRTS.
+ .
+ Binaries and systemd services to support concentrating LIGO
+ front end data into a single buffer for transmission.
+
+Package: advligorts-awgtpman
+Architecture: any
+Depends:
+ advligorts-common,
+ advligorts-gpstime-dkms,
+ advligorts-mbuf-dkms,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: advLigoRTS waveform generator and test point manager.
+ Core component of advLigoRTS.
+ .
+ Binaries and systemd services for the advLigoRTS front end system.
+ Awgtpman is the interface which interacts with the LIGO front end
+ systems to enable test points and injections.
+
+Package: advligorts-edc
+Architecture: any
+Depends:
+ advligorts-common,
+ advligorts-gpstime-dkms,
+ advligorts-mbuf-dkms,
+ advligorts-local-dc,
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: advLigoRTS EPICS data collection software.
+ Core component of advLigoRTS.
+ .
+ Binaries and systemd services for the advLigoRTS system.  The
+ edc collects EPICS channels and stores them in a shared memory
+ buffer that can be consumed by the advLigoRTS daqd systems.
 
 Package: advligorts-transport-common
 Architecture: all

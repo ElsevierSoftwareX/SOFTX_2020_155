@@ -1,3 +1,11 @@
+advligorts (4.0.0-1) unstable; urgency=medium
+
+  * Initial release for production
+  * Extracted local_dc, awgtpman, and the edc to seperate packages to
+    facilitate possible future upgrades.
+
+ -- Jonathan Hanks <jonathan.hanks@ligo.org>  Fri, 31 Jul 2020 11:01:18 -0700
+
 advligorts (4.0.0~dev17-1) unstable; urgency=medium
 
   * dev release
