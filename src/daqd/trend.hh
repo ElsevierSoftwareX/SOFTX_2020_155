@@ -5,6 +5,7 @@
 #include "profiler.hh"
 #include "stats/stats.hh"
 #include "daqd_thread.hh"
+#include "epics_pvs.hh"
 #include <atomic>
 
 /// Trend circular buffer block structure
@@ -122,8 +123,10 @@ public:
           minute_trend_buffer_blocks( 60 ), mtb( 0 ), mt_stats( ),
           mt_file_stats( ), tb( 0 ), num_channels( 0 ), num_trend_channels( 0 ),
           block_size( 0 ), ascii_output( 0 ), frames_per_file( 1 ),
-          trend_buffer_blocks( 60 ), profile( (char*)"trend" ),
-          profile_mt( (char*)"mt" ), fsd( 60 ), minute_fsd( 3600 ),
+          trend_buffer_blocks( 60 ),
+          profile( "trend", PV::PV_NAME::PV_PROFILER_FREE_SEGMENTS_STREND_BUF ),
+          profile_mt( "mt", PV::PV_NAME::PV_PROFILER_FREE_SEGMENTS_MTREND_BUF ),
+          fsd( 60 ), minute_fsd( 3600 ),
           raw_minute_trend_saving_period( 2 ), worker_first_channel( 0 ),
           trend_worker_nb( 0 ), worker_busy( 0 ), _configuration_number( 0 )
     {
