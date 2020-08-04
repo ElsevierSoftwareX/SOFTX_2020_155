@@ -1,0 +1,45 @@
+#!/usr/bin/python3
+import os
+import sys
+import os.path as path
+import argparse
+import re
+
+parser = argparse.ArgumentParser(description='Concatenates smaller INI files into a single INI file for a standalone edcu.')
+
+parser.add_argument('-m', dest='master_path', help="""Path to master file containing a list of INI files.
+Each line of the master file should have one file name of an INI file.  
+The INI files must be in the same directory as the master file.""", required=True)
+parser.add_argument('-o', dest='output_file', help="""File name to use for the concatenated INI file.
+The file will be written to the same directory as the master file.""", required=True)
+
+args = parser.parse_args()
+
+master_path = args.master_path
+output_file = args.output_file
+
+header="""[default]
+gain=1.00
+datatype=4
+ifoid=0
+slope=6.1028e-05
+acquire=1
+offset=0
+units=V
+dcuid=52
+datarate=16
+"""
+
+master_dir, master_file = path.split(master_path)
+
+os.chdir(master_dir)
+
+nonspace_re = re.compile(r'\S')
+
+with open(master_file, "rt") as mf:
+    with open(output_file, "wt") as of:
+        of.write(header)
+        for line in mf.readlines():
+            if nonspace_re.search(line):
+                with open(line.strip(), "rt") as ini_f:
+                    of.write(ini_f.read())
