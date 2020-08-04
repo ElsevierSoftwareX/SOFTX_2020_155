@@ -132,6 +132,24 @@ if($iopModel == 1) {
     $ypos += 20;
     $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_BIO_MON_3",$ecolors{white},$ecolors{black},"static");
 
+    # Add Timing Error Info
+if($iopModel == 1) {
+	$xpos = 380; $ypos = 137; $width = 125; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"TIMING ERRORS",$ecolors{white});
+	$xpos = 409; $ypos = 157; $width = 75; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"ADC HOLD",$ecolors{white});
+	$xpos = 409; $ypos = 177; $width = 75; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"PROC TIME",$ecolors{white});
+	$xpos = 409; $ypos = 197; $width = 75; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"IRIG-B",$ecolors{white});
+    
+	$xpos = 501; $ypos = 157; $width = 20; $height = 15;
+    $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DIAG_WORD","1","1",$ecolors{red},$ecolors{green});
+	$xpos = 501; $ypos = 177; $width = 20; $height = 15;
+    $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DIAG_WORD","3","3",$ecolors{red},$ecolors{green});
+	$xpos = 501; $ypos = 197; $width = 20; $height = 15;
+    $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DIAG_WORD","4","4",$ecolors{red},$ecolors{green});
+}
 
     # Add Clock Period Info
 	$xpos = 10; $ypos = 280; $width = 150; $height = 15;
