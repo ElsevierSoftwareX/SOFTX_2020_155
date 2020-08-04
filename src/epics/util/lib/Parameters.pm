@@ -51,6 +51,8 @@ sub parseParams {
                 			$::location = "lho";
         			} elsif ($::ifo =~ /^L/) {
                 			$::location = "llo";
+        			} elsif ($::ifo =~ /^N/) {
+                			$::location = "anu";
         			} elsif ($::ifo =~ /^C/) {
                 			$::location = "caltech";
         			} elsif ($::ifo =~ /^S/) {
