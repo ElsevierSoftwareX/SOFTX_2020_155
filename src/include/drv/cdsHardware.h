@@ -109,13 +109,14 @@ typedef struct IO_MEM_DATA{
 	int rfmCount;
 	long pci_rfm[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
 	long pci_rfm_dma[MAX_RFM_MODULES];	/* Remapped addresses of RFM modules	*/
-        int dolphinCount;
+    int dolphinCount;
 	volatile unsigned long *dolphinRead[4]; /* read and write Dolphin memory */
 	volatile unsigned long *dolphinWrite[4]; /* read and write Dolphin memory */
 	MEM_DATA_BLOCK iodata[MAX_IO_MODULES][IO_MEMORY_SLOTS];
 	// Combined DAC channels map; used to check on control app DAC channel allocations
 	unsigned int dacOutUsed[MAX_DAC_MODULES][16];
 	unsigned int ipcDetect[2][8];
+	int card[MAX_IO_MODULES];
 }IO_MEM_DATA;
 
 typedef struct IO_MEM_DATA_IOP{
@@ -194,44 +195,23 @@ typedef struct PLX_9056_INTCTRL{
 #define PLX_VID         0x10b5		/* PLX9056 Vendor Id	*/
 #define PLX_TID         0x9056		/* PLX9056 Type Id	*/
 
-/* GSA 18Bit ADC/DAC Module Definitions ***************************************************** */
-#define AD18_SS_ID       0x3172	/* Subsystem ID to locate module on PCI bus	*/
-
-/* Structure defining ADC module PCI register layout	*/
-typedef struct GSA_AD18_REG{
-        unsigned int BCR;       /* 0x0000 	Board Control */
-        unsigned int DIO;       /* 0x0004 	Digital IO Port */
-        unsigned int RES1;      /* 0x0008 	Reserved */
-        unsigned int CLS;       /* 0x000C 	Current Loop Select */
-        unsigned int RES2;      /* 0x0010 	Reserved */
-        unsigned int AIC;       /* 0x0014 	Analog Input Configuration */
-        unsigned int AIB;       /* 0x0018 	Analog Input BUFFER */
-        unsigned int RGA;       /* 0x001C 	Rate Generator A */
-        unsigned int RGB;       /* 0x0020 	Rate Generator B */
-        unsigned int ABS;       /* 0x0024 	AI Burst Block Size */
-        unsigned int IBS;       /* 0x0028 	Input Buffer Size */
-        unsigned int IBT;       /* 0x002C 	Input Buffer Threshold */
-        unsigned int PSF;       /* 0x0030 	Principal status flag */
-        unsigned int ASC;       /* 0x0034 	Assembly Configuration */
-        unsigned int AVR;       /* 0x0038 	Autocal value readback */
-        unsigned int BOO;       /* 0x003C 	Buffered Output Operation */
-        unsigned int OBT;       /* 0x0040 	Output Buffer Threshold */
-        unsigned int OBS;       /* 0x0044 	Output Buffer Size */
-        unsigned int AOB;       /* 0x0048 	Anallog Output Buffer */
-        unsigned int RGC;       /* 0x004C 	Rate Generator C */
-        unsigned int RGD;       /* 0x004C 	Rate Generator D */
-        unsigned int AOC;       /* 0x0050 	Analog Output Configuration */
-}GSA_AD18_REG;
 
 /* Standard structure to maintain PCI module information.			*/
 typedef struct CDS_HARDWARE{
 	int dacCount;			/* Number of DAC modules found 		*/
+	int dac16Count;			/* Number of DAC modules found 		*/
+	int dac18Count;			/* Number of DAC modules found 		*/
+	int dac20Count;			/* Number of DAC modules found 		*/
 	long pci_dac[MAX_DAC_MODULES];	/* Remapped addresses of DAC modules	*/
 	int dacType[MAX_DAC_MODULES];
+	int dacInstance[MAX_DAC_MODULES];
 	int dacConfig[MAX_DAC_MODULES];
 	int adcCount;			/* Number of ADC modules found		*/
+	int adc16Count;			/* Number of 16 bit ADC modules found		*/
+	int adc18Count;			/* Number of 18 bit ADC modules found		*/
 	long pci_adc[MAX_ADC_MODULES];	/* Remapped addresses of ADC modules	*/
 	int adcType[MAX_ADC_MODULES];
+	int adcInstance[MAX_ADC_MODULES];
     int adcChannels[MAX_ADC_MODULES];
 	int adcConfig[MAX_ADC_MODULES];
 	int doCount;			/* Number of DIO modules found		*/

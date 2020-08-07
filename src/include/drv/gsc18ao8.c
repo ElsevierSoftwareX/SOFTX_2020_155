@@ -109,6 +109,8 @@ gsc18ao8Init( CDS_HARDWARE* pHardware, struct pci_dev* dacdev )
     pHardware->dacConfig[ devNum ] = (int)( dac18bitPtr->ASY_CONFIG );
     pHardware->dacType[ devNum ] = GSC_18AO8;
     pHardware->dacCount++;
+    pHardware->dacInstance[ devNum ] = pHardware->dac18Count;
+    pHardware->dac18Count++;
 
     /// Call patch in map.c needed to properly write to native PCIe module
     /// version of 16AO16

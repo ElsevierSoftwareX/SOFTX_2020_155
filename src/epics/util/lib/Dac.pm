@@ -22,7 +22,6 @@ $default_board_type = "GSC_16AO16";
 #// \n \n
 #// \b sub \b initDac \n 
 #// Called by Parser3.pm to check if ADC supported and fill in ADC info. \n
-#// See Parser3.pm function sortDacs(), where the information in global arrays is sorted \n
 #// if there is a new global array introduced, it will need to be addressed in sortDacs() \n\n
 #
 sub initDac {

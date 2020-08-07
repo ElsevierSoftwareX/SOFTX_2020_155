@@ -86,174 +86,104 @@ mapPciModules( CDS_HARDWARE* pCds )
     dacdev = NULL;
     status = 0;
 
-    // Search system for any module with PLX-9056 and PLX id
-    while ( ( dacdev = pci_get_device( PLX_VID, PLX_TID, dacdev ) ) )
+    // Search for ADC cards
+    for ( i = 0; i < pCds->cards; i++ )
     {
-        // Check if this is an 18bit DAC from General Standards
-        if ( ( dacdev->subsystem_device == DAC_18BIT_SS_ID ) &&
-             ( dacdev->subsystem_vendor == PLX_VID ) )
+        adc_cnt = 0;
+        fast_adc_cnt = 0;
+        dac_cnt = 0;
+        dac_18bit_cnt = 0;
+        dac_20bit_cnt = 0;
+        // Search system for any module with PLX-9056 and PLX id
+        while ( ( dacdev = pci_get_device( PLX_VID, PLX_TID, dacdev ) ) )
         {
-            use_it = 0;
-            if ( pCds->cards )
+            // Check if it is an ADC module
+            if ( ( dacdev->subsystem_device == ADC_SS_ID ) &&
+                 ( dacdev->subsystem_vendor == PLX_VID ) )
             {
-                use_it = 0;
-                /* See if ought to use this one or not */
-                for ( i = 0; i < pCds->cards; i++ )
+                if ( pCds->cards_used[ i ].instance == adc_cnt &&
+                     pCds->cards_used[ i ].type == GSC_16AI64SSA )
                 {
-                    if ( pCds->cards_used[ i ].type == GSC_18AO8 &&
-                         pCds->cards_used[ i ].instance == dac_18bit_cnt )
-                    {
-                        use_it = 1;
-                        break;
-                    }
+                    status = gsc16ai64Init( pCds, dacdev );
+                    modCount++;
+                    printk( "adc card on bus %x; device %x status %d\n",
+                            dacdev->bus->number,
+                            PCI_SLOT( dacdev->devfn ),
+                            status );
                 }
+                adc_cnt++;
             }
-            if ( use_it )
+            // Check if it is a 1M ADC module
+            if ( ( dacdev->subsystem_device == GSC_18AI32SSC1M ) &&
+                 ( dacdev->subsystem_vendor == PLX_VID ) )
             {
-                status = gsc18ao8Init( pCds, dacdev );
-                modCount++;
-                printk( "18-bit dac card on bus %x; device %x status %d\n",
-                        dacdev->bus->number,
-                        PCI_SLOT( dacdev->devfn ),
-                        status );
-            }
-            dac_18bit_cnt++;
-        }
-        // Check if this is an 20bit DAC from General Standards
-        if ( ( dacdev->subsystem_device == DAC_20BIT_SS_ID ) &&
-             ( dacdev->subsystem_vendor == PLX_VID ) )
-        {
-            use_it = 0;
-            if ( pCds->cards )
-            {
-                use_it = 0;
-                /* See if ought to use this one or not */
-                for ( i = 0; i < pCds->cards; i++ )
+                if ( pCds->cards_used[ i ].instance == fast_adc_cnt &&
+                     pCds->cards_used[ i ].type == GSC_18AI32SSC1M )
                 {
-                    if ( pCds->cards_used[ i ].type == GSC_20AO8 &&
-                         pCds->cards_used[ i ].instance == dac_20bit_cnt )
-                    {
-                        use_it = 1;
-                        break;
-                    }
+                    status = gsc18ai32Init( pCds, dacdev );
+                    modCount++;
+                    printk( "fast adc card on bus %x; device %x\n",
+                            dacdev->bus->number,
+                            PCI_SLOT( dacdev->devfn ) );
                 }
+                fast_adc_cnt++;
             }
-            if ( use_it )
+
+            // Search for DAC16 cards
+            // Search system for any module with PLX-9056 and PLX id
+            // Check if it is a DAC16 module
+            if ( ( dacdev->subsystem_device == DAC_SS_ID ) &&
+                 ( dacdev->subsystem_vendor == PLX_VID ) )
             {
-                status = gsc20ao8Init( pCds, dacdev );
-                modCount++;
-                printk( "20-bit dac card on bus %x; device %x status %d\n",
-                        dacdev->bus->number,
-                        PCI_SLOT( dacdev->devfn ),
-                        status );
-            }
-            dac_20bit_cnt++;
-        }
-        // if found, check if it is a DAC module
-        if ( ( dacdev->subsystem_device == DAC_SS_ID ) &&
-             ( dacdev->subsystem_vendor == PLX_VID ) )
-        {
-            use_it = 0;
-            if ( pCds->cards )
-            {
-                use_it = 0;
-                /* printk("DAC card on bus %x; device %x prim %x\n",
-                      dacdev->bus->number,
-                      PCI_SLOT(dacdev->devfn),
-                      dacdev->bus->secondary);
-                      */
-                /* See if ought to use this one or not */
-                for ( i = 0; i < pCds->cards; i++ )
+                if ( pCds->cards_used[ i ].instance == dac_cnt &&
+                     pCds->cards_used[ i ].type == GSC_16AO16 )
                 {
-                    if ( pCds->cards_used[ i ].type == GSC_16AO16 &&
-                         pCds->cards_used[ i ].instance == dac_cnt )
-                    {
-                        use_it = 1;
-                        break;
-                    }
+                    status = gsc16ao16Init( pCds, dacdev );
+                    modCount++;
+                    printk( "16 bit dac card on bus %x; device %x status %d\n",
+                            dacdev->bus->number,
+                            PCI_SLOT( dacdev->devfn ),
+                            status );
                 }
+                dac_cnt++;
             }
-            if ( use_it )
+
+            // Search system for any module with PLX-9056 and PLX id
+            // Check if it is a DAC16 module
+            if ( ( dacdev->subsystem_device == DAC_18BIT_SS_ID ) &&
+                 ( dacdev->subsystem_vendor == PLX_VID ) )
             {
-                status = gsc16ao16Init( pCds, dacdev );
-                modCount++;
-                printk( "16 bit dac card on bus %x; device %x status %d\n",
-                        dacdev->bus->number,
-                        PCI_SLOT( dacdev->devfn ),
-                        status );
-            }
-            dac_cnt++;
-        }
-        // if found, check if it is an ADC module
-#ifndef CONTROL_MODEL
-        if ( ( dacdev->subsystem_device == ADC_SS_ID ) &&
-             ( dacdev->subsystem_vendor == PLX_VID ) )
-        {
-            use_it = 0;
-            if ( pCds->cards )
-            {
-                use_it = 0;
-                /* printk("ADC card on bus %x; device %x prim %x\n",
-                      dacdev->bus->number,
-                      PCI_SLOT(dacdev->devfn),
-                      dacdev->bus->secondary);
-                      */
-                /* See if ought to use this one or not */
-                for ( i = 0; i < pCds->cards; i++ )
+                if ( pCds->cards_used[ i ].instance == dac_18bit_cnt &&
+                     pCds->cards_used[ i ].type == GSC_18AO8 )
                 {
-                    if ( pCds->cards_used[ i ].type == GSC_16AI64SSA &&
-                         pCds->cards_used[ i ].instance == adc_cnt )
-                    {
-                        use_it = 1;
-                        break;
-                    }
+                    status = gsc18ao8Init( pCds, dacdev );
+                    modCount++;
+                    printk( "18-bit dac card on bus %x; device %x status %d\n",
+                            dacdev->bus->number,
+                            PCI_SLOT( dacdev->devfn ),
+                            status );
                 }
+                dac_18bit_cnt++;
             }
-            if ( use_it )
+
+            // Check if it is a DAC20 module
+            if ( ( dacdev->subsystem_device == DAC_20BIT_SS_ID ) &&
+                 ( dacdev->subsystem_vendor == PLX_VID ) )
             {
-                status = gsc16ai64Init( pCds, dacdev );
-                modCount++;
-                printk("adc card on bus %x; device %x status %d\n",
-                      dacdev->bus->number,
-                      PCI_SLOT(dacdev->devfn),
-                      status);
-            }
-            adc_cnt++;
-        }
-        // if found, check if it is a Fast ADC module
-        // TODO: for the time of testing of the 18-bit board, it returned same
-        // PCI device number as the 16-bit fast GS board This number will most
-        // likely change in the future.
-        if ( ( dacdev->subsystem_device == ADC_18AI32_SS_ID ) &&
-             ( dacdev->subsystem_vendor == PLX_VID ) )
-        {
-            use_it = 0;
-            if ( pCds->cards )
-            {
-                use_it = 0;
-                /* See if ought to use this one or not */
-                for ( i = 0; i < pCds->cards; i++ )
+                if ( pCds->cards_used[ i ].instance == dac_20bit_cnt &&
+                     pCds->cards_used[ i ].type == GSC_20AO8 )
                 {
-                    if ( pCds->cards_used[ i ].type == GSC_18AI32SSC1M &&
-                         pCds->cards_used[ i ].instance == fast_adc_cnt )
-                    {
-                        use_it = 1;
-                        break;
-                    }
+                    status = gsc20ao8Init( pCds, dacdev );
+                    modCount++;
+                    printk( "20-bit dac card on bus %x; device %x status %d\n",
+                            dacdev->bus->number,
+                            PCI_SLOT( dacdev->devfn ),
+                            status );
                 }
+                dac_20bit_cnt++;
             }
-            if ( use_it )
-            {
-                printk( "fast adc card on bus %x; device %x\n",
-                        dacdev->bus->number,
-                        PCI_SLOT( dacdev->devfn ) );
-                status = gsc18ai32Init( pCds, dacdev );
-                modCount++;
-            }
-            fast_adc_cnt++;
-        }
-    }
-#endif
+        } // end of while
+    } // end of pci_cards used
 
     dacdev = NULL;
     status = 0;

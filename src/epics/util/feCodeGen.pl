@@ -161,7 +161,7 @@ $daq_prefix="DC0";
 $skeleton = $ARGV[1];
 
 # Check to verify model name begins with a valid IFO designator.
-if ($skeleton !~ m/^[acghiklmsuwx]\d.*/) {
+if ($skeleton !~ m/^[acghiklmnsuwx]\d.*/) {
    die "***ERROR: Model name must begin with <ifo><subsystem>: $skeleton\n";
 }
 
@@ -290,7 +290,6 @@ require "lib/Parser3.pm";
 open(IN,"<".$ARGV[0]) || die "cannot open mdl file $ARGV[0]\n";
 die unless CDS::Parser::parse();
 die unless CDS::Parser::process();
-die unless CDS::Parser::sortDacs();
 
 close(IN);
 

@@ -1,5 +1,5 @@
 ///     @file moduleLoadCommon.c
-///     @brief File contains common routines for moduleLoad.c 
+///     @brief File contains common routines for moduleLoad.c
 ///     for both IOP and User apps.`
 
 void
@@ -62,6 +62,7 @@ print_io_info( CDS_HARDWARE* cdsp )
         if ( cdsp->adcType[ ii ] == GSC_16AI64SSA )
         {
             printf( "\tADC %d is a GSC_16AI64SSA module\n", ii );
+            printf( "\tMemory at block %d\n", cdsp->adcConfig[ ii ] );
             if ( ( cdsp->adcConfig[ ii ] & 0x10000 ) > 0 )
                 jj = 32;
             else
@@ -81,16 +82,19 @@ print_io_info( CDS_HARDWARE* cdsp )
         if ( cdsp->dacType[ ii ] == GSC_18AO8 )
         {
             printf( "\tDAC %d is a GSC_18AO8 module\n", ii );
+            printf( "\tMemory at block %d\n", cdsp->dacConfig[ ii ] );
         }
         if ( cdsPciModules.dacType[ ii ] == GSC_20AO8 )
         {
             printf( "\tDAC %d is a GSC_20AO8 module\n", ii );
+            printf( "Memory at block %d\n", cdsp->dacConfig[ ii ] );
             printf( "\t\tFirmware Revision: %d\n",
                     ( cdsPciModules.dacConfig[ ii ] & 0xffff ) );
         }
         if ( cdsp->dacType[ ii ] == GSC_16AO16 )
         {
             printf( "\tDAC %d is a GSC_16AO16 module\n", ii );
+            printf( "\tMemory at block %d\n", cdsp->dacConfig[ ii ] );
             if ( ( cdsp->dacConfig[ ii ] & 0x10000 ) == 0x10000 )
                 jj = 8;
             if ( ( cdsp->dacConfig[ ii ] & 0x20000 ) == 0x20000 )
@@ -132,18 +136,18 @@ print_io_info( CDS_HARDWARE* cdsp )
     printf( "" SYSTEM_NAME_STRING_LOWER
             ":%d IIRO-16 Isolated DIO cards found\n",
             cdsp->iiroDio1Count );
-    pLocalEpics->epicsOutput.bioMon[0] = cdsp->iiroDio1Count;
+    pLocalEpics->epicsOutput.bioMon[ 0 ] = cdsp->iiroDio1Count;
     printf( "******************************************************************"
             "*********\n" );
     printf( "" SYSTEM_NAME_STRING_LOWER ":%d Contec 32ch PCIe DO cards found\n",
             cdsp->cDo32lCount );
-    pLocalEpics->epicsOutput.bioMon[1] = cdsp->cDo32lCount;
+    pLocalEpics->epicsOutput.bioMon[ 1 ] = cdsp->cDo32lCount;
     printf( "" SYSTEM_NAME_STRING_LOWER ":%d Contec PCIe DIO1616 cards found\n",
             cdsp->cDio1616lCount );
-    pLocalEpics->epicsOutput.bioMon[2] = cdsp->cDio1616lCount;
+    pLocalEpics->epicsOutput.bioMon[ 2 ] = cdsp->cDio1616lCount;
     printf( "" SYSTEM_NAME_STRING_LOWER ":%d Contec PCIe DIO6464 cards found\n",
             cdsp->cDio6464lCount );
-    pLocalEpics->epicsOutput.bioMon[3] = cdsp->cDio6464lCount;
+    pLocalEpics->epicsOutput.bioMon[ 3 ] = cdsp->cDio6464lCount;
     printf( "" SYSTEM_NAME_STRING_LOWER ":%d DO cards found\n", cdsp->doCount );
     printf( "" SYSTEM_NAME_STRING_LOWER
             ":Total of %d I/O modules found and mapped\n",
@@ -171,7 +175,7 @@ print_io_info( CDS_HARDWARE* cdsp )
     }
     for ( ii = 0; ii < cdsp->dolphinCount; ii++ )
     {
-        printf( "\tDolphin found %d\n",ii);
+        printf( "\tDolphin found %d\n", ii );
         printf( "Read address is 0x%lx\n", cdsp->dolphinRead[ ii ] );
         printf( "Write address is 0x%lx\n", cdsp->dolphinWrite[ ii ] );
     }
@@ -227,7 +231,7 @@ detach_shared_memory( )
 
     ret = mbuf_release_area( SYSTEM_NAME_STRING_LOWER, _epics_shm );
     ret = mbuf_release_area( "ipc", _ipc_shm );
-    ret = mbuf_release_area( "shmipc", _shmipc_shm  );
+    ret = mbuf_release_area( "shmipc", _shmipc_shm );
     sprintf( fname, "%s_daq", SYSTEM_NAME_STRING_LOWER );
     ret = mbuf_release_area( fname, _daq_shm );
     return ret;
@@ -316,6 +320,7 @@ send_io_info_to_mbuf( int totalcards, CDS_HARDWARE* pCds )
     {
         // MASTER maps ADC modules first in ipc shm for control models
         ioMemData->model[ ii ] = pCds->adcType[ ii ];
+        ioMemData->card[ ii ] = pCds->adcInstance[ ii ];
         ioMemData->ipc[ ii ] =
             ii; // ioData memory buffer location for control model to use
     }
@@ -323,6 +328,7 @@ send_io_info_to_mbuf( int totalcards, CDS_HARDWARE* pCds )
     {
         // Pass DAC info to control processes
         ioMemData->model[ kk ] = pCds->dacType[ ii ];
+        ioMemData->card[ kk ] = pCds->dacInstance[ ii ];
         ioMemData->ipc[ kk ] = kk;
         // Following used by MASTER to point to ipc memory for inputting DAC
         // data from control models
@@ -372,12 +378,12 @@ send_io_info_to_mbuf( int totalcards, CDS_HARDWARE* pCds )
     ioMemData->dolphinWrite[ 1 ] = pCds->dolphinWrite[ 1 ];
 
 #else
-        // Clear Dolphin pointers so the controller process sees NULLs
-        ioMemData->dolphinCount = 0;
-        ioMemData->dolphinRead[ 0 ] = 0;
-        ioMemData->dolphinWrite[ 0 ] = 0;
-        ioMemData->dolphinRead[ 1 ] = 0;
-        ioMemData->dolphinWrite[ 1 ] = 0;
+    // Clear Dolphin pointers so the controller process sees NULLs
+    ioMemData->dolphinCount = 0;
+    ioMemData->dolphinRead[ 0 ] = 0;
+    ioMemData->dolphinWrite[ 0 ] = 0;
+    ioMemData->dolphinRead[ 1 ] = 0;
+    ioMemData->dolphinWrite[ 1 ] = 0;
 #endif
 }
 #endif

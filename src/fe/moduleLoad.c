@@ -116,10 +116,6 @@ rt_fe_init( void )
         cardCountErr = 1;
     }
 
-    // Print out all the I/O information
-    // Following routine is in moduleLoadCommon.c
-    print_io_info( &cdsPciModules );
-
 #ifdef REQUIRE_IO_CNT
     if ( cardCountErr )
     {
@@ -159,6 +155,10 @@ rt_fe_init( void )
 #endif
         return -6;
     }
+
+    // Print out all the I/O information
+    // Following routine is in moduleLoadCommon.c
+    print_io_info( &cdsPciModules );
 
     pLocalEpics->epicsInput.vmeReset = 0;
     udelay( 2000 );

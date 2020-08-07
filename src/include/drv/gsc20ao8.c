@@ -127,6 +127,8 @@ gsc20ao8Init( CDS_HARDWARE* pHardware, struct pci_dev* dacdev )
     // Return the device type to main code.
     pHardware->dacType[ devNum ] = GSC_20AO8;
     pHardware->dacCount++;
+    pHardware->dacInstance[ devNum ] = pHardware->dac20Count;
+    pHardware->dac20Count++;
 
     /// Call patch in map.c needed to properly write to native PCIe module
     set_8111_prefetch( dacdev );

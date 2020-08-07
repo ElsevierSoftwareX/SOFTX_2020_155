@@ -493,7 +493,7 @@ sub createGdsMedm
 		if(($totalCards % 5) == 0) {
 			$xpos = 295;
 			$ypos = 200;
-			$bxpos = 327;
+			$bxpos = 340;
 			$bypos = 201;
 		}
 	}

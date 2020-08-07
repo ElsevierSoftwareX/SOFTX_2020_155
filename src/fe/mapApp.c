@@ -8,8 +8,10 @@ mapPciModules( CDS_HARDWARE* pCds )
     int status = 0;
     int ii, jj, kk; /// @param ii,jj,kk default loop counters
     int cards; /// @param cards Number of PCIe cards found on bus
-    int adcCnt = 0; /// @param adcCnt Number of ADC cards found by control model.
-    int fastadcCnt = 0; /// @param adcCnt Number of ADC cards found by control model.
+    int adcCnt =
+        0; /// @param adcCnt Number of ADC cards found by control model.
+    int fastadcCnt =
+        0; /// @param adcCnt Number of ADC cards found by control model.
     int dacCnt = 0; /// @param dacCnt Number of 16bit DAC cards found by control
                     /// model.
     int dac18Cnt = 0; /// @param dac18Cnt Number of 18bit DAC cards found by
@@ -30,16 +32,17 @@ mapPciModules( CDS_HARDWARE* pCds )
                       /// 32bit input sections mapped by control model.
 
     // Have to search thru all cards and find desired instance for application
-    // Master will map ADC cards first, then DAC and finally DIO
-    for ( ii = 0; ii < ioMemData->totalCards; ii++ )
+    // IOP will map ADC cards first, then DAC and finally DIO
+    for ( jj = 0; jj < pCds->cards; jj++ )
     {
-        for ( jj = 0; jj < pCds->cards; jj++ )
+        for ( ii = 0; ii < ioMemData->totalCards; ii++ )
         {
             switch ( ioMemData->model[ ii ] )
             {
             case GSC_16AI64SSA:
                 if ( ( pCds->cards_used[ jj ].type == GSC_16AI64SSA ) &&
-                     ( pCds->cards_used[ jj ].instance == adcCnt ) )
+                     ( pCds->cards_used[ jj ].instance ==
+                       ioMemData->card[ ii ] ) )
                 {
                     kk = pCds->adcCount;
                     pCds->adcType[ kk ] = GSC_16AI64SSA;
@@ -50,7 +53,8 @@ mapPciModules( CDS_HARDWARE* pCds )
                 break;
             case GSC_18AI32SSC1M:
                 if ( ( pCds->cards_used[ jj ].type == GSC_18AI32SSC1M ) &&
-                     ( pCds->cards_used[ jj ].instance == fastadcCnt ) )
+                     ( pCds->cards_used[ jj ].instance ==
+                       ioMemData->card[ ii ] ) )
                 {
                     kk = pCds->adcCount;
                     pCds->adcType[ kk ] = GSC_18AI32SSC1M;
@@ -61,10 +65,12 @@ mapPciModules( CDS_HARDWARE* pCds )
                 break;
             case GSC_16AO16:
                 if ( ( pCds->cards_used[ jj ].type == GSC_16AO16 ) &&
-                     ( pCds->cards_used[ jj ].instance == dacCnt ) )
+                     ( pCds->cards_used[ jj ].instance ==
+                       ioMemData->card[ ii ] ) )
                 {
                     kk = pCds->dacCount;
                     pCds->dacType[ kk ] = GSC_16AO16;
+                    pCds->dacInstance[ kk ] = ioMemData->card[ ii ];
                     pCds->dacConfig[ kk ] = ioMemData->ipc[ ii ];
                     pCds->pci_dac[ kk ] = (long)( ioMemData->iodata[ ii ] );
                     pCds->dacCount++;
@@ -73,7 +79,8 @@ mapPciModules( CDS_HARDWARE* pCds )
                 break;
             case GSC_18AO8:
                 if ( ( pCds->cards_used[ jj ].type == GSC_18AO8 ) &&
-                     ( pCds->cards_used[ jj ].instance == dac18Cnt ) )
+                     ( pCds->cards_used[ jj ].instance ==
+                       ioMemData->card[ ii ] ) )
                 {
                     kk = pCds->dacCount;
                     pCds->dacType[ kk ] = GSC_18AO8;
@@ -85,7 +92,8 @@ mapPciModules( CDS_HARDWARE* pCds )
                 break;
             case GSC_20AO8:
                 if ( pCds->cards_used[ jj ].type == GSC_20AO8 &&
-                     ( pCds->cards_used[ jj ].instance == dac20Cnt ) )
+                     ( pCds->cards_used[ jj ].instance ==
+                       ioMemData->card[ ii ] ) )
                 {
                     kk = pCds->dacCount;
                     pCds->dacType[ kk ] = GSC_20AO8;
