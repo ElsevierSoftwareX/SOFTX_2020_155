@@ -27,7 +27,6 @@ sync2master( volatile TIMING_SIGNAL* timePtr )
     int loop = 0;
     int cycle = 65535;
 
-printk("sync to master %d\n",timePtr->gps_time);
     do
     {
         udelay( 5 );

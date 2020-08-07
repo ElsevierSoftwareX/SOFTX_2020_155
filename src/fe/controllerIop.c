@@ -458,6 +458,10 @@ fe_start_controller( void* arg )
     timeSec = remote_time( (struct CDS_EPICS*)pLocalEpics );
 #elif USE_DOLPHIN_TIMING
     timeSec = sync2master( pcieTimer );
+    if(timeSec == -1)
+    {
+        timeSec = current_time_fe( ) - 1;
+    }
 #elif RUN_WO_IO_MODULES
     // printk("Sync to cpu\n");
     timeSec = sync2cpuclock( );
