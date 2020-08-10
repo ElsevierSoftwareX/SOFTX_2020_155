@@ -74,13 +74,13 @@ mapPciModules( CDS_HARDWARE* pCds )
     int                    i,ii;
     int                    ret;
     int                    modCount = 0;
-//  int fast_adc_cnt = 0;
 #ifndef CONTROL_MODEL
-    int adc_cnt = 0;
+    int            adc_cnt = 0;
 #endif
     int            dac_cnt = 0;
     int            dac_18bit_cnt = 0;
     int            dac_20bit_cnt = 0;
+    int            fast_adc_cnt = 0;
     int            bo_cnt = 0;
     int            use_it;
     char           fname[ 128 ];
@@ -89,6 +89,17 @@ mapPciModules( CDS_HARDWARE* pCds )
 
     dacdev = NULL;
     status = 0;
+
+    // Initialize CDS_HARDWARE Structure
+    pCds->adcCount = 0;
+    pCds->adc16Count = 0;
+    pCds->adc18Count = 0;
+    pCds->dacCount = 0;
+    pCds->dac16Count = 0;
+    pCds->dac18Count = 0;
+    pCds->dac20Count = 0;
+    pCds->dioCount = 0;
+    pCds->doCount = 0;
 
     for ( i = 0; i < pCds->cards; i++ )
     {
@@ -151,6 +162,8 @@ mapPciModules( CDS_HARDWARE* pCds )
             _device_shm = (unsigned char*)( kmalloc_area[ ret ] );
             pCds->pci_adc[ adc_cnt ] = (long)_device_shm;
             pCds->adcType[ adc_cnt ] = GSC_16AI64SSA;
+            pCds->adcInstance[ adc_cnt ] = pCds-> adc16Count;
+            pCDS-> adc16Count ++;
             pCds->adcChannels[ adc_cnt ] = 32;
             pCds->adcCount++;
             data = (int *) pCds->pci_adc[ adc_cnt ];
