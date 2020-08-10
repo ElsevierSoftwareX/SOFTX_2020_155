@@ -116,6 +116,8 @@ mapPciModules( CDS_HARDWARE* pCds )
             pCds->pci_dac[ dac_cnt ] = (long)_device_shm;
             pCds->dacType[ dac_cnt ] = GSC_18AO8;
             pCds->dacCount++;
+            pCds->dacInstance[ dac_cnt ] =  pCds->dac18Count;
+            pCds->dac18Count++;
             dac_cnt++;
             dac_18bit_cnt++;
         }
@@ -132,6 +134,8 @@ mapPciModules( CDS_HARDWARE* pCds )
             pCds->pci_dac[ dac_cnt ] = (long)_device_shm;
             pCds->dacType[ dac_cnt ] = GSC_16AO16;
             pCds->dacCount++;
+            pCds->dacInstance[ dac_cnt ] =  pCds->dac16Count;
+            pCds->dac16Count++;
             dac_cnt++;
         }
         if ( pCds->cards_used[ i ].type == GSC_20AO8 )
@@ -149,6 +153,8 @@ mapPciModules( CDS_HARDWARE* pCds )
             pCds->dacCount++;
             dac_cnt++;
             dac_20bit_cnt++;
+            pCds->dacInstance[ dac_cnt ] =  pCds->dac20Count;
+            pCds->dac20Count++;
         }
         if ( pCds->cards_used[ i ].type == GSC_16AI64SSA )
         {
@@ -163,7 +169,7 @@ mapPciModules( CDS_HARDWARE* pCds )
             pCds->pci_adc[ adc_cnt ] = (long)_device_shm;
             pCds->adcType[ adc_cnt ] = GSC_16AI64SSA;
             pCds->adcInstance[ adc_cnt ] = pCds-> adc16Count;
-            pCDS-> adc16Count ++;
+            pCds-> adc16Count ++;
             pCds->adcChannels[ adc_cnt ] = 32;
             pCds->adcCount++;
             data = (int *) pCds->pci_adc[ adc_cnt ];
