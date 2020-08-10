@@ -1110,7 +1110,7 @@ printCoefs(fmReadCoeff *fmc, int subsystems) {
   }
 }
 
-getwords(char *line, char *words[], int maxwords)
+int getwords(char *line, char *words[], int maxwords)
 {
 char *p = line;
 int nwords = 0;

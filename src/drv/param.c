@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include "daqmap.h"
 #include "param.h"
+#include "crc.h"
 
 #ifdef OS_VXWORKS
 #define strcasecmp strcmp

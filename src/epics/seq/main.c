@@ -27,6 +27,7 @@ of this distribution.
 #include <time.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <ctype.h>
 
 #ifdef USE_SYSTEM_TIME
 #include <time.h>
