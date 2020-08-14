@@ -1,5 +1,10 @@
 ==================================================================================================
-Changes for 4.0  (NOT YET RELEASED)
+Changes for 4.0.1
+==================================================================================================
+- Minor fix to the daq_wiper.py script, so that it does not crash when a free size is specified.
+- Bug fix to enable biquad filtering.
+==================================================================================================
+Changes for 4.0
 ==================================================================================================
 - Added a new streamer cps_xmit/recv (cds pub sub) which is an ip based streamer system
 - Added a mx receiver variant omx_recv_buffered which can hold multiple cycles of data
