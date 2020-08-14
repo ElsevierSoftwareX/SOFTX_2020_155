@@ -322,6 +322,7 @@ void cleanupCASDF();
 #else
 int getDbValueDouble(ADDRESS*,double *,time_t *);
 int getDbValueString(ADDRESS*,char *, int, time_t *);
+int getDbValueLong(ADDRESS *,unsigned int * ,time_t *);
 void dbDumpRecords(DBBASE *,const char *);
 #endif
 

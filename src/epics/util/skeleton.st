@@ -73,6 +73,7 @@ program %SEQUENCER_NAME%
 %% static %EPICS_TYPE% *pEpics;
 %% static unsigned int sysnum;
 %% extern void *findRfmCard(int);
+%% extern int fmCreatePartial(char *, char *, char *);;
 #else
 %% static VME_COEF vmeCoeffSpace;
 %% static COEF coeffSpace;

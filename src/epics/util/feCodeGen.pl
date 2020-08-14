@@ -156,6 +156,7 @@ $servoflag = "-DSERVO64K";
 $clock_div = 1;
 $dolphin_recover = 0;
 $daq_prefix="DC0";
+$allBiquad = 1;
 
 # Load model name without .mdl extension.
 $skeleton = $ARGV[1];
