@@ -1,3 +1,11 @@
+advligorts (4.0.1-1) unstable; urgency=medium
+
+  * Bugfix release
+  * Fix for biquad filters
+  * Fix on the daq_wiper script
+
+ -- Jonathan Hanks <jonathan.hanks@devbox.localdomain>  Fri, 14 Aug 2020 09:21:37 -0700
+
 advligorts (4.0.0-1) unstable; urgency=medium
 
   * Initial release for production
