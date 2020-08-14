@@ -257,6 +257,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", action="store_true", help="turn on verbose output")
     parser.add_argument("-t", "--terrabytes",
                         help="Number of terrabytes of disk to ensure are free [{}]".format(REQUIREDFREETB),
+                        type=float,
                         default=REQUIREDFREETB)
     parser.add_argument("framepath", help="path to frames directory, e.g. /cds-h1-frames/frames")
 
