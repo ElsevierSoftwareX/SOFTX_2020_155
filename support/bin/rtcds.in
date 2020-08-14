@@ -110,7 +110,7 @@ list_host_sys_systemd() {
 
 list_host_sys() {
   if [[ -e /etc/rtsystab ]] && [[ -e /etc/rt_fe.sh ]] ; then
-    /etc/rt_fe.sh
+    /etc/rt_fe.sh | sed 's/ /\n/g'
   else
     list_host_sys_systemd
   fi
