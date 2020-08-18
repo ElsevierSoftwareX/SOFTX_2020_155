@@ -2,58 +2,12 @@
 // Created by jonathan.hanks on 3/13/20.
 //
 #include "gap_check.hh"
-#include <chrono>
-#include <daq_core.h>
-
-#include <sys/time.h>
-#include <unistd.h>
 
 #include <iostream>
+#include "mbuf_probe.hh"
 
 namespace check_gap
 {
-    static std::int64_t
-    time_now_ms( )
-    {
-        timeval tv;
-        gettimeofday( &tv, 0 );
-        return static_cast< std::uint64_t >( tv.tv_sec * 1000 +
-                                             tv.tv_usec / 1000 );
-    }
-
-    struct cycle_sample_t
-    {
-        unsigned int  cycle;
-        unsigned int  gps;
-        unsigned int  gps_nano;
-        unsigned int  gps_cycle;
-        std::uint64_t time_ms;
-    };
-
-    cycle_sample_t
-    wait_for_time_change( volatile daq_multi_cycle_header_t& header )
-    {
-        cycle_sample_t results;
-        unsigned int   cur_cycle = header.curCycle;
-        while ( header.curCycle == cur_cycle )
-        {
-            usleep( 2000 );
-        }
-        results.time_ms = time_now_ms( );
-        results.cycle = header.curCycle;
-
-        unsigned int   stride = header.cycleDataSize;
-        volatile char* buffer_data =
-            reinterpret_cast< volatile char* >( &header ) +
-            sizeof( daq_multi_cycle_header_t );
-        volatile daq_dc_data_t* daq =
-            reinterpret_cast< volatile daq_dc_data_t* >(
-                buffer_data + stride * header.curCycle );
-        results.gps = daq->header.dcuheader[ 0 ].timeSec;
-        results.gps_nano = daq->header.dcuheader[ 0 ].timeNSec;
-        results.gps_cycle = daq->header.dcuheader[ 0 ].cycle;
-        return results;
-    }
 
     int
     check_gaps( volatile void* buffer, std::size_t buffer_size )
