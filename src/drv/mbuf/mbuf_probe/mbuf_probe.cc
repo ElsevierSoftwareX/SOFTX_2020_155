@@ -28,6 +28,10 @@
 #include "analyze_daq_multi_dc.hh"
 #include "analyze_rmipc.hh"
 #include "gap_check.hh"
+#include "check_size.hh"
+
+const int OK = 0;
+const int ERROR = 1;
 
 void
 usage( const char* progname )
@@ -42,6 +46,8 @@ usage( const char* progname )
     std::cout << "\tanalyze - continually read the mbuf and do some analysis\n";
     std::cout << "\tgap_check - continually scan the buffers looking for "
                  "gaps/jumps in the data stream\n";
+    std::cout << "\tcheck_sizes - check the given buffer's data segment sizes "
+                 "against the expected size as calculated in the ini files.";
     std::cout << "\t-b <buffer name> - The name of the buffer to act on\n";
     std::cout
         << "\t-m <buffer size in MB> - The size of the buffer in megabytes\n";
@@ -49,6 +55,8 @@ usage( const char* progname )
                  "multiple of 4k)\n";
     std::cout << "\t-o <filename> - Output file for the copy operation "
                  "(defaults to probe_out.bin)\n";
+    std::cout << "\t-i <filename> - Path to the master ini file (only used "
+                 "for the check_size action)\n";
     std::cout
         << "\t--struct <type> - Type of structure to analyze [rmIpcStr]\n";
     std::cout << "\t--dcu <dcuid> - Optional DCU id used to select a dcu for "
@@ -79,6 +87,7 @@ parse_options( int argc, char* argv[] )
     command_lookup.insert( std::make_pair( "delete", DELETE ) );
     command_lookup.insert( std::make_pair( "analyze", ANALYZE ) );
     command_lookup.insert( std::make_pair( "gap_check", GAP_CHECK ) );
+    command_lookup.insert( std::make_pair( "check_size", CHECK_SIZE ) );
 
     std::map< std::string, MBufStructures > struct_lookup;
     struct_lookup.insert( std::make_pair( "rmIpcStr", MBUF_RMIPC ) );
@@ -156,6 +165,17 @@ parse_options( int argc, char* argv[] )
             std::size_t        offset = 0;
             is >> offset;
             opts.decoder = DataDecoder( offset, format_spec );
+        }
+        else if ( arg == "-i" )
+        {
+            if ( args.empty( ) )
+            {
+                opts.set_error(
+                    "You must specify a ini file path when using -i" );
+                return opts;
+            }
+            opts.ini_file_fname = args.front( );
+            args.pop_front( );
         }
         else if ( arg == "--struct" )
         {
@@ -325,9 +345,6 @@ list_shmem_segments( )
 int
 handle_analyze( const ConfigOpts& opts )
 {
-    const int OK = 0;
-    const int ERROR = 1;
-
     volatile void* buffer =
         shmem_open_segment( opts.buffer_name.c_str( ), opts.buffer_size );
     switch ( opts.analysis_type )
@@ -348,9 +365,6 @@ handle_analyze( const ConfigOpts& opts )
 int
 handle_gap_check( const ConfigOpts& opts )
 {
-    const int OK = 0;
-    const int ERROR = 1;
-
     if ( opts.analysis_type != MBUF_DAQ_MULTI_DC )
     {
         std::cout << "daq_multi_cycle is the only mode that the crc_check is "
@@ -360,6 +374,26 @@ handle_gap_check( const ConfigOpts& opts )
     volatile void* buffer =
         shmem_open_segment( opts.buffer_name.c_str( ), opts.buffer_size );
     check_gap::check_gaps( buffer, opts.buffer_size );
+    return OK;
+}
+
+int
+handle_check_size( const ConfigOpts& opts )
+{
+    volatile void* buffer =
+        shmem_open_segment( opts.buffer_name.c_str( ), opts.buffer_size );
+    switch ( opts.analysis_type )
+    {
+    case MBUF_RMIPC:
+        check_mbuf_sizes::check_size_rmipc( buffer, opts.buffer_size, opts );
+        break;
+    case MBUF_DAQ_MULTI_DC:
+        check_mbuf_sizes::check_size_multi( buffer, opts.buffer_size, opts );
+        break;
+    default:
+        std::cout << "Unknown analysis type for the check size commandn";
+        return ERROR;
+    }
     return OK;
 }
 
@@ -408,6 +442,8 @@ main( int argc, char* argv[] )
         return handle_analyze( opts );
     case GAP_CHECK:
         return handle_gap_check( opts );
+    case CHECK_SIZE:
+        return handle_check_size( opts );
     }
     return 0;
 }
