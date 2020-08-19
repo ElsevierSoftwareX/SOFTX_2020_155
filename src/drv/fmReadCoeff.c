@@ -31,6 +31,9 @@
 #include "fmReadCoeff.h"
 #include "crc.h"
 
+int getwords(char *, char *[], int );
+extern int checkFileCrc(char *);
+
 /* Cat string and make upper case */
 static char *strcat_upper(char *dest, char *src) {
   char *d = dest;
