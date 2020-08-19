@@ -111,12 +111,12 @@ $maxDioMod = pop(@mdmNum);
 # Initialize default settings.
 $sitedepwarning = 0;
 $adcmasterdepwarning = 0;
-$ifo = "M1"; # Default value for the ifo name
-$location = "mit"; # Default value for the location name
-$rate = "60"; # In microseconds (default setting)
+$ifo = "dummy"; # Default value for the ifo name
+$location = "zzz"; # Default value for the location name
+$rate = 0; # In microseconds (default setting)
 $brate = "52";
-$dcuId = 10; # Default dcu Id
-$targetHost = "localhost"; # Default target host name
+$dcuId = 0; # Default dcu Id
+$targetHost = "dummy"; # Default target host name
 $edcusync = "none";
 $specificCpu = -1; # Defaults is to run the FE on the first available CPU
 $iopModel = -1;

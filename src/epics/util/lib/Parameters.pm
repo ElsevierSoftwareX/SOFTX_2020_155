@@ -9,6 +9,7 @@ use Env qw(RCG_HOST);
 #//
 #// \n
 
+use Switch;
 
 # Print Epics communication structure into a header file
 # Current part number is passed as first argument
@@ -24,23 +25,26 @@ sub parseParams {
 	for (@sp) {
 		@spp = split(/=/);
 		if (@spp == 2) {
-			if ($spp[0] eq "site" ) {
+            if ($spp[0] eq "site" ) {
                 $::sitedepwarning = 1;
+                $spp[0] = "ifo";
             }
-			if ($spp[0] eq "adcMaster" ) {
+            if($spp[0] eq "adcMaster") {
                 $::adcmasterdepwarning = 1;
+                $spp[0] = "iop_model";
             }
-			if (($spp[0] eq "site") or ($spp[0] eq "ifo") ) {
-				$spp[1] =~ s/,/ /g;
+            switch($spp[0])
+            {
+                case  "ifo" {
+				    print "PARAM ifo set to $spp[1]\n";
+				    $spp[1] =~ s/,/ /g;
+                    if (lc($spp[1]) ne $::ifo_from_mdl_name) {
+                        $errmsg = "***ERROR: Model <ifo> name part does not match cdsParameters: ";
+                        $errmsg .= $::ifo . ", " . $spp[1] . "\n";
+                        die $errmsg;
+                    }
 
-                                if (lc($spp[1]) ne $::ifo_from_mdl_name) {
-                                   $errmsg = "***ERROR: Model <ifo> name part does not match cdsParameters: ";
-                                   $errmsg .= $::ifo . ", " . $spp[1] . "\n";
-
-                                    die $errmsg;
-                                }
-
-				$::ifo = $spp[1];
+				    $::ifo = $spp[1];
 			        if ($::ifo =~ /^M/) {
                 			$::location = "mit";
         			} elsif ($::ifo =~ /^A/) {
@@ -62,146 +66,283 @@ sub parseParams {
         			} elsif ($::ifo =~ /^X/) {
                 			$::location = "tst";
         			}
-			} elsif ($spp[0] eq "rate") {
-				print "Rate set to $spp[1]\n";
+                }
+                case "rate"
+                {
+				    print "PARAM Rate set to $spp[1]\n";
         			my $param_speed = $spp[1];
-        			if ($param_speed eq "2K") {
+                    switch($param_speed)
+                    {
+        			case "2K" {
                 			$::rate = 480;
                 			$::modelrate = 2;
                 			$::servoflag = "-DSERVO2K";
-        			} elsif ($param_speed eq "4K") {
+        			} 
+        			case "4K" {
                 			$::rate = 240;
                 			$::modelrate = 4;
                 			$::servoflag = "-DSERVO4K";
-        			} elsif ($param_speed eq "16K") {
+        			} 
+                    case "16K" {
                 			$::rate = 60;
                 			$::modelrate = 16;
                 			$::servoflag = "-DSERVO16K";
-        			} elsif ($param_speed eq "32K") {
+                    }
+                    case "32K" {
                 			$::rate = 30;
                 			$::modelrate = 32;
                 			$::servoflag = "-DSERVO32K";
-        			} elsif ($param_speed eq "64K") {
+                    }
+                    case "64K" {
                 			$::rate = 15;
                 			$::modelrate = 64;
                 			$::servoflag = "-DSERVO64K";
-        			} elsif ($param_speed eq "128K") {
+                    }
+                    case "128K" {
                 			$::rate = 8;
                 			$::modelrate = 128;
                 			$::servoflag = "-DSERVO128K";
-        			} elsif ($param_speed eq "256K") {
+                    }
+                    case "256K" {
                 			$::rate = 4;
                 			$::modelrate = 256;
                 			$::servoflag = "-DSERVO256K";
-        			} elsif ($param_speed eq "512K") {
+                    }
+                    case "512K" {
                 			$::rate = 2;
                 			$::modelrate = 512;
                 			$::servoflag = "-DSERVO512K";
-        			} elsif ($param_speed eq "1024K") {
-                			$::rate = 1;
-                			$::modelrate = 1024;
-                			$::servoflag = "-DSERVO1024K";
-        			} else  { die "Invalid speed $param_speed specified\n"; }
+        			} 
+                    else  { 
+                        $errmsg = "\n************\n";
+                        $errmsg .= "***ERROR: Invalid Parameter Block Entry: rate = $param_speed \n";
+                        $errmsg .= "************\n\n";
+                        die $errmsg;
+                    }
+                    }
+                }
 
-			} elsif ($spp[0] eq "dcuid") {
-				print "Dcu Id is set to $spp[1]\n";
-				$::dcuId = $spp[1];
-				print "GDS node id is set to $::dcuId \n";
-				$::gdsNodeId = $::dcuId;
-			} elsif ($spp[0] eq "host") {
-				print "Target host name is set to $spp[1]\n";
-				$::targetHost = $spp[1];
-				if ($RCG_HOST) {
-					$::targetHost = $RCG_HOST;
-				}
-			} elsif ($spp[0] eq "plant_name") {
-				print "Plant name is set to $spp[1]\n";
-				$::plantName = $spp[1];
-			} elsif ($spp[0] eq "daq_prefix")  {
-				$::daq_prefix = $spp[1];
-			} elsif ($spp[0] eq "no_sync" && $spp[1] == 1) {
-                # This essentially set up IOP for a Cymac
-				print "Will not sync up to 1PPS\n";
-				$::no_sync = 1;
-			} elsif ($spp[0] eq "no_daq" && $spp[1] == 1) {
-                # Will compile code not to use DAQ
-				print "Will not connect to DAQ\n";
-				$::no_daq = 1;
-			} elsif ($spp[0] eq "enable_fir" && $spp[1] == 1) {
-                # Will compile code to use FIR filtes
-				print "Will use FIR filters\n";
-				$::useFIRs = 1;
-			} elsif ($spp[0] eq "no_oversampling" && $spp[1] == 1) {
-				print "Will not oversample\n";
-				$::no_oversampling = 1;
-			} elsif ($spp[0] eq "no_dac_interpolation" && $spp[1] == 1) {
-				print "Will not interpolate DAC\n";
-				$::no_dac_interpolation = 1;
-			} elsif ($spp[0] eq "specific_cpu") {
-				print "FE will run on CPU $spp[1]\n";
-				$::specificCpu = $spp[1];
-			} elsif ($spp[0] eq "adcMaster") {
-				print "FE will run as IOP\n";
-				$::iopModel = $spp[1];
-			} elsif ($spp[0] eq "iop_model") {
-				print "FE will run as IOP\n";
-				$::iopModel = $spp[1];
-			} elsif ($spp[0] eq "diagTest") {
-				print "FE Compiles as DIAG TEST CODE\n";
-				$::diagTest = $spp[1];
-			} elsif ($spp[0] eq "dacwdoverride") {
-				print "FE Compiles with override of bad DAC error\n";
-				$::dacWdOverride = $spp[1];
-			} elsif ($spp[0] eq "dolphin_time_xmit") {
-				$::dolphin_time_xmit = $spp[1];
-			} elsif ($spp[0] eq "dolphin_recover") {
-				$::dolphin_recover = $spp[1];
-			} elsif ($spp[0] eq "dolphin_time_rcvr") {
-				$::dolphinTiming = $spp[1];
-			} elsif ($spp[0] eq "no_cpu_shutdown") {
-				$::no_cpu_shutdown = $spp[1];
-			} elsif ($spp[0] eq "pciRfm") {
-				print "FE will run with PCIE RFM Network\n";
-				$::pciNet = $spp[1];
-			} elsif ($spp[0] eq "dolphingen") {
-				print "FE will run with PCIE RFM Network\n";
-                # Set Dolphin Gen to run with; default=2
-				$::dolphinGen = $spp[1];
-			} elsif ($spp[0] eq "remoteGPS") {
-				print "FE will run with EPICS for GPS Time\n";
-				$::remoteGPS = $spp[1];
-			} elsif ($spp[0] eq "rfm_delay") {
-				$::rfmDelay = 1;
-			} elsif ($spp[0] eq "flip_signals") { 
-				$::flipSignals = $spp[1];
-			} elsif ($spp[0] eq "edcu") { 
-				$::edcu = $spp[1];
-			} elsif ($spp[0] eq "sdf") { 
-				$::globalsdf = $spp[1];
-			} elsif ($spp[0] eq "casdf") {
-				$::casdf = $spp[1];
-			} elsif ($spp[0] eq "requireIOcnt") { 
-				$::requireIOcnt = $spp[1];
-			} elsif ($spp[0] eq "virtualIOP") { 
-				$::virtualiop = $spp[1];
-			} elsif ($spp[0] eq "use_shm_ipc") { 
-				$::force_shm_ipc = $spp[1];
-			} elsif ($spp[0] eq "adcclock") { 
-				$::adcclock = $spp[1];
-			} elsif ($spp[0] eq "clock_div") { 
-				$::clock_div = $spp[1];
-			} elsif ($spp[0] eq "sync") { 
-				$::edcusync = $spp[1];
-			} elsif ($spp[0] eq "optimizeIO") { 
-				$::optimizeIO = $spp[1];
-			} elsif ($spp[0] eq "no_zero_pad") { 
-				$::noZeroPad = $spp[1];
-			} elsif ($spp[0] eq "ipc_rate") { 
-                # Specify IPC rate if lower than model rate
-				$::ipcrate = $spp[1];
-			}
-		}
+                case "dcuid"
+                {
+				    print "PARAM Dcu Id is set to $spp[1]\n";
+				    $::dcuId = $spp[1];
+				    print "GDS node id is set to $::dcuId \n";
+				    $::gdsNodeId = $::dcuId;
+                }
+                case "host"
+                {
+				    print "PARAM Target host name is set to $spp[1]\n";
+				    $::targetHost = $spp[1];
+				    if ($RCG_HOST) {
+					    $::targetHost = $RCG_HOST;
+				    }
+                }
+                case "plant_name"
+                {
+				    print "Plant name is set to $spp[1]\n";
+				    $::plantName = $spp[1];
+                }
+                case "daq_prefix"
+                {
+				    $::daq_prefix = $spp[1];
+                }
+                case "no_sync"
+                {
+                    # This essentially set up IOP for a Cymac
+				    print "Will not sync up to 1PPS\n";
+				    $::no_sync = 1;
+                }
+                case "no_daq"
+                {
+                    # Will compile code not to use DAQ
+				    print "Will not connect to DAQ\n";
+				    $::no_daq = 1;
+                }
+                case "enable_fir"
+                {
+                    # Will compile code to use FIR filtes
+				    print "Will use FIR filters\n";
+				    $::useFIRs = 1;
+                }
+                case "no_oversampling"
+                {
+				    print "Will not oversample\n";
+				    $::no_oversampling = 1;
+                }
+                case "no_dac_interpolation"
+                {
+				    print "Will not interpolate DAC\n";
+				    $::no_dac_interpolation = 1;
+                }
+                case "specific_cpu"
+                {
+				    print "PARAM FE will run on CPU $spp[1]\n";
+				    $::specificCpu = $spp[1];
+                }
+                case "iop_model"
+                {
+				    print "PARAM FE is IOP\n";
+				    print "FE will run as IOP\n";
+				    $::iopModel = $spp[1];
+                }
+                case "diagTest"
+                {
+				    print "PARAM FE Compiles as DIAG TEST CODE\n";
+				    $::diagTest = $spp[1];
+                }
+                case "dacwdoverride"
+                {
+				    print "FE Compiles with override of bad DAC error\n";
+				    $::dacWdOverride = $spp[1];
+                }
+                case "dolphin_time_xmit"
+                {
+				    $::dolphin_time_xmit = $spp[1];
+                }
+                case "dolphin_recover"
+                {
+				    $::dolphin_recover = $spp[1];
+                }
+                case "dolphin_time_rcvr"
+                {
+				    $::dolphinTiming = $spp[1];
+                }
+                case "no_cpu_shutdown"
+                {
+				    $::no_cpu_shutdown = $spp[1];
+                }
+                case "pciRfm"
+                {
+				    print "PARAM FE will run with PCIE RFM Network\n";
+				    $::pciNet = $spp[1];
+                }
+                case "dolphingen"
+                {
+				    print "PARAM FE will run with PCIE RFM Network\n";
+                    # Set Dolphin Gen to run with; default=2
+				    $::dolphinGen = $spp[1];
+                }
+                case "remoteGPS"
+                {
+				    print "FE will run with EPICS for GPS Time\n";
+				    $::remoteGPS = $spp[1];
+                }
+                case "rfm_delay"
+                {
+				    $::rfmDelay = 1;
+                }
+                case "flip_signals"
+                {
+				    $::flipSignals = $spp[1];
+                }
+                case "sdf"
+                {
+				    $::globalsdf = $spp[1];
+                }
+                case "casdf"
+                {
+				    $::casdf = $spp[1];
+                }
+                case "requireIOcnt"
+                {
+				    $::requireIOcnt = $spp[1];
+                }
+                case "virtualIOP"
+                {
+				    $::virtualiop = $spp[1];
+                }
+                case "use_shm_ipc"
+                {
+				    $::force_shm_ipc = $spp[1];
+                }
+                case "adcclock"
+                {
+				    $::adcclock = $spp[1];
+                }
+                case "clock_div"
+                {
+				    $::clock_div = $spp[1];
+                }
+                case "sync"
+                {
+				    $::edcusync = $spp[1];
+                }
+                case "optimizeIO"
+                {
+				    $::optimizeIO = $spp[1];
+                }
+                case "no_zero_pad"
+                {
+				    $::noZeroPad = $spp[1];
+                }
+                case "ipc_rate"
+                {
+                    # Specify IPC rate if lower than model rate
+				    $::ipcrate = $spp[1];
+                }
+                case "biquad"
+                {
+				    $nolongerused = 1;
+                }
+                case "adcSlave"
+                {
+				    $nolongerused = 2;
+                }
+                case "accum_overflow"
+                {
+				    $nolongerused = 2;
+                }
+                case "shmem_daq"
+                {
+				    $nolongerused = 2;
+                }
+			    else {
+                $errmsg = "***ERROR: Unknown Parameter Block Entry: ";
+                $errmsg .=  $spp[0] . "\n";
+                die $errmsg;
+                }
+		    }
+        }
 	}
+    if($::ifo eq "dummy")
+    {
+        $errmsg = "\n************\n";
+        $errmsg .= "***ERROR: Missing Required Parameter Block Entry: ifo\n";
+        $errmsg .= "************\n\n";
+        die $errmsg;
+    }
+    if($::targetHost eq "dummy")
+    {
+        $errmsg = "\n************\n";
+        $errmsg .= "***ERROR: Missing Required Parameter Block Entry: host\n";
+        $errmsg .= "********: Please add host=targetname, where: \n";
+        $errmsg .= "********: \ttargetname is name of computer on which code will run\n";
+        $errmsg .= "************\n\n";
+        die $errmsg;
+    }
+    if($::rate eq 0)
+    {
+        $errmsg = "\n************\n";
+        $errmsg .= "***ERROR: Missing Required Parameter Block Entry: rate\n";
+        $errmsg .= "************\n\n";
+        die $errmsg;
+    }
+    if($::dcuId eq 0)
+    {
+        $errmsg = "\n************\n";
+        $errmsg .= "***ERROR: Missing Required Parameter Block Entry: dcuid\n";
+        $errmsg .= "************\n\n";
+        die $errmsg;
+    }
+    if($::specificCpu eq -1 && $::iopModel ne 1)
+    {
+        $errmsg = "\n************\n";
+        $errmsg .= "***ERROR: Missing Required Parameter Block Entry: specific_cpu\n";
+        $errmsg .= "********: Please add specific_cpu=x, where: \n";
+        $errmsg .= "********: \tx = CPU core on which code will run\n";
+        $errmsg .= "************\n\n";
+        die $errmsg;
+    }
 }
 
 sub printHeaderStruct {
@@ -223,6 +364,7 @@ sub printFrontEndVars  {
 # Check inputs are connected
 sub checkInputConnect {
         my ($i) = @_;
+				    print "PARAM doin connect check\n";
         return "";
 }
 
