@@ -1,4 +1,12 @@
 ==================================================================================================
+Changes for 4.0.2
+==================================================================================================
+- RCG I/O module mapping modified to allow DAC models to appear in any order on the bus. (issue #150)
+- Fix for ANU new 'N' site setting (Issue #117)
+- Fix to rtcds stop --all to stop IOP model last
+- Various changes to clear all RCG code gcc compile warnings (Issue #147)
+- Modified Parameters.pm to perform proper checking for Parameter block entreis. (Issue #155)
+==================================================================================================
 Changes for 4.0.1
 ==================================================================================================
 - Minor fix to the daq_wiper.py script, so that it does not crash when a free size is specified.

@@ -111,6 +111,7 @@ $maxDioMod = pop(@mdmNum);
 # Initialize default settings.
 $sitedepwarning = 0;
 $adcmasterdepwarning = 0;
+$timemasterdepwarning = 0;
 $ifo = "dummy"; # Default value for the ifo name
 $location = "zzz"; # Default value for the location name
 $rate = 0; # In microseconds (default setting)
@@ -294,6 +295,7 @@ die unless CDS::Parser::process();
 
 close(IN);
 
+#Print warning messages if model contains Parameter block entries due for deprecation
 if(($iopModel == 1) and ($modelrate > $adcclock) and ($clock_div == 1)) 
 {
 	die "Error:\nModel rate $modelrate > ADC clock $adcclock\nFix adcclock in Param Block\n*****\n";
@@ -305,6 +307,10 @@ if($sitedepwarning == 1) {
 if($adcmasterdepwarning == 1) {
 	print WARNINGS "WARNING: The 'adcMaster=' designator in the model parameter block\n\t is scheduled for deprecation in future releases. \n";
 	print WARNINGS "*******: Please replace adcMaster=1 designator with iop_model=1 \n";
+}
+if($timemasterdepwarning == 1) {
+	print WARNINGS "WARNING: The 'time_master=' designator in the model parameter block\n\t is scheduled for deprecation in future releases. \n";
+	print WARNINGS "*******: Please replace time_master=1 designator with dolphin_time_xmit=1 \n";
 }
 
 #//	

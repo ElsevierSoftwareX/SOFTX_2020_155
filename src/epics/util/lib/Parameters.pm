@@ -24,6 +24,7 @@ sub parseParams {
 	#print "Split array is @sp\n";
 	for (@sp) {
 		@spp = split(/=/);
+        # Find and convert params due for deprecation in later releases
 		if (@spp == 2) {
             if ($spp[0] eq "site" ) {
                 $::sitedepwarning = 1;
@@ -32,6 +33,10 @@ sub parseParams {
             if($spp[0] eq "adcMaster") {
                 $::adcmasterdepwarning = 1;
                 $spp[0] = "iop_model";
+            }
+            if($spp[0] eq "time_master") {
+                $::timemasterdepwarning = 1;
+                $spp[0] = "dolphin_time_xmit";
             }
             switch($spp[0])
             {
@@ -280,6 +285,7 @@ sub parseParams {
                     # Specify IPC rate if lower than model rate
 				    $::ipcrate = $spp[1];
                 }
+                # Following are old options that are no longer required
                 case "biquad"
                 {
 				    $nolongerused = 1;
@@ -296,6 +302,10 @@ sub parseParams {
                 {
 				    $nolongerused = 2;
                 }
+                case "rfm_dma"
+                {
+				    $nolongerused = 2;
+                }
 			    else {
                 $errmsg = "***ERROR: Unknown Parameter Block Entry: ";
                 $errmsg .=  $spp[0] . "\n";
@@ -304,6 +314,7 @@ sub parseParams {
 		    }
         }
 	}
+    # Check that all required Parameter block entries have been set
     if($::ifo eq "dummy")
     {
         $errmsg = "\n************\n";
