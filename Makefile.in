@@ -46,6 +46,7 @@ DEVFLAGS=@DEVFLAGS@
 	@/bin/mkdir -p build/$@epics
 	@/bin/mv -f build/$@epics-medm build/$@epics/medm
 	@/bin/mv -f build/$@epics-config build/$@epics/config
+ifndef RCG_BUILD_NO_KOBJ
 	@echo Building front-end Linux kernel module $@...
 	@make -sC src/fe/$@ clean
 # copy IOP symbol file to build area if found
@@ -60,10 +61,13 @@ DEVFLAGS=@DEVFLAGS@
 	@make -C src/fe/$@ >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@$(srcdir)/src/epics/util/checkUndefined.pl $@_error.log >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
 	@echo Done
-#	@echo Building front-end user space object $@...
-#	@/bin/rm -rf src/fe/$@_usp/*.o ;
-#	@make -C src/fe/$@_usp >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
-#	@echo Done
+endif
+ifdef RCG_BUILD_USP
+	@echo Building front-end user space object $@...
+	@/bin/rm -rf src/fe/$@_usp/*.o ;
+	@make -C src/fe/$@_usp >> $@.log 2>>$@_error.log || (tail $@.log; cat $@_error.log && /bin/false)
+	@echo Done
+endif
 	@/bin/mkdir -p target/$@epics/src
 	@echo $(srcdir) > target/$@epics/src/rcg_location.txt
 	@echo Build date `date` > target/$@epics/src/build.txt

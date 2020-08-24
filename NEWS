@@ -6,6 +6,7 @@ Changes for 4.0.2
 - Fix to rtcds stop --all to stop IOP model last
 - Various changes to clear all RCG code gcc compile warnings (Issue #147)
 - Modified Parameters.pm to perform proper checking for Parameter block entreis. (Issue #155)
+- Enabled user space code compile with RCG_BUILD_USP compile argument
 ==================================================================================================
 Changes for 4.0.1
 ==================================================================================================
