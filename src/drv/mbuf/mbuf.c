@@ -42,6 +42,11 @@ static struct class* mbuf_class = NULL;
 static struct device* mbuf_device = NULL;
 static struct cdev mbuf_cdev;
 
+#define CDS_LOCAL_MBUF_SETTINGS_BUFFER_SIZE 10
+
+atomic_t mbuf_verbosity = ATOMIC_INIT(0);
+
+
 /* methods of the character device */
 static int mbuf_open(struct inode *inode, struct file *filp);
 static int mbuf_release(struct inode *inode, struct file *filp);
@@ -99,7 +104,10 @@ static DEFINE_SPINLOCK(lock);
 int mbuf_release_area(char *name, struct file *file) {
 	int i;
 
-    printk(KERN_INFO " mbuf_release_area %s\n", name);
+	if ((int)atomic_read(&mbuf_verbosity) > 0) {
+        printk(KERN_INFO
+        " mbuf_release_area %s\n", name);
+    }
 	spin_lock(&lock);
 	// See if allocated
 	for (i = 0; i < MAX_AREAS; i++) {
@@ -230,8 +238,8 @@ int mbuf_allocate_area(char *name, int size, struct file *file) {
 	//rkfree(kmalloc_area[i], s);
 	//kmalloc_area[i] = 0;
 	if (kmalloc_area[i] == 0) {
-		printk("malloc() failed\n");
-		spin_unlock(&lock);
+        spin_unlock(&lock);
+        printk("malloc() failed\n");
 	       	return -1;
 	}
 
@@ -309,14 +317,20 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
 {
 	int res;
     int mod = 0;
-	struct mbuf_request_struct req;
+	int verbose = 0;
+    struct mbuf_request_struct req;
         void __user *argp = (void __user *)arg;
 
-	printk(KERN_INFO "mbuf_ioctl: command=%d\n", cmd);
-        switch(cmd){
-        case IOCTL_MBUF_ALLOCATE:
+    verbose = (int)atomic_read(&mbuf_verbosity);
+
+    if (verbose > 0) {
+        printk(KERN_INFO
+        "mbuf_ioctl: command=%d\n", cmd);
+    }
+    switch(cmd){
+    case IOCTL_MBUF_ALLOCATE:
 		{
-        	  if (copy_from_user (&req, (void *) argp, sizeof (req))) {
+          if (copy_from_user (&req, (void *) argp, sizeof (req))) {
 			return -EFAULT;
 		  }
           // the size should be a multiple of page size
@@ -324,7 +338,10 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
           if (mod != 0) {
               req.size += PAGE_SIZE - mod;
           }
-        	  printk(KERN_INFO "mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n", req.name, (int)req.size, cmd, file);
+          if (verbose > 0) {
+              printk(KERN_INFO
+              "mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n", req.name, (int) req.size, cmd, file);
+          }
 		  res = mbuf_allocate_area(req.name, req.size, file);
 		  if (res >= 0) {
 			return kmalloc_area_size[res];
@@ -333,12 +350,12 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
 		  }
 		}
 		break;
-        case IOCTL_MBUF_DEALLOCATE:
+    case IOCTL_MBUF_DEALLOCATE:
 		{
         	  if (copy_from_user (&req, (void *) argp, sizeof (req))) {
 			return -EFAULT;
 		  }
-        	  //printk("mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n", req.name, req.size, cmd, file);
+          //printk("mbuf_ioctl: name:%.32s, size:%d, cmd:%d, file:%p\n", req.name, req.size, cmd, file);
 		  res = mbuf_release_area(req.name, file);
 		  if (res >= 0) {
 			return  0;
@@ -348,7 +365,7 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
 		} 
                 break;
 
-        case IOCTL_MBUF_INFO:
+    case IOCTL_MBUF_INFO:
 #if 0
 		for (i = 0; i < MAX_AREAS; i++) {
 			if (kmalloc_area[i]) {
@@ -361,8 +378,8 @@ static int mbuf_ioctl(struct inode *inode, struct file *file, unsigned int cmd, 
 		break;
         default:		
                 return -EINVAL;
-        }
-        return -EINVAL;
+    }
+    return -EINVAL;
 }
 
 static ssize_t mbuf_sysfs_status(struct kobject *kobj, struct kobj_attribute *attr, char *buf) {
@@ -389,15 +406,44 @@ static ssize_t mbuf_sysfs_status(struct kobject *kobj, struct kobj_attribute *at
 	return count;
 }
 
+static ssize_t mbuf_sysfs_verbosity_store(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count) {
+    int new_verbosity = 0;
+    char localbuf[CDS_LOCAL_MBUF_SETTINGS_BUFFER_SIZE+1];
+    int conv_ret = 0;
+
+    memset(localbuf, 0, CDS_LOCAL_MBUF_SETTINGS_BUFFER_SIZE+1);
+    if (count >= CDS_LOCAL_MBUF_SETTINGS_BUFFER_SIZE) {
+        printk("mbuf_sysfs_verbosity_store called with too much input, ignoring the value");
+        return -EFAULT;
+    }
+    memcpy(localbuf, buf, count);
+    localbuf[count] ='\0';
+
+
+    if ((conv_ret = kstrtoint(localbuf, 10, &new_verbosity)) != 0) {
+        printk("mbuf_sysfs_verbosity_store error converting verbosity into an integer - %s %d", (conv_ret == -ERANGE ? "range" : "overflow"), conv_ret);
+        return -EFAULT;
+    }
+    atomic_set(&mbuf_verbosity, new_verbosity);
+    return (ssize_t) count;
+}
+
+static ssize_t mbuf_sysfs_verbosity_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf) {
+    return sprintf(buf, "%d\n", (int)atomic_read(&mbuf_verbosity));
+}
+
+
 /* sysfs related structures */
 static struct kobject *mbuf_sysfs_dir = NULL;
 
 /* individual sysfs debug attributes */
 static struct kobj_attribute sysfs_mbuf_status_attr = __ATTR(status, 0444, mbuf_sysfs_status, NULL);
+static struct kobj_attribute sysfs_mbuf_verbosity_attr = __ATTR(verbosity, 0644, mbuf_sysfs_verbosity_show, mbuf_sysfs_verbosity_store);
 
 /* group attributes together for bulk operations */
 static struct attribute *mbuf_fields[] = {
 		&sysfs_mbuf_status_attr.attr,
+		&sysfs_mbuf_verbosity_attr.attr,
 		NULL,
 };
 
