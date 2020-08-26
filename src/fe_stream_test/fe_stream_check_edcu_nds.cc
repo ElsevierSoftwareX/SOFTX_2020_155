@@ -232,6 +232,43 @@ buffer_contains_only( const NDS::buffer& buf, float value )
                           static_cast< std::int32_t >( value ) );
 }
 
+template < typename Validator >
+bool
+buffer_monotonically_increasing( const NDS::buffer& buf, Validator check_valid )
+{
+    auto ok = true;
+    if ( buf.DataType( ) == NDS::channel::DATA_TYPE_FLOAT32 )
+    {
+        auto last = 0.;
+
+        std::for_each( buf.cbegin< float >( ),
+                       buf.cend< float >( ),
+                       [&last, &ok, &check_valid]( float val ) {
+                           if ( val < last || !check_valid( val ) )
+                           {
+                               ok = false;
+                           }
+                           last = val;
+                       } );
+    }
+    else
+    {
+        std::int32_t last = 0;
+
+        std::for_each( buf.cbegin< std::int32_t >( ),
+                       buf.cend< std::int32_t >( ),
+                       [&last, &ok, &check_valid]( std::int32_t val ) {
+                           if ( val < last ||
+                                !check_valid( static_cast< float >( val ) ) )
+                           {
+                               ok = false;
+                           }
+                           last = val;
+                       } );
+    }
+    return ok;
+}
+
 template < typename It1, typename It2 >
 bool
 blended_compare( It1 begin1, It1 end1, It1 begin2, It2 begin3 )
@@ -425,10 +462,49 @@ test_channel_counts( NDS::parameters&             params,
     }
     std::string chan_cnt = chans[ 0 ].Name( );
 
+    chans = NDS::find_channels(
+        params,
+        NDS::channel_predicate( "*EDCU_UPTIME_SECONDS",
+                                NDS::channel::CHANNEL_TYPE_ONLINE ) );
+    if ( chans.size( ) != 1 )
+    {
+        std::cerr
+            << "Unexpected channel count when looking up the uptime channel\n";
+        exit( 1 );
+    }
+    std::string uptime = chans[ 0 ].Name( );
+
+    chans = NDS::find_channels(
+        params,
+        NDS::channel_predicate( "*EDCU_DATA_RATE_KB_PER_S",
+                                NDS::channel::CHANNEL_TYPE_ONLINE ) );
+    if ( chans.size( ) != 1 )
+    {
+        std::cerr << "Unexpected channel count when looking up the byte count "
+                     "channel\n";
+        exit( 1 );
+    }
+    std::string data_rate = chans[ 0 ].Name( );
+
+    chans = NDS::find_channels(
+        params,
+        NDS::channel_predicate( "*EDCU_GPS",
+                                NDS::channel::CHANNEL_TYPE_ONLINE ) );
+    if ( chans.size( ) != 1 )
+    {
+        std::cerr
+            << "Unexpected channel count when looking up the gps channel\n";
+        exit( 1 );
+    }
+    std::string gps = chans[ 0 ].Name( );
+
     NDS::connection::channel_names_type channels;
     channels.push_back( chan_conn );
     channels.push_back( chan_nocon );
     channels.push_back( chan_cnt );
+    channels.push_back( uptime );
+    channels.push_back( data_rate );
+    channels.push_back( gps );
     std::cout << "Channels:\n\t";
     std::copy( channels.begin( ),
                channels.end( ),
@@ -436,12 +512,13 @@ test_channel_counts( NDS::parameters&             params,
     std::cout << "\n";
 
     float expected_count = -1;
+    float expected_size = -1;
 
     auto stream = NDS::iterate(
         params, NDS::request_period( gps_start, gps_stop ), channels );
     for ( const auto& bufs : stream )
     {
-        if ( bufs->size( ) != 3 )
+        if ( bufs->size( ) != 6 )
         {
             std::cerr << "size is wrong " << bufs->size( ) << "\n";
         }
@@ -459,6 +536,20 @@ test_channel_counts( NDS::parameters&             params,
                     bufs->at( 2 ).at< std::int32_t >( 0 ) );
             }
             std::cerr << "Expected count == " << expected_count << "\n";
+        }
+
+        if ( expected_size < 0.0 )
+        {
+            if ( bufs->at( 4 ).DataType( ) == NDS::channel::DATA_TYPE_FLOAT32 )
+            {
+                expected_size = bufs->at( 4 ).at< float >( 0 );
+            }
+            else
+            {
+                expected_size = static_cast< float >(
+                    bufs->at( 4 ).at< std::int32_t >( 0 ) );
+            }
+            std::cerr << "Expected size == " << expected_size << "\n";
         }
 
         if ( !buffer_contains_only( bufs->at( 2 ), expected_count ) )
@@ -481,6 +572,32 @@ test_channel_counts( NDS::parameters&             params,
             std::cout << "The connected count changed during the test "
                          "timespan, it was not always "
                       << expected_count << "\n";
+            exit( 1 );
+        }
+
+        if ( !buffer_monotonically_increasing(
+                 bufs->at( 3 ),
+                 []( float val ) -> bool { return val < 1000000000.0; } ) )
+        {
+            std::cout << "The uptime is not monotonically increasing or it is "
+                         "too large\n";
+            exit( 1 );
+        }
+
+        if ( !buffer_contains_only( bufs->at( 4 ), expected_size ) )
+        {
+            std::cout << "The data_rate changed during the test "
+                         "timespan, it was not always "
+                      << expected_size << "\n";
+            exit( 1 );
+        }
+
+        if ( !buffer_monotonically_increasing(
+                 bufs->at( 5 ),
+                 []( float val ) -> bool { return val > 1000000000.0; } ) )
+        {
+            std::cout << "The gps is not monotonically increasing or it is too "
+                         "small\n";
             exit( 1 );
         }
     }
