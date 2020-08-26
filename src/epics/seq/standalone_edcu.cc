@@ -1465,7 +1465,7 @@ main( int argc, char* argv[] )
         std::vector< char > tmp_buffer( daqd_edcu1.num_chans *
                                         sizeof( double ) );
         daqd_edcu1.data_rate =
-            ( copyDaqData( tmp_buffer.data( ) ) / 1024 ) * 16;
+            ( copyDaqData( tmp_buffer.data( ) ) * 16 ) / 1024;
     }
 
     // Start SPECT
