@@ -22,7 +22,7 @@ units=undef
 """)
         i = 0
 
-        for entry in ['EDCU_CHAN_CONN', 'EDCU_CHAN_CNT',]:
+        for entry in ['EDCU_CHAN_CONN', 'EDCU_CHAN_CNT', 'EDCU_UPTIME_SECONDS', 'EDCU_DATA_RATE_KB_PER_S', 'EDCU_GPS',]:
             f.write("""[{0}{1}]
 datarate=16
 datatype=4

@@ -146,11 +146,14 @@ private:
 class InternalChanNames
 {
 public:
-    InternalChanNames( const std::string& prefix )
+    explicit InternalChanNames( const std::string& prefix )
         : prefix_{ prefix }, chan_conn_{ create_string_vector(
                                  prefix, chan_conn_suffix( ) ) },
           chan_noconn_{ create_string_vector( prefix, chan_noconn_suffix( ) ) },
-          chan_cnt_{ create_string_vector( prefix, chan_cnt_suffix( ) ) }
+          chan_cnt_{ create_string_vector( prefix, chan_cnt_suffix( ) ) },
+          uptime_{ create_string_vector( prefix, uptime_suffix( ) ) },
+          data_rate_{ create_string_vector( prefix, data_rate_suffix( ) ) },
+          gpstime_{ create_string_vector( prefix, gpstime_suffix( ) ) }
     {
     }
     const std::string&
@@ -173,6 +176,21 @@ public:
     {
         return chan_cnt_.data( );
     }
+    const char*
+    uptime( ) const
+    {
+        return uptime_.data( );
+    }
+    const char*
+    data_rate( ) const
+    {
+        return data_rate_.data( );
+    }
+    const char*
+    gpstime( ) const
+    {
+        return gpstime_.data( );
+    }
 
     static const char*
     chan_conn_suffix( )
@@ -190,6 +208,27 @@ public:
     chan_cnt_suffix( )
     {
         static const char* data = "CHAN_CNT";
+        return data;
+    }
+
+    static const char*
+    uptime_suffix( )
+    {
+        static const char* data = "UPTIME_SECONDS";
+        return data;
+    }
+
+    static const char*
+    data_rate_suffix( )
+    {
+        static const char* data = "DATA_RATE_KB_PER_S";
+        return data;
+    }
+
+    static const char*
+    gpstime_suffix( )
+    {
+        static const char* data = "GPS";
         return data;
     }
 
@@ -211,6 +250,9 @@ private:
     std::vector< char > chan_conn_{};
     std::vector< char > chan_noconn_{};
     std::vector< char > chan_cnt_{};
+    std::vector< char > uptime_{};
+    std::vector< char > data_rate_{};
+    std::vector< char > gpstime_{};
 };
 
 // Function prototypes
@@ -243,7 +285,8 @@ public:
     daqd_c( )
         : num_chans( 0 ), con_chans( 0 ), val_events( 0 ), con_events( 0 ),
           channel_type( ), channel_value( ), channel_name( ), channel_status( ),
-          gpsTime( 0 ), epicsSync( 0 ), prefix( nullptr ), dcuid( 0 )
+          gpsTime( 0 ), epicsSync( 0 ), prefix( nullptr ), dcuid( 0 ),
+          uptime( 0 ), data_rate( 0 )
     {
     }
 
@@ -259,11 +302,16 @@ public:
     long                   epicsSync;
     const char*            prefix;
     int                    dcuid;
+    int                    data_rate;
+    int                    uptime;
 };
 
 int num_chans_index = -1;
 int con_chans_index = -1;
 int nocon_chans_index = -1;
+int uptime_index = -1;
+int data_rate_index = -1;
+int gpstime_index = -1;
 int internal_channel_count = 0;
 
 daqd_c                           daqd_edcu1;
@@ -289,13 +337,16 @@ int        nextTrig = 0;
  */
 struct diag_info_block
 {
-    diag_info_block( ) : con_chans( 0 ), nocon_chans( 0 ), status( )
+    diag_info_block( )
+        : con_chans( 0 ), nocon_chans( 0 ), uptime( 0 ), data_rate( 0 ),
+          gpstime( 0 ), status( )
     {
         std::fill( std::begin( status ), std::end( status ), 0xbad );
     }
     diag_info_block( const diag_info_block& other )
         : con_chans( other.con_chans ), nocon_chans( other.nocon_chans ),
-          status( )
+          uptime( other.uptime ), data_rate( other.data_rate ),
+          gpstime( other.gpstime ), status( )
     {
         std::copy( std::begin( other.status ),
                    std::end( other.status ),
@@ -306,6 +357,9 @@ struct diag_info_block
     {
         con_chans = other.con_chans;
         nocon_chans = other.nocon_chans;
+        uptime = other.uptime;
+        data_rate = other.data_rate;
+        gpstime = other.gpstime;
         std::copy( std::begin( other.status ),
                    std::end( other.status ),
                    std::begin( status ) );
@@ -314,6 +368,9 @@ struct diag_info_block
 
     int con_chans;
     int nocon_chans;
+    int uptime;
+    int data_rate;
+    int gpstime;
     int status[ EDCU_MAX_CHANS ];
 };
 
@@ -896,7 +953,10 @@ channel_is_edcu_special_chan( daqd_c* edc, const char* channel_name )
     return ( strcmp( remainder, InternalChanNames::chan_conn_suffix( ) ) == 0 ||
              strcmp( remainder, InternalChanNames::chan_noconn_suffix( ) ) ==
                  0 ||
-             strcmp( remainder, InternalChanNames::chan_cnt_suffix( ) ) == 0 );
+             strcmp( remainder, InternalChanNames::chan_cnt_suffix( ) ) == 0 ||
+             strcmp( remainder, InternalChanNames::uptime_suffix( ) ) == 0 ||
+             strcmp( remainder, InternalChanNames::data_rate_suffix( ) ) == 0 ||
+             strcmp( remainder, InternalChanNames::gpstime_suffix( ) ) == 0 );
 }
 
 int
@@ -976,6 +1036,9 @@ edcuCreateChanList( daqd_c&                  daq,
     const char* chan_conn_name = internal_chans.chan_conn( );
     const char* chan_cnt_name = internal_chans.chan_cnt( );
     const char* chan_noconn_name = internal_chans.chan_noconn( );
+    const char* uptime_name = internal_chans.uptime( );
+    const char* data_rate_name = internal_chans.data_rate( );
+    const char* gpstime_name = internal_chans.gpstime( );
 
     if ( !crc )
     {
@@ -1023,6 +1086,24 @@ edcuCreateChanList( daqd_c&                  daq,
         else if ( strcmp( daq.channel_name[ i ], chan_noconn_name ) == 0 )
         {
             nocon_chans_index = i;
+            internal_channel_count = internal_channel_count + 1;
+            daq.channel_status[ i ] = 0;
+        }
+        else if ( strcmp( daq.channel_name[ i ], uptime_name ) == 0 )
+        {
+            uptime_index = i;
+            internal_channel_count = internal_channel_count + 1;
+            daq.channel_status[ i ] = 0;
+        }
+        else if ( strcmp( daq.channel_name[ i ], data_rate_name ) == 0 )
+        {
+            data_rate_index = i;
+            internal_channel_count = internal_channel_count + 1;
+            daq.channel_status[ i ] = 0;
+        }
+        else if ( strcmp( daq.channel_name[ i ], gpstime_name ) == 0 )
+        {
+            gpstime_index = i;
             internal_channel_count = internal_channel_count + 1;
             daq.channel_status[ i ] = 0;
         }
@@ -1077,26 +1158,16 @@ edcuLoadSpecial( int index, int value )
     }
 }
 
-// **************************************************************************
-void
-edcuWriteData( int           daqBlockNum,
-               unsigned long cycle_gps_time,
-               int           dcuId,
-               int           daqreset )
-// **************************************************************************
+/*!
+ * @brief copy the data from daqd_edcu1.channel_value to the output buffer
+ * @param daqData The output buffer
+ * @return The number of bytes transferred.
+ */
+int
+copyDaqData( char* daqData )
 {
-    char* daqData;
-    int   buf_size;
-    int   ii;
-
-    edcuLoadSpecial( num_chans_index, daqd_edcu1.num_chans );
-    edcuLoadSpecial( con_chans_index, daqd_edcu1.con_chans );
-    edcuLoadSpecial( nocon_chans_index,
-                     daqd_edcu1.num_chans - daqd_edcu1.con_chans );
-
-    buf_size = DAQ_DCU_BLOCK_SIZE * DAQ_NUM_SWING_BUFFERS;
-    daqData = (char*)( shmDataPtr + ( buf_size * daqBlockNum ) );
-    char* data_start = daqData;
+    char* dataStart = daqData;
+    int   ii = 0;
 
     for ( ii = 0; ii < daqd_edcu1.num_chans; ++ii )
     {
@@ -1136,15 +1207,41 @@ edcuWriteData( int           daqBlockNum,
             exit( 1 );
         }
     }
-    // memcpy( daqData,
-    //        daqd_edcu1.channel_value,
-    //        daqd_edcu1.num_chans * sizeof( float ) );
+    return static_cast< int >( daqData - dataStart );
+}
+
+// **************************************************************************
+void
+edcuWriteData( int           daqBlockNum,
+               unsigned long cycle_gps_time,
+               int           dcuId,
+               int           daqreset )
+// **************************************************************************
+{
+    char* daqData;
+    int   buf_size;
+    int   ii;
+
+    edcuLoadSpecial( num_chans_index, daqd_edcu1.num_chans );
+    edcuLoadSpecial( con_chans_index, daqd_edcu1.con_chans );
+    edcuLoadSpecial( nocon_chans_index,
+                     daqd_edcu1.num_chans - daqd_edcu1.con_chans );
+    edcuLoadSpecial( uptime_index, daqd_edcu1.uptime );
+    edcuLoadSpecial( data_rate_index, daqd_edcu1.data_rate );
+    edcuLoadSpecial( gpstime_index, static_cast< int >( daqd_edcu1.gpsTime ) );
+
+    buf_size = DAQ_DCU_BLOCK_SIZE * DAQ_NUM_SWING_BUFFERS;
+    daqData = (char*)( shmDataPtr + ( buf_size * daqBlockNum ) );
+
+    unsigned int data_size = copyDaqData( daqData );
+    ;
+
     dipc->dcuId = dcuId;
     dipc->crc = daqFileCrc;
-    dipc->dataBlockSize = daqData - data_start;
+    dipc->dataBlockSize = data_size;
     dipc->channelCount = daqd_edcu1.num_chans;
     dipc->bp[ daqBlockNum ].cycle = daqBlockNum;
-    dipc->bp[ daqBlockNum ].crc = daqData - data_start;
+    dipc->bp[ daqBlockNum ].crc = data_size;
     dipc->bp[ daqBlockNum ].timeSec = (unsigned int)cycle_gps_time;
     dipc->bp[ daqBlockNum ].timeNSec = (unsigned int)daqBlockNum;
     if ( daqreset )
@@ -1284,11 +1381,12 @@ main( int argc, char* argv[] )
            << InternalChanNames::chan_noconn_suffix( )
            << "\n"
               "\t<prefix>"
-           << InternalChanNames::chan_cnt_suffix( )
-           << "\n"
-              "The standalone edc requires the LIGO mbuf and gpstime modules "
-              "to be "
-              "loaded.\n";
+           << InternalChanNames::chan_cnt_suffix( ) << "\n"
+           << "\t<prefix>" << InternalChanNames::uptime_suffix( ) << "\n"
+           << "\t<prefix>" << InternalChanNames::data_rate_suffix( ) << "\n"
+           << "\t<prefix>" << InternalChanNames::gpstime_suffix( ) << "\n"
+           << "The standalone edc requires the LIGO mbuf and gpstime modules "
+              "to be loaded.\n";
         auto preamble = os.str( );
         arg_parser = args_create_parser( preamble.c_str( ) );
         if ( !arg_parser )
@@ -1339,7 +1437,7 @@ main( int argc, char* argv[] )
     {
         return -1;
     }
-    if (delay_ms < -50 || delay_ms > 50 )
+    if ( delay_ms < -50 || delay_ms > 50 )
     {
         std::cout << "Please keep the delay value between [-50, 50]"
                   << std::endl;
@@ -1362,7 +1460,13 @@ main( int argc, char* argv[] )
     edcuInitialize( daqsharedmemname, "-" );
     edcuCreateChanList( daqd_edcu1, daqFile, &daqFileCrc, internal_channels );
     std::cout << "The edc dcuid = " << daqd_edcu1.dcuid << "\n";
-    int datarate = daqd_edcu1.num_chans * 64 / 1000;
+
+    {
+        std::vector< char > tmp_buffer( daqd_edcu1.num_chans *
+                                        sizeof( double ) );
+        daqd_edcu1.data_rate =
+            ( copyDaqData( tmp_buffer.data( ) ) * 16 ) / 1024;
+    }
 
     // Start SPECT
     daqd_edcu1.gpsTime = symm_initialize( );
@@ -1390,15 +1494,15 @@ main( int argc, char* argv[] )
     ++transmit_time.sec;
     transmit_time.nanosec = 0;
 
-    if (delay_ms < 0 )
+    if ( delay_ms < 0 )
     {
         ++transmit_time.sec;
-        transmit_time.nanosec = 1000000000 + ms_to_ns(delay_ms );
+        transmit_time.nanosec = 1000000000 + ms_to_ns( delay_ms );
     }
 
     int cyle = 0;
 
-    int sleep_per_cycle = (delay_ms > 0 ? delay_ms : 0 );
+    int sleep_per_cycle = ( delay_ms > 0 ? delay_ms : 0 );
 
     update_diag_info( diag_args.queues );
     std::thread diag_thread(
@@ -1421,7 +1525,7 @@ main( int argc, char* argv[] )
         daqd_edcu1.gpsTime = now.sec;
         daqd_edcu1.epicsSync = cycle;
 
-        if (delay_ms < 0 && cycle == 0 )
+        if ( delay_ms < 0 && cycle == 0 )
         {
             // account for running early.
             // We need to nudge the time up on boundary conditions
@@ -1440,6 +1544,7 @@ main( int argc, char* argv[] )
 
         if ( cycle == 0 )
         {
+            ++daqd_edcu1.uptime;
             update_diag_info( diag_args.queues );
         }
     }
@@ -1465,6 +1570,9 @@ update_diag_info( diag_thread_queues& queues )
 
     info->con_chans = daqd_edcu1.con_chans;
     info->nocon_chans = daqd_edcu1.num_chans - info->con_chans;
+    info->uptime = daqd_edcu1.uptime;
+    info->data_rate = daqd_edcu1.data_rate;
+    info->gpstime = static_cast< int >( daqd_edcu1.gpsTime );
 
     std::copy( std::begin( daqd_edcu1.channel_status ),
                std::begin( daqd_edcu1.channel_status ) + daqd_edcu1.num_chans,
@@ -1553,6 +1661,12 @@ client_open_json( Writer& writer, diag_client_conn& conn )
     writer.Int( conn.data.con_chans );
     writer.Key( "DisconnectedChannelCount" );
     writer.Int( conn.data.nocon_chans );
+    writer.Key( "Uptime" );
+    writer.Int( conn.data.uptime );
+    writer.Key( "DataRateKbPerSec" );
+    writer.Int( conn.data.data_rate );
+    writer.Key( "Gpstime" );
+    writer.Int( conn.data.gpstime );
     writer.Key( "DisconnectedChannels" );
     writer.StartArray( );
 }
