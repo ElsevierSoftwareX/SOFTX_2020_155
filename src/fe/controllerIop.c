@@ -430,8 +430,6 @@ fe_start_controller( void* arg )
         gsc18ao8Enable( &cdsPciModules );
         gsc20ao8Enable( &cdsPciModules );
         gsc16ao16Enable( &cdsPciModules );
-        // No 1PPS, so disable future testing
-        dac_preload = 0;
         break;
     case SYNC_SRC_DOLPHIN:
         break;
