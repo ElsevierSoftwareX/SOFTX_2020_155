@@ -93,6 +93,7 @@ Depends:
  pkg-config,
  python3,
  tcsh,
+ libswitch-perl,
  ${misc:Depends},
  ${perl:Depends},
 Recommends:
