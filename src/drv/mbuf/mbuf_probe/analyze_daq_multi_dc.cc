@@ -130,7 +130,9 @@ namespace analyze
                    << std::setw( 2 ) << max_cycle;
                 os << " DataSize: " << data_size;
                 os << " DcuCount: " << dcu_count;
+                os << " DataBlockSize: " << dc_data->header.fullDataBlockSize;
 
+                std::uint64_t cycle_data_in_bytes = 0;
                 for ( unsigned int i = 0; i < dcu_count; ++i )
                 {
                     volatile daq_msg_header_t& header =
@@ -141,6 +143,9 @@ namespace analyze
                     os << " fileCrc: " << header.fileCrc;
                     os << " data: " << header.dataBlockSize;
                     os << " tp: " << header.tpBlockSize;
+                    cycle_data_in_bytes += header.dataBlockSize;
+                    cycle_data_in_bytes += header.tpBlockSize;
+
                     if ( header.tpCount > 0 )
                     {
                         os << "(";
@@ -152,6 +157,14 @@ namespace analyze
                             std::ostream_iterator< unsigned int >( os, "," ) );
                         os << ")";
                     }
+                }
+                if (cycle_data_in_bytes > dc_data->header.fullDataBlockSize)
+                {
+                    os << " overflow " << cycle_data_in_bytes << " > " << dc_data->header.fullDataBlockSize;
+                }
+                else if (cycle_data_in_bytes != static_cast<std::int64_t>(dc_data->header.fullDataBlockSize))
+                {
+                    os << " data  " << cycle_data_in_bytes << " != " << dc_data->header.fullDataBlockSize;
                 }
 
                 std::cout << os.str( ) << std::endl;
