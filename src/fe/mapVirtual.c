@@ -78,8 +78,6 @@ mapPciModules( CDS_HARDWARE* pCds )
     int            adc_cnt = 0;
 #endif
     int            dac_cnt = 0;
-    int            dac_18bit_cnt = 0;
-    int            dac_20bit_cnt = 0;
     int            fast_adc_cnt = 0;
     int            bo_cnt = 0;
     int            use_it;
@@ -115,11 +113,10 @@ mapPciModules( CDS_HARDWARE* pCds )
             _device_shm = (unsigned char*)( kmalloc_area[ ret ] );
             pCds->pci_dac[ dac_cnt ] = (long)_device_shm;
             pCds->dacType[ dac_cnt ] = GSC_18AO8;
-            pCds->dacCount++;
             pCds->dacInstance[ dac_cnt ] =  pCds->dac18Count;
+            pCds->dacCount++;
             pCds->dac18Count++;
             dac_cnt++;
-            dac_18bit_cnt++;
         }
         if ( pCds->cards_used[ i ].type == GSC_16AO16 )
         {
@@ -133,8 +130,8 @@ mapPciModules( CDS_HARDWARE* pCds )
             _device_shm = (unsigned char*)( kmalloc_area[ ret ] );
             pCds->pci_dac[ dac_cnt ] = (long)_device_shm;
             pCds->dacType[ dac_cnt ] = GSC_16AO16;
-            pCds->dacCount++;
             pCds->dacInstance[ dac_cnt ] =  pCds->dac16Count;
+            pCds->dacCount++;
             pCds->dac16Count++;
             dac_cnt++;
         }
@@ -150,10 +147,9 @@ mapPciModules( CDS_HARDWARE* pCds )
             _device_shm = (unsigned char*)( kmalloc_area[ ret ] );
             pCds->pci_dac[ dac_cnt ] = (long)_device_shm;
             pCds->dacType[ dac_cnt ] = GSC_20AO8;
+            pCds->dacInstance[ dac_cnt ] =  pCds->dac20Count;
             pCds->dacCount++;
             dac_cnt++;
-            dac_20bit_cnt++;
-            pCds->dacInstance[ dac_cnt ] =  pCds->dac20Count;
             pCds->dac20Count++;
         }
         if ( pCds->cards_used[ i ].type == GSC_16AI64SSA )

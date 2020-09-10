@@ -84,6 +84,7 @@ mapPciModules( CDS_HARDWARE* pCds )
                 {
                     kk = pCds->dacCount;
                     pCds->dacType[ kk ] = GSC_18AO8;
+                    pCds->dacInstance[ kk ] = ioMemData->card[ ii ];
                     pCds->dacConfig[ kk ] = ioMemData->ipc[ ii ];
                     pCds->pci_dac[ kk ] = (long)( ioMemData->iodata[ ii ] );
                     pCds->dacCount++;
@@ -97,6 +98,7 @@ mapPciModules( CDS_HARDWARE* pCds )
                 {
                     kk = pCds->dacCount;
                     pCds->dacType[ kk ] = GSC_20AO8;
+                    pCds->dacInstance[ kk ] = ioMemData->card[ ii ];
                     pCds->dacConfig[ kk ] = ioMemData->ipc[ ii ];
                     pCds->pci_dac[ kk ] = (long)( ioMemData->iodata[ ii ] );
                     pCds->dacCount++;

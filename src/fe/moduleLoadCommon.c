@@ -82,11 +82,13 @@ print_io_info( CDS_HARDWARE* cdsp )
         if ( cdsp->dacType[ ii ] == GSC_18AO8 )
         {
             printf( "\tDAC %d is a GSC_18AO8 module\n", ii );
+            printf( "\tCard number is %d\n", cdsp->dacInstance[ ii ] );
             printf( "\tMemory at block %d\n", cdsp->dacConfig[ ii ] );
         }
         if ( cdsPciModules.dacType[ ii ] == GSC_20AO8 )
         {
             printf( "\tDAC %d is a GSC_20AO8 module\n", ii );
+            printf( "\tCard number is %d\n", cdsp->dacInstance[ ii ] );
             printf( "Memory at block %d\n", cdsp->dacConfig[ ii ] );
             printf( "\t\tFirmware Revision: %d\n",
                     ( cdsPciModules.dacConfig[ ii ] & 0xffff ) );
@@ -94,6 +96,7 @@ print_io_info( CDS_HARDWARE* cdsp )
         if ( cdsp->dacType[ ii ] == GSC_16AO16 )
         {
             printf( "\tDAC %d is a GSC_16AO16 module\n", ii );
+            printf( "\tCard number is %d\n", cdsp->dacInstance[ ii ] );
             printf( "\tMemory at block %d\n", cdsp->dacConfig[ ii ] );
             if ( ( cdsp->dacConfig[ ii ] & 0x10000 ) == 0x10000 )
                 jj = 8;
