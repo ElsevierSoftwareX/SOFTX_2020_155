@@ -27,6 +27,15 @@ current_time_fe( void )
     // t.tv_sec -= 315964819;
     return t.tv_sec;
 }
+inline unsigned long
+current_nanosecond( void )
+{
+    struct timespec        t;
+    extern struct timespec current_kernel_time( void );
+
+    t = current_kernel_time( );
+    return t.tv_nsec;
+}
 
 //***********************************************************************
 /// \brief Calculate ADC/DAC duotone offset for diagnostics. \n

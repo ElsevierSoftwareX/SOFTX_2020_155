@@ -142,6 +142,8 @@ if($iopModel == 1) {
 	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"PROC TIME",$ecolors{white});
 	$xpos = 409; $ypos = 197; $width = 75; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"IRIG-B",$ecolors{white});
+	$xpos = 409; $ypos = 217; $width = 75; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"1PPS SYNC",$ecolors{white});
     
 	$xpos = 501; $ypos = 157; $width = 20; $height = 15;
     $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DIAG_WORD","1","1",$ecolors{red},$ecolors{green});
@@ -149,6 +151,8 @@ if($iopModel == 1) {
     $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DIAG_WORD","3","3",$ecolors{red},$ecolors{green});
 	$xpos = 501; $ypos = 197; $width = 20; $height = 15;
     $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DIAG_WORD","4","4",$ecolors{red},$ecolors{green});
+	$xpos = 501; $ypos = 217; $width = 20; $height = 15;
+    $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DIAG_WORD","5","5",$ecolors{red},$ecolors{green});
 }
 
     # Add Clock Period Info

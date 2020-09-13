@@ -155,7 +155,13 @@ sub parseParams {
                 {
                     # This essentially set up IOP for a Cymac
 				    print "Will not sync up to 1PPS\n";
-				    $::no_sync = 1;
+				    $::no_sync = $spp[1];
+                }
+                case "test1pps"
+                {
+                    # This essentially set up IOP for a Cymac
+				    print "Will not sync up to 1PPS\n";
+				    $::test1pps = $spp[1];
                 }
                 case "no_daq"
                 {

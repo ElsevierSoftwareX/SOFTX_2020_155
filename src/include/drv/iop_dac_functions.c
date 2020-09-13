@@ -1,6 +1,6 @@
 inline int iop_dac_init( int[] );
 inline int iop_dac_preload( volatile GSC_DAC_REG*[] );
-inline int iop_dac_write( int );
+inline int iop_dac_write( int, int );
 
 inline int
 iop_dac_init( int errorPend[] )
@@ -112,7 +112,7 @@ iop_dac_recover( int samples, volatile GSC_DAC_REG* dacReg[] )
 }
 
 inline int
-iop_dac_write( int in_delay )
+iop_dac_write( int in_delay, int start_cycle )
 {
     unsigned int* pDacData;
     int           mm;
@@ -128,7 +128,7 @@ iop_dac_write( int in_delay )
     /// - -- Code will require restart to clear.
     // COMMENT OUT NEX LINE FOR TEST STAND w/bad DAC cards.
     /// \> Loop thru all DAC modules
-    if ( ( dacWriteEnable > 4 ) && ( in_delay < 2 ) )
+    if ( ( dacWriteEnable > start_cycle ) && ( in_delay < 2 ) )
     {
         for ( card = 0; card < cdsPciModules.dacCount; card++ )
         {
@@ -258,7 +258,7 @@ iop_dac_write( int in_delay )
             /// be used again by Master
             ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle = -1;
             /// - -- DMA Write data to DAC module
-            if ( dacWriteEnable > 4 )
+            if ( dacWriteEnable > start_cycle )
             {
                 if ( cdsPciModules.dacType[ card ] == GSC_16AO16 )
                 {
@@ -285,8 +285,10 @@ iop_dac_write( int in_delay )
 }
 
 inline int
-check_dac_buffers( int cycleNum )
+check_dac_buffers( int cycleNum, int report_all_faults )
 {
+    // if report_all_faults not set, then will only set
+    // dacTimingError on FIFO full.
     volatile GSA_18BIT_DAC_REG* dac18bitPtr;
     volatile GSA_20BIT_DAC_REG* dac20bitPtr;
     int                         out_buf_size = 0;
@@ -296,40 +298,65 @@ check_dac_buffers( int cycleNum )
     jj = cycleNum - HKP_DAC_FIFO_CHK;
     if ( cdsPciModules.dacType[ jj ] == GSC_18AO8 )
     {
-        dac18bitPtr = (volatile GSA_18BIT_DAC_REG*)( dacPtr[ jj ] );
-        out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
-        dacOutBufSize[ jj ] = out_buf_size;
-        pLocalEpics->epicsOutput.buffDac[ jj ] = out_buf_size;
-        if ( !dacTimingError )
+        if ( report_all_faults )
         {
-            if ( ( out_buf_size < 8 ) || ( out_buf_size > 24 ) )
+            dac18bitPtr = (volatile GSA_18BIT_DAC_REG*)( dacPtr[ jj ] );
+            out_buf_size = dac18bitPtr->OUT_BUF_SIZE;
+            dacOutBufSize[ jj ] = out_buf_size;
+            pLocalEpics->epicsOutput.buffDac[ jj ] = out_buf_size;
+            if ( !dacTimingError )
             {
+                if ( ( out_buf_size < 8 ) || ( out_buf_size > 24 ) )
+                {
+                    pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_BIT );
+                    if ( dacTimingErrorPending[ jj ] )
+                        dacTimingError = 1;
+                    dacTimingErrorPending[ jj ] = 1;
+                }
+                else
+                {
+                    pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_BIT;
+                    dacTimingErrorPending[ jj ] = 0;
+                }
+            }
+
+            // Set/unset FIFO empty,hi qtr, full diags
+            if ( out_buf_size < 4 )
+                pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_EMPTY;
+            else
+                pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_EMPTY );
+            if ( out_buf_size > 24 )
+                pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_HI_QTR;
+            else
+                pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_HI_QTR );
+            if ( out_buf_size > 320 )
+            {
+                pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_FULL;
+                dacTimingError = 1;
+            }
+            else
+            {
+                pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_FULL );
+            }
+        }
+        else
+        {
+            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_EMPTY );
+            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_HI_QTR );
+            // Check only for FIFO FULL
+            if ( out_buf_size > 320 )
+            {
+                pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_FULL;
                 pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_BIT );
-                if ( dacTimingErrorPending[ jj ] )
-                    dacTimingError = 1;
-                dacTimingErrorPending[ jj ] = 1;
+                dacTimingError = 1;
             }
             else
             {
                 pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_BIT;
-                dacTimingErrorPending[ jj ] = 0;
             }
         }
-
-        // Set/unset FIFO empty,hi qtr, full diags
-        if ( out_buf_size < 4 )
-            pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_EMPTY;
-        else
-            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_EMPTY );
-        if ( out_buf_size > 24 )
-            pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_HI_QTR;
-        else
-            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_HI_QTR );
-        if ( out_buf_size > 320 )
-            pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_FULL;
-        else
-            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_FULL );
     }
+
     if ( cdsPciModules.dacType[ jj ] == GSC_20AO8 )
     {
         dac20bitPtr = (volatile GSA_20BIT_DAC_REG*)( dacPtr[ jj ] );
@@ -339,7 +366,7 @@ check_dac_buffers( int cycleNum )
         if ( ( out_buf_size > 24 ) )
         {
             pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_BIT );
-            if ( dacTimingErrorPending[ jj ] )
+            if ( dacTimingErrorPending[ jj ] && report_all_faults )
                 dacTimingError = 1;
             dacTimingErrorPending[ jj ] = 1;
         }
@@ -355,43 +382,73 @@ check_dac_buffers( int cycleNum )
         else
             pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_HI_QTR );
         if ( out_buf_size > 500 )
+        {
             pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_FULL;
+            dacTimingError = 1;
+        }
         else
+        {
             pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_FULL );
+        }
     }
     if ( cdsPciModules.dacType[ jj ] == GSC_16AO16 )
     {
         status = gsc16ao16CheckDacBuffer( jj );
         dacOutBufSize[ jj ] = status;
-        if ( !dacTimingError )
+        if ( report_all_faults )
         {
-            if ( status != 2 )
+            if ( !dacTimingError )
             {
+                if ( status != 2 )
+                {
+                    pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_BIT );
+                    if ( dacTimingErrorPending[ jj ] )
+                        dacTimingError = 1;
+                    dacTimingErrorPending[ jj ] = 1;
+                }
+                else
+                {
+                    pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_BIT;
+                    dacTimingErrorPending[ jj ] = 0;
+                }
+            }
+
+            // Set/unset FIFO empty,hi qtr, full diags
+            if ( status & 1 )
+                pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_EMPTY;
+            else
+                pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_EMPTY );
+            if ( status & 8 )
+            {
+                pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_FULL;
+                dacTimingError = 1;
+            }
+            else
+            {
+                pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_FULL );
+            }
+            if ( status & 4 )
+                pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_HI_QTR;
+            else
+                pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_HI_QTR );
+        }
+        else
+        {
+            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_EMPTY );
+            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_HI_QTR );
+            // Check only for FIFO FULL
+            if ( status & 8 )
+            {
+                pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_FULL;
                 pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_BIT );
-                if ( dacTimingErrorPending[ jj ] )
-                    dacTimingError = 1;
-                dacTimingErrorPending[ jj ] = 1;
+                dacTimingError = 1;
             }
             else
             {
                 pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_BIT;
-                dacTimingErrorPending[ jj ] = 0;
+                pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_FULL );
             }
         }
-
-        // Set/unset FIFO empty,hi qtr, full diags
-        if ( status & 1 )
-            pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_EMPTY;
-        else
-            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_EMPTY );
-        if ( status & 8 )
-            pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_FULL;
-        else
-            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_FULL );
-        if ( status & 4 )
-            pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_HI_QTR;
-        else
-            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_HI_QTR );
     }
     return 0;
 }

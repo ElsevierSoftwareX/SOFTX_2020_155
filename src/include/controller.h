@@ -50,7 +50,7 @@ char fp[ 64 * 1024 ];
 #define ODC_EXC_SET 0x4
 
 #define CPURATE ( cpu_khz / 1000 )
-#define ONE_PPS_THRESH 2000
+#define ONE_PPS_THRESH 1000
 #define SYNC_SRC_NONE 0
 #define SYNC_SRC_DOLPHIN 1
 #define SYNC_SRC_1PPS 2

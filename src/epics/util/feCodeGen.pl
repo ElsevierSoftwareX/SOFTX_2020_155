@@ -136,6 +136,7 @@ $casdf = 0;
 $globalsdf = 0;
 $pciNet = -1;
 $no_sync = 0; # Sync up to 1PPS by default
+$test1pps = 0; # Forrce Sync up to 1PPS for testing
 $no_daq = 0; # Enable DAQ by default
 $gdsNodeId = 0;
 $ifoid = 0; # Default ifoid for the DAQ
@@ -1335,7 +1336,7 @@ print EPICS "DUMMY FEC\_$dcuId\_UPTIME_MINUTE int ao 0\n";
 # The following code is in solely for automated testing.
 if($diagTest > -1)
 {
-print OUTH "\tint timingTest[16];\n";
+print OUTH "\tint timingTest[17];\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_CYCLE epicsInput.bumpCycle int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_BUMP_ADC epicsInput.bumpAdcRd int ao 0\n";
 print EPICS "MOMENTARY FEC\_$dcuId\_LONG_ADC epicsInput.longAdcRd int ao 0\n";
@@ -1355,6 +1356,7 @@ print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_16KB epicsOutput.timingTest[12
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_04KB epicsOutput.timingTest[13] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_02KB epicsOutput.timingTest[14] int ao 0\n";
 print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_DELAY epicsOutput.timingTest[15] int ao 0\n";
+print EPICS "OUTVARIABLE FEC\_$dcuId\_TIMING_TEST_1PPS epicsOutput.timingTest[16] int ao 0\n";
 }
 
 print OUTH "} CDS_EPICS_OUT;\n\n";
@@ -2524,9 +2526,12 @@ if ($iopModel > -1) {  #************ SETUP FOR IOP ***************
   print OUTM "EXTRA_CFLAGS += -DDAC_AUTOCAL\n";
 
 # Set to run without LIGO timing system
-  if ($no_sync) {
-    print OUTM "#Comment out to enable 1PPS synchronization\n";
+  if ($no_sync == 1) {
     print OUTM "EXTRA_CFLAGS += -DNO_SYNC\n";
+  }  
+# Test mode to force sync to 1pps even if TDS present
+  if ($test1pps == 1) {
+    print OUTM "EXTRA_CFLAGS += -DTEST_1PPS\n";
   }  
 # Set to run IOP as time master for the Dolphin Network
   if ($dolphin_time_xmit > -1) {
