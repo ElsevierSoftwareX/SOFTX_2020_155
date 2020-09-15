@@ -264,7 +264,9 @@ if($iopModel == 1) {
         $ypos += 15;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","2","2",$ecolors{green},$ecolors{red});
         $ypos += 15;
+    if($dactype[$ii] ne "GSC_16AO16" ) {
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","4","4",$ecolors{green},$ecolors{red});
+    }
         $ypos += 15;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","3","3",$ecolors{green},$ecolors{red});
         $ypos += 15;
