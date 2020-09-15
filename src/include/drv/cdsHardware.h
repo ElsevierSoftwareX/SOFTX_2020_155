@@ -88,6 +88,7 @@ typedef struct CDS_REMOTE_NODES {
 #define ADC_DUOTONE_BRD		0
 #define ADC_DUOTONE_CHAN	31
 #define DAC_DUOTONE_CHAN	30
+#define DAC_START_CYCLE     4
 #define ADC_BUS_DELAY		1
 #define ADC_SHORT_CYCLE		2
 #define ADC_MAPPED  		1

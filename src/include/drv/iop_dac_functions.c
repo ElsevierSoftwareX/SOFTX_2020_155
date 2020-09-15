@@ -1,6 +1,6 @@
 inline int iop_dac_init( int[] );
 inline int iop_dac_preload( volatile GSC_DAC_REG*[] );
-inline int iop_dac_write( int, int );
+inline int iop_dac_write( int );
 
 inline int
 iop_dac_init( int errorPend[] )
@@ -112,7 +112,7 @@ iop_dac_recover( int samples, volatile GSC_DAC_REG* dacReg[] )
 }
 
 inline int
-iop_dac_write( int in_delay, int start_cycle )
+iop_dac_write( int in_delay )
 {
     unsigned int* pDacData;
     int           mm;
@@ -128,7 +128,7 @@ iop_dac_write( int in_delay, int start_cycle )
     /// - -- Code will require restart to clear.
     // COMMENT OUT NEX LINE FOR TEST STAND w/bad DAC cards.
     /// \> Loop thru all DAC modules
-    if ( ( dacWriteEnable > start_cycle ) && ( in_delay < 2 ) )
+    if ( ( dacWriteEnable > DAC_START_CYCLE ) && ( in_delay < 2 ) )
     {
         for ( card = 0; card < cdsPciModules.dacCount; card++ )
         {
@@ -258,7 +258,7 @@ iop_dac_write( int in_delay, int start_cycle )
             /// be used again by Master
             ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle = -1;
             /// - -- DMA Write data to DAC module
-            if ( dacWriteEnable > start_cycle )
+            if ( dacWriteEnable > DAC_START_CYCLE )
             {
                 if ( cdsPciModules.dacType[ card ] == GSC_16AO16 )
                 {

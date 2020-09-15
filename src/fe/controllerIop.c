@@ -141,7 +141,6 @@ fe_start_controller( void* arg )
     adcInfo_t* padcinfo;
     int        expect_delays = 0;
     int        delay_cycles = 0;
-    int        dac_start_cycle = 4;
 #ifdef NO_DAC_PRELOAD
     int dac_preload = 0;
     // DAC FIFO check will produce DAC error only for FIFO full
@@ -205,15 +204,15 @@ fe_start_controller( void* arg )
 
 #ifdef TEST_1PPS
     syncSource = SYNC_SRC_1PPS;
-        for ( ii = 0; ii < tdsCount; ii++ )
-        {
-            // CDIO1616Output[ii] = TDS_START_ADC_NEG_DAC_POS;
-            CDIO1616Output[ ii ] =
-                TDS_START_ADC_NEG_DAC_POS | TDS_NO_DAC_DUOTONE;
-            CDIO1616Input[ ii ] = contec1616WriteOutputRegister(
-                &cdsPciModules, tdsControl[ ii ], CDIO1616Output[ ii ] );
-        }
-        msleep( 1000 );
+    // Need to start TDS clocks for testing
+    for ( ii = 0; ii < tdsCount; ii++ )
+    {
+        CDIO1616Output[ ii ] =
+            TDS_START_ADC_NEG_DAC_POS | TDS_NO_DAC_DUOTONE;
+        CDIO1616Input[ ii ] = contec1616WriteOutputRegister(
+            &cdsPciModules, tdsControl[ ii ], CDIO1616Output[ ii ] );
+    }
+    msleep( 1000 );
 #endif
 #ifdef NO_SYNC
     syncSource = SYNC_SRC_NONE;
@@ -417,9 +416,8 @@ fe_start_controller( void* arg )
         }
         break;
     case SYNC_SRC_1PPS:
-        // Preload values to DAC FIFOs
-        if ( dac_preload )
-           status = iop_dac_preload ( dacPtr );
+        // Do Not Preload values to DAC FIFOs
+        dac_fault_armed = 0;
         // Clocks are already running, so can't enable all ADC cards
         // at once as some may trigger on one clock and one or more
         // on the next clock, leaving them out of sync with each other.
@@ -459,10 +457,9 @@ fe_start_controller( void* arg )
         onePpsHi = 1;
         onePpsTime = cycleNum;
         pLocalEpics->epicsOutput.timeErr = syncSource;
-        dac_start_cycle = 6;
         break;
     case SYNC_SRC_NONE:
-        // Preload values to DAC FIFOs
+        // Do Not Preload values to DAC FIFOs
         dac_fault_armed = 0;
         // Enable only the 1st ADC
         gsc16ai64Enable1PPS( 0 );
@@ -664,7 +661,7 @@ fe_start_controller( void* arg )
 #endif
             // Write out data to DAC modules
             if ( usloop == 0 )
-                dkiTrip = iop_dac_write( expect_delays, dac_start_cycle );
+                dkiTrip = iop_dac_write( expect_delays );
 
             // ***********************************************************************
             /// BEGIN HOUSEKEEPING
