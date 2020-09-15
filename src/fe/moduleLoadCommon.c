@@ -3,7 +3,7 @@
 ///     for both IOP and User apps.`
 
 void
-print_io_info( CDS_HARDWARE* cdsp )
+print_io_info( CDS_HARDWARE* cdsp , int iopmodel)
 {
     int ii, jj, kk;
     int channels = 0;
@@ -35,7 +35,7 @@ print_io_info( CDS_HARDWARE* cdsp )
         kk++;
         if ( cdsp->adcType[ ii ] == GSC_18AI32SSC1M )
         {
-            printf( "\tADC %d is a GSC_18AI32SSC1M module\n", ii );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tADC %d is a GSC_18AI32SSC1M module\n", ii );
             jj = ( cdsp->adcConfig[ ii ] >> 16 ) & 0x3;
             switch ( jj )
             {
@@ -55,21 +55,28 @@ print_io_info( CDS_HARDWARE* cdsp )
                 channels = 0;
                 break;
             }
-            printf( "\t\tChannels = %d \n", channels );
-            printf( "\t\tFirmware Rev = %d \n\n",
-                    ( cdsp->adcConfig[ ii ] & 0xfff ) );
+            if(iopmodel) {
+                printf( "" SYSTEM_NAME_STRING_LOWER ":\t\tChannels = %d \n", channels );
+                printf( "" SYSTEM_NAME_STRING_LOWER ":\t\tFirmware Rev = %d \n\n",
+                        ( cdsp->adcConfig[ ii ] & 0xfff ) );
+            }
         }
         if ( cdsp->adcType[ ii ] == GSC_16AI64SSA )
         {
-            printf( "\tADC %d is a GSC_16AI64SSA module\n", ii );
-            printf( "\tMemory at block %d\n", cdsp->adcConfig[ ii ] );
-            if ( ( cdsp->adcConfig[ ii ] & 0x10000 ) > 0 )
-                jj = 32;
-            else
-                jj = 64;
-            printf( "\t\tChannels = %d \n", jj );
-            printf( "\t\tFirmware Rev = %d \n\n",
-                    ( cdsp->adcConfig[ ii ] & 0xfff ) );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tADC %d is a GSC_16AI64SSA module\n", ii );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tCard number is %d\n", cdsp->adcInstance[ ii ] );
+            if(! iopmodel) {
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tMemory at block %d\n", cdsp->adcConfig[ ii ] );
+            }
+            if(iopmodel) {
+                if ( ( cdsp->adcConfig[ ii ] & 0x10000 ) > 0 )
+                    jj = 32;
+                else
+                    jj = 64;
+                printf( "" SYSTEM_NAME_STRING_LOWER ":\t\tChannels = %d \n", channels );
+                printf( "" SYSTEM_NAME_STRING_LOWER ":\t\tFirmware Rev = %d \n\n",
+                        ( cdsp->adcConfig[ ii ] & 0xfff ) );
+            }
         }
     }
     printf( "******************************************************************"
@@ -81,48 +88,21 @@ print_io_info( CDS_HARDWARE* cdsp )
         kk++;
         if ( cdsp->dacType[ ii ] == GSC_18AO8 )
         {
-            printf( "\tDAC %d is a GSC_18AO8 module\n", ii );
-            printf( "\tCard number is %d\n", cdsp->dacInstance[ ii ] );
-            printf( "\tMemory at block %d\n", cdsp->dacConfig[ ii ] );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tDAC %d is a GSC_18AO8 module\n", ii );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tCard number is %d\n", cdsp->dacInstance[ ii ] );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tMemory at block %d\n\n", cdsp->dacConfig[ ii ] );
         }
         if ( cdsPciModules.dacType[ ii ] == GSC_20AO8 )
         {
-            printf( "\tDAC %d is a GSC_20AO8 module\n", ii );
-            printf( "\tCard number is %d\n", cdsp->dacInstance[ ii ] );
-            printf( "Memory at block %d\n", cdsp->dacConfig[ ii ] );
-            printf( "\t\tFirmware Revision: %d\n",
-                    ( cdsPciModules.dacConfig[ ii ] & 0xffff ) );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tDAC %d is a GSC_20AO8 module\n", ii );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tCard number is %d\n", cdsp->dacInstance[ ii ] );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tMemory at block %d\n\n", cdsp->dacConfig[ ii ] );
         }
         if ( cdsp->dacType[ ii ] == GSC_16AO16 )
         {
-            printf( "\tDAC %d is a GSC_16AO16 module\n", ii );
-            printf( "\tCard number is %d\n", cdsp->dacInstance[ ii ] );
-            printf( "\tMemory at block %d\n", cdsp->dacConfig[ ii ] );
-            if ( ( cdsp->dacConfig[ ii ] & 0x10000 ) == 0x10000 )
-                jj = 8;
-            if ( ( cdsp->dacConfig[ ii ] & 0x20000 ) == 0x20000 )
-                jj = 12;
-            if ( ( cdsp->dacConfig[ ii ] & 0x30000 ) == 0x30000 )
-                jj = 16;
-            printf( "\t\tChannels = %d \n", jj );
-            if ( ( cdsp->dacConfig[ ii ] & 0xC0000 ) == 0x0000 )
-            {
-                printf( "\t\tFilters = None\n" );
-            }
-            if ( ( cdsp->dacConfig[ ii ] & 0xC0000 ) == 0x40000 )
-            {
-                printf( "\t\tFilters = 10kHz\n" );
-            }
-            if ( ( cdsp->dacConfig[ ii ] & 0xC0000 ) == 0x80000 )
-            {
-                printf( "\t\tFilters = 100kHz\n" );
-            }
-            if ( ( cdsp->dacConfig[ ii ] & 0x100000 ) == 0x100000 )
-            {
-                printf( "\t\tOutput Type = Differential\n" );
-            }
-            printf( "\t\tFirmware Rev = %d \n\n",
-                    ( cdsp->dacConfig[ ii ] & 0xfff ) );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tDAC %d is a GSC_16AO16 module\n", ii );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tCard number is %d\n", cdsp->dacInstance[ ii ] );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tMemory at block %d\n\n", cdsp->dacConfig[ ii ] );
         }
     }
     kk += cdsp->dioCount;

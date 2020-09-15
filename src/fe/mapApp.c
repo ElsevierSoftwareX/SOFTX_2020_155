@@ -46,6 +46,7 @@ mapPciModules( CDS_HARDWARE* pCds )
                 {
                     kk = pCds->adcCount;
                     pCds->adcType[ kk ] = GSC_16AI64SSA;
+                    pCds->adcInstance[ kk ] = ioMemData->card[ ii ];
                     pCds->adcConfig[ kk ] = ioMemData->ipc[ ii ];
                     pCds->adcCount++;
                     status++;
@@ -58,6 +59,7 @@ mapPciModules( CDS_HARDWARE* pCds )
                 {
                     kk = pCds->adcCount;
                     pCds->adcType[ kk ] = GSC_18AI32SSC1M;
+                    pCds->adcInstance[ kk ] = ioMemData->card[ ii ];
                     pCds->adcConfig[ kk ] = ioMemData->ipc[ ii ];
                     pCds->adcCount++;
                     status++;

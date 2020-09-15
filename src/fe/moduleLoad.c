@@ -158,7 +158,11 @@ rt_fe_init( void )
 
     // Print out all the I/O information
     // Following routine is in moduleLoadCommon.c
-    print_io_info( &cdsPciModules );
+#ifdef IOP_MODEL
+    print_io_info( &cdsPciModules, 1 );
+#else
+    print_io_info( &cdsPciModules, 0 );
+#endif
 
     pLocalEpics->epicsInput.vmeReset = 0;
     udelay( 2000 );
