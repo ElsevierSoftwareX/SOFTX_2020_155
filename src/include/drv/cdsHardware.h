@@ -80,7 +80,7 @@ typedef struct CDS_REMOTE_NODES {
 #define MAX_ADC_WAIT_CYCLE	17
 #define DUMMY_ADC_VAL		0xf000000	// Dummy value for test last ADC channel has arrived
 #define ADC_1ST_CHAN_MARKER	0xf0000		// Only first ADC channel should have upper bits set as first chan marker.
-#ifdef DIAG_TEST
+#ifdef TEST_1PPS
 #define ADC_ONEPPS_BRD		2
 #else
 #define ADC_ONEPPS_BRD		0
