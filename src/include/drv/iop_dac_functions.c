@@ -26,6 +26,8 @@ iop_dac_init( int errorPend[] )
     for ( jj = 0; jj < cdsPciModules.dacCount; jj++ )
     {
         pLocalEpics->epicsOutput.statDac[ jj ] = DAC_FOUND_BIT;
+        status = cdsPciModules.dacAcr[ jj ] & DAC_CAL_PASS;
+        if(status)  pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_AUTOCAL_BIT;
         // Arm DAC DMA for full data size
         if ( cdsPciModules.dacType[ jj ] == GSC_16AO16 )
         {

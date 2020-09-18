@@ -83,7 +83,7 @@ gsc16ao16Init( CDS_HARDWARE* pHardware, struct pci_dev* dacdev )
     printk( "DAC BOR = 0x%x\n", dacPtr[ devNum ]->BOR );
     pHardware->pci_dac[ devNum ] =
         (long)pci_alloc_consistent( dacdev, 0x200, &dac_dma_handle[ devNum ] );
-    pHardware->dacConfig[ devNum ] = (int)( dacPtr[ devNum ]->ASSC );
+    pHardware->dacAcr[ devNum ] = (int)( dacPtr[ devNum ]->ASSC );
     pHardware->dacType[ devNum ] = GSC_16AO16;
     pHardware->dacCount++;
     pHardware->dacInstance[ devNum ] =  pHardware->dac16Count;

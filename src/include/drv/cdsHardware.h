@@ -95,6 +95,8 @@ typedef struct CDS_REMOTE_NODES {
 #define ADC_CHAN_HOP  		2
 #define ADC_OVERFLOW  		4
 #define ADC_CAL_PASS  		8
+#define DAC_CAL_PASS  		0x100000
+#define DAC_ACR_MASK  		0x01ffff
 #define ADC_RD_TIME  		16
 
 
@@ -212,6 +214,7 @@ typedef struct CDS_HARDWARE{
 	int dacType[MAX_DAC_MODULES];
 	int dacInstance[MAX_DAC_MODULES];
 	int dacConfig[MAX_DAC_MODULES];
+    int dacAcr[MAX_DAC_MODULES];
 	int adcCount;			/* Number of ADC modules found		*/
 	int adc16Count;			/* Number of 16 bit ADC modules found		*/
 	int adc18Count;			/* Number of 18 bit ADC modules found		*/

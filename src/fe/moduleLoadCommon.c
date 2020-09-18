@@ -90,19 +90,39 @@ print_io_info( CDS_HARDWARE* cdsp , int iopmodel)
         {
             printf( "" SYSTEM_NAME_STRING_LOWER ":\tDAC %d is a GSC_18AO8 module\n", ii );
             printf( "" SYSTEM_NAME_STRING_LOWER ":\tCard number is %d\n", cdsp->dacInstance[ ii ] );
-            printf( "" SYSTEM_NAME_STRING_LOWER ":\tMemory at block %d\n\n", cdsp->dacConfig[ ii ] );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tMemory at block %d\n", cdsp->dacConfig[ ii ] );
+            if(iopmodel) {
+                channels = 8;
+                if(cdsp->dacAcr[ii] & 0x10000) channels = 4;
+                printf( "" SYSTEM_NAME_STRING_LOWER ":\tChannels = %d \n", channels );
+                printf( "" SYSTEM_NAME_STRING_LOWER ":\tFirmware Rev = %d \n\n",
+                        ( cdsp->dacAcr[ ii ] & 0xfff ) );
+            }
         }
         if ( cdsPciModules.dacType[ ii ] == GSC_20AO8 )
         {
             printf( "" SYSTEM_NAME_STRING_LOWER ":\tDAC %d is a GSC_20AO8 module\n", ii );
             printf( "" SYSTEM_NAME_STRING_LOWER ":\tCard number is %d\n", cdsp->dacInstance[ ii ] );
-            printf( "" SYSTEM_NAME_STRING_LOWER ":\tMemory at block %d\n\n", cdsp->dacConfig[ ii ] );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tMemory at block %d\n", cdsp->dacConfig[ ii ] );
+            if(iopmodel) {
+                channels = 8;
+                if(cdsp->dacAcr[ii] & 0x10000) channels = 4;
+                printf( "" SYSTEM_NAME_STRING_LOWER ":\tChannels = %d \n", channels );
+                printf( "" SYSTEM_NAME_STRING_LOWER ":\tFirmware Rev = %d \n\n",
+                        ( cdsp->dacAcr[ ii ] & 0xfff ) );
+            }
         }
         if ( cdsp->dacType[ ii ] == GSC_16AO16 )
         {
             printf( "" SYSTEM_NAME_STRING_LOWER ":\tDAC %d is a GSC_16AO16 module\n", ii );
             printf( "" SYSTEM_NAME_STRING_LOWER ":\tCard number is %d\n", cdsp->dacInstance[ ii ] );
-            printf( "" SYSTEM_NAME_STRING_LOWER ":\tMemory at block %d\n\n", cdsp->dacConfig[ ii ] );
+            printf( "" SYSTEM_NAME_STRING_LOWER ":\tMemory at block %d\n", cdsp->dacConfig[ ii ] );
+            if(iopmodel) {
+                channels = 16;
+                printf( "" SYSTEM_NAME_STRING_LOWER ":\tChannels = %d \n", channels );
+                printf( "" SYSTEM_NAME_STRING_LOWER ":\tFirmware Rev = %d \n\n",
+                        ( cdsp->dacAcr[ ii ] & 0xfff ) );
+            }
         }
     }
     kk += cdsp->dioCount;

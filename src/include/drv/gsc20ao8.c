@@ -100,6 +100,7 @@ gsc20ao8Init( CDS_HARDWARE* pHardware, struct pci_dev* dacdev )
     dac20bitPtr->BCR |= GSAO_20BIT_AUTOCAL_SET;
     // Wait for autocal to complete
     timer = 0;
+    pHardware->dacAcr[ devNum ] = 0;
     do
     {
         udelay( 1000 );
@@ -109,9 +110,12 @@ gsc20ao8Init( CDS_HARDWARE* pHardware, struct pci_dev* dacdev )
 
     printk( "DAC after autocal PSR = 0x%x\n", dac20bitPtr->PRIMARY_STATUS );
     if ( dac20bitPtr->BCR & GSAO_20BIT_AUTOCAL_PASS )
+    {
         printk( "DAC AUTOCAL SUCCESS in %d milliseconds \n", timer );
-    else
+        pHardware->dacAcr[ devNum ] = DAC_CAL_PASS;
+    } else {
         printk( "DAC AUTOCAL FAILED in %d milliseconds \n", timer );
+    }
     printk( "DAC PSR = 0x%x\n", dac20bitPtr->PRIMARY_STATUS );
 
     // If 20bit DAC, need to enable outputs.
@@ -122,7 +126,7 @@ gsc20ao8Init( CDS_HARDWARE* pHardware, struct pci_dev* dacdev )
 
     pHardware->pci_dac[ devNum ] =
         (long)pci_alloc_consistent( dacdev, 0x200, &dac_dma_handle[ devNum ] );
-    pHardware->dacConfig[ devNum ] = (int)( dac20bitPtr->ASY_CONFIG );
+    pHardware->dacAcr[ devNum ] |= ((int)( dac20bitPtr->ASY_CONFIG )  & DAC_ACR_MASK);
 
     // Return the device type to main code.
     pHardware->dacType[ devNum ] = GSC_20AO8;

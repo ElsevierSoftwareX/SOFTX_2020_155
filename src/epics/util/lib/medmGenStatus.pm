@@ -222,6 +222,8 @@ if($iopModel == 1) {
     $ypos += 15;
 	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"ON LINE",$ecolors{white});
     $ypos += 15;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"AUTOCAL",$ecolors{white});
+    $ypos += 15;
 	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"WATCHDOG",$ecolors{white});
     $ypos += 15;
 	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"OVERRANGE",$ecolors{white});
@@ -230,7 +232,7 @@ if($iopModel == 1) {
     $ypos += 15;
 	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"FIFO STATUS",$ecolors{white});
     $ypos += 15;
-	$xpos = 35; $ypos = 570; $width = 100; $height = 15;
+	$xpos = 35; $ypos = 585; $width = 100; $height = 15;
 	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"EMPTY",$ecolors{white});
     $ypos += 15;
 	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"HIGH QTR",$ecolors{white});
@@ -259,6 +261,10 @@ if($iopModel == 1) {
 
         $ypos += 15;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","0","0",$ecolors{green},$ecolors{red});
+        $ypos += 15;
+    if($dactype[$ii] ne "GSC_16AO16" ) {
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","8","8",$ecolors{green},$ecolors{red});
+    }
         $ypos += 15;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","1","1",$ecolors{green},$ecolors{red});
         $ypos += 15;

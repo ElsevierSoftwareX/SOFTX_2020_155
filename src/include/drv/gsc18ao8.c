@@ -84,6 +84,7 @@ gsc18ao8Init( CDS_HARDWARE* pHardware, struct pci_dev* dacdev )
 #ifdef DAC_AUTOCAL
     // Start Calibration
     dac18bitPtr->BCR |= GSAO_18BIT_AUTOCAL_SET;
+    pHardware->dacAcr[ devNum ] = 0;
     do
     {
         udelay( 1000 );
@@ -91,9 +92,12 @@ gsc18ao8Init( CDS_HARDWARE* pHardware, struct pci_dev* dacdev )
     } while ( ( dac18bitPtr->BCR & GSAO_18BIT_AUTOCAL_SET ) != 0 );
 
     if ( dac18bitPtr->BCR & GSAO_18BIT_AUTOCAL_PASS )
+    {
         printk( "DAC AUTOCAL SUCCESS in %d milliseconds \n", timer );
-    else
+        pHardware->dacAcr[ devNum ] = DAC_CAL_PASS;
+    } else {
         printk( "DAC AUTOCAL FAILED in %d milliseconds \n", timer );
+    }
     printk( "DAC OUTPUT CONFIG after init = 0x%x with BCR = 0x%x\n",
             dac18bitPtr->OUTPUT_CONFIG,
             dac18bitPtr->BCR );
@@ -106,7 +110,7 @@ gsc18ao8Init( CDS_HARDWARE* pHardware, struct pci_dev* dacdev )
     // board?
     pHardware->pci_dac[ devNum ] =
         (long)pci_alloc_consistent( dacdev, 0x200, &dac_dma_handle[ devNum ] );
-    pHardware->dacConfig[ devNum ] = (int)( dac18bitPtr->ASY_CONFIG );
+    pHardware->dacAcr[ devNum ] |= ((int)( dac18bitPtr->ASY_CONFIG ) & DAC_ACR_MASK);
     pHardware->dacType[ devNum ] = GSC_18AO8;
     pHardware->dacCount++;
     pHardware->dacInstance[ devNum ] = pHardware->dac18Count;

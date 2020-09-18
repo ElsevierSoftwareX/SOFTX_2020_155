@@ -227,6 +227,7 @@ char fp[ 64 * 1024 ];
 #define DAC_FIFO_EMPTY 32
 #define DAC_FIFO_HI_QTR 64
 #define DAC_FIFO_FULL 128
+#define DAC_AUTOCAL_BIT 256
 
 #define MAX_IRIGB_SKEW  (20 * UNDERSAMPLE)
 #define MIN_IRIGB_SKEW 5
