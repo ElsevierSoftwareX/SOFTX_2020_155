@@ -305,9 +305,9 @@ check_dac_buffers( int cycleNum )
             if ( ( out_buf_size < 8 ) || ( out_buf_size > 24 ) )
             {
                 pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_BIT );
-                if ( dacTimingErrorPending[ jj ] )
+                if ( dacTimingErrorPending[ jj ] > DAC_WD_TRIP_SET)
                     dacTimingError = 1;
-                dacTimingErrorPending[ jj ] = 1;
+		else dacTimingErrorPending[ jj ] ++;
             }
             else
             {
@@ -339,9 +339,9 @@ check_dac_buffers( int cycleNum )
         if ( ( out_buf_size > 24 ) )
         {
             pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_BIT );
-            if ( dacTimingErrorPending[ jj ] )
+            if ( dacTimingErrorPending[ jj ] > DAC_WD_TRIP_SET)
                 dacTimingError = 1;
-            dacTimingErrorPending[ jj ] = 1;
+	    else dacTimingErrorPending[ jj ] ++;
         }
         else
         {
@@ -368,9 +368,9 @@ check_dac_buffers( int cycleNum )
             if ( status != 2 )
             {
                 pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_BIT );
-                if ( dacTimingErrorPending[ jj ] )
+                if ( dacTimingErrorPending[ jj ] > DAC_WD_TRIP_SET)
                     dacTimingError = 1;
-                dacTimingErrorPending[ jj ] = 1;
+	        dacTimingErrorPending[ jj ] ++;
             }
             else
             {
