@@ -22,7 +22,7 @@ namespace PV
         PV_LOOKBACK_STREND_DIR = 10,
         PV_LOOKBACK_MTREND = 11,
         PV_LOOKBACK_MTREND_DIR = 12,
-        PV_FAST_DATA_CRC = 13,
+        PV_FAST_DATA_CRC = 13,              // CRC of the full data stream when writing frames
         PV_FAULT = 14,
         PV_BCAST_RETR = 15,
         PV_BCAST_FAILED_RETR = 16,
@@ -64,6 +64,8 @@ namespace PV
         PV_PRDCR_CRC_TIME_XFER_MEAN_MS,
         PV_PRDCR_CRC_TIME_XFER_MIN_MS,
         PV_PRDCR_CRC_TIME_XFER_MAX_MS,
+        // Producer data state
+        PV_PRDCR_DATA_CRC,                          // CRC of the data CRCs in the producer
         // Profiler buffer values
         PV_PROFILER_FREE_SEGMENTS_MAIN_BUF,
         PV_PROFILER_FREE_SEGMENTS_STREND_BUF,
