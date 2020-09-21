@@ -311,9 +311,9 @@ check_dac_buffers( int cycleNum, int report_all_faults )
                 if ( ( out_buf_size < 8 ) || ( out_buf_size > 24 ) )
                 {
                     pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_BIT );
-                    if ( dacTimingErrorPending[ jj ] )
+                    if ( dacTimingErrorPending[ jj ] > DAC_WD_TRIP_SET)
                         dacTimingError = 1;
-                    dacTimingErrorPending[ jj ] = 1;
+                    dacTimingErrorPending[ jj ] ++;
                 }
                 else
                 {
