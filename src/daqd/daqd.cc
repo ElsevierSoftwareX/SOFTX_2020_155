@@ -1024,7 +1024,7 @@ daqd_c::framer_io( shared_frame_work_queue_ptr _work_queue, int science )
                     close( fd );
                     if ( dump_bcast_frame && cur_buf->gps % 60 == 0 )
                     {
-                        if (!long_lived_debug_frame.empty()
+                        if ( !long_lived_debug_frame.empty( ) )
                         {
                             unlink( long_lived_debug_frame.c_str( ) );
                         }
