@@ -375,7 +375,7 @@ pvInfo exServer::pvList[] = {
             1,
             pvValue + PV::PV_PRDCR_CRC_TIME_XFER_MAX_MS ),
     pvInfo( 1,
-            "PV_PRDCR_DATA_CRC",
+            "PRDCR_DATA_CRC",
             0xffffffff,
             0,
             excasIoSync,
