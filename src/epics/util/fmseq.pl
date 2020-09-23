@@ -1287,31 +1287,30 @@ foreach (sort @section_names) {
 	my $dblAdd = 0;
 
 	if ($have_daq_spec) {
-	  if (defined $DAQ_Channels{$_}) {
-	    ${$sections{$_}}{"datarate"} = $DAQ_Channels{$_};
-	    undef $comment;
-	    delete $DAQ_Channels{$_};
-	    # See if this is an integer channel
-	    if ($DAQ_Channels_type{$_} eq "uint32") {
-		${$sections{$_}}{"datatype"} = 7;
-	    }
-	    if ($DAQ_Channels_type{$_} eq "int32") {
-		${$sections{$_}}{"datatype"} = 2;
-	    }
-	    if ($DAQ_Channels_type{$_} eq "double") {
-		${$sections{$_}}{"datatype"} = 5;
-		$dblAdd = 1;
-	    }
-	    if ($DAQ_Channels_egu{$_} ne "") {
-		${$sections{$_}}{"units"} = $DAQ_Channels_egu{$_};
-	    }
-	  } else {
-	    $comment = "#";
-          }
-        } else  {
+	    if (defined $DAQ_Channels{$_}) {
+	        ${$sections{$_}}{"datarate"} = $DAQ_Channels{$_};
+	        undef $comment;
+	        delete $DAQ_Channels{$_};
+	        # See if this is an integer channel
+	        if ($DAQ_Channels_type{$_} eq "uint32") {
+		        ${$sections{$_}}{"datatype"} = 7;
+	        }
+	        if ($DAQ_Channels_type{$_} eq "int32") {
+		        ${$sections{$_}}{"datatype"} = 2;
+	        }
+	        if ($DAQ_Channels_type{$_} eq "double") {
+		        ${$sections{$_}}{"datatype"} = 5;
+		        $dblAdd = 1;
+	        }
+	        if ($DAQ_Channels_egu{$_} ne "") {
+		        ${$sections{$_}}{"units"} = $DAQ_Channels_egu{$_};
+	        }
+	    }  else {
+	        $comment = "#";
+        }
+    } else  {
 		$comment = "#";
 	}
-#        print OUTG "${comment}[${_}_${def_datarate}]\n";
 	my $science = $DAQ_Channels_science{$_};
 	if($dblAdd) {
 		print OUTG "${comment}[${_}_$dbl_suffix\_${daq_name}]\n";
@@ -1329,11 +1328,27 @@ foreach (sort @section_names) {
 	} else {
         	print OUTG  "${comment}acquire=$have_daq_spec\n";
 	}
-        foreach $sec (keys %{$sections{$_}}) {
-          if ($sec eq "chnnum" || $sec eq "datarate" || $sec eq "datatype" || $sec eq "units") {
-                print OUTG  "${comment}$sec=${$sections{$_}}{$sec}\n";
-          }
-        }
+    # Write out remaining channel info
+    foreach $sec (keys %{$sections{$_}}) {
+       if ($sec eq "datarate" ) {
+           print OUTG  "${comment}$sec=${$sections{$_}}{$sec}\n";
+       }
+    }
+    foreach $sec (keys %{$sections{$_}}) {
+       if ($sec eq "datatype" ) {
+           print OUTG  "${comment}$sec=${$sections{$_}}{$sec}\n";
+       }
+    }
+    foreach $sec (keys %{$sections{$_}}) {
+       if ($sec eq "chnnum" ) {
+           print OUTG  "${comment}$sec=${$sections{$_}}{$sec}\n";
+       }
+    }
+    foreach $sec (keys %{$sections{$_}}) {
+       if ($sec eq "units" ) {
+           print OUTG  "${comment}$sec=${$sections{$_}}{$sec}\n";
+       }
+    }
 }
 
 if (keys %DAQ_Channels) {
