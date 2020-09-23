@@ -244,11 +244,11 @@ sub createGdsMedm
 	$medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"MIN",$ecolors{black});
 
 	$xpos = 76; $ypos = 221 + $yoffset; $width = 35; $height = 15;
-    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_DAY",$ecolors{white},$ecolors{black},"static");
+    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_DAY",$ecolors{green},$ecolors{black},"static");
 	$xpos = 117;
-    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_HOUR",$ecolors{white},$ecolors{black},"static");
+    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_HOUR",$ecolors{green},$ecolors{black},"static");
 	$xpos = 157; 
-    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_MINUTE",$ecolors{white},$ecolors{black},"static");
+    $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_UPTIME_MINUTE",$ecolors{green},$ecolors{black},"static");
 
     # Add More Info related display link
 	$xpos = 18; $ypos = 326; $width = 125; $height = 25;
