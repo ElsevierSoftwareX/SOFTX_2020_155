@@ -511,7 +511,6 @@ daqd_c::update_configuration_number( const char* source_address )
         check_sum.Update( &( cur->chNum ), sizeof( cur->chNum ) );
         check_sum.Update( &( cur->seq_num ), sizeof( cur->seq_num ) );
         size_t name_len = strnlen( cur->name, channel_t::channel_name_max_len );
-        static_assert( sizeof( name_len ) == 8, "not 4 bytes" );
         check_sum.Update( cur->name, sizeof( name_len ) );
         check_sum.Update( &( cur->sample_rate ), sizeof( cur->sample_rate ) );
         check_sum.Update( &( cur->active ), sizeof( cur->active ) );
