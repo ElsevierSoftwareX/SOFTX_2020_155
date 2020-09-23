@@ -129,4 +129,27 @@ public:
     }
 };
 
+template < typename HashObject >
+void
+hash_channel( HashObject& hash, const channel_t& channel )
+{
+    hash.add( &( channel.chNum ), sizeof( channel.chNum ) );
+    hash.add( &( channel.seq_num ), sizeof( channel.seq_num ) );
+    size_t name_len = strnlen( channel.name, channel_t::channel_name_max_len );
+    hash.add( channel.name, name_len );
+    hash.add( &( channel.sample_rate ), sizeof( channel.sample_rate ) );
+    hash.add( &( channel.active ), sizeof( channel.active ) );
+    hash.add( &( channel.trend ), sizeof( channel.trend ) );
+    hash.add( &( channel.group_num ), sizeof( channel.group_num ) );
+    hash.add( &( channel.bps ), sizeof( channel.bps ) );
+    hash.add( &( channel.dcu_id ), sizeof( channel.dcu_id ) );
+    hash.add( &( channel.data_type ), sizeof( channel.data_type ) );
+    hash.add( &( channel.signal_gain ), sizeof( channel.signal_gain ) );
+    hash.add( &( channel.signal_slope ), sizeof( channel.signal_slope ) );
+    hash.add( &( channel.signal_offset ), sizeof( channel.signal_offset ) );
+    size_t unit_len =
+        strnlen( channel.signal_units, channel_t::engr_unit_max_len );
+    hash.add( channel.signal_units, unit_len );
+}
+
 #endif

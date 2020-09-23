@@ -63,6 +63,7 @@ using namespace std;
 #include <string.h>
 
 #include "epics_pvs.hh"
+#include "checksum_crc32.hh"
 
 /// Helper function to deal with the archive channels.
 int
@@ -510,6 +511,7 @@ daqd_c::update_configuration_number( const char* source_address )
         check_sum.Update( &( cur->chNum ), sizeof( cur->chNum ) );
         check_sum.Update( &( cur->seq_num ), sizeof( cur->seq_num ) );
         size_t name_len = strnlen( cur->name, channel_t::channel_name_max_len );
+        static_assert( sizeof( name_len ) == 8, "not 4 bytes" );
         check_sum.Update( cur->name, sizeof( name_len ) );
         check_sum.Update( &( cur->sample_rate ), sizeof( cur->sample_rate ) );
         check_sum.Update( &( cur->active ), sizeof( cur->active ) );
@@ -1536,6 +1538,14 @@ daqd_c::start_main( int pmain_buffer_size, ostream* yyout )
     }
     /* Epics display: memory buffer look back */
     PV::set_pv( PV::PV_LOOKBACK_RAM, main_buffer_size );
+
+    checksum_crc32   csum;
+    const channel_t* cur = channels;
+    const channel_t* end = cur + num_channels;
+    std::for_each( cur, end, [&csum]( const channel_t& channel ) {
+        hash_channel( csum, channel );
+    } );
+    PV::set_pv( PV::PV_CHANNEL_LIST_CHECK_SUM, csum.result( ) );
 
     return 0;
 }
