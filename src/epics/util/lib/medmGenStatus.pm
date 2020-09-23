@@ -37,10 +37,10 @@ sub createStatusMedm
 
 	# Create MEDM File
 if($iopModel == 1) {
-	my $xpos = 0; my $ypos = 400; my $width = 800; my $height = 650;
+	my $xpos = 0; my $ypos = 400; my $width = 800; my $height = 950;
 	$medmdata = ("CDS::medmGen::medmGenFile") -> ($medmDir,$fname,$width,$height);
 } else {
-	my $xpos = 0; my $ypos = 400; my $width = 800; my $height = 350;
+	my $xpos = 0; my $ypos = 400; my $width = 800; my $height = 760;
 	$medmdata = ("CDS::medmGen::medmGenFile") -> ($medmDir,$fname,$width,$height);
 }
 
@@ -59,10 +59,10 @@ if($iopModel == 1) {
 	# Add time string to banner
 	# Put blue rectangle banner at bottom of screen
 if($iopModel == 1) {
-	$xpos = 5; $ypos = 32; $width = 790; $height = 600;
+	$xpos = 5; $ypos = 32; $width = 790; $height = 900;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{black},"","","");
 } else {
-	$xpos = 5; $ypos = 32; $width = 790; $height = 310;
+	$xpos = 5; $ypos = 32; $width = 790; $height = 710;
         $medmdata .= ("CDS::medmGen::medmGenRectangle") -> ($xpos,$ypos,$width,$height,$ecolors{black},"","","");
 }
 	# Add build info label
@@ -238,6 +238,9 @@ if($iopModel == 1) {
 	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"HIGH QTR",$ecolors{white});
     $ypos += 15;
 	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"FULL",$ecolors{white});
+    $ypos += 30;
+    $xpos = 10;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"OUTPUT VALUES",$ecolors{white});
 
     # Add DAC status info
 	$xpos = 155; $ypos = 467; $width = 50; $height = 15;
@@ -245,17 +248,17 @@ if($iopModel == 1) {
     {
         $label = "DAC".$ii;
 	    $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$label",$ecolors{white});
-        $xpos += 55;
+        $xpos += 65;
     }
 	$xpos = 174; $ypos = 483; $width = 12; $height = 12;
     for($ii=0;$ii<$dacCnt;$ii++)
     {
         if($dactype[$ii] eq "GSC_18AO8" ) {
-            $label = "18AO8";
+            $label = "18AO8-" . "$::dacCardNum[$ii]";
         } elsif($dactype[$ii] eq "GSC_20AO8" ) {
-            $label = "20AO8";
+            $label = "20AO8-" . "$::dacCardNum[$ii]";
         } else {
-            $label = "16AO16";
+            $label = "16AO16-" . "$::dacCardNum[$ii]";
         }
 	    $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$label",$ecolors{white});
 
@@ -281,9 +284,110 @@ if($iopModel == 1) {
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","6","6",$ecolors{red},$ecolors{green});
         $ypos += 15;
         $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","7","7",$ecolors{red},$ecolors{green});
+        $ypos += 15;
 
-        $xpos += 55;
+        $xpos += 65;
         $ypos = 483;
+    }
+
+    $xpos = 155; $ypos=645; $width = 50; $height = 15;
+    for($ii=0;$ii<$dacCnt;$ii++)
+    {
+        $nummon = 8;
+        if($dactype[$ii] eq "GSC_16AO16" ) {
+            $nummon = 16;
+        }
+        for($jj=0;$jj<$nummon;$jj++)
+        {
+            $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_OUTPUT_$ii\_$jj",$ecolors{green},$ecolors{black},"alarm");
+            $ypos += 15;
+            if($jj == 7 ) {
+                $ypos += 15;
+            }
+        }
+        $xpos += 65;
+        $ypos = 645;
+    }
+}
+if($iopModel != 1) {
+	$xpos = 10; $ypos = 315; $width = 100; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"ADC STATUS",$ecolors{white});
+	$xpos = 20; $ypos = 338; $width = 70; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"ON LINE",$ecolors{white});
+    $ypos += 20;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"OVERRANGE",$ecolors{white});
+    # Add ADC status info
+	$xpos = 155; $ypos = 315; $width = 50; $height = 15;
+    for($ii=0;$ii<$adcCnt;$ii++)
+    {
+        $label = "ADC".$ii;
+	    $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$label",$ecolors{white});
+        $xpos += 55;
+    }
+	$xpos = 173; $ypos = 336; $width = 15; $height = 15;
+    for($ii=0;$ii<$adcCnt;$ii++)
+    {
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_STAT_$ii","0","0",$ecolors{green},$ecolors{red});
+        $ypos += 20;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_ADC_STAT_$ii","2","2",$ecolors{green},$ecolors{red});
+        $xpos += 55;
+        $ypos = 336;
+    }
+    #Add DAC status
+	$xpos = 10; $ypos = 400; $width = 100; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"DAC STATUS",$ecolors{white});
+	$xpos = 20; $ypos = 415; $width = 100; $height = 15;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"TYPE",$ecolors{white});
+    $ypos += 15;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"ON LINE",$ecolors{white});
+    $ypos += 15;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"OVERRANGE",$ecolors{white});
+    $ypos += 15;
+	$medmdata .= ("CDS::medmGen::medmGenTextLeft") -> ($xpos,$ypos,$width,$height,"OUTPUT VALUES",$ecolors{white});
+    # Add DAC status info
+	$xpos = 155; $ypos = 400; $width = 50; $height = 15;
+    for($ii=0;$ii<$dacCnt;$ii++)
+    {
+        $label = "DAC".$ii;
+	    $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$label",$ecolors{white});
+        $xpos += 65;
+    }
+	$xpos = 174; $ypos = 413; $width = 12; $height = 12;
+    for($ii=0;$ii<$dacCnt;$ii++)
+    {
+        if($dactype[$ii] eq "GSC_18AO8" ) {
+            $label = "18AO8-" . "$::dacCardNum[$ii]";
+        } elsif($dactype[$ii] eq "GSC_20AO8" ) {
+            $label = "20AO8-" . "$::dacCardNum[$ii]";
+        } else {
+            $label = "16AO16-" . "$::dacCardNum[$ii]";
+        }
+	    $medmdata .= ("CDS::medmGen::medmGenText") -> ($xpos,$ypos,$width,$height,"$label",$ecolors{white});
+        $ypos += 15;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","0","0",$ecolors{green},$ecolors{red});
+        $ypos += 15;
+        $medmdata .= ("CDS::medmGen::medmGenByte") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","2","2",$ecolors{green},$ecolors{red});
+        $xpos += 65;
+        $ypos = 412;
+    }
+
+    $xpos = 155; $ypos=465; $width = 50; $height = 15;
+    for($ii=0;$ii<$dacCnt;$ii++)
+    {
+        $nummon = 8;
+        if($dactype[$ii] eq "GSC_16AO16" ) {
+            $nummon = 16;
+        }
+        for($jj=0;$jj<$nummon;$jj++)
+        {
+            $medmdata .= ("CDS::medmGen::medmGenTextMon") -> ($xpos,$ypos,$width,$height,"$ifo\:FEC-$dcuid\_DAC_OUTPUT_$ii\_$jj",$ecolors{green},$ecolors{black},"alarm");
+            $ypos += 15;
+            if($jj == 7 ) {
+                $ypos += 15;
+            }
+        }
+        $xpos += 65;
+        $ypos = 465;
     }
 }
 
