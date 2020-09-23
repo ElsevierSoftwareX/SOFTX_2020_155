@@ -789,7 +789,7 @@ daqd_c::framer_io( shared_frame_work_queue_ptr _work_queue, int science )
 
     shmem_bcast_frame = parameters( ).get< int >( "GDS_BROADCAST", 0 ) == 1;
     dump_bcast_frame =
-        parameters( ).get< int >( "DUMP_BROADCAST_FRAME", 0 ) == 1;
+        parameters( ).get< int >( "DUMP_PERIODIC_BROADCAST_FRAME", 0 ) == 1;
 
     if ( science )
     {
