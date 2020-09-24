@@ -201,21 +201,7 @@ iop_dac_write( int in_delay )
                 }
 // Code below is only for use in DAQ test system.
 #ifdef DIAG_TEST
-                if ( ( chan == 0 ) && ( card == 0 ) )
-                {
-                    if ( cycleNum < 100 )
-                        dac_out = limit / 20;
-                    else
-                        dac_out = 0;
-                }
-                if ( ( chan == 0 ) && ( card == 1 ) )
-                {
-                    if ( cycleNum < 100 )
-                        dac_out = limit / 20;
-                    else
-                        dac_out = 0;
-                }
-                if ( ( chan == 0 ) && ( card == 2 ) )
+                if ( ( chan == 0 ) && ( card < 3 ) )
                 {
                     if ( cycleNum < 100 )
                         dac_out = limit / 20;
@@ -368,9 +354,9 @@ check_dac_buffers( int cycleNum, int report_all_faults )
         if ( ( out_buf_size > 24 ) )
         {
             pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_BIT );
-            if ( dacTimingErrorPending[ jj ] && report_all_faults )
+            if ( (dacTimingErrorPending[ jj ] > DAC_WD_TRIP_SET) && report_all_faults )
                 dacTimingError = 1;
-            dacTimingErrorPending[ jj ] = 1;
+            else dacTimingErrorPending[ jj ] ++;
         }
         else
         {
@@ -404,9 +390,9 @@ check_dac_buffers( int cycleNum, int report_all_faults )
                 if ( status != 2 )
                 {
                     pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_BIT );
-                    if ( dacTimingErrorPending[ jj ] )
+                    if ( dacTimingErrorPending[ jj ] > DAC_WD_TRIP_SET)
                         dacTimingError = 1;
-                    dacTimingErrorPending[ jj ] = 1;
+                    else dacTimingErrorPending[ jj ] ++;
                 }
                 else
                 {
@@ -441,12 +427,14 @@ check_dac_buffers( int cycleNum, int report_all_faults )
             // Check only for FIFO FULL
             if ( status & 8 )
             {
+                pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_BIT );
                 pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_FULL;
                 pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_BIT );
                 dacTimingError = 1;
             }
             else
             {
+                pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_BIT;
                 pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_FIFO_BIT;
                 pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_FIFO_FULL );
             }

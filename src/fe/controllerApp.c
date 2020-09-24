@@ -39,6 +39,7 @@
 #include <drv/app_adc_read.c>
 #include <drv/app_dac_functions.c>
 #include <drv/app_dio_routines.c>
+#include <drv/dac_info.c>
 
 int startGpsTime = 0;
 int getGpsTime( unsigned int* tsyncSec, unsigned int* tsyncUsec );
@@ -623,7 +624,7 @@ fe_start_controller( void* arg )
         {
             pLocalEpics->epicsOutput.ovAccum = overflowAcc;
             feStatus |= app_adc_status_update( &adcinfo );
-            feStatus |= app_dac_status_update( &dacinfo );
+            feStatus |= dac_status_update( &dacinfo );
         }
 
         // *****************************************************************

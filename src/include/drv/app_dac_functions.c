@@ -1,5 +1,4 @@
 inline int app_dac_init( void );
-inline int app_dac_status_update( dacInfo_t* );
 inline int app_dac_write( int, int, dacInfo_t* );
 
 inline int
@@ -30,6 +29,7 @@ app_dac_init( )
     }
     for ( ii = 0; ii < cdsPciModules.dacCount; ii++ )
     {
+        pLocalEpics->epicsOutput.statDac[ jj ] = DAC_FOUND_BIT;
         pd = cdsPciModules.dacConfig[ ii ] -
             ioMemData->adcCount; // physical DAC number
         for ( jj = 0; jj < MAX_DAC_CHN_PER_MOD; jj++ )
@@ -44,53 +44,12 @@ app_dac_init( )
 }
 
 inline int
-app_dac_status_update( dacInfo_t* dacinfo )
-{
-    int ii, jj;
-    int status = 0;
-
-    for ( jj = 0; jj < cdsPciModules.dacCount; jj++ )
-    {
-        if ( dacOF[ jj ] )
-        {
-            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_OVERFLOW_BIT );
-            status |= FE_ERROR_OVERFLOW;
-            ;
-        }
-        else
-            pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_OVERFLOW_BIT;
-        dacOF[ jj ] = 0;
-        if ( dacChanErr[ jj ] )
-        {
-            pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_TIMING_BIT );
-        }
-        else
-            pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_TIMING_BIT;
-        dacChanErr[ jj ] = 0;
-        for ( ii = 0; ii < MAX_DAC_CHN_PER_MOD; ii++ )
-        {
-
-            if ( pLocalEpics->epicsOutput.overflowDacAcc[ jj ][ ii ] >
-                 OVERFLOW_CNTR_LIMIT )
-            {
-                pLocalEpics->epicsOutput.overflowDacAcc[ jj ][ ii ] = 0;
-            }
-            pLocalEpics->epicsOutput.overflowDac[ jj ][ ii ] =
-                dacinfo->overflowDac[ jj ][ ii ];
-            dacinfo->overflowDac[ jj ][ ii ] = 0;
-        }
-    }
-    return status;
-}
-
-inline int
 app_dac_write( int ioMemCtrDac, int ioClkDac, dacInfo_t* dacinfo )
 {
     int    ii, jj, mm, kk;
     int    limit, mask, num_outs;
     double dac_in = 0.0;
     int    dac_out = 0;
-    int    dacOF[ MAX_DAC_MODULES ];
     int    memCtr = 0;
 
     /// \> Loop thru all DAC modules
