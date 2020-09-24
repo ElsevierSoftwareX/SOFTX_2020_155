@@ -29,7 +29,7 @@ app_dac_init( )
     }
     for ( ii = 0; ii < cdsPciModules.dacCount; ii++ )
     {
-        pLocalEpics->epicsOutput.statDac[ jj ] = DAC_FOUND_BIT;
+        pLocalEpics->epicsOutput.statDac[ ii ] = DAC_FOUND_BIT;
         pd = cdsPciModules.dacConfig[ ii ] -
             ioMemData->adcCount; // physical DAC number
         for ( jj = 0; jj < MAX_DAC_CHN_PER_MOD; jj++ )
