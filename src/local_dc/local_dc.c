@@ -27,7 +27,7 @@
 #include "modelrate.h"
 #include "local_dc_utils.h"
 
-#define MSG_BUF_SIZE 0x200000
+#define MSG_BUF_SIZE sizeof( daq_dc_data_t )
 
 #define __CDECL
 
@@ -51,8 +51,6 @@ static volatile int keepRunning = 1;
 char*               ifo;
 char*               ifo_data;
 size_t              cycle_data_size;
-
-char msg_buffer[ MSG_BUF_SIZE ];
 
 int symmetricom_fd = -1;
 int daqStatBit[ 2 ];
@@ -317,7 +315,9 @@ send_to_local_memory( int nsys, int len, int do_wait )
     for ( ii = 0; ii < 10; ii++ )
         dataRdy[ ii ] = 0;
 
-    int myErrorSignal = 1;
+    int           myErrorSignal = 1;
+    unsigned long maxDataSize =
+        ( MSG_BUF_SIZE > cycle_data_size ? cycle_data_size : MSG_BUF_SIZE );
 
     do
     {
@@ -346,7 +346,7 @@ send_to_local_memory( int nsys, int len, int do_wait )
         nextData += cycle_data_size * nextCycle;
         ixDataBlock = (daq_multi_dcu_data_t*)nextData;
         int sendLength = loadMessageBuffer( nsys, nextCycle, status, dataRdy );
-        if ( sendLength == -1 || sendLength > MSG_BUF_SIZE )
+        if ( sendLength == -1 || sendLength > maxDataSize )
         {
             fprintf( stderr, "Message buffer overflow error\n" );
             return ( -1 );

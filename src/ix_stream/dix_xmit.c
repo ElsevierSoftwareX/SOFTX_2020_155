@@ -272,6 +272,11 @@ main( int argc, char** argv )
                  cycle_data_size % 8 );
         exit( 1 );
     }
+    if ( cycle_data_size > IX_BLOCK_SIZE )
+    {
+        fprintf( stderr, "cycle_data_size > IX_BLOCK_SIZE\n" );
+        exit( 1 );
+    }
     if ( ( cycle_data_size * ( ifo_header->maxCycle ) ) +
              sizeof( *ifo_header ) >
          max_data_size )
