@@ -129,6 +129,7 @@ producer::frame_writer( )
     unsigned long gps, frac;
 
     checksum_crc32 crc_obj;
+    checksum_crc32 total_crc_obj;
 
     // last status value
     std::array< bool, DCU_COUNT > dcuSeenLastCycle{};
@@ -316,6 +317,9 @@ producer::frame_writer( )
         stat_recv.sample( );
         daq_dc_data_t* data_block = shmem_receiver.receive_data( );
         stat_recv.tick( );
+
+        // clear the total crc
+        total_crc_obj.reset( );
 
         if ( i % 16 == 0 )
         {
@@ -616,6 +620,7 @@ producer::frame_writer( )
 
                 crc_obj.add( cp, bytes );
                 auto crc = crc_obj.result( );
+                total_crc_obj.add( &crc, sizeof( crc ) );
                 crc_obj.reset( );
 
                 int cblk = i % 16;
@@ -796,6 +801,8 @@ producer::frame_writer( )
                         conv::s_to_ms_int( stat_crc.getMax( ) ) );
             PV::set_pv( PV::PV_PRDCR_CRC_TIME_CRC_MEAN_MS,
                         conv::s_to_ms_int( stat_crc.getMean( ) ) );
+
+            PV::set_pv( PV::PV_PRDCR_DATA_CRC, total_crc_obj.result( ) );
 
             stat_full.clearStats( );
             stat_crc.clearStats( );

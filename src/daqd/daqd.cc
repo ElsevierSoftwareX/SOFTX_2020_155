@@ -780,12 +780,16 @@ daqd_c::full_frame( int                frame_length_seconds,
 void*
 daqd_c::framer_io( shared_frame_work_queue_ptr _work_queue, int science )
 {
-    const int STATE_NORMAL = 0;
-    const int STATE_WRITING = 1;
-    const int STATE_BROADCAST = 2;
-    bool      shmem_bcast_frame = true;
+    const int   STATE_NORMAL = 0;
+    const int   STATE_WRITING = 1;
+    const int   STATE_BROADCAST = 2;
+    bool        shmem_bcast_frame = true;
+    bool        dump_bcast_frame = false;
+    std::string long_lived_debug_frame = "";
 
     shmem_bcast_frame = parameters( ).get< int >( "GDS_BROADCAST", 0 ) == 1;
+    dump_bcast_frame =
+        parameters( ).get< int >( "DUMP_PERIODIC_BROADCAST_FRAME", 0 ) == 1;
 
     if ( science )
     {
@@ -1018,7 +1022,22 @@ daqd_c::framer_io( shared_frame_work_queue_ptr _work_queue, int science )
                     PV::set_pv( epics_state_var, STATE_NORMAL );
                     munmap( addr, sb.st_size );
                     close( fd );
-                    unlink( cur_buf->tmpf );
+                    if ( dump_bcast_frame && cur_buf->gps % 60 == 0 )
+                    {
+                        if ( !long_lived_debug_frame.empty( ) )
+                        {
+                            unlink( long_lived_debug_frame.c_str( ) );
+                        }
+
+                        long_lived_debug_frame = cur_buf->tmpf;
+                        DEBUG( 4,
+                               cerr << "Keeping " << cur_buf->tmpf
+                                    << " alive for a minute" << endl );
+                    }
+                    else
+                    {
+                        unlink( cur_buf->tmpf );
+                    }
                 }
             } /*catch (...) {
          system_log(1, "failed to write full frame out");
