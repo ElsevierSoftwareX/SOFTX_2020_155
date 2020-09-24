@@ -286,6 +286,10 @@ sub parseParams {
                 {
 				    $::noZeroPad = $spp[1];
                 }
+                case "lhomid"
+                {
+				    $::lhomid = $spp[1];
+                }
                 case "ipc_rate"
                 {
                     # Specify IPC rate if lower than model rate

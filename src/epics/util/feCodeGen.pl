@@ -2316,6 +2316,9 @@ $directDacWrite = 0;
 # Set to disable zero padding DAC data
 $noZeroPad = 0;
 
+# Special case for LHO PEM MID to add 1sec on startup
+$lhomid = 0;
+
 # Set if DAC writes with no FIFO preload
 $optimizeIO = 0;
 
@@ -2567,6 +2570,9 @@ if ($iopModel > -1) {  #************ SETUP FOR IOP ***************
 
   if ($::optimizeIO) {
     print OUTM "EXTRA_CFLAGS += -DNO_DAC_PRELOAD=1\n";
+  }
+  if ($::lhomid) {
+    print OUTM "EXTRA_CFLAGS += -DADD_SEC_ON_START=1\n";
   }
 }
 # End of IOP compile options

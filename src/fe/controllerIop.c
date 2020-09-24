@@ -525,6 +525,11 @@ fe_start_controller( void* arg )
 
 #endif
 
+#ifdef ADD_SEC_ON_START
+    // This is a special for LHO PEMMID
+    timeSec ++;
+#endif
+
     adcinfo.adcTime = rdtsc_ordered( );
 
     /// ******************************************************************************\n
