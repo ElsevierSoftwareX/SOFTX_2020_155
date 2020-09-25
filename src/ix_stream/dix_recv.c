@@ -174,6 +174,14 @@ int __CDECL
             (char*)myreadaddr + sizeof( struct daq_multi_cycle_header_t );
         myreadaddr += IX_BLOCK_SIZE;
     }
+    if ( cycle_data_size > IX_BLOCK_SIZE )
+    {
+        fprintf( stderr,
+                 "cycle_data_size > IX_BLOCK_SIZE, this is could allow for "
+                 "truncated messages\n" );
+        fprintf( stderr,
+                 "program will exit if the message size is > IX_BLOCK_SIZE\n" );
+    }
 
     // Catch control C exit
     signal( SIGINT, intHandler );
@@ -198,6 +206,17 @@ int __CDECL
         nextData += cycle_data_size * new_cycle;
         ixDataBlock = (daq_multi_dcu_data_t*)nextData;
         sendLength = rcvHeader[ rcvBlockNum ]->cycleDataSize;
+
+        if ( sendLength > IX_BLOCK_SIZE )
+        {
+            fprintf(
+                stderr,
+                "Message was bigger than IX_BLOCK_SIZE, message truncated\n" );
+            fprintf( stderr, "Message size %ld\n", (long int)sendLength );
+            fprintf( stderr, "IX_BLOCK_SIZE %ld\n", (long int)IX_BLOCK_SIZE );
+            exit( 1 );
+        }
+
         // Copy data from Dolphin to local memory
         memcpy( nextData, rcvDataPtr[ rcvBlockNum ], sendLength );
 
