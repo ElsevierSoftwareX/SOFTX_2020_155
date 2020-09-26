@@ -1,5 +1,6 @@
 inline int app_dac_init( void );
 inline int app_dac_write( int, int, dacInfo_t* );
+void deallocate_dac_channels( void );
 
 inline int
 app_dac_init( )
@@ -11,6 +12,8 @@ app_dac_init( )
     // See if my DAC channel map overlaps with already running models
     for ( ii = 0; ii < cdsPciModules.dacCount; ii++ )
     {
+      if(cdsPciModules.dacConfig[ ii ])
+      {
         pd = cdsPciModules.dacConfig[ ii ] -
             ioMemData->adcCount; // physical DAC number
         for ( jj = 0; jj < 16; jj++ )
@@ -26,9 +29,12 @@ app_dac_init( )
                 }
             }
         }
+      }
     }
     for ( ii = 0; ii < cdsPciModules.dacCount; ii++ )
     {
+      if(cdsPciModules.dacConfig[ ii ])
+      {
         pLocalEpics->epicsOutput.statDac[ ii ] = DAC_FOUND_BIT;
         pd = cdsPciModules.dacConfig[ ii ] -
             ioMemData->adcCount; // physical DAC number
@@ -39,9 +45,29 @@ app_dac_init( )
                 ioMemData->dacOutUsed[ pd ][ jj ] = 1;
             }
         }
+      }
     }
     return 0;
 }
+// Clear DAC channel shared memory map,
+// used to keep track of non-overlapping DAC channels among control models
+//
+void
+deallocate_dac_channels( void )
+{
+    int ii, jj;
+    for ( ii = 0; ii < MAX_DAC_MODULES; ii++ )
+    {
+      if(cdsPciModules.dacConfig[ ii ])
+      {
+        int pd = cdsPciModules.dacConfig[ ii ] - ioMemData->adcCount;
+        for ( jj = 0; jj < 16; jj++ )
+            if ( dacOutUsed[ ii ][ jj ] )
+                ioMemData->dacOutUsed[ pd ][ jj ] = 0;
+      }
+    }
+}
+
 
 inline int
 app_dac_write( int ioMemCtrDac, int ioClkDac, dacInfo_t* dacinfo )
@@ -57,6 +83,7 @@ app_dac_write( int ioMemCtrDac, int ioClkDac, dacInfo_t* dacinfo )
     {
         /// - -- locate the proper DAC memory block
         mm = cdsPciModules.dacConfig[ jj ];
+      if (mm) {
         /// - -- Set overflow limits, data mask, and chan count based on DAC
         /// type
         limit = OVERFLOW_LIMIT_16BIT;
@@ -164,6 +191,7 @@ app_dac_write( int ioMemCtrDac, int ioClkDac, dacInfo_t* dacinfo )
                 ioMemData->iodata[ mm ][ memCtr ].cycle =
                     ( ioClkDac + kk ) % IOP_IO_RATE;
         }
+      }
     }
     return 0;
 }

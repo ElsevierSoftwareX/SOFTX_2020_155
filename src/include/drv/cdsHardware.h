@@ -203,7 +203,6 @@ typedef struct PLX_9056_INTCTRL{
 #define PLX_VID         0x10b5		/* PLX9056 Vendor Id	*/
 #define PLX_TID         0x9056		/* PLX9056 Type Id	*/
 
-
 /* Standard structure to maintain PCI module information.			*/
 typedef struct CDS_HARDWARE{
 	int dacCount;			/* Number of DAC modules found 		*/
@@ -214,6 +213,7 @@ typedef struct CDS_HARDWARE{
 	int dacType[MAX_DAC_MODULES];
 	int dacInstance[MAX_DAC_MODULES];
 	int dacConfig[MAX_DAC_MODULES];
+	int dacMap[MAX_DAC_MODULES];
     int dacAcr[MAX_DAC_MODULES];
 	int adcCount;			/* Number of ADC modules found		*/
 	int adc16Count;			/* Number of 16 bit ADC modules found		*/
@@ -223,6 +223,7 @@ typedef struct CDS_HARDWARE{
 	int adcInstance[MAX_ADC_MODULES];
     int adcChannels[MAX_ADC_MODULES];
 	int adcConfig[MAX_ADC_MODULES];
+	int adcMap[MAX_ADC_MODULES];
 	int doCount;			/* Number of DIO modules found		*/
 	unsigned short pci_do[MAX_DIO_MODULES];	/* io registers of DIO	*/
 	int doType[MAX_DIO_MODULES];

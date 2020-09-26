@@ -93,187 +93,10 @@ main( int argc, char** argv )
     // memory
     printf( "%d PCI cards found\n", ioMemData->totalCards );
 
-    // Have to search thru all cards and find desired instance for application
-    // Master will map ADC cards first, then DAC and finally DIO
-    for ( ii = 0; ii < ioMemData->totalCards; ii++ )
-    {
-        for ( jj = 0; jj < cards; jj++ )
-        {
-            switch ( ioMemData->model[ ii ] )
-            {
-            case GSC_16AI64SSA:
-                if ( ( cdsPciModules.cards_used[ jj ].type == GSC_16AI64SSA ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == adcCnt ) )
-                {
-                    printf( "Found ADC at %d %d\n", jj, ioMemData->ipc[ ii ] );
-                    kk = cdsPciModules.adcCount;
-                    cdsPciModules.adcType[ kk ] = GSC_16AI64SSA;
-                    cdsPciModules.adcConfig[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.adcCount++;
-                    status++;
-                }
-                break;
-            case GSC_16AO16:
-                if ( ( cdsPciModules.cards_used[ jj ].type == GSC_16AO16 ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == dacCnt ) )
-                {
-                    printf( "Found DAC at %d %d\n", jj, ioMemData->ipc[ ii ] );
-                    kk = cdsPciModules.dacCount;
-                    cdsPciModules.dacType[ kk ] = GSC_16AO16;
-                    cdsPciModules.dacConfig[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.pci_dac[ kk ] =
-                        (long)( ioMemData->iodata[ ii ] );
-                    cdsPciModules.dacCount++;
-                    status++;
-                }
-                break;
-            case GSC_18AO8:
-                if ( ( cdsPciModules.cards_used[ jj ].type == GSC_18AO8 ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == dac18Cnt ) )
-                {
-                    printf( "Found DAC at %d %d\n", jj, ioMemData->ipc[ ii ] );
-                    kk = cdsPciModules.dacCount;
-                    cdsPciModules.dacType[ kk ] = GSC_18AO8;
-                    cdsPciModules.dacConfig[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.pci_dac[ kk ] =
-                        (long)( ioMemData->iodata[ ii ] );
-                    cdsPciModules.dacCount++;
-                    status++;
-                }
-                break;
-            case GSC_20AO8:
-                if ( ( cdsPciModules.cards_used[ jj ].type == GSC_20AO8 ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == dac20Cnt ) )
-                {
-                    printf( "Found DAC at %d %d\n", jj, ioMemData->ipc[ ii ] );
-                    kk = cdsPciModules.dacCount;
-                    cdsPciModules.dacType[ kk ] = GSC_20AO8;
-                    cdsPciModules.dacConfig[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.pci_dac[ kk ] =
-                        (long)( ioMemData->iodata[ ii ] );
-                    cdsPciModules.dacCount++;
-                    status++;
-                }
-                break;
-            case CON_6464DIO:
-                if ( ( cdsPciModules.cards_used[ jj ].type == CON_6464DIO ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == doCnt ) )
-                {
-                    kk = cdsPciModules.doCount;
-                    printf( "Found 6464 DIO CONTEC at %d 0x%x\n",
-                            jj,
-                            ioMemData->ipc[ ii ] );
-                    cdsPciModules.doType[ kk ] = ioMemData->model[ ii ];
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doCount++;
-                    cdsPciModules.cDio6464lCount++;
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doInstance[ kk ] = doCnt;
-                    status += 2;
-                }
-                if ( ( cdsPciModules.cards_used[ jj ].type == CDO64 ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == doCnt ) )
-                {
-                    kk = cdsPciModules.doCount;
-                    cdsPciModules.doType[ kk ] = CDO64;
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doCount++;
-                    cdsPciModules.cDio6464lCount++;
-                    cdsPciModules.doInstance[ kk ] = doCnt;
-                    printf( "Found 6464 DOUT CONTEC at %d 0x%x index %d \n",
-                            jj,
-                            ioMemData->ipc[ ii ],
-                            doCnt );
-                    cdo64Cnt++;
-                    status++;
-                }
-                if ( ( cdsPciModules.cards_used[ jj ].type == CDI64 ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == doCnt ) )
-                {
-                    kk = cdsPciModules.doCount;
-                    cdsPciModules.doType[ kk ] = CDI64;
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doInstance[ kk ] = doCnt;
-                    cdsPciModules.doCount++;
-                    printf( "Found 6464 DIN CONTEC at %d 0x%x index %d \n",
-                            jj,
-                            ioMemData->ipc[ ii ],
-                            doCnt );
-                    cdsPciModules.cDio6464lCount++;
-                    cdi64Cnt++;
-                    status++;
-                }
-                break;
-            case CON_32DO:
-                if ( ( cdsPciModules.cards_used[ jj ].type == CON_32DO ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == do32Cnt ) )
-                {
-                    kk = cdsPciModules.doCount;
-                    printf( "Found 32 DO CONTEC at %d 0x%x\n",
-                            jj,
-                            ioMemData->ipc[ ii ] );
-                    cdsPciModules.doType[ kk ] = ioMemData->model[ ii ];
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doCount++;
-                    cdsPciModules.cDo32lCount++;
-                    cdsPciModules.doInstance[ kk ] = do32Cnt;
-                    status++;
-                }
-                break;
-            case ACS_16DIO:
-                if ( ( cdsPciModules.cards_used[ jj ].type == ACS_16DIO ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance ==
-                       doIIRO16Cnt ) )
-                {
-                    kk = cdsPciModules.doCount;
-                    printf( "Found Access IIRO-16 at %d 0x%x\n",
-                            jj,
-                            ioMemData->ipc[ ii ] );
-                    cdsPciModules.doType[ kk ] = ioMemData->model[ ii ];
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doCount++;
-                    cdsPciModules.iiroDio1Count++;
-                    cdsPciModules.doInstance[ kk ] = doIIRO16Cnt;
-                    status++;
-                }
-                break;
-            case ACS_8DIO:
-                if ( ( cdsPciModules.cards_used[ jj ].type == ACS_8DIO ) &&
-                     ( cdsPciModules.cards_used[ jj ].instance == doIIRO8Cnt ) )
-                {
-                    kk = cdsPciModules.doCount;
-                    printf( "Found Access IIRO-8 at %d 0x%x\n",
-                            jj,
-                            ioMemData->ipc[ ii ] );
-                    cdsPciModules.doType[ kk ] = ioMemData->model[ ii ];
-                    cdsPciModules.pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    cdsPciModules.doCount++;
-                    cdsPciModules.iiroDioCount++;
-                    cdsPciModules.doInstance[ kk ] = doIIRO8Cnt;
-                    status++;
-                }
-                break;
-            default:
-                break;
-            }
-        }
-        if ( ioMemData->model[ ii ] == GSC_16AI64SSA )
-            adcCnt++;
-        if ( ioMemData->model[ ii ] == GSC_16AO16 )
-            dacCnt++;
-        if ( ioMemData->model[ ii ] == GSC_18AO8 )
-            dac18Cnt++;
-        if ( ioMemData->model[ ii ] == GSC_20AO8 )
-            dac20Cnt++;
-        if ( ioMemData->model[ ii ] == CON_6464DIO )
-            doCnt++;
-        if ( ioMemData->model[ ii ] == CON_32DO )
-            do32Cnt++;
-        if ( ioMemData->model[ ii ] == ACS_16DIO )
-            doIIRO16Cnt++;
-        if ( ioMemData->model[ ii ] == ACS_8DIO )
-            doIIRO8Cnt++;
-    }
+    initmap( &cdsPciModules );
+    /// Call PCI initialization routine in map.c file.
+    status = mapPciModules( &cdsPciModules );
+
     // If no ADC cards were found, then control cannot run
     if ( !cdsPciModules.adcCount )
     {
@@ -301,7 +124,7 @@ main( int argc, char** argv )
     }
 #endif
     // Print out all the I/O information
-    print_io_info( &cdsPciModules );
+    print_io_info( &cdsPciModules,0 );
 
     // Initialize buffer for daqLib.c code
     printf( "Initializing space for daqLib buffers\n" );
@@ -319,6 +142,11 @@ main( int argc, char** argv )
     }
 
     pLocalEpics->epicsInput.vmeReset = 0;
+    // Setup signal handler to catch Control C
+    signal( SIGINT, intHandler );
+    signal( SIGTERM, intHandler );
+    sleep( 1 );
+
     // Start the control loop software
     fe_start_app_user( );
 

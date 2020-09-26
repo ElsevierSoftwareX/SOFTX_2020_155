@@ -44,11 +44,8 @@ mapPciModules( CDS_HARDWARE* pCds )
                      ( pCds->cards_used[ jj ].instance ==
                        ioMemData->card[ ii ] ) )
                 {
-                    kk = pCds->adcCount;
-                    pCds->adcType[ kk ] = GSC_16AI64SSA;
-                    pCds->adcInstance[ kk ] = ioMemData->card[ ii ];
+                    kk = pCds->adcMap[ jj ];
                     pCds->adcConfig[ kk ] = ioMemData->ipc[ ii ];
-                    pCds->adcCount++;
                     status++;
                 }
                 break;
@@ -57,11 +54,8 @@ mapPciModules( CDS_HARDWARE* pCds )
                      ( pCds->cards_used[ jj ].instance ==
                        ioMemData->card[ ii ] ) )
                 {
-                    kk = pCds->adcCount;
-                    pCds->adcType[ kk ] = GSC_18AI32SSC1M;
-                    pCds->adcInstance[ kk ] = ioMemData->card[ ii ];
+                    kk = pCds->adcMap[ jj ];
                     pCds->adcConfig[ kk ] = ioMemData->ipc[ ii ];
-                    pCds->adcCount++;
                     status++;
                 }
                 break;
@@ -70,12 +64,9 @@ mapPciModules( CDS_HARDWARE* pCds )
                      ( pCds->cards_used[ jj ].instance ==
                        ioMemData->card[ ii ] ) )
                 {
-                    kk = pCds->dacCount;
-                    pCds->dacType[ kk ] = GSC_16AO16;
-                    pCds->dacInstance[ kk ] = ioMemData->card[ ii ];
+                    kk = pCds->dacMap[ jj ];
                     pCds->dacConfig[ kk ] = ioMemData->ipc[ ii ];
                     pCds->pci_dac[ kk ] = (long)( ioMemData->iodata[ ii ] );
-                    pCds->dacCount++;
                     status++;
                 }
                 break;
@@ -84,12 +75,9 @@ mapPciModules( CDS_HARDWARE* pCds )
                      ( pCds->cards_used[ jj ].instance ==
                        ioMemData->card[ ii ] ) )
                 {
-                    kk = pCds->dacCount;
-                    pCds->dacType[ kk ] = GSC_18AO8;
-                    pCds->dacInstance[ kk ] = ioMemData->card[ ii ];
+                    kk = pCds->dacMap[ jj ];
                     pCds->dacConfig[ kk ] = ioMemData->ipc[ ii ];
                     pCds->pci_dac[ kk ] = (long)( ioMemData->iodata[ ii ] );
-                    pCds->dacCount++;
                     status++;
                 }
                 break;
@@ -98,12 +86,9 @@ mapPciModules( CDS_HARDWARE* pCds )
                      ( pCds->cards_used[ jj ].instance ==
                        ioMemData->card[ ii ] ) )
                 {
-                    kk = pCds->dacCount;
-                    pCds->dacType[ kk ] = GSC_20AO8;
-                    pCds->dacInstance[ kk ] = ioMemData->card[ ii ];
+                    kk = pCds->dacMap[ jj ];
                     pCds->dacConfig[ kk ] = ioMemData->ipc[ ii ];
                     pCds->pci_dac[ kk ] = (long)( ioMemData->iodata[ ii ] );
-                    pCds->dacCount++;
                     status++;
                 }
                 break;

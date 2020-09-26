@@ -300,6 +300,78 @@ attach_shared_memory( )
     return 0;
 }
 
+void initmap(CDS_HARDWARE* pCds)
+{
+int i;
+int dac_cnt = 0;
+int adc_cnt = 0;
+    pCds->adcCount = 0;
+    pCds->dacCount = 0;
+    pCds->dioCount = 0;
+    pCds->doCount = 0;
+
+ for ( i = 0; i < pCds->cards; i++ )
+    {
+     pCds->adcMap[ i ] = 0;
+     pCds->dacMap[ i ] = 0;
+    }
+
+ for ( i = 0; i < pCds->cards; i++ )
+    {
+        if ( pCds->cards_used[ i ].type == GSC_18AO8 )
+        {
+            pCds->dacType[ dac_cnt ] = GSC_18AO8;
+            pCds->dacInstance[ dac_cnt ] =  pCds->cards_used[ i ].instance;
+            pCds->dacConfig[ dac_cnt ] = 0;
+            pCds->dacMap[ i ] = dac_cnt;
+            pCds->dacCount++;
+            pCds->dac18Count++;
+            dac_cnt++;
+        }
+        if ( pCds->cards_used[ i ].type == GSC_16AO16 )
+        {
+            pCds->dacType[ dac_cnt ] = GSC_16AO16;
+            pCds->dacInstance[ dac_cnt ] =  pCds->cards_used[ i ].instance;
+            pCds->dacConfig[ dac_cnt ] = 0;
+            pCds->dacMap[ i ] = dac_cnt;
+            pCds->dacCount++;
+            pCds->dac16Count++;
+            dac_cnt++;
+        }
+        if ( pCds->cards_used[ i ].type == GSC_20AO8 )
+        {
+            pCds->dacType[ dac_cnt ] = GSC_20AO8;
+            pCds->dacInstance[ dac_cnt ] =  pCds->cards_used[ i ].instance;
+            pCds->dacConfig[ dac_cnt ] = 0;
+            pCds->dacMap[ i ] = dac_cnt;
+            pCds->dacCount++;
+            pCds->dac20Count++;
+            dac_cnt++;
+        }
+        if ( pCds->cards_used[ i ].type == GSC_16AI64SSA )
+        {
+            pCds->adcType[ adc_cnt ] = GSC_16AI64SSA;
+            pCds->adcInstance[ adc_cnt ] =  pCds->cards_used[ i ].instance;
+            pCds->adcConfig[ adc_cnt ] = -1;
+            pCds->adcMap[ i ] = adc_cnt;
+            pCds->adcCount++;
+            pCds->adc16Count++;
+            adc_cnt++;
+        }
+        if ( pCds->cards_used[ i ].type == GSC_18AI32SSC1M )
+        {
+            pCds->adcType[ adc_cnt ] = GSC_18AI32SSC1M;
+            pCds->adcInstance[ adc_cnt ] =  pCds->cards_used[ i ].instance;
+            pCds->adcConfig[ adc_cnt ] = -1;
+            pCds->adcMap[ i ] = adc_cnt;
+            pCds->adcCount++;
+            pCds->adc18Count++;
+            adc_cnt++;
+        }
+    }
+
+}
+
 void
 send_io_info_to_mbuf( int totalcards, CDS_HARDWARE* pCds )
 {

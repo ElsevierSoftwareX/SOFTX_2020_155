@@ -45,22 +45,6 @@ int startGpsTime = 0;
 int getGpsTime( unsigned int* tsyncSec, unsigned int* tsyncUsec );
 int killipc = 0;
 
-// Clear DAC channel shared memory map,
-// used to keep track of non-overlapping DAC channels among control models
-//
-void
-deallocate_dac_channels( void )
-{
-    int ii, jj;
-    for ( ii = 0; ii < MAX_DAC_MODULES; ii++ )
-    {
-        int pd = cdsPciModules.dacConfig[ ii ] - ioMemData->adcCount;
-        for ( jj = 0; jj < 16; jj++ )
-            if ( dacOutUsed[ ii ][ jj ] )
-                ioMemData->dacOutUsed[ pd ][ jj ] = 0;
-    }
-}
-
 //***********************************************************************
 // TASK: fe_start_controller()
 // This routine is the skeleton for all front end code

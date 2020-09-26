@@ -95,6 +95,9 @@ rt_fe_init( void )
     cdsPciModules.dioCount = 0;
     cdsPciModules.doCount = 0;
 
+#ifdef CONTROL_MODEL
+    initmap( &cdsPciModules );
+#endif
     /// Call PCI initialization routine in map.c file.
     status = mapPciModules( &cdsPciModules );
 

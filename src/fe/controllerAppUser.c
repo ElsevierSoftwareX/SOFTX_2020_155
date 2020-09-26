@@ -54,10 +54,11 @@
 #include "drv/mapuser.h"
 #include "timing.c" // timing module / IRIG-B  functions
 
-int dacOF[ MAX_DAC_MODULES ];
+// int dacOF[ MAX_DAC_MODULES ];
 #include "drv/inputFilterModule.h"
 #include "drv/inputFilterModule1.h"
 #include <drv/app_dac_functions.c>
+#include <drv/dac_info.c>
 
 // #include "dolphin_usp.c"
 
@@ -90,21 +91,6 @@ int             timeHoldHold =
     0; ///< Max code cycle time within 1 sec period; hold for another sec
 struct timespec myTimer[ 2 ]; ///< Used in code cycle timing
 
-// Clear DAC channel shared memory map,
-// used to keep track of non-overlapping DAC channels among control models
-//
-void
-deallocate_dac_channels( void )
-{
-    int ii, jj;
-    for ( ii = 0; ii < MAX_DAC_MODULES; ii++ )
-    {
-        int pd = cdsPciModules.dacConfig[ ii ] - ioMemData->adcCount;
-        for ( jj = 0; jj < 16; jj++ )
-            if ( dacOutUsed[ ii ][ jj ] )
-                ioMemData->dacOutUsed[ pd ][ jj ] = 0;
-    }
-}
 unsigned int
 getGpsTimeProc( )
 {
@@ -151,11 +137,6 @@ fe_start_app_user( )
     static struct timespec
         cpuClock[ CPU_TIMER_CNT ]; ///  @param cpuClock[] Code timing diag
                                    ///  variables
-    // int dacOF[MAX_DAC_MODULES];
-
-    adcInfo_t adcInfo;
-    dacInfo_t dacInfo;
-
     static int dacWriteEnable =
         0; /// @param dacWriteEnable  No DAC outputs until >4 times through code
            ///< Code runs longer for first few cycles on startup as it settles
@@ -387,50 +368,11 @@ fe_start_app_user( )
     /// \> Verify DAC channels defined for this app are not already in use. \n
     /// - ---- User apps are allowed to share DAC modules but not DAC channels.
     // See if my DAC channel map overlaps with already running models
-    for ( ii = 0; ii < cdsPciModules.dacCount; ii++ )
+    status = app_dac_init( );
+    if ( status )
     {
-        int pd = cdsPciModules.dacConfig[ ii ] -
-            ioMemData->adcCount; // physical DAC number
-        for ( jj = 0; jj < 16; jj++ )
-        {
-            if ( dacOutUsed[ ii ][ jj ] )
-            {
-                if ( ioMemData->dacOutUsed[ pd ][ jj ] )
-                {
-                    // vmeDone = 1;
-                    printf( "Failed to allocate DAC channel.\n" );
-                    printf( "DAC local %d global %d channel %d is already "
-                            "allocated.\n",
-                            ii,
-                            pd,
-                            jj );
-                }
-            }
-        }
-    }
-    if ( vmeDone )
-    {
+        pLocalEpics->epicsOutput.fe_status = DAC_INIT_ERROR;
         return ( 0 );
-    }
-    else
-    {
-        for ( ii = 0; ii < cdsPciModules.dacCount; ii++ )
-        {
-            int pd = cdsPciModules.dacConfig[ ii ] -
-                ioMemData->adcCount; // physical DAC number
-            for ( jj = 0; jj < MAX_DAC_CHN_PER_MOD; jj++ )
-            {
-                if ( dacOutUsed[ ii ][ jj ] )
-                {
-                    ioMemData->dacOutUsed[ pd ][ jj ] = 1;
-                    printf( "Setting card local=%d global = %d channel=%d dac "
-                            "usage\n",
-                            ii,
-                            pd,
-                            jj );
-                }
-            }
-        }
     }
 
     // Initialize ADC status
@@ -527,15 +469,15 @@ fe_start_app_user( )
                 {
                     clock_gettime( CLOCK_MONOTONIC,
                                    &cpuClock[ CPU_TIME_ADC_WAIT ] );
-                    adcInfo.adcWait = BILLION *
+                    adcinfo.adcWait = BILLION *
                             ( cpuClock[ CPU_TIME_ADC_WAIT ].tv_sec -
                               cpuClock[ CPU_TIME_RDY_ADC ].tv_sec ) +
                         cpuClock[ CPU_TIME_ADC_WAIT ].tv_nsec -
                         cpuClock[ CPU_TIME_RDY_ADC ].tv_nsec;
-                    adcInfo.adcWait /= 1000;
+                    adcinfo.adcWait /= 1000;
                 } while (
                     ( ioMemData->iodata[ mm ][ ioMemCntr ].cycle != ioClock ) &&
-                    ( adcInfo.adcWait < MAX_ADC_WAIT_CONTROL ) );
+                    ( adcinfo.adcWait < MAX_ADC_WAIT_CONTROL ) );
                 timeSec = ioMemData->iodata[ mm ][ ioMemCntr ].timeSec;
                 if ( cycle_gps_time == 0 )
                 {
@@ -547,7 +489,7 @@ fe_start_app_user( )
 
                 /// - --------- If data not ready in time, set error, release
                 /// DAC channel reservation and exit the code.
-                if ( adcInfo.adcWait >= MAX_ADC_WAIT_CONTROL )
+                if ( adcinfo.adcWait >= MAX_ADC_WAIT_CONTROL )
                 {
                     printf( "ADC TIMEOUT %d %d %d %d\n",
                             mm,
@@ -562,12 +504,12 @@ fe_start_app_user( )
                 for ( ii = 0; ii < MAX_ADC_CHN_PER_MOD; ii++ )
                 {
                     /// - ---- Read data from shared memory.
-                    adcInfo.adcData[ jj ][ ii ] =
+                    adcinfo.adcData[ jj ][ ii ] =
                         ioMemData->iodata[ mm ][ ioMemCntr ].data[ ii ];
 #ifdef FLIP_SIGNALS
-                    adcInfo.adcData[ jj ][ ii ] *= -1;
+                    adcinfo.adcData[ jj ][ ii ] *= -1;
 #endif
-                    dWord[ jj ][ ii ] = adcInfo.adcData[ jj ][ ii ];
+                    dWord[ jj ][ ii ] = adcinfo.adcData[ jj ][ ii ];
 #ifdef OVERSAMPLE
                     /// - ---- Downsample ADC data from 64K to rate of user
                     /// application
@@ -580,13 +522,13 @@ fe_start_app_user( )
                                                &dHistory[ ii + jj * 32 ][ 0 ] );
                     }
                     /// - ---- Check for ADC data over/under range
-                    if ( ( adcInfo.adcData[ jj ][ ii ] > limit ) ||
-                         ( adcInfo.adcData[ jj ][ ii ] < -limit ) )
+                    if ( ( adcinfo.adcData[ jj ][ ii ] > limit ) ||
+                         ( adcinfo.adcData[ jj ][ ii ] < -limit ) )
                     {
-                        adcInfo.overflowAdc[ jj ][ ii ]++;
+                        adcinfo.overflowAdc[ jj ][ ii ]++;
                         pLocalEpics->epicsOutput.overflowAdcAcc[ jj ][ ii ]++;
                         overflowAcc++;
-                        adcInfo.adcOF[ jj ] = 1;
+                        adcinfo.adcOF[ jj ] = 1;
                         odcStateWord |= ODC_ADC_OVF;
                     }
 #endif
@@ -762,8 +704,8 @@ fe_start_app_user( )
                 {
                     for ( jj = 0; jj < cdsPciModules.adcCount; jj++ )
                     {
-                        adcInfo.overflowAdc[ jj ][ ii ] = 0;
-                        adcInfo.overflowAdc[ jj ][ ii + 16 ] = 0;
+                        adcinfo.overflowAdc[ jj ][ ii ] = 0;
+                        adcinfo.overflowAdc[ jj ][ ii + 16 ] = 0;
                         pLocalEpics->epicsOutput.overflowAdcAcc[ jj ][ ii ] = 0;
                         pLocalEpics->epicsOutput
                             .overflowAdcAcc[ jj ][ ii + 16 ] = 0;
@@ -800,8 +742,8 @@ fe_start_app_user( )
             {
                 for ( ii = 0; ii < MAX_DAC_CHN_PER_MOD; ii++ )
                 {
-                    pLocalEpics->epicsOutput.dacValue[ jj ][ ii ] =
-                        dacInfo.dacOutEpics[ jj ][ ii ];
+                    pLocalEpics->epicsOutput.dacValue[ jj ][ ii ] = 
+                         dacinfo.dacOutEpics[ jj ][ ii ];
                 }
             }
         }
@@ -815,7 +757,7 @@ fe_start_app_user( )
             for ( jj = 0; jj < cdsPciModules.adcCount; jj++ )
             {
                 // SET/CLR Channel Hopping Error
-                if ( adcInfo.adcChanErr[ jj ] )
+                if ( adcinfo.adcChanErr[ jj ] )
                 {
                     pLocalEpics->epicsOutput.statAdc[ jj ] &= ~( 2 );
                     feStatus |= FE_ERROR_ADC;
@@ -823,9 +765,9 @@ fe_start_app_user( )
                 }
                 else
                     pLocalEpics->epicsOutput.statAdc[ jj ] |= 2;
-                adcInfo.adcChanErr[ jj ] = 0;
+                adcinfo.adcChanErr[ jj ] = 0;
                 // SET/CLR Overflow Error
-                if ( adcInfo.adcOF[ jj ] )
+                if ( adcinfo.adcOF[ jj ] )
                 {
                     pLocalEpics->epicsOutput.statAdc[ jj ] &= ~( 4 );
                     feStatus |= FE_ERROR_OVERFLOW;
@@ -833,7 +775,7 @@ fe_start_app_user( )
                 }
                 else
                     pLocalEpics->epicsOutput.statAdc[ jj ] |= 4;
-                adcInfo.adcOF[ jj ] = 0;
+                adcinfo.adcOF[ jj ] = 0;
                 for ( ii = 0; ii < 32; ii++ )
                 {
                     if ( pLocalEpics->epicsOutput.overflowAdcAcc[ jj ][ ii ] >
@@ -842,42 +784,11 @@ fe_start_app_user( )
                         pLocalEpics->epicsOutput.overflowAdcAcc[ jj ][ ii ] = 0;
                     }
                     pLocalEpics->epicsOutput.overflowAdc[ jj ][ ii ] =
-                        adcInfo.overflowAdc[ jj ][ ii ];
-                    adcInfo.overflowAdc[ jj ][ ii ] = 0;
+                        adcinfo.overflowAdc[ jj ][ ii ];
+                    adcinfo.overflowAdc[ jj ][ ii ] = 0;
                 }
             }
-            for ( jj = 0; jj < cdsPciModules.dacCount; jj++ )
-            {
-                if ( dacOF[ jj ] )
-                {
-                    pLocalEpics->epicsOutput.statDac[ jj ] &=
-                        ~( DAC_OVERFLOW_BIT );
-                    feStatus |= FE_ERROR_OVERFLOW;
-                    ;
-                }
-                else
-                    pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_OVERFLOW_BIT;
-                dacOF[ jj ] = 0;
-                if ( dacChanErr[ jj ] )
-                {
-                    pLocalEpics->epicsOutput.statDac[ jj ] &=
-                        ~( DAC_TIMING_BIT );
-                }
-                else
-                    pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_TIMING_BIT;
-                dacChanErr[ jj ] = 0;
-                for ( ii = 0; ii < MAX_DAC_CHN_PER_MOD; ii++ )
-                {
-                    if ( pLocalEpics->epicsOutput.overflowDacAcc[ jj ][ ii ] >
-                         OVERFLOW_CNTR_LIMIT )
-                    {
-                        pLocalEpics->epicsOutput.overflowDacAcc[ jj ][ ii ] = 0;
-                    }
-                    pLocalEpics->epicsOutput.overflowDac[ jj ][ ii ] =
-                        dacInfo.overflowDac[ jj ][ ii ];
-                    dacInfo.overflowDac[ jj ][ ii ] = 0;
-                }
-            }
+            feStatus |= dac_status_update( &dacinfo );
         }
         // *********************************************************************
         // Capture end of cycle time.
