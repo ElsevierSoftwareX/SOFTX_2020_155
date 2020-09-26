@@ -16,8 +16,8 @@
 ///\n
 /// 	@detail More information can be found in the following DCC document:
 ///<	<a
-///<href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">T0900607
-///<CDS RT Sequencer Software</a>
+///< href="https://dcc.ligo.org/cgi-bin/private/DocDB/ShowDocument?docid=7688">T0900607
+///< CDS RT Sequencer Software</a>
 ///	@author R.Bork, A.Ivanov
 ///     @copyright Copyright (C) 2014 LIGO Project      \n
 ///<    California Institute of Technology              \n
@@ -73,8 +73,8 @@ unsigned int CDIO6464LastOutState[ MAX_DIO_MODULES ]; // Current requested value
 // /// Contec6464 values to be written to the output register
 unsigned int CDIO6464Output[ MAX_DIO_MODULES ]; // Binary output bits
 //
-// // This Contect 16 input / 16 output DIO card is used to control timing receiver
-// by IOP
+// // This Contect 16 input / 16 output DIO card is used to control timing
+// receiver by IOP
 // /// Contec1616 input register values
 unsigned int CDIO1616InputInput[ MAX_DIO_MODULES ]; // Binary input bits
 // /// Contec1616 output register values read back from the module
@@ -149,8 +149,8 @@ fe_start_app_user( )
     int           dkiTrip = 0;
     RFM_FE_COMMS* pEpicsComms; /// @param *pEpicsComms Pointer to EPICS shared
                                /// memory space
-    // int timeHoldMax = 0;			/// @param timeHoldMax Max code cycle time since
-    // last diag reset
+    // int timeHoldMax = 0;			/// @param timeHoldMax Max code cycle
+    // time since last diag reset
     int myGmError2 = 0; /// @param myGmError2 Myrinet error variable
     int status; /// @param status Typical function return value
     float
@@ -381,8 +381,9 @@ fe_start_app_user( )
         pLocalEpics->epicsOutput.statAdc[ jj ] = 1;
     }
 
-    // Control model needs to sync with MASTER by looking for cycle 0 count in ipc
-    // memory Find memory buffer of first ADC to be used in control application.
+    // Control model needs to sync with MASTER by looking for cycle 0 count in
+    // ipc memory Find memory buffer of first ADC to be used in control
+    // application.
     pLocalEpics->epicsOutput.fe_status = INIT_SYNC;
     ll = cdsPciModules.adcConfig[ 0 ];
     printf( "waiting to sync %d\n", ioMemData->iodata[ ll ][ 0 ].cycle );
@@ -457,7 +458,8 @@ fe_start_app_user( )
         }
         for ( ll = 0; ll < sampleCount; ll++ )
         {
-            /// \> Control model gets its adc data from MASTER via ipc shared memory\n
+            /// \> Control model gets its adc data from MASTER via ipc shared
+            /// memory\n
             for ( jj = 0; jj < cdsPciModules.adcCount; jj++ )
             {
                 mm = cdsPciModules.adcConfig[ jj ];
@@ -566,8 +568,8 @@ fe_start_app_user( )
         /// Writing of DAC outputs is dependent on code compile option: \n
         /// - -- IOP (IOP_MODEL) reads DAC output values from memory shared
         /// with user apps and writes to DAC hardware. \n
-        /// - -- USER APP (CONTROL_MODEL) sends output values to memory shared with
-        /// IOP. \n
+        /// - -- USER APP (CONTROL_MODEL) sends output values to memory shared
+        /// with IOP. \n
 
         /// START OF USER APP DAC WRITE
         /// *****************************************
@@ -742,8 +744,8 @@ fe_start_app_user( )
             {
                 for ( ii = 0; ii < MAX_DAC_CHN_PER_MOD; ii++ )
                 {
-                    pLocalEpics->epicsOutput.dacValue[ jj ][ ii ] = 
-                         dacinfo.dacOutEpics[ jj ][ ii ];
+                    pLocalEpics->epicsOutput.dacValue[ jj ][ ii ] =
+                        dacinfo.dacOutEpics[ jj ][ ii ];
                 }
             }
         }

@@ -355,7 +355,7 @@ main( int argc, char** argv )
     printf( "Total of %d I/O modules found and mapped\n", kk );
     printf( "******************************************************************"
             "*********\n" );
-    print_io_info(&cdsPciModules);
+    print_io_info(&cdsPciModules,1);
     // Following section maps Reflected Memory, both VMIC hardware style and
     // Dolphin PCIe network style. Control units will perform I/O transactions
     // with RFM directly ie IOP does not do RFM I/O. Master unit only maps

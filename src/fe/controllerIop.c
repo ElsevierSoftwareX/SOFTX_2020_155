@@ -106,9 +106,10 @@ fe_start_controller( void* arg )
     float
         onePps; /// @param onePps Value of 1PPS signal, if used, for diagnostics
     int onePpsHi = 1; /// @param onePpsHi One PPS diagnostic check
-    int onePpsTime = IOP_IO_RATE * 4; /// @param onePpsTime One PPS diagnostic check
+    int onePpsTime =
+        IOP_IO_RATE * 4; /// @param onePpsTime One PPS diagnostic check
     unsigned long nanotime = 100000;
-    int sync21pps = 0;
+    int           sync21pps = 0;
 #ifdef DIAG_TEST
     float onePpsTest; /// @param onePpsTest Value of 1PPS signal, if used, for
                       /// diagnostics
@@ -207,8 +208,7 @@ fe_start_controller( void* arg )
     // Need to start TDS clocks for testing
     for ( ii = 0; ii < tdsCount; ii++ )
     {
-        CDIO1616Output[ ii ] =
-            TDS_START_ADC_NEG_DAC_POS | TDS_NO_DAC_DUOTONE;
+        CDIO1616Output[ ii ] = TDS_START_ADC_NEG_DAC_POS | TDS_NO_DAC_DUOTONE;
         CDIO1616Input[ ii ] = contec1616WriteOutputRegister(
             &cdsPciModules, tdsControl[ ii ], CDIO1616Output[ ii ] );
     }
@@ -431,21 +431,24 @@ fe_start_controller( void* arg )
 
         // Now search for the 1PPS sync pulse
         // on last channel of 1st ADC
-        do {
+        do
+        {
             status = iop_adc_read( padcinfo, cpuClock );
-            onePps = dWord[ADC_ONEPPS_BRD][ADC_DUOTONE_CHAN][0];
-            onePpsHi ++;
-        } while (onePps < ONE_PPS_THRESH && onePpsHi < onePpsTime);
-        if(onePpsHi >= onePpsTime) {
+            onePps = dWord[ ADC_ONEPPS_BRD ][ ADC_DUOTONE_CHAN ][ 0 ];
+            onePpsHi++;
+        } while ( onePps < ONE_PPS_THRESH && onePpsHi < onePpsTime );
+        if ( onePpsHi >= onePpsTime )
+        {
             // Sync21PPS failed, so default to no sync
             syncSource = SYNC_SRC_NONE;
             // Now search for the start of 1sec from internal clock
-            do {
+            do
+            {
                 status = iop_adc_read( padcinfo, cpuClock );
-                nanotime = current_nanosecond();
-                onePpsHi ++;
-            } while (nanotime < 50000 && onePpsHi < onePpsTime);
-        } 
+                nanotime = current_nanosecond( );
+                onePpsHi++;
+            } while ( nanotime < 50000 && onePpsHi < onePpsTime );
+        }
         // Enable all DAC cards
         gsc16ao16Enable( &cdsPciModules );
         gsc18ao8Enable( &cdsPciModules );
@@ -467,16 +470,18 @@ fe_start_controller( void* arg )
         // Found a clock so now enable all cards
         gsc16ai64Enable( &cdsPciModules );
         // Now search for the start of 1sec from internal clock
-        do {
+        do
+        {
             status = iop_adc_read( padcinfo, cpuClock );
-            nanotime = current_nanosecond();
-            onePpsHi ++;
-        } while (nanotime < 50000 && onePpsHi < onePpsTime);
+            nanotime = current_nanosecond( );
+            onePpsHi++;
+        } while ( nanotime < 50000 && onePpsHi < onePpsTime );
         // Following is just test indication that above did not
         // find a start of second from internal clock
-        if(onePpsHi >= onePpsTime) {
+        if ( onePpsHi >= onePpsTime )
+        {
             diagWord |= TIME_ERR_1PPS;
-        } 
+        }
         // Enable all available DAC modules
         gsc18ao8Enable( &cdsPciModules );
         gsc20ao8Enable( &cdsPciModules );
@@ -506,7 +511,7 @@ fe_start_controller( void* arg )
     timeSec = remote_time( (struct CDS_EPICS*)pLocalEpics );
 #elif USE_DOLPHIN_TIMING
     timeSec = sync2master( pcieTimer );
-    if(timeSec == -1)
+    if ( timeSec == -1 )
     {
         timeSec = current_time_fe( ) - 1;
     }
@@ -527,7 +532,7 @@ fe_start_controller( void* arg )
 
 #ifdef ADD_SEC_ON_START
     // This is a special for LHO PEMMID
-    timeSec ++;
+    timeSec++;
 #endif
 
     adcinfo.adcTime = rdtsc_ordered( );
@@ -581,11 +586,12 @@ fe_start_controller( void* arg )
         }
 #endif
 #endif
-        
+
         // Start of ADC Read
         // **********************************************************************
         // Read ADC data
-        if(!sync21pps) status = iop_adc_read( padcinfo, cpuClock );
+        if ( !sync21pps )
+            status = iop_adc_read( padcinfo, cpuClock );
         sync21pps = 0;
 #ifdef DOLPHIN_RECOVERY
         if ( ( status > 0 ) && ( dacWriteEnable > 6 ) )
@@ -710,7 +716,7 @@ fe_start_controller( void* arg )
             // if ( cycleNum == HKP_READ_TSYNC_IRIBB )
             if ( cycleNum == HKP_READ_TSYNC_IRIBB )
             // if ( cycleNum == HKP_READ_TSYNC_IRIBB &&
-               //   syncSource == SYNC_SRC_TDS )
+            //   syncSource == SYNC_SRC_TDS )
             {
                 if ( cdsPciModules.gpsType == TSYNC_RCVR )
                 {
@@ -881,7 +887,7 @@ fe_start_controller( void* arg )
                 {
                     onePpsTimeTest[ ii ] = cycleNum;
                     onePpsHiTest[ ii ] = 1;
-                    if ( ( ii %  5 ) == 0 )
+                    if ( ( ii % 5 ) == 0 )
                         pLocalEpics->epicsOutput.timingTest[ ii ] =
                             cycleNum * 15.26;
                     // Control apps do not see 1pps until after IOP signal loops
@@ -1107,7 +1113,7 @@ fe_start_controller( void* arg )
                  cycleNum < ( HKP_DAC_FIFO_CHK + cdsPciModules.dacCount ) )
             {
                 if ( !expect_delays )
-                    status = check_dac_buffers( cycleNum , dac_fault_armed);
+                    status = check_dac_buffers( cycleNum, dac_fault_armed );
                 if ( dacTimingError )
                     feStatus |= FE_ERROR_DAC;
             }

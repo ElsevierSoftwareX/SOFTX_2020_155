@@ -1,6 +1,6 @@
 ///	@file rcguser.c
 ///	@brief File contains startup routines for running user app in user
-///space.
+/// space.
 
 // TODO:
 //  - Release DAC channels
@@ -39,32 +39,32 @@ main( int argc, char** argv )
     char fname[ 128 ]; /// @param fname[128] Name of shared mem area to allocate
                        /// for DAQ data
     int cards; /// @param cards Number of PCIe cards found on bus
-    int adcCnt = 0; /// @param adcCnt Number of ADC cards found by control model.
+    int adcCnt =
+        0; /// @param adcCnt Number of ADC cards found by control model.
     int dacCnt = 0; /// @param dacCnt Number of 16bit DAC cards found by control
-                /// model.
-    int dac18Cnt = 0; /// @param dac18Cnt Number of 18bit DAC cards found by control
-                  /// model.
-    int dac20Cnt = 0; /// @param dac20Cnt Number of 20bit DAC cards found by control
-                  /// model.
-    int doCnt = 0; /// @param doCnt Total number of digital I/O cards found by control
-               /// model.
+                    /// model.
+    int dac18Cnt = 0; /// @param dac18Cnt Number of 18bit DAC cards found by
+                      /// control model.
+    int dac20Cnt = 0; /// @param dac20Cnt Number of 20bit DAC cards found by
+                      /// control model.
+    int doCnt = 0; /// @param doCnt Total number of digital I/O cards found by
+                   /// control model.
     int do32Cnt = 0; /// @param do32Cnt Total number of Contec 32 bit DIO cards
-                 /// found by control model.
+                     /// found by control model.
     int doIIRO16Cnt = 0; /// @param doIIRO16Cnt Total number of Acces I/O 16 bit
-                     /// relay cards found by control model.
-    int doIIRO8Cnt = 0; /// @param doIIRO8Cnt Total number of Acces I/O 8 bit relay
-                    /// cards found by control model.
-    int cdo64Cnt = 0; /// @param cdo64Cnt Total number of Contec 6464 DIO card 32bit
-                  /// output sections mapped by control model.
-    int cdi64Cnt = 0; /// @param cdo64Cnt Total number of Contec 6464 DIO card 32bit
-                  /// input sections mapped by control model.
+                         /// relay cards found by control model.
+    int doIIRO8Cnt = 0; /// @param doIIRO8Cnt Total number of Acces I/O 8 bit
+                        /// relay cards found by control model.
+    int cdo64Cnt = 0; /// @param cdo64Cnt Total number of Contec 6464 DIO card
+                      /// 32bit output sections mapped by control model.
+    int cdi64Cnt = 0; /// @param cdo64Cnt Total number of Contec 6464 DIO card
+                      /// 32bit input sections mapped by control model.
     int ret; /// @param ret Return value from various Malloc calls to allocate
              /// memory.
-    int   cnt;
-
+    int cnt;
 
     // Connect and allocate mbuf memory spaces
-    attach_shared_memory(SYSTEM_NAME_STRING_LOWER);
+    attach_shared_memory( SYSTEM_NAME_STRING_LOWER );
     // Set pointer to EPICS shared memory
     pLocalEpics = (CDS_EPICS*)&( (RFM_FE_COMMS*)_epics_shm )->epicsSpace;
 
@@ -113,7 +113,6 @@ main( int argc, char** argv )
         cardCountErr = 1;
     }
 
-
     // Control app gets RFM module count from MASTER.
     cdsPciModules.rfmCount = ioMemData->rfmCount;
     cdsPciModules.dolphinCount = ioMemData->dolphinCount;
@@ -124,7 +123,7 @@ main( int argc, char** argv )
     }
 #endif
     // Print out all the I/O information
-    print_io_info( &cdsPciModules,0 );
+    print_io_info( &cdsPciModules, 0 );
 
     // Initialize buffer for daqLib.c code
     printf( "Initializing space for daqLib buffers\n" );
