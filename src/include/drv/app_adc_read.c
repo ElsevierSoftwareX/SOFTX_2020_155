@@ -15,6 +15,8 @@ app_adc_read( int ioMemCtr, int ioClk, adcInfo_t* adcinfo, int cpuClk[] )
     for ( card = 0; card < cdsPciModules.adcCount; card++ )
     {
         mm = cdsPciModules.adcConfig[ card ];
+        if( mm >= 0 ) 
+        {
         cpuClk[ CPU_TIME_RDY_ADC ] = rdtsc_ordered( );
         /// - ---- Wait for proper timestamp in shared memory, indicating data
         /// ready.
@@ -71,6 +73,7 @@ app_adc_read( int ioMemCtr, int ioClk, adcInfo_t* adcinfo, int cpuClk[] )
             }
 #endif
         }
+      }
     }
     return 0;
 }

@@ -286,7 +286,10 @@ fe_start_controller( void* arg )
     /// \> Initialize the ADC status
     for ( jj = 0; jj < cdsPciModules.adcCount; jj++ )
     {
-        pLocalEpics->epicsOutput.statAdc[ jj ] = 1;
+        if( cdsPciModules.adcConfig[ jj ] >= 0 )
+            pLocalEpics->epicsOutput.statAdc[ jj ] = 1;
+        else 
+            pLocalEpics->epicsOutput.statAdc[ jj ] = 0;
     }
 
     // Control model needs to sync with MASTER by looking for cycle 0 count in ipc
