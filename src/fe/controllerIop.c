@@ -212,7 +212,8 @@ fe_start_controller( void* arg )
         CDIO1616Input[ ii ] = contec1616WriteOutputRegister(
             &cdsPciModules, tdsControl[ ii ], CDIO1616Output[ ii ] );
     }
-    msleep( 1000 );
+    udelay( MAX_UDELAY );
+    udelay( MAX_UDELAY );
 #endif
 #ifdef NO_SYNC
     syncSource = SYNC_SRC_NONE;
