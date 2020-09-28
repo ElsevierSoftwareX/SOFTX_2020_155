@@ -1099,7 +1099,6 @@ fe_start_controller( void* arg )
                         pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_WD_BIT;
                 }
             }
-#endif
 
             // *****************************************************************
             /// \> Cycle 600 to 600 + numDacModules, Check DAC FIFO Sizes to
@@ -1118,6 +1117,7 @@ fe_start_controller( void* arg )
                 if ( dacTimingError )
                     feStatus |= FE_ERROR_DAC;
             }
+#endif
 
             // *****************************************************************
             // Update end of cycle information
