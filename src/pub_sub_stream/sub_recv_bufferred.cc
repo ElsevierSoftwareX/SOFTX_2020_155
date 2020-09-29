@@ -33,7 +33,9 @@
 #include "../include/daq_core.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/optional.hpp>
 #include <cds-pubsub/sub.hh>
+#include "cps_recv_admin.hh"
 
 #include "args.h"
 
@@ -410,6 +412,7 @@ main( int argc, char** argv )
     const char*                subs = nullptr;
     const char*                subs_file = nullptr;
     const char*                epics_prefix = nullptr;
+    const char*                admin_interface = nullptr;
     std::vector< std::string > subscription_strings{};
     int                        thread_per_sub = 0;
     int                        dcus_received = 0;
@@ -514,6 +517,14 @@ main( int argc, char** argv )
                          "The EPICS variable prefix to use",
                          &epics_prefix,
                          nullptr );
+    args_add_string_ptr(
+        arg_parser,
+        'a',
+        "admin",
+        "[interface:port]",
+        "Optional admin interface [ip:port] to export basic admin controls to",
+        &admin_interface,
+        nullptr );
 
     if ( args_parse( arg_parser, argc, argv ) < 0 )
     {
@@ -893,6 +904,7 @@ main( int argc, char** argv )
     data_recorder recorder( buffer_name, max_data_size_mb );
 
     std::vector< std::unique_ptr< pub_sub::Subscriber > > subscribers{};
+    std::vector< cps_admin::SubEntry >                    admin_sub_entries{};
     subscribers.reserve( subscription_strings.size( ) );
     if ( !thread_per_sub )
     {
@@ -907,11 +919,20 @@ main( int argc, char** argv )
         }
         subscribers.front( )->SetupDebugHooks( &debug );
         fprintf( stderr, "Beginning subscription on %s\n", conn_str.c_str( ) );
-        subscribers.front( )->subscribe(
+        auto sub_id = subscribers.front( )->subscribe(
             conn_str, []( pub_sub::SubMessage sub_msg ) {
                 circular_buffer.ingest(
                     *( (daq_multi_dcu_data_t*)sub_msg.data( ) ) );
             } );
+        admin_sub_entries.emplace_back( cps_admin::SubEntry{
+            conn_str, sub_id, subscribers.back( ).get( ) } );
+    }
+
+    boost::optional< cps_admin::AdminInterface > admin_instance{ boost::none };
+    if ( admin_interface != nullptr )
+    {
+        admin_instance = boost::make_optional( cps_admin::AdminInterface(
+            std::string{ admin_interface }, admin_sub_entries ) );
     }
 
     int nextCycle = 0;
