@@ -42,4 +42,5 @@ with open(master_file, "rt") as mf:
         for line in mf.readlines():
             if nonspace_re.search(line):
                 with open(line.strip(), "rt") as ini_f:
-                    of.write(ini_f.read())
+                    for ini_line in ini_f.readlines():
+                        of.write(ini_line.rstrip() + "\n")
