@@ -453,7 +453,7 @@ sub createGdsMedm
 		}
 	}
 	$bwidth = 28;
-	$b1width = 14;
+	$b1width = 21;
 	for($ii=0;$ii<$dacCnt;$ii++)
 	{
 		$relDisp = "$medmTarget\/$mdlNamelc\/$mdlName\_DAC_MONITOR_$ii.adl";
@@ -463,7 +463,7 @@ sub createGdsMedm
 			{
 				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$bwidth,$bheight,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","0","4",$ecolors{green},$ecolors{red});
 			} else {
-				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$b1width,$bheight,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","1","2",$ecolors{green},$ecolors{red});
+				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$b1width,$bheight,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","0","2",$ecolors{green},$ecolors{red});
 			}
 		} elsif($dactype[$ii] eq "GSC_20AO8" ) {
 			$medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{black},$ecolors{ltblue},"D$::dacCardNum[$ii]");
@@ -471,7 +471,7 @@ sub createGdsMedm
 			{
 				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$bwidth,$bheight,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","0","4",$ecolors{green},$ecolors{red});
 			} else {
-				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$b1width,$bheight,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","1","2",$ecolors{green},$ecolors{red});
+				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$b1width,$bheight,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","0","2",$ecolors{green},$ecolors{red});
 			}
 		} else {
 			$medmdata .= ("CDS::medmGen::medmGenRelDisp") -> ($xpos,$ypos,$width,$height,$relDisp,$ecolors{white},$ecolors{blue},"D$::dacCardNum[$ii]");
@@ -484,7 +484,7 @@ sub createGdsMedm
             $bxpos2 = $bxpos + 21;
 			$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos2,$bypos,5,$bheight,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","7","7",$ecolors{red},$ecolors{green});
 			} else {
-				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$b1width,$bheight,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","1","2",$ecolors{green},$ecolors{red});
+				$medmdata .= ("CDS::medmGen::medmGenByte") -> ($bxpos,$bypos,$b1width,$bheight,"$ifo\:FEC-$dcuid\_DAC_STAT_$ii","0","2",$ecolors{green},$ecolors{red});
 			}
 		}
 		$ypos += 22;
