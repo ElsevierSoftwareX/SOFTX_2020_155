@@ -119,16 +119,6 @@ rt_fe_init( void )
         cardCountErr = 1;
     }
 
-#ifdef REQUIRE_IO_CNT
-    if ( cardCountErr )
-    {
-        pLocalEpics->epicsOutput.fe_status = IO_CONFIG_ERROR;
-        printk( "" SYSTEM_NAME_STRING_LOWER
-                ": ERROR: Exit on incorrect card count \n" );
-        return -5;
-    }
-#endif
-
 #ifdef IOP_MODEL
     /// Wirte PCIe card info to mbuf for use by userapp models
     send_io_info_to_mbuf( status, &cdsPciModules );
@@ -165,6 +155,18 @@ rt_fe_init( void )
     print_io_info( &cdsPciModules, 1 );
 #else
     print_io_info( &cdsPciModules, 0 );
+#endif
+#ifdef REQUIRE_IO_CNT
+    if ( cardCountErr )
+    {
+#ifdef DOLPHIN_TEST
+        finish_dolphin( );
+#endif
+        pLocalEpics->epicsOutput.fe_status = IO_CONFIG_ERROR;
+        printk( "" SYSTEM_NAME_STRING_LOWER
+                ": ERROR: Exit on incorrect card count \n" );
+        return -5;
+    }
 #endif
 
     pLocalEpics->epicsInput.vmeReset = 0;

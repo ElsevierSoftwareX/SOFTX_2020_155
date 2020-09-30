@@ -318,7 +318,6 @@ mapPciModules( CDS_HARDWARE* pCds )
                     PCI_SLOT( dacdev->devfn ) );
             status = contec6464Init( pCds, dacdev );
             modCount++;
-            modCount++;
         }
         bo_cnt++;
         bo_cnt++;
@@ -402,19 +401,6 @@ mapPciModules( CDS_HARDWARE* pCds )
     status = 0;
     pCds->gps = 0;
     pCds->gpsType = 0;
-    // Look for Symmetricom GPS board
-#if 0
-  if ((dacdev = pci_get_device(SYMCOM_VID, SYMCOM_BC635_TID, dacdev))) {
-            	printk("Symmetricom GPS card on bus %x; device %x\n",
-                   	dacdev->bus->number,
-		   	PCI_SLOT(dacdev->devfn));
-		status = symmetricomGpsInit(pCds,dacdev);
-		if (status == 0) {
-		  // GPS board initialized and mapped
-		  modCount ++;
-		}
-  }
-#endif
     dacdev = NULL;
     status = 0;
     // Look for TSYNC GPS board
@@ -424,11 +410,6 @@ mapPciModules( CDS_HARDWARE* pCds )
                 dacdev->bus->number,
                 PCI_SLOT( dacdev->devfn ) );
         status = spectracomGpsInit( pCds, dacdev );
-        if ( status == 0 )
-        {
-            // GPS board initialized and mapped
-            modCount++;
-        }
     }
 
     return ( modCount );
