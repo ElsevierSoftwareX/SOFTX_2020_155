@@ -210,8 +210,14 @@ if (libNDS2Client_FOUND)
 	configure_file(tests/daqdrc_nds_test ${CMAKE_CURRENT_BINARY_DIR}/daqdrc_nds_test COPYONLY)
 	configure_file(tests/test_daqd_nds.sh.in ${CMAKE_CURRENT_BINARY_DIR}/test_daqd_nds.sh @ONLY)
 
+	configure_file(tests/test_daqd_stall_signal.sh.in ${CMAKE_CURRENT_BINARY_DIR}/test_daqd_stall_signal.sh @ONLY)
+
 	add_test(NAME test_daqd_nds
 			COMMAND /bin/bash ./test_daqd_nds.sh
+			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+	add_test(NAME test_daqd_stall_signal
+			COMMAND /bin/bash ./test_daqd_stall_signal.sh
 			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 
