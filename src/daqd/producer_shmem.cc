@@ -237,7 +237,7 @@ producer::frame_writer( )
     ShMemReceiver shmem_receiver(
         daqd.parameters( ).get( "shmem_input", "local_dc" ),
         daqd.parameters( ).get< size_t >( "shmem_size", 104857600 ),
-        []( ) { PV::set_pv( PV::PV_PRDCR_STALLED, 1 ); } );
+        []( ) { PV::set_pv( PV::PV_PRDCR_NOT_STALLED, 0 ); } );
 
     sleep( 1 );
 
@@ -318,7 +318,7 @@ producer::frame_writer( )
         stat_recv.sample( );
         daq_dc_data_t* data_block = shmem_receiver.receive_data( );
         stat_recv.tick( );
-        PV::set_pv( PV::PV_PRDCR_STALLED, 0 );
+        PV::set_pv( PV::PV_PRDCR_NOT_STALLED, 1 );
 
         // clear the total crc
         total_crc_obj.reset( );

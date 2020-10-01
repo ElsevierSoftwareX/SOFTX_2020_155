@@ -48,7 +48,7 @@ namespace PV
         PV_PRDCR_TP_DATA_RATE_KB_PER_S,
         PV_PRDCR_MODEL_DATA_RATE_KB_PER_S,
         PV_PRDCR_OPEN_TP_COUNT,
-        PV_PRDCR_STALLED,
+        PV_PRDCR_NOT_STALLED,
         // Main producer thread timings
         PV_PRDCR_TIME_FULL_MEAN_MS,
         PV_PRDCR_TIME_FULL_MIN_MS,

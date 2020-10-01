@@ -95,9 +95,9 @@ PID_MULTI_STREAM=0
 
 sleep 5
 
-SVAL=`caget -F z -f 0 X3:DAQ-SHM0_PRDCR_STALLED | cut -d z -f 2`
-echo "X3:DAQ-SHM0_PRDCR_STALLED = $SVAL"
-if [ "$SVAL" -ne "1" ]; then
+SVAL=`caget -F z -f 0 X3:DAQ-SHM0_PRDCR_NOT_STALLED | cut -d z -f 2`
+echo "X3:DAQ-SHM0_PRDCR_NOT_STALLED = $SVAL"
+if [ "$SVAL" -ne "0" ]; then
     exit 1
 fi
 
