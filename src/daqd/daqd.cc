@@ -63,6 +63,7 @@ using namespace std;
 #include <string.h>
 
 #include "epics_pvs.hh"
+#include "checksum_crc32.hh"
 
 /// Helper function to deal with the archive channels.
 int
@@ -500,32 +501,27 @@ daqd_c::update_configuration_number( const char* source_address )
     if ( num_channels == 0 )
         return;
 
-    FrameCPP::Common::MD5Sum check_sum;
+    FrameCPP::Common::MD5Sum                       check_sum;
+    FrameCpp_hash_adapter< decltype( check_sum ) > hash_wrapper( check_sum );
 
     channel_t* cur = channels;
     channel_t* end = channels + num_channels;
-    for ( ; cur < end; ++cur )
-    {
 
-        check_sum.Update( &( cur->chNum ), sizeof( cur->chNum ) );
-        check_sum.Update( &( cur->seq_num ), sizeof( cur->seq_num ) );
-        size_t name_len = strnlen( cur->name, channel_t::channel_name_max_len );
-        check_sum.Update( cur->name, sizeof( name_len ) );
-        check_sum.Update( &( cur->sample_rate ), sizeof( cur->sample_rate ) );
-        check_sum.Update( &( cur->active ), sizeof( cur->active ) );
-        check_sum.Update( &( cur->trend ), sizeof( cur->trend ) );
-        check_sum.Update( &( cur->group_num ), sizeof( cur->group_num ) );
-        check_sum.Update( &( cur->bps ), sizeof( cur->bps ) );
-        check_sum.Update( &( cur->dcu_id ), sizeof( cur->dcu_id ) );
-        check_sum.Update( &( cur->data_type ), sizeof( cur->data_type ) );
-        check_sum.Update( &( cur->signal_gain ), sizeof( cur->signal_gain ) );
-        check_sum.Update( &( cur->signal_slope ), sizeof( cur->signal_slope ) );
-        check_sum.Update( &( cur->signal_offset ),
-                          sizeof( cur->signal_offset ) );
-        size_t unit_len =
-            strnlen( cur->signal_units, channel_t::engr_unit_max_len );
-        check_sum.Update( cur->signal_units, sizeof( unit_len ) );
+    std::function< void( const channel_t& ) > hash_cb{
+        [&hash_wrapper]( const channel_t& channel ) {
+            hash_channel( hash_wrapper, channel );
+        }
+    };
+    auto use_broken = parameters( ).get< int >(
+                          "USE_BROKEN_CONFIGURATION_NUMBER_HASH", 0 ) == 1;
+    if ( use_broken )
+    {
+        hash_cb = [&hash_wrapper]( const channel_t& channel ) {
+            hash_channel_v0_broken( hash_wrapper, channel );
+        };
     }
+    std::for_each( cur, end, hash_cb );
+
     check_sum.Finalize( );
 
     std::ostringstream ss;
@@ -1536,6 +1532,14 @@ daqd_c::start_main( int pmain_buffer_size, ostream* yyout )
     }
     /* Epics display: memory buffer look back */
     PV::set_pv( PV::PV_LOOKBACK_RAM, main_buffer_size );
+
+    checksum_crc32   csum;
+    const channel_t* cur = channels;
+    const channel_t* end = cur + num_channels;
+    std::for_each( cur, end, [&csum]( const channel_t& channel ) {
+        hash_channel( csum, channel );
+    } );
+    PV::set_pv( PV::PV_CHANNEL_LIST_CHECK_SUM, csum.result( ) );
 
     return 0;
 }

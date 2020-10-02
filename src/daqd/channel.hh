@@ -3,6 +3,7 @@
 
 #include "channel.h"
 #include <string.h>
+#include <cstdlib>
 
 typedef struct
 {
@@ -128,5 +129,73 @@ public:
         return *this;
     }
 };
+
+template < typename Hash >
+class FrameCpp_hash_adapter
+{
+public:
+    explicit FrameCpp_hash_adapter( Hash& hash ) : hash_{ hash }
+    {
+    }
+    FrameCpp_hash_adapter( const FrameCpp_hash_adapter& ) = default;
+
+    void
+    add( const void* data, std::size_t length )
+    {
+        // why is this not const void* ?
+        hash_.Update( const_cast< void* >( data ), length );
+    }
+
+private:
+    Hash& hash_;
+};
+
+template < typename HashObject >
+void
+hash_channel_v0_broken( HashObject& hash, const channel_t& channel )
+{
+    // this is broken, but is kept (for now) for compatibility
+    // the name and units sum the first sizeof(size_t) bytes of their values
+    hash.add( &( channel.chNum ), sizeof( channel.chNum ) );
+    hash.add( &( channel.seq_num ), sizeof( channel.seq_num ) );
+    size_t name_len = strnlen( channel.name, channel_t::channel_name_max_len );
+    hash.add( channel.name, sizeof( name_len ) );
+    hash.add( &( channel.sample_rate ), sizeof( channel.sample_rate ) );
+    hash.add( &( channel.active ), sizeof( channel.active ) );
+    hash.add( &( channel.trend ), sizeof( channel.trend ) );
+    hash.add( &( channel.group_num ), sizeof( channel.group_num ) );
+    hash.add( &( channel.bps ), sizeof( channel.bps ) );
+    hash.add( &( channel.dcu_id ), sizeof( channel.dcu_id ) );
+    hash.add( &( channel.data_type ), sizeof( channel.data_type ) );
+    hash.add( &( channel.signal_gain ), sizeof( channel.signal_gain ) );
+    hash.add( &( channel.signal_slope ), sizeof( channel.signal_slope ) );
+    hash.add( &( channel.signal_offset ), sizeof( channel.signal_offset ) );
+    size_t unit_len =
+        strnlen( channel.signal_units, channel_t::engr_unit_max_len );
+    hash.add( channel.signal_units, sizeof( unit_len ) );
+}
+
+template < typename HashObject >
+void
+hash_channel( HashObject& hash, const channel_t& channel )
+{
+    hash.add( &( channel.chNum ), sizeof( channel.chNum ) );
+    hash.add( &( channel.seq_num ), sizeof( channel.seq_num ) );
+    size_t name_len = strnlen( channel.name, channel_t::channel_name_max_len );
+    hash.add( channel.name, name_len );
+    hash.add( &( channel.sample_rate ), sizeof( channel.sample_rate ) );
+    hash.add( &( channel.active ), sizeof( channel.active ) );
+    hash.add( &( channel.trend ), sizeof( channel.trend ) );
+    hash.add( &( channel.group_num ), sizeof( channel.group_num ) );
+    hash.add( &( channel.bps ), sizeof( channel.bps ) );
+    hash.add( &( channel.dcu_id ), sizeof( channel.dcu_id ) );
+    hash.add( &( channel.data_type ), sizeof( channel.data_type ) );
+    hash.add( &( channel.signal_gain ), sizeof( channel.signal_gain ) );
+    hash.add( &( channel.signal_slope ), sizeof( channel.signal_slope ) );
+    hash.add( &( channel.signal_offset ), sizeof( channel.signal_offset ) );
+    size_t unit_len =
+        strnlen( channel.signal_units, channel_t::engr_unit_max_len );
+    hash.add( channel.signal_units, unit_len );
+}
 
 #endif

@@ -157,10 +157,13 @@ add_executable(test_daqd_unit_tests tests/test_main.cc
 		tests/test_daqd_cmask_t.cc
 		tests/test_shmem_recv.cc
 		tests/test_daqd_thread.cc
+		tests/test_daqd_channel_hashes.cc
         daqd_thread.cc
 		)
 target_include_directories(test_daqd_unit_tests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ../include)
-target_link_libraries(test_daqd_unit_tests PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(test_daqd_unit_tests PUBLIC
+		ldastools::framecpp
+		${CMAKE_THREAD_LIBS_INIT})
 add_test(NAME test_daqd_unit_tests
 		COMMAND test_daqd_unit_tests
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
