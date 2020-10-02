@@ -217,7 +217,7 @@ iop_dac_write( int in_delay )
                     dacinfo.overflowDac[ card ][ chan ]++;
                     pLocalEpics->epicsOutput.overflowDacAcc[ card ][ chan ]++;
                     overflowAcc++;
-                    dacOF[ card ] = 1;
+                    dacinfo.dacOF[ card ] = 1;
                     odcStateWord |= ODC_DAC_OVF;
                     ;
                     if ( dac_out > limit )

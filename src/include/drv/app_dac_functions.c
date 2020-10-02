@@ -163,7 +163,7 @@ app_dac_write( int ioMemCtrDac, int ioClkDac, dacInfo_t* dacinfo )
                         dacinfo->overflowDac[ jj ][ ii ]++;
                         pLocalEpics->epicsOutput.overflowDacAcc[ jj ][ ii ]++;
                         overflowAcc++;
-                        dacOF[ jj ] = 1;
+                        dacinfo->dacOF[ jj ] = 1;
                         odcStateWord |= ODC_DAC_OVF;
                         ;
                         if ( dac_out > limit )

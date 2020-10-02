@@ -55,6 +55,7 @@
 
 #include "drv/inputFilterModule.h"
 #include "drv/inputFilterModule1.h"
+#include <drv/dac_info.c>
 
 #ifdef DOLPHIN_TEST
 #include "dolphin.c"
@@ -168,14 +169,13 @@ fe_start_iop_user( )
         cpuClock[ CPU_TIMER_CNT ]; ///  @param cpuClock[] Code timing diag
                                    ///  variables
     static int chanHop = 0; /// @param chanHop Adc channel hopping status
-    int        dacOF[ MAX_DAC_MODULES ];
 
     int adcData[ MAX_ADC_MODULES ]
                [ MAX_ADC_CHN_PER_MOD ]; /// @param adcData[][]  ADC raw data
     int adcChanErr[ MAX_ADC_MODULES ];
     // int adcWait = 0;
     adcInfo_t adcInfo;
-    dacInfo_t dacInfo;
+    dacInfo_t dacinfo;
     int adcOF[ MAX_ADC_MODULES ]; /// @param adcOF[]  ADC overrange counters
 
     static int dacWriteEnable =
@@ -291,7 +291,7 @@ fe_start_iop_user( )
         {
             dacOut[ ii ][ jj ] = 0.0;
             dacOutUsed[ ii ][ jj ] = 0;
-            dacInfo.dacOutBufSize[ ii ] = 0;
+            dacinfo.dacOutBufSize[ ii ] = 0;
             // Zero out DAC channel map in the shared memory
             // to be used to check on control models' channel allocation
             ioMemData->dacOutUsed[ ii ][ jj ] = 0;
@@ -665,10 +665,10 @@ fe_start_iop_user( )
                 /// errors
                 if ( dac_out > limit || dac_out < -limit )
                 {
-                    dacInfo.overflowDac[ jj ][ ii ]++;
+                    dacinfo.overflowDac[ jj ][ ii ]++;
                     pLocalEpics->epicsOutput.overflowDacAcc[ jj ][ ii ]++;
                     overflowAcc++;
-                    dacOF[ jj ] = 1;
+                    dacinfo.dacOF[ jj ] = 1;
                     odcStateWord |= ODC_DAC_OVF;
                     ;
                     if ( dac_out > limit )
@@ -681,7 +681,7 @@ fe_start_iop_user( )
                     dac_out = 0;
                 /// - ---- Load last values to EPICS channels for monitoring on
                 /// GDS_TP screen.
-                dacInfo.dacOutEpics[ jj ][ ii ] = dac_out;
+                dacinfo.dacOutEpics[ jj ][ ii ] = dac_out;
 
                 /// - ---- Load DAC testpoints
                 floatDacOut[ 16 * jj + ii ] = dac_out;
@@ -696,15 +696,6 @@ fe_start_iop_user( )
             /// again by Master
             ioMemData->iodata[ mm ][ ioMemCntrDac ].cycle = -1;
             /// - -- DMA Write data to DAC module
-#if 0
-        if(dacWriteEnable > 4) {
-            if(cdsPciModules.dacType[jj] == GSC_16AO16) {
-                gsc16ao16DmaStart(jj);
-            } else {
-                gsc18ao8DmaStart(jj);
-            }
-        }
-#endif
         }
         /// \> Increment DAC memory block pointers for next cycle
         ioClockDac = ( ioClockDac + 1 ) % IOP_IO_RATE;
@@ -883,7 +874,7 @@ fe_start_iop_user( )
                 for ( ii = 0; ii < MAX_DAC_CHN_PER_MOD; ii++ )
                 {
                     pLocalEpics->epicsOutput.dacValue[ jj ][ ii ] =
-                        dacInfo.dacOutEpics[ jj ][ ii ];
+                        dacinfo.dacOutEpics[ jj ][ ii ];
                 }
             }
         }
@@ -944,39 +935,7 @@ fe_start_iop_user( )
                 printf( "Code is exiting ..............\n" );
                 continue;
             }
-            for ( jj = 0; jj < cdsPciModules.dacCount; jj++ )
-            {
-                if ( dacOF[ jj ] )
-                {
-                    pLocalEpics->epicsOutput.statDac[ jj ] &=
-                        ~( DAC_OVERFLOW_BIT );
-                    feStatus |= FE_ERROR_OVERFLOW;
-                    ;
-                }
-                else
-                    pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_OVERFLOW_BIT;
-                dacOF[ jj ] = 0;
-                if ( dacChanErr[ jj ] )
-                {
-                    pLocalEpics->epicsOutput.statDac[ jj ] &=
-                        ~( DAC_TIMING_BIT );
-                }
-                else
-                    pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_TIMING_BIT;
-                dacChanErr[ jj ] = 0;
-                for ( ii = 0; ii < MAX_DAC_CHN_PER_MOD; ii++ )
-                {
-
-                    if ( pLocalEpics->epicsOutput.overflowDacAcc[ jj ][ ii ] >
-                         OVERFLOW_CNTR_LIMIT )
-                    {
-                        pLocalEpics->epicsOutput.overflowDacAcc[ jj ][ ii ] = 0;
-                    }
-                    pLocalEpics->epicsOutput.overflowDac[ jj ][ ii ] =
-                        dacInfo.overflowDac[ jj ][ ii ];
-                    dacInfo.overflowDac[ jj ][ ii ] = 0;
-                }
-            }
+            feStatus |= dac_status_update( &dacinfo );
         }
         // *********************************************************************
         // Capture end of cycle time.

@@ -54,7 +54,6 @@
 #include "drv/mapuser.h"
 #include "timing.c" // timing module / IRIG-B  functions
 
-// int dacOF[ MAX_DAC_MODULES ];
 #include "drv/inputFilterModule.h"
 #include "drv/inputFilterModule1.h"
 #include <drv/app_dac_functions.c>

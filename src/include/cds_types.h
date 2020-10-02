@@ -25,6 +25,7 @@ typedef struct dacInfo_t
                    [ MAX_DAC_CHN_PER_MOD ]; // DAC overflow diagnostics
     int dacOutBufSize[ MAX_DAC_MODULES ];
     int dacOutEpics[ MAX_DAC_MODULES ][ MAX_DAC_CHN_PER_MOD ];
+    int dacOF[ MAX_DAC_MODULES ];
 } dacInfo_t;
 
 typedef struct duotone_diag_t

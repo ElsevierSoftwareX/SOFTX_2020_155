@@ -8,7 +8,7 @@ dac_status_update( dacInfo_t* dacinfo )
 
     for ( jj = 0; jj < cdsPciModules.dacCount; jj++ )
     {
-        if ( dacOF[ jj ] )
+        if ( dacinfo->dacOF[ jj ] )
         {
             pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_OVERFLOW_BIT );
             status |= FE_ERROR_OVERFLOW;
@@ -16,7 +16,7 @@ dac_status_update( dacInfo_t* dacinfo )
         }
         else
             pLocalEpics->epicsOutput.statDac[ jj ] |= DAC_OVERFLOW_BIT;
-        dacOF[ jj ] = 0;
+        dacinfo->dacOF[ jj ] = 0;
         if ( dacChanErr[ jj ] )
         {
             pLocalEpics->epicsOutput.statDac[ jj ] &= ~( DAC_TIMING_BIT );
