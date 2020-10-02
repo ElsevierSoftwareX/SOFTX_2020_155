@@ -1,0 +1,2 @@
+nonewline.ini
+newline.ini
