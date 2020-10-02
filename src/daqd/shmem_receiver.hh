@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <functional>
 #include <thread>
 
 #include "daq_core.h"
@@ -17,9 +18,10 @@ class ShMemReceiver
 {
     volatile daq_multi_cycle_data_t* shmem_;
 
-    daq_dc_data_t data_;
-    unsigned int  prev_cycle_;
-    unsigned int  prev_gps_;
+    daq_dc_data_t                 data_;
+    unsigned int                  prev_cycle_;
+    unsigned int                  prev_gps_;
+    std::function< void( void ) > signal_stalled_;
 
     void
     wait( )
@@ -30,16 +32,20 @@ class ShMemReceiver
 public:
     ShMemReceiver( ) = delete;
     ShMemReceiver( ShMemReceiver& other ) = delete;
-    ShMemReceiver( const std::string& endpoint, size_t shmem_size )
+    ShMemReceiver( const std::string&            endpoint,
+                   size_t                        shmem_size,
+                   std::function< void( void ) > signal = []( ) {} )
         : shmem_( static_cast< volatile daq_multi_cycle_data_t* >(
               shmem_open_segment( endpoint.c_str( ), shmem_size ) ) ),
-          prev_cycle_( 0xffffffff ), prev_gps_( 0xffffffff )
+          prev_cycle_( 0xffffffff ),
+          prev_gps_( 0xffffffff ), signal_stalled_{ std::move( signal ) }
     {
     }
 
-    explicit ShMemReceiver( volatile daq_multi_cycle_data_t* shmem_area )
+    explicit ShMemReceiver( volatile daq_multi_cycle_data_t* shmem_area,
+                            std::function< void( void ) >    signal = []( ) {} )
         : shmem_( shmem_area ), prev_cycle_( 0xffffffff ),
-          prev_gps_( 0xffffffff )
+          prev_gps_( 0xffffffff ), signal_stalled_{ std::move( signal ) }
     {
     }
 
@@ -65,11 +71,18 @@ public:
             prev_cycle_ = *cycle_ptr;
             prev_gps_ = get_gps( prev_cycle_ );
         }
+        std::uint64_t spin_count = 0;
+
         unsigned int cur_cycle = *cycle_ptr;
         while ( cur_cycle == prev_cycle_ )
         {
             wait( );
             cur_cycle = *cycle_ptr;
+            ++spin_count;
+            if ( spin_count == 2000 )
+            {
+                signal_stalled_( );
+            }
         }
         cur_cycle = handle_cycle_jumps( cur_cycle );
 

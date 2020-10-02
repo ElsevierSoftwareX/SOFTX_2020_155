@@ -157,10 +157,13 @@ add_executable(test_daqd_unit_tests tests/test_main.cc
 		tests/test_daqd_cmask_t.cc
 		tests/test_shmem_recv.cc
 		tests/test_daqd_thread.cc
+		tests/test_daqd_channel_hashes.cc
         daqd_thread.cc
 		)
 target_include_directories(test_daqd_unit_tests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ../include)
-target_link_libraries(test_daqd_unit_tests PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(test_daqd_unit_tests PUBLIC
+		ldastools::framecpp
+		${CMAKE_THREAD_LIBS_INIT})
 add_test(NAME test_daqd_unit_tests
 		COMMAND test_daqd_unit_tests
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
@@ -210,8 +213,14 @@ if (libNDS2Client_FOUND)
 	configure_file(tests/daqdrc_nds_test ${CMAKE_CURRENT_BINARY_DIR}/daqdrc_nds_test COPYONLY)
 	configure_file(tests/test_daqd_nds.sh.in ${CMAKE_CURRENT_BINARY_DIR}/test_daqd_nds.sh @ONLY)
 
+	configure_file(tests/test_daqd_stall_signal.sh.in ${CMAKE_CURRENT_BINARY_DIR}/test_daqd_stall_signal.sh @ONLY)
+
 	add_test(NAME test_daqd_nds
 			COMMAND /bin/bash ./test_daqd_nds.sh
+			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+	add_test(NAME test_daqd_stall_signal
+			COMMAND /bin/bash ./test_daqd_stall_signal.sh
 			WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 
 
