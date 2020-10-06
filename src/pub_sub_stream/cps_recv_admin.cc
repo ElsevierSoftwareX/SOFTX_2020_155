@@ -40,6 +40,15 @@ namespace cps_admin
             return tcp::endpoint{ address, port };
         }
 
+        /*!
+         * @brief The Connection represents a client connection into the admin
+         * interface.  It holds the buisiness logic of the interface, manages
+         * request parsing, routing, and responses.  The http message support is
+         * provided by boost::beast.
+         *
+         * @note At this time no matter what the keep alive policy of the
+         * request the connection closes after the response is sent.
+         */
         struct Connection : std::enable_shared_from_this< Connection >
         {
             using response_type = http::response< http::string_body >;
@@ -52,12 +61,20 @@ namespace cps_admin
             {
             }
 
+            /*!
+             * @brief Start running the client.  First read data, parse the
+             * request, and then respond.
+             */
             void
             run( )
             {
                 read_request( );
             }
 
+            /*!
+             * @brief Perform a async read of the request, then trigger the
+             * response to be created
+             */
             void
             read_request( )
             {
@@ -77,6 +94,11 @@ namespace cps_admin
                                   } );
             }
 
+            /*!
+             * @brief Transmit a response
+             * @param resp the response message (headers + body) to send
+             * @note Closes the connection
+             */
             void
             send_response( response_type&& resp )
             {
@@ -92,6 +114,10 @@ namespace cps_admin
                                    } );
             }
 
+            /*!
+             * @brief do basic routing of the request and return a response
+             * @return the reponse for the request
+             */
             response_type
             handle_request( )
             {
@@ -107,6 +133,13 @@ namespace cps_admin
                 return not_found( );
             }
 
+            /*!
+             * @brief Helper to parse urls of the form "/<id>/" where id is an
+             * integer value.
+             * @param target The url to parse
+             * @return An optional<SubId>, with a value if one could be parsed,
+             * else empty
+             */
             static boost::optional< pub_sub::SubId >
             parse_sub_id_target( const boost::beast::string_view target )
             {
@@ -125,6 +158,10 @@ namespace cps_admin
                 return sub_id;
             }
 
+            /*!
+             * @brief the index view, list the subscriptions and ids in json
+             * @return the response
+             */
             response_type
             handle_index_view( )
             {
@@ -164,6 +201,11 @@ namespace cps_admin
                 return resp;
             }
 
+            /*!
+             * @brief handle a request to restart a subscription
+             * @param sub_id the id of the subscription to restart
+             * @return the appropriate response to send to the user.
+             */
             response_type
             handle_sub_id_view( pub_sub::SubId sub_id )
             {
@@ -199,6 +241,11 @@ namespace cps_admin
                 return resp;
             }
 
+            /*!
+             * @brief helper to return a method not allowed error message
+             * @param msg optional message to add to the response
+             * @return a http response object
+             */
             response_type
             bad_req_type( const std::string& msg )
             {
@@ -212,6 +259,10 @@ namespace cps_admin
                 return resp;
             }
 
+            /*!
+             * @brief helper to return a not found error message
+             * @return a http response object
+             */
             response_type
             not_found( )
             {
@@ -232,6 +283,12 @@ namespace cps_admin
             std::vector< SubEntry >&           subscriptions_;
         };
 
+        /*!
+         * @brief The AdminInterfaceIntl manages the server socket and accept
+         * loop for the AdminInterface.  It owns the thread and io_context that
+         * client sockets are handled via.  Client connections are managed via
+         * the Connection objects.
+         */
         struct AdminInterfaceIntl
         {
             using work_guard = boost::asio::executor_work_guard<

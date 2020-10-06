@@ -17,6 +17,10 @@ namespace cps_admin
         struct AdminInterfaceIntl;
     }
 
+    /*!
+     * @brief A SubEntry is the record of a subscription that the admin
+     * interface should report on and manage.
+     */
     struct SubEntry
     {
         std::string          conn_str;
@@ -24,11 +28,24 @@ namespace cps_admin
         pub_sub::Subscriber* subscriber;
     };
 
+    /*!
+     * @brief The AdminInterface represents an administrative interface into the
+     * cps_recv service that runs as small web server.
+     */
     class AdminInterface
     {
     public:
+        /*!
+         * @brief create the admin interface and start its http server.
+         * @param interface The address and port to listen on
+         * @param subscriptions The list of subscriptions to manage, these must
+         * be valid for the lifetime of the AdminInterface
+         */
         AdminInterface( const std::string&       interface,
                         std::vector< SubEntry >& subscriptions );
+        /*!
+         * Close down the AdminInterface and stop its web server.
+         */
         ~AdminInterface( );
 
         AdminInterface( const AdminInterface& ) = delete;
