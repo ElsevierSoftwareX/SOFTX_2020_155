@@ -95,7 +95,7 @@ mapPciModules( CDS_HARDWARE* pCds )
 
             case CON_6464DIO:
                 if ( ( pCds->cards_used[ jj ].type == CON_6464DIO ) &&
-                     ( pCds->cards_used[ jj ].instance == doCnt ) )
+                     ( pCds->cards_used[ jj ].instance == ioMemData->card[ ii ] ) )
                 {
                     kk = pCds->doCount;
                     pCds->doType[ kk ] = ioMemData->model[ ii ];
@@ -107,7 +107,7 @@ mapPciModules( CDS_HARDWARE* pCds )
                     status += 2;
                 }
                 if ( ( pCds->cards_used[ jj ].type == CDO64 ) &&
-                     ( pCds->cards_used[ jj ].instance == doCnt ) )
+                     ( pCds->cards_used[ jj ].instance == ioMemData->card[ ii ] ) )
                 {
                     kk = pCds->doCount;
                     pCds->doType[ kk ] = CDO64;
@@ -119,7 +119,7 @@ mapPciModules( CDS_HARDWARE* pCds )
                     status++;
                 }
                 if ( ( pCds->cards_used[ jj ].type == CDI64 ) &&
-                     ( pCds->cards_used[ jj ].instance == doCnt ) )
+                     ( pCds->cards_used[ jj ].instance == ioMemData->card[ ii ] ) )
                 {
                     kk = pCds->doCount;
                     pCds->doType[ kk ] = CDI64;
@@ -133,7 +133,7 @@ mapPciModules( CDS_HARDWARE* pCds )
                 break;
             case CON_32DO:
                 if ( ( pCds->cards_used[ jj ].type == CON_32DO ) &&
-                     ( pCds->cards_used[ jj ].instance == do32Cnt ) )
+                     ( pCds->cards_used[ jj ].instance == ioMemData->card[ ii ] ) )
                 {
                     kk = pCds->doCount;
                     pCds->doType[ kk ] = ioMemData->model[ ii ];
@@ -146,7 +146,7 @@ mapPciModules( CDS_HARDWARE* pCds )
                 break;
             case ACS_16DIO:
                 if ( ( pCds->cards_used[ jj ].type == ACS_16DIO ) &&
-                     ( pCds->cards_used[ jj ].instance == doIIRO16Cnt ) )
+                     ( pCds->cards_used[ jj ].instance == ioMemData->card[ ii ] ) )
                 {
                     kk = pCds->doCount;
                     pCds->doType[ kk ] = ioMemData->model[ ii ];
@@ -159,7 +159,7 @@ mapPciModules( CDS_HARDWARE* pCds )
                 break;
             case ACS_8DIO:
                 if ( ( pCds->cards_used[ jj ].type == ACS_8DIO ) &&
-                     ( pCds->cards_used[ jj ].instance == doIIRO8Cnt ) )
+                     ( pCds->cards_used[ jj ].instance == ioMemData->card[ ii ] ) )
                 {
                     kk = pCds->doCount;
                     pCds->doType[ kk ] = ioMemData->model[ ii ];

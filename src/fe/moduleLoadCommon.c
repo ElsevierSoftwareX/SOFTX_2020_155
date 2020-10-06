@@ -125,7 +125,7 @@ print_io_info( CDS_HARDWARE* cdsp , int iopmodel)
             }
         }
     }
-    kk += cdsp->dioCount;
+    kk += cdsp->doCount;
     printf( "******************************************************************"
             "*********\n" );
     printf( "" SYSTEM_NAME_STRING_LOWER ":%d DIO cards found\n",
@@ -423,6 +423,7 @@ send_io_info_to_mbuf( int totalcards, CDS_HARDWARE* pCds )
             tdsCount++;
         }
         ioMemData->model[ kk ] = pCds->doType[ ii ];
+        ioMemData->card[ kk ] = pCds->doInstance[ ii ];
         // Unlike ADC and DAC, where a memory buffer number is passed, a PCIe
         // address is passed for DIO cards.
         ioMemData->ipc[ kk ] = pCds->pci_do[ ii ];
