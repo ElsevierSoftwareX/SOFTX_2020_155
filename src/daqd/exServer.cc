@@ -235,7 +235,7 @@ pvInfo exServer::pvList[] = {
             1,
             pvValue + PV::PV_CHANNEL_LIST_CHECK_SUM ),
     pvInfo( 1,
-            "PV_CHANNEL_LIST_CHECK_SUM_BCAST",
+            "CHANNEL_LIST_CHECK_SUM_BCAST",
             0xffffffff,
             0,
             excasIoSync,
