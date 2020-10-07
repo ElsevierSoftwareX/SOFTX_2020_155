@@ -278,6 +278,10 @@ sub parseParams {
                 {
 				    $::edcusync = $spp[1];
                 }
+                case "bio_test"
+                {
+				    $::biotest = $spp[1];
+                }
                 case "optimizeIO"
                 {
 				    $::optimizeIO = $spp[1];

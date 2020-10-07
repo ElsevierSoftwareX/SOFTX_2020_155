@@ -125,6 +125,7 @@ $dacWdOverride = -1;
 $dolphin_time_xmit = -1;
 $dolphinTiming = -1;
 $diagTest = -1;
+$biotest = -1;
 $flipSignals = 0;
 $ipcrate = 0;
 $ipccycle = 0;
@@ -2585,6 +2586,9 @@ if ($iopModel < 1) {   #************ SETUP FOR USER APP ***************
 
   if ($::noZeroPad) {
     print OUTM "EXTRA_CFLAGS += -DNO_ZERO_PAD=1\n";
+  }
+  if ($::biotest) {
+    print OUTM "EXTRA_CFLAGS += -DDIO_TEST=1\n";
   }
 
 #Following used with IOP running at 128K 

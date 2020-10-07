@@ -17,7 +17,7 @@ sub initCDO64 {
         } 
 	$::boType[$::boCnt] = "CDO64";
 	$::boNum[$::boCnt] = $CDO64num;
-	$::card2array[$::partCnt] = $CDO64num;
+	$::card2array[$::partCnt] = $::boCnt;
 	$::boCnt ++;
 	$::bo64Cnt ++;
 }

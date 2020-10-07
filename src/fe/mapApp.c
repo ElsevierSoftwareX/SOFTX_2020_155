@@ -112,9 +112,9 @@ mapPciModules( CDS_HARDWARE* pCds )
                     kk = pCds->doCount;
                     pCds->doType[ kk ] = CDO64;
                     pCds->pci_do[ kk ] = ioMemData->ipc[ ii ];
+                    pCds->doInstance[ kk ] =  kk;
                     pCds->doCount++;
                     pCds->cDio6464lCount++;
-                    pCds->doInstance[ kk ] = doCnt;
                     cdo64Cnt++;
                     status++;
                 }
@@ -124,7 +124,7 @@ mapPciModules( CDS_HARDWARE* pCds )
                     kk = pCds->doCount;
                     pCds->doType[ kk ] = CDI64;
                     pCds->pci_do[ kk ] = ioMemData->ipc[ ii ];
-                    pCds->doInstance[ kk ] = doCnt;
+                    pCds->doInstance[ kk ] = kk;
                     pCds->doCount++;
                     pCds->cDio6464lCount++;
                     cdi64Cnt++;

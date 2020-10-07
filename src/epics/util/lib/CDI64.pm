@@ -19,7 +19,7 @@ sub initCDI64 {
         } 
 	$::boType[$::boCnt] = "CDI64";
 	$::boNum[$::boCnt] = $CDI64num;
-	$::card2array[$::partCnt] = $CDI64num;
+	$::card2array[$::partCnt] = $::boCnt;
 	$::boCnt ++;
 	$::bi64Cnt ++;
 }

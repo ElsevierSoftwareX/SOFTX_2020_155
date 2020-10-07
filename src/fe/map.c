@@ -318,6 +318,7 @@ mapPciModules( CDS_HARDWARE* pCds )
                     PCI_SLOT( dacdev->devfn ) );
             status = contec6464Init( pCds, dacdev );
             modCount++;
+            modCount++;
         }
         bo_cnt++;
         bo_cnt++;

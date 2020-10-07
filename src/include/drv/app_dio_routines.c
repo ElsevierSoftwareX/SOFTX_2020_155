@@ -84,11 +84,20 @@ app_dio_read_write( )
             CDIO6464InputInput[ ii ] =
                 contec6464ReadInputRegister( &cdsPciModules, kk );
         }
+#ifdef DIO_TEST
+        // For testing, want to read back what code wrote to module
+        if ( cdsPciModules.doType[ kk ] == CDI64 )
+        {
+            CDIO6464InputInput[ ii ] =
+                contec6464ReadOutputRegister( &cdsPciModules, kk );
+        }
+#else
         if ( cdsPciModules.doType[ kk ] == CDI64 )
         {
             CDIO6464InputInput[ ii ] =
                 contec6464ReadInputRegister( &cdsPciModules, kk );
         }
+#endif
     }
     /// \> Write Dio cards only on change
     for ( kk = 0; kk < cdsPciModules.doCount; kk++ )
