@@ -37,6 +37,11 @@ rt_fe_init( void )
     int ret; /// @param ret Return value from various Malloc calls to allocate
              /// memory.
     int        cnt;
+    int adcCount = 0;
+    int dacCount = 0;
+    int dioCount = 0;
+    int doCount = 0;
+    int cards2map = 0;
     extern int cpu_down( unsigned int ); /// @param cpu_down CPU shutdown call.
     extern int is_cpu_taken_by_rcg_model(
         unsigned int cpu ); /// @param is_cpu_taken_by_rcg_model Check to verify
@@ -95,6 +100,36 @@ rt_fe_init( void )
     cdsPciModules.dioCount = 0;
     cdsPciModules.doCount = 0;
 
+    // Determine total number of cards model is looking for by type
+    for(ii=0;ii<cards;ii++) {
+        switch(cdsPciModules.cards_used[ii].type)
+        {
+            case GSC_16AI64SSA:
+            case GSC_18AI32SSC1M:
+                adcCount ++;
+                break;
+            case GSC_18AO8:
+            case GSC_16AO16:
+            case GSC_20AO8:
+                dacCount ++;
+                break;
+            case CON_6464DIO:
+                doCount += 2;
+                break;
+            case CON_1616DIO:
+            case CDI64:
+            case CDO64:
+            case ACS_8DIO:
+            case CON_32DO:
+                doCount ++;
+                break;
+            default:
+                break;
+        }
+    }
+    // Get a card total for later comparison against total cards mapped
+    cards2map = adcCount + dacCount + doCount + dioCount;
+
 #ifdef CONTROL_MODEL
     initmap( &cdsPciModules );
 #endif
@@ -109,14 +144,34 @@ rt_fe_init( void )
         return -5;
     }
 
-    if ( status < cards )
+    if ( status != cards2map )
     {
         printk( "" SYSTEM_NAME_STRING_LOWER
                 ": ERROR: Did not find correct number of cards! Expected %d "
                 "and Found %d\n",
-                cards,
+                cards2map,
                 status );
+        if(adcCount != cdsPciModules.adcCount)
+            printk( "" SYSTEM_NAME_STRING_LOWER
+                    ": ERROR: Did not find correct number of ADC cards! Expected %d "
+                    "and Found %d\n",
+                    adcCount,
+                    cdsPciModules.adcCount );
+        if(dacCount != cdsPciModules.dacCount)
+            printk( "" SYSTEM_NAME_STRING_LOWER
+                    ": ERROR: Did not find correct number of DAC cards! Expected %d "
+                    "and Found %d\n",
+                    dacCount,
+                    cdsPciModules.dacCount );
+        if(doCount != cdsPciModules.doCount)
+            printk( "" SYSTEM_NAME_STRING_LOWER
+                    ": ERROR: Did not find correct number of DIO cards! Expected %d "
+                    "and Found %d\n",
+                    doCount,
+                    cdsPciModules.doCount );
         cardCountErr = 1;
+    } else {
+        printk( "" SYSTEM_NAME_STRING_LOWER": Successfully mapped all I/O cards \n");
     }
 
 #ifdef IOP_MODEL
@@ -130,7 +185,7 @@ rt_fe_init( void )
     // wait to ensure EPICS is running before proceeding
     pLocalEpics->epicsOutput.fe_status = WAIT_BURT;
     msleep( 5000 );
-    printk( "Waiting for EPICS BURT Restore = %d\n",
+    printk( "" SYSTEM_NAME_STRING_LOWER ": Waiting for EPICS BURT Restore = %d\n",
             pLocalEpics->epicsInput.burtRestore );
     /// Ensure EPICS running else exit
     for ( cnt = 0; cnt < 10 && pLocalEpics->epicsInput.burtRestore == 0; cnt++ )
@@ -139,8 +194,7 @@ rt_fe_init( void )
     }
     if ( cnt == 10 )
     {
-        printk( "" SYSTEM_NAME_STRING_LOWER
-                ": ERROR: EPICS restore not set - exiting\n" );
+        printk( "" SYSTEM_NAME_STRING_LOWER ": ERROR: EPICS restore not set - exiting\n" );
         pLocalEpics->epicsOutput.fe_status = BURT_RESTORE_ERROR;
         // Cleanup
 #ifdef DOLPHIN_TEST

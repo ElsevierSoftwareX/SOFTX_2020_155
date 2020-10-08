@@ -73,10 +73,8 @@ mapPciModules( CDS_HARDWARE* pCds )
     int                    status;
     int                    i;
     int                    modCount = 0;
-#ifndef CONTROL_MODEL
     int fast_adc_cnt = 0;
     int adc_cnt = 0;
-#endif
     int dac_cnt = 0;
     int dac_18bit_cnt = 0;
     int dac_20bit_cnt = 0;

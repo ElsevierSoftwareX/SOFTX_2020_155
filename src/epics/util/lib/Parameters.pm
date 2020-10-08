@@ -195,6 +195,10 @@ sub parseParams {
 				    print "PARAM FE is IOP\n";
 				    print "FE will run as IOP\n";
 				    $::iopModel = $spp[1];
+                    if($::location eq "lho" or $::location eq "llo")
+                    {
+                        $::requireIOcnt = 1;
+                    }
                 }
                 case "diagTest"
                 {
