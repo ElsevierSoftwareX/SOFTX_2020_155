@@ -32,6 +32,7 @@ if (libcds-pubsub_FOUND)
     add_executable(cps_recv
             sub_recv_bufferred.cc
             recv_buffer.cc
+            cps_recv_admin.cc
             )
     target_include_directories(cps_recv PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include
             ${CMAKE_CURRENT_BINARY_DIR})
@@ -45,6 +46,7 @@ if (libcds-pubsub_FOUND)
     add_executable(cps_recv_asan
             sub_recv_bufferred.cc
             recv_buffer.cc
+            cps_recv_admin.cc
             )
     target_include_directories(cps_recv_asan PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include
             ${CMAKE_CURRENT_BINARY_DIR})

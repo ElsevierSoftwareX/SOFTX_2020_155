@@ -10,6 +10,7 @@
 #include "config.h"
 
 #include "daqd.hh"
+#include "checksum_crc32.hh"
 
 extern daqd_c daqd;
 
@@ -30,10 +31,17 @@ namespace comm_impl
             exit( 1 );
         int cur_dcu = -1;
 
+        // compute the checksum of the channels two ways
+        // the broadcaster mode uses a different set of active channels
+        // which changes the channel hash with respect to the other daqds.
+        // So to help compare state this computes two hashes, one that
+        // all daqds will see and one with the broadcast settings.
+        checksum_crc32 csum;
+        checksum_crc32 csum_bcast;
         // Save channel offsets and assign trend channel data struct
         for ( i = 0, offs = 0; i < daqd.num_channels + 1; i++ )
         {
-
+            int active_before_bcast_check = 0;
             int t = 0;
             if ( i == daqd.num_channels )
                 t = 1;
@@ -129,6 +137,7 @@ namespace comm_impl
                 }
             }
 
+            active_before_bcast_check = daqd.channels[ i ].active;
             if ( !daqd.broadcast_set.empty( ) )
             {
                 // Activate configured DMT broadcast channels
@@ -165,7 +174,19 @@ namespace comm_impl
                     daqd.trender.num_channels++;
                 }
             }
+            // the unmodified hash, this differs between
+            // broadcasters and all other daqds
+            hash_channel( csum_bcast, daqd.channels[ i ] );
+            {
+                // 'undo' the potential broadcast change to create
+                // the 'normal' channel hash.
+                channel_t tmp = daqd.channels[ i ];
+                tmp.active = active_before_bcast_check;
+                hash_channel( csum, tmp );
+            }
         }
+        PV::set_pv( PV::PV_CHANNEL_LIST_CHECK_SUM, csum.result( ) );
+        PV::set_pv( PV::PV_CHANNEL_LIST_CHECK_SUM_BCAST, csum_bcast.result( ) );
 
         if ( !daqd.broadcast_set.empty( ) )
         {
