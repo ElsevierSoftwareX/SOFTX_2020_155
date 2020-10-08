@@ -1533,14 +1533,6 @@ daqd_c::start_main( int pmain_buffer_size, ostream* yyout )
     /* Epics display: memory buffer look back */
     PV::set_pv( PV::PV_LOOKBACK_RAM, main_buffer_size );
 
-    checksum_crc32   csum;
-    const channel_t* cur = channels;
-    const channel_t* end = cur + num_channels;
-    std::for_each( cur, end, [&csum]( const channel_t& channel ) {
-        hash_channel( csum, channel );
-    } );
-    PV::set_pv( PV::PV_CHANNEL_LIST_CHECK_SUM, csum.result( ) );
-
     return 0;
 }
 
