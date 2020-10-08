@@ -162,6 +162,7 @@ add_executable(test_daqd_unit_tests tests/test_main.cc
 		)
 target_include_directories(test_daqd_unit_tests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ../include)
 target_link_libraries(test_daqd_unit_tests PUBLIC
+		catch2
 		ldastools::framecpp
 		${CMAKE_THREAD_LIBS_INIT})
 add_test(NAME test_daqd_unit_tests
@@ -177,6 +178,7 @@ add_executable(test_crc32 checksum_crc32.cc
 		../drv/crc.c)
 target_compile_definitions(test_crc32 PRIVATE CRC32_AUTO_GENERATE_TABLE)
 target_include_directories(test_crc32 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(test_crc32 PUBLIC catch2)
 add_test(NAME test_crc32
 		COMMAND test_crc32
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
@@ -186,6 +188,7 @@ add_executable(test_crc32_table_lookup
 		tests/test_checksum_crc32.cc
 		../drv/crc.c)
 target_include_directories(test_crc32_table_lookup PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(test_crc32_table_lookup PUBLIC catch2)
 add_test(NAME test_crc32_table_lookup
 		COMMAND test_crc32_table_lookup
 		WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")

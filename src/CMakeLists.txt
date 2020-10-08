@@ -1,3 +1,4 @@
+add_subdirectory(catch)
 add_subdirectory(args)
 add_subdirectory(epics)
 add_subdirectory(gds)

@@ -66,6 +66,7 @@ if (OPENMX_FOUND)
 			${CMAKE_CURRENT_SOURCE_DIR}/../include
 			${CMAKE_CURRENT_BINARY_DIR})
 	target_link_libraries(test_recv_buffer PUBLIC
+			catch2
 			${CMAKE_THREAD_LIBS_INIT})
 	target_requires_cpp11(test_recv_buffer PUBLIC)
 
