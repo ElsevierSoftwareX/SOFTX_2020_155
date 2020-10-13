@@ -60,9 +60,9 @@ typedef struct daq_msg_header_t
 
 typedef struct daq_multi_dcu_header_t
 {
-    int dcuTotalModels; // Number of models
-    int fullDataBlockSize; // Number of bytes used in the data block (including
-                           // TP data)
+    unsigned int dcuTotalModels; // Number of models
+    unsigned int fullDataBlockSize; // Number of bytes used in the data block
+                                    // (including TP data)
     daq_msg_header_t dcuheader[ DAQ_TRANSIT_MAX_DCU ];
 } daq_multi_dcu_header_t;
 
@@ -87,7 +87,7 @@ typedef struct daq_multi_cycle_header_t
     unsigned int cycleDataSize; // stride in bytes of the data
     // max data size is assumed to be
     // at least maxCycle * cycleDataSize
-    int msgcrc; // Data CRC checksum for DC -> FB/NDS
+    unsigned int msgcrc; // Data CRC checksum for DC -> FB/NDS
 } daq_multi_cycle_header_t;
 
 // Data structure to support multiple cycles of multiple dcus

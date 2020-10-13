@@ -431,21 +431,49 @@ producer::frame_writer( )
         // map out the order of the dcuids in the zmq data, this could change
         // with each data block
         {
-            int   total_zmq_models = data_block->header.dcuTotalModels;
+            int total_zmq_models = data_block->header.dcuTotalModels;
+            if ( total_zmq_models >= DAQ_TRANSIT_MAX_DCU )
+            {
+                fprintf( stderr,
+                         "Too many dcus %d, this looks like corrupt data, "
+                         "aborting\n",
+                         total_zmq_models );
+                exit( 1 );
+            }
             char* cur_dcu_zmq_ptr = data_block->dataBlock;
+            char* end_data = cur_dcu_zmq_ptr + sizeof( data_block->dataBlock );
+            static_assert(
+                sizeof( data_block->dataBlock ) > sizeof( char* ),
+                "Make sure we are referring to the whole data block in a "
+                "daq_dc_data_t, not just a pointer to the data" );
             for ( int cur_block = 0; cur_block < total_zmq_models; ++cur_block )
             {
                 unsigned int cur_dcuid =
                     data_block->header.dcuheader[ cur_block ].dcuId;
-                dcu_to_zmq_lookup[ cur_dcuid ] = cur_block;
-                dcu_data_from_zmq[ cur_dcuid ] = cur_dcu_zmq_ptr;
-                dcu_data_crc[ cur_dcuid ] =
-                    data_block->header.dcuheader[ cur_block ].dataCrc;
-                dcu_data_gps[ cur_dcuid ] =
-                    data_block->header.dcuheader[ cur_block ].timeSec;
+                if ( cur_dcuid >= DCU_COUNT )
+                {
+                    std::cerr << "Skipping a high dcu data block " << cur_dcuid
+                              << std::endl;
+                }
+                else
+                {
+                    dcu_to_zmq_lookup[ cur_dcuid ] = cur_block;
+                    dcu_data_from_zmq[ cur_dcuid ] = cur_dcu_zmq_ptr;
+                    dcu_data_crc[ cur_dcuid ] =
+                        data_block->header.dcuheader[ cur_block ].dataCrc;
+                    dcu_data_gps[ cur_dcuid ] =
+                        data_block->header.dcuheader[ cur_block ].timeSec;
+                }
                 cur_dcu_zmq_ptr +=
                     data_block->header.dcuheader[ cur_block ].dataBlockSize +
                     data_block->header.dcuheader[ cur_block ].tpBlockSize;
+                if ( cur_dcu_zmq_ptr > end_data )
+                {
+                    std::cerr
+                        << "The current datablock has overflowed, aborting"
+                        << std::endl;
+                    exit( 1 );
+                }
             }
         }
 
