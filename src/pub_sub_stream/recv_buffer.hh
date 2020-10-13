@@ -183,7 +183,7 @@ private:
     {
     }
 
-    static key_type
+    constexpr static key_type
     shift_amount( )
     {
         return 4;
@@ -379,7 +379,10 @@ struct receive_buffer
     void
     ingest( const daq_multi_dcu_data_t& input )
     {
-        if ( input.header.dcuTotalModels <= 0 )
+        // drop empty and malformed messages
+        if ( input.header.dcuTotalModels <= 0 ||
+             input.header.dcuTotalModels > DAQ_TRANSIT_MAX_DCU ||
+             input.header.dcuheader[ 0 ].cycle >= max_cycle( ) )
         {
             return;
         }
@@ -467,6 +470,12 @@ struct receive_buffer
     }
 
 private:
+    constexpr static unsigned int
+    max_cycle( )
+    {
+        return 16;
+    }
+
     gps_key                       latest_;
     std::atomic< std::int64_t >   late_entries_;
     std::atomic< std::int64_t >   discarded_entries_;
