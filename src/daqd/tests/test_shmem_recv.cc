@@ -32,7 +32,7 @@ TEST_CASE(
     }
 
     ShMemReceiver recv(
-        reinterpret_cast< volatile daq_multi_cycle_data_t* >( shmem.get( ) ) );
+        reinterpret_cast< volatile daq_multi_cycle_data_t* >( shmem.get( ) ), sizeof( daq_multi_cycle_data_t) );
     recv.reset_previous_cycle( 4, 1000000000 );
     auto data = recv.receive_data( );
     REQUIRE( data->dataBlock[ 0 ] == 5 );
@@ -62,7 +62,7 @@ TEST_CASE( "ShMemReceiver should try to catch up if it sees a jump" )
     }
 
     ShMemReceiver recv(
-        reinterpret_cast< volatile daq_multi_cycle_data_t* >( shmem.get( ) ) );
+        reinterpret_cast< volatile daq_multi_cycle_data_t* >( shmem.get( ) ), sizeof( daq_multi_cycle_data_t ) );
     recv.reset_previous_cycle( 0, 1000000000 );
     auto data = recv.receive_data( );
     REQUIRE( data->dataBlock[ 0 ] == 1 );
@@ -94,7 +94,8 @@ TEST_CASE( "ShMemReceiver should try to catch up if it sees a jump, even when "
     }
 
     ShMemReceiver recv(
-        reinterpret_cast< volatile daq_multi_cycle_data_t* >( shmem.get( ) ) );
+        reinterpret_cast< volatile daq_multi_cycle_data_t* >( shmem.get( ) ),
+        sizeof( daq_multi_cycle_data_t ) );
     recv.reset_previous_cycle( 10, 1000000000 );
     auto data = recv.receive_data( );
     REQUIRE( data->dataBlock[ 0 ] == 11 );
@@ -124,8 +125,52 @@ TEST_CASE( "ShMemReceiver should try to catch up but will jump if needed" )
     }
 
     ShMemReceiver recv(
-        reinterpret_cast< volatile daq_multi_cycle_data_t* >( shmem.get( ) ) );
+        reinterpret_cast< volatile daq_multi_cycle_data_t* >( shmem.get( ) ),
+        sizeof( daq_multi_cycle_data_t ) );
     recv.reset_previous_cycle( 0, 1000000000 - 1 );
     auto data = recv.receive_data( );
     REQUIRE( data->dataBlock[ 0 ] == 5 );
+}
+
+TEST_CASE( "ShMemReceiver will throw an exception if max cycles is too big")
+{
+    auto shmem = raii::make_unique_ptr< daq_multi_cycle_data_t >( );
+    shmem->header.maxCycle = 65;
+    shmem->header.curCycle = 5;
+    shmem->header.cycleDataSize = sizeof( shmem->dataBlock ) / 16;
+    ShMemReceiver recv(
+            reinterpret_cast< volatile daq_multi_cycle_data_t* >( shmem.get( ) ),
+            sizeof( daq_multi_cycle_data_t ) );
+    recv.reset_previous_cycle( 0, 1000000000 - 1 );
+    REQUIRE_THROWS_AS(recv.receive_data(), std::runtime_error);
+}
+
+TEST_CASE( "ShMemReceiver will throw an exception if curCycle is too big")
+{
+    auto shmem = raii::make_unique_ptr< daq_multi_cycle_data_t >( );
+    shmem->header.maxCycle = 16;
+    shmem->header.curCycle = 15;
+    shmem->header.cycleDataSize = sizeof( shmem->dataBlock ) / 16;
+    ShMemReceiver recv(
+            reinterpret_cast< volatile daq_multi_cycle_data_t* >( shmem.get( ) ),
+            sizeof( daq_multi_cycle_data_t ) );
+    recv.reset_previous_cycle( 15, 1000000000 - 1 );
+    shmem->header.curCycle = 16;
+    REQUIRE_THROWS_AS(recv.receive_data(), std::runtime_error);
+}
+
+TEST_CASE( "ShMemReceiver will throw an exception if cycleDataSize*maxCycle is too big")
+{
+    auto shmem = raii::make_unique_ptr< daq_multi_cycle_data_t >( );
+    shmem->header.maxCycle = 16;
+    shmem->header.curCycle = 15;
+    shmem->header.cycleDataSize = sizeof( shmem->dataBlock ) / 16;
+    ShMemReceiver recv(
+            reinterpret_cast< volatile daq_multi_cycle_data_t* >( shmem.get( ) ),
+            sizeof( daq_multi_cycle_data_t ) );
+    recv.reset_previous_cycle( 15, 1000000000 - 1 );
+    shmem->header.curCycle = 0;
+    // this does not take away the header size, so it should lead to an overflow condition
+    shmem->header.cycleDataSize = sizeof(daq_multi_cycle_data_t)/16;
+    REQUIRE_THROWS_AS(recv.receive_data(), std::runtime_error);
 }

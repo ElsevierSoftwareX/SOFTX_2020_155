@@ -10,42 +10,30 @@
 #include <chrono>
 #include <functional>
 #include <thread>
+#include <sstream>
 
 #include "daq_core.h"
 #include "drv/shmem.h"
 
 class ShMemReceiver
 {
-    volatile daq_multi_cycle_data_t* shmem_;
-
-    daq_dc_data_t                 data_;
-    unsigned int                  prev_cycle_;
-    unsigned int                  prev_gps_;
-    std::function< void( void ) > signal_stalled_;
-
-    void
-    wait( )
-    {
-        std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-    }
-
 public:
     ShMemReceiver( ) = delete;
     ShMemReceiver( ShMemReceiver& other ) = delete;
     ShMemReceiver( const std::string&            endpoint,
-                   size_t                        shmem_size,
+                   std::size_t                   shmem_size,
                    std::function< void( void ) > signal = []( ) {} )
         : shmem_( static_cast< volatile daq_multi_cycle_data_t* >(
               shmem_open_segment( endpoint.c_str( ), shmem_size ) ) ),
-          prev_cycle_( 0xffffffff ),
-          prev_gps_( 0xffffffff ), signal_stalled_{ std::move( signal ) }
+          shmem_size_( shmem_size ), signal_stalled_{ std::move( signal ) }
     {
     }
 
-    explicit ShMemReceiver( volatile daq_multi_cycle_data_t* shmem_area,
-                            std::function< void( void ) >    signal = []( ) {} )
-        : shmem_( shmem_area ), prev_cycle_( 0xffffffff ),
-          prev_gps_( 0xffffffff ), signal_stalled_{ std::move( signal ) }
+    ShMemReceiver( volatile daq_multi_cycle_data_t* shmem_area,
+                   std::size_t                      shmem_size,
+                   std::function< void( void ) >    signal = []( ) {} )
+        : shmem_( shmem_area ),
+          shmem_size_( shmem_size ), signal_stalled_{ std::move( signal ) }
     {
     }
 
@@ -84,7 +72,9 @@ public:
                 signal_stalled_( );
             }
         }
-        cur_cycle = handle_cycle_jumps( cur_cycle );
+        unsigned int max_cycle = get_max_cycle( );
+        verify_cycle_state( cur_cycle, max_cycle );
+        cur_cycle = handle_cycle_jumps( cur_cycle, max_cycle );
 
         unsigned int cycle_stride = shmem_->header.cycleDataSize;
         // figure out offset to the right block
@@ -121,10 +111,31 @@ private:
             .timeSec;
     }
 
-    int
-    handle_cycle_jumps( unsigned int new_cycle )
+    void
+    verify_cycle_state( unsigned int cur_cycle, unsigned int max_cycle )
     {
-        unsigned int max_cycle = get_max_cycle( );
+        if ( cur_cycle >= max_cycle || max_cycle > 64 )
+        {
+            throw std::runtime_error(
+                "Invalid shmem header or nonsensical values" );
+        }
+        auto cycleDataSize = shmem_->header.cycleDataSize;
+        if ( cycleDataSize * max_cycle +
+                 sizeof( daq_multi_cycle_header_t ) >
+             shmem_size_ )
+        {
+            std::ostringstream os;
+            os << "Overflow condition exists, the cycleDataSize is wrong for the "
+                  "shared memory size. cycleDataSize=" << cycleDataSize << " max_cycle="
+                  << max_cycle << " header_size=" << sizeof( daq_multi_cycle_header_t) << " shmem_size=" << shmem_size_;
+            std::string msg = os.str();
+            throw std::runtime_error( msg );
+        }
+    }
+
+    int
+    handle_cycle_jumps( unsigned int new_cycle, unsigned int max_cycle )
+    {
         unsigned int prev = prev_cycle_;
         unsigned int prev_gps = prev_gps_;
 
@@ -149,6 +160,20 @@ private:
         }
         return new_cycle;
     }
+
+    void
+    wait( )
+    {
+        std::this_thread::sleep_for( std::chrono::milliseconds( 3 ) );
+    }
+
+    volatile daq_multi_cycle_data_t* shmem_;
+    std::size_t                      shmem_size_;
+
+    daq_dc_data_t                 data_{};
+    unsigned int                  prev_cycle_{ 0xffffffff };
+    unsigned int                  prev_gps_{ 0xffffffff };
+    std::function< void( void ) > signal_stalled_;
 };
 
 #endif // DAQD_// SHMEM_RECEIVER_HH
