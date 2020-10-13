@@ -86,20 +86,38 @@ PID_DAQD=$!
 
 echo "Daqd PID = $PID_DAQD"
 
-sleep 15
+sleep 5
+tries=0
+SVAL=`caget -F z -f 0 X3:DAQ-SHM0_PRDCR_NOT_STALLED | cut -d z -f 2`
+while [ "$SVAL" -ne "1" ]; do
+    sleep 2
+    SVAL=`caget -F z -f 0 X3:DAQ-SHM0_PRDCR_NOT_STALLED | cut -d z -f 2`
+    let tries+=1
+    if [ "$tries" -gt "15" ]; then
+        echo "The daqd did not leave the stalled state"
+        exit 1
+    fi
+done
 
 echo "Killing the streamer"
 
 kill $PID_MULTI_STREAM
 PID_MULTI_STREAM=0
 
-sleep 5
+sleep 2
 
 SVAL=`caget -F z -f 0 X3:DAQ-SHM0_PRDCR_NOT_STALLED | cut -d z -f 2`
-echo "X3:DAQ-SHM0_PRDCR_NOT_STALLED = $SVAL"
-if [ "$SVAL" -ne "0" ]; then
-    exit 1
-fi
+tries=0
+while [ "$SVAL" -ne "0" ]; do
+    echo "X3:DAQ-SHM0_PRDCR_NOT_STALLED = $SVAL"
+    let tries+=1
+    if [ "$tries" -gt "5" ]; then
+        echo "The daqd did not enter the stalled state"
+        exit 1
+    fi
+    sleep 1
+    SVAL=`caget -F z -f 0 X3:DAQ-SHM0_PRDCR_NOT_STALLED | cut -d z -f 2`
+done
 
 #echo "Press enter to continue..."
 #DUMMY=""
