@@ -1048,19 +1048,6 @@ int writeTable2File(char *burtdir,
 		}
 	}
 	fclose(csFile);
-// Make sure group-write bit is set
-        struct stat filestat;
-        int res = stat(filename, &filestat);
-        mode_t filemod = filestat.st_mode | S_IWGRP;
-        errno=0;
-        int setstat = chmod(filename,filemod);
-        if (setstat) 
-        {
-            sprintf(filemsg,"ERROR Unable to set group-write on %s - %s",filename,strerror(errno));
-            logFileEntry(filemsg);
-            return(-2);
-        }
-        return(0);
 }
 
 /// Function to append alarm settings to saved files..
