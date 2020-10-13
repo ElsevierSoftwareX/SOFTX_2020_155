@@ -1,7 +1,7 @@
 [Unit]
 Description=Advanced LIGO RTS awgtpman: %i
 After=rts-module@%i.service
-Wants=rts-module@%i.service
+Requisite=rts-module@%i.service
 PartOf=rts@%i.target
 
 [Service]
