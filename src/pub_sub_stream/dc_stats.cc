@@ -177,7 +177,7 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
     std::for_each(
         dcu_status_.begin( ), dcu_status_.end( ), [&pvs]( DCUStats& cur ) {
             cur.setup_pv_names( );
-            if ( cur.full_model_name.empty( ) )
+            if ( !cur.full_model_name.empty( ) )
             {
                 pvs.emplace_back( SimplePV{
                     cur.expected_config_crc_name.data( ),
