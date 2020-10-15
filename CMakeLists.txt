@@ -1,5 +1,5 @@
 project(daqd-trunk)
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.12)
 
 enable_testing()
 
@@ -29,6 +29,7 @@ FIND_PACKAGE(Boost COMPONENTS filesystem system)
 FIND_PACKAGE(RapidJSON)
 FIND_PACKAGE(RPC)
 FIND_PACKAGE(libcds-pubsub)
+FIND_PACKAGE(Python3)
 
 CHECK_CXX_SOURCE_COMPILES("#include <iostream>
 #include <FlexLexer.h>
