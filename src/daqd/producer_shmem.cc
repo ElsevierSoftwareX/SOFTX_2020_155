@@ -431,7 +431,7 @@ producer::frame_writer( )
         // map out the order of the dcuids in the zmq data, this could change
         // with each data block
         {
-            int total_zmq_models = data_block->header.dcuTotalModels;
+            unsigned int total_zmq_models = data_block->header.dcuTotalModels;
             if ( total_zmq_models >= DAQ_TRANSIT_MAX_DCU )
             {
                 fprintf( stderr,
@@ -446,7 +446,7 @@ producer::frame_writer( )
                 sizeof( data_block->dataBlock ) > sizeof( char* ),
                 "Make sure we are referring to the whole data block in a "
                 "daq_dc_data_t, not just a pointer to the data" );
-            for ( int cur_block = 0; cur_block < total_zmq_models; ++cur_block )
+            for ( unsigned int cur_block = 0; cur_block < total_zmq_models; ++cur_block )
             {
                 unsigned int cur_dcuid =
                     data_block->header.dcuheader[ cur_block ].dcuId;
