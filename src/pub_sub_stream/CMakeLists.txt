@@ -33,28 +33,38 @@ if (libcds-pubsub_FOUND)
             sub_recv_bufferred.cc
             recv_buffer.cc
             cps_recv_admin.cc
+            dc_stats.cc
             )
     target_include_directories(cps_recv PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include
-            ${CMAKE_CURRENT_BINARY_DIR})
+            ${CMAKE_CURRENT_BINARY_DIR}
+            ${Boost_INCLUDE_DIRS}
+            ${CMAKE_CURRENT_SOURCE_DIR}/../daqd)
     target_link_libraries(cps_recv PUBLIC
             driver::shmem
             pv::simple_pv
             args
-            cds::pub_sub)
+            cds::pub_sub
+            driver::ini_parsing
+            crc32)
     target_requires_cpp11(cps_recv PUBLIC)
 
     add_executable(cps_recv_asan
             sub_recv_bufferred.cc
             recv_buffer.cc
             cps_recv_admin.cc
+            dc_stats.cc
             )
     target_include_directories(cps_recv_asan PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include
-            ${CMAKE_CURRENT_BINARY_DIR})
+            ${CMAKE_CURRENT_BINARY_DIR}
+            ${Boost_INCLUDE_DIRS}
+            ${CMAKE_CURRENT_SOURCE_DIR}/../daqd)
     target_link_libraries(cps_recv_asan PUBLIC
             driver::shmem
             pv::simple_pv
             args
-            cds::pub_sub_asan)
+            cds::pub_sub_asan
+            driver::ini_parsing
+            crc32)
     target_requires_cpp11(cps_recv_asan PUBLIC)
 
     add_executable(cds_pub_sub
@@ -89,6 +99,16 @@ if (libcds-pubsub_FOUND)
             ${CMAKE_CURRENT_BINARY_DIR}
             ${CMAKE_CURRENT_SOURCE_DIR}/../include)
     target_requires_cpp11(test_buffer_entry PUBLIC)
+
+    add_executable(test_pub_sub_stream_unit_tests
+            tests/test_main.cc
+            tests/test_message_queue.cc)
+    target_include_directories(test_pub_sub_stream_unit_tests PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${Boost_INCLUDE_DIRS})
+    target_link_libraries(test_pub_sub_stream_unit_tests PUBLIC
+            catch2
+            ${CMAKE_THREAD_LIBS_INIT})
 
     configure_file(test_pub_sub_xmit_recv.sh.in test_pub_sub_xmit_recv.sh @ONLY)
     configure_file(test_pub_sub.sh.in test_pub_sub.sh @ONLY)

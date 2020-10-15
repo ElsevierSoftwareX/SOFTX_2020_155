@@ -92,6 +92,10 @@ target_link_libraries(dc_gds_shmem PRIVATE
 		${RPC_LIBRARIES}
 		)
 
+add_library(crc32 STATIC
+		checksum_crc32.cc)
+target_include_directories(crc32 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
 add_executable(daqd
 		archive.cc
 		profiler.cc
@@ -112,7 +116,6 @@ add_executable(daqd
 		listener.cc
 		daqd.cc
 		comm_impl.cc
-		checksum_crc32.cc
         daqd_thread.cc
 		../include/daq_core.h
 		${CMAKE_CURRENT_BINARY_DIR}/comm.cc
@@ -141,6 +144,7 @@ target_link_libraries(daqd PUBLIC
 		ldastools::framecpp
 		driver::shmem
 		driver::ini_parsing
+		crc32
 		${CMAKE_THREAD_LIBS_INIT}
 		${RPC_LIBRARIES}
 		)
