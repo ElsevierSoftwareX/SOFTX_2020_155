@@ -317,27 +317,27 @@ main( int argc, char** argv )
                  (long)xmitDataOffset[ ii ] );
     }
 
-    int              nextCycle = 0;
-    int64_t          mytime = 0;
-    int64_t          mylasttime = 0;
-    int64_t          myptime = 0;
-    int64_t          n_cycle_time = 0;
-    int              mytotaldcu = 0;
-    char*            zbuffer;
-    size_t           zbuffer_remaining = 0;
-    int              dc_datablock_size = 0;
-    int              datablock_size_running = 0;
-    int              datablock_size_mb_s = 0;
-    static const int header_size = sizeof( daq_multi_dcu_header_t );
-    char             dcs[ 48 ];
-    int              edcuid[ 10 ];
-    int              estatus[ 10 ];
-    unsigned long    ets = 0;
-    int              timeout = 0;
-    int              threads_rdy;
-    int              any_rdy = 0;
-    int              jj, kk;
-    int              sendLength = 0;
+    int                       nextCycle = 0;
+    int64_t                   mytime = 0;
+    int64_t                   mylasttime = 0;
+    int64_t                   myptime = 0;
+    int64_t                   n_cycle_time = 0;
+    int                       mytotaldcu = 0;
+    char*                     zbuffer;
+    size_t                    zbuffer_remaining = 0;
+    int                       dc_datablock_size = 0;
+    int                       datablock_size_running = 0;
+    int                       datablock_size_mb_s = 0;
+    static const unsigned int header_size = sizeof( daq_multi_dcu_header_t );
+    char                      dcs[ 48 ];
+    int                       edcuid[ 10 ];
+    int                       estatus[ 10 ];
+    unsigned long             ets = 0;
+    int                       timeout = 0;
+    int                       threads_rdy;
+    int                       any_rdy = 0;
+    int                       jj, kk;
+    unsigned int              sendLength = 0;
 
     int     min_cycle_time = 1 << 30;
     int     pv_min_cycle_time = 0;
