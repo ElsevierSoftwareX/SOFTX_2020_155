@@ -28,6 +28,7 @@ struct DCUStats
     std::vector< char > crc_per_sec_name{};
     std::vector< char > crc_sum_name{};
 
+    bool seen_last_cycle{ false };
     bool processed{ false };
     bool processed_this_cycle{ false };
 

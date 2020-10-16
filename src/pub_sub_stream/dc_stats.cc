@@ -306,6 +306,21 @@ DCStats::process_channel( std::vector< channel_t >& channels,
 }
 
 static void
+clear_seen_last_cycle( DCUStats& cur )
+{
+    cur.seen_last_cycle = false;
+}
+
+static void
+clear_seen_last_cycle_if_skipped( DCUStats& cur )
+{
+    if (!cur.processed_this_cycle)
+    {
+        clear_seen_last_cycle( cur );
+    }
+}
+
+static void
 clear_processed( DCUStats& cur )
 {
     cur.processed = false;
@@ -329,12 +344,16 @@ clear_entries( DCUStats& cur )
 {
     cur.crc_per_sec = 0;
     cur.status = 0;
+    cur.processed = false;
 }
 
 static void
 dcu_skipped( DCUStats& cur )
 {
-    add_crc_err( cur );
+    if (cur.seen_last_cycle)
+    {
+        add_crc_err(cur);
+    }
     cur.status |= 0xbad;
 }
 
@@ -369,6 +388,12 @@ mark_bad_data_crc( DCUStats& cur )
     cur.status |= 0x4000;
 }
 
+static void
+mark_as_seen( DCUStats& cur )
+{
+    cur.seen_last_cycle = true;
+}
+
 void
 DCStats::run( simple_pv_handle epics_server )
 {
@@ -379,6 +404,7 @@ DCStats::run( simple_pv_handle epics_server )
 
     checksum_crc32 crc;
 
+    for_each( dcu_status_, clear_seen_last_cycle );
     for_each( dcu_status_, clear_entries );
     for ( std::uint64_t cycles = 1;; ++cycles )
     {
@@ -434,6 +460,8 @@ DCStats::run( simple_pv_handle epics_server )
                 break;
             }
 
+            mark_as_seen( cur_status );
+
             crc.reset( );
             crc.add( data, cur_header.dataBlockSize );
             if ( crc.result( ) != cur_header.dataCrc )
@@ -443,7 +471,7 @@ DCStats::run( simple_pv_handle epics_server )
             data += total_data_size;
         }
         for_each( dcu_status_, mark_dcu_if_skipped );
-
+        for_each( dcu_status_, clear_seen_last_cycle_if_skipped );
         // we can either do this off of our counter or off of the
         // data cycle counter.
         if ( cycles % 16 == 0 )
