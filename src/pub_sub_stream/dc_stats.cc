@@ -226,6 +226,24 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         std::numeric_limits< int >::max( ),
         std::numeric_limits< int >::min( ),
     } );
+    pvs.emplace_back( SimplePV{
+            "UPTIME_SECONDS",
+            SIMPLE_PV_INT,
+            reinterpret_cast< void* >( &uptime_ ),
+            std::numeric_limits< int >::max( ),
+            0,
+            std::numeric_limits< int >::max( ),
+            0,
+    } );
+    pvs.emplace_back( SimplePV{
+            "GPS",
+            SIMPLE_PV_INT,
+            reinterpret_cast< void* >( &gpstime_ ),
+            std::numeric_limits< int >::max( ),
+            0,
+            std::numeric_limits< int >::max( ),
+            0,
+    } );
 
     valid_ = true;
 }
