@@ -119,6 +119,23 @@ TEST_CASE( "You can optionally time out a pop operation on a message_queue " )
     REQUIRE( val.operator bool( ) == false );
 }
 
+TEST_CASE( "An empty message queue blocks until data is present, if timeouts are not requested")
+{
+    Message_queue<int, 5> test_queue;
+
+    std::thread t([&test_queue]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        test_queue.emplace(42);
+    });
+    auto start = std::chrono::steady_clock::now();
+    int val = test_queue.pop();
+    auto end = std::chrono::steady_clock::now();
+    REQUIRE(val == 42);
+    auto duration = end-start;
+    REQUIRE(duration > std::chrono::milliseconds(200));
+    t.join();
+}
+
 TEST_CASE(
     "You can push as much into a message queue as long as you take out things" )
 {

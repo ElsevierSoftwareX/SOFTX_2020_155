@@ -983,6 +983,7 @@ main( int argc, char** argv )
             usleep( 2000 );
             latest_in_buffer = circular_buffer.latest( );
         } while ( latest_in_buffer == last_received );
+        last_received = latest_in_buffer;
 
         usleep( delay_cycles );
 
