@@ -628,6 +628,8 @@ DCStats::run( simple_pv_handle epics_server )
             for_each( dcu_status_, clear_entries );
 
             tp_data = 0;
+            model_data = 0;
+            total_data = 0;
         }
     }
 }
