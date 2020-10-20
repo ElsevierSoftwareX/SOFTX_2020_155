@@ -107,7 +107,7 @@ DCUStats::setup_pv_names( )
     {
         concat_into_vector(
             expected_config_crc_name, full_model_name, "_CFG_CRC" );
-        concat_into_vector( status_name, full_model_name, "_status" );
+        concat_into_vector( status_name, full_model_name, "_STATUS" );
         concat_into_vector( crc_per_sec_name, full_model_name, "_CRC_CPS" );
         concat_into_vector( crc_sum_name, full_model_name, "_CRC_SUM" );
     }
