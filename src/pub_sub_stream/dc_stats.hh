@@ -60,6 +60,8 @@ public:
     }
 
 private:
+    dc_queue::value_type get_message( simple_pv_handle epics_server );
+
     static int process_channel( std::vector< channel_t >& channels,
                                 int&                      ini_file_dcu_id,
                                 const char*               channel_name,
@@ -68,9 +70,17 @@ private:
     dc_queue                          queue_;
     std::array< DCUStats, DCU_COUNT > dcu_status_{};
 
+    int          not_stalled_{ 0 };
     int          uptime_{ 0 };
     unsigned int gpstime_{ 0 };
     int          channel_config_hash_{ 0 };
+    int          unique_dcus_per_sec_{ 0 };
+    int          data_rate_{ 0 };
+    int          total_chans_{ 0 };
+    int          open_tp_count_{ 0 };
+    unsigned int tp_data_kb_per_s_{ 0 };
+    unsigned int model_data_kb_per_s_{ 0 };
+    unsigned int total_data_kb_per_s_{ 0 };
 
     bool valid_{ false };
 };

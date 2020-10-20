@@ -8,9 +8,12 @@
 #include <functional>
 #include <iostream>
 #include <iterator>
+#include <set>
 #include <sstream>
 #include <string>
 
+#include <boost/range/algorithm.hpp>
+#include <boost/range/numeric.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "checksum_crc32.hh"
@@ -118,6 +121,7 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
     {
         return;
     }
+    std::set< int >          dcus{};
     std::vector< channel_t > channels{};
     int                      ini_file_dcu_id = -1;
     std::ifstream            f( channel_list_path );
@@ -152,6 +156,7 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         if ( ini_file_dcu_id > 0 && ini_file_dcu_id < DCU_COUNT )
         {
             dcu_status_[ ini_file_dcu_id ].expected_config_crc = fileCrc;
+            dcus.emplace( ini_file_dcu_id );
         }
         if ( boost::ends_with( stripped_line, ".ini" ) && ini_file_dcu_id > 0 &&
              ini_file_dcu_id < DCU_COUNT )
@@ -167,56 +172,56 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         }
     }
     checksum_crc32 crc{};
-    std::for_each(
-        channels.begin( ), channels.end( ), [&crc]( const channel_t& chan ) {
-            hash_channel( crc, chan );
-        } );
+    for_each( channels, [&crc]( const channel_t& chan ) {
+        hash_channel( crc, chan );
+
+        chan.bps;
+    } );
     channel_config_hash_ = static_cast< int >( crc.result( ) );
     std::cerr << "Loaded " << channels.size( ) << " channels" << std::endl;
 
-    std::for_each(
-        dcu_status_.begin( ), dcu_status_.end( ), [&pvs]( DCUStats& cur ) {
-            cur.setup_pv_names( );
-            if ( !cur.full_model_name.empty( ) )
-            {
-                pvs.emplace_back( SimplePV{
-                    cur.expected_config_crc_name.data( ),
-                    SIMPLE_PV_INT,
-                    reinterpret_cast< void* >( &cur.expected_config_crc ),
-                    std::numeric_limits< int >::max( ),
-                    std::numeric_limits< int >::min( ),
-                    std::numeric_limits< int >::max( ),
-                    std::numeric_limits< int >::min( ),
-                } );
-                pvs.emplace_back( SimplePV{
-                    cur.status_name.data( ),
-                    SIMPLE_PV_INT,
-                    reinterpret_cast< void* >( &cur.status ),
-                    1,
-                    0,
-                    1,
-                    0,
-                } );
-                pvs.emplace_back( SimplePV{
-                    cur.crc_per_sec_name.data( ),
-                    SIMPLE_PV_INT,
-                    reinterpret_cast< void* >( &cur.crc_per_sec ),
-                    1,
-                    0,
-                    1,
-                    0,
-                } );
-                pvs.emplace_back( SimplePV{
-                    cur.crc_sum_name.data( ),
-                    SIMPLE_PV_INT,
-                    reinterpret_cast< void* >( &cur.crc_sum ),
-                    1,
-                    0,
-                    1,
-                    0,
-                } );
-            }
-        } );
+    for_each( dcu_status_, [&pvs]( DCUStats& cur ) {
+        cur.setup_pv_names( );
+        if ( !cur.full_model_name.empty( ) )
+        {
+            pvs.emplace_back( SimplePV{
+                cur.expected_config_crc_name.data( ),
+                SIMPLE_PV_INT,
+                reinterpret_cast< void* >( &cur.expected_config_crc ),
+                std::numeric_limits< int >::max( ),
+                std::numeric_limits< int >::min( ),
+                std::numeric_limits< int >::max( ),
+                std::numeric_limits< int >::min( ),
+            } );
+            pvs.emplace_back( SimplePV{
+                cur.status_name.data( ),
+                SIMPLE_PV_INT,
+                reinterpret_cast< void* >( &cur.status ),
+                1,
+                0,
+                1,
+                0,
+            } );
+            pvs.emplace_back( SimplePV{
+                cur.crc_per_sec_name.data( ),
+                SIMPLE_PV_INT,
+                reinterpret_cast< void* >( &cur.crc_per_sec ),
+                1,
+                0,
+                1,
+                0,
+            } );
+            pvs.emplace_back( SimplePV{
+                cur.crc_sum_name.data( ),
+                SIMPLE_PV_INT,
+                reinterpret_cast< void* >( &cur.crc_sum ),
+                1,
+                0,
+                1,
+                0,
+            } );
+        }
+    } );
     pvs.emplace_back( SimplePV{
         "CHANNEL_LIST_CHECK_SUM",
         SIMPLE_PV_INT,
@@ -227,24 +232,107 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         std::numeric_limits< int >::min( ),
     } );
     pvs.emplace_back( SimplePV{
-            "UPTIME_SECONDS",
+            "PRDCR_NOT_STALLED",
             SIMPLE_PV_INT,
-            reinterpret_cast< void* >( &uptime_ ),
-            std::numeric_limits< int >::max( ),
+            reinterpret_cast< void* >( &not_stalled_ ),
+            2,
             0,
-            std::numeric_limits< int >::max( ),
+            2,
             0,
     } );
     pvs.emplace_back( SimplePV{
-            "GPS",
-            SIMPLE_PV_INT,
-            reinterpret_cast< void* >( &gpstime_ ),
-            std::numeric_limits< int >::max( ),
-            0,
-            std::numeric_limits< int >::max( ),
-            0,
+        "UPTIME_SECONDS",
+        SIMPLE_PV_INT,
+        reinterpret_cast< void* >( &uptime_ ),
+        std::numeric_limits< int >::max( ),
+        0,
+        std::numeric_limits< int >::max( ),
+        0,
+    } );
+    pvs.emplace_back( SimplePV{
+        "GPS",
+        SIMPLE_PV_INT,
+        reinterpret_cast< void* >( &gpstime_ ),
+        std::numeric_limits< int >::max( ),
+        0,
+        std::numeric_limits< int >::max( ),
+        0,
+    } );
+    pvs.emplace_back( SimplePV{
+        "PRDCR_UNIQUE_DCU_REPORTED_PER_S",
+        SIMPLE_PV_INT,
+        reinterpret_cast< void* >( &unique_dcus_per_sec_ ),
+        static_cast< int >( dcus.size( ) ) + 1,
+        static_cast< int >( dcus.size( ) ) - 1,
+        static_cast< int >( dcus.size( ) ) + 1,
+        static_cast< int >( dcus.size( ) ) - 1,
+    } );
+    pvs.emplace_back( SimplePV{
+        "DATA_RATE",
+        SIMPLE_PV_INT,
+        reinterpret_cast< void* >( &data_rate_ ),
+        std::numeric_limits< int >::max( ),
+        -1,
+        std::numeric_limits< int >::max( ),
+        -1,
+    } );
+    pvs.emplace_back( SimplePV{
+        "TOTAL_CHANS",
+        SIMPLE_PV_INT,
+        reinterpret_cast< void* >( &total_chans_ ),
+        static_cast< int >( channels.size( ) ) + 1,
+        static_cast< int >( channels.size( ) ) - 1,
+        static_cast< int >( channels.size( ) ) + 1,
+        static_cast< int >( channels.size( ) ) - 1,
+    } );
+    pvs.emplace_back( SimplePV{
+        "PRDCR_OPEN_TP_COUNT",
+        SIMPLE_PV_INT,
+        reinterpret_cast< void* >( &open_tp_count_ ),
+        256,
+        -1,
+        256,
+        -1,
+    } );
+    pvs.emplace_back( SimplePV{
+        "PRDCR_TP_DATA_RATE_KB_PER_S",
+        SIMPLE_PV_INT,
+        reinterpret_cast< void* >( &tp_data_kb_per_s_ ),
+        std::numeric_limits< int >::max( ),
+        -1,
+        std::numeric_limits< int >::max( ),
+        -1,
+    } );
+    pvs.emplace_back( SimplePV{
+        "PRDCR_MODEL_DATA_RATE_KB_PER_S",
+        SIMPLE_PV_INT,
+        reinterpret_cast< void* >( &model_data_kb_per_s_ ),
+        std::numeric_limits< int >::max( ),
+        -1,
+        std::numeric_limits< int >::max( ),
+        -1,
+    } );
+    pvs.emplace_back( SimplePV{
+        "PRDCR_TOTAL_DATA_RATE_KB_PER_S",
+        SIMPLE_PV_INT,
+        reinterpret_cast< void* >( &total_data_kb_per_s_ ),
+        std::numeric_limits< int >::max( ),
+        -1,
+        std::numeric_limits< int >::max( ),
+        -1,
     } );
 
+    {
+        data_rate_ = static_cast< int >(
+            boost::accumulate( channels,
+                               std::int64_t{ 0 },
+                               []( std::uint64_t    total,
+                                   const channel_t& cur ) -> std::uint64_t {
+                                   return total + cur.bytes;
+                               } ) /
+            1024 );
+    }
+    total_chans_ = static_cast< int >( channels.size( ) );
     valid_ = true;
 }
 
@@ -281,6 +369,7 @@ DCStats::process_channel( std::vector< channel_t >& channels,
     cur.bps = recv_data_type_size( params->datatype );
     cur.data_type = static_cast< daq_data_t >( params->datatype );
     cur.sample_rate = params->datarate;
+    cur.bytes = static_cast< int >( cur.bps * cur.sample_rate );
 
     cur.active = 0;
     if ( cur.sample_rate > 1 )
@@ -332,7 +421,7 @@ clear_seen_last_cycle( DCUStats& cur )
 static void
 clear_seen_last_cycle_if_skipped( DCUStats& cur )
 {
-    if (!cur.processed_this_cycle)
+    if ( !cur.processed_this_cycle )
     {
         clear_seen_last_cycle( cur );
     }
@@ -368,9 +457,9 @@ clear_entries( DCUStats& cur )
 static void
 dcu_skipped( DCUStats& cur )
 {
-    if (cur.seen_last_cycle)
+    if ( cur.seen_last_cycle )
     {
-        add_crc_err(cur);
+        add_crc_err( cur );
     }
     cur.status |= 0xbad;
 }
@@ -412,6 +501,26 @@ mark_as_seen( DCUStats& cur )
     cur.seen_last_cycle = true;
 }
 
+static bool
+entry_was_processed( DCUStats& cur )
+{
+    return cur.processed;
+}
+
+dc_queue::value_type
+DCStats::get_message( simple_pv_handle epics_server )
+{
+    boost::optional< dc_queue::value_type > val{ queue_.pop(
+        std::chrono::seconds( 2 ) ) };
+    if ( val )
+    {
+        return std::move( val.get( ) );
+    }
+    not_stalled_ = 0;
+    simple_pv_server_update( epics_server );
+    return queue_.pop( );
+}
+
 void
 DCStats::run( simple_pv_handle epics_server )
 {
@@ -419,14 +528,20 @@ DCStats::run( simple_pv_handle epics_server )
     {
         return;
     }
-
     checksum_crc32 crc;
 
+    std::uint64_t tp_data{ 0 };
+    std::uint64_t model_data{ 0 };
+    std::uint64_t total_data{ 0 };
     for_each( dcu_status_, clear_seen_last_cycle );
     for_each( dcu_status_, clear_entries );
     for ( std::uint64_t cycles = 1;; ++cycles )
     {
-        dc_queue::value_type entry{ queue_.pop( ) };
+
+        dc_queue::value_type entry{ get_message( epics_server ) };
+
+        unsigned int tp_count{ 0 };
+        not_stalled_ = 1;
 
         for_each( dcu_status_, clear_processed_this_cycle );
 
@@ -442,6 +557,7 @@ DCStats::run( simple_pv_handle epics_server )
             continue;
         }
         bool first{ true };
+        total_data += entry->header.fullDataBlockSize;
         for ( int i = 0; i < entry->header.dcuTotalModels; ++i )
         {
             auto& cur_header = entry->header.dcuheader[ i ];
@@ -457,6 +573,10 @@ DCStats::run( simple_pv_handle epics_server )
                 }
                 continue;
             }
+            tp_count += cur_header.tpCount;
+            tp_data += cur_header.tpBlockSize;
+            model_data += cur_header.dataBlockSize;
+
             auto& cur_status = dcu_status_[ dcu_id ];
             cur_status.processed = true;
             cur_status.processed_this_cycle = true;
@@ -495,8 +615,19 @@ DCStats::run( simple_pv_handle epics_server )
         if ( cycles % 16 == 0 )
         {
             ++uptime_;
+            tp_data_kb_per_s_ = static_cast< unsigned int >( tp_data / 1024 );
+            model_data_kb_per_s_ =
+                static_cast< unsigned int >( model_data / 1024 );
+            total_data_kb_per_s_ =
+                static_cast< unsigned int >( total_data / 1024 );
+
+            open_tp_count_ = static_cast< int >( tp_count );
+            unique_dcus_per_sec_ =
+                boost::count_if( dcu_status_, entry_was_processed );
             simple_pv_server_update( epics_server );
             for_each( dcu_status_, clear_entries );
+
+            tp_data = 0;
         }
     }
 }
