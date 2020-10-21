@@ -38,12 +38,18 @@ int                 do_verbose = 0;
 static volatile int keepRunning = 1;
 size_t              cycle_data_size = 0;
 
+constexpr int
+max_arena_queue_depth( )
+{
+    return ( 16 * 2 ) + 2;
+}
+
 class Arena
 {
 public:
     explicit Arena( int prealloc_count ) : arena_{}
     {
-        int count = std::min( prealloc_count, 10 );
+        int count = std::min( prealloc_count, max_arena_queue_depth( ) );
         for ( int i = 0; i < count; ++i )
         {
             put( new unsigned char[ sizeof( daq_dc_data_t ) ] );
@@ -97,9 +103,9 @@ public:
     }
 
 private:
-    using queue_t =
-        boost::lockfree::spsc_queue< unsigned char*,
-                                     boost::lockfree::capacity< 10 > >;
+    using queue_t = boost::lockfree::spsc_queue<
+        unsigned char*,
+        boost::lockfree::capacity< max_arena_queue_depth( ) > >;
     queue_t arena_;
 };
 
