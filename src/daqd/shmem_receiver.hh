@@ -9,6 +9,7 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
+#include <iostream>
 #include <thread>
 #include <sstream>
 
@@ -120,15 +121,17 @@ private:
                 "Invalid shmem header or nonsensical values" );
         }
         auto cycleDataSize = shmem_->header.cycleDataSize;
-        if ( cycleDataSize * max_cycle +
-                 sizeof( daq_multi_cycle_header_t ) >
+        if ( cycleDataSize * max_cycle + sizeof( daq_multi_cycle_header_t ) >
              shmem_size_ )
         {
             std::ostringstream os;
-            os << "Overflow condition exists, the cycleDataSize is wrong for the "
-                  "shared memory size. cycleDataSize=" << cycleDataSize << " max_cycle="
-                  << max_cycle << " header_size=" << sizeof( daq_multi_cycle_header_t) << " shmem_size=" << shmem_size_;
-            std::string msg = os.str();
+            os << "Overflow condition exists, the cycleDataSize is wrong for "
+                  "the "
+                  "shared memory size. cycleDataSize="
+               << cycleDataSize << " max_cycle=" << max_cycle
+               << " header_size=" << sizeof( daq_multi_cycle_header_t )
+               << " shmem_size=" << shmem_size_;
+            std::string msg = os.str( );
             throw std::runtime_error( msg );
         }
     }
@@ -151,10 +154,14 @@ private:
             {
                 ++expected_gps;
             }
-            if ( get_gps( next_cycle ) == expected_gps )
+            auto actual_gps = get_gps( next_cycle );
+            if ( actual_gps == expected_gps )
             {
                 return next_cycle;
             }
+            std::cout << "shmem_receiver looking for gps=" << expected_gps
+                      << " found " << actual_gps << " on cycle " << next_cycle
+                      << "\n";
             prev = next_cycle;
             next_cycle = ( prev + 1 ) % max_cycle;
         }
