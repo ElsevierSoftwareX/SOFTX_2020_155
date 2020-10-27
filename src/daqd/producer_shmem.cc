@@ -424,6 +424,18 @@ producer::frame_writer( )
                          "\texpected cycle = %d\n\texpected nano = %d\n\n",
                          expected_cycle,
                          expected_cycle );
+                auto max_show = std::min( (unsigned int)10,
+                                          data_block->header.dcuTotalModels );
+
+                fprintf( stderr,
+                         "first %d dcuids seen\n",
+                         std::min( (unsigned int)10, max_show ) );
+                for ( auto ii = 0; ii < max_show; ii++ )
+                {
+                    fprintf( stderr,
+                             "saw dcu %d\n",
+                             data_block->header.dcuheader[ ii ].dcuId );
+                }
                 exit( 1 );
             }
         }
@@ -446,7 +458,8 @@ producer::frame_writer( )
                 sizeof( data_block->dataBlock ) > sizeof( char* ),
                 "Make sure we are referring to the whole data block in a "
                 "daq_dc_data_t, not just a pointer to the data" );
-            for ( unsigned int cur_block = 0; cur_block < total_zmq_models; ++cur_block )
+            for ( unsigned int cur_block = 0; cur_block < total_zmq_models;
+                  ++cur_block )
             {
                 unsigned int cur_dcuid =
                     data_block->header.dcuheader[ cur_block ].dcuId;
