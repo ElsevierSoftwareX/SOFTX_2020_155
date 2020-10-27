@@ -119,21 +119,22 @@ TEST_CASE( "You can optionally time out a pop operation on a message_queue " )
     REQUIRE( val.operator bool( ) == false );
 }
 
-TEST_CASE( "An empty message queue blocks until data is present, if timeouts are not requested")
+TEST_CASE( "An empty message queue blocks until data is present, if timeouts "
+           "are not requested" )
 {
-    Message_queue<int, 5> test_queue;
+    Message_queue< int, 5 > test_queue;
 
-    std::thread t([&test_queue]() {
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        test_queue.emplace(42);
-    });
-    auto start = std::chrono::steady_clock::now();
-    int val = test_queue.pop();
-    auto end = std::chrono::steady_clock::now();
-    REQUIRE(val == 42);
-    auto duration = end-start;
-    REQUIRE(duration > std::chrono::milliseconds(200));
-    t.join();
+    std::thread t( [&test_queue]( ) {
+        std::this_thread::sleep_for( std::chrono::milliseconds( 300 ) );
+        test_queue.emplace( 42 );
+    } );
+    auto        start = std::chrono::steady_clock::now( );
+    int         val = test_queue.pop( );
+    auto        end = std::chrono::steady_clock::now( );
+    REQUIRE( val == 42 );
+    auto duration = end - start;
+    REQUIRE( duration > std::chrono::milliseconds( 200 ) );
+    t.join( );
 }
 
 TEST_CASE(
@@ -158,6 +159,27 @@ TEST_CASE(
     }
     pop_thread.join( );
     REQUIRE( !failed );
+}
+
+TEST_CASE(
+    "You can optionally timeout an emplace operation if the queue is full" )
+{
+    Message_queue< int, 5 > test_queue;
+
+    test_queue.emplace( 0 );
+    test_queue.emplace( 1 );
+    test_queue.emplace( 2 );
+    test_queue.emplace( 3 );
+    REQUIRE( test_queue.size( ) == test_queue.capacity( ) - 1 );
+    boost::optional< int > results =
+        test_queue.emplace_with_timeout( std::chrono::milliseconds( 10 ), 4 );
+
+    REQUIRE( ( (bool)results ) == false );
+
+    results =
+        test_queue.emplace_with_timeout( std::chrono::milliseconds( 10 ), 5 );
+    REQUIRE( ( (bool)results ) == true );
+    REQUIRE( results.get( ) == 5 );
 }
 
 TEST_CASE( "If a message queue is destroyed it calls the destructor on all "

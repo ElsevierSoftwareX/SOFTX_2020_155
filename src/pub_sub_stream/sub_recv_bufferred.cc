@@ -944,7 +944,7 @@ main( int argc, char** argv )
     if ( admin_interface != nullptr )
     {
         admin_instance = boost::make_optional( cps_admin::AdminInterface(
-            std::string{ admin_interface }, admin_sub_entries ) );
+            std::string{ admin_interface }, admin_sub_entries, dc_stats ) );
     }
 
     int nextCycle = 0;

@@ -2,7 +2,9 @@
 #define CPS_PUB_SUB_DC_STATS_HH
 
 #include <array>
+#include <atomic>
 #include <vector>
+
 #include <daq_core.h>
 #include "simple_pv.h"
 #include "message_queue.hh"
@@ -40,9 +42,32 @@ class DCStats
 public:
     DCStats( std::vector< SimplePV >& pvs,
              const std::string&       channel_list_path );
+
+    /*!
+     * @brief This is a debug interface to allow setting up the state
+     * of the dcus.  It does not handle epics information.
+     * @tparam C
+     * @param dcus
+     */
+    template < typename C >
+    explicit DCStats( const C& dcus )
+    {
+        valid_ = true;
+        if ( dcus.size( ) > dcu_status_.size( ) )
+        {
+            throw std::runtime_error( "The list of dcus provided was too big" );
+        }
+        std::copy( dcus.begin( ), dcus.end( ), dcu_status_.begin( ) );
+    }
+
     DCStats( const DCStats& ) = delete;
+
     DCStats( DCStats&& ) = delete;
+
+    ~DCStats( );
+
     DCStats& operator=( const DCStats& ) = delete;
+
     DCStats& operator=( DCStats&& ) = delete;
 
     dc_queue*
@@ -57,6 +82,30 @@ public:
     is_valid( ) const
     {
         return valid_;
+    }
+
+    void
+    request_clear_crc( )
+    {
+        request_clear_crc_ = true;
+    }
+
+    void
+    stop( )
+    {
+        request_stop_ = true;
+        queue_.emplace_with_timeout( std::chrono::milliseconds( 0 ), nullptr );
+    }
+
+    /*!
+     * @brief this is a debug interface
+     * @param dcuid
+     * @return
+     */
+    const DCUStats&
+    peek_stats( unsigned int dcuid ) const
+    {
+        return dcu_status_[ dcuid ];
     }
 
 private:
@@ -82,7 +131,9 @@ private:
     unsigned int model_data_kb_per_s_{ 0 };
     unsigned int total_data_kb_per_s_{ 0 };
 
-    bool valid_{ false };
+    std::atomic< bool > request_clear_crc_{ false };
+    std::atomic< bool > request_stop_{ false };
+    bool                valid_{ false };
 };
 
 #endif // CPS_PUB_SUB_DC_STATS_HH

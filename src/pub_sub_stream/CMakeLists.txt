@@ -102,12 +102,19 @@ if (libcds-pubsub_FOUND)
 
     add_executable(test_pub_sub_stream_unit_tests
             tests/test_main.cc
-            tests/test_message_queue.cc)
+            tests/test_message_queue.cc
+            tests/test_dc_stats.cc
+            dc_stats.cc)
     target_include_directories(test_pub_sub_stream_unit_tests PUBLIC
             ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_CURRENT_SOURCE_DIR}/../include
+            ${CMAKE_CURRENT_SOURCE_DIR}/../daqd
             ${Boost_INCLUDE_DIRS})
     target_link_libraries(test_pub_sub_stream_unit_tests PUBLIC
             catch2
+            pv::simple_pv
+            driver::ini_parsing
+            crc32
             ${CMAKE_THREAD_LIBS_INIT})
 
     configure_file(test_pub_sub_xmit_recv.sh.in test_pub_sub_xmit_recv.sh @ONLY)

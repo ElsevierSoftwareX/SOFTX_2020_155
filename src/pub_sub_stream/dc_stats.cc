@@ -232,13 +232,13 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         std::numeric_limits< int >::min( ),
     } );
     pvs.emplace_back( SimplePV{
-            "PRDCR_NOT_STALLED",
-            SIMPLE_PV_INT,
-            reinterpret_cast< void* >( &not_stalled_ ),
-            2,
-            0,
-            2,
-            0,
+        "PRDCR_NOT_STALLED",
+        SIMPLE_PV_INT,
+        reinterpret_cast< void* >( &not_stalled_ ),
+        2,
+        0,
+        2,
+        0,
     } );
     pvs.emplace_back( SimplePV{
         "UPTIME_SECONDS",
@@ -336,6 +336,23 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
     valid_ = true;
 }
 
+DCStats::~DCStats( )
+{
+    if ( !request_stop_ )
+    {
+        stop( );
+    }
+}
+
+/*!
+ * @brief The channel callback for the ini file parser.  This is called for each
+ * channel found.
+ * @param channels The current channel list
+ * @param ini_file_dcu_id Where to put the dcu id
+ * @param channel_name the name of the current channel
+ * @param params attributes of the current channel
+ * @return 0 on error, else 1
+ */
 int
 DCStats::process_channel( std::vector< channel_t >& channels,
                           int&                      ini_file_dcu_id,
@@ -455,6 +472,13 @@ clear_entries( DCUStats& cur )
 }
 
 static void
+clear_crc( DCUStats& cur )
+{
+    cur.crc_per_sec = 0;
+    cur.crc_sum = 0;
+}
+
+static void
 dcu_skipped( DCUStats& cur )
 {
     if ( cur.seen_last_cycle )
@@ -464,14 +488,14 @@ dcu_skipped( DCUStats& cur )
     cur.status |= 0xbad;
 }
 
-static void
-mark_dcu_if_skipped( DCUStats& cur )
-{
-    if ( !cur.processed )
-    {
-        dcu_skipped( cur );
-    }
-}
+// static void
+// mark_dcu_if_skipped( DCUStats& cur )
+//{
+//    if ( !cur.processed )
+//    {
+//        dcu_skipped( cur );
+//    }
+//}
 
 static void
 mark_dcu_if_skipped_this_cycle( DCUStats& cur )
@@ -539,6 +563,11 @@ DCStats::run( simple_pv_handle epics_server )
     {
 
         dc_queue::value_type entry{ get_message( epics_server ) };
+
+        if ( request_stop_ )
+        {
+            return;
+        }
 
         unsigned int tp_count{ 0 };
         not_stalled_ = 1;
@@ -608,7 +637,7 @@ DCStats::run( simple_pv_handle epics_server )
             }
             data += total_data_size;
         }
-        for_each( dcu_status_, mark_dcu_if_skipped );
+        for_each( dcu_status_, mark_dcu_if_skipped_this_cycle );
         for_each( dcu_status_, clear_seen_last_cycle_if_skipped );
         // we can either do this off of our counter or off of the
         // data cycle counter.
@@ -630,6 +659,12 @@ DCStats::run( simple_pv_handle epics_server )
             tp_data = 0;
             model_data = 0;
             total_data = 0;
+
+            if ( request_clear_crc_ )
+            {
+                for_each( dcu_status_, clear_crc );
+                request_clear_crc_ = false;
+            }
         }
     }
 }

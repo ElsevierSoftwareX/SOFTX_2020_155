@@ -5,10 +5,11 @@
 #ifndef DAQD_TRUNK_CPS_RECV_ADMIN_HH
 #define DAQD_TRUNK_CPS_RECV_ADMIN_HH
 
-#include <cds-pubsub/sub.hh>
-
 #include <memory>
 #include <vector>
+
+#include <cds-pubsub/sub.hh>
+#include "dc_stats.hh"
 
 namespace cps_admin
 {
@@ -42,7 +43,8 @@ namespace cps_admin
          * be valid for the lifetime of the AdminInterface
          */
         AdminInterface( const std::string&       interface,
-                        std::vector< SubEntry >& subscriptions );
+                        std::vector< SubEntry >& subscriptions,
+                        DCStats&                 dc_stats );
         /*!
          * Close down the AdminInterface and stop its web server.
          */

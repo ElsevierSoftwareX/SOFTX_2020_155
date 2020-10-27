@@ -106,12 +106,27 @@ public:
     {
         lock_type l{ m_ };
         wait_for_free_space( l );
-        T* dest = reinterpret_cast< T* >( &storage_[ begin_ ] );
-        new ( dest ) T( std::forward< Args >( args )... );
-        begin_ = decr( begin_ );
-        ++size_;
-        item_added_flag_.notify_one( );
+        emplace_while_locked( std::forward< Args >( args )... );
     }
+
+    template < typename Duration, typename... Args >
+    boost::optional< T >
+    emplace_with_timeout( const Duration duration, Args... args )
+    {
+        boost::optional< T > results = boost::none;
+
+        lock_type l{ m_ };
+        wait_for_free_space_with_timeout( l, duration );
+        if ( size_ < MaxSize )
+        {
+            emplace_while_locked( std::forward< Args >( args )... );
+        }
+        else
+        {
+            results = std::move( T( std::forward< Args >( args )... ) );
+        }
+        return results;
+    };
 
     T
     pop( ) noexcept
@@ -138,6 +153,17 @@ public:
     }
 
 private:
+    template < typename... Args >
+    void
+    emplace_while_locked( Args... args )
+    {
+        T* dest = reinterpret_cast< T* >( &storage_[ begin_ ] );
+        new ( dest ) T( std::forward< Args >( args )... );
+        begin_ = decr( begin_ );
+        ++size_;
+        item_added_flag_.notify_one( );
+    }
+
     T
     pop_while_locked( ) noexcept
     {
@@ -163,6 +189,18 @@ private:
         {
             item_removed_flag_.wait( l );
         }
+    }
+
+    template < typename Duration >
+    void
+    wait_for_free_space_with_timeout( lock_type& l, const Duration& timeout )
+    {
+        if ( size_ < MaxSize )
+        {
+            return;
+        }
+        item_removed_flag_.wait_for(
+            l, timeout, [this]( ) -> bool { return size_ < MaxSize; } );
     }
 
     void
