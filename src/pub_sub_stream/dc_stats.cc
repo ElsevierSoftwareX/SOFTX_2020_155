@@ -198,27 +198,27 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
                 SIMPLE_PV_INT,
                 reinterpret_cast< void* >( &cur.status ),
                 1,
-                0,
+                -1,
                 1,
-                0,
+                -1,
             } );
             pvs.emplace_back( SimplePV{
                 cur.crc_per_sec_name.data( ),
                 SIMPLE_PV_INT,
                 reinterpret_cast< void* >( &cur.crc_per_sec ),
                 1,
-                0,
+                -1,
                 1,
-                0,
+                -1,
             } );
             pvs.emplace_back( SimplePV{
                 cur.crc_sum_name.data( ),
                 SIMPLE_PV_INT,
                 reinterpret_cast< void* >( &cur.crc_sum ),
                 1,
-                0,
+                -1,
                 1,
-                0,
+                -1,
             } );
         }
     } );
