@@ -125,6 +125,10 @@ namespace cps_admin
                 {
                     return handle_index_view( );
                 }
+                if ( req_.target( ) == "/channels/" )
+                {
+                    return handle_channel_view( );
+                }
                 if ( req_.target( ) == "/clear_crc/" )
                 {
                     return handle_clear_crc( );
@@ -194,6 +198,59 @@ namespace cps_admin
                                                   entry.conn_str.size( ),
                                                   true );
                                    writer.EndObject( 2 );
+                               } );
+                writer.EndArray( subscriptions_.size( ) );
+
+                auto resp = response_type{ http::status::ok, req_.version( ) };
+                resp.set( http::field::content_type, "application/json" );
+                resp.keep_alive( false );
+                resp.body( ) = os.str( );
+                resp.prepare_payload( );
+                return resp;
+            }
+
+            /*!
+             * @brief the channel list view
+             * @return the response
+             */
+            response_type
+            handle_channel_view( )
+            {
+                if ( req_.method( ) != http::verb::get )
+                {
+                    return bad_req_type( "Only GET supported" );
+                }
+
+                std::ostringstream                             os;
+                rapidjson::OStreamWrapper                      json_out( os );
+                rapidjson::Writer< rapidjson::OStreamWrapper > writer(
+                    json_out );
+
+                writer.StartArray( );
+
+                const auto& channels = dc_stats_.channels( );
+                std::for_each( channels.begin( ),
+                               channels.end( ),
+                               [&writer]( const channel_t& chan ) {
+                                   writer.StartObject( );
+                                   writer.Key( "name" );
+                                   writer.String(
+                                       chan.name, strlen( chan.name ), false );
+                                   writer.Key( "rate" );
+                                   writer.Int( chan.sample_rate );
+                                   writer.Key( "active" );
+                                   writer.Int( chan.active );
+                                   writer.Key( "trend" );
+                                   writer.Bool( chan.trend > 0 );
+                                   writer.Key( "bps" );
+                                   writer.Int( chan.bps );
+                                   writer.Key( "dcu" );
+                                   writer.Int( chan.dcu_id );
+                                   writer.Key( "tp_node" );
+                                   writer.Int( chan.tp_node );
+                                   writer.Key( "chan_num" );
+                                   writer.Int( chan.chNum );
+                                   writer.EndObject( 8 );
                                } );
                 writer.EndArray( subscriptions_.size( ) );
 

@@ -108,13 +108,22 @@ public:
         return dcu_status_[ dcuid ];
     }
 
+    /*!
+     * @brief get a readonly reference to the channel list
+     * @return the channel list
+     */
+    const std::vector< channel_t >&
+    channels( ) const
+    {
+        return channels_;
+    }
+
 private:
     dc_queue::value_type get_message( simple_pv_handle epics_server );
 
-    static int process_channel( std::vector< channel_t >& channels,
-                                int&                      ini_file_dcu_id,
-                                const char*               channel_name,
-                                const CHAN_PARAM*         params );
+    int process_channel( int&              ini_file_dcu_id,
+                         const char*       channel_name,
+                         const CHAN_PARAM* params );
 
     dc_queue                          queue_;
     std::array< DCUStats, DCU_COUNT > dcu_status_{};
@@ -134,6 +143,8 @@ private:
     std::atomic< bool > request_clear_crc_{ false };
     std::atomic< bool > request_stop_{ false };
     bool                valid_{ false };
+
+    std::vector< channel_t > channels_{};
 };
 
 #endif // CPS_PUB_SUB_DC_STATS_HH

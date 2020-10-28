@@ -121,10 +121,10 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
     {
         return;
     }
-    std::set< int >          dcus{};
-    std::vector< channel_t > channels{};
-    int                      ini_file_dcu_id = -1;
-    std::ifstream            f( channel_list_path );
+    std::set< int > dcus{};
+
+    int           ini_file_dcu_id = -1;
+    std::ifstream f( channel_list_path );
     while ( !f.eof( ) && !f.bad( ) )
     {
         std::string line{};
@@ -136,11 +136,10 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         }
         bool test_point = boost::ends_with( stripped_line, ".par" );
 
-        Channel_cb_func cb = [this, &channels, &ini_file_dcu_id](
-                                 const char*       channel_name,
-                                 const CHAN_PARAM* param ) -> int {
-            return process_channel(
-                channels, ini_file_dcu_id, channel_name, param );
+        Channel_cb_func cb =
+            [this, &ini_file_dcu_id]( const char*       channel_name,
+                                      const CHAN_PARAM* param ) -> int {
+            return process_channel( ini_file_dcu_id, channel_name, param );
         };
         ini_file_dcu_id = -1;
         unsigned long fileCrc{ 0 };
@@ -172,13 +171,13 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         }
     }
     checksum_crc32 crc{};
-    for_each( channels, [&crc]( const channel_t& chan ) {
+    for_each( channels_, [&crc]( const channel_t& chan ) {
         hash_channel( crc, chan );
 
         chan.bps;
     } );
     channel_config_hash_ = static_cast< int >( crc.result( ) );
-    std::cerr << "Loaded " << channels.size( ) << " channels" << std::endl;
+    std::cerr << "Loaded " << channels_.size( ) << " channels" << std::endl;
 
     for_each( dcu_status_, [&pvs]( DCUStats& cur ) {
         cur.setup_pv_names( );
@@ -280,10 +279,10 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         "TOTAL_CHANS",
         SIMPLE_PV_INT,
         reinterpret_cast< void* >( &total_chans_ ),
-        static_cast< int >( channels.size( ) ) + 1,
-        static_cast< int >( channels.size( ) ) - 1,
-        static_cast< int >( channels.size( ) ) + 1,
-        static_cast< int >( channels.size( ) ) - 1,
+        static_cast< int >( channels_.size( ) ) + 1,
+        static_cast< int >( channels_.size( ) ) - 1,
+        static_cast< int >( channels_.size( ) ) + 1,
+        static_cast< int >( channels_.size( ) ) - 1,
     } );
     pvs.emplace_back( SimplePV{
         "PRDCR_OPEN_TP_COUNT",
@@ -324,7 +323,7 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
 
     {
         data_rate_ = static_cast< int >(
-            boost::accumulate( channels,
+            boost::accumulate( channels_,
                                std::int64_t{ 0 },
                                []( std::uint64_t    total,
                                    const channel_t& cur ) -> std::uint64_t {
@@ -332,7 +331,7 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
                                } ) /
             1024 );
     }
-    total_chans_ = static_cast< int >( channels.size( ) );
+    total_chans_ = static_cast< int >( channels_.size( ) );
     valid_ = true;
 }
 
@@ -354,20 +353,19 @@ DCStats::~DCStats( )
  * @return 0 on error, else 1
  */
 int
-DCStats::process_channel( std::vector< channel_t >& channels,
-                          int&                      ini_file_dcu_id,
-                          const char*               channel_name,
-                          const CHAN_PARAM*         params )
+DCStats::process_channel( int&              ini_file_dcu_id,
+                          const char*       channel_name,
+                          const CHAN_PARAM* params )
 {
-    if ( channels.size( ) >= MAX_CHANNELS )
+    if ( channels_.size( ) >= MAX_CHANNELS )
     {
         std::cerr << "Too many channels.  The hard limit is " << MAX_CHANNELS
                   << "\n";
         return 0;
     }
-    channels.emplace_back( );
-    channel_t& cur = channels.back( );
-    cur.seq_num = static_cast< int >( channels.size( ) - 1 );
+    channels_.emplace_back( );
+    channel_t& cur = channels_.back( );
+    cur.seq_num = static_cast< int >( channels_.size( ) - 1 );
     cur.id = nullptr;
     if ( params->dcuid >= DCU_COUNT || params->dcuid < 0 )
     {
