@@ -63,17 +63,20 @@ public:
         std::uint64_t spin_count = 0;
 
         unsigned int cur_cycle = *cycle_ptr;
-        while ( cur_cycle == prev_cycle_ )
+        unsigned int max_cycle = get_max_cycle( );
+
+        while ( cur_cycle == prev_cycle_ || get_total_dcus( cur_cycle ) == 0 )
         {
             wait( );
             cur_cycle = *cycle_ptr;
+            verify_cycle_state( cur_cycle, max_cycle );
             ++spin_count;
             if ( spin_count == 2000 )
             {
                 signal_stalled_( );
             }
         }
-        unsigned int max_cycle = get_max_cycle( );
+        max_cycle = get_max_cycle( );
         verify_cycle_state( cur_cycle, max_cycle );
         cur_cycle = handle_cycle_jumps( cur_cycle, max_cycle );
 
@@ -91,6 +94,7 @@ public:
             start, start + copy_size, reinterpret_cast< char* >( &data_ ) );
 
         prev_cycle_ = cur_cycle;
+        prev_gps_ = data_.header.dcuheader[ 0 ].timeSec;
         return &data_;
     }
 
@@ -110,6 +114,16 @@ private:
         return reinterpret_cast< daq_multi_dcu_data_t* >( start )
             ->header.dcuheader[ 0 ]
             .timeSec;
+    }
+
+    unsigned int
+    get_total_dcus( unsigned int cycle )
+    {
+        unsigned int cycle_stride = shmem_->header.cycleDataSize;
+        char*        start = const_cast< char* >( &shmem_->dataBlock[ 0 ] );
+        start += cycle * cycle_stride;
+        return reinterpret_cast< daq_multi_dcu_data_t* >( start )
+            ->header.dcuTotalModels;
     }
 
     void
@@ -142,11 +156,11 @@ private:
         unsigned int prev = prev_cycle_;
         unsigned int prev_gps = prev_gps_;
 
-        if ( new_cycle == ( prev + 1 ) % max_cycle )
+        auto next_cycle = ( prev + 1 ) % max_cycle;
+        if ( new_cycle == next_cycle )
         {
             return new_cycle;
         }
-        auto next_cycle = ( prev + 1 ) % max_cycle;
         while ( next_cycle != new_cycle )
         {
             auto expected_gps = prev_gps;
@@ -155,7 +169,8 @@ private:
                 ++expected_gps;
             }
             auto actual_gps = get_gps( next_cycle );
-            if ( actual_gps == expected_gps )
+            if ( actual_gps == expected_gps &&
+                 get_total_dcus( next_cycle ) != 0 )
             {
                 return next_cycle;
             }
