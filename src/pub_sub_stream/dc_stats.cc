@@ -189,21 +189,19 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         }
     }
     checksum_crc32 crc{};
-    for_each( channels_, [&crc]( const channel_t& chan ) {
-        hash_channel( crc, chan );
-
-        chan.bps;
-    } );
+    for_each( channels_,
+              [&crc]( const channel_t& chan ) { hash_channel( crc, chan ); } );
     {
         data_rate_ = static_cast< int >(
-                boost::accumulate(
-                        channels_, std::int64_t{ 0 }, accumulate_data_rate ) /
-                1024 );
+            boost::accumulate(
+                channels_, std::int64_t{ 0 }, accumulate_data_rate ) /
+            1024 );
     }
     total_chans_ = boost::accumulate( channels_, 0, count_data_channels );
 
     channel_config_hash_ = static_cast< int >( crc.result( ) );
-    std::cerr << "Loaded " << channels_.size( ) << " tp + channels" << std::endl;
+    std::cerr << "Loaded " << channels_.size( ) << " tp + channels"
+              << std::endl;
 
     for_each( dcu_status_, [&pvs]( DCUStats& cur ) {
         cur.setup_pv_names( );
@@ -246,6 +244,15 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
                 -1,
             } );
         }
+    } );
+    pvs.emplace_back( SimplePV{
+        "PRDCR_DATA_CRC",
+        SIMPLE_PV_INT,
+        reinterpret_cast< void* >( &data_crc_ ),
+        std::numeric_limits< int >::max( ),
+        std::numeric_limits< int >::min( ),
+        std::numeric_limits< int >::max( ),
+        std::numeric_limits< int >::min( ),
     } );
     pvs.emplace_back( SimplePV{
         "CHANNEL_LIST_CHECK_SUM",
@@ -565,7 +572,8 @@ DCStats::run( simple_pv_handle epics_server )
     {
         return;
     }
-    checksum_crc32 crc;
+    checksum_crc32 total_data_crc;
+    checksum_crc32 data_block_crc;
 
     std::uint64_t tp_data{ 0 };
     std::uint64_t model_data{ 0 };
@@ -574,7 +582,7 @@ DCStats::run( simple_pv_handle epics_server )
     for_each( dcu_status_, clear_entries );
     for ( std::uint64_t cycles = 1;; ++cycles )
     {
-
+        total_data_crc.reset( );
         dc_queue::value_type entry{ get_message( epics_server ) };
 
         if ( request_stop_ )
@@ -642,9 +650,12 @@ DCStats::run( simple_pv_handle epics_server )
 
             mark_as_seen( cur_status );
 
-            crc.reset( );
-            crc.add( data, cur_header.dataBlockSize );
-            if ( crc.result( ) != cur_header.dataCrc )
+            data_block_crc.reset( );
+            data_block_crc.add( data, cur_header.dataBlockSize );
+            auto data_block_crc_sum = data_block_crc.result( );
+            total_data_crc.add( &data_block_crc_sum,
+                                sizeof( data_block_crc_sum ) );
+            if ( data_block_crc_sum != cur_header.dataCrc )
             {
                 mark_bad_data_crc( cur_status );
             }
@@ -666,6 +677,7 @@ DCStats::run( simple_pv_handle epics_server )
             open_tp_count_ = static_cast< int >( tp_count );
             unique_dcus_per_sec_ =
                 boost::count_if( dcu_status_, entry_was_processed );
+            data_crc_ = static_cast< int >( total_data_crc.result( ) );
             simple_pv_server_update( epics_server );
             for_each( dcu_status_, clear_entries );
 
