@@ -172,6 +172,9 @@ private:
             if ( actual_gps == expected_gps &&
                  get_total_dcus( next_cycle ) != 0 )
             {
+                std::cout
+                    << "shmem_receiver handle_cycle_jumps found skipped cycle "
+                    << actual_gps << ":" << next_cycle << "\n";
                 return next_cycle;
             }
             std::cout << "shmem_receiver looking for gps=" << expected_gps
