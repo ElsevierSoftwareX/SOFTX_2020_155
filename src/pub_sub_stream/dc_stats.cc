@@ -98,6 +98,24 @@ namespace
         dest.back( ) = '\0';
     }
 
+    bool
+    is_testpoint( const channel_t& chan )
+    {
+        return chan.tp_node >= 0;
+    }
+
+    std::uint64_t
+    accumulate_data_rate( std::uint64_t total, const channel_t& cur_chan )
+    {
+        return total + ( is_testpoint( cur_chan ) ? 0 : cur_chan.bytes );
+    }
+
+    int
+    count_data_channels( int cur_value, const channel_t& cur_chan )
+    {
+        return ( is_testpoint( cur_chan ) ? cur_value + 1 : cur_value );
+    }
+
 } // namespace
 
 void
@@ -323,15 +341,12 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
 
     {
         data_rate_ = static_cast< int >(
-            boost::accumulate( channels_,
-                               std::int64_t{ 0 },
-                               []( std::uint64_t    total,
-                                   const channel_t& cur ) -> std::uint64_t {
-                                   return total + cur.bytes;
-                               } ) /
+            boost::accumulate(
+                channels_, std::int64_t{ 0 }, accumulate_data_rate ) /
             1024 );
     }
-    total_chans_ = static_cast< int >( channels_.size( ) );
+    total_chans_ = boost::accumulate( channels_, 0, count_data_channels );
+
     valid_ = true;
 }
 
