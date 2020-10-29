@@ -194,8 +194,16 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
 
         chan.bps;
     } );
+    {
+        data_rate_ = static_cast< int >(
+                boost::accumulate(
+                        channels_, std::int64_t{ 0 }, accumulate_data_rate ) /
+                1024 );
+    }
+    total_chans_ = boost::accumulate( channels_, 0, count_data_channels );
+
     channel_config_hash_ = static_cast< int >( crc.result( ) );
-    std::cerr << "Loaded " << channels_.size( ) << " channels" << std::endl;
+    std::cerr << "Loaded " << channels_.size( ) << " tp + channels" << std::endl;
 
     for_each( dcu_status_, [&pvs]( DCUStats& cur ) {
         cur.setup_pv_names( );
@@ -297,10 +305,10 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         "TOTAL_CHANS",
         SIMPLE_PV_INT,
         reinterpret_cast< void* >( &total_chans_ ),
-        static_cast< int >( channels_.size( ) ) + 1,
-        static_cast< int >( channels_.size( ) ) - 1,
-        static_cast< int >( channels_.size( ) ) + 1,
-        static_cast< int >( channels_.size( ) ) - 1,
+        total_chans_ + 1,
+        total_chans_ - 1,
+        total_chans_ + 1,
+        total_chans_ - 1,
     } );
     pvs.emplace_back( SimplePV{
         "PRDCR_OPEN_TP_COUNT",
@@ -338,14 +346,6 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         std::numeric_limits< int >::max( ),
         -1,
     } );
-
-    {
-        data_rate_ = static_cast< int >(
-            boost::accumulate(
-                channels_, std::int64_t{ 0 }, accumulate_data_rate ) /
-            1024 );
-    }
-    total_chans_ = boost::accumulate( channels_, 0, count_data_channels );
 
     valid_ = true;
 }
