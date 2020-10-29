@@ -113,7 +113,7 @@ namespace
     int
     count_data_channels( int cur_value, const channel_t& cur_chan )
     {
-        return ( is_testpoint( cur_chan ) ? cur_value + 1 : cur_value );
+        return cur_value + ( is_testpoint( cur_chan ) ? 0 : 1 );
     }
 
 } // namespace
