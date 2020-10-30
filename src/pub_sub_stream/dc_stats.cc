@@ -582,6 +582,7 @@ DCStats::run( simple_pv_handle epics_server )
     for_each( dcu_status_, clear_entries );
     for ( std::uint64_t cycles = 1;; ++cycles )
     {
+        unsigned int data_cycle = 0xffffffff;
         total_data_crc.reset( );
         dc_queue::value_type entry{ get_message( epics_server ) };
 
@@ -633,6 +634,7 @@ DCStats::run( simple_pv_handle epics_server )
             if ( first )
             {
                 gpstime_ = cur_header.timeSec;
+                data_cycle = cur_header.cycle;
                 first = false;
             }
             if ( cur_header.fileCrc != cur_status.expected_config_crc )
@@ -663,9 +665,18 @@ DCStats::run( simple_pv_handle epics_server )
         }
         for_each( dcu_status_, mark_dcu_if_skipped_this_cycle );
         for_each( dcu_status_, clear_seen_last_cycle_if_skipped );
+
+        bool alternating_cycle = cycles % 2 == 0;
+        bool one_sec_update = cycles % 16 == 0;
+
+        if ( data_cycle == 0 )
+        {
+            data_crc_ = static_cast< int >( total_data_crc.result( ) );
+        }
+
         // we can either do this off of our counter or off of the
         // data cycle counter.
-        if ( cycles % 16 == 0 )
+        if ( one_sec_update )
         {
             ++uptime_;
             tp_data_kb_per_s_ = static_cast< unsigned int >( tp_data / 1024 );
@@ -677,7 +688,7 @@ DCStats::run( simple_pv_handle epics_server )
             open_tp_count_ = static_cast< int >( tp_count );
             unique_dcus_per_sec_ =
                 boost::count_if( dcu_status_, entry_was_processed );
-            data_crc_ = static_cast< int >( total_data_crc.result( ) );
+
             simple_pv_server_update( epics_server );
             for_each( dcu_status_, clear_entries );
 
@@ -690,6 +701,10 @@ DCStats::run( simple_pv_handle epics_server )
                 for_each( dcu_status_, clear_crc );
                 request_clear_crc_ = false;
             }
+        }
+        else if ( alternating_cycle )
+        {
+            simple_pv_server_update( epics_server );
         }
     }
 }
