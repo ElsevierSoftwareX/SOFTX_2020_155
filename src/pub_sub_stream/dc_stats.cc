@@ -679,7 +679,7 @@ DCStats::run( simple_pv_handle epics_server )
             boost::sort(
                 data_block_crcs,
                 []( const dcuid_crc_pair& a, const dcuid_crc_pair& b ) -> bool {
-                    return a.first < a.second;
+                    return a.first < b.first;
                 } );
             total_data_crc.reset( );
             for_each( data_block_crcs,
