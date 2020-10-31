@@ -568,12 +568,16 @@ DCStats::get_message( simple_pv_handle epics_server )
 void
 DCStats::run( simple_pv_handle epics_server )
 {
+    using dcuid_crc_pair = std::pair< unsigned int, std::uint32_t >;
     if ( !valid_ )
     {
         return;
     }
     checksum_crc32 total_data_crc;
     checksum_crc32 data_block_crc;
+
+    std::vector< dcuid_crc_pair > data_block_crcs;
+    data_block_crcs.reserve( DCU_COUNT );
 
     std::uint64_t tp_data{ 0 };
     std::uint64_t model_data{ 0 };
@@ -609,6 +613,7 @@ DCStats::run( simple_pv_handle epics_server )
         }
         bool first{ true };
         total_data += entry->header.fullDataBlockSize;
+        data_block_crcs.clear( );
         for ( int i = 0; i < entry->header.dcuTotalModels; ++i )
         {
             auto& cur_header = entry->header.dcuheader[ i ];
@@ -655,8 +660,8 @@ DCStats::run( simple_pv_handle epics_server )
             data_block_crc.reset( );
             data_block_crc.add( data, cur_header.dataBlockSize );
             auto data_block_crc_sum = data_block_crc.result( );
-            total_data_crc.add( &data_block_crc_sum,
-                                sizeof( data_block_crc_sum ) );
+            data_block_crcs.emplace_back(
+                std::make_pair( dcu_id, data_block_crc_sum ) );
             if ( data_block_crc_sum != cur_header.dataCrc )
             {
                 mark_bad_data_crc( cur_status );
@@ -671,7 +676,18 @@ DCStats::run( simple_pv_handle epics_server )
 
         if ( data_cycle == 0 )
         {
-            data_crc_ = static_cast< int >( total_data_crc.result( ) );
+            boost::sort(
+                data_block_crcs,
+                []( const dcuid_crc_pair& a, const dcuid_crc_pair& b ) -> bool {
+                    return a.first < a.second;
+                } );
+            total_data_crc.reset( );
+            for_each( data_block_crcs,
+                      [&total_data_crc]( dcuid_crc_pair& entry ) {
+                          total_data_crc.add( &( entry.second ),
+                                              sizeof( entry.second ) );
+                      } );
+            data_crc_ = static_cast< unsigned int >( total_data_crc.result( ) );
         }
 
         // we can either do this off of our counter or off of the
