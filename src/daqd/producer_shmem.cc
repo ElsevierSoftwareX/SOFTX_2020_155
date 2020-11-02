@@ -297,6 +297,8 @@ producer::frame_writer( )
     if ( daqd.dcu_status_check & 4 )
         resync = 1;
 
+    unsigned int total_crc_err_seen = 0;
+
     std::array< int, DCU_COUNT >          dcu_to_zmq_lookup{};
     std::array< char*, DCU_COUNT >        dcu_data_from_zmq{};
     std::array< unsigned int, DCU_COUNT > dcu_data_crc{};
@@ -506,6 +508,7 @@ producer::frame_writer( )
                     daqd.dcuCrcErrCntPerSecond[ 0 ][ j ]++;
                     daqd.dcuCrcErrCntPerSecondRunning[ 0 ][ j ]++;
                     daqd.dcuCrcErrCnt[ 0 ][ j ]++;
+                    ++total_crc_err_seen;
                 }
                 dcuSeenLastCycle[ j ] = false;
                 daqd.dcuStatus[ 0 ][ j ] = 0xbad;
@@ -735,6 +738,7 @@ producer::frame_writer( )
                     {
                         daqd.dcuCrcErrCnt[ 0 ][ j ]++;
                         daqd.dcuCrcErrCntPerSecondRunning[ 0 ][ j ]++;
+                        ++total_crc_err_seen;
                     }
                 }
             }
@@ -846,6 +850,8 @@ producer::frame_writer( )
                         conv::s_to_ms_int( stat_crc.getMean( ) ) );
 
             PV::set_pv( PV::PV_PRDCR_DATA_CRC, total_crc_obj.result( ) );
+
+            PV::set_pv( PV::PV_TOTAL_CRC_SUM, total_crc_err_seen );
 
             stat_full.clearStats( );
             stat_crc.clearStats( );
