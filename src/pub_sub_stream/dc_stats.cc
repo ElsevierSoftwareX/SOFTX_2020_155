@@ -188,9 +188,12 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
                 std::move( full_name );
         }
     }
+    sort_channels( );
+
     checksum_crc32 crc{};
     for_each( channels_,
               [&crc]( const channel_t& chan ) { hash_channel( crc, chan ); } );
+
     {
         data_rate_ = static_cast< int >(
             boost::accumulate(
@@ -363,6 +366,26 @@ DCStats::~DCStats( )
     {
         stop( );
     }
+}
+
+void
+DCStats::sort_channels( )
+{
+    // sort the list by dcu
+    boost::sort( channels_,
+                 []( const channel_t& a, const channel_t& b ) -> bool {
+                     unsigned int dcu1, dcu2;
+                     dcu1 = a.dcu_id + DCU_COUNT * a.ifoid;
+                     dcu2 = b.dcu_id + DCU_COUNT * b.ifoid;
+                     if ( dcu1 == dcu2 )
+                     {
+                         return a.seq_num < b.seq_num;
+                     }
+                     return dcu1 < dcu2;
+                 } );
+    int seq_num = 0;
+    for_each( channels_,
+              [&seq_num]( channel_t& chan ) { chan.seq_num = seq_num++; } );
 }
 
 /*!
@@ -674,7 +697,7 @@ DCStats::run( simple_pv_handle epics_server )
         bool alternating_cycle = cycles % 2 == 0;
         bool one_sec_update = cycles % 16 == 0;
 
-        if ( data_cycle == 0 )
+        if ( data_cycle == 15 )
         {
             boost::sort(
                 data_block_crcs,
