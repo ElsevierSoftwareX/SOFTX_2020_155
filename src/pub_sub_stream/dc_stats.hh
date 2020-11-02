@@ -119,6 +119,11 @@ public:
     }
 
 private:
+    /*!
+     * @brief sort the channels in a way that is compatible with daqd
+     */
+    void sort_channels( );
+
     dc_queue::value_type get_message( simple_pv_handle epics_server );
 
     int process_channel( int&              ini_file_dcu_id,
