@@ -323,7 +323,7 @@ with open(lockfile, "w") as lock_f:
 
     # create master file
     with open(new_master, "w") as mf:
-        mf.write("\n".join(master_entries))
+        mf.write("\n".join(master_entries)+"\n")
 
     # link to master
     create_link(new_archive, master_link)

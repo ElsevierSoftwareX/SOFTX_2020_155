@@ -12,8 +12,7 @@ test_hash = "7d134aad8c722085dda3b78b2ba20233"
 
 def get_test_dir(test_folder):
     global test_dir
-
-    base_dir, _ = path.split(__file__)
+    base_dir, _ = path.split(path.abspath(__file__))
     abs_test_dir = path.join(base_dir, test_dir)
     return path.join(abs_test_dir, test_folder)
 
@@ -47,8 +46,11 @@ def test_link(self, daq_name):
     link_path = f"{self.base_path}/{daq_name}/running"
     self.assertTrue(path.lexists(link_path), "running doesn't exist")
     self.assertTrue(path.islink(link_path), "running not a link")
+    print(f"link path is: {link_path}")
     real_path = path.realpath(link_path)
-    self.assertEqual(real_path, self.hash_path, f"running pointing to wrong path: {real_path}")
+    print(f"real path is: {real_path}")
+    real_hash_path = path.realpath(self.hash_path)
+    self.assertEqual(real_path, self.hash_path, f"'running' link pointing to wrong path")
 
 class TargetTestCase(unittest.TestCase):
     def setUp(self):
