@@ -109,6 +109,17 @@ public:
     }
 
     /*!
+     * @brief Return the total crc count for the system, a debugging/testing
+     * aid.
+     * @return the sum of the crc count for the lifetime of this object.
+     */
+    int
+    get_total_crcs( ) const
+    {
+        return total_crc_count_;
+    }
+
+    /*!
      * @brief get a readonly reference to the channel list
      * @return the channel list
      */
@@ -145,6 +156,7 @@ private:
     unsigned int tp_data_kb_per_s_{ 0 };
     unsigned int model_data_kb_per_s_{ 0 };
     unsigned int total_data_kb_per_s_{ 0 };
+    int          total_crc_count_{ 0 };
 
     std::atomic< bool > request_clear_crc_{ false };
     std::atomic< bool > request_stop_{ false };

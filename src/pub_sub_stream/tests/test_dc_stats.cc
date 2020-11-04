@@ -142,6 +142,7 @@ TEST_CASE(
     REQUIRE( dc_stats.peek_stats( 2 ).processed );
     REQUIRE( dc_stats.peek_stats( 2 ).crc_sum == 0 );
     REQUIRE( dc_stats.peek_stats( 2 ).status == 0 );
+    REQUIRE( dc_stats.get_total_crcs( ) == 0 );
     {
         auto data = make_unique_ptr< daq_dc_data_t >( );
         memset(
@@ -158,6 +159,7 @@ TEST_CASE(
     REQUIRE( dc_stats.peek_stats( 2 ).processed );
     REQUIRE( dc_stats.peek_stats( 2 ).crc_sum == 0 );
     REQUIRE( dc_stats.peek_stats( 2 ).status == 0 );
+    REQUIRE( dc_stats.get_total_crcs( ) == 1 );
     {
         auto data = make_unique_ptr< daq_dc_data_t >( );
         memset(
@@ -174,6 +176,7 @@ TEST_CASE(
     REQUIRE( dc_stats.peek_stats( 2 ).processed );
     REQUIRE( dc_stats.peek_stats( 2 ).crc_sum == 0 );
     REQUIRE( dc_stats.peek_stats( 2 ).status == 0 );
+    REQUIRE( dc_stats.get_total_crcs( ) == 1 );
     dc_stats.stop( );
 
     th.join( );

@@ -356,6 +356,15 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         std::numeric_limits< int >::max( ),
         -1,
     } );
+    pvs.emplace_back( SimplePV{
+        "TOTAL_CRC_SUM",
+        SIMPLE_PV_INT,
+        reinterpret_cast< void* >( &total_crc_count_ ),
+        1,
+        1,
+        -1,
+        -1,
+    } );
 
     valid_ = true;
 }
@@ -574,6 +583,12 @@ entry_was_processed( DCUStats& cur )
     return cur.processed;
 }
 
+static std::int64_t
+total_crc_sum( std::int64_t val, const DCUStats& cur )
+{
+    return val + static_cast< std::int64_t >( cur.crc_sum );
+}
+
 dc_queue::value_type
 DCStats::get_message( simple_pv_handle epics_server )
 {
@@ -602,6 +617,7 @@ DCStats::run( simple_pv_handle epics_server )
     std::vector< dcuid_crc_pair > data_block_crcs;
     data_block_crcs.reserve( DCU_COUNT );
 
+    int           prev_total_crc_count{ 0 };
     std::uint64_t tp_data{ 0 };
     std::uint64_t model_data{ 0 };
     std::uint64_t total_data{ 0 };
@@ -694,6 +710,13 @@ DCStats::run( simple_pv_handle epics_server )
         for_each( dcu_status_, mark_dcu_if_skipped_this_cycle );
         for_each( dcu_status_, clear_seen_last_cycle_if_skipped );
 
+        uint64_t crc_sum = boost::accumulate( dcu_status_, 0, total_crc_sum );
+        if ( crc_sum > prev_total_crc_count )
+        {
+            total_crc_count_ += crc_sum - prev_total_crc_count;
+        }
+        prev_total_crc_count = crc_sum;
+
         bool alternating_cycle = cycles % 2 == 0;
         bool one_sec_update = cycles % 16 == 0;
 
@@ -739,6 +762,7 @@ DCStats::run( simple_pv_handle epics_server )
             {
                 for_each( dcu_status_, clear_crc );
                 request_clear_crc_ = false;
+                prev_total_crc_count = 0;
             }
         }
         else if ( alternating_cycle )
