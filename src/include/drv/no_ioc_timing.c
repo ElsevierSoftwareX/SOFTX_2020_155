@@ -7,8 +7,8 @@ waitPcieTimingSignal( volatile TIMING_SIGNAL* timePtr, int cycle )
     {
         udelay( 1 );
         loop++;
-    } while ( timePtr->cycle != cycle && loop < 18 );
-    if ( loop >= 18 )
+    } while ( timePtr->cycle != cycle && loop < 28 );
+    if ( loop >= 25 )
         return ( 1 );
     else
         return ( 0 );
@@ -105,6 +105,16 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
     // Read ADC data
 #ifdef USE_DOLPHIN_TIMING
     missedCycle = waitPcieTimingSignal( pcieTimer, cycleNum );
+    if(missedCycle)
+    {
+        pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
+        pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
+        pLocalEpics->epicsOutput.fe_status = ADC_TO_ERROR;
+        stop_working_threads = 1;
+        vmeDone = 1;
+        adcStat = ADC_BUS_DELAY;
+        return adcStat;
+    }
     timeSec = pcieTimer->gps_time;
 #else
     missedCycle = waitInternalTimingSignal( cycleNum );
@@ -156,14 +166,12 @@ iop_adc_read( adcInfo_t* adcinfo, int cpuClk[] )
         /// is overflowing.
         if ( adcinfo->adcWait >= MAX_ADC_WAIT )
         {
-            // printk("timeout %d %d \n",jj,adcinfo->adcWait);
             pLocalEpics->epicsOutput.stateWord = FE_ERROR_ADC;
             pLocalEpics->epicsOutput.diagWord |= ADC_TIMEOUT_ERR;
             pLocalEpics->epicsOutput.fe_status = ADC_TO_ERROR;
             stop_working_threads = 1;
             vmeDone = 1;
             continue;
-            // return 0;
         }
 
         if ( card == 0 )
