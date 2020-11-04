@@ -30,6 +30,21 @@ namespace simple_epics
 
         setup_string_pv_table pv_string_table_setup_;
 
+        class setup_double_pv_table
+        {
+        public:
+            setup_double_pv_table( )
+            {
+                simpleDoublePV::setup_func_table( );
+            }
+        };
+
+        setup_double_pv_table pv_double_table_setup_;
+
+        /*
+         * Start of int PV
+         */
+
         gddAppFuncTable< simpleIntPV >&
         simpleIntPV::get_func_table( )
         {
@@ -226,6 +241,10 @@ namespace simple_epics
             }
         }
 
+        /*
+         * Start of string PV
+         */
+
         gddAppFuncTable< simpleStringPV >&
         simpleStringPV::get_func_table( )
         {
@@ -363,6 +382,206 @@ namespace simple_epics
             if ( monitored_ )
             {
                 casEventMask mask = casEventMask( server_.valueEventMask( ) );
+                postEvent( mask, *val_ );
+            }
+        }
+
+        /*
+         * Start of double PV
+         */
+
+        gddAppFuncTable< simpleDoublePV >&
+        simpleDoublePV::get_func_table( )
+        {
+            static gddAppFuncTable< simpleDoublePV > func_table;
+            return func_table;
+        }
+
+        simpleDoublePV::~simpleDoublePV( ) = default;
+
+        gddAppFuncTableStatus
+        simpleDoublePV::read_status( gdd& g )
+        {
+            g.putConvert( val_->getStat( ) );
+            return S_casApp_success;
+        }
+
+        gddAppFuncTableStatus
+        simpleDoublePV::read_severity( gdd& g )
+        {
+            g.putConvert( val_->getSevr( ) );
+            return S_casApp_success;
+        }
+
+        gddAppFuncTableStatus
+        simpleDoublePV::read_precision( gdd& g )
+        {
+            g.putConvert( 0 );
+            return S_casApp_success;
+        }
+
+        gddAppFuncTableStatus
+        simpleDoublePV::read_alarm_high( gdd& g )
+        {
+            g.putConvert( attr_.alarm_high( ) );
+            return S_casApp_success;
+        }
+
+        gddAppFuncTableStatus
+        simpleDoublePV::read_alarm_low( gdd& g )
+        {
+            g.putConvert( attr_.alarm_low( ) );
+            return S_casApp_success;
+        }
+
+        gddAppFuncTableStatus
+        simpleDoublePV::read_warn_high( gdd& g )
+        {
+            g.putConvert( attr_.warn_high( ) );
+            return S_casApp_success;
+        }
+
+        gddAppFuncTableStatus
+        simpleDoublePV::read_warn_low( gdd& g )
+        {
+            g.putConvert( attr_.warn_low( ) );
+            return S_casApp_success;
+        }
+
+        gddAppFuncTableStatus
+        simpleDoublePV::read_value( gdd& g )
+        {
+            auto status =
+                gddApplicationTypeTable::app_table.smartCopy( &g, val_.get( ) );
+            return ( status ? S_cas_noConvert : S_casApp_success );
+        }
+
+        void
+        simpleDoublePV::setup_func_table( )
+        {
+            auto install = []( const char* name,
+                               gddAppFuncTableStatus (
+                                   simpleDoublePV::*handler )( gdd& ) ) {
+                gddAppFuncTableStatus status;
+
+                //           char error_string[100];
+
+                status = get_func_table( ).installReadFunc( name, handler );
+                if ( status != S_gddAppFuncTable_Success )
+                {
+                    //                errSymLookup(status, error_string,
+                    //                sizeof(error_string));
+                    //               throw std::runtime_error(error_string);
+                    throw std::runtime_error(
+                        "Unable to initialize pv lookup table" );
+                }
+            };
+
+            install( "units", &simpleDoublePV::read_attr_not_handled );
+            install( "status", &simpleDoublePV::read_status );
+            install( "severity", &simpleDoublePV::read_severity );
+            install( "maxElements", &simpleDoublePV::read_attr_not_handled );
+            install( "precision", &simpleDoublePV::read_precision );
+            install( "alarmHigh", &simpleDoublePV::read_alarm_high );
+            install( "alarmLow", &simpleDoublePV::read_alarm_low );
+            install( "alarmHighWarning", &simpleDoublePV::read_warn_high );
+            install( "alarmLowWarning", &simpleDoublePV::read_warn_low );
+            install( "maxElements", &simpleDoublePV::read_attr_not_handled );
+            install( "graphicHigh", &simpleDoublePV::read_attr_not_handled );
+            install( "graphicLow", &simpleDoublePV::read_attr_not_handled );
+            install( "controlHigh", &simpleDoublePV::read_attr_not_handled );
+            install( "controlLow", &simpleDoublePV::read_attr_not_handled );
+            install( "enums", &simpleDoublePV::read_attr_not_handled );
+            install( "menuitem", &simpleDoublePV::read_attr_not_handled );
+            install( "timestamp", &simpleDoublePV::read_attr_not_handled );
+            install( "value", &simpleDoublePV::read_value );
+        }
+
+        caStatus
+        simpleDoublePV::read( const casCtx& ctx, gdd& prototype )
+        {
+            return get_func_table( ).read( *this, prototype );
+        }
+        caStatus
+        simpleDoublePV::write( const casCtx& ctx, const gdd& value )
+        {
+            return S_casApp_noSupport;
+        }
+
+        aitEnum
+        simpleDoublePV::bestExternalType( ) const
+        {
+            return val_->primitiveType( );
+        }
+
+        caStatus
+        simpleDoublePV::interestRegister( )
+        {
+            monitored_ = true;
+            return S_casApp_success;
+        }
+
+        void
+        simpleDoublePV::interestDelete( )
+        {
+            monitored_ = false;
+        }
+
+        void
+        simpleDoublePV::update( )
+        {
+            set_value( *attr_.src( ) );
+        }
+
+        void
+        simpleDoublePV::set_value( double value )
+        {
+            double current_value = 0;
+
+            val_->getConvert( current_value );
+            if ( current_value == value )
+            {
+                return;
+            }
+
+            val_->putConvert( value );
+            aitTimeStamp ts = aitTimeStamp( epicsTime::getCurrent( ) );
+            val_->setTimeStamp( &ts );
+
+            aitUint16 stat = epicsAlarmNone;
+            aitUint16 sevr = epicsSevNone;
+            if ( value >= attr_.alarm_high( ) )
+            {
+                stat = epicsAlarmHiHi;
+                sevr = epicsSevMajor;
+            }
+            else if ( value <= attr_.alarm_low( ) )
+            {
+                stat = epicsAlarmLoLo;
+                sevr = epicsSevMajor;
+            }
+            else if ( value >= attr_.warn_high( ) )
+            {
+                stat = epicsAlarmHigh;
+                sevr = epicsSevMinor;
+            }
+            else if ( value <= attr_.warn_low( ) )
+            {
+                stat = epicsAlarmLow;
+                sevr = epicsSevMinor;
+            }
+            val_->setSevr( sevr );
+            val_->setStat( stat );
+
+            if ( monitored_ )
+            {
+                casEventMask mask = casEventMask( server_.valueEventMask( ) );
+                bool         alarm_changed =
+                    ( stat != val_->getStat( ) || sevr != val_->getSevr( ) );
+                if ( alarm_changed )
+                {
+                    mask |= server_.alarmEventMask( );
+                }
                 postEvent( mask, *val_ );
             }
         }

@@ -23,9 +23,10 @@ namespace simple_epics
                 "Duplicate key insertion to the epics db" );
         }
         std::string name{ attr.name( ) };
-        pvs_.insert( std::make_pair( std::move( name ),
-                                     detail::make_unique_ptr< detail::simpleIntPV >(
-                                         *this, std::move( attr ) ) ) );
+        pvs_.insert(
+            std::make_pair( std::move( name ),
+                            detail::make_unique_ptr< detail::simpleIntPV >(
+                                *this, std::move( attr ) ) ) );
     }
 
     void
@@ -40,9 +41,28 @@ namespace simple_epics
                 "Duplicate key insertion to the epics db" );
         }
         std::string name{ attr.name( ) };
-        pvs_.insert( std::make_pair( std::move( name ),
-                                     detail::make_unique_ptr< detail::simpleStringPV >(
-                                         *this, std::move( attr ) ) ) );
+        pvs_.insert(
+            std::make_pair( std::move( name ),
+                            detail::make_unique_ptr< detail::simpleStringPV >(
+                                *this, std::move( attr ) ) ) );
+    }
+
+    void
+    Server::addPV( pvDoubleAttributes attr )
+    {
+        std::lock_guard< std::mutex > l_( m_ );
+
+        auto it = pvs_.find( attr.name( ) );
+        if ( it != pvs_.end( ) )
+        {
+            throw std::runtime_error(
+                "Duplicate key insertion to the epics db" );
+        }
+        std::string name{ attr.name( ) };
+        pvs_.insert(
+            std::make_pair( std::move( name ),
+                            detail::make_unique_ptr< detail::simpleDoublePV >(
+                                *this, std::move( attr ) ) ) );
     }
 
     void

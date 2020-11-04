@@ -132,6 +132,70 @@ namespace simple_epics
     };
 
     /*!
+     * @brief A description of a PV, used to describe a double PV to the server.
+     * @note this is given a pointer to the data.  This value is only read
+     * when a Server object is told to update its data.
+     */
+    class pvDoubleAttributes
+    {
+    public:
+        pvDoubleAttributes( std::string                 pv_name,
+                            double*                     value,
+                            std::pair< double, double > alarm_range,
+                            std::pair< double, double > warn_range )
+            : name_{ std::move( pv_name ) },
+
+              alarm_low_{ alarm_range.first },
+              alarm_high_{ alarm_range.second }, warn_low_{ warn_range.first },
+              warn_high_{ warn_range.second }, src_{ value }
+        {
+        }
+
+        const std::string&
+        name( ) const
+        {
+            return name_;
+        }
+
+        double
+        alarm_high( ) const
+        {
+            return alarm_high_;
+        }
+        double
+        alarm_low( ) const
+        {
+            return alarm_low_;
+        }
+        double
+        warn_high( ) const
+        {
+            return warn_high_;
+        }
+        double
+        warn_low( ) const
+        {
+            return warn_low_;
+        }
+
+        const double*
+        src( ) const
+        {
+            return src_;
+        }
+
+    private:
+        std::string name_;
+
+        double alarm_high_;
+        double alarm_low_;
+        double warn_high_;
+        double warn_low_;
+
+        double* src_;
+    };
+
+    /*!
      * @brief An R/O implementation of the Portable CA Server.
      */
     class Server : public caServer
@@ -147,6 +211,7 @@ namespace simple_epics
          */
         void addPV( pvIntAttributes attr );
         void addPV( pvStringAttributes attr );
+        void addPV( pvDoubleAttributes attr );
 
         /*!
          * @brief Reflect all changes in the data for each PV into the server
