@@ -14,11 +14,13 @@ main( int argc, char** argv )
 {
     const double pi = std::acos( -1 );
 
-    int  sin_val = 0;
-    int  cos_val = 100;
-    int  delay_ms = 0;
-    char buffer1[ 1024 ] = "Hello World!";
-    char buffer2[ 1024 ] = "0";
+    int    sin_val = 0;
+    int    cos_val = 100;
+    double sin_val_d = 0.0;
+    double cos_val_d = 100.0;
+    int    delay_ms = 0;
+    char   buffer1[ 1024 ] = "Hello World!";
+    char   buffer2[ 1024 ] = "0";
 
     int                  i = 0;
     bool                 done = false;
@@ -33,6 +35,16 @@ main( int argc, char** argv )
                                        &cos_val,
                                        std::make_pair( -200, 200 ),
                                        std::make_pair( -198, 198 ) ) );
+    server.addPV(
+        simple_epics::pvDoubleAttributes( "TEST_SIN_D",
+                                          &sin_val_d,
+                                          std::make_pair( -98.5, 98.5 ),
+                                          std::make_pair( -85.5, 85.5 ) ) );
+    server.addPV(
+        simple_epics::pvDoubleAttributes( "TEST_COS_D",
+                                          &cos_val_d,
+                                          std::make_pair( -98.5, 98.5 ),
+                                          std::make_pair( -85.5, 85.5 ) ) );
     server.addPV( simple_epics::pvIntAttributes( "TEST_DELAY",
                                                  &delay_ms,
                                                  std::make_pair( -1, 200 ),
@@ -43,7 +55,7 @@ main( int argc, char** argv )
     while ( !done )
     {
         auto now = std::chrono::system_clock::now( );
-        auto end_by = now + std::chrono::milliseconds( 1000 / 4 );
+        auto end_by = now + std::chrono::milliseconds( 1000 / 8 );
 
         fileDescriptorManager.process( 1 );
 
@@ -51,6 +63,9 @@ main( int argc, char** argv )
 
         sin_val = static_cast< int >( 100 * std::sin( rad ) );
         cos_val = static_cast< int >( 100 * std::cos( rad ) );
+
+        sin_val_d = 100 * std::sin( rad );
+        cos_val_d = 100 * std::cos( rad );
 
         i = ( i + 5 ) % 360;
 

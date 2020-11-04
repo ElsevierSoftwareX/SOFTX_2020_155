@@ -7,6 +7,7 @@ extern "C" {
 
 #define SIMPLE_PV_INT 0
 #define SIMPLE_PV_STRING 1
+#define SIMPLE_PV_DOUBLE 2
 
 /*!
  * @brief A Simple structure representing a read-only PV
@@ -17,11 +18,12 @@ typedef struct SimplePV
     int         pv_type; /// SIMPLE_PV_INT or SIMPLE_PV_STRING
     void*       data;
 
-    // These values are only used for an int pv
-    int alarm_high;
-    int alarm_low;
-    int warn_high;
-    int warn_low;
+    // These values are only used for an int or double pv
+    // they will be cased to the appropriate type
+    double alarm_high;
+    double alarm_low;
+    double warn_high;
+    double warn_low;
 } SimplePV;
 
 typedef void* simple_pv_handle;
