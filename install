@@ -29,7 +29,8 @@ if test ${site} = tst; then site_letter=X; fi
 if test ${site} = stn; then site_letter=S; fi
 if test ${site} = kamioka; then site_letter=K; fi
 if test ${site} = indigo; then site_letter=I; fi
-if test ${site} = anu; then site_letter=A; fi
+if test ${site} = anu; then site_letter=N; fi
+if test ${site} = lao; then site_letter=A; fi
 if test ${site} = uwa; then site_letter=U; fi
 if test ${site} = cardiff; then site_letter=W; fi
 if test ${site} = bham; then site_letter=B; fi
