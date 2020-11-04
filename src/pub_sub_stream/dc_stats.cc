@@ -202,7 +202,7 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
     }
     total_chans_ = boost::accumulate( channels_, 0, count_data_channels );
 
-    channel_config_hash_ = static_cast< int >( crc.result( ) );
+    channel_config_hash_ = static_cast< double >( crc.result( ) );
     std::cerr << "Loaded " << channels_.size( ) << " tp + channels"
               << std::endl;
 
@@ -250,7 +250,7 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
     } );
     pvs.emplace_back( SimplePV{
         "PRDCR_DATA_CRC",
-        SIMPLE_PV_INT,
+        SIMPLE_PV_DOUBLE,
         reinterpret_cast< void* >( &data_crc_ ),
         std::numeric_limits< int >::max( ),
         std::numeric_limits< int >::min( ),
@@ -259,7 +259,7 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
     } );
     pvs.emplace_back( SimplePV{
         "CHANNEL_LIST_CHECK_SUM",
-        SIMPLE_PV_INT,
+        SIMPLE_PV_DOUBLE,
         reinterpret_cast< void* >( &channel_config_hash_ ),
         std::numeric_limits< int >::max( ),
         std::numeric_limits< int >::min( ),
@@ -297,10 +297,10 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         "PRDCR_UNIQUE_DCU_REPORTED_PER_S",
         SIMPLE_PV_INT,
         reinterpret_cast< void* >( &unique_dcus_per_sec_ ),
-        static_cast< int >( dcus.size( ) ) + 1,
-        static_cast< int >( dcus.size( ) ) - 1,
-        static_cast< int >( dcus.size( ) ) + 1,
-        static_cast< int >( dcus.size( ) ) - 1,
+        static_cast< double >( dcus.size( ) ) + 1,
+        static_cast< double >( dcus.size( ) ) - 1,
+        static_cast< double >( dcus.size( ) ) + 1,
+        static_cast< double >( dcus.size( ) ) - 1,
     } );
     pvs.emplace_back( SimplePV{
         "DATA_RATE",
@@ -315,10 +315,10 @@ DCStats::DCStats( std::vector< SimplePV >& pvs,
         "TOTAL_CHANS",
         SIMPLE_PV_INT,
         reinterpret_cast< void* >( &total_chans_ ),
-        total_chans_ + 1,
-        total_chans_ - 1,
-        total_chans_ + 1,
-        total_chans_ - 1,
+        static_cast< double >( total_chans_ + 1 ),
+        static_cast< double >( total_chans_ - 1 ),
+        static_cast< double >( total_chans_ + 1 ),
+        static_cast< double >( total_chans_ - 1 ),
     } );
     pvs.emplace_back( SimplePV{
         "PRDCR_OPEN_TP_COUNT",
@@ -733,7 +733,7 @@ DCStats::run( simple_pv_handle epics_server )
                           total_data_crc.add( &( entry.second ),
                                               sizeof( entry.second ) );
                       } );
-            data_crc_ = static_cast< unsigned int >( total_data_crc.result( ) );
+            data_crc_ = static_cast< double >( total_data_crc.result( ) );
         }
 
         // we can either do this off of our counter or off of the

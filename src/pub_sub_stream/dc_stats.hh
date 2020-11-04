@@ -147,8 +147,8 @@ private:
     int          not_stalled_{ 0 };
     int          uptime_{ 0 };
     unsigned int gpstime_{ 0 };
-    int          data_crc_{ 0 };
-    int          channel_config_hash_{ 0 };
+    double       data_crc_{ 0 };
+    double       channel_config_hash_{ 0 };
     int          unique_dcus_per_sec_{ 0 };
     int          data_rate_{ 0 };
     int          total_chans_{ 0 };
