@@ -278,11 +278,16 @@ daqd_c::configure_channels_files( )
     for ( ;; )
     {
         unsigned long crc = 0;
-        int   chanConfigCallback( char*, struct CHAN_PARAM*, void* user );
-        int   testpoint = 0;
-        char  buf[ 1024 ];
-        char* c = fgets( buf, 1024, mcf );
+        int  chanConfigCallback( char*, struct CHAN_PARAM*, void* user );
+        int  testpoint = 0;
+        char buf[ 1024 ];
+
         if ( feof( mcf ) )
+        {
+            break;
+        }
+        char* c = fgets( buf, 1024, mcf );
+        if ( c == nullptr )
             break;
         if ( *buf == '#' )
             continue;

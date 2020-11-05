@@ -25,6 +25,7 @@ add_executable(test_run_number
         run_number.hh)
 target_include_directories(test_run_number PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(test_run_number PRIVATE
+        catch2
         ${Boost_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT})
 
@@ -32,12 +33,14 @@ target_link_libraries(test_run_number PRIVATE
 add_executable(test_run_number_client tests/test_client_main.cc)
 target_link_libraries(test_run_number_client
         PUBLIC run_number::run_number
+        catch2
         ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(run_number_test_client run_number_test_client.cc)
 target_link_libraries(run_number_test_client PUBLIC
         args
         run_number_client
+        catch2
         ${CMAKE_THREAD_LIBS_INIT})
 
 add_test(_rn_basic_run_number_tests_ test_run_number)

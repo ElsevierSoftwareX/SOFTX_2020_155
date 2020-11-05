@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
-#include "../drv/crc.c"
+//#include "../drv/crc.c"
 #include <time.h>
 #include "../include/daqmap.h"
 #include "../include/daq_core.h"
@@ -42,6 +42,7 @@
 #include "simple_pv.h"
 #include "recv_buffer.hh"
 #include "make_unique.hh"
+#include "dc_stats.hh"
 
 #define __CDECL
 
@@ -256,18 +257,18 @@ quick_stats( It cur, It end, std::ostream& os, gps_key now_key )
  */
 class data_recorder
 {
-    data_recorder( const data_recorder& other );
-    data_recorder& operator=( const data_recorder& other );
-
 public:
     /*!
      * @Initialize the data_recorder, opening the output shared memory buffer
      * @param shmem_name Name of the shared memory buffer to output to
      * @param shmem_max_size_mb Size of the buffer in MB
      */
-    data_recorder( const std::string shmem_name, int shmem_max_size_mb )
+    data_recorder( const std::string shmem_name,
+                   int               shmem_max_size_mb,
+                   dc_queue*         next_stage )
         : shmem_ptr_( findSharedMemorySize(
-              const_cast< char* >( shmem_name.c_str( ) ), shmem_max_size_mb ) )
+              const_cast< char* >( shmem_name.c_str( ) ), shmem_max_size_mb ) ),
+          next_stage_{ next_stage }
     {
         ifo_header_ = (daq_multi_cycle_header_t*)shmem_ptr_;
         ifo_data_ = (char*)shmem_ptr_ + sizeof( daq_multi_cycle_header_t );
@@ -283,6 +284,9 @@ public:
         ifo_header_->cycleDataSize = cycle_data_size_;
         ifo_header_->maxCycle = DAQ_NUM_DATA_BLOCKS_PER_SECOND;
     }
+
+    data_recorder( const data_recorder& other ) = delete;
+    data_recorder& operator=( const data_recorder& other ) = delete;
 
     /*!
      * @brief copy the given daq_dc_data_t into the output buffer
@@ -307,6 +311,12 @@ public:
         memcpy( dest, &input_data, data_size );
 
         ifo_header_->curCycle = input_data.header.dcuheader[ 0 ].cycle;
+
+        if ( next_stage_ )
+        {
+            next_stage_->emplace(
+                make_unique_ptr< daq_dc_data_t >( input_data ) );
+        }
     }
 
 private:
@@ -314,6 +324,7 @@ private:
     daq_multi_cycle_header_t* ifo_header_;
     char*                     ifo_data_;
     size_t                    cycle_data_size_;
+    dc_queue*                 next_stage_;
 };
 
 // *************************************************************************
@@ -413,6 +424,7 @@ main( int argc, char** argv )
     const char*                subs_file = nullptr;
     const char*                epics_prefix = nullptr;
     const char*                admin_interface = nullptr;
+    const char*                channel_list_file = nullptr;
     std::vector< std::string > subscription_strings{};
     int                        thread_per_sub = 0;
     int                        dcus_received = 0;
@@ -525,6 +537,13 @@ main( int argc, char** argv )
         "Optional admin interface [ip:port] to export basic admin controls to",
         &admin_interface,
         nullptr );
+    args_add_string_ptr( arg_parser,
+                         ARGS_NO_SHORT,
+                         "channels",
+                         "ini file",
+                         "A primary channel list file",
+                         &channel_list_file,
+                         "" );
 
     if ( args_parse( arg_parser, argc, argv ) < 0 )
     {
@@ -591,304 +610,296 @@ main( int argc, char** argv )
     SubDebug                debug;
     simple_pv_handle        epics_server = nullptr;
     std::vector< SimplePV > pvs;
+
+    pvs.emplace_back( SimplePV{
+        "DCUS_RECEIVED", SIMPLE_PV_INT, &dcus_received, 1000, 0, 1000, 0 } );
+    pvs.emplace_back( SimplePV{ "MAX_DCUS_RECEIVED",
+                                SIMPLE_PV_INT,
+                                &reporting_max_dcus_received,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "MIN_DCUS_RECEIVED",
+                                SIMPLE_PV_INT,
+                                &reporting_min_dcus_received,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "MEAN_DCUS_RECEIVED",
+                                SIMPLE_PV_INT,
+                                &reporting_mean_dcus_recieved,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back(
+        SimplePV{ "SPREAD_MS", SIMPLE_PV_INT, &spread_ms, 1000, 0, 1000, 0 } );
+    pvs.emplace_back( SimplePV{ "MAX_SPREAD_MS_LATCHED",
+                                SIMPLE_PV_INT,
+                                &latching_max_spread_ms,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "MAX_SPREAD_MS",
+                                SIMPLE_PV_INT,
+                                &reporting_max_spread_ms,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "MIN_SPREAD_MS",
+                                SIMPLE_PV_INT,
+                                &reporting_min_spread_ms,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "MEAN_SPREAD_MS",
+                                SIMPLE_PV_INT,
+                                &reporting_mean_spread_ms,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "TOTAL_SPREAD_MS",
+                                SIMPLE_PV_INT,
+                                &total_spread_ms,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "MAX_TOTAL_SPREAD_MS_LATCHED",
+                                SIMPLE_PV_INT,
+                                &latching_total_max_spread_ms,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "MAX_TOTAL_SPREAD_MS",
+                                SIMPLE_PV_INT,
+                                &reporting_total_max_spread_ms,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "MIN_TOTAL_SPREAD_MS",
+                                SIMPLE_PV_INT,
+                                &reporting_total_min_spread_ms,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "MEAN_TOTAL_SPREAD_MS",
+                                SIMPLE_PV_INT,
+                                &reporting_total_mean_spread_ms,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "LATE_MESSAGES_LAST_SEC",
+                                SIMPLE_PV_INT,
+                                &late_messages_last_sec,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "VERY_LATE_MESSAGES_LAST_SEC",
+                                SIMPLE_PV_INT,
+                                &very_late_messages_last_sec,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "DROPPED_MESSAGES_LAST_SEC",
+                                SIMPLE_PV_INT,
+                                &discarded_messages_last_sec,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{
+        "LATE_MESSAGES", SIMPLE_PV_INT, &late_messages, 1000, 0, 1000, 0 } );
+    pvs.emplace_back( SimplePV{ "VERY_LATE_MESSAGES",
+                                SIMPLE_PV_INT,
+                                &very_late_messages,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "DROPPED_MESSAGES",
+                                SIMPLE_PV_INT,
+                                &discarded_messages,
+                                1000,
+                                0,
+                                1000,
+                                0 } );
+    pvs.emplace_back( SimplePV{ "RECEIVED_MSG_COUNT",
+                                SIMPLE_PV_INT,
+                                &debug.received_messages,
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "DROPPED_UDP_MSG_COUNT",
+                                SIMPLE_PV_INT,
+                                &debug.dropped_messages,
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "RETRANSMIT_REQ",
+                                SIMPLE_PV_INT,
+                                &debug.retransmit_requests,
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "RETRANSMIT_5_PKT",
+                                SIMPLE_PV_INT,
+                                &debug.retransmit_size[ 0 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "RETRANSMIT_10_PKT",
+                                SIMPLE_PV_INT,
+                                &debug.retransmit_size[ 1 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "RETRANSMIT_15_PKT",
+                                SIMPLE_PV_INT,
+                                &debug.retransmit_size[ 2 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "RETRANSMIT_20_PKT",
+                                SIMPLE_PV_INT,
+                                &debug.retransmit_size[ 3 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "RETRANSMIT_25_PKT",
+                                SIMPLE_PV_INT,
+                                &debug.retransmit_size[ 4 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "RETRANSMIT_30_PKT",
+                                SIMPLE_PV_INT,
+                                &debug.retransmit_size[ 5 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "RETRANSMIT_35_PKT",
+                                SIMPLE_PV_INT,
+                                &debug.retransmit_size[ 6 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "RETRANSMIT_40_PKT",
+                                SIMPLE_PV_INT,
+                                &debug.retransmit_size[ 7 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "RETRANSMIT_45_PKT",
+                                SIMPLE_PV_INT,
+                                &debug.retransmit_size[ 8 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "RETRANSMIT_50_PKT",
+                                SIMPLE_PV_INT,
+                                &debug.retransmit_size[ 9 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "MSG_DURATION_0_MS",
+                                SIMPLE_PV_INT,
+                                &debug.message_spread[ 0 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "MSG_DURATION_2_MS",
+                                SIMPLE_PV_INT,
+                                &debug.message_spread[ 1 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "MSG_DURATION_4_MS",
+                                SIMPLE_PV_INT,
+                                &debug.message_spread[ 2 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "MSG_DURATION_6_MS",
+                                SIMPLE_PV_INT,
+                                &debug.message_spread[ 3 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "MSG_DURATION_8_MS",
+                                SIMPLE_PV_INT,
+                                &debug.message_spread[ 4 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "MSG_DURATION_10_MS",
+                                SIMPLE_PV_INT,
+                                &debug.message_spread[ 5 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "MSG_DURATION_12_MS",
+                                SIMPLE_PV_INT,
+                                &debug.message_spread[ 6 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "MSG_DURATION_14_MS",
+                                SIMPLE_PV_INT,
+                                &debug.message_spread[ 7 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "MSG_DURATION_16_MS",
+                                SIMPLE_PV_INT,
+                                &debug.message_spread[ 8 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    pvs.emplace_back( SimplePV{ "MSG_DURATION_18_MS",
+                                SIMPLE_PV_INT,
+                                &debug.message_spread[ 9 ],
+                                1000,
+                                -1,
+                                1000,
+                                -1 } );
+    DCStats dc_stats( pvs, channel_list_file );
     if ( epics_prefix )
     {
-        pvs.emplace_back( SimplePV{ "DCUS_RECEIVED",
-                                    SIMPLE_PV_INT,
-                                    &dcus_received,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "MAX_DCUS_RECEIVED",
-                                    SIMPLE_PV_INT,
-                                    &reporting_max_dcus_received,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "MIN_DCUS_RECEIVED",
-                                    SIMPLE_PV_INT,
-                                    &reporting_min_dcus_received,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "MEAN_DCUS_RECEIVED",
-                                    SIMPLE_PV_INT,
-                                    &reporting_mean_dcus_recieved,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{
-            "SPREAD_MS", SIMPLE_PV_INT, &spread_ms, 1000, 0, 1000, 0 } );
-        pvs.emplace_back( SimplePV{ "MAX_SPREAD_MS_LATCHED",
-                                    SIMPLE_PV_INT,
-                                    &latching_max_spread_ms,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "MAX_SPREAD_MS",
-                                    SIMPLE_PV_INT,
-                                    &reporting_max_spread_ms,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "MIN_SPREAD_MS",
-                                    SIMPLE_PV_INT,
-                                    &reporting_min_spread_ms,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "MEAN_SPREAD_MS",
-                                    SIMPLE_PV_INT,
-                                    &reporting_mean_spread_ms,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "TOTAL_SPREAD_MS",
-                                    SIMPLE_PV_INT,
-                                    &total_spread_ms,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "MAX_TOTAL_SPREAD_MS_LATCHED",
-                                    SIMPLE_PV_INT,
-                                    &latching_total_max_spread_ms,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "MAX_TOTAL_SPREAD_MS",
-                                    SIMPLE_PV_INT,
-                                    &reporting_total_max_spread_ms,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "MIN_TOTAL_SPREAD_MS",
-                                    SIMPLE_PV_INT,
-                                    &reporting_total_min_spread_ms,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "MEAN_TOTAL_SPREAD_MS",
-                                    SIMPLE_PV_INT,
-                                    &reporting_total_mean_spread_ms,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "LATE_MESSAGES_LAST_SEC",
-                                    SIMPLE_PV_INT,
-                                    &late_messages_last_sec,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "VERY_LATE_MESSAGES_LAST_SEC",
-                                    SIMPLE_PV_INT,
-                                    &very_late_messages_last_sec,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "DROPPED_MESSAGES_LAST_SEC",
-                                    SIMPLE_PV_INT,
-                                    &discarded_messages_last_sec,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "LATE_MESSAGES",
-                                    SIMPLE_PV_INT,
-                                    &late_messages,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "VERY_LATE_MESSAGES",
-                                    SIMPLE_PV_INT,
-                                    &very_late_messages,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "DROPPED_MESSAGES",
-                                    SIMPLE_PV_INT,
-                                    &discarded_messages,
-                                    1000,
-                                    0,
-                                    1000,
-                                    0 } );
-        pvs.emplace_back( SimplePV{ "RECEIVED_MSG_COUNT",
-                                    SIMPLE_PV_INT,
-                                    &debug.received_messages,
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "DROPPED_UDP_MSG_COUNT",
-                                    SIMPLE_PV_INT,
-                                    &debug.dropped_messages,
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "RETRANSMIT_REQ",
-                                    SIMPLE_PV_INT,
-                                    &debug.retransmit_requests,
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "RETRANSMIT_5_PKT",
-                                    SIMPLE_PV_INT,
-                                    &debug.retransmit_size[ 0 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "RETRANSMIT_10_PKT",
-                                    SIMPLE_PV_INT,
-                                    &debug.retransmit_size[ 1 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "RETRANSMIT_15_PKT",
-                                    SIMPLE_PV_INT,
-                                    &debug.retransmit_size[ 2 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "RETRANSMIT_20_PKT",
-                                    SIMPLE_PV_INT,
-                                    &debug.retransmit_size[ 3 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "RETRANSMIT_25_PKT",
-                                    SIMPLE_PV_INT,
-                                    &debug.retransmit_size[ 4 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "RETRANSMIT_30_PKT",
-                                    SIMPLE_PV_INT,
-                                    &debug.retransmit_size[ 5 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "RETRANSMIT_35_PKT",
-                                    SIMPLE_PV_INT,
-                                    &debug.retransmit_size[ 6 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "RETRANSMIT_40_PKT",
-                                    SIMPLE_PV_INT,
-                                    &debug.retransmit_size[ 7 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "RETRANSMIT_45_PKT",
-                                    SIMPLE_PV_INT,
-                                    &debug.retransmit_size[ 8 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "RETRANSMIT_50_PKT",
-                                    SIMPLE_PV_INT,
-                                    &debug.retransmit_size[ 9 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "MSG_DURATION_0_MS",
-                                    SIMPLE_PV_INT,
-                                    &debug.message_spread[ 0 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "MSG_DURATION_2_MS",
-                                    SIMPLE_PV_INT,
-                                    &debug.message_spread[ 1 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "MSG_DURATION_4_MS",
-                                    SIMPLE_PV_INT,
-                                    &debug.message_spread[ 2 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "MSG_DURATION_6_MS",
-                                    SIMPLE_PV_INT,
-                                    &debug.message_spread[ 3 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "MSG_DURATION_8_MS",
-                                    SIMPLE_PV_INT,
-                                    &debug.message_spread[ 4 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "MSG_DURATION_10_MS",
-                                    SIMPLE_PV_INT,
-                                    &debug.message_spread[ 5 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "MSG_DURATION_12_MS",
-                                    SIMPLE_PV_INT,
-                                    &debug.message_spread[ 6 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "MSG_DURATION_14_MS",
-                                    SIMPLE_PV_INT,
-                                    &debug.message_spread[ 7 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "MSG_DURATION_16_MS",
-                                    SIMPLE_PV_INT,
-                                    &debug.message_spread[ 8 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
-        pvs.emplace_back( SimplePV{ "MSG_DURATION_18_MS",
-                                    SIMPLE_PV_INT,
-                                    &debug.message_spread[ 9 ],
-                                    1000,
-                                    -1,
-                                    1000,
-                                    -1 } );
         epics_server =
             simple_pv_server_create( epics_prefix, pvs.data( ), pvs.size( ) );
     }
@@ -901,7 +912,8 @@ main( int argc, char** argv )
 
     fprintf( stderr, "Num of sys = %d\n", (int)subscription_strings.size( ) );
 
-    data_recorder recorder( buffer_name, max_data_size_mb );
+    data_recorder recorder(
+        buffer_name, max_data_size_mb, dc_stats.get_queue( ) );
 
     std::vector< std::unique_ptr< pub_sub::Subscriber > > subscribers{};
     std::vector< cps_admin::SubEntry >                    admin_sub_entries{};
@@ -932,7 +944,7 @@ main( int argc, char** argv )
     if ( admin_interface != nullptr )
     {
         admin_instance = boost::make_optional( cps_admin::AdminInterface(
-            std::string{ admin_interface }, admin_sub_entries ) );
+            std::string{ admin_interface }, admin_sub_entries, dc_stats ) );
     }
 
     int nextCycle = 0;
@@ -957,6 +969,9 @@ main( int argc, char** argv )
 
     std::array< buffer_headers, 4 > headers;
 
+    std::thread stats_thread(
+        [&dc_stats, epics_server]( ) { dc_stats.run( epics_server ); } );
+
     // ensure the threads get stopped before exit.
     thread_stopper clean_threads_;
     do
@@ -968,6 +983,7 @@ main( int argc, char** argv )
             usleep( 2000 );
             latest_in_buffer = circular_buffer.latest( );
         } while ( latest_in_buffer == last_received );
+        last_received = latest_in_buffer;
 
         usleep( delay_cycles );
 
@@ -1050,7 +1066,10 @@ main( int argc, char** argv )
             very_late_messages += very_late_messages_last_sec;
             discarded_messages = late_messages + very_late_messages;
         }
-        simple_pv_server_update( epics_server );
+        if ( !dc_stats.is_valid( ) )
+        {
+            simple_pv_server_update( epics_server );
+        }
         if ( latest_in_buffer.cycle( ) == 0 )
         {
             debug.clear( );

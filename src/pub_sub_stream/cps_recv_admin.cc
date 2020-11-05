@@ -54,10 +54,10 @@ namespace cps_admin
             using response_type = http::response< http::string_body >;
 
             Connection( boost::asio::io_context& context,
-                        std::vector< SubEntry >& subscriptions )
-                : context_{ context }, s_{ context_ }, subscriptions_{
-                      subscriptions
-                  }
+                        std::vector< SubEntry >& subscriptions,
+                        DCStats&                 dc_stats )
+                : context_{ context }, s_{ context_ },
+                  subscriptions_{ subscriptions }, dc_stats_{ dc_stats }
             {
             }
 
@@ -124,6 +124,14 @@ namespace cps_admin
                 if ( req_.target( ) == "/" || req_.target( ).empty( ) )
                 {
                     return handle_index_view( );
+                }
+                if ( req_.target( ) == "/channels/" )
+                {
+                    return handle_channel_view( );
+                }
+                if ( req_.target( ) == "/clear_crc/" )
+                {
+                    return handle_clear_crc( );
                 }
                 auto opt_id = parse_sub_id_target( req_.target( ) );
                 if ( opt_id )
@@ -197,6 +205,80 @@ namespace cps_admin
                 resp.set( http::field::content_type, "application/json" );
                 resp.keep_alive( false );
                 resp.body( ) = os.str( );
+                resp.prepare_payload( );
+                return resp;
+            }
+
+            /*!
+             * @brief the channel list view
+             * @return the response
+             */
+            response_type
+            handle_channel_view( )
+            {
+                if ( req_.method( ) != http::verb::get )
+                {
+                    return bad_req_type( "Only GET supported" );
+                }
+
+                std::ostringstream                             os;
+                rapidjson::OStreamWrapper                      json_out( os );
+                rapidjson::Writer< rapidjson::OStreamWrapper > writer(
+                    json_out );
+
+                writer.StartArray( );
+
+                const auto& channels = dc_stats_.channels( );
+                std::for_each( channels.begin( ),
+                               channels.end( ),
+                               [&writer]( const channel_t& chan ) {
+                                   writer.StartObject( );
+                                   writer.Key( "name" );
+                                   writer.String(
+                                       chan.name, strlen( chan.name ), false );
+                                   writer.Key( "rate" );
+                                   writer.Int( chan.sample_rate );
+                                   writer.Key( "active" );
+                                   writer.Int( chan.active );
+                                   writer.Key( "trend" );
+                                   writer.Bool( chan.trend > 0 );
+                                   writer.Key( "bps" );
+                                   writer.Int( chan.bps );
+                                   writer.Key( "dcu" );
+                                   writer.Int( chan.dcu_id );
+                                   writer.Key( "tp_node" );
+                                   writer.Int( chan.tp_node );
+                                   writer.Key( "chan_num" );
+                                   writer.Int( chan.chNum );
+                                   writer.EndObject( 8 );
+                               } );
+                writer.EndArray( subscriptions_.size( ) );
+
+                auto resp = response_type{ http::status::ok, req_.version( ) };
+                resp.set( http::field::content_type, "application/json" );
+                resp.keep_alive( false );
+                resp.body( ) = os.str( );
+                resp.prepare_payload( );
+                return resp;
+            }
+
+            /*!
+             * @brief handle a request to clear the crcs
+             * @return the response
+             */
+            response_type
+            handle_clear_crc( )
+            {
+                if ( req_.method( ) != http::verb::post )
+                {
+                    return bad_req_type( "Only POST supported" );
+                }
+                dc_stats_.request_clear_crc( );
+
+                auto resp = response_type{ http::status::ok, req_.version( ) };
+                resp.set( http::field::content_type, "application/json" );
+                resp.keep_alive( false );
+                resp.body( ) = "clear crc requested";
                 resp.prepare_payload( );
                 return resp;
             }
@@ -281,6 +363,7 @@ namespace cps_admin
             http::request< http::string_body > req_{};
             boost::beast::flat_buffer          buffer_{};
             std::vector< SubEntry >&           subscriptions_;
+            DCStats&                           dc_stats_;
         };
 
         /*!
@@ -294,11 +377,12 @@ namespace cps_admin
             using work_guard = boost::asio::executor_work_guard<
                 typename boost::asio::io_context::executor_type >;
             AdminInterfaceIntl( std::string              interface,
-                                std::vector< SubEntry >& subscriptions )
+                                std::vector< SubEntry >& subscriptions,
+                                DCStats&                 dc_stats )
                 : context_( ), work_guard_{ boost::asio::make_work_guard(
                                    context_ ) },
                   acceptor_( context_, parse_address( interface ) ), thread_{},
-                  subscriptions_{ subscriptions }
+                  subscriptions_{ subscriptions }, dc_stats_{ dc_stats }
             {
                 context_.post( [this]( ) { start_accept( ); } );
                 thread_ = std::thread( [this]( ) { context_.run( ); } );
@@ -307,8 +391,8 @@ namespace cps_admin
             void
             start_accept( )
             {
-                auto conn =
-                    std::make_shared< Connection >( context_, subscriptions_ );
+                auto conn = std::make_shared< Connection >(
+                    context_, subscriptions_, dc_stats_ );
                 acceptor_.async_accept(
                     conn->s_,
                     [this, conn]( const boost::system::error_code& ec ) {
@@ -329,13 +413,16 @@ namespace cps_admin
             work_guard               work_guard_;
             tcp::acceptor            acceptor_;
             std::vector< SubEntry >& subscriptions_;
+            DCStats&                 dc_stats_;
         };
 
     } // namespace detail
 
     AdminInterface::AdminInterface( const std::string&       interface,
-                                    std::vector< SubEntry >& subscriptions )
-        : p_( new detail::AdminInterfaceIntl( interface, subscriptions ) )
+                                    std::vector< SubEntry >& subscriptions,
+                                    DCStats&                 dc_stats )
+        : p_( new detail::AdminInterfaceIntl(
+              interface, subscriptions, dc_stats ) )
     {
     }
 
