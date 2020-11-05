@@ -63,7 +63,7 @@ public:
 
     static_assert( MaxSize > 0, "the MaxSize parameter must be > 0" );
     static_assert( std::is_nothrow_move_constructible< T >::value == true,
-                   "Tye type must be no through move constructable" );
+                   "The type must be no through move constructable" );
     static_assert( std::is_nothrow_move_assignable< T >::value == true,
                    "The type must be no throw move assignable" );
 
