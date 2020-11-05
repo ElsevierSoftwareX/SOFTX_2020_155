@@ -16,31 +16,29 @@
 
 namespace
 {
+    DCUStats
+    make_stats( int          config_crc,
+                unsigned int status,
+                int          crc_per_sec,
+                int          crc_sum,
+                std::string  model_name )
+    {
+        DCUStats d;
+        d.expected_config_crc = config_crc;
+        d.status = status;
+        d.crc_per_sec = crc_per_sec;
+        d.crc_sum = crc_sum;
+        d.full_model_name = std::move( model_name );
+        return d;
+    }
+
     std::vector< DCUStats >
     basic_dcus( )
     {
         std::vector< DCUStats > dcus;
-        dcus.emplace_back( DCUStats{
-            0,
-            0,
-            0,
-            0,
-            "mod0",
-        } );
-        dcus.emplace_back( DCUStats{
-            1,
-            0,
-            0,
-            0,
-            "mod1",
-        } );
-        dcus.emplace_back( DCUStats{
-            2,
-            0,
-            0,
-            0,
-            "mod2",
-        } );
+        dcus.emplace_back( make_stats( 0, 0, 0, 0, "mod0" ) );
+        dcus.emplace_back( make_stats( 1, 0, 0, 0, "mod1" ) );
+        dcus.emplace_back( make_stats( 2, 0, 0, 0, "mod2" ) );
         return dcus;
     }
 
